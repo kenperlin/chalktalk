@@ -2,6 +2,8 @@
 <script src=g.js></script>
 <script src=three.min.js></script>
 <script src=four.js></script>
+<script src=lobserLibrary.js></script>
+
 </head>
 <body onLoad=gStart();>
 
@@ -307,7 +309,7 @@
          var pace = 1.1;
 
          // LEFT AND RIGHT FOOT ARE DISPLACED IN TIME.
- 
+
          var t = pace * this.walkT;
          var TFoot = [ (saw(t)/2 - .5) / pace, (saw(t+.5)/2 - .5) / pace ];
 
@@ -1191,6 +1193,39 @@
    }
    Marker.prototype = new Sketch;
 
+   function Adder() {
+      this.labels = "adder".split(' ');
+      this.xin = 0;
+      this.yin = 0;
+
+      this.render = function() {
+         m.save();
+
+         mCurve([[-.5,.5],[.5,.5],[.5,-.5],[-.5,-.5],[-.5,.5]]);
+         mCurve([[0,.3],[0,-.3]]);
+         mCurve([[-.3,0],[.3,0]]);
+
+         this.afterSketch(function(S) {
+            if (S.portLocation.length == 0) {
+               S.addPort("x", -.5,.3);
+               S.addPort("y", -.5,-.3);
+               S.addPort("o", .5,0);
+            }
+         });
+
+         if (this.isInValue("x"))
+            this.xin = this.getInFloat("x");
+
+         if (this.isInValue("y"))
+            this.yin = this.getInFloat("y");
+
+         this.setOutValue('o', this.xin + this.yin);
+
+         m.restore();
+      }
+   }
+   Adder.prototype = new Sketch;
+
    function Physics() {
       this.labels = "swing".split(' ');
 
@@ -1280,8 +1315,8 @@
          mCurve(c);
 
          m.restore();
-      }  
-   }  
+      }
+   }
    Physics.prototype = new Sketch;
 
    function raySegment(vx, vy, wx, wy, p0, p1) {
