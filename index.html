@@ -4,17 +4,18 @@
 <script src=four.js></script>
 </head>
 <body onLoad=gStart();>
-<div id="container"></div>
 
 <div id=page0>
    <center>
-   <hr color=white size=800>
+   <table width=1280>
+   <tr height=832></tr>
+   </table>
    </center>
 </div>
 
 <div id=page1>
    <table width=1280>
-   <tr><th><hr color=white size=100></th></tr>
+   <tr height=180></tr>
    <tr><th><img src=imgs/ken_at_blackboard.png></th></tr>
    </table>
 </div>
@@ -22,6 +23,7 @@
 <div id=page2>
    <center>
    <table width=1280>
+   <tr height=50></tr>
    <tr><th><img src=imgs/coursepage_screenshot.png></th></tr>
    </table>
    </center>
@@ -34,7 +36,7 @@
 
 <div id=page4>
    <table width=1280>
-   <tr><th><hr color=white size=100></th></tr>
+   <tr height=300></tr>
    <tr><th><img src=imgs/gertie.jpg width=300></th>
        <th><img src=imgs/harold.jpg width=300></th>
        <th><img src=imgs/3dbb.jpg width=300></th>
@@ -49,7 +51,7 @@
 
 <div id=page6>
    <table width=1280>
-   <tr><th><hr color=white size=100></th></tr>
+   <tr height=200></tr>
    <tr><th><img src=imgs/see_through.png width=600></th>
        <th><img src=imgs/see_through_closeup.png width=500></th>
 </div>
@@ -185,7 +187,6 @@
       sketch.tY = y;
       sketch.geometry = g;
 
-      console.log(g.material);
       if (g.material == blackMaterial) {
          var C = colorToRGB(sketchColor());
          g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
@@ -213,19 +214,19 @@
 
    function unitCube() {
       if (isFinishedDrawing())
-         fillUnitCube();
+         fillUnitCube(backgroundColor);
       drawUnitCube();
    }
 
    function unitDisk() {
       if (isFinishedDrawing())
-         fillUnitDisk();
+         fillUnitDisk(backgroundColor);
       drawUnitDisk();
    }
 
    function unitTube() {
       if (isFinishedDrawing())
-         fillUnitTube();
+         fillUnitTube(backgroundColor);
       drawUnitTube();
    }
 
@@ -501,6 +502,30 @@
 
       this.isWandering = false;
 
+      this.dragX = 0;
+      this.dragY = 0;
+
+      this.sx = 1;
+      this.sy = 1;
+
+      this.mouseDown = function(x, y) {
+         this.dragX = x;
+         this.dragY = y;
+      }
+
+      this.mouseDrag = function(x, y) {
+         switch (this.labels[this.selection]) {
+	 case 'square':
+	 case 'circle':
+	 case 'triangle':
+	    this.sx *= (this.size - (this.dragX - x)) / this.size;
+	    this.sy *= (this.size + (this.dragY - y)) / this.size;
+	    break;
+	 }
+         this.dragX = x;
+         this.dragY = y;
+      }
+
       this.mouseUp = function(x, y) {
          var dx = x - sketchPage.xDown;
          var dy = y - sketchPage.yDown;
@@ -592,7 +617,7 @@
             this.setOutValue(S_THETA + "1", asin(s1));
             this.setOutValue(S_THETA + "2", asin(s2 < 1 ? s2 : s1));
 
-            color('black');
+            color(defaultPenColor);
             line(-w/2,0,w/2,0);
             curve([ [x1,y1], [0,0], [x2,y2] ]);
 
@@ -733,7 +758,7 @@
                .57,.75, .70,.23, .74,.12, .78,.05, .81,.02, .85,0,
             ];
 
-            color('black');
+            color(defaultPenColor);
             line(-w/2,yHi,w/2,yHi);
 
             color('red');
@@ -748,7 +773,7 @@
             this.afterSketch(function(S) {
                var x = max(-w/2, min(w/2, S.mouseX));
                var ty = yHi + w/32;
-               color('black');
+               color(defaultPenColor);
                textHeight(w/48);
                text("400", -w/2, ty);
                text("500", -w/2 + w/3 - w/20/3, ty);
@@ -779,7 +804,7 @@
                text("B:", w/60 - w/2, yLo + w/20 * 3);
                fillRect(w/16 - w/2, yLo + w/20*2.3, h * yb / 3, w/30);
 
-               color('black');
+               color(defaultPenColor);
                line(x, yLo, x, yHi);
             });
 
@@ -795,8 +820,6 @@
             drawOval( d-w/4, -w/4, w/2, w/2, 40,  TAU/12, 13*TAU/12);
 
             this.afterSketch(function(S) {
-               color('#f0f0ff');
-               fillPolygon(S.region);
 
                color('blue');
                drawPolygon(S.region);
@@ -820,7 +843,7 @@
                var p = rayCurve(x0, y0, dx, dy, S.region);
                if (p.length >= 2 && d > len(p[1][0]-x0, p[1][1]-y0)) {
                   color('blue');
-                  lineWidth(3);
+                  lineWidth(6);
                   fillOval(p[1][0]-w*0.01, p[1][1]-w*0.01, w*0.02, w*0.02);
                   if (d < len(p[0][0]-x0, p[0][1]-y0))
                      arrow(p[1][0], p[1][1], x1, y1);
@@ -834,19 +857,24 @@
             break;
 
          case "square":
-	    this.code = [["a", "x = 0"]];
-            closedCurve([ [-w/2,-h/2], [-w/2,h/2], [w/2,h/2], [w/2,-h/2] ]);
+	    var xx = w/2 * this.sx;
+	    var yy = h/2 * this.sy;
+            closedCurve([ [-xx,-yy], [-xx,yy], [xx,yy], [xx,-yy] ]);
             break;
 
          case "circle":
+	    var xx = w/2 * this.sx;
+	    var yy = h/2 * this.sy;
             var c = [];
             for (var a = 0 ; a < TAU ; a += 0.2)
-               c.push([w/2*cos(a),-h/2*sin(a)]);
+               c.push([xx*cos(a),-yy*sin(a)]);
             closedCurve(c);
             break;
 
          case "triangle":
-            closedCurve([ [0,-h/2], [-w/2,h/2], [w/2,h/2] ]);
+	    var xx = w/2 * this.sx;
+	    var yy = h/2 * this.sy;
+            closedCurve([ [0,-yy], [-xx,yy], [xx,yy] ]);
             break;
 
          case "flap":
@@ -1415,6 +1443,19 @@
    }
    IO.prototype = new Sketch;
 
+   function Test1() {
+      this.labels = "X".split(' ');
+      this.render = function(elapsed) {
+         m.save();
+	    m.scale(this.size / 400);
+	    mCurve([[1,1],[-1,-1]]);
+	    mCurve([[-1,1],[1,-1]]);
+         m.restore();
+      }
+   }
+   Test1.prototype = new Sketch;
+
+
    var root, box3D;
    var redMaterial = new phongMaterial();
    redMaterial.setAmbient(.2,0,0).setDiffuse(.8,0,0).setSpecular(1,1,1,20);
@@ -1433,6 +1474,7 @@
 
 //                       1      2       3      4     5      6      7
    var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker" ).split(' ');
+   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Test1" ).split(' ');
 
    var pages = [
       ["page0", sketchTypes],

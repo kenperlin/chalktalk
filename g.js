@@ -1215,10 +1215,12 @@
 // UTILITY VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
+   var backgroundColor = 'black';
    var bgClickCount = 0;
    var clickX = 0;
    var clickY = 0;
    var curvatureCutoff = 0.1;
+   var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
    var glyphSketch = null;
    var iOut = 0;
@@ -1295,13 +1297,10 @@
       return sk().code;
    }
 
-   var codeOptions = [
-      //[ "", ""],
-      [ "nand gate 1", "  nand(x, y) = 1 - max(x, y);"],  
-      [ "nand gate 2", "  nand(x, y) = x + y < 2 ? 1 : 0;"],  
-      //[ "test2", "   callTest(2);"],  
-      //[ "test3", "   callTest(3);"],  
-   ];
+   function codeSelectorBgColor() { return backgroundColor === 'white' ? 'white' : '#0060c0'; }
+   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : 'white'; }
+   function codeTextBgColor() { return backgroundColor === 'white' ? '#e0f0ff' : '#000040'; }
+   function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
 
    function toggleCodeWidget() {
       if (! isCodeWidget && ! (isk() && sk().code != null))
@@ -1324,8 +1323,8 @@
 	  + options
           + "</select>"
 	  + "<br>"
-          + "<textArea rows=30 cols=25 id=code_text"
-          + " style='background-color:#e0f0ff;outline-width:2;outline-color:black'"
+          + "<textArea rows=40 cols=25 id=code_text"
+          + " style=';outline-width:0;outline-color:black;border-style:none'"
           + " onkeyup='updateF()'>"
 	  + "</textArea>";
       }
@@ -1334,12 +1333,15 @@
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.font="18px courier";
          codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
+         codeSelector.style.backgroundColor = codeSelectorBgColor();
+         codeSelector.style.color = codeSelectorFgColor();
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
-         codeTextArea.style.borderColor="white";
+         codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.font="18px courier";
-         codeTextArea.style.color="blue";
+         codeTextArea.style.backgroundColor=codeTextBgColor();
+         codeTextArea.style.color=codeTextFgColor();
 	 codeTextArea.value= code()[codeSelector.selectedIndex][1];
 	 if (code().length < 2) {
             codeTextArea.style.position = "absolute";
@@ -1378,13 +1380,13 @@
       + " <div id=scene_div width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id=sketch_canvas width=500 height=500 tabindex=1"
+      + " <canvas id=sketch_canvas width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
       + " <div id=code"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <hr size=1000 color='white'>"
+      + " <hr id=background size=1000 color='" + backgroundColor + "'>"
       ;
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
@@ -1392,7 +1394,7 @@
       // INITIALIZE THE SKETCH CANVAS
 
       sketch_canvas.animate = function(elapsed) { sketchPage.animate(elapsed); }
-      sketch_canvas.height = 832;// - 72;
+      sketch_canvas.height = 832;
       sketch_canvas.keyDown = function(key) { sketchPage.keyDown(key); }
       sketch_canvas.keyUp = function(key) { sketchPage.keyUp(key); }
       sketch_canvas.mouseDown = function(x, y) { sketchPage.mouseDown(x, y); }
@@ -1467,7 +1469,7 @@
    var pageIndex = 0;
 
    var sketchPalette = [
-      'black',
+      defaultPenColor,
       'brown',
       'red',
       'orange',
@@ -1482,6 +1484,7 @@
    function colorToRGB(colorName) {
       var R = 0, G = 0, B = 0;
       switch (colorName) {
+      case 'white'  : R = 0.9; G = 0.9; B = 0.9; break;
       case 'black'  : R = 0.7; G = 0.7; B = 0.7; break;
       case 'brown'  : R = 0.5; G = 0.0; B = 0.0; break;
       case 'red'    : R = 1.0; G = 0.0; B = 0.0; break;
@@ -1536,6 +1539,7 @@
       ['w'  , "toggle whiteboard"],
       ['x'  , "tottle expert mode"],
       ['z'  , "zoom"],
+      ['-'  , "b/w <-> w/b"],
       ['spc', "show pie menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],
@@ -1598,6 +1602,7 @@
             }
          }
 /*
+FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 color('red');
 	 curve(path);
 */
@@ -1645,7 +1650,7 @@
    var sketchBook = new SketchBook();
 
    var cloneObject = null;
-   var dataColor = 'rgb(192,192,192)';
+   var dataColor = 'rgb(128,128,128)'
    var dataLineWidth = 2.4;
    var globalSketchId = 0;
    var group = {};
@@ -1656,7 +1661,7 @@
    var overlayColor = 'rgb(0,64,255)';
    var overlayScrim = 'rgba(0,64,255,.25)';
    var portColor = 'rgb(0,192,96)';
-   var portBgColor = 'white';
+   var portBgColor = backgroundColor;
    var portHeight = 24;
    var portHighlightColor = 'rgb(192,255,224)';
    var sketchLineWidth = 4;
@@ -1797,7 +1802,7 @@
 
       var str;
       for (var n = 0 ; n < PMA ; n++) {
-         color(n == choice ? 'rgba(0,0,255,0.05)' : 'white');
+         color(n == choice ? 'rgba(0,0,255,0.05)' : backgroundColor);
          fillOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
          color('blue');
          drawOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
@@ -1883,7 +1888,7 @@
          if (b.portName.length == 0 && ! b.isNullText()) {
             var cx = (ax + bx) / 2 + (ay - by) * s;
             var cy = (ay + by) / 2 + (bx - ax) * s;
-            color('white');
+            color(backgroundColor);
             fillOval(cx - 10, cy - 10, 20, 20);
             color(dataColor);
             text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy, .5, .6);
@@ -3464,6 +3469,25 @@
             break;
          case 'z':
             break;
+         case '-':
+	    if (backgroundColor === 'white') {
+	       backgroundColor = 'black';
+	       defaultPenColor = 'white';
+	    }
+	    else {
+	       backgroundColor = 'white';
+	       defaultPenColor = 'black';
+	    }
+            document.getElementById('background').color = backgroundColor;
+	    sketchPalette[0] = defaultPenColor;
+	    for (var i = 0 ; i < sketchPage.sketches.length ; i++)
+	       if (sketchPage.sketches[i].color == backgroundColor)
+	          sketchPage.sketches[i].color = defaultPenColor;
+            document.getElementById('code_text').style.backgroundColor = codeTextBgColor();
+            document.getElementById('code_text').style.color = codeTextFgColor();
+            document.getElementById('code_selector').style.backgroundColor = codeSelectorBgColor();
+            document.getElementById('code_selector').style.color = codeSelectorFgColor();
+            break;
          }
       }
 
@@ -3493,6 +3517,9 @@
 
       this.animate = function(elapsed) {
 
+         var w = width();
+         var h = height();
+
          if (sketchToDelete != null) {
             deleteSketch(sketchToDelete);
             sketchToDelete = null;
@@ -3503,9 +3530,6 @@
 
 	 if (nsk() == 0)
 	    outPort = -1;
-
-         var w = width();
-         var h = height();
 
 	 if (this.fadeAway > 0)
 	    fadeAwaySketchPage(elapsed);
@@ -4318,7 +4342,7 @@
          context.save();
 
          context.lineWidth = .07 * dy;
-         context.strokeStyle = 'black';
+         context.strokeStyle = defaultPenColor;
          context.beginPath();
 
          var x0 = x - dy * 4/16;
@@ -4352,7 +4376,7 @@
             if (isDef(this.inValue[0])) {
 
                context.save();
-                  context.strokeStyle = 'white';
+                  context.strokeStyle = backgroundColor;
                   context.fillStyle = dataColor;
                   context.font = fontSize + 'pt Comic Sans MS';
                   var str = roundedString(this.inValue[0]);
@@ -4376,8 +4400,8 @@
          }
 
          context.save();
-         context.strokeStyle = this.isNegated ? this.color : 'white';
-         context.fillStyle = this.isNegated ? 'white' : this.color;
+         context.strokeStyle = this.isNegated ? this.color : backgroundColor;
+         context.fillStyle = this.isNegated ? backgroundColor : this.color;
 
          var fontHeight = this.isParsed() ? floor(0.7 * fontSize) : fontSize;
 
@@ -4404,6 +4428,8 @@
             var x = x1;
             var y = y1 + 1.3 * fontHeight * (n - 0.5 * (this.textStrs.length-1));
             var tx = x - .5 * tw;
+	    if (this.fadeAway > 0)
+	       context.globalAlpha = this.fadeAway;
             context.fillText(str, tx, y + .35 * fontHeight);
 
             // IF A TEXT CURSOR X,Y HAS BEEN SPECIFIED, RESET THE TEXT CURSOR.
@@ -5221,7 +5247,7 @@
             inSketch = null;
             inPort = -1;
          }
-         else if (abs(x - this.xDown) > abs(y - this.yDown)) {
+         else if (abs(x - this.xDown) > 2 * abs(y - this.yDown)) {
             if (x > this.xDown) {
                this.value = "" + (parseFloat(this.value) / 10);
                this.increment /= 10;
@@ -5404,7 +5430,7 @@ var count = 0;
          _g.inSketch = false;
 
          if (sketchPage.isWhiteboard) {
-            color('white');
+            color(backgroundColor);
             fillRect(0, 0, w, h);
          }
 
@@ -5442,6 +5468,15 @@ var count = 0;
             isShowingGlyphs = true;
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
+
+         var saveAlpha = _g.globalAlpha;
+         _g.globalAlpha = 1;
+         color(backgroundColor);
+	 fillRect(0,0,w,10);
+	 fillRect(0,0,10,h);
+	 fillRect(0,h-10,w,10);
+	 fillRect(w-10,0,10,h);
+         _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)
             This().animate(This().elapsed);
@@ -5598,7 +5633,7 @@ var count = 0;
             if (! isShowingPresenterView) {
                audienceContext.clearRect(0, 0, width(), height());
                if (sketchPage.isWhiteboard) {
-                  audienceContext.fillStyle = 'white';
+                  audienceContext.fillStyle = backgroundColor;
                   audienceContext.fillRect(0, 0, width(), height());
                }
                audienceContext.drawImage(_g.canvas, 0, 0);
@@ -5625,9 +5660,9 @@ var count = 0;
                   a.outValue[0] = a.inValue[0];
                else
                   try {
-                     var result = eval(a.text.replace(/x/g, value(a.inValue[0]))
-                                             .replace(/y/g, value(a.inValue[1]))
-                                             .replace(/z/g, value(a.inValue[2])));
+                     var result = eval(a.text.replace(/x/g, '('+value(a.inValue[0])+')')
+                                             .replace(/y/g, '('+value(a.inValue[1])+')')
+                                             .replace(/z/g, '('+value(a.inValue[2])+')'));
                      if (isNumber(parseFloat(result)))
                         a.outValue[0] = result;
                   } catch (e) { }
@@ -5656,7 +5691,7 @@ var count = 0;
          sketchPage.advanceCurrentSketch();
 
          if (isAudiencePopup() && isShowingPresenterView) {
-            audienceContext.fillStyle = 'white';
+            audienceContext.fillStyle = backgroundColor;
             audienceContext.fillRect(0, 0, width(), height());
             audienceContext.drawImage(_g.canvas, 0, 0);
          }
@@ -5738,10 +5773,10 @@ var count = 0;
                   var i0 = i - 1;
                   while (i0 > 1 || sp[i0][2] == 1)
                      i0--;
-                  context.fillStyle = sketch.isNegated ? sketch.color : 'white';
+                  context.fillStyle = sketch.isNegated ? sketch.color : backgroundColor;
                   fillPath(sp, i0, i, context);
                   if (sketch.isNegated)
-                     context.strokeStyle = 'white';
+                     context.strokeStyle = backgroundColor;
                   isCard = false;
                   context.beginPath();
                }
@@ -6035,7 +6070,7 @@ var count = 0;
 
       textEditorTextArea = textEditorPopup.document.getElementById("textEditor_text");
       textEditorTextArea.onchange = 'console.log("button clicked")';
-      textEditorTextArea.style.borderColor="white";
+      textEditorTextArea.style.borderColor = backgroundColor;
       textEditorTextArea.style.font="18px courier";
       textEditorTextArea.style.color="blue";
       textEditorTextArea.value = "This is some text!";
@@ -6100,7 +6135,7 @@ var count = 0;
       y = floor(y);
 
       for (var n = 0 ; n < 2 ; n++) {
-         context.strokeStyle = n == 0 ? 'white' : 'black';
+         context.strokeStyle = n == 0 ? backgroundColor : defaultPenColor;
          context.lineWidth = (n == 0 ? .3 : .1) * r;
          context.beginPath();
          context.moveTo(x - r, y);

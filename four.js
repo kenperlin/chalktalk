@@ -351,7 +351,8 @@
    THREE.Object3D.prototype.updateMatrix = function() {
       if (this.mat === undefined) {
          this.matrix.setPosition(this.position);
-	 !1===this.useQuaternion
+	 //!1===this.useQuaternion
+	 !1===this
 	    ?this.matrix.setRotationFromEuler(this.rotation,this.eulerOrder)
 	    :this.matrix.setRotationFromQuaternion(this.quaternion);
          (1!==this.scale.x||1!==this.scale.y||1!==this.scale.z)
@@ -517,7 +518,8 @@
    var renderer, cameraFOV = 15, mouseX = 0, mouseY = 0;
 
    function fourStart() {
-      renderer = new THREE.WebGLRenderer();
+      renderer = new THREE.WebGLRenderer( { alpha: true} );
+      renderer.setClearColor(0, 0);
       renderer.setSize(width(), height());
 
       document.addEventListener('mousemove', function(event) {
