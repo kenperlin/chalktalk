@@ -349,15 +349,8 @@
    }
 
    THREE.Object3D.prototype.updateMatrix = function() {
-      if (this.mat === undefined) {
-         this.matrix.setPosition(this.position);
-	 //!1===this.useQuaternion
-	 !1===this
-	    ?this.matrix.setRotationFromEuler(this.rotation,this.eulerOrder)
-	    :this.matrix.setRotationFromQuaternion(this.quaternion);
-         (1!==this.scale.x||1!==this.scale.y||1!==this.scale.z)
-	    &&this.matrix.scale(this.scale);
-      }
+      if (this.mat === undefined)
+         this.matrix.compose( this.position, this.quaternion, this.scale );
       else {
          var v = this.mat._m();
 	 this.matrix.set(v[0],v[4],v[ 8],v[12],

@@ -1312,6 +1312,10 @@
       codeElement.innerHTML = "";
 
       if (isCodeWidget) {
+/*
+         codeElement.style.left = 100;
+         codeElement.style.top = 100;
+*/
 	 var options = "";
 	 for (var i = 0 ; i < code().length ; i++)
 	    options += "<option value='" + code()[i][1] + "'>"
@@ -1327,9 +1331,7 @@
           + " style=';outline-width:0;outline-color:black;border-style:none'"
           + " onkeyup='updateF()'>"
 	  + "</textArea>";
-      }
 
-      if (isCodeWidget) {
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.font="18px courier";
          codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
@@ -1340,7 +1342,8 @@
          codeTextArea.onchange = 'console.log("button clicked")';
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.font="18px courier";
-         codeTextArea.style.backgroundColor=codeTextBgColor();
+         //codeTextArea.style.backgroundColor=codeTextBgColor();
+         codeTextArea.style.backgroundColor='rgba(255,255,255,0.1)';
          codeTextArea.style.color=codeTextFgColor();
 	 codeTextArea.value= code()[codeSelector.selectedIndex][1];
 	 if (code().length < 2) {
@@ -3268,14 +3271,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.handleTextChar = function(letter) {
          switch (letter) {
-         case 'control': sk().insertText(CONTROL); break;
-         case 'alt'    : sk().insertText(ALT    ); break;
-         case 'command': sk().insertText(COMMAND); break;
+         case 'control': if (isk()) sk().insertText(CONTROL); break;
+         case 'alt'    : if (isk()) sk().insertText(ALT    ); break;
+         case 'command': if (isk()) sk().insertText(COMMAND); break;
          case L_ARROW:
-            sk().moveCursor(-1);
+            if (isk()) sk().moveCursor(-1);
             break;
          case R_ARROW:
-            sk().moveCursor(+1);
+            if (isk()) sk().moveCursor(+1);
             break;
          case 'command':
             isCommandPressed = false;
@@ -3291,7 +3294,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case '\b':
          case 'del':
-            sk().deleteChar();
+            if (isk()) sk().deleteChar();
             break;
          default:
             switch (letter) {
@@ -3302,7 +3305,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                letter = '\n';
                break;
             }
-            sk().insertText(letter);
+            if (isk()) sk().insertText(letter);
          break;
          }
       }
@@ -3483,10 +3486,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    for (var i = 0 ; i < sketchPage.sketches.length ; i++)
 	       if (sketchPage.sketches[i].color == backgroundColor)
 	          sketchPage.sketches[i].color = defaultPenColor;
-            document.getElementById('code_text').style.backgroundColor = codeTextBgColor();
-            document.getElementById('code_text').style.color = codeTextFgColor();
-            document.getElementById('code_selector').style.backgroundColor = codeSelectorBgColor();
-            document.getElementById('code_selector').style.color = codeSelectorFgColor();
+
+            var codeText = document.getElementById('code_text');
+	    if (codeText != null) {
+               codeText.style.backgroundColor = codeTextBgColor();
+               codeText.style.color = codeTextFgColor();
+            }
+
+            var codeSelector = document.getElementById('code_selector');
+	    if (codeSelector != null) {
+               codeSelector.style.backgroundColor = codeSelectorBgColor();
+               codeSelector.style.color = codeSelectorFgColor();
+	    }
+
             break;
          }
       }
@@ -5473,9 +5485,11 @@ var count = 0;
          _g.globalAlpha = 1;
          color(backgroundColor);
 	 fillRect(0,0,w,10);
+/*
 	 fillRect(0,0,10,h);
 	 fillRect(0,h-10,w,10);
 	 fillRect(w-10,0,10,h);
+*/
          _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)

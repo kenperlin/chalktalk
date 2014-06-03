@@ -1,11 +1,21 @@
 <head>
 <script src=g.js></script>
-<script src=three.min.js></script>
+<script src=three.min.2.js></script>
 <script src=four.js></script>
 <script src=lobserLibrary.js></script>
 
+<style>
+   body{
+      background-color:white;
+      margin:0;
+      padding:0;
+      text-decoration:none;
+       overflow: hidden;
+    }
+</style>
 </head>
-<body onLoad=gStart();>
+
+<body onLoad=gStart()>
 
 <div id=page0>
    <center>
@@ -146,11 +156,12 @@
       a.addCube().getMatrix().translate(-.5, .0, .0).scale(.50,.01,.01);
       a.addCube().getMatrix().translate( .0,-.5, .0).scale(.01,.50,.01);
       a.addCube().getMatrix().translate( .0, .0,-.5).scale(.01,.01,.50);
+      a.setMaterial(blackMaterial);
 
       var sketch = geometry(a, [-.25,.3,-.1,-.1,2]);
 
       a.update = function() {
-         this.getMatrix().rotateY(time);
+         //this.getMatrix().rotateY(time);
       }
    }
 
@@ -510,24 +521,6 @@
       this.sx = 1;
       this.sy = 1;
 
-      this.mouseDown = function(x, y) {
-         this.dragX = x;
-         this.dragY = y;
-      }
-
-      this.mouseDrag = function(x, y) {
-         switch (this.labels[this.selection]) {
-	 case 'square':
-	 case 'circle':
-	 case 'triangle':
-	    this.sx *= (this.size - (this.dragX - x)) / this.size;
-	    this.sy *= (this.size + (this.dragY - y)) / this.size;
-	    break;
-	 }
-         this.dragX = x;
-         this.dragY = y;
-      }
-
       this.mouseUp = function(x, y) {
          var dx = x - sketchPage.xDown;
          var dy = y - sketchPage.yDown;
@@ -546,6 +539,18 @@
          var w = this.width;
          var h = this.height;
          var sel = (this.selection + 1000 * this.labels.length) % this.labels.length;
+
+         if (this.mousePressed)
+            switch (this.labels[this.selection]) {
+	    case 'square':
+	    case 'circle':
+	    case 'triangle':
+	       this.sx *= (this.size - (this.dragX - this.x)) / this.size;
+	       this.sy *= (this.size + (this.dragY - this.y)) / this.size;
+	       break;
+            }
+	 this.dragX = this.x;
+	 this.dragY = this.y;
 
          switch (this.labels[this.selection]) {
 
@@ -1508,7 +1513,6 @@
    }
 
 //                       1      2       3      4     5      6      7
-   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker" ).split(' ');
    var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Test1" ).split(' ');
 
    var pages = [
