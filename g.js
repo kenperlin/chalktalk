@@ -1615,9 +1615,11 @@
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
             var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
-	    var c = createRoundRect(_x+1, _y+1, _w-2, _h-2, 3);
-	    if ( this.mx >= _x && this.mx < _x + _w &&
-	         this.my >= _y && this.my < _y + _h ) {
+	    isCurrentKey = this.mx >= _x && this.mx < _x + _w &&
+	                   this.my >= _y && this.my < _y + _h ;
+	    var margin = isCurrentKey && sketchPage.isPressed ? 3 : 1;
+	    var c = createRoundRect(_x + margin, _y + margin, _w - 2*margin, _h - 2*margin, 3);
+	    if (isCurrentKey) {
                this.key = key;
                color(bgColor);
                fillCurve(c);
@@ -2018,7 +2020,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function kbd() {
       isKeyboardMode = ! isKeyboardMode;
-      console.log("isKeyboardMode = " + isKeyboardMode);
    }
 
    function isKeyboard() {
@@ -2676,6 +2677,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.mouseDown = function(x, y) {
 
+         this.isPressed = true;
+
          if (isKeyboard() && keyboard.mouseDown(x,y)) {
 	    return;
 	 }
@@ -2699,7 +2702,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-         this.isPressed = true;
          this.isClick = true;
          this.isPossibleClickOverBackground = ! isHover();
          this.travel = 0;
@@ -2841,6 +2843,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.mouseUp = function(x, y) {
 
+         this.isPressed = false;
+
          if (isKeyboard() && keyboard.mouseUp(x,y)) {
 	    this.handleTextChar(keyboard.key);
 	    return;
@@ -2869,7 +2873,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-         this.isPressed = false;
          this.isClick = this.travel < 10;
 
          if (isPieMenu) {
