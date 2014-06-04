@@ -5647,6 +5647,7 @@ var count = 0;
 
          if (! isPullDown && isFinishedDrawing()
                           && letterPressed == '\0'
+			  && ! sketchPage.isPressed
                           && sketchAction == null)
             for (var I = nsk() - 1 ; I >= 0 ; I--)
                if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
