@@ -1607,6 +1607,11 @@
          for (var row = 0 ; row < nRows()        ; row++)
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
             var key = keyAt(row, k);
+            switch (key) {
+            case '\b': key = 'del'; break; 
+            case '\n': key = 'ret'; break; 
+            case '\f': key = 'shift'; break; 
+            }
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
             var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
@@ -1619,12 +1624,10 @@
                color(fgColor);
             }
             curve(c);
-            switch (key) {
-            case '\b': key = "del"; break; 
-            case '\n': key = "ret"; break; 
-            case '\f': this.key = key = "shift"; break; 
-            }
-            text(key, x+_w/2, y+_h/2, .8, .75, 'Arial');
+	    var isToRight = row != 1 && k == rowLength(row)-1;
+	    var dx = isToRight ? 0.7 : .5;
+	    var jx = isToRight ? 0.6 : .5;
+            text(key, x + (_w-s/2) * dx, y + _h/2, jx, .75, 'Arial');
          }
 /*
 FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
