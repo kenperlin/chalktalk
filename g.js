@@ -1214,7 +1214,7 @@
       return _g.textHeight;
    }
 
-   function text(message, x, y, alignX, alignY) {
+   function text(message, x, y, alignX, alignY, font) {
       var th = _g.textHeight;
       if (isDrawingSketch2D) {
          var xx = x, yy = y;
@@ -1227,7 +1227,7 @@
          alignX = 0;
       if (! isDef(alignY))
          alignY = 1;
-      _g.font = th + 'pt ' + (isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
+      _g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 
@@ -1600,29 +1600,31 @@
       this.render = function() {
          save();
 	 lineWidth(1);
-         color('#444444');
+	 var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
+         var bgColor = backgroundColor=='white' ? 'rgba(0,0,255,.2)' : 'rgba(0,128,255,.5)';
+         color(fgColor);
 	 this.key = null;
          for (var row = 0 ; row < nRows()        ; row++)
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
             var key = keyAt(row, k);
-            if (key != ' ') {
-               var x = this.x + X(row, k) - w/2;
-               var y = this.y + Y(row, k);
-               var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
-	       if ( this.mx >= _x && this.mx < _x + _w &&
-	            this.my >= _y && this.my < _y + _h ) {
-                  this.key = key;
-                  color('rgba(0,0,0,.25)');
-                  fillRect(_x, _y, _w, _h);
-                  color('#444444');
-               }
-               drawRect(_x, _y, _w, _h);
-               switch (key) {
-               case '\b': key = "del"; break; 
-               case '\n': key = "ret"; break; 
-               }
-               text(key, x+8, y+2*s-6);
+            var x = this.x + X(row, k) - w/2;
+            var y = this.y + Y(row, k);
+            var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
+	    var c = createRoundRect(_x+1, _y+1, _w-2, _h-2, 3);
+	    if ( this.mx >= _x && this.mx < _x + _w &&
+	         this.my >= _y && this.my < _y + _h ) {
+               this.key = key;
+               color(bgColor);
+               fillCurve(c);
+               color(fgColor);
             }
+            curve(c);
+            switch (key) {
+            case '\b': key = "del"; break; 
+            case '\n': key = "ret"; break; 
+            case '\f': this.key = key = "shift"; break; 
+            }
+            text(key, x+_w/2, y+_h/2, .8, .75, 'Arial');
          }
 /*
 FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
@@ -1636,13 +1638,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       function nRows()       { return keys().length;         }
       function rowLength(row){ return keys()[row].length;  }
       function keyAt(row, k) { return keys()[row].substring(k, k+1); }
-      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2; }
+      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (row<4?0:4.45*s); }
       function Y(row, k) { return 3*s*row - s - w/4; }
-      function W(row, k) { x=X(row,k), r=x+3*s; return (r>w-3*s ? w-s/2 : r)-x-s; }
+      function W(row, k) { x=X(row,k), r=x+3*s;
+                           return row==4 ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
       function H(row, k) { return 2 * s; }
       var w = 550, s = w/45;
-      var lc = ["`1234567890-=\b"," qwertyuiop[]\\"," asdfghjkl;'\n"," zxcvbnm,./"];
-      var uc = ["~!@#$%^&*()_+\b"," QWERTYUIOP{}|" ,' ASDFGHJKL:"\n'," ZXCVBNM<>?"];
+      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," "];
+      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," "];
       var path = [];
    }
 
@@ -3306,6 +3309,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case 'control':
             isControlPressed = false;
             break;
+         case 'shift':
+            isShiftPressed = ! isShiftPressed;
+            break;
          case 'cap':
             isShiftPressed = false;
             break;
@@ -3670,7 +3676,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             renderer.render(renderer.scene, renderer.camera);
          }
 
-	 // DRAW THE SPECH BUBBLE FOR THE CODE WIDGET.
+	 // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
 
