@@ -638,12 +638,25 @@
 
    // Create an arc of a circle.
 
-   function createArc(x, y, r, a0, a1, n) {
+   function createArc(x, y, r, angle0, angle1, n) {
       var c = [];
       for (var i = 0 ; i <= n ; i++) {
-         var a = a0 + i * (a1 - a0) / n;
-         c.push([x + r * cos(a), y + r * sin(a)]);
+         var angle = lerp(i / n, angle0, angle1);
+         c.push([x + r * cos(angle), y + r * sin(angle)]);
       }
+      return c;
+   }
+
+   function createRoundRect(x, y, w, h, r) {
+      var c = [];
+      c = c.concat(createArc(x+r,y+h-r,r,PI/2,PI,8));
+      c = c.concat([[x,y+h-r],[x,y+r]]);
+      c = c.concat(createArc(x+r,y+r,r,PI,3*PI/2,8));
+      c = c.concat([[x+r,y],[x+w-r,y]]);
+      c = c.concat(createArc(x+w-r,y+r,r,-PI/2,0,8));
+      c = c.concat([[x+w,y+r],[x+w,y+h-r]]);
+      c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
+      c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
       return c;
    }
 
@@ -1033,6 +1046,16 @@
    }
 
    function curve(c, i0) {
+      startCurve(c, i0);
+      _g.stroke();
+   }
+
+   function fillCurve(c, i0) {
+      startCurve(c, i0);
+      _g.fill();
+   }
+
+   function startCurve(c, i0) {
       if (i0 === undefined)
          i0 = 0;
       if (c.length <= i0)
@@ -1041,7 +1064,6 @@
       _g_moveTo(c[i0][0], c[i0][1]);
       for (var i = i0 + 1 ; i < c.length ; i++)
          _g_lineTo(c[i][0], c[i][1]);
-      _g.stroke();
    }
 
    function color(red, grn, blu) {
@@ -1276,7 +1298,8 @@
    var sketchTypes = [];
    var sketchAction = null;
 
-   var codeSelector,
+   var codeElement,
+       codeSelector,
        codeTextArea,
        codeExample = function() {
           codeTextArea.value = codeSelector.value;
@@ -1297,9 +1320,9 @@
       return sk().code;
    }
 
-   function codeSelectorBgColor() { return backgroundColor === 'white' ? 'white' : '#0060c0'; }
-   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : 'white'; }
-   function codeTextBgColor() { return backgroundColor === 'white' ? '#e0f0ff' : '#000040'; }
+   function codeSelectorBgColor() { return 'rgba(0,0,0,0)'; }
+   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : '#c0e0ff'; }
+   function codeTextBgColor() { return 'rgba(0,0,0,0)'; }
    function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
 
    function toggleCodeWidget() {
@@ -1308,14 +1331,10 @@
 
       isCodeWidget = ! isCodeWidget;
 
-      var codeElement = document.getElementById('code');
+      codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
       if (isCodeWidget) {
-/*
-         codeElement.style.left = 100;
-         codeElement.style.top = 100;
-*/
 	 var options = "";
 	 for (var i = 0 ; i < code().length ; i++)
 	    options += "<option value='" + code()[i][1] + "'>"
@@ -1327,8 +1346,8 @@
 	  + options
           + "</select>"
 	  + "<br>"
-          + "<textArea rows=40 cols=25 id=code_text"
-          + " style=';outline-width:0;outline-color:black;border-style:none'"
+          + "<textArea rows=8 cols=24 id=code_text resize='none'"
+          + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
 	  + "</textArea>";
 
@@ -1337,13 +1356,14 @@
          codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.color = codeSelectorFgColor();
+         codeSelector.style.borderColor = codeTextFgColor();
+         codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.font="18px courier";
-         //codeTextArea.style.backgroundColor=codeTextBgColor();
-         codeTextArea.style.backgroundColor='rgba(255,255,255,0.1)';
+         codeTextArea.style.backgroundColor=codeTextBgColor();
          codeTextArea.style.color=codeTextFgColor();
 	 codeTextArea.value= code()[codeSelector.selectedIndex][1];
 	 if (code().length < 2) {
@@ -1377,16 +1397,16 @@
       // ADD VIEWER ELEMENTS TO DOCUMENT
 
       var viewerHTML = ""
-      + " <div id=slide width=1280 height=832 tabindex=1"
+      + " <div id='slide' width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <div id=scene_div width=1280 height=832 tabindex=1"
+      + " <div id='scene_div' width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id=sketch_canvas width=1280 height=832 tabindex=1"
+      + " <canvas id='sketch_canvas' width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
-      + " <div id=code"
+      + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
       + " <hr id=background size=1000 color='" + backgroundColor + "'>"
@@ -3650,21 +3670,79 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             renderer.render(renderer.scene, renderer.camera);
          }
 
-// PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
-/*
-         var msg = "_g.globalAlpha = " + _g.globalAlpha;
-         _g.save();
-         _g.font = '20pt Calibri';
-         _g.fillStyle = 'black';
-         _g.fillText(msg, 70, 30);
-         _g.restore();
-*/
+	 // DRAW THE SPECH BUBBLE FOR THE CODE WIDGET.
+
+         if (isCodeWidget) {
+
+	    var x = sk().cx();
+	    var y = 10;
+
+            // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
+
+            var text = codeTextArea.value;
+
+            var rows = text.replace(/./g,'').length + 3;
+
+            var cols = 10;
+	    var lines = text.split('\n');
+	    for (var i = 0 ; i < lines.length ; i++)
+	       cols = max(cols, lines[i].length);
+
+            codeTextArea.rows = rows;
+            codeTextArea.cols = cols;
+
+            var w = 12 * cols + 6;
+
+	    if (rows > 3)
+	       rows += 0.3;
+	    if (code().length > 1)
+	       rows += 1.2;
+
+            var h = floor(18 * rows);
+
+	    codeElement.style.left = x - w/2 + 10;
+	    codeElement.style.top = y + 10;
+
+	    // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
+
+	    var c = createRoundRect(x - w/2, y, w, h, 16);
+
+	    // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
+
+	    var L = c[c.length-1];
+	    c.splice(c.length-1, c.length);
+	    var R = c[c.length-1];
+
+	    c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
+	    c.push([lerp(0.25, sk().xlo, x), sk().ylo]);
+	    c.push(L);
+
+	    // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+
+	    color('rgba(0,0,255,0.2)');
+	    fillCurve(c);
+
+	    lineWidth(2);
+	    color(codeTextFgColor());
+	    curve(c);
+	 }
 
          if (isKeyboard()) {
             keyboard.x = sk().tX;
             keyboard.y = sk().yhi + keyboard.height();
             keyboard.render();
          }
+
+// PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
+/*
+         if (isCodeWidget) {
+            _g.save();
+            _g.font = '20pt Calibri';
+            _g.fillStyle = defaultPenColor;
+            _g.fillText(msg, 70, 30);
+            _g.restore();
+         }
+*/
       }
 
       this.showShorthand = function() {
@@ -5485,11 +5563,6 @@ var count = 0;
          _g.globalAlpha = 1;
          color(backgroundColor);
 	 fillRect(0,0,w,10);
-/*
-	 fillRect(0,0,10,h);
-	 fillRect(0,h-10,w,10);
-	 fillRect(w-10,0,10,h);
-*/
          _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)
@@ -6075,7 +6148,7 @@ var count = 0;
       textEditorPopup.document.write( ""
           + "<head><title>TEXT EDIT</title></head>"
 	  + "<body>"
-          + "<textArea rows=18 cols=55 height=100 id=textEditor_text"
+          + "<textArea rows=40 cols=55 height=100 id=textEditor_text"
           + " style='background-color:transparent;border:none'"
 	  + "</textArea>"
           + "</body>"
