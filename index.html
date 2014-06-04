@@ -1080,10 +1080,10 @@
       this.IDENT = [[-.5,.4],[.5,0],[-.5,-.4],[-.5,.4]];
       this.AND   = [[-.5,.4]].concat(createArc(.1, 0, .4, PI/2, -PI/2, 12))
                              .concat([[-.5,-.4],[-.5,.4]]);
-      this.OR    = [[-.5,.4]].concat(createArc( -.2 ,-.4, .8,  PI/2,  PI/6, 12))
-                             .concat(createArc( -.2 , .4, .8, -PI/6, -PI/2, 12))
-                             .concat(createArc(-1.2 ,  0, .8, -PI/6,  PI/6, 12));
-      this.X     =                   createArc(-1.35,  0, .8,  PI/6, -PI/6, 12);
+      this.OR    = [[-.5,.4]].concat(createArc( -.2 ,-.4, .80,  PI/2  ,  PI/6  , 12))
+                             .concat(createArc( -.2 , .4, .80, -PI/6  , -PI/2  , 12))
+                             .concat(createArc(-0.904,  0, .565, -PI/4  ,  PI/4  , 12));
+      this.X     =                   createArc(-1.00,  0, .51,  PI/3.5, -PI/3.5, 12);
 
       this.INVERT = createArc(.6, .0, .1, PI, -PI, 24);
 

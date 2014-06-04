@@ -1365,7 +1365,7 @@
          codeTextArea.style.font="18px courier";
          codeTextArea.style.backgroundColor=codeTextBgColor();
          codeTextArea.style.color=codeTextFgColor();
-	 codeTextArea.value= code()[codeSelector.selectedIndex][1];
+	 codeTextArea.value = code()[codeSelector.selectedIndex][1];
 	 if (code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
@@ -5953,6 +5953,10 @@ var count = 0;
       sketchPage.index = n;
       if (n >= 0)
          pullDownLabels = sketchActionLabels.concat(sk().labels);
+      if (isCodeWidget) {
+         toggleCodeWidget();
+         toggleCodeWidget();
+      }
    }
 
    function copySketch(s) {
