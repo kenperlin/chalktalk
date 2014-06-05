@@ -811,7 +811,7 @@
          prev_x = x;
          prev_y = y;
       }
-      else 
+      else
          sketch(x, y, 0);
    }
 
@@ -1601,9 +1601,9 @@
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
             var key = keyAt(row, k);
             switch (key) {
-            case '\b': key = 'del'; break; 
-            case '\n': key = 'ret'; break; 
-            case '\f': key = 'shift'; break; 
+            case '\b': key = 'del'; break;
+            case '\n': key = 'ret'; break;
+            case '\f': key = 'shift'; break;
             }
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
@@ -1766,7 +1766,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function drawPieMenu(x0, y0) {
       var w = width(), h = height();
       var R = 130, r = 30;
-      
+
       if (x0 === undefined) x0 = w / 2;
       if (y0 === undefined) y0 = h / 2;
 
@@ -2118,7 +2118,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   }
                }
          }
-            
+
       // FIND ALL THE COORDS AND SORT THEM.
 
       var xs = new Set();
@@ -2933,7 +2933,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          // CLICK ON A GROUP TO UNGROUP IT.
-         
+
          if (isHover() && sk().isGroup()) {
             this.toggleGroup();
             return;
@@ -4547,7 +4547,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      if (_x < tx + (tw0 + tw1) / 2)
                         break;
                   }
-                  this.textCursor = j + i;                
+                  this.textCursor = j + i;
                   this.textCursorXY = null;
                }
             }
@@ -5554,8 +5554,8 @@ var count = 0;
          if (isk() && sk().sketchState == 'in progress'
                    && isSketchDrawingEnabled
                    && sk().sketchProgress == 0) {
-            _g.mouseX = This().mouseX; 
-            _g.mouseY = This().mouseY; 
+            _g.mouseX = This().mouseX;
+            _g.mouseY = This().mouseY;
          }
 
          // ANIMATE AND DRAW ALL THE STROKES
@@ -5671,7 +5671,7 @@ var count = 0;
 
          if (isTextMode && time - strokesStartTime >= 0.5)
             isShorthandTimeout = true;
-            
+
          // HANDLE THE AUDIENCE POPUP VIEW
 
          if (isAudiencePopup() || ! isShowingOverlay()) {
@@ -5963,6 +5963,8 @@ var count = 0;
    }
 
    function selectSketch(n) {
+      if (n == sketchPage.index)
+         return
       sketchPage.index = n;
       if (n >= 0)
          pullDownLabels = sketchActionLabels.concat(sk().labels);
