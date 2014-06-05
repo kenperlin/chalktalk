@@ -1502,11 +1502,6 @@
    var whiteMaterial = new phongMaterial();
    whiteMaterial.setAmbient(.4,.4,.4).setDiffuse(.3,.3,.3).setSpecular(0,0,0,1);
 
-   initScene = function() {
-      root = new node();
-      renderer.scene.add(root);
-   }
-
    updateScene = function(elapsed) {
       //root.getMatrix().rotateY(elapsed).rotateX(2 * elapsed);
       //root.getMatrix().identity().translate(1,0,0).scale(1,1,.01);

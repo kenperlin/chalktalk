@@ -1433,13 +1433,6 @@
 
       fourStart();
 
-      renderer.scene = new THREE.Scene();
-      renderer.scene.add(ambientLight(0x333333));
-      renderer.scene.add(directionalLight(1,1,1, 0xffffff));
-       
-      if (initScene != 0)
-         initScene();
-
       var sceneElement = document.getElementById('scene_div');
       sceneElement.appendChild(renderer.domElement);
 
@@ -1451,7 +1444,7 @@
              startCanvas(c[i].id);
    }
 
-   var initScene = 0, updateScene = 0, pixelsPerUnit = 97;
+   var updateScene = 0, pixelsPerUnit = 97;
 
    function This() { return window[_g.name]; }
 
@@ -2640,6 +2633,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.clear = function() {
+         if (isCodeWidget)
+	    toggleCodeWidget();
+
          this.colorIndex = 0;
          this.index = -1;
          this.isWhiteboard = false;
@@ -2648,9 +2644,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 while (this.sketches.length > 0)
 	    deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
+
 	 if (renderer != null) {
-            renderer.scene.remove(root);
-	    initScene();
+	    var root = renderer.scene.root;
+	    if (isDef(root))
+	       for (var i = root.children.length ; i > 0 ; i--)
+	          root.remove(i);
          }
       }
       this.clear();
@@ -4706,6 +4705,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
          }
       }
+      this.scene = null;
       this.selection = 0;
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);
@@ -6327,6 +6327,9 @@ var count = 0;
 
    function setPage(index) {
 
+      if (isCodeWidget)
+         toggleCodeWidget();
+
       // REMOVE ALL GLYPHS DEFINED FROM PREVIOUS PAGE, IF ANY.
 
       if (glyphCountBeforePage > 0)
@@ -6358,6 +6361,16 @@ var count = 0;
       sketchTypeLabels = [];
       for (var n = 0 ; n < sketchTypes.length ; n++)
          registerSketch(sketchTypes[n]);
+
+      if (sketchPage.scene == null) {
+         sketchPage.scene = new THREE.Scene();
+         sketchPage.scene.add(ambientLight(0x333333));
+         sketchPage.scene.add(directionalLight(1,1,1, 0xffffff));
+	 sketchPage.scene.root = new node();
+         sketchPage.scene.add(sketchPage.scene.root);
+      }
+      renderer.scene = sketchPage.scene;
+      root = renderer.scene.root;
    }
 
 var glyphData = [

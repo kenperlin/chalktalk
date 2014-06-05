@@ -374,7 +374,7 @@
    }
 
    THREE.Object3D.prototype.addCube = function() {
-      var geometry = new THREE.CubeGeometry(2, 2, 2);
+      var geometry = new THREE.BoxGeometry(2, 2, 2);
       var child = new THREE.Mesh(geometry, blackMaterial);
       this.add(child);
       return child;
