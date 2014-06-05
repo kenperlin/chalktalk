@@ -3713,6 +3713,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var x = codeSketch.cx();
             var y = 10;
 
+            // MOVE THE BUBBLE IF SKETCH IS CLOSE
+
+            if (sk().ylo < 125)
+               x -= 160;
+
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
             var text = codeTextArea.value;
