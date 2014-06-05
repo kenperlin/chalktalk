@@ -1239,6 +1239,7 @@
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
+   var clickSize = 20;
    var clickX = 0;
    var clickY = 0;
    var codeSketch = null;
@@ -2832,7 +2833,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isk() && (outPort == -1 || sk() instanceof Number)) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
-               if (sk().travel > 10)
+               if (sk().travel > clickSize)
                   sk().isClick = false;
                sk().x = x;
                sk().y = y;
@@ -2875,7 +2876,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-         this.isClick = this.travel < 10;
+         this.isClick = this.travel <= clickSize;
 
          if (isPieMenu) {
             endPieMenu();
