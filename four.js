@@ -309,7 +309,7 @@
       var cc = [];
       for (var n = 0 ; n < c.length ; n++)
          cc.push(m.transform(c[n]));
-      curve(cc);
+      drawCurve(cc);
    };
    function mArrow(a,b){
       var A = m.transform(a);

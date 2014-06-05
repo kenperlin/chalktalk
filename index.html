@@ -407,7 +407,7 @@
                      c.push(m.transform([.3,0,0]));
                   m.restore();
                m.restore();
-               curve(c);
+               drawCurve(c);
             }
 
          m.restore();
@@ -626,7 +626,7 @@
 
             color(defaultPenColor);
             line(-w/2,0,w/2,0);
-            curve([ [x1,y1], [0,0], [x2,y2] ]);
+            drawCurve([ [x1,y1], [0,0], [x2,y2] ]);
 
             this.afterSketch(function(S) {
                arrow(0,0, x2,y2);
@@ -725,14 +725,15 @@
             h = this.height = 250;
             var yLo = -h/2, yHi = -150 + h*4/5 + h/4;
 
-            function drawCurve(pts) {
+            function drawColorCurve(rgb, pts) {
                var c = [];
                for (var n = 0 ; n < pts.length ; n += 2) {
                   var x = (pts[n  ] - .04) / .81;
                   var y =  pts[n+1] * 4/5 - .4;
                   c.push([w * x - w/2, h * (4/5-y) - 3*h/4]);
                }
-               curve(c);
+               color(rgb);
+               drawCurve(c);
             }
 
             function evalCurve(pts, x) {
@@ -768,14 +769,9 @@
             color(defaultPenColor);
             line(-w/2,yHi,w/2,yHi);
 
-            color('red');
-            drawCurve(redCurve);
-
-            color('#00e000');
-            drawCurve(greenCurve);
-
-            color('blue');
-            drawCurve(blueCurve);
+            drawColorCurve('red', redCurve);
+            drawColorCurve('#00e000', greenCurve);
+            drawColorCurve('blue', blueCurve);
 
             this.afterSketch(function(S) {
                var x = max(-w/2, min(w/2, S.mouseX));
@@ -866,7 +862,7 @@
          case "square":
 	    var xx = w/2 * this.sx;
 	    var yy = h/2 * this.sy;
-            closedCurve([ [-xx,-yy], [-xx,yy], [xx,yy], [xx,-yy] ]);
+            drawClosedCurve([ [-xx,-yy], [-xx,yy], [xx,yy], [xx,-yy] ]);
             break;
 
          case "circle":
@@ -875,13 +871,13 @@
             var c = [];
             for (var a = 0 ; a < TAU ; a += 0.2)
                c.push([xx*cos(a),-yy*sin(a)]);
-            closedCurve(c);
+            drawClosedCurve(c);
             break;
 
          case "triangle":
 	    var xx = w/2 * this.sx;
 	    var yy = h/2 * this.sy;
-            closedCurve([ [0,-yy], [-xx,yy], [xx,yy] ]);
+            drawClosedCurve([ [0,-yy], [-xx,yy], [xx,yy] ]);
             break;
 
          case "flap":
@@ -923,11 +919,11 @@
             var x2 = x1 + (dx2 * cb + dy2 * sb);
             var y2 = y1 + (dy2 * cb - dx2 * sb);
 
-            curve([ [ox-x2, oy+y2],
-                    [ox-x1, oy+y1],
-                    [ox+x0, oy+y0],
-                    [ox+x1, oy+y1],
-                    [ox+x2, oy+y2] ]);
+            drawCurve([ [ox-x2, oy+y2],
+                        [ox-x1, oy+y1],
+                        [ox+x0, oy+y0],
+                        [ox+x1, oy+y1],
+                        [ox+x2, oy+y2] ]);
 
             this.afterSketch(function(S) {
                var r = w/40;

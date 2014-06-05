@@ -42,10 +42,10 @@
          audioNode.onaudioprocess = function(event) {
             var output = event.outputBuffer;
             var signal = output.getChannelData(0);
-	    if (f instanceof Array)
+            if (f instanceof Array)
                for (var i = 0 ; i < output.length ; i++)
                   signal[i] = f[audioIndex++ % f.length];
-	    else
+            else
                for (var i = 0 ; i < output.length ; i++)
                   signal[i] = f(audioIndex++ / output.sampleRate);
          }
@@ -765,7 +765,7 @@
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
          amp = 1 - sketch.styleTransition;
-	 seed = 100 * sketch.index;
+         seed = 100 * sketch.index;
          dx = sketch.tx();
          dy = sketch.ty();
          if (sketch instanceof Sketch2D) {
@@ -779,7 +779,7 @@
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
          amp = 1 - sketch.styleTransition;
-	 seed = 100 * sketch.index;
+         seed = 100 * sketch.index;
          dx = sketch.tx();
          dy = sketch.ty();
          if (sketch instanceof Sketch2D) {
@@ -1041,11 +1041,11 @@
       _g.stroke();
    }
 
-   function closedCurve(c, i0) {
-      curve(c.concat([c[0]]), i0);
+   function drawClosedCurve(c, i0) {
+      drawCurve(c.concat([c[0]]), i0);
    }
 
-   function curve(c, i0) {
+   function drawCurve(c, i0) {
       startCurve(c, i0);
       _g.stroke();
    }
@@ -1241,6 +1241,7 @@
    var bgClickCount = 0;
    var clickX = 0;
    var clickY = 0;
+   var codeSketch = null;
    var curvatureCutoff = 0.1;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
@@ -1312,12 +1313,12 @@
           try {
              eval(codeTextArea.value);
           } catch (e) { }
-	  if (code() != null)
-	     code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+          if (code() != null)
+             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
        };
 
    function code() {
-      return sk().code;
+      return codeSketch == null ? null : codeSketch.code;
    }
 
    function codeSelectorBgColor() { return 'rgba(0,0,0,0)'; }
@@ -1326,8 +1327,8 @@
    function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
 
    function toggleCodeWidget() {
-      if (! isCodeWidget && ! (isk() && sk().code != null))
-	 return;
+      if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
+         return;
 
       isCodeWidget = ! isCodeWidget;
 
@@ -1335,21 +1336,21 @@
       codeElement.innerHTML = "";
 
       if (isCodeWidget) {
-	 var options = "";
-	 for (var i = 0 ; i < code().length ; i++)
-	    options += "<option value='" + code()[i][1] + "'>"
-	             + code()[i][0]
-		     + "</option>";
+         var options = "";
+         for (var i = 0 ; i < code().length ; i++)
+            options += "<option value='" + code()[i][1] + "'>"
+                     + code()[i][0]
+                     + "</option>";
 
          codeElement.innerHTML =
             "<select id=code_selector onchange='codeExample()'>"
-	  + options
+          + options
           + "</select>"
-	  + "<br>"
+          + "<br>"
           + "<textArea rows=8 cols=24 id=code_text resize='none'"
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
-	  + "</textArea>";
+          + "</textArea>";
 
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.font="18px courier";
@@ -1365,8 +1366,8 @@
          codeTextArea.style.font="18px courier";
          codeTextArea.style.backgroundColor=codeTextBgColor();
          codeTextArea.style.color=codeTextFgColor();
-	 codeTextArea.value = code()[codeSelector.selectedIndex][1];
-	 if (code().length < 2) {
+         codeTextArea.value = code()[codeSelector.selectedIndex][1];
+         if (code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
          }
@@ -1406,10 +1407,10 @@
       + " <canvas id='sketch_canvas' width=1280 height=832 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
+      + " <hr id='background' size=1000 color='" + backgroundColor + "'>"
       + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <hr id=background size=1000 color='" + backgroundColor + "'>"
       ;
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
@@ -1578,25 +1579,27 @@
       this.height = function() { return 3 * w / 11; }
       this.mouseDown = function(x, y) {
          path = [];
-	 path.push([x,y]);
+         path.push([x,y]);
          this.keyPressed = this.key;
          return this.keyPressed != null;
       }
       this.mouseDrag = function(x, y) {
-	 path.push([x,y]);
+         path.push([x,y]);
          return this.keyPressed != null;
       }
       this.mouseUp = function(x, y) {
-	 path.push([x,y]);
+         path.push([x,y]);
          return this.keyPressed != null && this.key != null;
       }
       this.render = function() {
          save();
-	 lineWidth(1);
-	 var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
+         lineWidth(1);
+         var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
          var bgColor = backgroundColor=='white' ? 'rgba(0,0,255,.2)' : 'rgba(0,128,255,.5)';
          color(fgColor);
-	 this.key = null;
+	 var kw = w - 3*s/2;
+	 drawCurve(createRoundRect(this.x - kw/2, this.y - s*13.05, kw, s*15.55, 9));
+         this.key = null;
          for (var row = 0 ; row < nRows()        ; row++)
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
             var key = keyAt(row, k);
@@ -1608,26 +1611,26 @@
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
             var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
-	    isCurrentKey = this.mx >= _x && this.mx < _x + _w &&
-	                   this.my >= _y && this.my < _y + _h ;
-	    var margin = isCurrentKey && sketchPage.isPressed ? 3 : 1;
-	    var c = createRoundRect(_x + margin, _y + margin, _w - 2*margin, _h - 2*margin, 3);
-	    if (isCurrentKey) {
+            isCurrentKey = this.mx >= _x && this.mx < _x + _w &&
+                           this.my >= _y && this.my < _y + _h ;
+            var margin = isCurrentKey && sketchPage.isPressed ? 3 : 1;
+            var c = createRoundRect(_x + margin, _y + margin, _w - 2*margin, _h - 2*margin, 3);
+            if (isCurrentKey) {
                this.key = key;
                color(bgColor);
                fillCurve(c);
                color(fgColor);
             }
-            curve(c);
-	    var isToRight = row != 1 && k == rowLength(row)-1;
-	    var dx = isToRight ? 0.7 : .5;
-	    var jx = isToRight ? 0.6 : .5;
+            drawCurve(c);
+            var isToRight = row != 1 && k == rowLength(row)-1;
+            var dx = isToRight ? 0.7 : .5;
+            var jx = isToRight ? 0.6 : .5;
             text(key, x + (_w-s/2) * dx, y + _h/2, jx, .75, 'Arial');
          }
 /*
 FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
-	 color('red');
-	 curve(path);
+         color('red');
+         drawCurve(path);
 */
          restore();
       }
@@ -2585,7 +2588,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.update = function(delta) {
          if (delta === undefined)
-	    delta = 0;
+            delta = 0;
 
          while (this.weights.length <= this.value)
             this.weights.push(0);
@@ -2634,22 +2637,22 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.clear = function() {
          if (isCodeWidget)
-	    toggleCodeWidget();
+            toggleCodeWidget();
 
          this.colorIndex = 0;
          this.index = -1;
          this.isWhiteboard = false;
          this.mx = 0;
          this.my = 0;
-	 while (this.sketches.length > 0)
-	    deleteSketch(this.sketches[0]);
+         while (this.sketches.length > 0)
+            deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
 
-	 if (renderer != null) {
-	    var root = renderer.scene.root;
-	    if (isDef(root))
-	       for (var i = root.children.length ; i > 0 ; i--)
-	          root.remove(i);
+         if (renderer != null) {
+            var root = renderer.scene.root;
+            if (isDef(root))
+               for (var i = root.children.length ; i > 0 ; i--)
+                  root.remove(i);
          }
       }
       this.clear();
@@ -2679,11 +2682,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.isPressed = true;
 
          if (isKeyboard() && keyboard.mouseDown(x,y)) {
-	    return;
-	 }
+            return;
+         }
 
          if (bgClickCount == 1)
-	    return;
+            return;
 
          if (y >= height() - 50) {
             isBottomGesture = true;
@@ -2775,11 +2778,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseDrag = function(x, y) {
 
          if (isKeyboard() && keyboard.mouseDrag(x,y)) {
-	    return;
-	 }
+            return;
+         }
 
          if (bgClickCount == 1)
-	    return;
+            return;
 
          if (isBottomGesture)
             return;
@@ -2845,20 +2848,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.isPressed = false;
 
          if (isKeyboard() && keyboard.mouseUp(x,y)) {
-	    this.handleTextChar(keyboard.key);
-	    return;
-	 }
+            this.handleTextChar(keyboard.key);
+            return;
+         }
 
          if (isBottomGesture) {
             isBottomGesture = false;
-	    if (y < height() - 100)
-	       clearSketchPage();
+            if (y < height() - 100)
+               clearSketchPage();
             else if (x < this.xDown - 100)
                setPage(pageIndex - 1);
             else if (x > this.xDown + 100)
                setPage(pageIndex + 1);
             return;
-	 }
+         }
 
          if (isTogglingExpertMode) {
             isTogglingExpertMode = false;
@@ -2961,20 +2964,21 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // EXPERT MODE:
 
-	 else if (this.isClick && isHover()) {
+         else if (this.isClick && isHover()) {
 
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
-	    if (bgClickCount == 0 && sk().code != null) {
-	       toggleCodeWidget();
-	       return;
+            if (bgClickCount == 0 && sk().code != null) {
+               codeSketch = sk();
+               toggleCodeWidget();
+               return;
             }
 
-	    // CLICK ON A SKETCH AFTER A BG CLICK TO DO AN ACTION.
+            // CLICK ON A SKETCH AFTER A BG CLICK TO DO AN ACTION.
 
             else if (doAction(x, y))
-	       return;
-	 }
+               return;
+         }
 
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
@@ -2999,7 +3003,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   clickY = y;
                   break;
                case 2:
-	          if (len(x - clickX, y - clickY) < 20)
+                  if (len(x - clickX, y - clickY) < 20)
                      startPieMenu(x, y);
                   bgClickCount = 0;
                   break;
@@ -3113,13 +3117,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {
 
          if (isFakeMouseDown) {
-	    this.mouseDrag(x, y);
-	    return;
-	 }
+            this.mouseDrag(x, y);
+            return;
+         }
 
          if (isKeyboard()) {
-	    keyboard.mouseMove(x, y);
-	 }
+            keyboard.mouseMove(x, y);
+         }
 
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
 
@@ -3136,7 +3140,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             this.mx = x;
             this.my = y;
-	    bgClickCount = 0;
+            bgClickCount = 0;
             return;
          }
 
@@ -3280,9 +3284,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.handleDrawnTextChar = function(textChar) {
          if (textChar.length > 0 && textChar.indexOf('(') > 0) {
-	    if (textChar == 'kbd()')
-	       kbd();
-	    return;
+            if (textChar == 'kbd()')
+               kbd();
+            return;
          }
 
          switch (textChar) {
@@ -3370,15 +3374,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case PAGE_UP:
             break;
          case PAGE_DN:
-	    var handle = window[_g.canvas.id];
-	    if (! isFakeMouseDown) {
+            var handle = window[_g.canvas.id];
+            if (! isFakeMouseDown) {
                handle.mouseX = mouseMoveEvent.clientX;
                handle.mouseY = mouseMoveEvent.clientY;
                handle.mousePressedAtX = handle.mouseX;
                handle.mousePressedAtY = handle.mouseY;
                handle.mousePressedAtTime = time;
                handle.mousePressed = true;
-	       handle.mouseDown(handle.mouseX, handle.mouseY);
+               handle.mouseDown(handle.mouseX, handle.mouseY);
             }
             else {
                if (sketchAction != null) {
@@ -3386,14 +3390,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      sketchPage.figureOutLink();
                   sketchAction = null;
                }
-	       else {
+               else {
                   handle.mouseX = mouseMoveEvent.clientX;
                   handle.mouseY = mouseMoveEvent.clientY;
                   handle.mousePressed = false;
-	          handle.mouseUp(handle.mouseX, handle.mouseY);
+                  handle.mouseUp(handle.mouseX, handle.mouseY);
                }
             }
-	    isFakeMouseDown = ! isFakeMouseDown;
+            isFakeMouseDown = ! isFakeMouseDown;
             break;
          case L_ARROW:
             if (isk())
@@ -3417,7 +3421,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isk())
                if (isShiftPressed) {
                   deleteSketch(sk());
-		  setTextMode(false);
+                  setTextMode(false);
                }
                else
                   sk().removeLastStroke();
@@ -3454,13 +3458,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isSketchDrawingEnabled = true;
             break;
          case 'e':
-	    toggleCodeWidget();
-	    break;
+            toggleCodeWidget();
+            break;
          case 'f':
-	    isAudioSignal = ! isAudioSignal;
-	    setAudioSignal(isAudioSignal ? function(t) { return cos(125 * TAU * t) > 0 ? 1 : -1; }
-	                                 : function(t) { return 0; });
-	    break;
+            isAudioSignal = ! isAudioSignal;
+            setAudioSignal(isAudioSignal ? function(t) { return cos(125 * TAU * t) > 0 ? 1 : -1; }
+                                         : function(t) { return 0; });
+            break;
          case 'g':
             this.toggleGroup();
             break;
@@ -3504,31 +3508,31 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case 'z':
             break;
          case '-':
-	    if (backgroundColor === 'white') {
-	       backgroundColor = 'black';
-	       defaultPenColor = 'white';
-	    }
-	    else {
-	       backgroundColor = 'white';
-	       defaultPenColor = 'black';
-	    }
+            if (backgroundColor === 'white') {
+               backgroundColor = 'black';
+               defaultPenColor = 'white';
+            }
+            else {
+               backgroundColor = 'white';
+               defaultPenColor = 'black';
+            }
             document.getElementById('background').color = backgroundColor;
-	    sketchPalette[0] = defaultPenColor;
-	    for (var i = 0 ; i < sketchPage.sketches.length ; i++)
-	       if (sketchPage.sketches[i].color == backgroundColor)
-	          sketchPage.sketches[i].color = defaultPenColor;
+            sketchPalette[0] = defaultPenColor;
+            for (var i = 0 ; i < sketchPage.sketches.length ; i++)
+               if (sketchPage.sketches[i].color == backgroundColor)
+                  sketchPage.sketches[i].color = defaultPenColor;
 
             var codeText = document.getElementById('code_text');
-	    if (codeText != null) {
+            if (codeText != null) {
                codeText.style.backgroundColor = codeTextBgColor();
                codeText.style.color = codeTextFgColor();
             }
 
             var codeSelector = document.getElementById('code_selector');
-	    if (codeSelector != null) {
+            if (codeSelector != null) {
                codeSelector.style.backgroundColor = codeSelectorBgColor();
                codeSelector.style.color = codeSelectorFgColor();
-	    }
+            }
 
             break;
          }
@@ -3568,21 +3572,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             sketchToDelete = null;
          }
 
-         if (isCodeWidget && ! (isk() && sk().code != null))
-            toggleCodeWidget();
+         if (nsk() == 0)
+            outPort = -1;
 
-	 if (nsk() == 0)
-	    outPort = -1;
-
-	 if (this.fadeAway > 0)
-	    fadeAwaySketchPage(elapsed);
+         if (this.fadeAway > 0)
+            fadeAwaySketchPage(elapsed);
 
          noisy = 1;
 
          for (var I = 0 ; I < nsk() ; I++) {
 
-	    if (sk() == null)
-	       break;
+            if (sk() == null)
+               break;
 
             sketchStart();
 
@@ -3601,27 +3602,27 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             save();
 
-	    // FADE AWAY THIS SKETCH BEFORE DELETING IT.
+            // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
-	    if (sk().fadeAway > 0) {
-	       sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
-	       if (sk().fadeAway == 0) {
-	          deleteSketch(sk());
-		  restore();
-	          _g.globalAlpha = 1;
-		  bgClickCount = 0;
-		  I--;
-		  continue;
-	       }
-	       _g.globalAlpha = sk().fadeAway;
-	    }
+            if (sk().fadeAway > 0) {
+               sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
+               if (sk().fadeAway == 0) {
+                  deleteSketch(sk());
+                  restore();
+                  _g.globalAlpha = 1;
+                  bgClickCount = 0;
+                  I--;
+                  continue;
+               }
+               _g.globalAlpha = sk().fadeAway;
+            }
 
             if (sk().glyphTrace != null && sk().sketchState != 'finished') {
                sk().trace = [];
             }
 
-	    if (sk().code != null)
-	       eval(sk().code);
+            if (sk().code != null)
+               eval(sk().code);
 
             if (sk() instanceof Sketch2D) {
                isDrawingSketch2D = true;
@@ -3666,7 +3667,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isSpacePressed)
                drawPieMenu();
             if (isTextMode && isShorthandMode) {
-               color('black');
+               color(defaultPenColor);
                lineWidth(1);
                drawOval(This().mousePressedAtX - 4,
                         This().mousePressedAtY - 4, 8, 8);
@@ -3674,19 +3675,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isTextMode)
-	    this.drawTextStrokes();
+            this.drawTextStrokes();
 
          if (updateScene != 0) {
             updateScene(elapsed);
             renderer.render(renderer.scene, renderer.camera);
          }
 
-	 // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
+         // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
 
-	    var x = sk().cx();
-	    var y = 10;
+            var x = codeSketch.cx();
+            var y = 10;
 
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
@@ -3695,54 +3696,54 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var rows = text.replace(/./g,'').length + 3;
 
             var cols = 10;
-	    var lines = text.split('\n');
-	    for (var i = 0 ; i < lines.length ; i++)
-	       cols = max(cols, lines[i].length);
+            var lines = text.split('\n');
+            for (var i = 0 ; i < lines.length ; i++)
+               cols = max(cols, lines[i].length);
 
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
 
             var w = 12 * cols + 6;
 
-	    if (rows > 3)
-	       rows += 0.3;
-	    if (code().length > 1)
-	       rows += 1.2;
+            if (rows > 3)
+               rows += 0.3;
+            if (code().length > 1)
+               rows += 1.2;
 
             var h = floor(18 * rows);
 
-	    codeElement.style.left = x - w/2 + 10;
-	    codeElement.style.top = y + 10;
+            codeElement.style.left = x - w/2 + 10;
+            codeElement.style.top = y + 10;
 
-	    // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
+            // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
 
-	    var c = createRoundRect(x - w/2, y, w, h, 16);
+            var c = createRoundRect(x - w/2, y, w, h, 16);
 
-	    // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
+            // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
-	    var L = c[c.length-1];
-	    c.splice(c.length-1, c.length);
-	    var R = c[c.length-1];
+            if (codeSketch.ylo > c[c.length-1][1]) {
 
-	    c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-	    c.push([lerp(0.25, sk().xlo, x), sk().ylo]);
-	    c.push(L);
+               var L = c[c.length-1];
+               c.splice(c.length-1, c.length);
+               var R = c[c.length-1];
 
-	    // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+               c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
+               c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               c.push(L);
+            }
 
-	    color('rgba(0,0,255,0.2)');
-	    fillCurve(c);
+            // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
-	    lineWidth(2);
-	    color(codeTextFgColor());
-	    curve(c);
-	 }
+            color('rgba(0,0,255,0.2)');
+            fillCurve(c);
 
-         if (isKeyboard()) {
-            keyboard.x = sk().tX;
-            keyboard.y = sk().yhi + keyboard.height();
-            keyboard.render();
+            lineWidth(2);
+            color(codeTextFgColor());
+            drawCurve(c);
          }
+
+         if (isKeyboard())
+            keyboard.render();
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*
@@ -3799,68 +3800,69 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.showGlyphs = function() {
-            _g.save();
-            _g.strokeStyle = 'rgba(0,0,0,.3)';
-            _g.font = '10pt Calibri';
-            _g.lineWidth = 1;
-            var y0 = height() - glyphsH;
-            line(0, y0, width(), y0);
-            line(0, height()-1, width(), height()-1);
+         _g.save();
+         _g.strokeStyle = 'rgba(0,0,0,.3)';
+         _g.font = '10pt Calibri';
+         _g.lineWidth = 1;
+         var y0 = height() - glyphsH;
+         line(0, y0, width(), y0);
+         line(0, height()-1, width(), height()-1);
 
-            var t = 5 * floor(sketchPage.mx / (glyphsW/2)) +
-                    5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
+         var t = 5 * floor(sketchPage.mx / (glyphsW/2)) +
+                 5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
 
-            for (var i = 0 ; i < glyphs.length ; i++) {
-               _g.fillStyle = t >= i && t < i+1 ? 'black' : 'rgb(0,100,240)';
-               var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5);
-               var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
-	       var txt = glyphs[i].name;
-	       var j0 = txt.indexOf('(');
-	       if (j0 > 0) {
-	          var j1 = txt.indexOf(",", j0);
-		  if (j1 > 0) {
-		     var j2 = txt.indexOf("'", j1);
-		     if (j2 > 0) {
-		        var j3 = txt.indexOf("'", j2+1);
-		        txt = txt.substring(j2+1, j3);
-		     }
-		  }
-		  else
-		     txt = txt.substring(0, j0);
-	       }
-               var tw = textWidth(txt);
-               _g.fillText(txt, x - tw/2, y);
-               if (i % 10 == 0) {
-                  line(x + 60, 0, x + 60, height());
+         for (var i = 0 ; i < glyphs.length ; i++) {
+            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : 'rgb(0,100,240)';
+            var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5);
+            var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
+            var txt = glyphs[i].name;
+            var j0 = txt.indexOf('(');
+            if (j0 > 0) {
+               var j1 = txt.indexOf(",", j0);
+               if (j1 > 0) {
+                  var j2 = txt.indexOf("'", j1);
+                  if (j2 > 0) {
+                     var j3 = txt.indexOf("'", j2+1);
+                     txt = txt.substring(j2+1, j3);
+                  }
                }
+               else
+                  txt = txt.substring(0, j0);
+            }
+            var tw = textWidth(txt);
+            _g.fillText(txt, x - tw/2, y);
+            if (i % 10 == 0) {
+               line(x + 60, 0, x + 60, height());
+            }
+         }
+
+         for (var i = 0 ; i < glyphs.length ; i++) {
+            var glyph = glyphs[i];
+            var x = (glyphsW*3/16) + glyphsW * floor(i / 10);
+            var y =  5 + (i % 10) * (height() - glyphsH) / 10;
+            var selected = t >= i && t < i+1;
+            _g.strokeStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
+            _g.fillStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
+            _g.lineWidth = selected ? 2 : 1;
+
+            var nn = glyph.data.length;
+
+            for (var n = 0 ; n < nn ; n++) {
+               var d = glyph.data[n];
+               if (t >= i + n / nn)
+                  fillOval(x + d[0][0] * .5 - 3, y + d[0][1] * .5 - 3, 6, 6);
+               _g.beginPath();
+               _g.moveTo(x + d[0][0] * .5, y + d[0][1] * .5);
+               for (var j = 1 ; j < d.length ; j++)
+                  if (t > lerp((n + j / d.length) / nn, i, i+1))
+                     _g.lineTo(x + d[j][0] * .5, y + d[j][1] * .5);
+               _g.stroke();
             }
 
-            for (var i = 0 ; i < glyphs.length ; i++) {
-               var glyph = glyphs[i];
-               var x = (glyphsW*3/16) + glyphsW * floor(i / 10);
-               var y =  5 + (i % 10) * (height() - glyphsH) / 10;
-               var selected = t >= i && t < i+1;
-               _g.strokeStyle = selected ? 'black' : 'rgb(0,100,240)';
-               _g.fillStyle = selected ? 'black' : 'rgb(0,100,240)';
-               _g.lineWidth = selected ? 2 : 1;
-
-               var nn = glyph.data.length;
-               for (var n = 0 ; n < nn ; n++) {
-                  var d = glyph.data[n];
-                  if (t >= i + n / nn)
-                     fillOval(x + d[0][0] * .5 - 3, y + d[0][1] * .5 - 3, 6, 6);
-                  _g.beginPath();
-                  _g.moveTo(x + d[0][0] * .5, y + d[0][1] * .5);
-                  for (var j = 1 ; j < d.length ; j++)
-                     if (t > lerp((n + j / d.length) / nn, i, i+1))
-                        _g.lineTo(x + d[j][0] * .5, y + d[j][1] * .5);
-                  _g.stroke();
-               }
-
-               if (t < i+1)
-                  break;
-            }
-            _g.restore();
+            if (t < i+1)
+               break;
+         }
+         _g.restore();
       }
 
       this.overlay = function() {
@@ -3877,8 +3879,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          // SHOW THE GLYPH DICTIONARY
 
          if (isShowingGlyphs) {
-	    this.showGlyphs();
-	    return;
+            this.showGlyphs();
+            return;
          }
 
          // SHOW THE TIMELINE
@@ -3946,7 +3948,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isTextMode)
-	    this.drawTextModeMessage();
+            this.drawTextModeMessage();
 
          // REMIND THE PRESENTER WHEN INTERFACE IS IN AUTO-SKETCHING MODE.
 
@@ -4165,7 +4167,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                // DRAW ALL THE TEXT LABELS.
 
-               color('black');
+               color(defaultPenColor);
                textHeight(PH * 3 / 5);
                for (var row = 0 ; row < labels.length ; row++)
                   text(labels[row], x + PH/7, y + PH/2 + PH * row, 0, .55);
@@ -4237,7 +4239,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (pieMenuStroke.length > 0) {
             lineWidth(10);
             color('rgba(0,0,255,0.1)');
-            curve(pieMenuStroke);
+            drawCurve(pieMenuStroke);
          }
 
          annotateEnd();
@@ -4381,7 +4383,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.setPortLocation = function(name, x, y) {
          var index = getIndex(this.portName, name);
-	 if (index >= 0 && index < this.portLocation.length) {
+         if (index >= 0 && index < this.portLocation.length) {
             this.portLocation[index][0] = x;
             this.portLocation[index][1] = y;
          }
@@ -4529,8 +4531,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var x = x1;
             var y = y1 + 1.3 * fontHeight * (n - 0.5 * (this.textStrs.length-1));
             var tx = x - .5 * tw;
-	    if (this.fadeAway > 0)
-	       context.globalAlpha = this.fadeAway;
+            if (this.fadeAway > 0)
+               context.globalAlpha = this.fadeAway;
             context.fillText(str, tx, y + .35 * fontHeight);
 
             // IF A TEXT CURSOR X,Y HAS BEEN SPECIFIED, RESET THE TEXT CURSOR.
@@ -5271,7 +5273,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                ab.push([lerp(parsedTransition, src[0], dst[0]),
                         lerp(parsedTransition, src[1], dst[1])]);
             }
-            curve(ab);
+            drawCurve(ab);
          }
 
          annotateEnd();
@@ -5509,9 +5511,12 @@ var count = 0;
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
             isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
-	    bgClickCount == 1 ? 'cell' : 'crosshair';
+            bgClickCount == 1 ? 'cell' : 'crosshair';
 
          var w = width(), h = height();
+
+         keyboard.x = w / 2;
+         keyboard.y = h * 3 / 4;
 
          var prevTime = time;
          time = ((new Date()).getTime() - _startTime) / 1000.0;
@@ -5574,13 +5579,13 @@ var count = 0;
          var saveAlpha = _g.globalAlpha;
          _g.globalAlpha = 1;
          color(backgroundColor);
-	 fillRect(0,0,w,10);
+         fillRect(0,0,w,10);
          _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)
             This().animate(This().elapsed);
          else if (isExpertMode)
-	    sketchPage.showGlyphs();
+            sketchPage.showGlyphs();
 
          for (var I = 0 ; I < nsk() ; I++)
             if (! sk(I).isSimple())
@@ -5659,7 +5664,7 @@ var count = 0;
 
          if (! isPullDown && isFinishedDrawing()
                           && letterPressed == '\0'
-			  && ! sketchPage.isPressed
+                          && ! sketchPage.isPressed
                           && sketchAction == null)
             for (var I = nsk() - 1 ; I >= 0 ; I--)
                if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
@@ -5858,13 +5863,13 @@ var count = 0;
          var isCard = sketch.isCard;
 
          context.beginPath();
-	 var strokeIndex = -1;
+         var strokeIndex = -1;
          for (var i = 0 ; i < sp.length ; i++) {
             if (sp[i][2] == 0) {
                context.moveTo(sp[i][0], sp[i][1]);
-	       strokeIndex++;
-	       if (strokeIndex < sketch.colorIndex.length)
-	          context.strokeStyle = sketchPalette[sketch.colorIndex[strokeIndex]];
+               strokeIndex++;
+               if (strokeIndex < sketch.colorIndex.length)
+                  context.strokeStyle = sketchPalette[sketch.colorIndex[strokeIndex]];
             }
             else {
                context.lineTo(sp[i][0], sp[i][1]);
@@ -5958,15 +5963,22 @@ var count = 0;
                   deleteInLink(inSketch, inPort);
                }
       }
+
+      if (isCodeWidget && sketch == codeSketch)
+         toggleCodeWidget();
+
       if (sketchPage.index >= nsk())
          selectSketch(nsk() - 1);
    }
 
    function selectSketch(n) {
+      if (n == sketchPage.index)
+         return;
       sketchPage.index = n;
       if (n >= 0)
          pullDownLabels = sketchActionLabels.concat(sk().labels);
-      if (isCodeWidget) {
+      if (isCodeWidget && sk().code != null) {
+         codeSketch = sk();
          toggleCodeWidget();
          toggleCodeWidget();
       }
@@ -6164,10 +6176,10 @@ var count = 0;
       );
       textEditorPopup.document.write( ""
           + "<head><title>TEXT EDIT</title></head>"
-	  + "<body>"
+          + "<body>"
           + "<textArea rows=40 cols=55 height=100 id=textEditor_text"
           + " style='background-color:transparent;border:none'"
-	  + "</textArea>"
+          + "</textArea>"
           + "</body>"
       );
       textEditorPopup.blur();
@@ -6366,7 +6378,7 @@ var count = 0;
          sketchPage.scene = new THREE.Scene();
          sketchPage.scene.add(ambientLight(0x333333));
          sketchPage.scene.add(directionalLight(1,1,1, 0xffffff));
-	 sketchPage.scene.root = new node();
+         sketchPage.scene.root = new node();
          sketchPage.scene.add(sketchPage.scene.root);
       }
       renderer.scene = sketchPage.scene;
