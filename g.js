@@ -1497,7 +1497,10 @@
    ];
    function paletteX(i) { return 30; }
    function paletteY(i) { return 30 + i * 30; }
-   function paletteR(i) { return i == sketchPage.colorIndex ? 12 : 8; }
+   function paletteR(i) {
+      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
+      return i == index ? 12 : 8;
+   }
 
    function colorToRGB(colorName) {
       var R = 0, G = 0, B = 0;
@@ -2602,6 +2605,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.set(0);
    }
 
+   function findPaletteColorIndex(x, y) {
+      for (var n = 0 ; n < sketchPalette.length ; n++) {
+         var dx = x - paletteX(n);
+         var dy = y - paletteY(n);
+            if (dx * dx + dy * dy < 20 * 20)
+               return n;
+      }
+      return -1;
+   }
+
    function SketchPage() {
       this.fadeAway = 0;
       this.sketches = [];
@@ -2688,6 +2701,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (bgClickCount == 1)
             return;
+
+         if (paletteColorIndex >= 0)
+	    return;
 
          if (y >= height() - 50) {
             isBottomGesture = true;
@@ -2785,6 +2801,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (bgClickCount == 1)
             return;
 
+         if (paletteColorIndex >= 0) {
+	    var index = findPaletteColorIndex(x, y);
+	    if (index >= 0)
+	       paletteColorIndex = index;
+	    return;
+         }
+
          if (isBottomGesture)
             return;
 
@@ -2847,6 +2870,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+         if (paletteColorIndex >= 0) {
+	    sketchPage.colorIndex = paletteColorIndex;
+	    return;
+         }
 
          if (isKeyboard() && keyboard.mouseUp(x,y)) {
             this.handleTextChar(keyboard.key);
@@ -3218,12 +3246,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // IF MOUSE MOVES OVER THE COLOR PALETTE, SET THE DRAWING COLOR.
 
-         for (var n = 0 ; n < sketchPalette.length ; n++) {
-            var dx = x - paletteX(n);
-            var dy = y - paletteY(n);
-               if (dx * dx + dy * dy < 20 * 20)
-                  this.colorIndex = n;
-         }
+         paletteColorIndex = findPaletteColorIndex(x, y);
       }
 
       var altCmdState = 0;
