@@ -3716,7 +3716,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             // MOVE THE BUBBLE IF SKETCH IS CLOSE
 
             if (sk().ylo < 125)
-               x -= 160;
+               x -= 160 * sk().sc;
 
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
