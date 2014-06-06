@@ -4480,10 +4480,30 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.dSum = 0;
       this.deleteChar = function() {
-         if (this.textCursor > 0) {
-            this.setText(this.text.substring(0, this.textCursor-1) +
-                         this.text.substring(this.textCursor, this.text.length));
-            this.textCursor--;
+         var hasCodeBubble = this.code != null && isCodeWidget;
+         var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
+
+         if (cursorPos > 0) {
+            if (hasCodeBubble) {
+                codeTextArea.value = codeTextArea.value.substring(0, cursorPos-1) +
+                                     codeTextArea.value.substring(cursorPos, codeTextArea.value.length);
+                this.code[codeSelector.selectedIndex][1] = codeTextArea.value;
+
+                if (cursorPos < codeTextArea.value.length) {
+                   codeTextArea.selectionStart--;
+                   codeTextArea.selectionEnd--;
+                } else {
+                   // DO NOT DECREMENT IF DELETING LAST CHARACTER
+                   // BROWSER DOES THIS AUTOMATICALLY
+
+                   codeTextArea.selectionStart = cursorPos;
+                   codeTextArea.selestionStart = cursorPos;
+                }
+            } else {
+                this.setText(this.text.substring(0, this.textCursor-1) +
+                             this.text.substring(this.textCursor, this.text.length));
+                this.textCursor--;
+            }
          }
       }
       this.drawBounds = function() {
