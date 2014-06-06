@@ -1387,6 +1387,11 @@
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
          }
+
+         codeTextArea.onclick = function(event) {
+            setTextMode(true);
+            isKeyboardMode = true;
+         };
       }
    }
 
@@ -3732,7 +3737,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             // MOVE THE BUBBLE IF SKETCH IS CLOSE
 
-            if (sk().ylo < 125)
+            if (codeSketch.ylo < 125)
                x -= 160 * sk().sc;
 
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
@@ -4632,10 +4637,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.insertText = function(str) {
-         this.setText(this.text.substring(0, this.textCursor) +
-                      str +
-                      this.text.substring(this.textCursor, this.text.length));
-         this.textCursor += str.length;
+         if (this.code != null && isCodeWidget) {
+            var cursorPos = codeTextArea.selectionStart;
+            codeTextArea.value = codeTextArea.value.substring(0, cursorPos) +
+                                 str +
+                                 codeTextArea.value.substring(cursorPos, codeTextArea.value.length);
+            codeTextArea.selectionStart += str.length;
+            this.code[codeSelector.selectedIndex][1] = codeTextArea.value;
+         } else {
+            this.setText(this.text.substring(0, this.textCursor) +
+                         str +
+                         this.text.substring(this.textCursor, this.text.length));
+            this.textCursor += str.length;
+         }
       }
       this.invertStandardView = function() {
          invertStandardView(.5 + this.tx() / width(),
