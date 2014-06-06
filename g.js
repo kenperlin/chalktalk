@@ -1916,15 +1916,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             else
                arrow(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
 
-         if (b.portName.length == 0 && ! b.isNullText()) {
+         if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
             var cx = (ax + bx) / 2 + (ay - by) * s;
             var cy = (ay + by) / 2 + (bx - ax) * s;
             color(backgroundColor);
-            fillOval(cx - 10, cy - 10, 20, 20);
+            fillOval(cx - 13, cy - 13, 26, 26);
             color(dataColor);
-            text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy, .5, .6);
+            textHeight(16);
+            text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
             lineWidth(1);
-            drawOval(cx - 10, cy - 10, 20, 20);
+            drawOval(cx - 13, cy - 13, 26, 26);
          }
       }
    }
