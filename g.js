@@ -3723,7 +3723,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             var text = codeTextArea.value;
 
-            var rows = text.replace(/./g,'').length + 3;
+            var rows = text.replace(/./g,'').length + 2;
 
             var cols = 10;
             var lines = text.split('\n');
@@ -3733,17 +3733,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
 
-            var w = 12 * cols + 6;
+            var w = 12 * cols + 10;
 
             if (rows > 3)
                rows += 0.3;
             if (code().length > 1)
                rows += 1.2;
 
-            var h = floor(18 * rows);
+            var h = floor(21 * rows);
 
             codeElement.style.left = x - w/2 + 10;
-            codeElement.style.top = y + 10;
+            codeElement.style.top = y + 5;
 
             // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
 
