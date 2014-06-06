@@ -433,16 +433,6 @@
          e.z =  atan2( mat[1+4*0] / C, mat[1+4*1] / C);
       }
    }
-   function max(a,b) { return Math.max(a,b); }
-   function min(a,b) { return Math.min(a,b); }
-   function pow(a,b) { return Math.pow(a,b); }
-   function random() { return Math.random(); }
-   function round() { return Math.round(); }
-   function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
-   function sign(t) { return Math.sign(t); }
-   function sin(t) { return Math.sin(t); }
-   function sqrt(t) { return Math.sqrt(t); }
-   function tan(t) { return Math.tan(t); }
 
    function ambientLight(color) {
       return new THREE.AmbientLight(color);

@@ -3,6 +3,7 @@
 <script src=three.min.2.js></script>
 <script src=four.js></script>
 <script src=lobserLibrary.js></script>
+<script src=june26.js></script>
 
 <style>
    body{
@@ -438,7 +439,7 @@
 
       this.mouseDrag = function(x, y) {
          m.save();
-         var sc = this.size / 400 * (this.selection==0 ? 5 : 2);
+         var sc = this.size / 180;
          this.invertStandardView();
          var p = m.transform([x,y]);
          p = [p[0]/sc, p[1]/sc];
@@ -447,18 +448,18 @@
       }
 
       this.render = function(elapsed) {
-         var sc = this.size / 400;
+         var sc = this.size / 180;
 
          this.afterSketch(function(S) {
             if (S.portLocation.length == 0) {
                switch (S.selection) {
                case 0:
-                  S.addPort("lo", -.65 * sc * 5, 0);
-                  S.addPort("hi",  .65 * sc * 5, 0);
+                  S.addPort("lo", -.62 * sc, 0);
+                  S.addPort("hi",  .62 * sc, 0);
                   break;
                case 1:
-                  S.addPort("lo", 0, -.65 * sc);
-                  S.addPort("hi", 0,  .65 * sc);
+                  S.addPort("lo", 0, -.62 * sc);
+                  S.addPort("hi", 0,  .62 * sc);
                   break;
                }
                S.addPort("t", 0, 0);
@@ -475,7 +476,7 @@
          this.setOutValue("t", lerp(t, this.lo, this.hi));
 
          m.save();
-         m.scale((this.selection == 0 ? 5 : 2) * sc);
+         m.scale(sc);
 
          var x = t - .5;
          switch (this.selection) {
@@ -1110,7 +1111,7 @@
       }
 
       this.render = function() {
-         var sc = 3 * this.size / 400;
+         var sc = this.size / 180;
          m.save();
          m.scale(sc);
          var s = (this.selection + 1000 * this.labels.length) % this.labels.length;
@@ -1519,7 +1520,7 @@
    var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Test1" ).split(' ');
 
    var pages = [
-      ["page0", sketchTypes],
+      ["page0", sketchTypes.concat(["Noises"])],
       ["page1", sketchTypes],
       ["page2", sketchTypes],
       ["page3", sketchTypes],

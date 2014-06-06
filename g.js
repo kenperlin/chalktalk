@@ -479,9 +479,11 @@
          return sqrt(x[0] * x[0] + x[1] * x[1]);
       return sqrt(x * x + y * y);
    }
+
    function lerp(t, a, b) { return a + t * (b - a); }
-   function min(a, b) { return Math.min(a, b); }
-   function max(a, b) { return Math.max(a, b); }
+   function max(a,b) { return Math.max(a,b); }
+   function min(a,b) { return Math.min(a,b); }
+
    var noise2P = [], noise2U = [], noise2V = [];
    function noise2(x, y) {
       if (noise2P.length == 0) {
@@ -515,13 +517,34 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
-   var _rSeed = 1;
-   function pow(a, b) { return Math.pow(a, b); }
-   function random() { var x = 10000*sin(_rSeed++); return x-floor(x); }
-   function sCurve(t) { return t * t * (3 - t - t); }
+
+   function pow(a,b) { return Math.pow(a,b); }
+
+   function createRandom() {
+      var seed = 2;
+
+      var x = (seed % 30268) + 1;
+      seed  = (seed - (seed % 30268)) / 30268;
+      var y = (seed % 30306) + 1;
+      seed  = (seed - (seed % 30306)) / 30306;
+      var z = (seed % 30322) + 1;
+      seed  = (seed - (seed % 30322)) / 30322;
+
+      return function() {
+         x = (171 * x) % 30269;
+         y = (172 * y) % 30307;
+         z = (170 * z) % 30323;
+         return (x / 30269 + y / 30307 + z / 30323) % 1;
+      }
+   }
+   var random = createRandom();
+
+   function round() { return Math.round(); }
+   function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
    function saw(t) { t = 2*t % 2; return t<1 ? t : 2-t; }
-   function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
+   function sign(t) { return Math.sign(t); }
    function sin(t) { return Math.sin(t); }
+   function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
    function value(t) { return isDef(t) ? t : "0"; }
@@ -1747,7 +1770,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().glyphTransition = 0;
       sk().trace = [];
 
-      sk().size = sk().height * 2;
+      //sk().size = sk().height * 2;
+      sk().size = 2 * max(sk().width, sk().height);
 
       if (sk().computeStatistics != null)
          sk().computeStatistics();
