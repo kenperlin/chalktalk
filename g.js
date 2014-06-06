@@ -517,28 +517,20 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
-
    function pow(a,b) { return Math.pow(a,b); }
-
-   function createRandom() {
+   var random = function() {
       var seed = 2;
-
       var x = (seed % 30268) + 1;
       seed  = (seed - (seed % 30268)) / 30268;
       var y = (seed % 30306) + 1;
       seed  = (seed - (seed % 30306)) / 30306;
       var z = (seed % 30322) + 1;
-      seed  = (seed - (seed % 30322)) / 30322;
-
       return function() {
-         x = (171 * x) % 30269;
-         y = (172 * y) % 30307;
-         z = (170 * z) % 30323;
-         return (x / 30269 + y / 30307 + z / 30323) % 1;
+         return ( ((x = (171 * x) % 30269) / 30269) +
+                  ((y = (172 * y) % 30307) / 30307) +
+                  ((z = (170 * z) % 30323) / 30323) ) % 1;
       }
-   }
-   var random = createRandom();
-
+   }();
    function round() { return Math.round(); }
    function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
    function saw(t) { t = 2*t % 2; return t<1 ? t : 2-t; }
