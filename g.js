@@ -225,8 +225,18 @@
             return;
 
          if (sketchAction != null) {
-            if (sketchAction == "linking")
+	    switch (sketchAction) {
+	    case "linking":
                sketchPage.figureOutLink();
+	       break;
+            case "translating":
+	       if (sk().hitOnUp != null) {
+	          var sketches = sk().intersectingSketches();
+		  if (sketches.length > 0)
+		     sk().hitOnUp(sketches);
+	       }
+	       break;
+            }
             sketchAction = null;
             return;
          }
@@ -1254,7 +1264,7 @@
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
-   var clickSize = 20;
+   var clickSize = 30;
    var clickX = 0;
    var clickY = 0;
    var codeSketch = null;
@@ -1271,7 +1281,10 @@
    var isDrawingSketch2D = false;
    var isExpertMode = true;
    var isFakeMouseDown = false;
+/*
    var isKeyboardMode = false;
+*/
+   var isKeyboardMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isNumeric = false;
@@ -1508,7 +1521,7 @@
 
    var sketchPalette = [
       defaultPenColor,
-      'brown',
+      'rgb(128,50,25)',
       'red',
       'orange',
       'green',
@@ -1527,12 +1540,12 @@
       switch (colorName) {
       case 'white'  : R = 0.9; G = 0.9; B = 0.9; break;
       case 'black'  : R = 0.7; G = 0.7; B = 0.7; break;
-      case 'brown'  : R = 0.5; G = 0.0; B = 0.0; break;
       case 'red'    : R = 1.0; G = 0.0; B = 0.0; break;
       case 'orange' : R = 1.0; G = 0.5; B = 0.0; break;
       case 'green'  : R = 0.0; G = 0.6; B = 0.0; break;
       case 'blue'   : R = 0.0; G = 0.0; B = 1.0; break;
       case 'magenta': R = 1.0; G = 0.0; B = 1.0; break;
+      default       : R = 0.5; G = 0.2; B = 0.1; break;
       }
       return [R, G, B];
    }
@@ -2759,8 +2772,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTextMode) {
             strokes = [[[x,y]]];
             strokesStartTime = time;
+/*
             isShorthandMode = true;
             isShorthandTimeout = false;
+*/
+            // FOR THIS VERSION WE ARE DISABLING SHORTHAND MODE.
+
+            isShorthandMode = false;
+            isShorthandTimeout = true;
+
             iOut = 0;
             return;
          }
@@ -2956,9 +2976,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                return;
             }
             if (! isShorthandMode) {
-               var glyphName = interpretStrokes().name;
-               if (! isCreatingTextGlyphData)
-                  sketchPage.handleDrawnTextChar(glyphName);
+	       var glyph = interpretStrokes();
+	       if (glyph != null && ! isCreatingTextGlyphData)
+                  sketchPage.handleDrawnTextChar(glyph.name);
             }
             strokes = [];
             return;
@@ -3096,6 +3116,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                cursorY += y - this.my;
                sk().sp[0] = [sk().xStart = cursorX, sk().yStart = cursorY, 0];
             }
+	    if (sk().hitOnDrag != null) {
+	       var sketches = this.intersectingSketches();
+               if (sketches.length > 0)
+	          sk().hitOnDrag(sketches);
+	    }
          }
       }
 
@@ -4653,6 +4678,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
+      this.hitOnDrag = null;
+      this.hitOnUp = null;
       this.id;
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
@@ -4670,6 +4697,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                          this.text.substring(this.textCursor, this.text.length));
             this.textCursor += str.length;
          }
+      }
+      this.intersectingSketches = function() {
+         var sketches = [];
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
+	       sketches.push(sk(I));
+         return sketches;
+      }
+      this.intersects = function(s) {
+         return this.xhi > s.xlo && this.xlo < s.xhi &&
+                this.yhi > s.ylo && this.ylo < s.yhi ;
       }
       this.invertStandardView = function() {
          invertStandardView(.5 + this.tx() / width(),

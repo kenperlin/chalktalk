@@ -450,7 +450,8 @@
       if (shiny   === undefined) shiny   = 0;
       if (power   === undefined) power   = 1;
       return new THREE.MeshPhongMaterial({
-         emissive : ambient,
+         ambient  : ambient,
+         emissive : 0,
          color    : diffuse,
          specular : shiny,
          shininess: power
