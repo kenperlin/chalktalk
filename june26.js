@@ -14,14 +14,10 @@
       this.freqs = [1];
       this.t0 = 0;
 
-      this.hitOnUp = function(sketches) {
-         for (var i = 0 ; i < sketches.length ; i++) {
-	    var sketch = sketches[i];
-	    if (sketch instanceof Noises) {
-	       this.freqs = this.freqs.concat(sketch.freqs);
-	       deleteSketch(sketch);
-	       break;
-	    }
+      this.hitOnUp = function(sketch) {
+	 if (sketch instanceof Noises) {
+	    this.freqs = this.freqs.concat(sketch.freqs);
+	    deleteSketch(sketch);
 	 }
       }
 

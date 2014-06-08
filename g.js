@@ -232,8 +232,8 @@
             case "translating":
 	       if (sk().hitOnUp != null) {
 	          var sketches = sk().intersectingSketches();
-		  if (sketches.length > 0)
-		     sk().hitOnUp(sketches);
+		  for (var i = 0 ; i < sketches.length ; i++)
+		     sk().hitOnUp(sketches[i]);
 	       }
 	       break;
             }
@@ -3118,8 +3118,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
 	    if (sk().hitOnDrag != null) {
 	       var sketches = this.intersectingSketches();
-               if (sketches.length > 0)
-	          sk().hitOnDrag(sketches);
+	       for (var i = 0 ; i < sketches.length ; i++)
+	          sk().hitOnDrag(sketches[i]);
 	    }
          }
       }
