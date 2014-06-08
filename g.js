@@ -1631,6 +1631,10 @@
             case '\b': key = 'del'; break;
             case '\n': key = 'ret'; break;
             case '\f': key = 'shift'; break;
+            case '\L': key = L_ARROW; break;
+            case '\U': key = U_ARROW; break;
+            case '\D': key = D_ARROW; break;
+            case '\R': key = R_ARROW; break;
             }
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
@@ -1663,14 +1667,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       function nRows()       { return keys().length;         }
       function rowLength(row){ return keys()[row].length;  }
       function keyAt(row, k) { return keys()[row].substring(k, k+1); }
-      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (row<4?0:4.45*s); }
+      function isSpace(row, k) { return row == 4 && k == 0; }
+      function isArrow(row, k) { return row == 4 && k > 0; }
+      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (!isSpace(row,k)?0:4.45*s) + (!isArrow(row,k)?0:16.5*s); }
       function Y(row, k) { return 3*s*row - s - w/4; }
       function W(row, k) { x=X(row,k), r=x+3*s;
-                           return row==4 ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
+                           return isSpace(row,k) ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
       function H(row, k) { return 2 * s; }
       var w = 550, s = w/45;
-      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," "];
-      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," "];
+      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," \L\U\D\R"];
+      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," \L\U\D\R"];
       var path = [];
    }
 
@@ -4702,7 +4708,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {}
       this.mouseUp = function(x, y) {}
       this.moveCursor = function(incr) {
-         this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
+         var hasCodeBubble = this.code != null && isCodeWidget;
+         if (this.code != null && isCodeWidget) {
+            var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
+            codeTextArea.selectionStart = newPos;
+            codeTextArea.selectionEnd = newPos;
+         } else {
+            this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
+        }
       }
       this.nPorts = 0;
       this.offsetSelection = function(d) { this.selection += d; }
