@@ -79,3 +79,35 @@
    }
    Noises.prototype = new Sketch;
 
+/*
+   Things to work on:
+   	Coffee cup:
+		profile view morphs into
+		3/4 view morphs into
+		top view.
+		Pour line of cream.
+		Swirling cream folds over.
+		Swirls more then folds over a second time.
+		Mention Feigenbaum,onset of turbulence and powers of two.
+	Marble principle
+		show stripes (show code for this)
+		add phase shift (show code for this)
+		use turbulence instead of fractal sum.
+	Add gesture to set to a particular page (with its attendant sketch definitions).
+	Flame -> corona
+	Clouds
+	Smoke
+	Principle of endless cycle for noise.
+	List of movies.
+	nVideo, etc., -> WebGL
+	Animated creature:  Add noise to movement.
+	Trees waving in the wind.
+		- build as a fractal.
+		- add noise to each node (show code).
+	Slice through a 3D block.
+	To make a marble vase:
+		- draw a contour.
+		- draw a circle.
+		- drag circle to contour to create 3D shape.
+		- add texture (show code).
+*/
