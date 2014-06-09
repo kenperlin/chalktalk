@@ -3389,6 +3389,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case R_ARROW:
             if (isk()) sk().moveCursor(+1);
             break;
+         case U_ARROW:
+            break;
+         case D_ARROW:
+            break;
          case 'command':
             isCommandPressed = false;
             break;
