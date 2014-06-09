@@ -1931,6 +1931,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          linkData[4] = createCurve(A, B, s);
 
          function clipCurveAgainstRect(src, R) {
+            if (src[0] == undefined) return [];
             var dst = [];
             var x1 = src[0][0];
             var y1 = src[0][1];
