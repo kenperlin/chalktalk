@@ -361,6 +361,23 @@
       this.matrixWorldNeedsUpdate = true;
    }
 
+   THREE.Object3D.prototype.addTorus = function(r, m, n) {
+      var geometry = new THREE.TorusGeometry( 1, r, m, n );
+      var child = new THREE.Mesh( geometry, blackMaterial );
+      this.add(child);
+      return child;
+   }
+
+   THREE.Object3D.prototype.addLathe = function(p, nSegments) {
+      var points = [];
+      for (var i = 0 ; i < p.length ; i++)
+         points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
+      var geometry = new THREE.LatheGeometry( points, nSegments );
+      var child = new THREE.Mesh(geometry, blackMaterial);
+      this.add(child);
+      return child;
+   }
+
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
       var child = new node();

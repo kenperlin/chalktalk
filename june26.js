@@ -5,6 +5,62 @@
     Then they can all be dragged together to show the fractal sum of 1/f noise.
 */
 
+   registerGlyph("cup()", [
+      [ [ -1,-1 ], [ -1,1 ], [ 1,1 ], [1,-1 ] ],
+      [ [ 1,-1], [-1,-1], [1,-1] ],
+      makeOval(-1.6,-.6, 1.2, 1.2, 20, 0, PI),
+      makeOval(-1.4,-.4, 0.8, 0.8, 20, 0, PI),
+   ]);
+
+   function cup() {
+      var node = root.addNode();
+      var body = node.addLathe( [
+         [ 0.00, 0, -1.00],
+         [ 0.90, 0, -1.00],
+         [ 1.00, 0, -0.90],
+	 [ 1.00, 0,  1.00],
+	 [ 0.90, 0,  1.00],
+	 [ 0.90, 0, -0.90],
+	 [ 0.00, 0, -0.90],
+      ], 32);
+
+      var handle = node.addTorus(.3, 8, 24);
+      handle.getMatrix().translate(-1,0,0).rotateX(PI/2).scale(.5);
+
+      var coffee = node.addCylinder();
+      coffee.getMatrix().translate(0,0,.9).scale(.95,.95,.01);
+
+      node.setMaterial(whiteMaterial);
+      coffee.setMaterial(new phongMaterial().setAmbient(.07,0,0));
+
+      var sketch = geometry(node, [0.1,0,0,-PI/2,0.9]);
+      sketch.swirlMode = -1;
+
+      sketch.mouseDown = function(x, y) {
+         this.mx = x;
+         this.my = y;
+      }
+      sketch.mouseDrag = function(x, y) {
+      }
+      sketch.mouseUp = function(x, y) {
+         if (len(x - this.mx, y - this.my) > 2 * clickSize)
+	    this.swirlMode = pieMenuIndex(x - this.mx, y - this.my, 4);
+	    console.log(this.swirlMode);
+      }
+
+      sketch.update = function() {
+/*
+         _g.save();
+	 _g.lineWidth = (this.xhi - this.xlo) / 50;
+         _g.beginPath();
+	    _g.moveTo(lerp(.25, this.xlo, this.xhi), lerp(.25, this.ylo, this.yhi));
+	    _g.lineTo(lerp(.75, this.xlo, this.xhi), lerp(.75, this.ylo, this.yhi));
+         _g.stroke();
+         _g.restore();
+*/
+      }
+   }
+
    function Noises() {
       this.labels = "noise1D".split(' ');
 

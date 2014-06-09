@@ -230,7 +230,7 @@
                sketchPage.figureOutLink();
 	       break;
             case "translating":
-	       if (sk().hitOnUp != null) {
+	       if (isDef(sk().hitOnUp)) {
 	          var sketches = sk().intersectingSketches();
 		  for (var i = 0 ; i < sketches.length ; i++)
 		     sk().hitOnUp(sketches[i]);
@@ -527,6 +527,7 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
+   function pieMenuIndex(x,y,n) { return floor(n+.5-atan2(y,x) / (PI/2)) % n; }
    function pow(a,b) { return Math.pow(a,b); }
    var random = function() {
       var seed = 2;
@@ -3116,7 +3117,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                cursorY += y - this.my;
                sk().sp[0] = [sk().xStart = cursorX, sk().yStart = cursorY, 0];
             }
-	    if (sk().hitOnDrag != null) {
+	    if (isDef(sk().hitOnDrag)) {
 	       var sketches = this.intersectingSketches();
 	       for (var i = 0 ; i < sketches.length ; i++)
 	          sk().hitOnDrag(sketches[i]);
@@ -4678,8 +4679,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
-      this.hitOnDrag = null;
-      this.hitOnUp = null;
       this.id;
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
@@ -6657,4 +6656,5 @@ R_ARROW,
 var glyphs = [];
 for (var i = 0 ; i < glyphData.length ; i += 2)
    registerGlyph(glyphData[i], glyphData[i+1]);
+
 

@@ -125,6 +125,9 @@
          if (isDef(this.geometry.update))
 	    this.geometry.update(elapsed);
 
+         if (isDef(this.update))
+	    this.update(elapsed);
+
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
 	                       || this.glyphSketch != null) {
 	    var alpha = this.fadeAway > 0 ? this.fadeAway :
@@ -159,7 +162,7 @@
       a.addCube().getMatrix().translate( .0, .0,-.5).scale(.01,.01,.50);
       a.setMaterial(blackMaterial);
 
-      var sketch = geometry(a, [-.25,.3,-.1,-.1,2]);
+      geometry(a, [-.25,.3,-.1,-.1,2]);
 
       a.update = function() {
          //this.getMatrix().rotateY(time);
@@ -210,6 +213,8 @@
 
       addSketch(sketch);
       finishDrawingUnfinishedSketch();
+
+      return sketch;
    }
 
    function face() { image('smiling-cat.jpg', 0.35); }
