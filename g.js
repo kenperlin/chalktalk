@@ -1627,7 +1627,14 @@
       }
       this.mouseUp = function(x, y) {
          path.push([x,y]);
-         return this.keyPressed != null && this.key != null;
+         var softKeyPressed = this.keyPressed != null && this.key != null;
+         if (this.keyPressed != null && this.key != null) {
+            return softKeyPressed;
+         } else {
+            isKeyboardMode = false;
+            setTextMode(false);
+            return false;
+         }
       }
       this.render = function() {
          save();
