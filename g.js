@@ -1631,8 +1631,8 @@
       }
       this.dismissClick = function(x, y) {
 	 var kw = w - 3*s/2;
-         if ((x < (this.x - kw/2) || x > (this.x + kw/2)) &&
-             (y < (this.y - s*13.05)) || y > (this.y + s*2.5)) {
+         if (x < (this.x - kw/2) || x > (this.x + kw/2) ||
+             y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
             isKeyboardMode = false;
             setTextMode(false);
             return true;
