@@ -1282,10 +1282,7 @@
    var isDrawingSketch2D = false;
    var isExpertMode = true;
    var isFakeMouseDown = false;
-/*
    var isKeyboardMode = false;
-*/
-   var isKeyboardMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isNumeric = false;
@@ -2978,6 +2975,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTextMode) {
             var stroke = strokes[0];
             var n = stroke.length;
+
             if (! isShorthandTimeout &&
                 len(stroke[n-1][0] - stroke[0][0],
                     stroke[n-1][1] - stroke[0][1]) < shRadius) {
@@ -2995,11 +2993,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                strokes = [];
                return;
             }
-            if (! isShorthandMode) {
+
+	    if (this.isClick)
+	       toggleTextMode();
+
+            else if (! isShorthandMode) {
 	       var glyph = interpretStrokes();
 	       if (glyph != null && ! isCreatingTextGlyphData)
                   sketchPage.handleDrawnTextChar(glyph.name);
             }
+
             strokes = [];
             return;
          }
