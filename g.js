@@ -1257,8 +1257,8 @@
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 
-   function width() { return _g.canvas.width; }
-   function height() { return _g.canvas.height; }
+   function width () { return isDef(_g) ? _g.canvas.width : 1280; }
+   function height() { return isDef(_g) ? _g.canvas.height : 720; }
 
 // UTILITY VARIABLES.
 
@@ -1303,6 +1303,7 @@
    var isTogglingExpertMode = false;
    var isTogglingMenuType = false;
    var loopFlag = 1000;
+   var margin = 50;
    var menuType = 0;
    var pageActionLabels = "text clone group whiteboard clear".split(' ');
    var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
@@ -1433,13 +1434,13 @@
       // ADD VIEWER ELEMENTS TO DOCUMENT
 
       var viewerHTML = ""
-      + " <div id='slide' width=1280 height=832 tabindex=1"
+      + " <div id='slide' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <div id='scene_div' width=1280 height=832 tabindex=1"
+      + " <div id='scene_div' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id='sketch_canvas' width=1280 height=832 tabindex=1"
+      + " <canvas id='sketch_canvas' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
       + " <hr id='background' size=1000 color='" + backgroundColor + "'>"
@@ -1453,7 +1454,7 @@
       // INITIALIZE THE SKETCH CANVAS
 
       sketch_canvas.animate = function(elapsed) { sketchPage.animate(elapsed); }
-      sketch_canvas.height = 832;
+      sketch_canvas.height = 720;
       sketch_canvas.keyDown = function(key) { sketchPage.keyDown(key); }
       sketch_canvas.keyUp = function(key) { sketchPage.keyUp(key); }
       sketch_canvas.mouseDown = function(x, y) { sketchPage.mouseDown(x, y); }
@@ -2758,18 +2759,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (paletteColorIndex >= 0)
 	    return;
 
-         if (y >= height() - 50) {
+         if (y >= height() - margin) {
             isBottomGesture = true;
             this.xDown = x;
             return;
          }
 
-         if (x >= width() - 50 && y < 50) {
+         if (x >= width() - margin && y < margin) {
             isTogglingExpertMode = true;
             return;
          }
 
-         if (x >= width() - 50 && y >= height() - 50) {
+         if (x >= width() - margin && y >= height() - margin) {
             isTogglingMenuType = true;
             return;
          }
@@ -3755,7 +3756,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < 50)
+            if (This().mouseX < margin)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
@@ -3845,13 +3846,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*
-         if (isCodeWidget) {
-            _g.save();
-            _g.font = '20pt Calibri';
-            _g.fillStyle = defaultPenColor;
-            _g.fillText(msg, 70, 30);
-            _g.restore();
-         }
+         var msg = height() + " " + _g.canvas.height;
+         _g.save();
+         _g.font = '20pt Calibri';
+         _g.fillStyle = defaultPenColor;
+         _g.fillText(msg, 70, 30);
+         _g.restore();
 */
       }
 
@@ -4326,7 +4326,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             color('rgba(0,32,128,.2)');
             var msg = "AUDIENCE POPUP IS SHOWING";
             _g.font = 'bold 40pt Calibri';
-            _g.fillText(msg, (w - textWidth(msg)) / 2, h - 50);
+            _g.fillText(msg, (w - textWidth(msg)) / 2, h - margin);
          }
 
          if (isSpacePressed)
@@ -5128,7 +5128,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             // JOIN: APPEND STROKE TO sk(I), INVERT sk(I) XFORM FOR EACH PT OF STROKE.
 
-            if (action == "joining" && isk()) {
+            if (action == "joining" && isk() && isDef(sk(I))) {
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
@@ -5893,12 +5893,9 @@ var count = 0;
          // DRAW WIDGET THAT TOGGLES WHETHER TO SHOW OVERLAY.
 
          annotateStart();
-         if (This().mouseX >= width() - 50 && This().mouseY <= 50) {
-            color('rgba(192,192,192,0.2)');
-            fillRect(width() - 51, 1, 50, 50);
-         }
-         color(dataColor);
-         drawRect(width() - 51, 1, 50, 50);
+         var _a_ = This().mouseX >= width() - margin && This().mouseY <= margin ? '.2' : '.1';
+         color('rgba(128,128,128,' + _a_ + ')');
+         fillRect(width() - margin - 1, 1, margin, margin);
          annotateEnd();
 
          // PROPAGATE LINK VALUES.
@@ -5947,6 +5944,25 @@ var count = 0;
          }
 
          requestAnimFrame(function() { tick(g); });
+
+         _g.save();
+
+         _g.beginPath();
+         _g.moveTo(0, h - margin);
+         _g.lineTo(1280, h - margin);
+         _g.lineTo(1280, h);
+         _g.lineTo(0, h);
+         _g.fillStyle = 'rgba(128,128,128,0.075)';
+         _g.fill();
+         _g.moveTo(0, h);
+
+         _g.beginPath();
+         _g.moveTo(0, h);
+         _g.lineTo(1280, h);
+         _g.strokeStyle = 'rgba(128,128,128,0.15)';
+         _g.stroke();
+
+         _g.restore();
       }
    }
 
@@ -6356,7 +6372,7 @@ var count = 0;
       +  " width=" + w
       +  " height=" + (h+52)
       );
-      audiencePopup.moveTo(0, 832);
+      audiencePopup.moveTo(0, 720);
       audiencePopup.document.write( ""
       +  " <head><title>SKETCH</title></head>"
       +  " <body>"

@@ -49,15 +49,20 @@
       }
 
       sketch.update = function() {
-/*
          _g.save();
 	 _g.lineWidth = (this.xhi - this.xlo) / 50;
          _g.beginPath();
-	    _g.moveTo(lerp(.25, this.xlo, this.xhi), lerp(.25, this.ylo, this.yhi));
-	    _g.lineTo(lerp(.75, this.xlo, this.xhi), lerp(.75, this.ylo, this.yhi));
+	    var u = 0.5, v = 0.5;
+	    _g.moveTo(lerp(u, this.xlo, this.xhi), lerp(v, this.ylo, this.yhi));
+	    switch (this.swirlMode) {
+	    case 0: u = 0.8; break;
+	    case 1: v = 0.2; break;
+	    case 2: u = 0.2; break;
+	    case 3: v = 0.8; break;
+	    }
+	    _g.lineTo(lerp(u, this.xlo, this.xhi), lerp(v, this.ylo, this.yhi));
          _g.stroke();
          _g.restore();
-*/
       }
    }
 

@@ -513,9 +513,6 @@
       requestAnimationFrame(function(){ animate(); });
    }
 
-   function width() { return window.innerWidth; }
-   function height() { return window.innerHeight; }
-
    var renderer, cameraFOV = 15, mouseX = 0, mouseY = 0;
 
    function fourStart() {
