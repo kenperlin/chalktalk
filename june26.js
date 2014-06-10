@@ -43,24 +43,35 @@
       sketch.mouseDrag = function(x, y) {
       }
       sketch.mouseUp = function(x, y) {
-         if (len(x - this.mx, y - this.my) > 2 * clickSize)
+         if (len(x - this.mx, y - this.my) > 2 * clickSize) {
 	    this.swirlMode = pieMenuIndex(x - this.mx, y - this.my, 4);
-	    console.log(this.swirlMode);
+	    this.swirlStartTime = time;
+         }
       }
 
       sketch.update = function() {
          _g.save();
-	 _g.lineWidth = (this.xhi - this.xlo) / 50;
+	 _g.lineWidth = (this.xhi - this.xlo) / 100;
          _g.beginPath();
-	    var u = 0.5, v = 0.5;
-	    _g.moveTo(lerp(u, this.xlo, this.xhi), lerp(v, this.ylo, this.yhi));
-	    switch (this.swirlMode) {
-	    case 0: u = 0.8; break;
-	    case 1: v = 0.2; break;
-	    case 2: u = 0.2; break;
-	    case 3: v = 0.8; break;
+	 if (this.swirlMode == 0) {
+	    var cx = (this.xlo + this.xhi) / 2;
+	    var cy = (this.ylo + this.yhi) / 2;
+	    var cr = (this.xhi - this.xlo) / 2;
+	    var dt = time - this.swirlStartTime;
+	    var freq = 1 + dt / 10;
+	    for (var t = 0 ; t <= 1 ; t += .01) {
+	       var a = 2 * PI * t * dt / 10;
+	       var r = .5 - .2 * t;
+	       var x0 =  r * cos(a);
+	       var y0 = -r * sin(a);
+	       var x = cx + cr * (x0 + 0.1 * noise2(freq * x0, freq * y0));
+	       var y = cy + cr * (y0 + 0.1 * noise2(freq * x0, freq * y0 + 100));
+	       if (t == 0)
+	          _g.moveTo(x, y);
+	       else
+	          _g.lineTo(x, y);
 	    }
-	    _g.lineTo(lerp(u, this.xlo, this.xhi), lerp(v, this.ylo, this.yhi));
+         }
          _g.stroke();
          _g.restore();
       }
