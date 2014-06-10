@@ -5954,6 +5954,8 @@ var count = 0;
 
          _g.save();
 
+         _g.globalAlpha = 1.0;
+
          _g.beginPath();
          _g.moveTo(0, h - margin);
          _g.lineTo(1280, h - margin);
