@@ -1932,6 +1932,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          linkData[4] = createCurve(A, B, s);
 
          function clipCurveAgainstRect(src, R) {
+            if (src[0] == undefined) return [];
             var dst = [];
             var x1 = src[0][0];
             var y1 = src[0][1];
@@ -3368,6 +3369,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          case 'h':
             this.doHome();
+            break;
+         case 'l':
+            loadGlyphArray(characterGlyphData);
+            break;
+         case 'u':
+            unloadGlyphArray(characterGlyphData);
             break;
          }
       }
@@ -6546,7 +6553,24 @@ var count = 0;
       root = renderer.scene.root;
    }
 
-var glyphData = [
+   function loadGlyphArray(a) {
+      for (var i = 0 ; i < a.length ; i += 2)
+         registerGlyph(a[i], a[i+1]);
+   }
+
+   function unloadGlyphArray(a) {
+      for (var i = 0 ; i < a.length ; i += 2) {
+         for (var j = 0 ; j < glyphs.length ; ) {
+            if (a[i] == glyphs[j].name) {
+                glyphs.splice(j, 1);
+            } else {
+                j++;
+            }
+         }
+      }
+   }
+
+var characterGlyphData = [
 "a",
 ["P*N+L*H*E)C(@'=':'6'3(1).*++)-'0%2$5#8!; > A D G J M P!S#V$Y%]&`(b)e+h,j-m/p1r3u5v8w;x>xAxDwFuIsJpLnMkNhOePcQ`S]TYTVUSVPWMWJXGXDXAX>W;V8U5T2S/R-Q*O(O+O.O1P4R6S9T<V?WAYD[F]I_LaNbQdSfVhXkZm]p^s_u`xa{b~c"],
 "b",
@@ -6607,26 +6631,6 @@ L_ARROW,
 ["~g|g{gygxgvgugsgqgpgngmgkfjfhfgeeedebdad_d]d[dYdXcVcUcScRcPcNcMcKcJcHbGbEbDbBb@b?b=a<a:a9a7a6a4`3`1`/`.`,`+`)_(_&_%_#_!_!_#^%]&['Z(Z*Y+X,W.V/U0T2T3S4R6Q7P8O9N;M<L=K>J@JAIBGCFDEEDFCHBIAI@K?L>M=N;N:O9Q8"],
 R_ARROW,
 [" a#a$a&a'a)a*a,a-a/a0a2a3a5a6a8a9a;a<a>a@aAaCaDaFaGaIaJaLaMaOaPaRaSaUaVaXaYa[a^a_aaabadaeagahajakamanap`q`s`t`v`w`y`z`|`}`~_|^{^z]yZxYwYuXtWsVqUpToTnSlRkQjPiOgNfNeMdLcKaJ`I_I]H[GZFXFWEVDUCSBRAQ@P?O>M>"],
-"1",
-["B>B@C?D>E=E<F;G:H9I8I7J6K5L4L2M1N0N/O.O-P+P*Q)Q(Q&R%R$S#T U U!U$U%U&U(U)V*V+V-V.V/V1V2V3W5W6W7W9W:W;W=W>W?WAXBXCXEXFXGXHXJXKXLXNXOXPXRXSYTYVYWYXYZY[Z]Z_Z`ZaZb[d[e[f[h[i[j[l[m[n[p[q[r[t[u[v[x]y]z]{]}]~"],
-"2",
-["42516/7-8,:*;)<'>&@%A%C$E#G#I!K!M!O Q S!T#V$W&X'Y)Z+[,[.]0]2]4[6Z7Y9W;V<U>T?RAQBPDOFNHMILJJLIMGNFPDQBRAR?T>U=W<Y;Z:]:_9a9c9e9g9i9k9m9o9q9s:u:w:x;z;|<}>|?{AzCzEyGyIyKyMyOzQzSzUzWzYz[{^{_|a|c|e|g|i}j}j}"],
-"3",
-["7!8 ; = ? A!C!E#G#J#L#N#P#R#T#W#Y#[#^#`#b#c$a&`'_)]+[-Z.Y0X2W4U6T7S9R;Q=P?OANCMELGKHJJMJOJQJSJUJWJYK[L^M`NbOcQeRfTgVhXiYj]k_kakckelglilkknkpjrhsgufwdxcya{_|]|Z}X}U}S~Q~O~M~K~I~F~D}B|@{?z=y;x:v8u7s5r3p"],
-"4",
-["xKvKsLqLoLlLjLgLeLbL`L]LZLWLULRLPLNMKMINFNDOAO?O=O:O8O5P3P0P.P+P)P'Q)P+N-M.K0I2G4F6D8C:B<A>@@>B<D;F9H7J6K4M2O1P/R-S+T)V&W$X!Y!Y$Y'Y)Y,Z.Z1Z3Z6Z8Z;Z=Z?ZBZDZGZIZLZNZQZSZVZXZ[Z^Z`ZcZeZhZjZmZoZrZt[w[y[|[~"],
-"5",
-["h'f(d)b*_*]+Z+X+U+S+Q*O)M)K(H'F&D%B$@#>!<!9!7 7#7%7'7*7,7.808385878:8<8>8@8C8E8G8I8L8N9P9R;R=Q@QBPDOFNHNJMMMOLQLSLULXMYN[P^Q`SaUbWcYd[d^e`ebfegggigkgngpgrftevdxcza{_}]}Z~X~U~S~Q}O|M|J|H{F{DzBy?x=w;v9v"],
-"6",
-["c d b ` ^!Z#X$V%T&R'P(N)L*J+I,G.E/C1B2A4@6?8?;>==?<A<C<E;G;J:L:N:P9R9U9W9Y9[9_9a9c9e9h9j:l;n<p>q?s@uBwCxEzG{I|J}M~O~Q~S~V~W}Y{[z^y_wavbtcrepfnflfjfhfeddcbb``^_]]Z[XXXVWTWRXPXMXKXIXGXDXBY@Z?[=^<`;a9c9b"],
-"7",
-["0)0+2+3,5,7,8,:,<,=,?,A+B+D+F*G)I)J)L)N(O(Q(S'T'V&X&Y&[%]%_%a$b$d$f$g$i#j#l!m o n!m$l%k&j(i)h+h,g.f/e1d2d4c5b7a8`:`;_<^>]@]A[CZDZFYGXIXJWLVMVOUQURTTTUSWSYRZR]Q^P`PbOcOeNfNhMjMkLmLnLpLrLtLuKwKxJzJ|I}J~"],
-"8",
-["g(d'b&_%[$X$T$Q#N#K#H!E!B ? =#;%9'7*6-5/4245486;8=;?=@@BCCEEHGJHMIPISJVKYK]L`McNeQfSgVhYi]i`icifiiilhogrfucway^zZ{X|U}R~O~L~I~E~B~?}=|<z<w<t=q>n@lBiCgEdGbI`J]LYMWNTPQQNQKRHTFVCXAZ?]<_:`7a4c2e/f-h*i'k%"],
-"9",
-["g)g(e'c&a%_$]#Z!W!U S P N K I G D!B#@$>&<';)9*8-7/616356586:7<8?9@;B=C?EAFCGEHHIJILIOHPGRFTDVBWAY?[=];_:`7a5c4d2e0f.h,j*h,g.f0e2c4b6a8_:^<[=Z?XAWCVFUHTJSLRNQPPSOUNWMYL[K^J`IbGdGgFiDkDmCoBrAt@v?x>z=|;~"],
-"0",
-["=O<P:R9U9W8Z7^6`6c6f6h6k6n7p8s:u<w>x@zB{E|H}J}M~P~R~T|W{Yz]x_waucsdqfoglijjhlflcm`n^oZpXqUqRqPqMpJoHnEmCl@k>j;i9h6f4e2c0a._,]*Z(X'V%T#Q!O L I G D B!?#>%<(;*:-9/827467595<4?4A4D3G2I2L1N0Q/S/V/Y.[._/b/a"],
 "!",
 ["IeJdLcNcPbQbSbUbWbYb[c^c_d`ebfbhcjdkdmdocqcsat`v_w]x[yYzW{V{T|R}P~O~M~K~I~G~E~D}B|A{?z>x=w<u;t;r;p;n<l=k>i?hAgBeCdEdGcIcJcLcNcPcRbR`R_R]RZRXRVRTRRQPQNQMQKQIQGQEQCPAP?P>P<P:P8P6P4P2P1P/P-P+P)P'P%P#P P!"],
 "@",
@@ -6685,6 +6689,29 @@ R_ARROW,
 ["n!n n!m#m$l%k&k&j'i(i)h*g+g,f-e.e/d0d1c2c3b4a5a6`7`8_9^:^:];]<[=[>Z?Y@YAXBXCWDWEVFVGUHTITJSKRLRMQNPOPPOQORNRMSMTLUKVKWJXIYIZH[G]G^F_E`E`DaCbCcBdAeAf@g?h?i>j=k=l<m<m;n:o:p9q8r8s7t6u6v5w5x4y3z3z2{2|1}1~"],
 "?",
 ["3,5,7+8*9);(<'='?&@%B%C$E$G$H#J#K#M!O!P!R T U W Y Z ] ^!`!b#c#e$f%g'h(i)i+j,j.k/l1l2l4l6k7k9k:k<j>j?iAiBhDgEfFeHcIbJaK`L^M]N[OYPXQWRWTUUTURVQXPYOZN[M]M_M`LbLcKeKfJhJiJkJmJnJpJrJsIuIvIxJyK{L|M}N}P~Q~Q|"],
+];
+
+var glyphData = [
+"1",
+["B>B@C?D>E=E<F;G:H9I8I7J6K5L4L2M1N0N/O.O-P+P*Q)Q(Q&R%R$S#T U U!U$U%U&U(U)V*V+V-V.V/V1V2V3W5W6W7W9W:W;W=W>W?WAXBXCXEXFXGXHXJXKXLXNXOXPXRXSYTYVYWYXYZY[Z]Z_Z`ZaZb[d[e[f[h[i[j[l[m[n[p[q[r[t[u[v[x]y]z]{]}]~"],
+"2",
+["42516/7-8,:*;)<'>&@%A%C$E#G#I!K!M!O Q S!T#V$W&X'Y)Z+[,[.]0]2]4[6Z7Y9W;V<U>T?RAQBPDOFNHMILJJLIMGNFPDQBRAR?T>U=W<Y;Z:]:_9a9c9e9g9i9k9m9o9q9s:u:w:x;z;|<}>|?{AzCzEyGyIyKyMyOzQzSzUzWzYz[{^{_|a|c|e|g|i}j}j}"],
+"3",
+["7!8 ; = ? A!C!E#G#J#L#N#P#R#T#W#Y#[#^#`#b#c$a&`'_)]+[-Z.Y0X2W4U6T7S9R;Q=P?OANCMELGKHJJMJOJQJSJUJWJYK[L^M`NbOcQeRfTgVhXiYj]k_kakckelglilkknkpjrhsgufwdxcya{_|]|Z}X}U}S~Q~O~M~K~I~F~D}B|@{?z=y;x:v8u7s5r3p"],
+"4",
+["xKvKsLqLoLlLjLgLeLbL`L]LZLWLULRLPLNMKMINFNDOAO?O=O:O8O5P3P0P.P+P)P'Q)P+N-M.K0I2G4F6D8C:B<A>@@>B<D;F9H7J6K4M2O1P/R-S+T)V&W$X!Y!Y$Y'Y)Y,Z.Z1Z3Z6Z8Z;Z=Z?ZBZDZGZIZLZNZQZSZVZXZ[Z^Z`ZcZeZhZjZmZoZrZt[w[y[|[~"],
+"5",
+["h'f(d)b*_*]+Z+X+U+S+Q*O)M)K(H'F&D%B$@#>!<!9!7 7#7%7'7*7,7.808385878:8<8>8@8C8E8G8I8L8N9P9R;R=Q@QBPDOFNHNJMMMOLQLSLULXMYN[P^Q`SaUbWcYd[d^e`ebfegggigkgngpgrftevdxcza{_}]}Z~X~U~S~Q}O|M|J|H{F{DzBy?x=w;v9v"],
+"6",
+["c d b ` ^!Z#X$V%T&R'P(N)L*J+I,G.E/C1B2A4@6?8?;>==?<A<C<E;G;J:L:N:P9R9U9W9Y9[9_9a9c9e9h9j:l;n<p>q?s@uBwCxEzG{I|J}M~O~Q~S~V~W}Y{[z^y_wavbtcrepfnflfjfhfeddcbb``^_]]Z[XXXVWTWRXPXMXKXIXGXDXBY@Z?[=^<`;a9c9b"],
+"7",
+["0)0+2+3,5,7,8,:,<,=,?,A+B+D+F*G)I)J)L)N(O(Q(S'T'V&X&Y&[%]%_%a$b$d$f$g$i#j#l!m o n!m$l%k&j(i)h+h,g.f/e1d2d4c5b7a8`:`;_<^>]@]A[CZDZFYGXIXJWLVMVOUQURTTTUSWSYRZR]Q^P`PbOcOeNfNhMjMkLmLnLpLrLtLuKwKxJzJ|I}J~"],
+"8",
+["g(d'b&_%[$X$T$Q#N#K#H!E!B ? =#;%9'7*6-5/4245486;8=;?=@@BCCEEHGJHMIPISJVKYK]L`McNeQfSgVhYi]i`icifiiilhogrfucway^zZ{X|U}R~O~L~I~E~B~?}=|<z<w<t=q>n@lBiCgEdGbI`J]LYMWNTPQQNQKRHTFVCXAZ?]<_:`7a4c2e/f-h*i'k%"],
+"9",
+["g)g(e'c&a%_$]#Z!W!U S P N K I G D!B#@$>&<';)9*8-7/616356586:7<8?9@;B=C?EAFCGEHHIJILIOHPGRFTDVBWAY?[=];_:`7a5c4d2e0f.h,j*h,g.f0e2c4b6a8_:^<[=Z?XAWCVFUHTJSLRNQPPSOUNWMYL[K^J`IbGdGgFiDkDmCoBrAt@v?x>z=|;~"],
+"0",
+["=O<P:R9U9W8Z7^6`6c6f6h6k6n7p8s:u<w>x@zB{E|H}J}M~P~R~T|W{Yz]x_waucsdqfoglijjhlflcm`n^oZpXqUqRqPqMpJoHnEmCl@k>j;i9h6f4e2c0a._,]*Z(X'V%T#Q!O L I G D B!?#>%<(;*:-9/827467595<4?4A4D3G2I2L1N0Q/S/V/Y.[._/b/a"],
 "face()",
 ["`0^0Z0X0U0R0P/M/K/H/E/C/@0>0;19263442607.9,;*=)?'A%C$E#G!J L O Q T W!Y#[%^'`)a+c-d0e2f5h7i9j<k>lAlCmFnHnKoMoPpSpUpXpZp^papcofohnkmmkojqhsguewdyb{`|^}Z}X~U~R~P~M}K|IzGxDwBv@t>r<q:o8m7j6h5e4c4`4^3Z3X3U3",":V:V;V;V<V<V<V=V=V>V>V?V?V?V@W@WAWAWAWBWBWCWCWCXDXDXEXEXEXFXFXGYGYGYHYHYIYIYIYJYJYKYKYKYLZLZMZMZMZNZNZOZOZPZPZPZQZQZRZRZRZSZSZTZTZUZUZUZVZVZWZWZWZXZXZYZYZZZZZZZ[Z[Z]Y]Y]Y^Y^Y^Y_X_X_X`W`W`WaWaWaVbVbVbU","9C9C9C9C9C9C9B8B8B8B8B8B8B8B8B9B9B9B9B9B9B9B:B:B:B:B:B:B:B:B;B;A;A;A;A;A;A;A;A;A<A<A<@<@<@<@<@<@<@=@=@=@=@=@=@=@=?>?>?>?>?>?>?>?>?????????????????@?@?@?@?@?@?@?A?A?A?A?A?A?A?B?B?B?B?B?B?B?B?C?C?C?C?C?","Y<Y<Y<Y<Y<Y<Z<Z<Z<Z<Z<Z<Z<Z<Z<[<[<[<[<[<[<[<[<]<]<]<]<]<]<]<]<]<^<^<^<^<^<^<^<^<_<_<_<_<_<_<_<_<_=_=`=`=`=`=`=`=`=`=`=`=a=a=a=a=a=a=a=a=a=b=b=b>b>b>b>b>b>b>b>b>b>b>b>b?b?b?b?c?c?c?c?c?c?c@c@c@c@c@c@c@",],
 "kwa()",
@@ -6698,7 +6725,5 @@ R_ARROW,
 ];
 
 var glyphs = [];
-for (var i = 0 ; i < glyphData.length ; i += 2)
-   registerGlyph(glyphData[i], glyphData[i+1]);
-
+loadGlyphArray(glyphData);
 
