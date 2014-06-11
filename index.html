@@ -149,9 +149,9 @@
    registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,PI,-PI) ]);
    registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
 
-   function cube()     { geometry(root.addCube()); }
-   function cylinder() { geometry(root.addCylinder()); }
-   function globe()    { geometry(root.addGlobe()); }
+   function cube()     { geometrySketch(root.addCube()); }
+   function cylinder() { geometrySketch(root.addCylinder()); }
+   function globe()    { geometrySketch(root.addGlobe()); }
    function axes3D() {
       var a = root.addNode();
       a.addCube().getMatrix().translate( .5, .0, .0).scale(.50,.03,.03);
@@ -162,14 +162,14 @@
       a.addCube().getMatrix().translate( .0, .0,-.5).scale(.01,.01,.50);
       a.setMaterial(blackMaterial);
 
-      geometry(a, [-.25,.3,-.1,-.1,2]);
+      geometrySketch(a, [-.25,.3,-.1,-.1,2]);
 
       a.update = function() {
          //this.getMatrix().rotateY(time);
       }
    }
 
-   function geometry(g, xf) {
+   function geometrySketch(g, xf) {
 
       var sketch = new GeometrySketch();
 

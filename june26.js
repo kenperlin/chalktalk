@@ -1,6 +1,8 @@
 /*
     Examples for June 26, 2014 talk.
 
+    cup() shows a coffee cup and swirling cream that illustrates the onset of turbulence.
+
     Noises/noise1D allows copies 1D noise to be successively frequency doubled.
     Then they can all be dragged together to show the fractal sum of 1/f noise.
 */
@@ -33,8 +35,16 @@
       node.setMaterial(whiteMaterial);
       coffee.setMaterial(new phongMaterial().setAmbient(.07,0,0));
 
-      var sketch = geometry(node, [0.1,0,0,-PI/2,0.9]);
+      var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
       sketch.swirlMode = -1;
+
+      sketch.coffee = coffee;
+
+      sketch.cream = [];
+      for (var i = 0 ; i < 10000 ; i++) {
+         var t = i / 10000;
+         sketch.cream.push( [ lerp(t, -1, 1) , 0 ] );
+      }
 
       sketch.mouseDown = function(x, y) {
          this.mx = x;
@@ -49,31 +59,68 @@
          }
       }
 
-      sketch.update = function() {
-         _g.save();
-	 _g.lineWidth = (this.xhi - this.xlo) / 100;
-         _g.beginPath();
+      sketch.update = function(elapsed) {
+
 	 if (this.swirlMode == 0) {
-	    var cx = (this.xlo + this.xhi) / 2;
-	    var cy = (this.ylo + this.yhi) / 2;
-	    var cr = (this.xhi - this.xlo) / 2;
-	    var dt = time - this.swirlStartTime;
-	    var freq = 1 + dt / 10;
-	    for (var t = 0 ; t <= 1 ; t += .01) {
-	       var a = 2 * PI * t * dt / 10;
-	       var r = .5 - .2 * t;
-	       var x0 =  r * cos(a);
-	       var y0 = -r * sin(a);
-	       var x = cx + cr * (x0 + 0.1 * noise2(freq * x0, freq * y0));
-	       var y = cy + cr * (y0 + 0.1 * noise2(freq * x0, freq * y0 + 100));
-	       if (t == 0)
+	    var x0 = (this.xlo + this.xhi) / 2;
+	    var y0 = (this.ylo + this.yhi) / 2;
+	    var r  = (this.xhi - this.xlo) / 2;
+
+	    var dt = (time - this.swirlStartTime) * 0.6;
+	    if (dt > 5)
+	       dt = 5 + .1 * (dt - 5);
+
+	    var fade = 1 - sCurve(max(0, 1 - dt / 8));
+
+	    var amp = lerp(fade*fade, .2, .15);
+	    var freq = 2 * pow(2, max(0, (dt - 4)));
+	    var eps = .01;
+
+	    for (var i = 0 ; i < this.cream.length ; i++) {
+	       var cx = this.cream[i][0];
+	       var cy = this.cream[i][1];
+
+	       var n00 = noise2(freq * cx      , freq * cy       + 100);
+	       var n10 = noise2(freq * cx + eps, freq * cy       + 100);
+	       var n01 = noise2(freq * cx      , freq * cy + eps + 100);
+	       var dx = (n01 - n00) / eps;
+	       var dy = (n00 - n10) / eps;
+
+	       cx += amp * elapsed * dx;
+	       cy += amp * elapsed * dy;
+
+	       var rr = cx * cx + cy * cy;
+	       if (rr > .8) {
+	          var f = lerp((1 - rr) / (1 - .8), .98, 1);
+	          cx *= f;
+	          cy *= f;
+	       }
+
+	       this.cream[i][0] = cx;
+	       this.cream[i][1] = cy;
+            }
+
+	    this.cream = resampleStroke(this.cream, this.cream.length);
+
+            _g.save();
+	    _g.lineWidth = (this.xhi - this.xlo) * lerp(fade * fade, .0025, .005);
+	    _g.strokeStyle = 'rgba(255,255,255,' + (1-fade) + ')';
+            _g.beginPath();
+
+	    for (var i = 0 ; i < this.cream.length ; i++) {
+	       var x = x0 + r * this.cream[i][0] * 0.6;
+	       var y = y0 + r * this.cream[i][1] * 0.6;
+	       if (i == 0)
 	          _g.moveTo(x, y);
-	       else
+	       else if (i/this.cream.length < dt)
 	          _g.lineTo(x, y);
 	    }
+
+            sketch.coffee.setMaterial(new phongMaterial().setAmbient(lerp(fade*fade,.07,.16),0,0));
+
+            _g.stroke();
+            _g.restore();
          }
-         _g.stroke();
-         _g.restore();
       }
    }
 
@@ -183,3 +230,5 @@
 		- drag circle to contour to create 3D shape.
 		- add texture (show code).
 */
+
+
