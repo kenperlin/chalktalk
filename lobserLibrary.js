@@ -153,7 +153,7 @@ THREE.Object3D.prototype.addBarley = function() {
 
 function makeBarley() {
 	var a = root.addBarley();
-	geometry(a);
+	geometrySketch(a);
 	a.update = function() {
 		this.getMatrix().translate(0,-2,0).scale(0.08);
 		 offset = time*mouseX*.002;
@@ -166,6 +166,7 @@ function makeBarley() {
 
 	}
 }
+
 
 
 
@@ -321,7 +322,7 @@ THREE.Object3D.prototype.addFragPlane = function() {
 
 function shaderPlane() {
 	var a = root.addFragPlane();
-	geometry(a);
+	geometrySketch(a);
 	a.update = function() {
 		this.getMatrix().translate(0,-2,0).scale(0.08);
 		this.shaderMaterial.uniforms['time'].value = time*.1;
@@ -403,7 +404,7 @@ THREE.Object3D.prototype.addTree = function() {
 
 function tree() {
 	var a = root.addTree();
-	geometry(a);
+	geometrySketch(a);
 	a.update = function() {
 
 		this.getMatrix().translate(0,-2,0).scale(0.08);
@@ -425,7 +426,7 @@ THREE.Object3D.prototype.addNoiseBall = function() {
 
 function noiseBaller() {
 	var a = root.addNoiseBall();
-	geometry(a);
+	geometrySketch(a);
 	a.update = function() {
 
 		this.shaderMaterial.uniforms['time'].value = time*.1;
