@@ -42,10 +42,10 @@
          audioNode.onaudioprocess = function(event) {
             var output = event.outputBuffer;
             var signal = output.getChannelData(0);
-	    if (f instanceof Array)
+            if (f instanceof Array)
                for (var i = 0 ; i < output.length ; i++)
                   signal[i] = f[audioIndex++ % f.length];
-	    else
+            else
                for (var i = 0 ; i < output.length ; i++)
                   signal[i] = f(audioIndex++ / output.sampleRate);
          }
@@ -225,8 +225,18 @@
             return;
 
          if (sketchAction != null) {
-            if (sketchAction == "linking")
+	    switch (sketchAction) {
+	    case "linking":
                sketchPage.figureOutLink();
+	       break;
+            case "translating":
+	       if (isDef(sk().hitOnUp)) {
+	          var sketches = sk().intersectingSketches();
+		  for (var i = 0 ; i < sketches.length ; i++)
+		     sk().hitOnUp(sketches[i]);
+	       }
+	       break;
+            }
             sketchAction = null;
             return;
          }
@@ -479,9 +489,11 @@
          return sqrt(x[0] * x[0] + x[1] * x[1]);
       return sqrt(x * x + y * y);
    }
+
    function lerp(t, a, b) { return a + t * (b - a); }
-   function min(a, b) { return Math.min(a, b); }
-   function max(a, b) { return Math.max(a, b); }
+   function max(a,b) { return Math.max(a,b); }
+   function min(a,b) { return Math.min(a,b); }
+
    var noise2P = [], noise2U = [], noise2V = [];
    function noise2(x, y) {
       if (noise2P.length == 0) {
@@ -515,13 +527,27 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
-   var _rSeed = 1;
-   function pow(a, b) { return Math.pow(a, b); }
-   function random() { var x = 10000*sin(_rSeed++); return x-floor(x); }
-   function sCurve(t) { return t * t * (3 - t - t); }
+   function pieMenuIndex(x,y,n) { return floor(n+.5-atan2(y,x) / (PI/2)) % n; }
+   function pow(a,b) { return Math.pow(a,b); }
+   var random = function() {
+      var seed = 2;
+      var x = (seed % 30268) + 1;
+      seed  = (seed - (seed % 30268)) / 30268;
+      var y = (seed % 30306) + 1;
+      seed  = (seed - (seed % 30306)) / 30306;
+      var z = (seed % 30322) + 1;
+      return function() {
+         return ( ((x = (171 * x) % 30269) / 30269) +
+                  ((y = (172 * y) % 30307) / 30307) +
+                  ((z = (170 * z) % 30323) / 30323) ) % 1;
+      }
+   }();
+   function round() { return Math.round(); }
+   function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
    function saw(t) { t = 2*t % 2; return t<1 ? t : 2-t; }
-   function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
+   function sign(t) { return Math.sign(t); }
    function sin(t) { return Math.sin(t); }
+   function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
    function value(t) { return isDef(t) ? t : "0"; }
@@ -765,7 +791,7 @@
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
          amp = 1 - sketch.styleTransition;
-	 seed = 100 * sketch.index;
+         seed = 100 * sketch.index;
          dx = sketch.tx();
          dy = sketch.ty();
          if (sketch instanceof Sketch2D) {
@@ -779,7 +805,7 @@
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
          amp = 1 - sketch.styleTransition;
-	 seed = 100 * sketch.index;
+         seed = 100 * sketch.index;
          dx = sketch.tx();
          dy = sketch.ty();
          if (sketch instanceof Sketch2D) {
@@ -811,7 +837,7 @@
          prev_x = x;
          prev_y = y;
       }
-      else 
+      else
          sketch(x, y, 0);
    }
 
@@ -1041,11 +1067,11 @@
       _g.stroke();
    }
 
-   function closedCurve(c, i0) {
-      curve(c.concat([c[0]]), i0);
+   function drawClosedCurve(c, i0) {
+      drawCurve(c.concat([c[0]]), i0);
    }
 
-   function curve(c, i0) {
+   function drawCurve(c, i0) {
       startCurve(c, i0);
       _g.stroke();
    }
@@ -1231,16 +1257,18 @@
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 
-   function width() { return _g.canvas.width; }
-   function height() { return _g.canvas.height; }
+   function width () { return isDef(_g) ? _g.canvas.width : 1280; }
+   function height() { return isDef(_g) ? _g.canvas.height : 720; }
 
 // UTILITY VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
+   var clickSize = 30;
    var clickX = 0;
    var clickY = 0;
+   var codeSketch = null;
    var curvatureCutoff = 0.1;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
@@ -1272,6 +1300,7 @@
    var isTogglingExpertMode = false;
    var isTogglingMenuType = false;
    var loopFlag = 1000;
+   var margin = 50;
    var menuType = 0;
    var pageActionLabels = "text clone group whiteboard clear".split(' ');
    var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
@@ -1312,12 +1341,12 @@
           try {
              eval(codeTextArea.value);
           } catch (e) { }
-	  if (code() != null)
-	     code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+          if (code() != null)
+             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
        };
 
    function code() {
-      return sk().code;
+      return codeSketch == null ? null : codeSketch.code;
    }
 
    function codeSelectorBgColor() { return 'rgba(0,0,0,0)'; }
@@ -1326,8 +1355,8 @@
    function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
 
    function toggleCodeWidget() {
-      if (! isCodeWidget && ! (isk() && sk().code != null))
-	 return;
+      if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
+         return;
 
       isCodeWidget = ! isCodeWidget;
 
@@ -1335,21 +1364,21 @@
       codeElement.innerHTML = "";
 
       if (isCodeWidget) {
-	 var options = "";
-	 for (var i = 0 ; i < code().length ; i++)
-	    options += "<option value='" + code()[i][1] + "'>"
-	             + code()[i][0]
-		     + "</option>";
+         var options = "";
+         for (var i = 0 ; i < code().length ; i++)
+            options += "<option value='" + code()[i][1] + "'>"
+                     + code()[i][0]
+                     + "</option>";
 
          codeElement.innerHTML =
             "<select id=code_selector onchange='codeExample()'>"
-	  + options
+          + options
           + "</select>"
-	  + "<br>"
+          + "<br>"
           + "<textArea rows=8 cols=24 id=code_text resize='none'"
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
-	  + "</textArea>";
+          + "</textArea>";
 
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.font="18px courier";
@@ -1365,11 +1394,16 @@
          codeTextArea.style.font="18px courier";
          codeTextArea.style.backgroundColor=codeTextBgColor();
          codeTextArea.style.color=codeTextFgColor();
-	 codeTextArea.value = code()[codeSelector.selectedIndex][1];
-	 if (code().length < 2) {
+         codeTextArea.value = code()[codeSelector.selectedIndex][1];
+         if (code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
          }
+
+         codeTextArea.onclick = function(event) {
+            setTextMode(true);
+            isKeyboardMode = true;
+         };
       }
    }
 
@@ -1397,19 +1431,19 @@
       // ADD VIEWER ELEMENTS TO DOCUMENT
 
       var viewerHTML = ""
-      + " <div id='slide' width=1280 height=832 tabindex=1"
+      + " <div id='slide' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <div id='scene_div' width=1280 height=832 tabindex=1"
+      + " <div id='scene_div' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id='sketch_canvas' width=1280 height=832 tabindex=1"
+      + " <canvas id='sketch_canvas' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
+      + " <hr id='background' size=1000 color='" + backgroundColor + "'>"
       + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <hr id=background size=1000 color='" + backgroundColor + "'>"
       ;
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
@@ -1417,7 +1451,7 @@
       // INITIALIZE THE SKETCH CANVAS
 
       sketch_canvas.animate = function(elapsed) { sketchPage.animate(elapsed); }
-      sketch_canvas.height = 832;
+      sketch_canvas.height = 720;
       sketch_canvas.keyDown = function(key) { sketchPage.keyDown(key); }
       sketch_canvas.keyUp = function(key) { sketchPage.keyUp(key); }
       sketch_canvas.mouseDown = function(x, y) { sketchPage.mouseDown(x, y); }
@@ -1433,13 +1467,6 @@
 
       fourStart();
 
-      renderer.scene = new THREE.Scene();
-      renderer.scene.add(ambientLight(0x333333));
-      renderer.scene.add(directionalLight(1,1,1, 0xffffff));
-       
-      if (initScene != 0)
-         initScene();
-
       var sceneElement = document.getElementById('scene_div');
       sceneElement.appendChild(renderer.domElement);
 
@@ -1451,7 +1478,7 @@
              startCanvas(c[i].id);
    }
 
-   var initScene = 0, updateScene = 0, pixelsPerUnit = 97;
+   var updateScene = 0, pixelsPerUnit = 97;
 
    function This() { return window[_g.name]; }
 
@@ -1493,7 +1520,7 @@
 
    var sketchPalette = [
       defaultPenColor,
-      'brown',
+      'rgb(128,50,25)',
       'red',
       'orange',
       'green',
@@ -1502,19 +1529,22 @@
    ];
    function paletteX(i) { return 30; }
    function paletteY(i) { return 30 + i * 30; }
-   function paletteR(i) { return i == sketchPage.colorIndex ? 12 : 8; }
+   function paletteR(i) {
+      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
+      return i == index ? 12 : 8;
+   }
 
    function colorToRGB(colorName) {
       var R = 0, G = 0, B = 0;
       switch (colorName) {
       case 'white'  : R = 0.9; G = 0.9; B = 0.9; break;
       case 'black'  : R = 0.7; G = 0.7; B = 0.7; break;
-      case 'brown'  : R = 0.5; G = 0.0; B = 0.0; break;
       case 'red'    : R = 1.0; G = 0.0; B = 0.0; break;
       case 'orange' : R = 1.0; G = 0.5; B = 0.0; break;
       case 'green'  : R = 0.0; G = 0.6; B = 0.0; break;
       case 'blue'   : R = 0.0; G = 0.0; B = 1.0; break;
       case 'magenta': R = 1.0; G = 0.0; B = 1.0; break;
+      default       : R = 0.5; G = 0.2; B = 0.1; break;
       }
       return [R, G, B];
    }
@@ -1585,54 +1615,73 @@
       this.height = function() { return 3 * w / 11; }
       this.mouseDown = function(x, y) {
          path = [];
-	 path.push([x,y]);
+         path.push([x,y]);
          this.keyPressed = this.key;
          return this.keyPressed != null;
       }
       this.mouseDrag = function(x, y) {
-	 path.push([x,y]);
+         path.push([x,y]);
          return this.keyPressed != null;
       }
       this.mouseUp = function(x, y) {
-	 path.push([x,y]);
+         path.push([x,y]);
          return this.keyPressed != null && this.key != null;
+      }
+      this.dismissClick = function(x, y) {
+	 var kw = w - 3*s/2;
+         if (x < (this.x - kw/2) || x > (this.x + kw/2) ||
+             y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
+            isKeyboardMode = false;
+            setTextMode(false);
+            return true;
+         } else {
+            return false;
+         }
       }
       this.render = function() {
          save();
-	 lineWidth(1);
-	 var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
+         lineWidth(1);
+         var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
          var bgColor = backgroundColor=='white' ? 'rgba(0,0,255,.2)' : 'rgba(0,128,255,.5)';
          color(fgColor);
-	 this.key = null;
+	 var kw = w - 3*s/2;
+	 drawCurve(createRoundRect(this.x - kw/2, this.y - s*13.05, kw, s*15.55, 9));
+         this.key = null;
          for (var row = 0 ; row < nRows()        ; row++)
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
             var key = keyAt(row, k);
             switch (key) {
-            case '\b': key = 'del'; break; 
-            case '\n': key = 'ret'; break; 
-            case '\f': key = 'shift'; break; 
+            case '\b': key = 'del'; break;
+            case '\n': key = 'ret'; break;
+            case '\f': key = 'shift'; break;
+            case '\L': key = L_ARROW; break;
+            case '\U': key = U_ARROW; break;
+            case '\D': key = D_ARROW; break;
+            case '\R': key = R_ARROW; break;
             }
             var x = this.x + X(row, k) - w/2;
             var y = this.y + Y(row, k);
             var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
-	    var c = createRoundRect(_x+1, _y+1, _w-2, _h-2, 3);
-	    if ( this.mx >= _x && this.mx < _x + _w &&
-	         this.my >= _y && this.my < _y + _h ) {
+            isCurrentKey = this.mx >= _x && this.mx < _x + _w &&
+                           this.my >= _y && this.my < _y + _h ;
+            var margin = isCurrentKey && sketchPage.isPressed ? 3 : 1;
+            var c = createRoundRect(_x + margin, _y + margin, _w - 2*margin, _h - 2*margin, 3);
+            if (isCurrentKey) {
                this.key = key;
                color(bgColor);
                fillCurve(c);
                color(fgColor);
             }
-            curve(c);
-	    var isToRight = row != 1 && k == rowLength(row)-1;
-	    var dx = isToRight ? 0.7 : .5;
-	    var jx = isToRight ? 0.6 : .5;
+            drawCurve(c);
+            var isToRight = row != 1 && k == rowLength(row)-1;
+            var dx = isToRight ? 0.7 : .5;
+            var jx = isToRight ? 0.6 : .5;
             text(key, x + (_w-s/2) * dx, y + _h/2, jx, .75, 'Arial');
          }
 /*
 FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
-	 color('red');
-	 curve(path);
+         color('red');
+         drawCurve(path);
 */
          restore();
       }
@@ -1641,14 +1690,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       function nRows()       { return keys().length;         }
       function rowLength(row){ return keys()[row].length;  }
       function keyAt(row, k) { return keys()[row].substring(k, k+1); }
-      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (row<4?0:4.45*s); }
+      function isSpace(row, k) { return row == 4 && k == 0; }
+      function isArrow(row, k) { return row == 4 && k > 0; }
+      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (!isSpace(row,k)?0:4.45*s) + (!isArrow(row,k)?0:16.5*s); }
       function Y(row, k) { return 3*s*row - s - w/4; }
       function W(row, k) { x=X(row,k), r=x+3*s;
-                           return row==4 ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
+                           return isSpace(row,k) ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
       function H(row, k) { return 2 * s; }
       var w = 550, s = w/45;
-      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," "];
-      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," "];
+      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," \L\U\D\R"];
+      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," \L\U\D\R"];
       var path = [];
    }
 
@@ -1745,7 +1796,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().glyphTransition = 0;
       sk().trace = [];
 
-      sk().size = sk().height * 2;
+      //sk().size = sk().height * 2;
+      sk().size = 2 * max(sk().width, sk().height);
 
       if (sk().computeStatistics != null)
          sk().computeStatistics();
@@ -1771,7 +1823,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function drawPieMenu(x0, y0) {
       var w = width(), h = height();
       var R = 130, r = 30;
-      
+
       if (x0 === undefined) x0 = w / 2;
       if (y0 === undefined) y0 = h / 2;
 
@@ -1877,6 +1929,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          linkData[4] = createCurve(A, B, s);
 
          function clipCurveAgainstRect(src, R) {
+            if (src[0] == undefined) return [];
             var dst = [];
             var x1 = src[0][0];
             var y1 = src[0][1];
@@ -1914,15 +1967,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             else
                arrow(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
 
-         if (b.portName.length == 0 && ! b.isNullText()) {
+         if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
             var cx = (ax + bx) / 2 + (ay - by) * s;
             var cy = (ay + by) / 2 + (bx - ax) * s;
             color(backgroundColor);
-            fillOval(cx - 10, cy - 10, 20, 20);
+            fillOval(cx - 13, cy - 13, 26, 26);
             color(dataColor);
-            text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy, .5, .6);
+            textHeight(16);
+            text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
             lineWidth(1);
-            drawOval(cx - 10, cy - 10, 20, 20);
+            drawOval(cx - 13, cy - 13, 26, 26);
          }
       }
    }
@@ -2018,7 +2072,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function kbd() {
       isKeyboardMode = ! isKeyboardMode;
-      console.log("isKeyboardMode = " + isKeyboardMode);
    }
 
    function isKeyboard() {
@@ -2124,7 +2177,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   }
                }
          }
-            
+
       // FIND ALL THE COORDS AND SORT THEM.
 
       var xs = new Set();
@@ -2591,7 +2644,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.update = function(delta) {
          if (delta === undefined)
-	    delta = 0;
+            delta = 0;
 
          while (this.weights.length <= this.value)
             this.weights.push(0);
@@ -2602,6 +2655,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                : max(0, this.weights[i] - delta);
       }
       this.set(0);
+   }
+
+   function findPaletteColorIndex(x, y) {
+      for (var n = 0 ; n < sketchPalette.length ; n++) {
+         var dx = x - paletteX(n);
+         var dy = y - paletteY(n);
+            if (dx * dx + dy * dy < 20 * 20)
+               return n;
+      }
+      return -1;
    }
 
    function SketchPage() {
@@ -2639,17 +2702,23 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.clear = function() {
+         if (isCodeWidget)
+            toggleCodeWidget();
+
          this.colorIndex = 0;
          this.index = -1;
          this.isWhiteboard = false;
          this.mx = 0;
          this.my = 0;
-	 while (this.sketches.length > 0)
-	    deleteSketch(this.sketches[0]);
+         while (this.sketches.length > 0)
+            deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
-	 if (renderer != null) {
-            renderer.scene.remove(root);
-	    initScene();
+
+         if (renderer != null) {
+            var root = renderer.scene.root;
+            if (isDef(root))
+               for (var i = root.children.length ; i > 0 ; i--)
+                  root.remove(i);
          }
       }
       this.clear();
@@ -2676,30 +2745,34 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.mouseDown = function(x, y) {
 
+         this.isPressed = true;
+
          if (isKeyboard() && keyboard.mouseDown(x,y)) {
-	    return;
-	 }
+            return;
+         }
 
          if (bgClickCount == 1)
+            return;
+
+         if (paletteColorIndex >= 0)
 	    return;
 
-         if (y >= height() - 50) {
+         if (y >= height() - margin) {
             isBottomGesture = true;
             this.xDown = x;
             return;
          }
 
-         if (x >= width() - 50 && y < 50) {
+         if (x >= width() - margin && y < margin) {
             isTogglingExpertMode = true;
             return;
          }
 
-         if (x >= width() - 50 && y >= height() - 50) {
+         if (x >= width() - margin && y >= height() - margin) {
             isTogglingMenuType = true;
             return;
          }
 
-         this.isPressed = true;
          this.isClick = true;
          this.isPossibleClickOverBackground = ! isHover();
          this.travel = 0;
@@ -2716,8 +2789,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTextMode) {
             strokes = [[[x,y]]];
             strokesStartTime = time;
+/*
             isShorthandMode = true;
             isShorthandTimeout = false;
+*/
+            // FOR THIS VERSION WE ARE DISABLING SHORTHAND MODE.
+
+            isShorthandMode = false;
+            isShorthandTimeout = true;
+
             iOut = 0;
             return;
          }
@@ -2774,11 +2854,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseDrag = function(x, y) {
 
          if (isKeyboard() && keyboard.mouseDrag(x,y)) {
-	    return;
-	 }
+            return;
+         }
 
          if (bgClickCount == 1)
+            return;
+
+         if (paletteColorIndex >= 0) {
+	    var index = findPaletteColorIndex(x, y);
+	    if (index >= 0)
+	       paletteColorIndex = index;
 	    return;
+         }
 
          if (isBottomGesture)
             return;
@@ -2828,7 +2915,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isk() && (outPort == -1 || sk() instanceof Number)) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
-               if (sk().travel > 10)
+               if (sk().travel > clickSize)
                   sk().isClick = false;
                sk().x = x;
                sk().y = y;
@@ -2841,21 +2928,28 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.mouseUp = function(x, y) {
 
-         if (isKeyboard() && keyboard.mouseUp(x,y)) {
-	    this.handleTextChar(keyboard.key);
+         this.isPressed = false;
+
+         if (paletteColorIndex >= 0) {
+	    sketchPage.colorIndex = paletteColorIndex;
 	    return;
-	 }
+         }
+
+         if (isKeyboard() && !keyboard.dismissClick(x,y) && keyboard.mouseUp(x,y)) {
+            this.handleTextChar(keyboard.key);
+            return;
+         }
 
          if (isBottomGesture) {
             isBottomGesture = false;
-	    if (y < height() - 100)
-	       clearSketchPage();
+            if (y < height() - 100)
+               clearSketchPage();
             else if (x < this.xDown - 100)
                setPage(pageIndex - 1);
             else if (x > this.xDown + 100)
                setPage(pageIndex + 1);
             return;
-	 }
+         }
 
          if (isTogglingExpertMode) {
             isTogglingExpertMode = false;
@@ -2869,8 +2963,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-         this.isPressed = false;
-         this.isClick = this.travel < 10;
+         this.isClick = this.travel <= clickSize;
 
          if (isPieMenu) {
             endPieMenu();
@@ -2882,6 +2975,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTextMode) {
             var stroke = strokes[0];
             var n = stroke.length;
+
             if (! isShorthandTimeout &&
                 len(stroke[n-1][0] - stroke[0][0],
                     stroke[n-1][1] - stroke[0][1]) < shRadius) {
@@ -2899,11 +2993,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                strokes = [];
                return;
             }
-            if (! isShorthandMode) {
-               var glyphName = interpretStrokes().name;
-               if (! isCreatingTextGlyphData)
-                  sketchPage.handleDrawnTextChar(glyphName);
+
+	    if (this.isClick)
+	       toggleTextMode();
+
+            else if (! isShorthandMode) {
+	       var glyph = interpretStrokes();
+	       if (glyph != null && ! isCreatingTextGlyphData)
+                  sketchPage.handleDrawnTextChar(glyph.name);
             }
+
             strokes = [];
             return;
          }
@@ -2931,7 +3030,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          // CLICK ON A GROUP TO UNGROUP IT.
-         
+
          if (isHover() && sk().isGroup()) {
             this.toggleGroup();
             return;
@@ -2959,20 +3058,21 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // EXPERT MODE:
 
-	 else if (this.isClick && isHover()) {
+         else if (this.isClick && isHover()) {
 
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
-	    if (bgClickCount == 0 && sk().code != null) {
-	       toggleCodeWidget();
-	       return;
+            if (bgClickCount == 0 && sk().code != null) {
+               codeSketch = sk();
+               toggleCodeWidget();
+               return;
             }
 
-	    // CLICK ON A SKETCH AFTER A BG CLICK TO DO AN ACTION.
+            // CLICK ON A SKETCH AFTER A BG CLICK TO DO AN ACTION.
 
             else if (doAction(x, y))
-	       return;
-	 }
+               return;
+         }
 
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
@@ -2997,7 +3097,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   clickY = y;
                   break;
                case 2:
-	          if (len(x - clickX, y - clickY) < 20)
+                  if (len(x - clickX, y - clickY) < 20)
                      startPieMenu(x, y);
                   bgClickCount = 0;
                   break;
@@ -3039,6 +3139,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                cursorY += y - this.my;
                sk().sp[0] = [sk().xStart = cursorX, sk().yStart = cursorY, 0];
             }
+	    if (isDef(sk().hitOnDrag)) {
+	       var sketches = this.intersectingSketches();
+	       for (var i = 0 ; i < sketches.length ; i++)
+	          sk().hitOnDrag(sketches[i]);
+	    }
          }
       }
 
@@ -3111,13 +3216,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {
 
          if (isFakeMouseDown) {
-	    this.mouseDrag(x, y);
-	    return;
-	 }
+            this.mouseDrag(x, y);
+            return;
+         }
 
          if (isKeyboard()) {
-	    keyboard.mouseMove(x, y);
-	 }
+            keyboard.mouseMove(x, y);
+         }
 
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
 
@@ -3134,7 +3239,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             this.mx = x;
             this.my = y;
-	    bgClickCount = 0;
+            bgClickCount = 0;
             return;
          }
 
@@ -3211,12 +3316,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // IF MOUSE MOVES OVER THE COLOR PALETTE, SET THE DRAWING COLOR.
 
-         for (var n = 0 ; n < sketchPalette.length ; n++) {
-            var dx = x - paletteX(n);
-            var dy = y - paletteY(n);
-               if (dx * dx + dy * dy < 20 * 20)
-                  this.colorIndex = n;
-         }
+         paletteColorIndex = findPaletteColorIndex(x, y);
       }
 
       var altCmdState = 0;
@@ -3273,14 +3373,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case 'h':
             this.doHome();
             break;
+         case 'l':
+            loadGlyphArray(characterGlyphData);
+            break;
+         case 'u':
+            unloadGlyphArray(characterGlyphData);
+            break;
          }
       }
 
       this.handleDrawnTextChar = function(textChar) {
          if (textChar.length > 0 && textChar.indexOf('(') > 0) {
-	    if (textChar == 'kbd()')
-	       kbd();
-	    return;
+            if (textChar == 'kbd()')
+               kbd();
+            return;
          }
 
          switch (textChar) {
@@ -3305,6 +3411,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case R_ARROW:
             if (isk()) sk().moveCursor(+1);
+            break;
+         case U_ARROW:
+            break;
+         case D_ARROW:
             break;
          case 'command':
             isCommandPressed = false;
@@ -3368,15 +3478,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case PAGE_UP:
             break;
          case PAGE_DN:
-	    var handle = window[_g.canvas.id];
-	    if (! isFakeMouseDown) {
+            var handle = window[_g.canvas.id];
+            if (! isFakeMouseDown) {
                handle.mouseX = mouseMoveEvent.clientX;
                handle.mouseY = mouseMoveEvent.clientY;
                handle.mousePressedAtX = handle.mouseX;
                handle.mousePressedAtY = handle.mouseY;
                handle.mousePressedAtTime = time;
                handle.mousePressed = true;
-	       handle.mouseDown(handle.mouseX, handle.mouseY);
+               handle.mouseDown(handle.mouseX, handle.mouseY);
             }
             else {
                if (sketchAction != null) {
@@ -3384,14 +3494,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      sketchPage.figureOutLink();
                   sketchAction = null;
                }
-	       else {
+               else {
                   handle.mouseX = mouseMoveEvent.clientX;
                   handle.mouseY = mouseMoveEvent.clientY;
                   handle.mousePressed = false;
-	          handle.mouseUp(handle.mouseX, handle.mouseY);
+                  handle.mouseUp(handle.mouseX, handle.mouseY);
                }
             }
-	    isFakeMouseDown = ! isFakeMouseDown;
+            isFakeMouseDown = ! isFakeMouseDown;
             break;
          case L_ARROW:
             if (isk())
@@ -3415,7 +3525,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isk())
                if (isShiftPressed) {
                   deleteSketch(sk());
-		  setTextMode(false);
+                  setTextMode(false);
                }
                else
                   sk().removeLastStroke();
@@ -3452,13 +3562,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isSketchDrawingEnabled = true;
             break;
          case 'e':
-	    toggleCodeWidget();
-	    break;
+            toggleCodeWidget();
+            break;
          case 'f':
-	    isAudioSignal = ! isAudioSignal;
-	    setAudioSignal(isAudioSignal ? function(t) { return cos(125 * TAU * t) > 0 ? 1 : -1; }
-	                                 : function(t) { return 0; });
-	    break;
+            isAudioSignal = ! isAudioSignal;
+            setAudioSignal(isAudioSignal ? function(t) { return cos(125 * TAU * t) > 0 ? 1 : -1; }
+                                         : function(t) { return 0; });
+            break;
          case 'g':
             this.toggleGroup();
             break;
@@ -3502,31 +3612,31 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case 'z':
             break;
          case '-':
-	    if (backgroundColor === 'white') {
-	       backgroundColor = 'black';
-	       defaultPenColor = 'white';
-	    }
-	    else {
-	       backgroundColor = 'white';
-	       defaultPenColor = 'black';
-	    }
+            if (backgroundColor === 'white') {
+               backgroundColor = 'black';
+               defaultPenColor = 'white';
+            }
+            else {
+               backgroundColor = 'white';
+               defaultPenColor = 'black';
+            }
             document.getElementById('background').color = backgroundColor;
-	    sketchPalette[0] = defaultPenColor;
-	    for (var i = 0 ; i < sketchPage.sketches.length ; i++)
-	       if (sketchPage.sketches[i].color == backgroundColor)
-	          sketchPage.sketches[i].color = defaultPenColor;
+            sketchPalette[0] = defaultPenColor;
+            for (var i = 0 ; i < sketchPage.sketches.length ; i++)
+               if (sketchPage.sketches[i].color == backgroundColor)
+                  sketchPage.sketches[i].color = defaultPenColor;
 
             var codeText = document.getElementById('code_text');
-	    if (codeText != null) {
+            if (codeText != null) {
                codeText.style.backgroundColor = codeTextBgColor();
                codeText.style.color = codeTextFgColor();
             }
 
             var codeSelector = document.getElementById('code_selector');
-	    if (codeSelector != null) {
+            if (codeSelector != null) {
                codeSelector.style.backgroundColor = codeSelectorBgColor();
                codeSelector.style.color = codeSelectorFgColor();
-	    }
+            }
 
             break;
          }
@@ -3566,21 +3676,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             sketchToDelete = null;
          }
 
-         if (isCodeWidget && ! (isk() && sk().code != null))
-            toggleCodeWidget();
+         if (nsk() == 0)
+            outPort = -1;
 
-	 if (nsk() == 0)
-	    outPort = -1;
-
-	 if (this.fadeAway > 0)
-	    fadeAwaySketchPage(elapsed);
+         if (this.fadeAway > 0)
+            fadeAwaySketchPage(elapsed);
 
          noisy = 1;
 
          for (var I = 0 ; I < nsk() ; I++) {
 
-	    if (sk() == null)
-	       break;
+            if (sk() == null)
+               break;
 
             sketchStart();
 
@@ -3599,27 +3706,27 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             save();
 
-	    // FADE AWAY THIS SKETCH BEFORE DELETING IT.
+            // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
-	    if (sk().fadeAway > 0) {
-	       sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
-	       if (sk().fadeAway == 0) {
-	          deleteSketch(sk());
-		  restore();
-	          _g.globalAlpha = 1;
-		  bgClickCount = 0;
-		  I--;
-		  continue;
-	       }
-	       _g.globalAlpha = sk().fadeAway;
-	    }
+            if (sk().fadeAway > 0) {
+               sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
+               if (sk().fadeAway == 0) {
+                  deleteSketch(sk());
+                  restore();
+                  _g.globalAlpha = 1;
+                  bgClickCount = 0;
+                  I--;
+                  continue;
+               }
+               _g.globalAlpha = sk().fadeAway;
+            }
 
             if (sk().glyphTrace != null && sk().sketchState != 'finished') {
                sk().trace = [];
             }
 
-	    if (sk().code != null)
-	       eval(sk().code);
+            if (sk().code != null)
+               eval(sk().code);
 
             if (sk() instanceof Sketch2D) {
                isDrawingSketch2D = true;
@@ -3659,12 +3766,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < 50)
+            if (This().mouseX < margin)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
             if (isTextMode && isShorthandMode) {
-               color('black');
+               color(defaultPenColor);
                lineWidth(1);
                drawOval(This().mousePressedAtX - 4,
                         This().mousePressedAtY - 4, 8, 8);
@@ -3672,85 +3779,89 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isTextMode)
-	    this.drawTextStrokes();
+            this.drawTextStrokes();
 
          if (updateScene != 0) {
             updateScene(elapsed);
             renderer.render(renderer.scene, renderer.camera);
          }
 
-	 // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
+         // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
 
-	    var x = sk().cx();
-	    var y = 10;
+            var x = codeSketch.cx();
+            var y = 10;
+
+            // MOVE THE BUBBLE IF SKETCH IS CLOSE
+
+            if (codeSketch.ylo < 125)
+               x -= 160 * sk().sc;
 
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
             var text = codeTextArea.value;
 
-            var rows = text.replace(/./g,'').length + 3;
+            var rows = text.replace(/./g,'').length + 2;
 
             var cols = 10;
-	    var lines = text.split('\n');
-	    for (var i = 0 ; i < lines.length ; i++)
-	       cols = max(cols, lines[i].length);
+            var lines = text.split('\n');
+            for (var i = 0 ; i < lines.length ; i++)
+               cols = max(cols, lines[i].length);
 
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
 
-            var w = 12 * cols + 6;
+            var w = 12 * cols + 10;
 
-	    if (rows > 3)
-	       rows += 0.3;
-	    if (code().length > 1)
-	       rows += 1.2;
+            if (rows > 3)
+               rows += 0.3;
+            if (code().length > 1)
+               rows += 1.2;
 
-            var h = floor(18 * rows);
+            var h = floor(21 * rows);
 
-	    codeElement.style.left = x - w/2 + 10;
-	    codeElement.style.top = y + 10;
+            codeElement.style.left = x - w/2 + 10;
+            codeElement.style.top = y + 5;
 
-	    // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
+            // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
 
-	    var c = createRoundRect(x - w/2, y, w, h, 16);
+            var c = createRoundRect(x - w/2, y, w, h, 16);
 
-	    // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
+            // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
-	    var L = c[c.length-1];
-	    c.splice(c.length-1, c.length);
-	    var R = c[c.length-1];
+            if (codeSketch.ylo > c[c.length-1][1]) {
 
-	    c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-	    c.push([lerp(0.25, sk().xlo, x), sk().ylo]);
-	    c.push(L);
+               var L = c[c.length-1];
+               c.splice(c.length-1, c.length);
+               var R = c[c.length-1];
 
-	    // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+               c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
+               c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               c.push(L);
+            }
 
-	    color('rgba(0,0,255,0.2)');
-	    fillCurve(c);
+            // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
-	    lineWidth(2);
-	    color(codeTextFgColor());
-	    curve(c);
-	 }
+            color('rgba(0,0,255,0.2)');
+            fillCurve(c);
 
-         if (isKeyboard()) {
-            keyboard.x = sk().tX;
-            keyboard.y = sk().yhi + keyboard.height();
-            keyboard.render();
+            lineWidth(2);
+            color(codeTextFgColor());
+            drawCurve(c);
          }
+
+         if (isKeyboard())
+            keyboard.render();
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*
-         if (isCodeWidget) {
-            _g.save();
-            _g.font = '20pt Calibri';
-            _g.fillStyle = defaultPenColor;
-            _g.fillText(msg, 70, 30);
-            _g.restore();
-         }
+         var msg = height() + " " + _g.canvas.height;
+         _g.save();
+         _g.font = '20pt Calibri';
+         _g.fillStyle = defaultPenColor;
+         _g.fillText(msg, 70, 30);
+         _g.restore();
 */
       }
 
@@ -3797,68 +3908,69 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.showGlyphs = function() {
-            _g.save();
-            _g.strokeStyle = 'rgba(0,0,0,.3)';
-            _g.font = '10pt Calibri';
-            _g.lineWidth = 1;
-            var y0 = height() - glyphsH;
-            line(0, y0, width(), y0);
-            line(0, height()-1, width(), height()-1);
+         _g.save();
+         _g.strokeStyle = 'rgba(0,0,0,.3)';
+         _g.font = '10pt Calibri';
+         _g.lineWidth = 1;
+         var y0 = height() - glyphsH;
+         line(0, y0, width(), y0);
+         line(0, height()-1, width(), height()-1);
 
-            var t = 5 * floor(sketchPage.mx / (glyphsW/2)) +
-                    5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
+         var t = 5 * floor(sketchPage.mx / (glyphsW/2)) +
+                 5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
 
-            for (var i = 0 ; i < glyphs.length ; i++) {
-               _g.fillStyle = t >= i && t < i+1 ? 'black' : 'rgb(0,100,240)';
-               var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5);
-               var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
-	       var txt = glyphs[i].name;
-	       var j0 = txt.indexOf('(');
-	       if (j0 > 0) {
-	          var j1 = txt.indexOf(",", j0);
-		  if (j1 > 0) {
-		     var j2 = txt.indexOf("'", j1);
-		     if (j2 > 0) {
-		        var j3 = txt.indexOf("'", j2+1);
-		        txt = txt.substring(j2+1, j3);
-		     }
-		  }
-		  else
-		     txt = txt.substring(0, j0);
-	       }
-               var tw = textWidth(txt);
-               _g.fillText(txt, x - tw/2, y);
-               if (i % 10 == 0) {
-                  line(x + 60, 0, x + 60, height());
+         for (var i = 0 ; i < glyphs.length ; i++) {
+            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : 'rgb(0,100,240)';
+            var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5);
+            var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
+            var txt = glyphs[i].name;
+            var j0 = txt.indexOf('(');
+            if (j0 > 0) {
+               var j1 = txt.indexOf(",", j0);
+               if (j1 > 0) {
+                  var j2 = txt.indexOf("'", j1);
+                  if (j2 > 0) {
+                     var j3 = txt.indexOf("'", j2+1);
+                     txt = txt.substring(j2+1, j3);
+                  }
                }
+               else
+                  txt = txt.substring(0, j0);
+            }
+            var tw = textWidth(txt);
+            _g.fillText(txt, x - tw/2, y);
+            if (i % 10 == 0) {
+               line(x + 60, 0, x + 60, height());
+            }
+         }
+
+         for (var i = 0 ; i < glyphs.length ; i++) {
+            var glyph = glyphs[i];
+            var x = (glyphsW*3/16) + glyphsW * floor(i / 10);
+            var y =  5 + (i % 10) * (height() - glyphsH) / 10;
+            var selected = t >= i && t < i+1;
+            _g.strokeStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
+            _g.fillStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
+            _g.lineWidth = selected ? 2 : 1;
+
+            var nn = glyph.data.length;
+
+            for (var n = 0 ; n < nn ; n++) {
+               var d = glyph.data[n];
+               if (t >= i + n / nn)
+                  fillOval(x + d[0][0] * .5 - 3, y + d[0][1] * .5 - 3, 6, 6);
+               _g.beginPath();
+               _g.moveTo(x + d[0][0] * .5, y + d[0][1] * .5);
+               for (var j = 1 ; j < d.length ; j++)
+                  if (t > lerp((n + j / d.length) / nn, i, i+1))
+                     _g.lineTo(x + d[j][0] * .5, y + d[j][1] * .5);
+               _g.stroke();
             }
 
-            for (var i = 0 ; i < glyphs.length ; i++) {
-               var glyph = glyphs[i];
-               var x = (glyphsW*3/16) + glyphsW * floor(i / 10);
-               var y =  5 + (i % 10) * (height() - glyphsH) / 10;
-               var selected = t >= i && t < i+1;
-               _g.strokeStyle = selected ? 'black' : 'rgb(0,100,240)';
-               _g.fillStyle = selected ? 'black' : 'rgb(0,100,240)';
-               _g.lineWidth = selected ? 2 : 1;
-
-               var nn = glyph.data.length;
-               for (var n = 0 ; n < nn ; n++) {
-                  var d = glyph.data[n];
-                  if (t >= i + n / nn)
-                     fillOval(x + d[0][0] * .5 - 3, y + d[0][1] * .5 - 3, 6, 6);
-                  _g.beginPath();
-                  _g.moveTo(x + d[0][0] * .5, y + d[0][1] * .5);
-                  for (var j = 1 ; j < d.length ; j++)
-                     if (t > lerp((n + j / d.length) / nn, i, i+1))
-                        _g.lineTo(x + d[j][0] * .5, y + d[j][1] * .5);
-                  _g.stroke();
-               }
-
-               if (t < i+1)
-                  break;
-            }
-            _g.restore();
+            if (t < i+1)
+               break;
+         }
+         _g.restore();
       }
 
       this.overlay = function() {
@@ -3875,8 +3987,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          // SHOW THE GLYPH DICTIONARY
 
          if (isShowingGlyphs) {
-	    this.showGlyphs();
-	    return;
+            this.showGlyphs();
+            return;
          }
 
          // SHOW THE TIMELINE
@@ -3944,7 +4056,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isTextMode)
-	    this.drawTextModeMessage();
+            this.drawTextModeMessage();
 
          // REMIND THE PRESENTER WHEN INTERFACE IS IN AUTO-SKETCHING MODE.
 
@@ -4163,7 +4275,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                // DRAW ALL THE TEXT LABELS.
 
-               color('black');
+               color(defaultPenColor);
                textHeight(PH * 3 / 5);
                for (var row = 0 ; row < labels.length ; row++)
                   text(labels[row], x + PH/7, y + PH/2 + PH * row, 0, .55);
@@ -4224,7 +4336,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             color('rgba(0,32,128,.2)');
             var msg = "AUDIENCE POPUP IS SHOWING";
             _g.font = 'bold 40pt Calibri';
-            _g.fillText(msg, (w - textWidth(msg)) / 2, h - 50);
+            _g.fillText(msg, (w - textWidth(msg)) / 2, h - margin);
          }
 
          if (isSpacePressed)
@@ -4235,7 +4347,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (pieMenuStroke.length > 0) {
             lineWidth(10);
             color('rgba(0,0,255,0.1)');
-            curve(pieMenuStroke);
+            drawCurve(pieMenuStroke);
          }
 
          annotateEnd();
@@ -4379,7 +4491,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.setPortLocation = function(name, x, y) {
          var index = getIndex(this.portName, name);
-	 if (index >= 0 && index < this.portLocation.length) {
+         if (index >= 0 && index < this.portLocation.length) {
             this.portLocation[index][0] = x;
             this.portLocation[index][1] = y;
          }
@@ -4425,10 +4537,30 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.dSum = 0;
       this.deleteChar = function() {
-         if (this.textCursor > 0) {
-            this.setText(this.text.substring(0, this.textCursor-1) +
-                         this.text.substring(this.textCursor, this.text.length));
-            this.textCursor--;
+         var hasCodeBubble = this.code != null && isCodeWidget;
+         var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
+
+         if (cursorPos > 0) {
+            if (hasCodeBubble) {
+                codeTextArea.value = codeTextArea.value.substring(0, cursorPos-1) +
+                                     codeTextArea.value.substring(cursorPos, codeTextArea.value.length);
+                this.code[codeSelector.selectedIndex][1] = codeTextArea.value;
+
+                if (cursorPos < codeTextArea.value.length) {
+                   codeTextArea.selectionStart--;
+                   codeTextArea.selectionEnd--;
+                } else {
+                   // DO NOT DECREMENT IF DELETING LAST CHARACTER
+                   // BROWSER DOES THIS AUTOMATICALLY
+
+                   codeTextArea.selectionStart = cursorPos;
+                   codeTextArea.selestionStart = cursorPos;
+                }
+            } else {
+                this.setText(this.text.substring(0, this.textCursor-1) +
+                             this.text.substring(this.textCursor, this.text.length));
+                this.textCursor--;
+            }
          }
       }
       this.drawBounds = function() {
@@ -4527,8 +4659,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var x = x1;
             var y = y1 + 1.3 * fontHeight * (n - 0.5 * (this.textStrs.length-1));
             var tx = x - .5 * tw;
-	    if (this.fadeAway > 0)
-	       context.globalAlpha = this.fadeAway;
+            if (this.fadeAway > 0)
+               context.globalAlpha = this.fadeAway;
             context.fillText(str, tx, y + .35 * fontHeight);
 
             // IF A TEXT CURSOR X,Y HAS BEEN SPECIFIED, RESET THE TEXT CURSOR.
@@ -4545,7 +4677,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      if (_x < tx + (tw0 + tw1) / 2)
                         break;
                   }
-                  this.textCursor = j + i;                
+                  this.textCursor = j + i;
                   this.textCursorXY = null;
                }
             }
@@ -4582,10 +4714,30 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.insertText = function(str) {
-         this.setText(this.text.substring(0, this.textCursor) +
-                      str +
-                      this.text.substring(this.textCursor, this.text.length));
-         this.textCursor += str.length;
+         if (this.code != null && isCodeWidget) {
+            var cursorPos = codeTextArea.selectionStart;
+            codeTextArea.value = codeTextArea.value.substring(0, cursorPos) +
+                                 str +
+                                 codeTextArea.value.substring(cursorPos, codeTextArea.value.length);
+            codeTextArea.selectionStart += str.length;
+            this.code[codeSelector.selectedIndex][1] = codeTextArea.value;
+         } else {
+            this.setText(this.text.substring(0, this.textCursor) +
+                         str +
+                         this.text.substring(this.textCursor, this.text.length));
+            this.textCursor += str.length;
+         }
+      }
+      this.intersectingSketches = function() {
+         var sketches = [];
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
+	       sketches.push(sk(I));
+         return sketches;
+      }
+      this.intersects = function(s) {
+         return this.xhi > s.xlo && this.xlo < s.xhi &&
+                this.yhi > s.ylo && this.ylo < s.yhi ;
       }
       this.invertStandardView = function() {
          invertStandardView(.5 + this.tx() / width(),
@@ -4618,7 +4770,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {}
       this.mouseUp = function(x, y) {}
       this.moveCursor = function(incr) {
-         this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
+         var hasCodeBubble = this.code != null && isCodeWidget;
+         if (this.code != null && isCodeWidget) {
+            var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
+            codeTextArea.selectionStart = newPos;
+            codeTextArea.selectionEnd = newPos;
+         } else {
+            this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
+        }
       }
       this.nPorts = 0;
       this.offsetSelection = function(d) { this.selection += d; }
@@ -4703,6 +4862,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
          }
       }
+      this.scene = null;
       this.selection = 0;
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);
@@ -4978,7 +5138,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             // JOIN: APPEND STROKE TO sk(I), INVERT sk(I) XFORM FOR EACH PT OF STROKE.
 
-            if (action == "joining" && isk()) {
+            if (action == "joining" && isk() && isDef(sk(I))) {
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
@@ -5014,7 +5174,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // CLICK
 
-         if (max(xhi - xlo, yhi - ylo) < 10) {
+         if (len(xhi - xlo, yhi - ylo) < clickSize) {
 
             // SKETCH WAS JUST BYPRODUCT OF A CLICK.  DELETE IT.
 
@@ -5268,7 +5428,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                ab.push([lerp(parsedTransition, src[0], dst[0]),
                         lerp(parsedTransition, src[1], dst[1])]);
             }
-            curve(ab);
+            drawCurve(ab);
          }
 
          annotateEnd();
@@ -5506,9 +5666,12 @@ var count = 0;
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
             isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
-	    bgClickCount == 1 ? 'cell' : 'crosshair';
+            bgClickCount == 1 ? 'cell' : 'crosshair';
 
          var w = width(), h = height();
+
+         keyboard.x = w / 2;
+         keyboard.y = h * 3 / 4;
 
          var prevTime = time;
          time = ((new Date()).getTime() - _startTime) / 1000.0;
@@ -5551,8 +5714,8 @@ var count = 0;
          if (isk() && sk().sketchState == 'in progress'
                    && isSketchDrawingEnabled
                    && sk().sketchProgress == 0) {
-            _g.mouseX = This().mouseX; 
-            _g.mouseY = This().mouseY; 
+            _g.mouseX = This().mouseX;
+            _g.mouseY = This().mouseY;
          }
 
          // ANIMATE AND DRAW ALL THE STROKES
@@ -5571,13 +5734,13 @@ var count = 0;
          var saveAlpha = _g.globalAlpha;
          _g.globalAlpha = 1;
          color(backgroundColor);
-	 fillRect(0,0,w,10);
+         fillRect(0,0,w,10);
          _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)
             This().animate(This().elapsed);
          else if (isExpertMode)
-	    sketchPage.showGlyphs();
+            sketchPage.showGlyphs();
 
          for (var I = 0 ; I < nsk() ; I++)
             if (! sk(I).isSimple())
@@ -5656,7 +5819,7 @@ var count = 0;
 
          if (! isPullDown && isFinishedDrawing()
                           && letterPressed == '\0'
-			  && ! sketchPage.isPressed
+                          && ! sketchPage.isPressed
                           && sketchAction == null)
             for (var I = nsk() - 1 ; I >= 0 ; I--)
                if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
@@ -5668,7 +5831,7 @@ var count = 0;
 
          if (isTextMode && time - strokesStartTime >= 0.5)
             isShorthandTimeout = true;
-            
+
          // HANDLE THE AUDIENCE POPUP VIEW
 
          if (isAudiencePopup() || ! isShowingOverlay()) {
@@ -5740,12 +5903,9 @@ var count = 0;
          // DRAW WIDGET THAT TOGGLES WHETHER TO SHOW OVERLAY.
 
          annotateStart();
-         if (This().mouseX >= width() - 50 && This().mouseY <= 50) {
-            color('rgba(192,192,192,0.2)');
-            fillRect(width() - 51, 1, 50, 50);
-         }
-         color(dataColor);
-         drawRect(width() - 51, 1, 50, 50);
+         var _a_ = This().mouseX >= width() - margin && This().mouseY <= margin ? '.2' : '.1';
+         color('rgba(128,128,128,' + _a_ + ')');
+         fillRect(width() - margin - 1, 1, margin, margin);
          annotateEnd();
 
          // PROPAGATE LINK VALUES.
@@ -5794,6 +5954,27 @@ var count = 0;
          }
 
          requestAnimFrame(function() { tick(g); });
+
+         _g.save();
+
+         _g.globalAlpha = 1.0;
+
+         _g.beginPath();
+         _g.moveTo(0, h - margin);
+         _g.lineTo(1280, h - margin);
+         _g.lineTo(1280, h);
+         _g.lineTo(0, h);
+         _g.fillStyle = 'rgba(128,128,128,0.075)';
+         _g.fill();
+         _g.moveTo(0, h);
+
+         _g.beginPath();
+         _g.moveTo(0, h);
+         _g.lineTo(1280, h);
+         _g.strokeStyle = 'rgba(128,128,128,0.15)';
+         _g.stroke();
+
+         _g.restore();
       }
    }
 
@@ -5855,13 +6036,13 @@ var count = 0;
          var isCard = sketch.isCard;
 
          context.beginPath();
-	 var strokeIndex = -1;
+         var strokeIndex = -1;
          for (var i = 0 ; i < sp.length ; i++) {
             if (sp[i][2] == 0) {
                context.moveTo(sp[i][0], sp[i][1]);
-	       strokeIndex++;
-	       if (strokeIndex < sketch.colorIndex.length)
-	          context.strokeStyle = sketchPalette[sketch.colorIndex[strokeIndex]];
+               strokeIndex++;
+               if (strokeIndex < sketch.colorIndex.length)
+                  context.strokeStyle = sketchPalette[sketch.colorIndex[strokeIndex]];
             }
             else {
                context.lineTo(sp[i][0], sp[i][1]);
@@ -5955,15 +6136,22 @@ var count = 0;
                   deleteInLink(inSketch, inPort);
                }
       }
+
+      if (isCodeWidget && sketch == codeSketch)
+         toggleCodeWidget();
+
       if (sketchPage.index >= nsk())
          selectSketch(nsk() - 1);
    }
 
    function selectSketch(n) {
+      if (n == sketchPage.index)
+         return;
       sketchPage.index = n;
       if (n >= 0)
          pullDownLabels = sketchActionLabels.concat(sk().labels);
-      if (isCodeWidget) {
+      if (isCodeWidget && sk().code != null) {
+         codeSketch = sk();
          toggleCodeWidget();
          toggleCodeWidget();
       }
@@ -6161,10 +6349,10 @@ var count = 0;
       );
       textEditorPopup.document.write( ""
           + "<head><title>TEXT EDIT</title></head>"
-	  + "<body>"
+          + "<body>"
           + "<textArea rows=40 cols=55 height=100 id=textEditor_text"
           + " style='background-color:transparent;border:none'"
-	  + "</textArea>"
+          + "</textArea>"
           + "</body>"
       );
       textEditorPopup.blur();
@@ -6196,7 +6384,7 @@ var count = 0;
       +  " width=" + w
       +  " height=" + (h+52)
       );
-      audiencePopup.moveTo(0, 832);
+      audiencePopup.moveTo(0, 720);
       audiencePopup.document.write( ""
       +  " <head><title>SKETCH</title></head>"
       +  " <body>"
@@ -6324,6 +6512,9 @@ var count = 0;
 
    function setPage(index) {
 
+      if (isCodeWidget)
+         toggleCodeWidget();
+
       // REMOVE ALL GLYPHS DEFINED FROM PREVIOUS PAGE, IF ANY.
 
       if (glyphCountBeforePage > 0)
@@ -6355,9 +6546,36 @@ var count = 0;
       sketchTypeLabels = [];
       for (var n = 0 ; n < sketchTypes.length ; n++)
          registerSketch(sketchTypes[n]);
+
+      if (sketchPage.scene == null) {
+         sketchPage.scene = new THREE.Scene();
+         sketchPage.scene.add(ambientLight(0x333333));
+         sketchPage.scene.add(directionalLight(1,1,1, 0xffffff));
+         sketchPage.scene.root = new node();
+         sketchPage.scene.add(sketchPage.scene.root);
+      }
+      renderer.scene = sketchPage.scene;
+      root = renderer.scene.root;
    }
 
-var glyphData = [
+   function loadGlyphArray(a) {
+      for (var i = 0 ; i < a.length ; i += 2)
+         registerGlyph(a[i], a[i+1]);
+   }
+
+   function unloadGlyphArray(a) {
+      for (var i = 0 ; i < a.length ; i += 2) {
+         for (var j = 0 ; j < glyphs.length ; ) {
+            if (a[i] == glyphs[j].name) {
+                glyphs.splice(j, 1);
+            } else {
+                j++;
+            }
+         }
+      }
+   }
+
+var characterGlyphData = [
 "a",
 ["P*N+L*H*E)C(@'=':'6'3(1).*++)-'0%2$5#8!; > A D G J M P!S#V$Y%]&`(b)e+h,j-m/p1r3u5v8w;x>xAxDwFuIsJpLnMkNhOePcQ`S]TYTVUSVPWMWJXGXDXAX>W;V8U5T2S/R-Q*O(O+O.O1P4R6S9T<V?WAYD[F]I_LaNbQdSfVhXkZm]p^s_u`xa{b~c"],
 "b",
@@ -6410,34 +6628,12 @@ var glyphData = [
 ["A B#B%B(B*B,B/B1B3B5B8B:C<C?DADCEEEHFJHKILLMNMPMRLULVJXIYGZE[C[@]>^<_:`8`6`3`1`/`,`*a(a&`$`&`)`+a-a0a2a4a6a9a;a=a@aBaDaFaIaKaMaPaRaTaWaYa[a^aaac`e`h`j`l`n`q_s^u]w[yYzX|V}S}Q}O~M~K~H~F}E{DyCwBuAs@q>p@p"],
 "z",
 ["&')),*.,1,4-7/:/=0@0D0G0J0M0Q0T/W/Z.^-a,d+g*j*m(o'r&u&x%{$~#{%x'w)t+r-o/l1j3h5e7c9a<_>[@XAUCSEQGNJLLJNHQFSDVBX@[>^<a9c6e4f1i0k-n,q*s'u%x#y {$z'z)w,v/u1s4s7s9r<r@rCrFrIrMrPrSrVrZr^rardrfsitluowrxtyvzx|",],
-"del",
-["~Q}P}P|P{PzPyPxPwPvPuPtPsPrPqPpPoOoOnOmOlOkOjNiNhNgNfNeMdMcMcMbMaM`M_M^M]M[MZMYMXMWMVMUMTMSMSNRNQNPNONNNMNLNKOJOIOHOGOFOEOEODOCOBOAP@P?P>P=P<P;P:P9P8P7P7P6Q5Q4Q3Q2Q1Q0Q/Q.Q-Q,Q+Q*Q)Q)Q(Q'Q&Q%Q$Q#Q!Q Q"],
 "spc",
 [" T!T#T$T%T&T'T(T)T*T+T+T,T-T.T/T0T1T2T3T4T5T6T7T8T9S:S;S<S=S>S>S?S@SASBSCSDSESFRGRHRIRJRKRLRMRMQNQOQPQQPRPSPTOUOVOWOXOXOYOZN[N]N^N_N`NaNbNcNdMeMfMgMhMiMjMjLkLlLmLnLoKpKqKrKsKtKuKvKwJwJxJyJzJ{J|J}J~J~K"],
 L_ARROW,
 ["~g|g{gygxgvgugsgqgpgngmgkfjfhfgeeedebdad_d]d[dYdXcVcUcScRcPcNcMcKcJcHbGbEbDbBb@b?b=a<a:a9a7a6a4`3`1`/`.`,`+`)_(_&_%_#_!_!_#^%]&['Z(Z*Y+X,W.V/U0T2T3S4R6Q7P8O9N;M<L=K>J@JAIBGCFDEEDFCHBIAI@K?L>M=N;N:O9Q8"],
 R_ARROW,
 [" a#a$a&a'a)a*a,a-a/a0a2a3a5a6a8a9a;a<a>a@aAaCaDaFaGaIaJaLaMaOaPaRaSaUaVaXaYa[a^a_aaabadaeagahajakamanap`q`s`t`v`w`y`z`|`}`~_|^{^z]yZxYwYuXtWsVqUpToTnSlRkQjPiOgNfNeMdLcKaJ`I_I]H[GZFXFWEVDUCSBRAQ@P?O>M>"],
-"1",
-["B>B@C?D>E=E<F;G:H9I8I7J6K5L4L2M1N0N/O.O-P+P*Q)Q(Q&R%R$S#T U U!U$U%U&U(U)V*V+V-V.V/V1V2V3W5W6W7W9W:W;W=W>W?WAXBXCXEXFXGXHXJXKXLXNXOXPXRXSYTYVYWYXYZY[Z]Z_Z`ZaZb[d[e[f[h[i[j[l[m[n[p[q[r[t[u[v[x]y]z]{]}]~"],
-"2",
-["42516/7-8,:*;)<'>&@%A%C$E#G#I!K!M!O Q S!T#V$W&X'Y)Z+[,[.]0]2]4[6Z7Y9W;V<U>T?RAQBPDOFNHMILJJLIMGNFPDQBRAR?T>U=W<Y;Z:]:_9a9c9e9g9i9k9m9o9q9s:u:w:x;z;|<}>|?{AzCzEyGyIyKyMyOzQzSzUzWzYz[{^{_|a|c|e|g|i}j}j}"],
-"3",
-["7!8 ; = ? A!C!E#G#J#L#N#P#R#T#W#Y#[#^#`#b#c$a&`'_)]+[-Z.Y0X2W4U6T7S9R;Q=P?OANCMELGKHJJMJOJQJSJUJWJYK[L^M`NbOcQeRfTgVhXiYj]k_kakckelglilkknkpjrhsgufwdxcya{_|]|Z}X}U}S~Q~O~M~K~I~F~D}B|@{?z=y;x:v8u7s5r3p"],
-"4",
-["xKvKsLqLoLlLjLgLeLbL`L]LZLWLULRLPLNMKMINFNDOAO?O=O:O8O5P3P0P.P+P)P'Q)P+N-M.K0I2G4F6D8C:B<A>@@>B<D;F9H7J6K4M2O1P/R-S+T)V&W$X!Y!Y$Y'Y)Y,Z.Z1Z3Z6Z8Z;Z=Z?ZBZDZGZIZLZNZQZSZVZXZ[Z^Z`ZcZeZhZjZmZoZrZt[w[y[|[~"],
-"5",
-["h'f(d)b*_*]+Z+X+U+S+Q*O)M)K(H'F&D%B$@#>!<!9!7 7#7%7'7*7,7.808385878:8<8>8@8C8E8G8I8L8N9P9R;R=Q@QBPDOFNHNJMMMOLQLSLULXMYN[P^Q`SaUbWcYd[d^e`ebfegggigkgngpgrftevdxcza{_}]}Z~X~U~S~Q}O|M|J|H{F{DzBy?x=w;v9v"],
-"6",
-["c d b ` ^!Z#X$V%T&R'P(N)L*J+I,G.E/C1B2A4@6?8?;>==?<A<C<E;G;J:L:N:P9R9U9W9Y9[9_9a9c9e9h9j:l;n<p>q?s@uBwCxEzG{I|J}M~O~Q~S~V~W}Y{[z^y_wavbtcrepfnflfjfhfeddcbb``^_]]Z[XXXVWTWRXPXMXKXIXGXDXBY@Z?[=^<`;a9c9b"],
-"7",
-["0)0+2+3,5,7,8,:,<,=,?,A+B+D+F*G)I)J)L)N(O(Q(S'T'V&X&Y&[%]%_%a$b$d$f$g$i#j#l!m o n!m$l%k&j(i)h+h,g.f/e1d2d4c5b7a8`:`;_<^>]@]A[CZDZFYGXIXJWLVMVOUQURTTTUSWSYRZR]Q^P`PbOcOeNfNhMjMkLmLnLpLrLtLuKwKxJzJ|I}J~"],
-"8",
-["g(d'b&_%[$X$T$Q#N#K#H!E!B ? =#;%9'7*6-5/4245486;8=;?=@@BCCEEHGJHMIPISJVKYK]L`McNeQfSgVhYi]i`icifiiilhogrfucway^zZ{X|U}R~O~L~I~E~B~?}=|<z<w<t=q>n@lBiCgEdGbI`J]LYMWNTPQQNQKRHTFVCXAZ?]<_:`7a4c2e/f-h*i'k%"],
-"9",
-["g)g(e'c&a%_$]#Z!W!U S P N K I G D!B#@$>&<';)9*8-7/616356586:7<8?9@;B=C?EAFCGEHHIJILIOHPGRFTDVBWAY?[=];_:`7a5c4d2e0f.h,j*h,g.f0e2c4b6a8_:^<[=Z?XAWCVFUHTJSLRNQPPSOUNWMYL[K^J`IbGdGgFiDkDmCoBrAt@v?x>z=|;~"],
-"0",
-["=O<P:R9U9W8Z7^6`6c6f6h6k6n7p8s:u<w>x@zB{E|H}J}M~P~R~T|W{Yz]x_waucsdqfoglijjhlflcm`n^oZpXqUqRqPqMpJoHnEmCl@k>j;i9h6f4e2c0a._,]*Z(X'V%T#Q!O L I G D B!?#>%<(;*:-9/827467595<4?4A4D3G2I2L1N0Q/S/V/Y.[._/b/a"],
 "!",
 ["IeJdLcNcPbQbSbUbWbYb[c^c_d`ebfbhcjdkdmdocqcsat`v_w]x[yYzW{V{T|R}P~O~M~K~I~G~E~D}B|A{?z>x=w<u;t;r;p;n<l=k>i?hAgBeCdEdGcIcJcLcNcPcRbR`R_R]RZRXRVRTRRQPQNQMQKQIQGQEQCPAP?P>P<P:P8P6P4P2P1P/P-P+P)P'P%P#P P!"],
 "@",
@@ -6462,8 +6658,6 @@ R_ARROW,
 ["Q~Q}Q|Q{QzQyQxQwQvQvQuQtQsQrQqQpQoQnQmQlQkQjQiQhQgPgPfPePdPcPbPaP`P_P^P]P[PZPYPXPWPVPVPUPTPSPRPQPPPOPNPMPLOKOJOIOHOGOGOFOEODOCNBNAN@N?N>N=N<N;M:M:M9M8M7M6M5M4M3M2M1M0M/M.M-M,M+M*M*M)M(M'M&M%M$M#M!M N "],
 "ret",
 ["}/~0|1{2z3x3w4u5t5r6q6p7n7l7k7i7h7f7e7c7b7`7_7]7Z7Y7W7V7T8S8Q8P8N9M9K9J9H9G9E9C9B9@9?9=9<9:9997969492919/9.9,9+9)9(9&9%9#9!8 9 : < = ? @!B!C!E#F#H#I#K$L$N$O%Q%S%T%V%W&Y&Z&]&^&`'a'c'd'f'g'i(j(l(m(o(o(n"],
-"-",
-[" Q#P$P&P(P*P,P.P/P1P3P5P7P8P:P<P>P@PBPCPEPGPIPKPMPNPPPRPTPVPWPYP[P^P`PbPcPePgPiPkPmPnPpOrNsNuMwMyM{M|M~L|L{LyLwLuLsLqLpLnLlLjLhLgMeMcMaM_M]M[MYMWMUMSMQMPMNNLNJNINGNENCNAN@N>O<P:P8P7P5P3Q2Q0Q.Q,Q*Q*R(R"],
 "_",
 ["~P|PzPxQwQuRsRqRoRmRkRiRgRfRdRbR`R^R[RYRWRURSRQRPRNQLQJQHQFQDQBP@P>P=P;P9P7O5O3O1O/N-N+N*N(N&M$M!M!M$M%M'M)M+N-N/N1N3N5O6O8O:O<O>O@OBODOFOHOJOLONOOOQOSNUNWNYN[N^N`NbMcMeMgMiMkMmMoMqMsMuMvLwLyL{L}L~M~O"],
 "=",
@@ -6490,12 +6684,39 @@ R_ARROW,
 ["%:':):+;-;/;1<3<4<6=8>:>;?=??@AACAEAFBHBJCLDMDOEQESFUFWGXGZG]H_HaHcIdJfKhKjKlKmLoLqMsMuMwMyNzO|O~O|OzOyOwOuOsPqPoPmPkQjQhRfReScTaU_U]U[VYVWVUVSVQVOVMVLWJWHXFXEYCZA[@]>]<^:^8_7_5`3`1`/`.a,b*b(c&c%d#e e",],
 ",",
 ["b b!b#b$b%b&b'b(b*b+b,b-b.b/b0b1b2b3b4b5b6b7b9b:b;b<b=b>a?a@aAaBaC`D`E`F_G_H_I^J^K^L]M]N]O[P[QZRZSYTYUXVXWWXWYVZV[U]U^T_T`TaSaRbRcQdPePfOgOgNhMiMjLkLlKmJmInHnHoHpGqFqErEsDtCtBuBvAwAxAy@z?{?{?}>}>}?~@~"],
-".",
-["J N Q T W [ _ b e h#k$n&p(r)t,u/w1x4z7{:{={@}C}F~I~L~O~R~V~Y~]~`~c}f{hykwnvpssqtnukvhweyb{_{[{X}U}R~O~L~I~F~B~?~<~9~6|3{0z.x+w)u(r'p%n%k$h$e!b!_ [ X U R O K H E!B#?%=&;(:)7+4,2/20/3.5-8-;,>+A*D*G*H'J%"],
 "/",
 ["n!n n!m#m$l%k&k&j'i(i)h*g+g,f-e.e/d0d1c2c3b4a5a6`7`8_9^:^:];]<[=[>Z?Y@YAXBXCWDWEVFVGUHTITJSKRLRMQNPOPPOQORNRMSMTLUKVKWJXIYIZH[G]G^F_E`E`DaCbCcBdAeAf@g?h?i>j=k=l<m<m;n:o:p9q8r8s7t6u6v5w5x4y3z3z2{2|1}1~"],
 "?",
 ["3,5,7+8*9);(<'='?&@%B%C$E$G$H#J#K#M!O!P!R T U W Y Z ] ^!`!b#c#e$f%g'h(i)i+j,j.k/l1l2l4l6k7k9k:k<j>j?iAiBhDgEfFeHcIbJaK`L^M]N[OYPXQWRWTUUTURVQXPYOZN[M]M_M`LbLcKeKfJhJiJkJmJnJpJrJsIuIvIxJyK{L|M}N}P~Q~Q|"],
+];
+
+var glyphData = [
+"del",
+["~Q}P}P|P{PzPyPxPwPvPuPtPsPrPqPpPoOoOnOmOlOkOjNiNhNgNfNeMdMcMcMbMaM`M_M^M]M[MZMYMXMWMVMUMTMSMSNRNQNPNONNNMNLNKOJOIOHOGOFOEOEODOCOBOAP@P?P>P=P<P;P:P9P8P7P7P6Q5Q4Q3Q2Q1Q0Q/Q.Q-Q,Q+Q*Q)Q)Q(Q'Q&Q%Q$Q#Q!Q Q"],
+"-",
+[" Q#P$P&P(P*P,P.P/P1P3P5P7P8P:P<P>P@PBPCPEPGPIPKPMPNPPPRPTPVPWPYP[P^P`PbPcPePgPiPkPmPnPpOrNsNuMwMyM{M|M~L|L{LyLwLuLsLqLpLnLlLjLhLgMeMcMaM_M]M[MYMWMUMSMQMPMNNLNJNINGNENCNAN@N>O<P:P8P7P5P3Q2Q0Q.Q,Q*Q*R(R"],
+".",
+["J N Q T W [ _ b e h#k$n&p(r)t,u/w1x4z7{:{={@}C}F~I~L~O~R~V~Y~]~`~c}f{hykwnvpssqtnukvhweyb{_{[{X}U}R~O~L~I~F~B~?~<~9~6|3{0z.x+w)u(r'p%n%k$h$e!b!_ [ X U R O K H E!B#?%=&;(:)7+4,2/20/3.5-8-;,>+A*D*G*H'J%"],
+"1",
+["B>B@C?D>E=E<F;G:H9I8I7J6K5L4L2M1N0N/O.O-P+P*Q)Q(Q&R%R$S#T U U!U$U%U&U(U)V*V+V-V.V/V1V2V3W5W6W7W9W:W;W=W>W?WAXBXCXEXFXGXHXJXKXLXNXOXPXRXSYTYVYWYXYZY[Z]Z_Z`ZaZb[d[e[f[h[i[j[l[m[n[p[q[r[t[u[v[x]y]z]{]}]~"],
+"2",
+["42516/7-8,:*;)<'>&@%A%C$E#G#I!K!M!O Q S!T#V$W&X'Y)Z+[,[.]0]2]4[6Z7Y9W;V<U>T?RAQBPDOFNHMILJJLIMGNFPDQBRAR?T>U=W<Y;Z:]:_9a9c9e9g9i9k9m9o9q9s:u:w:x;z;|<}>|?{AzCzEyGyIyKyMyOzQzSzUzWzYz[{^{_|a|c|e|g|i}j}j}"],
+"3",
+["7!8 ; = ? A!C!E#G#J#L#N#P#R#T#W#Y#[#^#`#b#c$a&`'_)]+[-Z.Y0X2W4U6T7S9R;Q=P?OANCMELGKHJJMJOJQJSJUJWJYK[L^M`NbOcQeRfTgVhXiYj]k_kakckelglilkknkpjrhsgufwdxcya{_|]|Z}X}U}S~Q~O~M~K~I~F~D}B|@{?z=y;x:v8u7s5r3p"],
+"4",
+["xKvKsLqLoLlLjLgLeLbL`L]LZLWLULRLPLNMKMINFNDOAO?O=O:O8O5P3P0P.P+P)P'Q)P+N-M.K0I2G4F6D8C:B<A>@@>B<D;F9H7J6K4M2O1P/R-S+T)V&W$X!Y!Y$Y'Y)Y,Z.Z1Z3Z6Z8Z;Z=Z?ZBZDZGZIZLZNZQZSZVZXZ[Z^Z`ZcZeZhZjZmZoZrZt[w[y[|[~"],
+"5",
+["h'f(d)b*_*]+Z+X+U+S+Q*O)M)K(H'F&D%B$@#>!<!9!7 7#7%7'7*7,7.808385878:8<8>8@8C8E8G8I8L8N9P9R;R=Q@QBPDOFNHNJMMMOLQLSLULXMYN[P^Q`SaUbWcYd[d^e`ebfegggigkgngpgrftevdxcza{_}]}Z~X~U~S~Q}O|M|J|H{F{DzBy?x=w;v9v"],
+"6",
+["c d b ` ^!Z#X$V%T&R'P(N)L*J+I,G.E/C1B2A4@6?8?;>==?<A<C<E;G;J:L:N:P9R9U9W9Y9[9_9a9c9e9h9j:l;n<p>q?s@uBwCxEzG{I|J}M~O~Q~S~V~W}Y{[z^y_wavbtcrepfnflfjfhfeddcbb``^_]]Z[XXXVWTWRXPXMXKXIXGXDXBY@Z?[=^<`;a9c9b"],
+"7",
+["0)0+2+3,5,7,8,:,<,=,?,A+B+D+F*G)I)J)L)N(O(Q(S'T'V&X&Y&[%]%_%a$b$d$f$g$i#j#l!m o n!m$l%k&j(i)h+h,g.f/e1d2d4c5b7a8`:`;_<^>]@]A[CZDZFYGXIXJWLVMVOUQURTTTUSWSYRZR]Q^P`PbOcOeNfNhMjMkLmLnLpLrLtLuKwKxJzJ|I}J~"],
+"8",
+["g(d'b&_%[$X$T$Q#N#K#H!E!B ? =#;%9'7*6-5/4245486;8=;?=@@BCCEEHGJHMIPISJVKYK]L`McNeQfSgVhYi]i`icifiiilhogrfucway^zZ{X|U}R~O~L~I~E~B~?}=|<z<w<t=q>n@lBiCgEdGbI`J]LYMWNTPQQNQKRHTFVCXAZ?]<_:`7a4c2e/f-h*i'k%"],
+"9",
+["g)g(e'c&a%_$]#Z!W!U S P N K I G D!B#@$>&<';)9*8-7/616356586:7<8?9@;B=C?EAFCGEHHIJILIOHPGRFTDVBWAY?[=];_:`7a5c4d2e0f.h,j*h,g.f0e2c4b6a8_:^<[=Z?XAWCVFUHTJSLRNQPPSOUNWMYL[K^J`IbGdGgFiDkDmCoBrAt@v?x>z=|;~"],
+"0",
+["=O<P:R9U9W8Z7^6`6c6f6h6k6n7p8s:u<w>x@zB{E|H}J}M~P~R~T|W{Yz]x_waucsdqfoglijjhlflcm`n^oZpXqUqRqPqMpJoHnEmCl@k>j;i9h6f4e2c0a._,]*Z(X'V%T#Q!O L I G D B!?#>%<(;*:-9/827467595<4?4A4D3G2I2L1N0Q/S/V/Y.[._/b/a"],
 "face()",
 ["`0^0Z0X0U0R0P/M/K/H/E/C/@0>0;19263442607.9,;*=)?'A%C$E#G!J L O Q T W!Y#[%^'`)a+c-d0e2f5h7i9j<k>lAlCmFnHnKoMoPpSpUpXpZp^papcofohnkmmkojqhsguewdyb{`|^}Z}X~U~R~P~M}K|IzGxDwBv@t>r<q:o8m7j6h5e4c4`4^3Z3X3U3",":V:V;V;V<V<V<V=V=V>V>V?V?V?V@W@WAWAWAWBWBWCWCWCXDXDXEXEXEXFXFXGYGYGYHYHYIYIYIYJYJYKYKYKYLZLZMZMZMZNZNZOZOZPZPZPZQZQZRZRZRZSZSZTZTZUZUZUZVZVZWZWZWZXZXZYZYZZZZZZZ[Z[Z]Y]Y]Y^Y^Y^Y_X_X_X`W`W`WaWaWaVbVbVbU","9C9C9C9C9C9C9B8B8B8B8B8B8B8B8B9B9B9B9B9B9B9B:B:B:B:B:B:B:B:B;B;A;A;A;A;A;A;A;A;A<A<A<@<@<@<@<@<@<@=@=@=@=@=@=@=@=?>?>?>?>?>?>?>?>?????????????????@?@?@?@?@?@?@?A?A?A?A?A?A?A?B?B?B?B?B?B?B?B?C?C?C?C?C?","Y<Y<Y<Y<Y<Y<Z<Z<Z<Z<Z<Z<Z<Z<Z<[<[<[<[<[<[<[<[<]<]<]<]<]<]<]<]<]<^<^<^<^<^<^<^<^<_<_<_<_<_<_<_<_<_=_=`=`=`=`=`=`=`=`=`=`=a=a=a=a=a=a=a=a=a=b=b=b>b>b>b>b>b>b>b>b>b>b>b>b?b?b?b?c?c?c?c?c?c?c@c@c@c@c@c@c@",],
 "kwa()",
@@ -6506,9 +6727,10 @@ R_ARROW,
 ["}NzNxNuNrNoNlNjMgMdMaM_M[MXMUMRMPMMMJMGMDMBN?N<N9N6N4N1N.N+O)O&O#O P$P'P)P,Q/Q2Q5Q7Q:Q=Q@QCQEQHQKQNQQQSQVQYQ]Q`QbQeQhPkPmOpOsNvNyN{N~N{NyMvMsMpMnMkMhMeMbM`M]MYMVMSMPMNMKMHMEMBM@M=M:M7M4M2M/N,N*N'N%O!O",],
 "kbd()",
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
+"diner()",
+["y9w9t8r8o7l6j5g4d3b2_1]0Y/W.T-R+P*N*L,J-G/E0B1@2=3;48667491:/;,<*>(?%@#B#D#G#J#M!O!R U W#Y%Z'[*^,_.a0c3d5f7g9i<j>l@mBoEpGrItKvMuOtRsUrWrZq^p`ocofninknnmqmslvlxk{k}j}g|d|a|_|[|X}U}S}P}M~J~H~E~B~?~=~:|9","P+P+P,P,O-O.O/O/O0O1O1O2N3N4N4N5N6M7M7M8M9M:M:M;M<M=M=M>M?M@M@MAMBMCMCLDLELFLFLGLHLILILJLKLLLLLMLNLOLOLPLQLRLRKSKTKUKUKVKWKXKXKYKZK[K[K]K^K_K`K`KaKbKcKcKdKeJeJfJgJhJhJiJjJkJkJlJmJnJoJoJpJqJrJrJsJtJsJr",],
 ];
 
 var glyphs = [];
-for (var i = 0 ; i < glyphData.length ; i += 2)
-   registerGlyph(glyphData[i], glyphData[i+1]);
+loadGlyphArray(glyphData);
 

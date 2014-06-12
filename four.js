@@ -309,7 +309,7 @@
       var cc = [];
       for (var n = 0 ; n < c.length ; n++)
          cc.push(m.transform(c[n]));
-      curve(cc);
+      drawCurve(cc);
    };
    function mArrow(a,b){
       var A = m.transform(a);
@@ -361,6 +361,23 @@
       this.matrixWorldNeedsUpdate = true;
    }
 
+   THREE.Object3D.prototype.addTorus = function(r, m, n) {
+      var geometry = new THREE.TorusGeometry( 1, r, m, n );
+      var child = new THREE.Mesh( geometry, blackMaterial );
+      this.add(child);
+      return child;
+   }
+
+   THREE.Object3D.prototype.addLathe = function(p, nSegments) {
+      var points = [];
+      for (var i = 0 ; i < p.length ; i++)
+         points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
+      var geometry = new THREE.LatheGeometry( points, nSegments );
+      var child = new THREE.Mesh(geometry, blackMaterial);
+      this.add(child);
+      return child;
+   }
+
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
       var child = new node();
@@ -374,7 +391,7 @@
    }
 
    THREE.Object3D.prototype.addCube = function() {
-      var geometry = new THREE.CubeGeometry(2, 2, 2);
+      var geometry = new THREE.BoxGeometry(2, 2, 2);
       var child = new THREE.Mesh(geometry, blackMaterial);
       this.add(child);
       return child;
@@ -433,16 +450,6 @@
          e.z =  atan2( mat[1+4*0] / C, mat[1+4*1] / C);
       }
    }
-   function max(a,b) { return Math.max(a,b); }
-   function min(a,b) { return Math.min(a,b); }
-   function pow(a,b) { return Math.pow(a,b); }
-   function random() { return Math.random(); }
-   function round() { return Math.round(); }
-   function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
-   function sign(t) { return Math.sign(t); }
-   function sin(t) { return Math.sin(t); }
-   function sqrt(t) { return Math.sqrt(t); }
-   function tan(t) { return Math.tan(t); }
 
    function ambientLight(color) {
       return new THREE.AmbientLight(color);
@@ -460,7 +467,8 @@
       if (shiny   === undefined) shiny   = 0;
       if (power   === undefined) power   = 1;
       return new THREE.MeshPhongMaterial({
-         emissive : ambient,
+         ambient  : ambient,
+         emissive : 0,
          color    : diffuse,
          specular : shiny,
          shininess: power
@@ -504,9 +512,6 @@
       renderer.render(renderer.scene, renderer.camera);
       requestAnimationFrame(function(){ animate(); });
    }
-
-   function width() { return window.innerWidth; }
-   function height() { return window.innerHeight; }
 
    var renderer, cameraFOV = 15, mouseX = 0, mouseY = 0;
 
