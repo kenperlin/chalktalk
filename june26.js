@@ -40,12 +40,6 @@
 
       sketch.coffee = coffee;
 
-      sketch.cream = [];
-      for (var i = 0 ; i < 10000 ; i++) {
-         var t = i / 10000;
-         sketch.cream.push( [ lerp(t, -1, 1) , 0 ] );
-      }
-
       sketch.mouseDown = function(x, y) {
          this.mx = x;
          this.my = y;
@@ -56,6 +50,15 @@
          if (len(x - this.mx, y - this.my) > 2 * clickSize) {
 	    this.swirlMode = pieMenuIndex(x - this.mx, y - this.my, 4);
 	    this.swirlStartTime = time;
+	    switch (this.swirlMode) {
+	    case 0:
+               this.cream = [];
+               for (var i = 0 ; i < 100 ; i++) {
+                  var t = i / 100;
+                  this.cream.push( [ lerp(t, -1, 1) , 0 ] );
+               }
+	       break;
+	    }
          }
       }
 
@@ -66,54 +69,89 @@
 	    var y0 = (this.ylo + this.yhi) / 2;
 	    var r  = (this.xhi - this.xlo) / 2;
 
-	    var dt = (time - this.swirlStartTime) * 0.6;
+	    var dt = .3 * (time - this.swirlStartTime);
 	    if (dt > 5)
 	       dt = 5 + .1 * (dt - 5);
 
-	    var fade = 1 - sCurve(max(0, 1 - dt / 8));
+	    var fade = 1 - sCurve(max(0, 1 - dt / 5.5));
 
-	    var amp = lerp(fade*fade, .2, .15);
-	    var freq = 2 * pow(2, max(0, (dt - 4)));
+	    var amp = lerp(fade*fade, .2, .15) * min(1, dt);
+	    var freq0 = 1;
+	    var freq = freq0 * pow(2, dt/1.5);
 	    var eps = .01;
 
 	    for (var i = 0 ; i < this.cream.length ; i++) {
 	       var cx = this.cream[i][0];
 	       var cy = this.cream[i][1];
 
-	       var n00 = noise2(freq * cx      , freq * cy       + 100);
-	       var n10 = noise2(freq * cx + eps, freq * cy       + 100);
-	       var n01 = noise2(freq * cx      , freq * cy + eps + 100);
-	       var dx = (n01 - n00) / eps;
-	       var dy = (n00 - n10) / eps;
+               var dx = 0;
+               var dy = 0;
+	       for (var f = freq0 ; f < freq ; f *= 2) {
+	          var ff = 1/f;
+	          var n00 = noise2(freq * cx      , freq * cy       + 180) * ff;
+	          var n10 = noise2(freq * cx + eps, freq * cy       + 180) * ff;
+	          var n01 = noise2(freq * cx      , freq * cy + eps + 180) * ff;
+	          dx += (n01 - n00) / eps;
+	          dy += (n00 - n10) / eps;
+               }
 
 	       cx += amp * elapsed * dx;
 	       cy += amp * elapsed * dy;
 
 	       var rr = cx * cx + cy * cy;
-	       if (rr > .8) {
-	          var f = lerp((1 - rr) / (1 - .8), .98, 1);
-	          cx *= f;
-	          cy *= f;
-	       }
+	       var f = lerp(1 - rr, .995, 1);
+	       cx *= f;
+	       cy *= f;
 
 	       this.cream[i][0] = cx;
 	       this.cream[i][1] = cy;
             }
 
-	    this.cream = resampleStroke(this.cream, this.cream.length);
+	    //this.cream = resampleStroke(this.cream, this.cream.length);
+
+	    function fillIn(a, eps) {
+	       for (var i = 0 ; i < a.length - 1 ; i++) {
+
+	          var x0 = a[i  ][0];
+	          var y0 = a[i  ][1];
+
+	          var x1 = a[i+1][0];
+	          var y1 = a[i+1][1];
+
+	          if (len(x1 - x0, y1 - y0) > 0.1) {
+		     var midpoint = [ (x0 + x1) / 2, (y0 + y1) / 2 ];
+
+		     var A = a.slice(0, i+1);
+		     var B = [ midpoint ];
+		     var C = a.slice(i+1, a.length);
+
+	             a = A.concat(B);
+	             a = a.concat(C);
+
+                     i++;
+                  }
+	       }
+	       return a;
+            }
+
+            if (dt < 4.5)
+	       this.cream = fillIn(this.cream, 0.1);
 
             _g.save();
 	    _g.lineWidth = (this.xhi - this.xlo) * lerp(fade * fade, .0025, .005);
 	    _g.strokeStyle = 'rgba(255,255,255,' + (1-fade) + ')';
             _g.beginPath();
 
+            var scale = .6, xPrev = 0, yPrev = 0;
 	    for (var i = 0 ; i < this.cream.length ; i++) {
-	       var x = x0 + r * this.cream[i][0] * 0.6;
-	       var y = y0 + r * this.cream[i][1] * 0.6;
-	       if (i == 0)
+	       var x = x0 + r * this.cream[i][0] * scale;
+	       var y = y0 + r * this.cream[i][1] * scale;
+	       if (i == 0 /* || len(x-xPrev,y-yPrev) > 20 */)
 	          _g.moveTo(x, y);
 	       else if (i/this.cream.length < dt)
 	          _g.lineTo(x, y);
+               xPrev = x;
+               yPrev = y;
 	    }
 
             sketch.coffee.setMaterial(new phongMaterial().setAmbient(lerp(fade*fade,.07,.16),0,0));
