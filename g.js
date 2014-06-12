@@ -3413,8 +3413,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isk()) sk().moveCursor(+1);
             break;
          case U_ARROW:
+            if (isk()) sk().moveLine(+1);
             break;
          case D_ARROW:
+            if (isk()) sk().moveLine(-1);
             break;
          case 'command':
             isCommandPressed = false;
@@ -4770,7 +4772,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {}
       this.mouseUp = function(x, y) {}
       this.moveCursor = function(incr) {
-         var hasCodeBubble = this.code != null && isCodeWidget;
          if (this.code != null && isCodeWidget) {
             var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
             codeTextArea.selectionStart = newPos;
@@ -4778,6 +4779,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          } else {
             this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
         }
+      }
+      this.moveLine = function(incr) {
+         if (this.code != null && isCodeWidget) {
+            // move cursor in code widget
+         } else {
+            // move cursor in normal text area
+         }
       }
       this.nPorts = 0;
       this.offsetSelection = function(d) { this.selection += d; }
