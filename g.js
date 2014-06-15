@@ -5174,7 +5174,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // CLICK
 
-         if (len(xhi - xlo, yhi - ylo) < clickSize) {
+         if (len(xhi - xlo, yhi - ylo) <= clickSize) {
 
             // SKETCH WAS JUST BYPRODUCT OF A CLICK.  DELETE IT.
 
@@ -5955,26 +5955,30 @@ var count = 0;
 
          requestAnimFrame(function() { tick(g); });
 
-         _g.save();
+	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
-         _g.globalAlpha = 1.0;
+         if (! isShowingGlyphs) {
+            _g.save();
 
-         _g.beginPath();
-         _g.moveTo(0, h - margin);
-         _g.lineTo(1280, h - margin);
-         _g.lineTo(1280, h);
-         _g.lineTo(0, h);
-         _g.fillStyle = 'rgba(128,128,128,0.075)';
-         _g.fill();
-         _g.moveTo(0, h);
+            _g.globalAlpha = 1.0;
 
-         _g.beginPath();
-         _g.moveTo(0, h);
-         _g.lineTo(1280, h);
-         _g.strokeStyle = 'rgba(128,128,128,0.15)';
-         _g.stroke();
+            _g.beginPath();
+            _g.moveTo(0, h - margin);
+            _g.lineTo(1280, h - margin);
+            _g.lineTo(1280, h);
+            _g.lineTo(0, h);
+            _g.fillStyle = 'rgba(128,128,128,0.15)';
+            _g.fill();
+            _g.moveTo(0, h);
 
-         _g.restore();
+            _g.beginPath();
+            _g.moveTo(0, h);
+            _g.lineTo(1280, h);
+            _g.strokeStyle = 'rgba(128,128,128,0.3)';
+            _g.stroke();
+
+            _g.restore();
+         }
       }
    }
 
@@ -6435,6 +6439,99 @@ var count = 0;
       }
    }
 
+
+
+// THINGS RELATED TO WEBGL AND SHADERS.
+
+function addShaderPlaneSketch(vertexShader, fragmentShader) {
+   var material = new THREE.ShaderMaterial({
+      uniforms: {
+         time : { type: "f", value: 0.0 },
+         alpha: { type: "f", value: 1.0 },
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShaderHeader.concat(fragmentShader),
+   });
+   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
+   root.add(mesh);
+
+   mesh.sketch = geometrySketch(mesh);
+   mesh.sketch.fragmentShader = fragmentShader;
+   mesh.update = function() {
+      this.getMatrix().scale(0.05);
+      this.material.uniforms['time'].value = time;
+      var fade = this.sketch.fadeAway;
+      this.material.uniforms['alpha'].value = fade == 0 ? 1 : fade;
+   }
+}
+
+// THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
+
+var defaultVertexShader = ["\
+   varying vec3 vNormal;\
+   varying float x;\
+   varying float y;\
+   void main() {\
+      x = 2. * uv.x - 1.;\
+      y = 2. * uv.y - 1.;\
+      vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
+   }\
+"].join("\n");
+
+// DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
+
+var fragmentShaderHeader = ["\
+   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+   vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }\
+   vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }\
+   vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }\
+   float noise(vec3 P) {\
+      vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));\
+      vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);\
+      vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);\
+      vec4 iz0 = i0.zzzz, iz1 = i1.zzzz;\
+      vec4 ixy = permute(permute(ix) + iy), ixy0 = permute(ixy + iz0), ixy1 = permute(ixy + iz1);\
+      vec4 gx0 = ixy0 * (1.0 / 7.0), gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;\
+      vec4 gx1 = ixy1 * (1.0 / 7.0), gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;\
+      gx0 = fract(gx0); gx1 = fract(gx1);\
+      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0), sz0 = step(gz0, vec4(0.0));\
+      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1), sz1 = step(gz1, vec4(0.0));\
+      gx0 -= sz0 * (step(0.0, gx0) - 0.5); gy0 -= sz0 * (step(0.0, gy0) - 0.5);\
+      gx1 -= sz1 * (step(0.0, gx1) - 0.5); gy1 -= sz1 * (step(0.0, gy1) - 0.5);\
+      vec3 g0 = vec3(gx0.x,gy0.x,gz0.x), g1 = vec3(gx0.y,gy0.y,gz0.y),\
+           g2 = vec3(gx0.z,gy0.z,gz0.z), g3 = vec3(gx0.w,gy0.w,gz0.w),\
+           g4 = vec3(gx1.x,gy1.x,gz1.x), g5 = vec3(gx1.y,gy1.y,gz1.y),\
+           g6 = vec3(gx1.z,gy1.z,gz1.z), g7 = vec3(gx1.w,gy1.w,gz1.w);\
+      vec4 norm0 = taylorInvSqrt(vec4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3)));\
+      vec4 norm1 = taylorInvSqrt(vec4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7)));\
+      g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;\
+      g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;\
+      vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),\
+                         dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
+                    vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
+                         dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
+      return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
+   }\
+   float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
+   float turbulence(vec3 P) {\
+      float f = 0., s = 1.;\
+      for (int i = 0 ; i < 9 ; i++) {\
+         f += abs(noise(s * P)) / s;\
+         s *= 2.;\
+         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
+      }\
+      return f;\
+   }\
+   varying float x;\
+   varying float y;\
+   uniform float time;\
+   uniform float alpha;\
+"].join("\n");
+
+
+
 // VARIOUS MANIPULATIONS OF HTML ELEMENTS.
 
    // Replace the text of an html element:
@@ -6728,7 +6825,7 @@ var glyphData = [
 "kbd()",
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
 "diner()",
-["y9w9t8r8o7l6j5g4d3b2_1]0Y/W.T-R+P*N*L,J-G/E0B1@2=3;48667491:/;,<*>(?%@#B#D#G#J#M!O!R U W#Y%Z'[*^,_.a0c3d5f7g9i<j>l@mBoEpGrItKvMuOtRsUrWrZq^p`ocofninknnmqmslvlxk{k}j}g|d|a|_|[|X}U}S}P}M~J~H~E~B~?~=~:|9","P+P+P,P,O-O.O/O/O0O1O1O2N3N4N4N5N6M7M7M8M9M:M:M;M<M=M=M>M?M@M@MAMBMCMCLDLELFLFLGLHLILILJLKLLLLLMLNLOLOLPLQLRLRKSKTKUKUKVKWKXKXKYKZK[K[K]K^K_K`K`KaKbKcKcKdKeJeJfJgJhJhJiJjJkJkJlJmJnJoJoJpJqJrJrJsJtJsJr",],
+["w(t(p(m(j(f(c(`)[)X)U)Q*N*K*G*D*A*>):)7)3)0)-)))&)#) * - 1!4!7#;#>$A$D%H%K%N&R&U&X&]&`&d&g&j%n%q%t%w(x+x.w2w5v8v<v?uBuFuItLtOsSsVsYs^rardrhrkrnrrrurxr{s~t~p~m}j}f}c}`|[|X{U{RzNzKzHzDyAy>y:y7x4x0w-w*w'","x9w9v9u9t9s8r8p8o8n8m8k8j8i8h8f8e8d8c8a7`7_7^7]7Z7Y7X7W6V6T6S7S7R8Q9P9O:N;M;L<K=J>I?H?G@F@EADACBCCACAD@D?E>F>F=G<H;H:H9H7I6I5I4I3I1I0I/I.I,I+I+J+K+M+N+O+P+R+S+T,U,W,X,Y,Z-[-^-_-`-a-b-d-e-f-g-h-j-k-l-l","S6S7S7S8S8S9S9S:S:S;S;S<S<S=S>S>S?S?S@S@SASASBSBSCSCSDSDRERERFRGRGRHRHRISISJSJSKSKSLSLSMSMSNSNSOSOSPSQSQSRSRSSSSSTSTSUSUTVTVTWTWTXTXTYTYTZT[T[T]T]T^T^T_T_T`T`TaUaUbUbUcUcUdUdUeUeUfUfUgUgUhUhUiUiUjUjVk","=G=G=H=H=H=I=I>I>J>J>J>K>K>K>L>L>L>M>M>N>N>N>N>O>O>P>P>P>Q>Q>Q>R>R>R>S>S>T>T>T>U>U>U>V>V>V>W>W>W>X>X>X>Y>Y>Z>Z>Z>[>[>[>]>]>]>^>^>^>_>_>_>`>`?`?a?a?a?b?b?b?c?c?c?d?d?d?e@e@e@f@f@f@g@g@g@h@h@i@i@i@j@j@j","=E=D=C=C=B=A=A=@=@=?=>=>===<=<=;=;=:=9=9=8=8=7=6=6=5=5=4=4=3=2<2<2;3;3:3:4949485857575656656564636362525150505/5/5/6/6/7/8/8/9/9/:/;/;/</=/=/>/>/?/@/@/@/@0@1@1@2@2@3?3?4?4?5?6?6?7?7?8?8>9>9>:>:>;>;><=",],
 ];
 
 var glyphs = [];

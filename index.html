@@ -224,7 +224,7 @@
    function kwa() { image('kwalado.jpg'); }
    function mit() { image('tangible_media_lab.jpg'); }
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
-   function diner() { image('red_fox_diner.jpg', 0.9); }
+   function diner() { image('red_fox_diner.jpg', 0.8); }
    function image(name, scale) {
       if (scale === undefined)
          scale = 1;
@@ -1501,19 +1501,6 @@
    }
    IO.prototype = new Sketch;
 
-   function Test1() {
-      this.labels = "X".split(' ');
-      this.render = function(elapsed) {
-         m.save();
-	    m.scale(this.size / 400);
-	    mCurve([[1,1],[-1,-1]]);
-	    mCurve([[-1,1],[1,-1]]);
-         m.restore();
-      }
-   }
-   Test1.prototype = new Sketch;
-
-
    var root, box3D;
    var redMaterial = new phongMaterial();
    redMaterial.setAmbient(.2,0,0).setDiffuse(.8,0,0).setSpecular(1,1,1,20);
@@ -1526,7 +1513,7 @@
    }
 
 //                       1      2       3      4     5      6      7
-   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Test1" ).split(' ');
+   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker" ).split(' ');
 
    var pages = [
       ["page0", sketchTypes.concat(["Noises"])],
