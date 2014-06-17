@@ -336,17 +336,66 @@ function marble() {
 
 function Grid() {
    this.labels = "empty".split(' ');
+   this.gridMode = -1;
    this.is3D = true;
+   this.mouseDown = function(x, y) {
+      this.mx = x;
+      this.my = y;
+   }
+   this.mouseDrag = function(x, y) {
+   }
+   this.mouseUp = function(x, y) {
+      if (len(x - this.mx, y - this.my) > 2 * clickSize)
+         this.gridMode = pieMenuIndex(x - this.mx, y - this.my, 4);
+   }
    this.render = function(elapsed) {
+      var f = 2/3;
       m.save();
          m.scale(this.size / 400);
          mCurve([[-1,0], [1, 0]]);
          mCurve([[ 0,1], [0, -1]]);
 	 this.afterSketch(function(S) {
-            mCurve([[-1, .5], [1, .5]]);
-            mCurve([[-1,-.5], [1,-.5]]);
-            mCurve([[-.5,1], [-.5,-1]]);
-            mCurve([[ .5,1], [ .5,-1]]);
+            mCurve([[-1, f], [1, f]]);
+            mCurve([[-1,-f], [1,-f]]);
+            mCurve([[-f,1], [-f,-1]]);
+            mCurve([[ f,1], [ f,-1]]);
+	    switch (S.gridMode) {
+            case 2:
+	       var d = 1/20;
+	       color('yellow');
+	       lineWidth(0.5);
+	       for (var u = -1 ; u <= 1 ; u += d)
+	       for (var v = -1 ; v <= 1 ; v += d) {
+	          var t0 = noise2(u, v);
+	          var tu = noise2(u+d, v);
+	          var tv = noise2(u, v+d);
+		  if (u < 1)
+	             mCurve([[u*f,v*f,t0] , [(u+d)*f,v*f,tu]]);
+		  if (v < 1)
+	             mCurve([[u*f,v*f,t0] , [u*f,(v+d)*f,tv]]);
+               }
+	    case 1:
+	       lineWidth(1);
+	       color('rgb(64,255,64)');
+	       for (var u = -1 ; u <= 1 ; u += 1)
+	       for (var v = -1 ; v <= 1 ; v += 1) {
+	          var t0 = noise2(u, v    );
+	          var t1 = noise2(u, v+.01);
+		  var s = .1 * (t1 - t0) / .01;
+	          mCurve([[u*f,v*f-.1,-s] , [u*f,v*f+.1,s]]);
+               }
+	    case 0:
+	       lineWidth(1);
+	       color('red');
+	       for (var u = -1 ; u <= 1 ; u += 1)
+	       for (var v = -1 ; v <= 1 ; v += 1) {
+	          var t0 = noise2(u    , v);
+	          var t1 = noise2(u+.01, v);
+		  var s = .1 * (t1 - t0) / .01;
+	          mCurve([[u*f-.1,v*f,-s] , [u*f+.1,v*f,s]]);
+               }
+	       break;
+	    }
 	 });
       m.restore();
    }
