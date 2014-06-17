@@ -319,8 +319,9 @@ var marbleFragmentShader = ["\
 "].join("\n");
 
 registerGlyph("marble()",[
-   [ [-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]],    // SQUARE OUTLINE CW FROM TOP LEFT.
-   [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
+   [ [-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
+   [ [-1/3,-1], [-1/3,1] ],
+   [ [ 1/3,-1], [ 1/3,1] ],
 ]);
 
 function marble() {

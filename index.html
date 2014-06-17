@@ -227,7 +227,9 @@
    function mit() { image('tangible_media_lab.jpg'); }
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
    function diner() { image('red_fox_diner.jpg', 0.8); }
-   function vase() { image('Vase.jpg', 0.8); }
+   function vase() { image('vase.png', 0.7); }
+   function blinn() { image('blinn.png', 2.4); }
+   function strawberry() { image('blinn-strawberry.jpg', 0.7); }
    function image(name, scale) {
       if (scale === undefined)
          scale = 1;
@@ -1447,8 +1449,10 @@
       this.labels = "speaker".split(' ');
       this.code = [
          ["sin", "sin(2 * PI * x * time)"],
-         ["sawtooth", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
-         ["square wave", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 4;"],
+         ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
+         ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
+         ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
+         ["noise", "return 5 * noise(3 * x * time)"],
       ];
       this.savedCode = "";
       this.savedX = "";
