@@ -308,8 +308,11 @@ function planet() { addShaderPlaneSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = turbulence(vec3(x,y,0.));\
-      float s = pow(.5+.5*sin(5.*x+6.*t),.1);\
+      float t = mode == 0. ? 0. :\
+                mode == 1. ? .7 * noise(vec3(x,y,0.)) :\
+		mode == 2. ? .5 * fractal(vec3(x,y,5.)) :\
+		             .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
+      float s = pow(.5+.5*cos(7.*x+6.*t),.1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
    }\
@@ -320,6 +323,14 @@ registerGlyph("marble()",[
    [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
-function marble() { addShaderPlaneSketch(defaultVertexShader, marbleFragmentShader); }
+function marble() {
+   var sketch = addShaderPlaneSketch(defaultVertexShader, marbleFragmentShader);
+   sketch.code = [
+      ["stripes", "sin(x)"],
+      ["add noise", "sin(x + noise(x,y,z))"],
+      ["add fractal", "sin(x + fractal(x,y,z))"],
+      ["add turbulence", "sin(x + turbulence(x,y,z))"],
+   ];
+}
 
 

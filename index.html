@@ -81,12 +81,14 @@
       this.sy = 1;
       this.dragx = 0;
       this.dragy = 0;
+      this.downx = 0;
+      this.downy = 0;
       this.cleanup = function() {
          root.remove(this.geometry);
       }
       this.mouseDown = function(x,y) {
-         this.dragx = x;
-         this.dragy = y;
+         this.downx = this.dragx = x;
+         this.downy = this.dragy = y;
       }
       this.mouseDrag = function(x,y) {
          this.sx *= (400 + x - this.dragx) / 400;
@@ -225,6 +227,7 @@
    function mit() { image('tangible_media_lab.jpg'); }
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
    function diner() { image('red_fox_diner.jpg', 0.8); }
+   function vase() { image('Vase.jpg', 0.8); }
    function image(name, scale) {
       if (scale === undefined)
          scale = 1;
@@ -1368,6 +1371,7 @@
             this.width = this.imageObj.width;
             this.height = this.imageObj.height;
          }
+	 color(backgroundColor);
          drawRect(-this.width/2,-this.height/2,this.width,this.height);
          this.afterSketch(function(S) {
             if (S.imageObj === undefined)

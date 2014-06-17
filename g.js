@@ -1330,19 +1330,18 @@
    var codeElement,
        codeSelector,
        codeTextArea,
-       codeExample = function() {
+       setCodeAreaText = function() {
           codeTextArea.value = codeSelector.value;
           updateF();
-       },
-       callTest = function(n) {
-          console.log("test select " + n);
        },
        updateF = function() {
           try {
              eval(codeTextArea.value);
           } catch (e) { }
-          if (code() != null)
+          if (code() != null) {
              code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+	     codeSketch.selectedIndex = codeSelector.selectedIndex;
+          }
        };
 
    function code() {
@@ -1360,6 +1359,8 @@
 
       isCodeWidget = ! isCodeWidget;
 
+      console.log("TOGGLE CODE WIDGET " + (isCodeWidget ? "ON" : "OFF"));
+
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
@@ -1371,7 +1372,7 @@
                      + "</option>";
 
          codeElement.innerHTML =
-            "<select id=code_selector onchange='codeExample()'>"
+            "<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -1387,6 +1388,8 @@
          codeSelector.style.color = codeSelectorFgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
+	 if (isDef(codeSketch.selectedIndex))
+	    codeSelector.selectedIndex = codeSketch.selectedIndex;
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
@@ -3808,6 +3811,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var lines = text.split('\n');
             for (var i = 0 ; i < lines.length ; i++)
                cols = max(cols, lines[i].length);
+
+            if (code().length > 0)
+	       for (var i = 0 ; i < code().length ; i++)
+	          cols = max(cols, code()[i][0].length + 3);
 
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
@@ -6446,6 +6453,7 @@ var count = 0;
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
       uniforms: {
+         mode : { type: "f", value: 0.0 },
          time : { type: "f", value: 0.0 },
          alpha: { type: "f", value: 1.0 },
       },
@@ -6462,7 +6470,10 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
       this.material.uniforms['time'].value = time;
       var fade = this.sketch.fadeAway;
       this.material.uniforms['alpha'].value = fade == 0 ? 1 : fade;
+      this.material.uniforms['mode'].value =
+         isDef(mesh.sketch.selectedIndex) ? mesh.sketch.selectedIndex : 0;
    }
+   return mesh.sketch;
 }
 
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
@@ -6515,6 +6526,15 @@ var fragmentShaderHeader = ["\
       return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
    }\
    float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
+   float fractal(vec3 P) {\
+      float f = 0., s = 1.;\
+      for (int i = 0 ; i < 9 ; i++) {\
+         f += noise(s * P) / s;\
+         s *= 2.;\
+         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
+      }\
+      return f;\
+   }\
    float turbulence(vec3 P) {\
       float f = 0., s = 1.;\
       for (int i = 0 ; i < 9 ; i++) {\
@@ -6526,6 +6546,7 @@ var fragmentShaderHeader = ["\
    }\
    varying float x;\
    varying float y;\
+   uniform float mode;\
    uniform float time;\
    uniform float alpha;\
 "].join("\n");
@@ -6826,6 +6847,8 @@ var glyphData = [
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
 "diner()",
 ["w(t(p(m(j(f(c(`)[)X)U)Q*N*K*G*D*A*>):)7)3)0)-)))&)#) * - 1!4!7#;#>$A$D%H%K%N&R&U&X&]&`&d&g&j%n%q%t%w(x+x.w2w5v8v<v?uBuFuItLtOsSsVsYs^rardrhrkrnrrrurxr{s~t~p~m}j}f}c}`|[|X{U{RzNzKzHzDyAy>y:y7x4x0w-w*w'","x9w9v9u9t9s8r8p8o8n8m8k8j8i8h8f8e8d8c8a7`7_7^7]7Z7Y7X7W6V6T6S7S7R8Q9P9O:N;M;L<K=J>I?H?G@F@EADACBCCACAD@D?E>F>F=G<H;H:H9H7I6I5I4I3I1I0I/I.I,I+I+J+K+M+N+O+P+R+S+T,U,W,X,Y,Z-[-^-_-`-a-b-d-e-f-g-h-j-k-l-l","S6S7S7S8S8S9S9S:S:S;S;S<S<S=S>S>S?S?S@S@SASASBSBSCSCSDSDRERERFRGRGRHRHRISISJSJSKSKSLSLSMSMSNSNSOSOSPSQSQSRSRSSSSSTSTSUSUTVTVTWTWTXTXTYTYTZT[T[T]T]T^T^T_T_T`T`TaUaUbUbUcUcUdUdUeUeUfUfUgUgUhUhUiUiUjUjVk","=G=G=H=H=H=I=I>I>J>J>J>K>K>K>L>L>L>M>M>N>N>N>N>O>O>P>P>P>Q>Q>Q>R>R>R>S>S>T>T>T>U>U>U>V>V>V>W>W>W>X>X>X>Y>Y>Z>Z>Z>[>[>[>]>]>]>^>^>^>_>_>_>`>`?`?a?a?a?b?b?b?c?c?c?d?d?d?e@e@e@f@f@f@g@g@g@h@h@i@i@i@j@j@j","=E=D=C=C=B=A=A=@=@=?=>=>===<=<=;=;=:=9=9=8=8=7=6=6=5=5=4=4=3=2<2<2;3;3:3:4949485857575656656564636362525150505/5/5/6/6/7/8/8/9/9/:/;/;/</=/=/>/>/?/@/@/@/@0@1@1@2@2@3?3?4?4?5?6?6?7?7?8?8>9>9>:>:>;>;><=",],
+"vase()",
+["C#@$?'?)A+C-C0C3C6C8A9>:;:8:5;3=1?1B1E0H0K0N1P3S4V6X8Z9];_=a?cBeCgEiFlFnFqEsBu@w@zC{E}H}K}N}Q~T~W~Y~]}^{^x[vYtYqZo]m_kaicgeefchaj_k[mYnVoToQoNnKnHmElBk@j=h<f:c9`9^8[7Y6X3X0X-X+Z)[']$[!X U R O L I F D!","B1B1A1A1A1A1A1A0@0@0@0@0@0?0?0?/?/>/>/>/>/=/=/=/</</</</;/;/;/;/:/:/:/:/9/9/9/8/8/8/8/7/7/7/7/6/6/6/60605050505141414141424242423233333333343434343535252526262627272727282828282929292:2:2:2:2;2;3;3;3<","X0X/X/X/Y/Y/Y/Y.Y.Z.Z.Z.[-[-[-]-]-]-]-^-^-^-_-_-_-`-`-`-a,a,a,b,b,b,b,c,c,c,d,d,d,e,e,e,f,f-f-f-f-g-g.g.g.g.h.h.h.h/h/h/h0h0h0h1i1i1i2i2i2i3i3i3i3i4i4i4j5j5j5j6j6j6j6j7j7j7j8j8j8j9j9i9i9i9i9i:h:h:h:h:",],
 ];
 
 var glyphs = [];
