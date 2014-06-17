@@ -264,7 +264,7 @@
 
       m.scale(s,-s,s);
    };
-   function invertStandardView(x,y,phi,theta,psi,s) {
+   function standardViewInverse(x,y,phi,theta,psi,s) {
       s *= width()/3.5;
       m.identity();
       m.scale(1/s,-1/s,1/s);

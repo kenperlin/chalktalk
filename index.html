@@ -318,7 +318,7 @@
       this.mouseDrag = function(x, y) {
          m.save();
          var sc = this.size / 180;
-         this.invertStandardView();
+         this.standardViewInverse();
          var p = m.transform([x,y]);
          p = [p[0]/sc, p[1]/sc];
          this.t = max(0, min(1, p[this.selection] + .5));
@@ -1062,7 +1062,7 @@
 
       this.mouseDrag = function(x, y) {
          m.save();
-         this.invertStandardView();
+         this.standardViewInverse();
          var p = m.transform([x,y]);
          if ( normSqr(vecDiff(this.a, p)) < normSqr(vecDiff(this.b, p)) )
             this.a = p;

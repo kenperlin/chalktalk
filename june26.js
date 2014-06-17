@@ -339,6 +339,7 @@ function Grid() {
    this.is3D = true;
    this.render = function(elapsed) {
       m.save();
+         m.scale(this.size / 400);
          mCurve([[-1,0], [1, 0]]);
          mCurve([[ 0,1], [0, -1]]);
 	 this.afterSketch(function(S) {

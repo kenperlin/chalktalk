@@ -1800,7 +1800,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().glyphTransition = 0;
       sk().trace = [];
 
-      sk().size = 2 * (max(sk().width, sk().height) - sketchPadding);
+      sk().size = 2 * max(sk().width, sk().height);
 
       if (sk().computeStatistics != null)
          sk().computeStatistics();
@@ -4747,14 +4747,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          return this.xhi > s.xlo && this.xlo < s.xhi &&
                 this.yhi > s.ylo && this.ylo < s.yhi ;
       }
-      this.invertStandardView = function() {
-         invertStandardView(.5 + this.tx() / width(),
-                            .5 - this.ty() / height(),
-                            this.is3D ? PI * this.rY : 0,
-                            this.is3D ? PI * this.rX : 0,
-                            this.is3D ? 0 : -TAU * this.rX,
-                            .25 * this.scale());
-      }
       this.is3D = false;
       this.isCard = false;
       this.isGroup = function() { return this.children.length > 0; }
@@ -4941,12 +4933,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.styleTransition = 0;
       this.sp = [];
       this.standardView = function(p) {
-         standardView(.5 + this.tx() / width(),
-                      .5 - this.ty() / height(),
-                      this.is3D ? PI * this.rY : 0,
-                      this.is3D ? PI * this.rX : 0,
-                      this.is3D ? PI * this.rX * (1 - this.rY*this.rY) : -TAU * this.rX,
-                      .25 * this.scale());
+         var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
+         standardView(
+	    .5 + this.tx() / width(),
+            .5 - this.ty() / height(),
+            this.is3D ? PI * ry          : 0,
+            this.is3D ? PI * rx * (1-yy) : 0,
+            this.is3D ? PI * rx * yy     : -TAU * rx,
+            .25 * this.scale());
+      }
+      this.standardViewInverse = function() {
+         var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
+         standardView(
+	    .5 + this.tx() / width(),
+            .5 - this.ty() / height(),
+            this.is3D ? PI * ry          : 0,
+            this.is3D ? PI * rx * (1-yy) : 0,
+            this.is3D ? PI * rx * yy     : -TAU * rx,
+            .25 * this.scale());
       }
       this.tX = 0;
       this.tY = 0;
