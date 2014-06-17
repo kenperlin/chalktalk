@@ -334,4 +334,21 @@ function marble() {
    ];
 }
 
+function Grid() {
+   this.labels = "empty".split(' ');
+   this.is3D = true;
+   this.render = function(elapsed) {
+      m.save();
+         mCurve([[-1,0], [1, 0]]);
+         mCurve([[ 0,1], [0, -1]]);
+	 this.afterSketch(function(S) {
+            mCurve([[-1, .5], [1, .5]]);
+            mCurve([[-1,-.5], [1,-.5]]);
+            mCurve([[-.5,1], [-.5,-1]]);
+            mCurve([[ .5,1], [ .5,-1]]);
+	 });
+      m.restore();
+   }
+}
+Grid.prototype = new Sketch;
 

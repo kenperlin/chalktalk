@@ -967,7 +967,7 @@
          return;
 
       if (isMakingGlyph) {
-         if (! (sk() instanceof Sketch2D) && ! sk().is3D)
+         if (! (sk() instanceof Sketch2D))
             y = -y;
          buildTrace(glyphInfo, x, y, isLine);
          return;
@@ -1800,8 +1800,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().glyphTransition = 0;
       sk().trace = [];
 
-      //sk().size = sk().height * 2;
-      sk().size = 2 * max(sk().width, sk().height);
+      sk().size = 2 * (max(sk().width, sk().height) - sketchPadding);
 
       if (sk().computeStatistics != null)
          sk().computeStatistics();
@@ -4475,9 +4474,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.afterSketch = function(drawFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
+	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
             _g.save();
-            _g.globalAlpha = isg ? 2 * this.glyphTransition - 1
-                                 : this.styleTransition;
+            _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
+                                  : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
             drawFunction(this);
@@ -4945,7 +4945,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                       .5 - this.ty() / height(),
                       this.is3D ? PI * this.rY : 0,
                       this.is3D ? PI * this.rX : 0,
-                      this.is3D ? 0 : -TAU * this.rX,
+                      this.is3D ? PI * this.rX * (1 - this.rY*this.rY) : -TAU * this.rX,
                       .25 * this.scale());
       }
       this.tX = 0;
@@ -5047,6 +5047,43 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
    Sketch2D.prototype = new Sketch;
+
+   function Picture(imageFile) {
+      this.width = 400;
+      this.height = 300;
+      if (isDef(imageFile)) {
+         this.imageObj = new Image();
+         this.imageObj.src = imageFile;
+      }
+      this.render = function() {
+         if (isDef(this.imageObj)) {
+            this.width = this.imageObj.width;
+            this.height = this.imageObj.height;
+         }
+	 color(backgroundColor);
+         drawRect(-this.width/2,-this.height/2,this.width,this.height);
+         this.afterSketch(function(S) {
+            if (S.imageObj === undefined)
+               return;
+            var s = S.scale();
+	    if (S.fadeAway > 0)
+	       _g.globalAlpha = S.fadeAway;
+            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
+                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
+         });
+      }
+   }
+   Picture.prototype = new Sketch2D;
+
+   function image(name, scale) {
+      if (scale === undefined)
+         scale = 1;
+      addSketch(new Picture('imgs/' + name));
+      sk().sketchState = 'in progress';
+      sk().styleTransition = 0;
+      sk().sketchProgress = 1;
+      sk().sc = scale * (glyphSketch.xhi - glyphSketch.xlo) / 250;
+   }
 
    function SimpleSketch() {
       this.sp0 = [[0,0]];
@@ -5594,8 +5631,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       _g.strokeStyle = saveStrokeStyle;
       _g.fillStyle = saveFillStyle;
    }
-
-var count = 0;
 
    function annotateStart(context) {
       if (context === undefined)
@@ -6447,6 +6482,128 @@ var count = 0;
       }
    }
 
+// SUPPORT FOR SKETCHES THAT TURN INTO TRUE 3D GEOMETRY.
+
+   function GeometrySketch() {
+      this.sx = 1;
+      this.sy = 1;
+      this.dragx = 0;
+      this.dragy = 0;
+      this.downx = 0;
+      this.downy = 0;
+      this.cleanup = function() {
+         root.remove(this.geometry);
+      }
+      this.mouseDown = function(x,y) {
+         this.downx = this.dragx = x;
+         this.downy = this.dragy = y;
+      }
+      this.mouseDrag = function(x,y) {
+         this.sx *= (400 + x - this.dragx) / 400;
+         this.sy *= (400 - y + this.dragy) / 400;
+         this.dragx = x;
+         this.dragy = y;
+      }
+      this.mouseUp = function(x,y) {
+      }
+      this.render = function(elapsed) {
+
+         // TURN OFF ROTATION TO COMPUTE 2D BOUNDING BOX.
+
+         var save_rX = this.rX;
+	 this.rX = 0;
+         this.makeXform();
+         this.rX = save_rX;
+
+	 for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
+	    var xy = this.xform(this.sp0[i]);
+	    this.sp[i][0] = xy[0];
+	    this.sp[i][1] = xy[1];
+         }
+
+         var b = [ this.xlo, this.ylo, this.xhi, this.yhi ];
+         var x = ( b[0] + b[2] - width()     ) / 2 / pixelsPerUnit;
+         var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
+         var s = len(b[2] - b[0] + 2 * sketchPadding,
+	             b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+         this.geometry.getMatrix()
+             .identity()
+	     .translate(x, -y, 0)
+	     .rotateX(-PI*this.rY)
+	     .rotateY( PI*this.rX)
+	     .scale(s * this.sx, s * this.sy, s);
+
+         if (isDef(this.geometry.update))
+	    this.geometry.update(elapsed);
+
+         if (isDef(this.update))
+	    this.update(elapsed);
+
+         if (this.fadeAway > 0 || sketchPage.fadeAway > 0
+	                       || this.glyphSketch != null) {
+	    var alpha = this.fadeAway > 0 ? this.fadeAway :
+	                this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+			sketchPage.fadeAway;
+            this.geometry.material.opacity = sCurve(alpha);
+            this.geometry.material.transparent = true;
+
+	    if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
+	       this.glyphSketch = null;
+         }
+      }
+      this.geometry = null;
+   }
+   GeometrySketch.prototype = new SimpleSketch;
+
+   function geometrySketch(g, xf) {
+
+      var sketch = new GeometrySketch();
+
+      var b = strokeComputeBounds(glyphSketch.sp, 1);
+
+      sketchPage.add(glyphSketch);
+      glyphSketch.fadeAway = 1.0;
+      sketch.glyphSketch = glyphSketch;
+
+      if (isDef(xf)) {
+         var w = b[2] - b[0];
+         var x = (b[0] + b[2]) / 2;
+         var y = (b[1] + b[3]) / 2;
+	 var dx = xf[0] * w;
+	 var dy = xf[1] * w;
+	 var sc = xf[4];
+         b[0] = x + dx - (x - b[0]) * sc;
+         b[1] = y + dy - (y - b[1]) * sc;
+         b[2] = x + dx + (b[2] - x) * sc;
+         b[3] = y + dy + (b[3] - y) * sc;
+         sketch.rX = xf[2];
+         sketch.rY = xf[3];
+      }
+
+      var x = (b[0] + b[2]) / 2;
+      var y = (b[1] + b[3]) / 2;
+
+      sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
+      sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
+
+      sketch.tX = x;
+      sketch.tY = y;
+      sketch.geometry = g;
+
+      if(g.material!=undefined){
+         if (g.material == blackMaterial) {
+            var C = colorToRGB(sketchColor());
+            g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
+                                             .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+                                             .setSpecular(0,0,0,1));
+         }
+      }
+
+      addSketch(sketch);
+      finishDrawingUnfinishedSketch();
+
+      return sketch;
+   }
 
 
 // THINGS RELATED TO WEBGL AND SHADERS.
