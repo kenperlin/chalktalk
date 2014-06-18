@@ -4944,7 +4944,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.standardViewInverse = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
-         standardView(
+         standardViewInverse(
 	    .5 + this.tx() / width(),
             .5 - this.ty() / height(),
             this.is3D ? PI * ry          : 0,
