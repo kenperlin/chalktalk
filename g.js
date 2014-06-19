@@ -3935,7 +3935,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.showGlyphs = function() {
          _g.save();
          _g.strokeStyle = 'rgba(0,0,0,.3)';
-         _g.font = '10pt Calibri';
+         _g.font = '9pt Calibri';
          _g.lineWidth = 1;
          var y0 = height() - glyphsH;
          line(0, y0, width(), y0);
@@ -4055,7 +4055,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          _g.save();
          _g.font = '30pt Calibri';
-         //_g.fillStyle = isTextMode ? overlayScrim : overlayColor;
          _g.fillStyle = overlayScrim;
          _g.fillText("PAGE " + sketchBook.page, 60, 40);
          _g.restore();
