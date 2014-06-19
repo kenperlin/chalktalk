@@ -495,6 +495,7 @@
    function min(a,b) { return Math.min(a,b); }
 
    var noise2P = [], noise2U = [], noise2V = [];
+   function noise(x) { return noise2(x, 0.03 * x); }
    function noise2(x, y) {
       if (noise2P.length == 0) {
          var p = noise2P, u = noise2U, v = noise2V, i, j;
@@ -966,7 +967,7 @@
          return;
 
       if (isMakingGlyph) {
-         if (! (sk() instanceof Sketch2D) && ! sk().is3D)
+         if (! (sk() instanceof Sketch2D))
             y = -y;
          buildTrace(glyphInfo, x, y, isLine);
          return;
@@ -1330,19 +1331,18 @@
    var codeElement,
        codeSelector,
        codeTextArea,
-       codeExample = function() {
+       setCodeAreaText = function() {
           codeTextArea.value = codeSelector.value;
           updateF();
-       },
-       callTest = function(n) {
-          console.log("test select " + n);
        },
        updateF = function() {
           try {
              eval(codeTextArea.value);
           } catch (e) { }
-          if (code() != null)
+          if (code() != null) {
              code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+	     codeSketch.selectedIndex = codeSelector.selectedIndex;
+          }
        };
 
    function code() {
@@ -1360,6 +1360,8 @@
 
       isCodeWidget = ! isCodeWidget;
 
+      console.log("TOGGLE CODE WIDGET " + (isCodeWidget ? "ON" : "OFF"));
+
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
@@ -1371,7 +1373,7 @@
                      + "</option>";
 
          codeElement.innerHTML =
-            "<select id=code_selector onchange='codeExample()'>"
+            "<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -1387,6 +1389,8 @@
          codeSelector.style.color = codeSelectorFgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
+	 if (isDef(codeSketch.selectedIndex))
+	    codeSelector.selectedIndex = codeSketch.selectedIndex;
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
@@ -1796,7 +1800,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().glyphTransition = 0;
       sk().trace = [];
 
-      //sk().size = sk().height * 2;
       sk().size = 2 * max(sk().width, sk().height);
 
       if (sk().computeStatistics != null)
@@ -3811,6 +3814,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             for (var i = 0 ; i < lines.length ; i++)
                cols = max(cols, lines[i].length);
 
+            if (code().length > 0)
+	       for (var i = 0 ; i < code().length ; i++)
+	          cols = max(cols, code()[i][0].length + 3);
+
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
 
@@ -4469,9 +4476,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.afterSketch = function(drawFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
+	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
             _g.save();
-            _g.globalAlpha = isg ? 2 * this.glyphTransition - 1
-                                 : this.styleTransition;
+            _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
+                                  : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
             drawFunction(this);
@@ -4741,14 +4749,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          return this.xhi > s.xlo && this.xlo < s.xhi &&
                 this.yhi > s.ylo && this.ylo < s.yhi ;
       }
-      this.invertStandardView = function() {
-         invertStandardView(.5 + this.tx() / width(),
-                            .5 - this.ty() / height(),
-                            this.is3D ? PI * this.rY : 0,
-                            this.is3D ? PI * this.rX : 0,
-                            this.is3D ? 0 : -TAU * this.rX,
-                            .25 * this.scale());
-      }
       this.is3D = false;
       this.isCard = false;
       this.isGroup = function() { return this.children.length > 0; }
@@ -4941,12 +4941,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.styleTransition = 0;
       this.sp = [];
       this.standardView = function(p) {
-         standardView(.5 + this.tx() / width(),
-                      .5 - this.ty() / height(),
-                      this.is3D ? PI * this.rY : 0,
-                      this.is3D ? PI * this.rX : 0,
-                      this.is3D ? 0 : -TAU * this.rX,
-                      .25 * this.scale());
+         var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
+         standardView(
+	    .5 + this.tx() / width(),
+            .5 - this.ty() / height(),
+            this.is3D ? PI * ry          : 0,
+            this.is3D ? PI * rx * (1-yy) : 0,
+            this.is3D ? PI * rx * yy     : -TAU * rx,
+            .25 * this.scale());
+      }
+      this.standardViewInverse = function() {
+         var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
+         standardViewInverse(
+	    .5 + this.tx() / width(),
+            .5 - this.ty() / height(),
+            this.is3D ? PI * ry          : 0,
+            this.is3D ? PI * rx * (1-yy) : 0,
+            this.is3D ? PI * rx * yy     : -TAU * rx,
+            .25 * this.scale());
       }
       this.tX = 0;
       this.tY = 0;
@@ -5047,6 +5059,43 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
    Sketch2D.prototype = new Sketch;
+
+   function Picture(imageFile) {
+      this.width = 400;
+      this.height = 300;
+      if (isDef(imageFile)) {
+         this.imageObj = new Image();
+         this.imageObj.src = imageFile;
+      }
+      this.render = function() {
+         if (isDef(this.imageObj)) {
+            this.width = this.imageObj.width;
+            this.height = this.imageObj.height;
+         }
+	 color(backgroundColor);
+         drawRect(-this.width/2,-this.height/2,this.width,this.height);
+         this.afterSketch(function(S) {
+            if (S.imageObj === undefined)
+               return;
+            var s = S.scale();
+	    if (S.fadeAway > 0)
+	       _g.globalAlpha = S.fadeAway;
+            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
+                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
+         });
+      }
+   }
+   Picture.prototype = new Sketch2D;
+
+   function image(name, scale) {
+      if (scale === undefined)
+         scale = 1;
+      addSketch(new Picture('imgs/' + name));
+      sk().sketchState = 'in progress';
+      sk().styleTransition = 0;
+      sk().sketchProgress = 1;
+      sk().sc = scale * (glyphSketch.xhi - glyphSketch.xlo) / 250;
+   }
 
    function SimpleSketch() {
       this.sp0 = [[0,0]];
@@ -5182,7 +5231,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // CLICK
 
-         if (len(xhi - xlo, yhi - ylo) < clickSize) {
+         if (len(xhi - xlo, yhi - ylo) <= clickSize) {
 
             // SKETCH WAS JUST BYPRODUCT OF A CLICK.  DELETE IT.
 
@@ -5595,8 +5644,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       _g.fillStyle = saveFillStyle;
    }
 
-var count = 0;
-
    function annotateStart(context) {
       if (context === undefined)
          context = _g;
@@ -5963,26 +6010,30 @@ var count = 0;
 
          requestAnimFrame(function() { tick(g); });
 
-         _g.save();
+	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
-         _g.globalAlpha = 1.0;
+         if (! isShowingGlyphs) {
+            _g.save();
 
-         _g.beginPath();
-         _g.moveTo(0, h - margin);
-         _g.lineTo(1280, h - margin);
-         _g.lineTo(1280, h);
-         _g.lineTo(0, h);
-         _g.fillStyle = 'rgba(128,128,128,0.075)';
-         _g.fill();
-         _g.moveTo(0, h);
+            _g.globalAlpha = 1.0;
 
-         _g.beginPath();
-         _g.moveTo(0, h);
-         _g.lineTo(1280, h);
-         _g.strokeStyle = 'rgba(128,128,128,0.15)';
-         _g.stroke();
+            _g.beginPath();
+            _g.moveTo(0, h - margin);
+            _g.lineTo(1280, h - margin);
+            _g.lineTo(1280, h);
+            _g.lineTo(0, h);
+            _g.fillStyle = 'rgba(128,128,128,0.15)';
+            _g.fill();
+            _g.moveTo(0, h);
 
-         _g.restore();
+            _g.beginPath();
+            _g.moveTo(0, h);
+            _g.lineTo(1280, h);
+            _g.strokeStyle = 'rgba(128,128,128,0.3)';
+            _g.stroke();
+
+            _g.restore();
+         }
       }
    }
 
@@ -6443,6 +6494,235 @@ var count = 0;
       }
    }
 
+// SUPPORT FOR SKETCHES THAT TURN INTO TRUE 3D GEOMETRY.
+
+   function GeometrySketch() {
+      this.sx = 1;
+      this.sy = 1;
+      this.dragx = 0;
+      this.dragy = 0;
+      this.downx = 0;
+      this.downy = 0;
+      this.cleanup = function() {
+         root.remove(this.geometry);
+      }
+      this.mouseDown = function(x,y) {
+         this.downx = this.dragx = x;
+         this.downy = this.dragy = y;
+      }
+      this.mouseDrag = function(x,y) {
+         this.sx *= (400 + x - this.dragx) / 400;
+         this.sy *= (400 - y + this.dragy) / 400;
+         this.dragx = x;
+         this.dragy = y;
+      }
+      this.mouseUp = function(x,y) {
+      }
+      this.render = function(elapsed) {
+
+         // TURN OFF ROTATION TO COMPUTE 2D BOUNDING BOX.
+
+         var save_rX = this.rX;
+	 this.rX = 0;
+         this.makeXform();
+         this.rX = save_rX;
+
+	 for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
+	    var xy = this.xform(this.sp0[i]);
+	    this.sp[i][0] = xy[0];
+	    this.sp[i][1] = xy[1];
+         }
+
+         var b = [ this.xlo, this.ylo, this.xhi, this.yhi ];
+         var x = ( b[0] + b[2] - width()     ) / 2 / pixelsPerUnit;
+         var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
+         var s = len(b[2] - b[0] + 2 * sketchPadding,
+	             b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+         this.geometry.getMatrix()
+             .identity()
+	     .translate(x, -y, 0)
+	     .rotateX(-PI*this.rY)
+	     .rotateY( PI*this.rX)
+	     .scale(s * this.sx, s * this.sy, s);
+
+         if (isDef(this.geometry.update))
+	    this.geometry.update(elapsed);
+
+         if (isDef(this.update))
+	    this.update(elapsed);
+
+         if (this.fadeAway > 0 || sketchPage.fadeAway > 0
+	                       || this.glyphSketch != null) {
+	    var alpha = this.fadeAway > 0 ? this.fadeAway :
+	                this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+			sketchPage.fadeAway;
+            this.geometry.material.opacity = sCurve(alpha);
+            this.geometry.material.transparent = true;
+
+	    if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
+	       this.glyphSketch = null;
+         }
+      }
+      this.geometry = null;
+   }
+   GeometrySketch.prototype = new SimpleSketch;
+
+   function geometrySketch(g, xf) {
+
+      var sketch = new GeometrySketch();
+
+      var b = strokeComputeBounds(glyphSketch.sp, 1);
+
+      sketchPage.add(glyphSketch);
+      glyphSketch.fadeAway = 1.0;
+      sketch.glyphSketch = glyphSketch;
+
+      if (isDef(xf)) {
+         var w = b[2] - b[0];
+         var x = (b[0] + b[2]) / 2;
+         var y = (b[1] + b[3]) / 2;
+	 var dx = xf[0] * w;
+	 var dy = xf[1] * w;
+	 var sc = xf[4];
+         b[0] = x + dx - (x - b[0]) * sc;
+         b[1] = y + dy - (y - b[1]) * sc;
+         b[2] = x + dx + (b[2] - x) * sc;
+         b[3] = y + dy + (b[3] - y) * sc;
+         sketch.rX = xf[2];
+         sketch.rY = xf[3];
+      }
+
+      var x = (b[0] + b[2]) / 2;
+      var y = (b[1] + b[3]) / 2;
+
+      sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
+      sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
+
+      sketch.tX = x;
+      sketch.tY = y;
+      sketch.geometry = g;
+
+      if(g.material!=undefined){
+         if (g.material == blackMaterial) {
+            var C = colorToRGB(sketchColor());
+            g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
+                                             .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+                                             .setSpecular(0,0,0,1));
+         }
+      }
+
+      addSketch(sketch);
+      finishDrawingUnfinishedSketch();
+
+      return sketch;
+   }
+
+
+// THINGS RELATED TO WEBGL AND SHADERS.
+
+function addShaderPlaneSketch(vertexShader, fragmentShader) {
+   var material = new THREE.ShaderMaterial({
+      uniforms: {
+         mode : { type: "f", value: 0.0 },
+         time : { type: "f", value: 0.0 },
+         alpha: { type: "f", value: 1.0 },
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShaderHeader.concat(fragmentShader),
+   });
+   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
+   root.add(mesh);
+
+   mesh.sketch = geometrySketch(mesh);
+   mesh.sketch.fragmentShader = fragmentShader;
+   mesh.update = function() {
+      this.getMatrix().scale(0.05);
+      this.material.uniforms['time'].value = time;
+      var fade = this.sketch.fadeAway;
+      this.material.uniforms['alpha'].value = fade == 0 ? 1 : fade;
+      this.material.uniforms['mode'].value =
+         isDef(mesh.sketch.selectedIndex) ? mesh.sketch.selectedIndex : 0;
+   }
+   return mesh.sketch;
+}
+
+// THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
+
+var defaultVertexShader = ["\
+   varying vec3 vNormal;\
+   varying float x;\
+   varying float y;\
+   void main() {\
+      x = 2. * uv.x - 1.;\
+      y = 2. * uv.y - 1.;\
+      vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
+   }\
+"].join("\n");
+
+// DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
+
+var fragmentShaderHeader = ["\
+   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+   vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }\
+   vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }\
+   vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }\
+   float noise(vec3 P) {\
+      vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));\
+      vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);\
+      vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);\
+      vec4 iz0 = i0.zzzz, iz1 = i1.zzzz;\
+      vec4 ixy = permute(permute(ix) + iy), ixy0 = permute(ixy + iz0), ixy1 = permute(ixy + iz1);\
+      vec4 gx0 = ixy0 * (1.0 / 7.0), gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;\
+      vec4 gx1 = ixy1 * (1.0 / 7.0), gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;\
+      gx0 = fract(gx0); gx1 = fract(gx1);\
+      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0), sz0 = step(gz0, vec4(0.0));\
+      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1), sz1 = step(gz1, vec4(0.0));\
+      gx0 -= sz0 * (step(0.0, gx0) - 0.5); gy0 -= sz0 * (step(0.0, gy0) - 0.5);\
+      gx1 -= sz1 * (step(0.0, gx1) - 0.5); gy1 -= sz1 * (step(0.0, gy1) - 0.5);\
+      vec3 g0 = vec3(gx0.x,gy0.x,gz0.x), g1 = vec3(gx0.y,gy0.y,gz0.y),\
+           g2 = vec3(gx0.z,gy0.z,gz0.z), g3 = vec3(gx0.w,gy0.w,gz0.w),\
+           g4 = vec3(gx1.x,gy1.x,gz1.x), g5 = vec3(gx1.y,gy1.y,gz1.y),\
+           g6 = vec3(gx1.z,gy1.z,gz1.z), g7 = vec3(gx1.w,gy1.w,gz1.w);\
+      vec4 norm0 = taylorInvSqrt(vec4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3)));\
+      vec4 norm1 = taylorInvSqrt(vec4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7)));\
+      g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;\
+      g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;\
+      vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),\
+                         dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
+                    vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
+                         dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
+      return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
+   }\
+   float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
+   float fractal(vec3 P) {\
+      float f = 0., s = 1.;\
+      for (int i = 0 ; i < 9 ; i++) {\
+         f += noise(s * P) / s;\
+         s *= 2.;\
+         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
+      }\
+      return f;\
+   }\
+   float turbulence(vec3 P) {\
+      float f = 0., s = 1.;\
+      for (int i = 0 ; i < 9 ; i++) {\
+         f += abs(noise(s * P)) / s;\
+         s *= 2.;\
+         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
+      }\
+      return f;\
+   }\
+   varying float x;\
+   varying float y;\
+   uniform float mode;\
+   uniform float time;\
+   uniform float alpha;\
+"].join("\n");
+
+
+
 // VARIOUS MANIPULATIONS OF HTML ELEMENTS.
 
    // Replace the text of an html element:
@@ -6736,7 +7016,13 @@ var glyphData = [
 "kbd()",
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
 "diner()",
-["y9w9t8r8o7l6j5g4d3b2_1]0Y/W.T-R+P*N*L,J-G/E0B1@2=3;48667491:/;,<*>(?%@#B#D#G#J#M!O!R U W#Y%Z'[*^,_.a0c3d5f7g9i<j>l@mBoEpGrItKvMuOtRsUrWrZq^p`ocofninknnmqmslvlxk{k}j}g|d|a|_|[|X}U}S}P}M~J~H~E~B~?~=~:|9","P+P+P,P,O-O.O/O/O0O1O1O2N3N4N4N5N6M7M7M8M9M:M:M;M<M=M=M>M?M@M@MAMBMCMCLDLELFLFLGLHLILILJLKLLLLLMLNLOLOLPLQLRLRKSKTKUKUKVKWKXKXKYKZK[K[K]K^K_K`K`KaKbKcKcKdKeJeJfJgJhJhJiJjJkJkJlJmJnJoJoJpJqJrJrJsJtJsJr",],
+["w(t(p(m(j(f(c(`)[)X)U)Q*N*K*G*D*A*>):)7)3)0)-)))&)#) * - 1!4!7#;#>$A$D%H%K%N&R&U&X&]&`&d&g&j%n%q%t%w(x+x.w2w5v8v<v?uBuFuItLtOsSsVsYs^rardrhrkrnrrrurxr{s~t~p~m}j}f}c}`|[|X{U{RzNzKzHzDyAy>y:y7x4x0w-w*w'","x9w9v9u9t9s8r8p8o8n8m8k8j8i8h8f8e8d8c8a7`7_7^7]7Z7Y7X7W6V6T6S7S7R8Q9P9O:N;M;L<K=J>I?H?G@F@EADACBCCACAD@D?E>F>F=G<H;H:H9H7I6I5I4I3I1I0I/I.I,I+I+J+K+M+N+O+P+R+S+T,U,W,X,Y,Z-[-^-_-`-a-b-d-e-f-g-h-j-k-l-l","S6S7S7S8S8S9S9S:S:S;S;S<S<S=S>S>S?S?S@S@SASASBSBSCSCSDSDRERERFRGRGRHRHRISISJSJSKSKSLSLSMSMSNSNSOSOSPSQSQSRSRSSSSSTSTSUSUTVTVTWTWTXTXTYTYTZT[T[T]T]T^T^T_T_T`T`TaUaUbUbUcUcUdUdUeUeUfUfUgUgUhUhUiUiUjUjVk","=G=G=H=H=H=I=I>I>J>J>J>K>K>K>L>L>L>M>M>N>N>N>N>O>O>P>P>P>Q>Q>Q>R>R>R>S>S>T>T>T>U>U>U>V>V>V>W>W>W>X>X>X>Y>Y>Z>Z>Z>[>[>[>]>]>]>^>^>^>_>_>_>`>`?`?a?a?a?b?b?b?c?c?c?d?d?d?e@e@e@f@f@f@g@g@g@h@h@i@i@i@j@j@j","=E=D=C=C=B=A=A=@=@=?=>=>===<=<=;=;=:=9=9=8=8=7=6=6=5=5=4=4=3=2<2<2;3;3:3:4949485857575656656564636362525150505/5/5/6/6/7/8/8/9/9/:/;/;/</=/=/>/>/?/@/@/@/@0@1@1@2@2@3?3?4?4?5?6?6?7?7?8?8>9>9>:>:>;>;><=",],
+"vase()",
+["I!F D!B#B&D'E)E,E/E3D5A5>4;484653719/;->-A-D.G/J0M1O3R5T6W8Z:]<`=b?dAgCiDkFmFpFsEvCwBzD|G}J}M~P~S~V~Y~]}_|`y^w[vYuYrZp]m_k`hbfdcf`g^iZkXmUnRoPpMqJrGrDrAq>o<n:l8j6g5d4a4^4Z3X2X/X,Y*[(]&[#Y!V!S!P M J I#",],
+"blinn()",
+["%$%&$($*#,#.!0!2 5 7 9 ; = ? B D F H!J!L#N$P%R&T&V(X)Z*[,^-_/a0b2d4e5f7h9i;j=k>m@nBoDoFpHqJrLrNsPtRtTtVuXu[u^u`ubtdtfsgqipkolmnlpkrjshufvewcxay_z]{[|Y|W}T~R~P~N~L~J~H~F}C}A}?}=};}9|7|4|2|0{.{,z*z(y&x(",".[.^/`/b0d1f1h2j2k2k2i2g3f4g4i5k6m6n7p8r9t9s9q9o9m:k;j<l=m=o>q?s@uAvBuBsBqBoBmBkBkCmDoDqErFtGvHxIyJwJuJsJqJoJnLoMqNsOtPvQxRyS{SySwSuSsSqTpUrUtWuXwYxZyZw[v[t[r]p^q_s`uavcwcucscqdqerftguhuisjqkokmlkljmh","<O=O>P>P?P?Q?Q@R@R@SASATBTBTCUCUCVDVDVEWEWFWFXGXGXHXHYIYIYJYJZKZLZLZMZM[N[N[O[O]P]Q]Q]R]R]S]T]T]U]U]V]W]W]X]X]Y]Y]Z[[[[[][][^Z^Z_Z_Z`ZaZaZbYbYcYcYdYdXdXeXeWeWfVfVgUgUgThThShSiSiRiRiQjQjQjPjOjOjNjOjOjP",],
+"strawberry()",
+["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",], 
 ];
 
 var glyphs = [];

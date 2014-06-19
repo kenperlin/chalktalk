@@ -1,6 +1,7 @@
 <head>
+   <script src=three.min.js></script>
+
 <script src=g.js></script>
-<script src=three.min.2.js></script>
 <script src=four.js></script>
 <script src=lobserLibrary.js></script>
 <script src=june26.js></script>
@@ -75,79 +76,10 @@
 </div>
 
 <script>
-   function GeometrySketch() {
-      this.sx = 1;
-      this.sy = 1;
-      this.dragx = 0;
-      this.dragy = 0;
-      this.cleanup = function() {
-         root.remove(this.geometry);
-      }
-      this.mouseDown = function(x,y) {
-         this.dragx = x;
-         this.dragy = y;
-      }
-      this.mouseDrag = function(x,y) {
-         this.sx *= (400 + x - this.dragx) / 400;
-         this.sy *= (400 - y + this.dragy) / 400;
-         this.dragx = x;
-         this.dragy = y;
-      }
-      this.mouseUp = function(x,y) {
-      }
-      this.render = function(elapsed) {
-
-         // TURN OFF ROTATION TO COMPUTE 2D BOUNDING BOX.
-
-         var save_rX = this.rX;
-	 this.rX = 0;
-         this.makeXform();
-         this.rX = save_rX;
-
-	 for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
-	    var xy = this.xform(this.sp0[i]);
-	    this.sp[i][0] = xy[0];
-	    this.sp[i][1] = xy[1];
-         }
-
-         var b = [ this.xlo, this.ylo, this.xhi, this.yhi ];
-         var x = ( b[0] + b[2] - width()     ) / 2 / pixelsPerUnit;
-         var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
-         var s = len(b[2] - b[0] + 2 * sketchPadding,
-	             b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
-         this.geometry.getMatrix()
-             .identity()
-	     .translate(x, -y, 0)
-	     .rotateX(-PI*this.rY)
-	     .rotateY( PI*this.rX)
-	     .scale(s * this.sx, s * this.sy, s);
-
-         if (isDef(this.geometry.update))
-	    this.geometry.update(elapsed);
-
-         if (isDef(this.update))
-	    this.update(elapsed);
-
-         if (this.fadeAway > 0 || sketchPage.fadeAway > 0
-	                       || this.glyphSketch != null) {
-	    var alpha = this.fadeAway > 0 ? this.fadeAway :
-	                this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
-			sketchPage.fadeAway;
-            this.geometry.material.opacity = sCurve(alpha);
-            this.geometry.material.transparent = true;
-
-	    if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
-	       this.glyphSketch = null;
-         }
-      }
-      this.geometry = null;
-   }
-   GeometrySketch.prototype = new SimpleSketch;
-
+   registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
    registerGlyph("cube()",    [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
    registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI,PI) ]);
    registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,PI,-PI) ]);
-   registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
 
    function cube()     { geometrySketch(root.addCube()); }
    function cylinder() { geometrySketch(root.addCylinder()); }
@@ -169,84 +101,24 @@
       }
    }
 
-   function geometrySketch(g, xf) {
-
-      var sketch = new GeometrySketch();
-
-      var b = strokeComputeBounds(glyphSketch.sp, 1);
-
-      sketchPage.add(glyphSketch);
-      glyphSketch.fadeAway = 1.0;
-      sketch.glyphSketch = glyphSketch;
-
-      if (isDef(xf)) {
-         var w = b[2] - b[0];
-         var x = (b[0] + b[2]) / 2;
-         var y = (b[1] + b[3]) / 2;
-	 var dx = xf[0] * w;
-	 var dy = xf[1] * w;
-	 var sc = xf[4];
-         b[0] = x + dx - (x - b[0]) * sc;
-         b[1] = y + dy - (y - b[1]) * sc;
-         b[2] = x + dx + (b[2] - x) * sc;
-         b[3] = y + dy + (b[3] - y) * sc;
-         sketch.rX = xf[2];
-         sketch.rY = xf[3];
-      }
-
-      var x = (b[0] + b[2]) / 2;
-      var y = (b[1] + b[3]) / 2;
-
-      sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
-      sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
-
-      sketch.tX = x;
-      sketch.tY = y;
-      sketch.geometry = g;
-
-      if (g.material == blackMaterial) {
-         var C = colorToRGB(sketchColor());
-         g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
-                                          .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
-                                          .setSpecular(0,0,0,1));
-      }
-
-      addSketch(sketch);
-      finishDrawingUnfinishedSketch();
-
-      return sketch;
-   }
-
+   function alan() { image('alan_kay_smiling.jpg', 1.8); }
+   function blinn() { image('blinn.png', 2.4); }
+   function diner() { image('red_fox_diner.jpg', 0.8); }
    function face() { image('smiling-cat.jpg', 0.35); }
    function kwa() { image('kwalado.jpg'); }
    function mit() { image('tangible_media_lab.jpg'); }
-   function alan() { image('alan_kay_smiling.jpg', 1.8); }
-   function diner() { image('red_fox_diner.jpg', 0.9); }
-   function image(name, scale) {
-      if (scale === undefined)
-         scale = 1;
-      addSketch(new Picture('imgs/' + name));
-      sk().sketchState = 'in progress';
-      sk().styleTransition = 0;
-      sk().sketchProgress = 1;
-      sk().sc = scale * (glyphSketch.xhi - glyphSketch.xlo) / 250;
-   }
+   function strawberry() { image('blinn-strawberry.jpg', 0.7); }
+   function vase() { image('vase.png', 0.7); }
 
    function unitCube() {
-      if (isFinishedDrawing())
-         fillUnitCube(backgroundColor);
       drawUnitCube();
    }
 
    function unitDisk() {
-      if (isFinishedDrawing())
-         fillUnitDisk(backgroundColor);
       drawUnitDisk();
    }
 
    function unitTube() {
-      if (isFinishedDrawing())
-         fillUnitTube(backgroundColor);
       drawUnitTube();
    }
 
@@ -446,7 +318,7 @@
       this.mouseDrag = function(x, y) {
          m.save();
          var sc = this.size / 180;
-         this.invertStandardView();
+         this.standardViewInverse();
          var p = m.transform([x,y]);
          p = [p[0]/sc, p[1]/sc];
          this.t = max(0, min(1, p[this.selection] + .5));
@@ -1190,7 +1062,7 @@
 
       this.mouseDrag = function(x, y) {
          m.save();
-         this.invertStandardView();
+         this.standardViewInverse();
          var p = m.transform([x,y]);
          if ( normSqr(vecDiff(this.a, p)) < normSqr(vecDiff(this.b, p)) )
             this.a = p;
@@ -1353,38 +1225,11 @@
       return roots;
    }
 
-   function Picture(imageFile) {
-      this.width = 400;
-      this.height = 300;
-      if (isDef(imageFile)) {
-         this.imageObj = new Image();
-         this.imageObj.src = imageFile;
-      }
-      this.render = function() {
-         if (isDef(this.imageObj)) {
-            this.width = this.imageObj.width;
-            this.height = this.imageObj.height;
-         }
-         drawRect(-this.width/2,-this.height/2,this.width,this.height);
-         this.afterSketch(function(S) {
-            if (S.imageObj === undefined)
-               return;
-            var s = S.scale();
-	    if (S.fadeAway > 0)
-	      _g.globalAlpha = S.fadeAway;
-            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
-                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
-         });
-      }
-   }
-   Picture.prototype = new Sketch2D;
-
    function Shape3D() {
       this.labels = "box".split(' ');
 
       this.sx = 1;
       this.sy = 1;
-      this.is3D = true;
       function drawLens() {
          m.save();
             m.translate(0,0,1);
@@ -1415,7 +1260,6 @@
          m.scale(s * this.sx, s * this.sy, s);
          switch (this.selection) {
          case 0:
-            m.rotateZ(PI);
             unitCube();
             break;
          case 1:
@@ -1440,8 +1284,10 @@
       this.labels = "speaker".split(' ');
       this.code = [
          ["sin", "sin(2 * PI * x * time)"],
-         ["sawtooth", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
-         ["square wave", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 4;"],
+         ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
+         ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
+         ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
+         ["noise", "return 5 * noise(3 * x * time)"],
       ];
       this.savedCode = "";
       this.savedX = "";
@@ -1498,19 +1344,6 @@
    }
    IO.prototype = new Sketch;
 
-   function Test1() {
-      this.labels = "X".split(' ');
-      this.render = function(elapsed) {
-         m.save();
-	    m.scale(this.size / 400);
-	    mCurve([[1,1],[-1,-1]]);
-	    mCurve([[-1,1],[1,-1]]);
-         m.restore();
-      }
-   }
-   Test1.prototype = new Sketch;
-
-
    var root, box3D;
    var redMaterial = new phongMaterial();
    redMaterial.setAmbient(.2,0,0).setDiffuse(.8,0,0).setSpecular(1,1,1,20);
@@ -1523,7 +1356,7 @@
    }
 
 //                       1      2       3      4     5      6      7
-   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Test1" ).split(' ');
+   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Grid" ).split(' ');
 
    var pages = [
       ["page0", sketchTypes.concat(["Noises"])],
