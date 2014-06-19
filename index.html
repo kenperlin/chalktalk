@@ -131,27 +131,21 @@
 
       this.choice = new Choice();
 
-      this.mouseUp = function(x, y) {
-         var dx = x - sketchPage.xDown;
-         var dy = y - sketchPage.yDown;
-
-         // DRAG LEFTWARD TO GO INTO IDLE STATE.
-
-         if (dx < -50)
-            this.choice.set(1);
-
-         // DRAG RIGHTWARD TO START WALKING.
-
-         else if (dx > 50)
-            this.choice.set(2);
-
-         // VERTICAL DRAG CHANGES HEIGHT.
-
-         else if (dy < -50)
-            this.isTall = true;
-
-         else if (dy > 50)
-            this.isTall = false;
+      this.onSwipe = function(dx, dy) {
+         switch (pieMenuIndex(dx, dy, 4)) {
+	 case 0:
+	    this.choice.set(2);
+	    break;
+	 case 1:
+	    this.isTall = true;
+	    break;
+	 case 2:
+	    this.choice.set(1);
+	    break;
+	 case 3:
+	    this.isTall = false;
+	    break;
+	 }
       }
 
       this.render = function(elapsed) {

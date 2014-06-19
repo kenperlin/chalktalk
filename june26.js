@@ -48,25 +48,18 @@
 
       sketch.coffee = coffee;
 
-      sketch.mouseDown = function(x, y) {
-         this.mx = x;
-         this.my = y;
-      }
-      sketch.mouseDrag = function(x, y) {
-      }
-      sketch.mouseUp = function(x, y) {
-         if (len(x - this.mx, y - this.my) > 2 * clickSize) {
-            this.swirlMode = pieMenuIndex(x - this.mx, y - this.my, 4);
-            this.swirlStartTime = time;
-            switch (this.swirlMode) {
-            case 0:
-               this.cream = [];
-               for (var i = 0 ; i < 100 ; i++) {
-                  var t = i / 100;
-                  this.cream.push( [ lerp(t, -1, 1) , 0 ] );
-               }
-               break;
+      sketch.mouseDrag = function() { }
+      sketch.onSwipe = function(dx, dy) {
+         this.swirlMode = pieMenuIndex(dx, dy, 4);
+         this.swirlStartTime = time;
+         switch (this.swirlMode) {
+         case 0:
+            this.cream = [];
+            for (var i = 0 ; i < 100 ; i++) {
+               var t = i / 100;
+               this.cream.push( [ lerp(t, -1, 1) , 0 ] );
             }
+            break;
          }
       }
 
@@ -431,15 +424,8 @@ function Grid() {
    this.labels = "empty".split(' ');
    this.gridMode = -1;
    this.is3D = true;
-   this.mouseDown = function(x, y) {
-      this.mx = x;
-      this.my = y;
-   }
-   this.mouseDrag = function(x, y) {
-   }
-   this.mouseUp = function(x, y) {
-      if (len(x - this.mx, y - this.my) > 2 * clickSize)
-         this.gridMode = pieMenuIndex(x - this.mx, y - this.my, 4);
+   this.onSwipe = function(dx, dy) {
+      this.gridMode = pieMenuIndex(dx, dy, 4);
    }
    this.render = function(elapsed) {
       var f = 2/3;

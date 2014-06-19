@@ -3097,6 +3097,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk().isPressed = false;
             isSketchDrawingEnabled = true;
             sk().mouseUp(x, y);
+
+	    if (this.isClick && isHover() && isDef(sk().onClick))
+	       sk().onClick(x, y);
+
+	    if (! this.isClick && isDef(sk().onSwipe))
+	       sk().onSwipe(x - this.xDown, y - this.yDown);
          }
 
          // CLICK OVER BACKGROUND
