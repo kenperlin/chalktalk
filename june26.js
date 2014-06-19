@@ -172,34 +172,21 @@
          }
       }
 
-      this.mouseDown = function(x, y) {
-         this.mouseX = x;
-         this.mouseY = y;
-         this.isClick = true;
-      }
-
       this.mouseDrag = function(x, y) {
-         if (! this.isClick) {
-            if (this.mode == "none")
-               this.mode = abs(x - this.mouseX) > abs(y - this.mouseY) ? "x" : "y";
-            if (this.mode == "x") {
-               this.t0 -= 2 * (x - this.mouseX) / (this.xhi - this.xlo);
-               this.mouseX = x;
-               this.mouseY = y;
-            }
-         }
+         if (isDef(this.dragX))
+            this.t0 -= 2 * (x - this.dragX) / (this.xhi - this.xlo);
+         this.dragX = x;
       }
 
-      this.mouseUp = function(x, y) {
-         if (! this.isClick && this.mode == "y") {
-            var factor = y < this.mouseY ? 2 : 0.5;
+      this.onClick = function(x, y) {
+         this.isAbs = ! this.isAbs;
+      }
+
+      this.onSwipe = function(dx, dy) {
+         var mode = pieMenuIndex(dx, dy, 4);
+	 if (mode == 1 || mode == 3)
             for (var n = 0 ; n < this.freqs.length ; n++)
-               this.freqs[n] *= factor;
-         }
-         if (this.isClick) {
-            this.isAbs = ! this.isAbs;
-         }
-         this.mode = "none";
+               this.freqs[n] *= (mode == 1 ? 2 : 0.5);
       }
 
       this.render = function(elapsed) {
