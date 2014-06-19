@@ -78,8 +78,8 @@
 <script>
    registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
    registerGlyph("cube()",    [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
-   registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI,PI) ]);
-   registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,PI,-PI) ]);
+   registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
+   registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
    function cube()     { geometrySketch(root.addCube()); }
    function cylinder() { geometrySketch(root.addCylinder()); }
@@ -695,11 +695,11 @@
          case "circles":
             var d = w/8;
             if (this.region === undefined)
-               this.region = makeOval(-d-w/4,-w/4,w/2,w/2,10,TAU*7/12,TAU*11/12).concat(
-                             makeOval( d-w/4,-w/4,w/2,w/2,10,TAU*1/12,TAU* 5/12));
+               this.region = makeOval(-d-w/4,-w/4,w/2,w/2,10,TAU*5/6,TAU*7/6).concat(
+                             makeOval( d-w/4,-w/4,w/2,w/2,10,TAU*2/6,TAU*4/6));
 
-            drawOval(-d-w/4, -w/4, w/2, w/2, 40, -TAU/12, 11*TAU/12);
-            drawOval( d-w/4, -w/4, w/2, w/2, 40,  TAU/12, 13*TAU/12);
+            drawOval(-d-w/4, -w/4, w/2, w/2, 40, TAU*1/6, TAU*7/6);
+            drawOval( d-w/4, -w/4, w/2, w/2, 40, TAU*2/6, TAU*8/6);
 
             this.afterSketch(function(S) {
 
@@ -1288,6 +1288,8 @@
          ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
          ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
          ["noise", "return 5 * noise(3 * x * time)"],
+         ["fractal", "return 5 * fractal(3 * x * time)"],
+         ["turbulence", "return 5 * turbulence(3 * x * time)"],
       ];
       this.savedCode = "";
       this.savedX = "";

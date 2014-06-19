@@ -13,8 +13,8 @@
 
       [ [ -1,-1 ], [ -1,1 ], [ 1,1 ], [1,-1 ] ],    // SIDES AND BOTTOM.
       [ [ 1,-1], [-1,-1], [1,-1] ],                 // TOP.
-      makeOval(-1.6,-.6, 1.2, 1.2, 20, 0, PI),      // OUTER HANDLE.
-      makeOval(-1.4,-.4, 0.8, 0.8, 20, 0, PI),      // INNER HANDLE.
+      makeOval(-1.6,-.6, 1.2, 1.2, 20, PI/2, 3*PI/2),      // OUTER HANDLE.
+      makeOval(-1.4,-.4, 0.8, 0.8, 20, PI/2, 3*PI/2),      // INNER HANDLE.
    ]);
 
    function cup() {
@@ -300,7 +300,7 @@ var planetFragmentShader = ["\
 "].join("\n");
 
 registerGlyph("planet()",[
-   makeOval(-1, -1, 2, 2, 32),                // OUTLINE PLANET CCW FROM TOP.
+   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
    [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
@@ -309,10 +309,13 @@ function planet() { addShaderPlaneSketch(defaultVertexShader, planetFragmentShad
 var marbleFragmentShader = ["\
    void main(void) {\
       float t = mode == 0. ? 0. :\
-                mode == 1. ? .7 * noise(vec3(x,y,0.)) :\
-		mode == 2. ? .5 * fractal(vec3(x,y,5.)) :\
+                mode == 1. ? 0. :\
+                mode == 2. ? .7 * noise(vec3(x,y,0.)) :\
+		mode == 3. ? .5 * fractal(vec3(x,y,5.)) :\
 		             .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
-      float s = pow(.5+.5*cos(7.*x+6.*t),.1);\
+      float s = .5 + .5*cos(7.*x+6.*t);\
+      if (mode > 0.)\
+         s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
    }\
@@ -327,12 +330,102 @@ registerGlyph("marble()",[
 function marble() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, marbleFragmentShader);
    sketch.code = [
-      ["stripes", "sin(x)"],
-      ["add noise", "sin(x + noise(x,y,z))"],
-      ["add fractal", "sin(x + fractal(x,y,z))"],
-      ["add turbulence", "sin(x + turbulence(x,y,z))"],
+      ["stripe", "sin(x)"],
+      ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["add noise", "pstripe(x + noise(x,y,z))"],
+      ["add fractal", "pstripe(x + fractal(x,y,z))"],
+      ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
    ];
 }
+
+
+var coronaFragmentShader = ["\
+   void main(void) {\
+      float a = .5;\
+      float b = .52;\
+      float s = 0.;\
+      float r0 = sqrt(x*x + y*y);\
+      if (r0 > a && r0 <= 1.) {\
+         float r = r0;\
+         if (mode == 2.)\
+            r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
+         else if (mode == 3.) {\
+	    float t = mod(time*.3, 1.);\
+            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1*t   ));\
+            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*t-.1));\
+	    r = min(1., r + 0.2 * mix(u0, u1, t));\
+	 }\
+         s = (1. - r) / (1. - b);\
+      }\
+      if (r0 < b)\
+         s *= (r0 - a) / (b - a);\
+      vec3 color = vec3(s,s,s);\
+      if (mode >= 1.) {\
+         s = s * s * s;\
+         color = vec3(s,s*s,s*s*s);\
+      }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
+
+registerGlyph("corona()",[
+   makeOval(-.5, -.5, 1, 1, 32,PI/2,5*PI/2),              // INNER LOOP CCW FROM TOP.
+   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTER LOOP CCW FROM TOP.
+]);
+
+function corona() {
+   var sketch = addShaderPlaneSketch(defaultVertexShader, coronaFragmentShader);
+   sketch.code = [
+      ["radial", "r = radius(x,y)"],
+      ["color grad", "grad(r)"],
+      ["turbulence", "grad(r + turbulence(x,y,z))"],
+      ["animate", "grad(r + cycle(time) + turbulence(x,y,z))"],
+   ];
+}
+
+
+var slicedFragmentShader = ["\
+   void main(void) {\
+      float rr = x*x + y*y;\
+      float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+      vec3 nn = vec3(x, y, z);\
+      float xx = 1.3 * (x - mx * 1.3 + .3);\
+      if (z > xx) {\
+         if (xx < -z)\
+	    rr = 1.;\
+	 else {\
+            z = xx;\
+	    nn = vec3(-.707,0,.707);\
+         }\
+      }\
+      float s = rr >= 1. ? 0. : .3 + max(0., .3 * (nn.x + nn.y + nn.z));\
+      float tu = turbulence(vec3(.9*x,.9*y,.9*z + 8.));\
+      float c = pow(.5 + .5 * sin(7. * x + 4. * tu), .1);\
+      vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+      if (rr < 1.) {\
+	 if (nn.x > 0.) {\
+            float h = .2 * pow(0.95 * (.707 * nn.x + .707 * nn.y + .5 * nn.z), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+	 }\
+	 else {\
+	    float h = .2 * pow(.707 * nn.x + .707 * nn.y, 7.);\
+            color += vec3(h, h*.8, h*.6);\
+         }\
+      }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
+
+registerGlyph("sliced()",[
+   makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
+   makeOval( 0, -1, 1, 1, 32,  PI*0.5, PI*2.0),
+]);
+
+function sliced() {
+   var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
+   sketch.mouseDrag = function() { }
+}
+
 
 function Grid() {
    this.labels = "empty".split(' ');

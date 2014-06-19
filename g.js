@@ -495,6 +495,18 @@
    function min(a,b) { return Math.min(a,b); }
 
    var noise2P = [], noise2U = [], noise2V = [];
+   function fractal(x) {
+      var value = 0;
+      for (var f = 1 ; f <= 512 ; f *= 2)
+         value += noise2(x * f, 0.03 * x * f) / f;
+      return value;
+   }
+   function turbulence(x) {
+      var value = 0;
+      for (var f = 1 ; f <= 512 ; f *= 2)
+         value += abs(noise2(x * f, 0.03 * x * f) / f);
+      return value;
+   }
    function noise(x) { return noise2(x, 0.03 * x); }
    function noise2(x, y) {
       if (noise2P.length == 0) {
@@ -1186,8 +1198,8 @@
       var xy = [];
       for (var i = 0 ; i < n ; i++) {
          var theta = angle0 + (angle1 - angle0) * i / (n-1);
-         xy.push([x + w/2 - w/2 * Math.sin(theta),
-                  y + h/2 - h/2 * Math.cos(theta)]);
+         xy.push([x + w/2 + w/2 * Math.cos(theta),
+                  y + h/2 - h/2 * Math.sin(theta)]);
       }
       return xy;
    }
@@ -6618,6 +6630,8 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
          mode : { type: "f", value: 0.0 },
          time : { type: "f", value: 0.0 },
          alpha: { type: "f", value: 1.0 },
+         mx   : { type: "f", value: 1.0 },
+         my   : { type: "f", value: 1.0 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShaderHeader.concat(fragmentShader),
@@ -6628,12 +6642,21 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
    mesh.sketch = geometrySketch(mesh);
    mesh.sketch.fragmentShader = fragmentShader;
    mesh.update = function() {
+      var S = this.sketch;
       this.getMatrix().scale(0.05);
       this.material.uniforms['time'].value = time;
-      var fade = this.sketch.fadeAway;
-      this.material.uniforms['alpha'].value = fade == 0 ? 1 : fade;
-      this.material.uniforms['mode'].value =
-         isDef(mesh.sketch.selectedIndex) ? mesh.sketch.selectedIndex : 0;
+      var xlo = S.xlo - 2*sketchPadding;
+      var xhi = S.xhi + 2*sketchPadding;
+      var ylo = S.ylo - 2*sketchPadding;
+      var yhi = S.yhi + 2*sketchPadding;
+      if (S.x == 0) {
+         S.x = (xlo + xhi)/2;
+         S.y = (ylo + yhi)/2;
+      }
+      this.material.uniforms['mx'].value = (S.x - (xlo + xhi)/2) / ((xhi - xlo)/2);
+      this.material.uniforms['my'].value = (S.y - (ylo + yhi)/2) / ((yhi - ylo)/2);
+      this.material.uniforms['alpha'].value = S.fadeAway == 0 ? 1 : S.fadeAway;
+      this.material.uniforms['mode'].value = isDef(S.selectedIndex) ? S.selectedIndex : 0;
    }
    return mesh.sketch;
 }
@@ -6708,6 +6731,8 @@ var fragmentShaderHeader = ["\
    }\
    varying float x;\
    varying float y;\
+   uniform float mx;\
+   uniform float my;\
    uniform float mode;\
    uniform float time;\
    uniform float alpha;\
