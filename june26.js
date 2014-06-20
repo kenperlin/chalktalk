@@ -364,27 +364,30 @@ var slicedFragmentShader = ["\
    void main(void) {\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
-      float p = 1.3 * (x - mx * 1.3 + .3);\
-      vec3 nn = vec3(x, y, z);\
-      if (z > p) {\
-         if (p < -z)\
-	    rr = 1.;\
-	 else {\
-            z = p;\
-	    nn = vec3(-.707,0,.707);\
-         }\
-      }\
-      float s = rr >= 1. ? 0. : .3 + max(0., .3 * (nn.x + nn.y + nn.z));\
-      float tu = turbulence(vec3(.9*x,.9*y,.9*z + 8.));\
-      float c = pow(.5 + .5 * sin(7. * x + 4. * tu), .1);\
-      vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+      float dzdx = 1.3;\
+      float zp = dzdx * (x - mx * 1.3 + .3);\
+      if (zp < -z)\
+	 rr = 1.;\
+      vec3 color = vec3(0.,0.,0.);\
       if (rr < 1.) {\
-	 if (nn.x > 0.) {\
-            float h = .2 * pow(0.95 * (.707 * nn.x + .707 * nn.y + .5 * nn.z), 20.);\
+         vec3 nn = vec3(x, y, z);\
+         if (zp < z) {\
+            z = zp;\
+	    nn = normalize(vec3(-dzdx,0.,1.));\
+         }\
+         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3,.3,.3), nn));\
+         float X =  x * cos(value) + z * sin(value);\
+         float Y =  y;\
+         float Z = -x * sin(value) + z * cos(value);\
+         float tu = turbulence(vec3(.9*X,.9*Y,.9*Z + 8.));\
+         float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
+         color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+         if (nn.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
             color += vec3(h*.4, h*.7, h);\
 	 }\
 	 else {\
-	    float h = .2 * pow(.707 * nn.x + .707 * nn.y, 7.);\
+	    float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
@@ -400,6 +403,9 @@ registerGlyph("sliced()",[
 function sliced() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
    sketch.mouseDrag = function(x, y) {}
+   sketch.spin = 0;
+   sketch.onClick = function() { this.spin = 1 - this.spin; }
+   sketch.update = function(elapsed) { this.value -= elapsed * this.spin; }
 }
 
 

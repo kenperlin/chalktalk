@@ -6661,8 +6661,10 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
          S.x = (S.xlo + S.xhi)/2;
          S.y = (S.ylo + S.yhi)/2;
       }
-      this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
-      this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
+      if (! S.isClick) {
+         this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
+         this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
+      }
       this.material.uniforms['alpha'].value = S.fadeAway == 0 ? 1 : S.fadeAway;
       this.material.uniforms['value'].value = isDef(S.selectedIndex) ? S.selectedIndex : isDef(S.value) ? S.value : 0;
    }
