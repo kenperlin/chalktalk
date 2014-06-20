@@ -1282,6 +1282,7 @@
    var clickX = 0;
    var clickY = 0;
    var codeSketch = null;
+   var count = 0;
    var curvatureCutoff = 0.1;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
@@ -1606,7 +1607,7 @@
       ['s'  , "scaling"],
       ['t'  , "translating"],
       ['w'  , "toggle whiteboard"],
-      ['x'  , "tottle expert mode"],
+      ['x'  , "toggle expert mode"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
       ['spc', "show pie menu"],
@@ -3862,7 +3863,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                var R = c[c.length-1];
 
                c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-               c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               //c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               c.push([(codeSketch.xlo + codeSketch.xhi)/2, codeSketch.ylo]);
                c.push(L);
             }
 
@@ -6632,11 +6634,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
       uniforms: {
-         mode : { type: "f", value: 0.0 },
-         time : { type: "f", value: 0.0 },
          alpha: { type: "f", value: 1.0 },
          mx   : { type: "f", value: 1.0 },
          my   : { type: "f", value: 1.0 },
+         time : { type: "f", value: 0.0 },
+         value: { type: "f", value: 0.0 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShaderHeader.concat(fragmentShader),
@@ -6650,18 +6652,14 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
       var S = this.sketch;
       this.getMatrix().scale(0.05);
       this.material.uniforms['time'].value = time;
-      var xlo = S.xlo - 2*sketchPadding;
-      var xhi = S.xhi + 2*sketchPadding;
-      var ylo = S.ylo - 2*sketchPadding;
-      var yhi = S.yhi + 2*sketchPadding;
       if (S.x == 0) {
-         S.x = (xlo + xhi)/2;
-         S.y = (ylo + yhi)/2;
+         S.x = (S.xlo + S.xhi)/2;
+         S.y = (S.ylo + S.yhi)/2;
       }
-      this.material.uniforms['mx'].value = (S.x - (xlo + xhi)/2) / ((xhi - xlo)/2);
-      this.material.uniforms['my'].value = (S.y - (ylo + yhi)/2) / ((yhi - ylo)/2);
+      this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
+      this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
       this.material.uniforms['alpha'].value = S.fadeAway == 0 ? 1 : S.fadeAway;
-      this.material.uniforms['mode'].value = isDef(S.selectedIndex) ? S.selectedIndex : 0;
+      this.material.uniforms['value'].value = isDef(S.selectedIndex) ? S.selectedIndex : isDef(S.value) ? S.value : 0;
    }
    return mesh.sketch;
 }
@@ -6738,8 +6736,8 @@ var fragmentShaderHeader = ["\
    varying float y;\
    uniform float mx;\
    uniform float my;\
-   uniform float mode;\
    uniform float time;\
+   uniform float value;\
    uniform float alpha;\
 "].join("\n");
 

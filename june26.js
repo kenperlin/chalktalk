@@ -270,11 +270,6 @@ var planetFragmentShader = ["\
       if (d <= 0.1)\
          f *= (g + 5.) / 3.;\
       vec3 color = vec3(d*f*f*.85, d*f, d*.7);       /* COLOR  */\
-      if (d <= .05) {                                /* STARS  */\
-         float t = noise(vec3(80.*x-time, 80.*y+.3*time, 1));\
-         if ((t = t*t*t*t) > color.x)\
-           color = vec3(t,t,t);\
-      }\
       gl_FragColor = vec4(color,alpha);\
    }\
 "].join("\n");
@@ -288,13 +283,13 @@ function planet() { addShaderPlaneSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = mode == 0. ? 0. :\
-                mode == 1. ? 0. :\
-                mode == 2. ? .7 * noise(vec3(x,y,0.)) :\
-		mode == 3. ? .5 * fractal(vec3(x,y,5.)) :\
-		             .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
+      float t = value == 0. ? 0. :\
+                value == 1. ? 0. :\
+                value == 2. ? .7 * noise(vec3(x,y,0.)) :\
+		value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
+		              .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (mode > 0.)\
+      if (value > 0.)\
          s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
@@ -327,9 +322,9 @@ var coronaFragmentShader = ["\
       float r0 = sqrt(x*x + y*y);\
       if (r0 > a && r0 <= 1.) {\
          float r = r0;\
-         if (mode == 2.)\
+         if (value == 2.)\
             r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
-         else if (mode == 3.) {\
+         else if (value == 3.) {\
 	    float t = mod(time*.3, 1.);\
             float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1*t   ));\
             float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*t-.1));\
@@ -340,7 +335,7 @@ var coronaFragmentShader = ["\
       if (r0 < b)\
          s *= (r0 - a) / (b - a);\
       vec3 color = vec3(s,s,s);\
-      if (mode >= 1.) {\
+      if (value >= 1.) {\
          s = s * s * s;\
          color = vec3(s,s*s,s*s*s);\
       }\
@@ -368,13 +363,13 @@ var slicedFragmentShader = ["\
    void main(void) {\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+      float p = 1.3 * (x - mx * 1.3 + .3);\
       vec3 nn = vec3(x, y, z);\
-      float xx = 1.3 * (x - mx * 1.3 + .3);\
-      if (z > xx) {\
-         if (xx < -z)\
+      if (z > p) {\
+         if (p < -z)\
 	    rr = 1.;\
 	 else {\
-            z = xx;\
+            z = p;\
 	    nn = vec3(-.707,0,.707);\
          }\
       }\
@@ -403,7 +398,7 @@ registerGlyph("sliced()",[
 
 function sliced() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
-   sketch.mouseDrag = function() { }
+   sketch.mouseDrag = function(x, y) {}
 }
 
 
