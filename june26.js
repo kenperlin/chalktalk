@@ -327,8 +327,8 @@ var coronaFragmentShader = ["\
          else if (value == 3.) {\
 	    float ti = time*.3;\
 	    float t = mod(ti, 1.);\
-            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1*t   +2.));\
-            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*t-.1+2.));\
+            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1* t    +2.));\
+            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*(t-1.)+2.));\
 	    r = min(1., r + 0.2 * mix(u0, u1, t));\
 	 }\
          s = (1. - r) / (1. - b);\
@@ -354,8 +354,8 @@ function corona() {
    sketch.code = [
       ["radial", "r = radius(x,y)"],
       ["color grad", "grad(r)"],
-      ["turbulence", "grad(r + turbulence(x,y,z))"],
-      ["animate", "grad(r + cycle(time) + turbulence(x,y,z))"],
+      ["turbulence", "grad(r + turbulence(P))"],
+      ["animate", "grad(r + turbulence(P(time)))"],
    ];
 }
 
@@ -364,7 +364,7 @@ var slicedFragmentShader = ["\
    void main(void) {\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
-      float dzdx = 1.3;\
+      float dzdx = -1.3;\
       float zp = dzdx * (x - mx * 1.3 + .3);\
       if (zp < -z)\
 	 rr = 1.;\
@@ -410,7 +410,7 @@ function sliced() {
 
 
 function Grid() {
-   this.labels = "empty".split(' ');
+   this.labels = "grid".split(' ');
    this.gridMode = -1;
    this.is3D = true;
    this.onSwipe = function(dx, dy) {
