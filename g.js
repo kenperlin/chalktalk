@@ -4287,19 +4287,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                // DRAW A SHADOW BEHIND THE MENU.
 
-               color('rgba(0,0,0,.02)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.02)' : 'rgba(255,255,255,.02)');
                for (var i = 0 ; i < 10 ; i += 2)
                   fillRect(x + PH/2 + i, y + PH/2 + i, w - 2 * i, h - 2 * i);
 
                // FILL THE MENU WITH ITS BACKGROUND COLOR.
 
-               color('rgb(247,251,255)');
+               color(backgroundColor == 'white' ? 'rgb(247,251,255)' : 'rgb(8,4,0)');
                fillRect(x, y, w, h);
 
                // HIGHLIGHT THE CURRENT SELECTION.
 
                if (selection >= 0) {
-                  color('rgba(0,128,255,.2)');
+                  color(backgroundColor == 'white' ? 'rgba(0,128,255,.2)' : 'rgba(255,128,0.2)');
                   fillRect(x, y + PH * selection, w, PH);
                }
 
@@ -4314,11 +4314,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                lineWidth(1);
 
-               color('rgba(0,0,0,.08)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.08)');
                line(x, y, x + w, y);
                line(x, y, x, y + h);
 
-               color('rgba(0,0,0,.24)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.24)' : 'rgba(255,255,255,.24)');
                line(x + w, y, x + w, y + h);
                line(x, y + h, x + w, y + h);
             }
@@ -4330,7 +4330,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var actionLabels =
                pullDownLabels == pagePullDownLabels ? pageActionLabels
                                                     : sketchActionLabels;
-            color('rgba(0,0,0,.28)');
+
+            color(backgroundColor == 'white' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.28)');
             fillRect(x, y + actionLabels.length * PH, w - 1, 1);
 
             // IF SELECTED SKETCH TYPE CONTAINS OPTIONS, SHOW THE SECONDARY MENU.

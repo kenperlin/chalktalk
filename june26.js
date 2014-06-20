@@ -316,8 +316,8 @@ function marble() {
 
 var coronaFragmentShader = ["\
    void main(void) {\
-      float a = .5;\
-      float b = .52;\
+      float a = .7;\
+      float b = .72;\
       float s = 0.;\
       float r0 = sqrt(x*x + y*y);\
       if (r0 > a && r0 <= 1.) {\
@@ -325,9 +325,10 @@ var coronaFragmentShader = ["\
          if (value == 2.)\
             r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
          else if (value == 3.) {\
-	    float t = mod(time*.3, 1.);\
-            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1*t   ));\
-            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*t-.1));\
+	    float ti = time*.3;\
+	    float t = mod(ti, 1.);\
+            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1*t   +2.));\
+            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*t-.1+2.));\
 	    r = min(1., r + 0.2 * mix(u0, u1, t));\
 	 }\
          s = (1. - r) / (1. - b);\
