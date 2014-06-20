@@ -6611,6 +6611,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var x = (b[0] + b[2]) / 2;
       var y = (b[1] + b[3]) / 2;
 
+      // FORCE THE BOUNDING RECTANGLE TO BE A SQUARE.
+
+      var r = (b[2] - b[0] + b[3] - b[1]) / 4;
+      b[0] = x - r;
+      b[1] = y - r;
+      b[2] = x + r;
+      b[3] = y + r;
+
       sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
       sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
 
@@ -6653,6 +6661,7 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 
    mesh.sketch = geometrySketch(mesh);
    mesh.sketch.fragmentShader = fragmentShader;
+
    mesh.update = function() {
       var S = this.sketch;
       this.getMatrix().scale(0.05);
