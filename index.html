@@ -132,7 +132,7 @@
       this.choice = new Choice();
 
       this.onSwipe = function(dx, dy) {
-         switch (pieMenuIndex(dx, dy, 4)) {
+         switch (pieMenuIndex(dx, dy)) {
 	 case 0:
 	    this.choice.set(2);
 	    break;
@@ -394,17 +394,15 @@
       this.sx = 1;
       this.sy = 1;
 
-      this.mouseUp = function(x, y) {
-         var dx = x - sketchPage.xDown;
-         var dy = y - sketchPage.yDown;
-
+      this.onSwipe = function(dx, dy) {
+         var dir = pieMenuIndex(dx, dy);
          switch (this.labels[this.selection]) {
-         case 'flap':
-            if (dx < -50) {
+         case "flap":
+            if (dir == 2) {
                this.wanderTime = time;
                this.isWandering = ! this.isWandering;
             }
-            break;
+	    break;
          }
       }
 

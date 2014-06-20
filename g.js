@@ -540,7 +540,11 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
-   function pieMenuIndex(x,y,n) { return floor(n+.5-atan2(y,x) / (PI/2)) % n; }
+   function pieMenuIndex(x,y,n) {
+      if (n === undefined)
+         n = 4;
+      return floor(n+.5-atan2(y,x) / (PI/2)) % n;
+   }
    function pow(a,b) { return Math.pow(a,b); }
    var random = function() {
       var seed = 2;

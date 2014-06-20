@@ -50,7 +50,7 @@
 
       sketch.mouseDrag = function() { }
       sketch.onSwipe = function(dx, dy) {
-         this.swirlMode = pieMenuIndex(dx, dy, 4);
+         this.swirlMode = pieMenuIndex(dx, dy);
          this.swirlStartTime = time;
          switch (this.swirlMode) {
          case 0:
@@ -183,7 +183,7 @@
       }
 
       this.onSwipe = function(dx, dy) {
-         var mode = pieMenuIndex(dx, dy, 4);
+         var mode = pieMenuIndex(dx, dy);
 	 if (mode == 1 || mode == 3)
             for (var n = 0 ; n < this.freqs.length ; n++)
                this.freqs[n] *= (mode == 1 ? 2 : 0.5);
@@ -407,7 +407,7 @@ function Grid() {
    this.gridMode = -1;
    this.is3D = true;
    this.onSwipe = function(dx, dy) {
-      this.gridMode = pieMenuIndex(dx, dy, 4);
+      this.gridMode = pieMenuIndex(dx, dy);
    }
    this.render = function(elapsed) {
       var f = 2/3;
