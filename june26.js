@@ -13,8 +13,8 @@
 
       [ [ -1,-1 ], [ -1,1 ], [ 1,1 ], [1,-1 ] ],    // SIDES AND BOTTOM.
       [ [ 1,-1], [-1,-1], [1,-1] ],                 // TOP.
-      makeOval(-1.6,-.6, 1.2, 1.2, 20, 0, PI),      // OUTER HANDLE.
-      makeOval(-1.4,-.4, 0.8, 0.8, 20, 0, PI),      // INNER HANDLE.
+      makeOval(-1.6,-.6, 1.2, 1.2, 20, PI/2, 3*PI/2),      // OUTER HANDLE.
+      makeOval(-1.4,-.4, 0.8, 0.8, 20, PI/2, 3*PI/2),      // INNER HANDLE.
    ]);
 
    function cup() {
@@ -48,25 +48,18 @@
 
       sketch.coffee = coffee;
 
-      sketch.mouseDown = function(x, y) {
-         this.mx = x;
-         this.my = y;
-      }
-      sketch.mouseDrag = function(x, y) {
-      }
-      sketch.mouseUp = function(x, y) {
-         if (len(x - this.mx, y - this.my) > 2 * clickSize) {
-            this.swirlMode = pieMenuIndex(x - this.mx, y - this.my, 4);
-            this.swirlStartTime = time;
-            switch (this.swirlMode) {
-            case 0:
-               this.cream = [];
-               for (var i = 0 ; i < 100 ; i++) {
-                  var t = i / 100;
-                  this.cream.push( [ lerp(t, -1, 1) , 0 ] );
-               }
-               break;
+      sketch.mouseDrag = function() { }
+      sketch.onSwipe = function(dx, dy) {
+         this.swirlMode = pieMenuIndex(dx, dy);
+         this.swirlStartTime = time;
+         switch (this.swirlMode) {
+         case 0:
+            this.cream = [];
+            for (var i = 0 ; i < 100 ; i++) {
+               var t = i / 100;
+               this.cream.push( [ lerp(t, -1, 1) , 0 ] );
             }
+            break;
          }
       }
 
@@ -179,34 +172,21 @@
          }
       }
 
-      this.mouseDown = function(x, y) {
-         this.mouseX = x;
-         this.mouseY = y;
-         this.isClick = true;
-      }
-
       this.mouseDrag = function(x, y) {
-         if (! this.isClick) {
-            if (this.mode == "none")
-               this.mode = abs(x - this.mouseX) > abs(y - this.mouseY) ? "x" : "y";
-            if (this.mode == "x") {
-               this.t0 -= 2 * (x - this.mouseX) / (this.xhi - this.xlo);
-               this.mouseX = x;
-               this.mouseY = y;
-            }
-         }
+         if (isDef(this.dragX))
+            this.t0 -= 2 * (x - this.dragX) / (this.xhi - this.xlo);
+         this.dragX = x;
       }
 
-      this.mouseUp = function(x, y) {
-         if (! this.isClick && this.mode == "y") {
-            var factor = y < this.mouseY ? 2 : 0.5;
+      this.onClick = function(x, y) {
+         this.isAbs = ! this.isAbs;
+      }
+
+      this.onSwipe = function(dx, dy) {
+         var mode = pieMenuIndex(dx, dy);
+	 if (mode == 1 || mode == 3)
             for (var n = 0 ; n < this.freqs.length ; n++)
-               this.freqs[n] *= factor;
-         }
-         if (this.isClick) {
-            this.isAbs = ! this.isAbs;
-         }
-         this.mode = "none";
+               this.freqs[n] *= (mode == 1 ? 2 : 0.5);
       }
 
       this.render = function(elapsed) {
@@ -290,17 +270,12 @@ var planetFragmentShader = ["\
       if (d <= 0.1)\
          f *= (g + 5.) / 3.;\
       vec3 color = vec3(d*f*f*.85, d*f, d*.7);       /* COLOR  */\
-      if (d <= .05) {                                /* STARS  */\
-         float t = noise(vec3(80.*x-time, 80.*y+.3*time, 1));\
-         if ((t = t*t*t*t) > color.x)\
-           color = vec3(t,t,t);\
-      }\
       gl_FragColor = vec4(color,alpha);\
    }\
 "].join("\n");
 
 registerGlyph("planet()",[
-   makeOval(-1, -1, 2, 2, 32),                // OUTLINE PLANET CCW FROM TOP.
+   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
    [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
@@ -308,11 +283,14 @@ function planet() { addShaderPlaneSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = mode == 0. ? 0. :\
-                mode == 1. ? .7 * noise(vec3(x,y,0.)) :\
-		mode == 2. ? .5 * fractal(vec3(x,y,5.)) :\
-		             .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
-      float s = pow(.5+.5*cos(7.*x+6.*t),.1);\
+      float t = value == 0. ? 0. :\
+                value == 1. ? 0. :\
+                value == 2. ? .7 * noise(vec3(x,y,0.)) :\
+		value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
+		              .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
+      float s = .5 + .5*cos(7.*x+6.*t);\
+      if (value > 0.)\
+         s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
    }\
@@ -327,26 +305,122 @@ registerGlyph("marble()",[
 function marble() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, marbleFragmentShader);
    sketch.code = [
-      ["stripes", "sin(x)"],
-      ["add noise", "sin(x + noise(x,y,z))"],
-      ["add fractal", "sin(x + fractal(x,y,z))"],
-      ["add turbulence", "sin(x + turbulence(x,y,z))"],
+      ["stripe", "sin(x)"],
+      ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["add noise", "pstripe(x + noise(x,y,z))"],
+      ["add fractal", "pstripe(x + fractal(x,y,z))"],
+      ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
    ];
 }
 
+
+var coronaFragmentShader = ["\
+   void main(void) {\
+      float a = .7;\
+      float b = .72;\
+      float s = 0.;\
+      float r0 = sqrt(x*x + y*y);\
+      if (r0 > a && r0 <= 1.) {\
+         float r = r0;\
+         if (value == 2.)\
+            r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
+         else if (value == 3.) {\
+	    float ti = time*.3;\
+	    float t = mod(ti, 1.);\
+            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1* t    +2.));\
+            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*(t-1.)+2.));\
+	    r = min(1., r + 0.2 * mix(u0, u1, t));\
+	 }\
+         s = (1. - r) / (1. - b);\
+      }\
+      if (r0 < b)\
+         s *= (r0 - a) / (b - a);\
+      vec3 color = vec3(s,s,s);\
+      if (value >= 1.) {\
+         s = s * s * s;\
+         color = vec3(s,s*s,s*s*s);\
+      }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
+
+registerGlyph("corona()",[
+   makeOval(-.5, -.5, 1, 1, 32,PI/2,5*PI/2),              // INNER LOOP CCW FROM TOP.
+   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTER LOOP CCW FROM TOP.
+]);
+
+function corona() {
+   var sketch = addShaderPlaneSketch(defaultVertexShader, coronaFragmentShader);
+   sketch.code = [
+      ["radial", "r = radius(x,y)"],
+      ["color grad", "grad(r)"],
+      ["turbulence", "grad(r + turbulence(P))"],
+      ["animate", "grad(r + turbulence(P(time)))"],
+   ];
+}
+
+
+var slicedFragmentShader = ["\
+   uniform float spinAngle;\
+   void main(void) {\
+      float rr = x*x + y*y;\
+      float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+      float dzdx = -1.3;\
+      float zp = dzdx * (x - mx * 1.3 + .3);\
+      if (zp < -z)\
+	 rr = 1.;\
+      vec3 color = vec3(0.,0.,0.);\
+      if (rr < 1.) {\
+         vec3 nn = vec3(x, y, z);\
+         if (zp < z) {\
+            z = zp;\
+	    nn = normalize(vec3(-dzdx,0.,1.));\
+         }\
+         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3,.3,.3), nn));\
+         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
+         float Y =  y;\
+         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
+         float tu = turbulence(vec3(.9*X,.9*Y,.9*Z + 8.));\
+         float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
+         color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+         if (nn.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+	 }\
+	 else {\
+	    float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
+            color += vec3(h, h*.8, h*.6);\
+         }\
+      }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
+
+registerGlyph("sliced()",[
+   makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
+   makeOval( 0, -1, 1, 1, 32,  PI*0.5, PI*2.0),
+]);
+
+function sliced() {
+   var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
+   sketch.mouseDrag = function(x, y) {}
+   sketch.spinRate = 0;
+   sketch.spinAngle = 0;
+   sketch.onClick = function() {
+      this.spinRate = -1 - this.spinRate;
+   }
+   sketch.update = function(elapsed) {
+      this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+   }
+}
+
+
 function Grid() {
-   this.labels = "empty".split(' ');
+   this.labels = "grid".split(' ');
    this.gridMode = -1;
    this.is3D = true;
-   this.mouseDown = function(x, y) {
-      this.mx = x;
-      this.my = y;
-   }
-   this.mouseDrag = function(x, y) {
-   }
-   this.mouseUp = function(x, y) {
-      if (len(x - this.mx, y - this.my) > 2 * clickSize)
-         this.gridMode = pieMenuIndex(x - this.mx, y - this.my, 4);
+   this.onSwipe = function(dx, dy) {
+      this.gridMode = pieMenuIndex(dx, dy);
    }
    this.render = function(elapsed) {
       var f = 2/3;
@@ -356,8 +430,8 @@ function Grid() {
             mCurve([[-1,0], [1, 0]]);
             mCurve([[ 0,1], [0, -1]]);
          }
-	 this.afterSketch(function(S) {
-	    if (S.gridMode != 3) {
+	 this.afterSketch(function() {
+	    if (this.gridMode != 3) {
                mCurve([[-1, f], [1, f]]);
                mCurve([[-1,-f], [1,-f]]);
                mCurve([[-f,1], [-f,-1]]);
@@ -365,7 +439,7 @@ function Grid() {
             }
 	    var uColor = 'rgb(255,64,64)';
 	    var vColor = 'rgb(64,255,64)';
-	    switch (S.gridMode) {
+	    switch (this.gridMode) {
             case 3:
             case 2:
 	       var d = 1/20;
@@ -385,7 +459,7 @@ function Grid() {
 	             mCurve([[u*f,v*f,t0] , [u*f,(v+d)*f,tv]]);
                   }
                }
-	       if (S.gridMode == 3)
+	       if (this.gridMode == 3)
 	          break;
 	    case 1:
 	       lineWidth(4);

@@ -495,6 +495,18 @@
    function min(a,b) { return Math.min(a,b); }
 
    var noise2P = [], noise2U = [], noise2V = [];
+   function fractal(x) {
+      var value = 0;
+      for (var f = 1 ; f <= 512 ; f *= 2)
+         value += noise2(x * f, 0.03 * x * f) / f;
+      return value;
+   }
+   function turbulence(x) {
+      var value = 0;
+      for (var f = 1 ; f <= 512 ; f *= 2)
+         value += abs(noise2(x * f, 0.03 * x * f) / f);
+      return value;
+   }
    function noise(x) { return noise2(x, 0.03 * x); }
    function noise2(x, y) {
       if (noise2P.length == 0) {
@@ -528,7 +540,11 @@
       return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
                      lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
    }
-   function pieMenuIndex(x,y,n) { return floor(n+.5-atan2(y,x) / (PI/2)) % n; }
+   function pieMenuIndex(x,y,n) {
+      if (n === undefined)
+         n = 4;
+      return floor(n+.5-atan2(y,x) / (PI/2)) % n;
+   }
    function pow(a,b) { return Math.pow(a,b); }
    var random = function() {
       var seed = 2;
@@ -1186,8 +1202,8 @@
       var xy = [];
       for (var i = 0 ; i < n ; i++) {
          var theta = angle0 + (angle1 - angle0) * i / (n-1);
-         xy.push([x + w/2 - w/2 * Math.sin(theta),
-                  y + h/2 - h/2 * Math.cos(theta)]);
+         xy.push([x + w/2 + w/2 * Math.cos(theta),
+                  y + h/2 - h/2 * Math.sin(theta)]);
       }
       return xy;
    }
@@ -1270,6 +1286,7 @@
    var clickX = 0;
    var clickY = 0;
    var codeSketch = null;
+   var count = 0;
    var curvatureCutoff = 0.1;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
@@ -1594,7 +1611,7 @@
       ['s'  , "scaling"],
       ['t'  , "translating"],
       ['w'  , "toggle whiteboard"],
-      ['x'  , "tottle expert mode"],
+      ['x'  , "toggle expert mode"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
       ['spc', "show pie menu"],
@@ -3085,6 +3102,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk().isPressed = false;
             isSketchDrawingEnabled = true;
             sk().mouseUp(x, y);
+
+	    if (this.isClick && isHover() && isDef(sk().onClick))
+	       sk().onClick(x, y);
+
+	    if (! this.isClick && isDef(sk().onSwipe))
+	       sk().onSwipe(x - this.xDown, y - this.yDown);
          }
 
          // CLICK OVER BACKGROUND
@@ -3846,7 +3869,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                var R = c[c.length-1];
 
                c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-               c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               //c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
+               c.push([(codeSketch.xlo + codeSketch.xhi)/2, codeSketch.ylo]);
                c.push(L);
             }
 
@@ -3919,7 +3943,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.showGlyphs = function() {
          _g.save();
          _g.strokeStyle = 'rgba(0,0,0,.3)';
-         _g.font = '10pt Calibri';
+         _g.font = '8pt Trebuchet MS';
          _g.lineWidth = 1;
          var y0 = height() - glyphsH;
          line(0, y0, width(), y0);
@@ -4039,7 +4063,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          _g.save();
          _g.font = '30pt Calibri';
-         //_g.fillStyle = isTextMode ? overlayScrim : overlayColor;
          _g.fillStyle = overlayScrim;
          _g.fillText("PAGE " + sketchBook.page, 60, 40);
          _g.restore();
@@ -4215,23 +4238,23 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      var str = sk(I).portName[i];
                      var A = sk(I).portXY(i);
                      lineWidth(1);
-                     sk(I).duringSketch(function(S) {
+                     sk(I).duringSketch(function() {
                         color(portColor);
                         fillRect(A[0] - 5, A[1] - 5, 10, 10);
                      });
-                     sk(I).afterSketch(function(S) {
+                     sk(I).afterSketch(function() {
                         var tw = max(portHeight, textWidth(str) + 10);
-                        S.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
-                                           A[0] + tw/2, A[1] + portHeight/2];
-                        var B = S.portBounds[i];
-                        if (S == sk() && isHover() || linkAtCursor != null) {
-                           color(S==outSketch && i==outPort ? portHighlightColor
-                                                            : portBgColor);
+                        this.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
+                                              A[0] + tw/2, A[1] + portHeight/2];
+                        var B = this.portBounds[i];
+                        if (this == sk() && isHover() || linkAtCursor != null) {
+                           color(this==outSketch && i==outPort ? portHighlightColor
+                                                               : portBgColor);
                            fillRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                            color(portColor);
                            text(str, A[0], A[1], .5, .55);
                         }
-                        color(S==inSketch && i==inPort ? 'red' : portColor);
+                        color(this==inSketch && i==inPort ? 'red' : portColor);
                         drawRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                      });
                   }
@@ -4266,19 +4289,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                // DRAW A SHADOW BEHIND THE MENU.
 
-               color('rgba(0,0,0,.02)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.02)' : 'rgba(255,255,255,.02)');
                for (var i = 0 ; i < 10 ; i += 2)
                   fillRect(x + PH/2 + i, y + PH/2 + i, w - 2 * i, h - 2 * i);
 
                // FILL THE MENU WITH ITS BACKGROUND COLOR.
 
-               color('rgb(247,251,255)');
+               color(backgroundColor == 'white' ? 'rgb(247,251,255)' : 'rgb(8,4,0)');
                fillRect(x, y, w, h);
 
                // HIGHLIGHT THE CURRENT SELECTION.
 
                if (selection >= 0) {
-                  color('rgba(0,128,255,.2)');
+                  color(backgroundColor == 'white' ? 'rgba(0,128,255,.2)' : 'rgba(255,128,0.2)');
                   fillRect(x, y + PH * selection, w, PH);
                }
 
@@ -4293,11 +4316,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                lineWidth(1);
 
-               color('rgba(0,0,0,.08)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.08)');
                line(x, y, x + w, y);
                line(x, y, x, y + h);
 
-               color('rgba(0,0,0,.24)');
+               color(backgroundColor == 'white' ? 'rgba(0,0,0,.24)' : 'rgba(255,255,255,.24)');
                line(x + w, y, x + w, y + h);
                line(x, y + h, x + w, y + h);
             }
@@ -4309,7 +4332,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             var actionLabels =
                pullDownLabels == pagePullDownLabels ? pageActionLabels
                                                     : sketchActionLabels;
-            color('rgba(0,0,0,.28)');
+
+            color(backgroundColor == 'white' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.28)');
             fillRect(x, y + actionLabels.length * PH, w - 1, 1);
 
             // IF SELECTED SKETCH TYPE CONTAINS OPTIONS, SHOW THE SECONDARY MENU.
@@ -4465,15 +4489,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.untransformY2D = function(x, y) {
          return (y - this.y2D) / this.scale();
       }
-      this.duringSketch = function(drawFunction) {
+      this.duringSketch = function(callbackFunction) {
          if (this.sketchProgress < 1) {
             _g.save();
             _g.globalAlpha = 1 - this.styleTransition;
-            drawFunction(this);
+            this.duringSketchCallbackFunction = collbackFunction;
+            this.duringSketchCallbackFunction();
             _g.restore();
          }
       }
-      this.afterSketch = function(drawFunction) {
+      this.afterSketch = function(collbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
 	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
@@ -4482,7 +4507,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                   : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
-            drawFunction(this);
+            this.afterSketchCallbackFunction = collbackFunction;
+            this.afterSketchCallbackFunction();
             _g.restore();
          }
       }
@@ -5074,14 +5100,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 	 color(backgroundColor);
          drawRect(-this.width/2,-this.height/2,this.width,this.height);
-         this.afterSketch(function(S) {
-            if (S.imageObj === undefined)
+         this.afterSketch(function() {
+            if (this.imageObj === undefined)
                return;
-            var s = S.scale();
-	    if (S.fadeAway > 0)
-	       _g.globalAlpha = S.fadeAway;
-            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
-                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
+            var s = this.scale();
+	    if (this.fadeAway > 0)
+	       _g.globalAlpha = this.fadeAway;
+            _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
+                                        this.y2D - this.height * s / 2,
+					this.width * s, this.height * s);
          });
       }
    }
@@ -6563,6 +6590,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	       this.glyphSketch = null;
          }
       }
+      this.setUniform = function(name, value) {
+         this.geometry.material.setUniform(name, value);
+      }
       this.geometry = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
@@ -6595,6 +6625,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var x = (b[0] + b[2]) / 2;
       var y = (b[1] + b[3]) / 2;
 
+      // FORCE THE BOUNDING RECTANGLE TO BE A SQUARE.
+
+      var r = (b[2] - b[0] + b[3] - b[1]) / 4;
+      b[0] = x - r;
+      b[1] = y - r;
+      b[2] = x + r;
+      b[3] = y + r;
+
       sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
       sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
 
@@ -6622,26 +6660,36 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
-      uniforms: {
-         mode : { type: "f", value: 0.0 },
-         time : { type: "f", value: 0.0 },
-         alpha: { type: "f", value: 1.0 },
-      },
+      uniforms: {},
       vertexShader: vertexShader,
-      fragmentShader: fragmentShaderHeader.concat(fragmentShader),
    });
+
+   var u = "alpha mx my time value".split(' ');
+   for (var i = 0 ; i < u.length ; i++)
+      material.declareUniform(u[i], 0.0);
+
+   material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
+
    var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
    root.add(mesh);
 
    mesh.sketch = geometrySketch(mesh);
    mesh.sketch.fragmentShader = fragmentShader;
+
    mesh.update = function() {
+      var S = this.sketch;
       this.getMatrix().scale(0.05);
       this.material.uniforms['time'].value = time;
-      var fade = this.sketch.fadeAway;
-      this.material.uniforms['alpha'].value = fade == 0 ? 1 : fade;
-      this.material.uniforms['mode'].value =
-         isDef(mesh.sketch.selectedIndex) ? mesh.sketch.selectedIndex : 0;
+      if (S.x == 0) {
+         S.x = (S.xlo + S.xhi)/2;
+         S.y = (S.ylo + S.yhi)/2;
+      }
+      if (! S.isClick) {
+         this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
+         this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
+      }
+      this.material.uniforms['alpha'].value = S.fadeAway == 0 ? 1 : S.fadeAway;
+      this.material.uniforms['value'].value = isDef(S.selectedIndex) ? S.selectedIndex : isDef(S.value) ? S.value : 0;
    }
    return mesh.sketch;
 }
@@ -6649,13 +6697,15 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
 var defaultVertexShader = ["\
-   varying vec3 vNormal;\
    varying float x;\
    varying float y;\
+   varying vec3 vPosition;\
+   varying vec3 vNormal;\
    void main() {\
       x = 2. * uv.x - 1.;\
       y = 2. * uv.y - 1.;\
       vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
    }\
 "].join("\n");
@@ -6714,10 +6764,14 @@ var fragmentShaderHeader = ["\
       }\
       return f;\
    }\
+   varying vec3 vNormal;\
+   varying vec3 vPosition;\
    varying float x;\
    varying float y;\
-   uniform float mode;\
+   uniform float mx;\
+   uniform float my;\
    uniform float time;\
+   uniform float value;\
    uniform float alpha;\
 "].join("\n");
 
@@ -7011,8 +7065,6 @@ var glyphData = [
 ["K H E C @!>#<%:&8(5*3+1-0/.1-4,6+9*;*>)@)C(F(H'K'N'P'S(U)X*Z,]._/b1d3e5g7h:i<j?kBlDlGmImLnOnQoToWoYo]n_mbldkgjiilinhqfseucvax_y]zY{W|T}R}O~L~J~G~D}B}?{=z:y8x6v3u1s/q.o,m*k(i'g%d$b#_!]!Y V T Q N L I!F!","B!A!@!@!?!?!>!=!=!<!<!;!:!:!9!9 8 7 7 6 5 5 4 4 3 2 2 1 1!0!/!/!.!.!-#-#,#,$+$+$*%)%)%(%(&(&''''&(&(&)%)%*%*$+$+$,#,#-#-!.!.!/ / 0 1 1 2 2 3 4 4 5 6 6 7 7 8 9 9!9!:!;!;#<#<#=#=$>$>$?%?%@%@%A&A&A'B'B'C","W*V*T*S*Q*P*N*M*K*J*H*G*E*D*B+A,@-@.?/?1?2>4=5<6<7;9;:;<;=;?:@:B:C:E:F:H;I;J<L=M>N?O@PBQCQDRFSGSHSJSKSMSNSPSQRSRTRVQWQYQZP]P^O_O`MaLbKdJdIeHfFfEfCgBhAh?i>j=k;k:k8k7j5j4i3h1h0g/e.d-c-a-`,_+]+[*Z*X*W*V)","ImImInInInInInInInInIoIoIoIoIoIoIoIoIpIpIpIpIpIpIpIpIqIqIqHqHqHqHqHqHqHqHqHrHrHrHrHrHrGrGrGsGsGsGsGsGsGsGsGsGsGtGtFtFtFtFtFtFtFtFtFuFuFuFuFuFuFuFuFvFvFvFvFvFvFvFvFvEwEwEwEwEwEwEwEwEwExExExExExExExExEx","dldldldmdmdmdmdmdndndndndodododododpdpdpdpdpdqdqdqdqdqdrdrdrdrdsdsdsdsdsdtdtdtdtdtdudueueueuevevevevevewewewewewexexexexexeyfyfyfyfyfzfzfzfzfzgzg{g{g{g{g{g{g{h|h|h|h|h|h|h|h|i}i}i}i}i}i}i}j~j~j~j~i~i~",],
 "mit()",
 ["!f!d!c!a!`!^!]!Z!X!W!U!T!R!Q!O!N!L!K!I!H!F!E!C!B!@!?!= < ; 9 8 7!8#9#:%;%<&='>(?)@*A+C-C.D.F0G1H2I3J3I4H5G6F6E7C7B8A:A:?;><==<=;>9>8?8@7@8@:@;@=@?@@@B@C@E@F@H@I@K@L@N@O@Q@R@T@U@W@X@Z@[@^@_@a@bAdAeAfAh","E7E7E7F7F7F7F7G7G7G7G7G7H7H7H7H7I7I7I7I7I7J7J7J7J7J7K7K7K7K7L7L7L7L7L7M7M7M7M7N7N7N7N7N7O7O7O7O7P7P7P7P7P7Q7Q7Q7Q7R7R7R7R7R7S7S7S7S7T7T7T7T7T7U7U7U7U7V7V7V7V7V7W7W7W7W7W7X7X7X7X7Y7Y7Y7Y7Y7Z7Z7Z7Z7[7[7","EfEfEfFfFfFfFfFfGfGfGfGfHfHfHfHfHfIfIfIfIfJfJfJfJfJfKfKfKfKfKfLfLfLfLfMfMfMfMfMfNfNfNfNfOfOfOfOfOfPfPfPfPfPfPfPfQfQfQfQfQfRfRfRfRfRfSfSfSfSfTfTfTfTfTfUfUfUfUfVfVfVfVfVfWfWeWeWeWeWeXeXeXeXeYeYeYeYeYeZe","O7O8O8O9O9O9O:O:O;O;O<O<O=O=O>O>O?O?O@O@OAOAOBOBOCOCOCODODPEPEPFPFPGPGPHPHPIPIPJPJPKPKPKPLPLPMPMPNPNPOPOPPPPPQPQPRPRPSPSPSPTQTQUQUQVQVQWQWQXQXQYQYQZQZQ[Q[Q]Q]Q]Q^Q^Q_Q_Q`Q`QaQaQbQbQcQcQdQdQePePePfPfPg","_7`7`7`7a7a7a7b7b7b7b7c7c7c7d7d7d7e7e7e7f7f7f7f7g7g7g7h7h7h7i7i7i7j7j7j7j7k7k7k7l7l7l7m7m7m7n7n7n7o7o7o7o7p7p7p7q7q7q7r7r7r7s7s7s7s7t7t7t7u7u7u7v7v7v7w7w7w7w7x7x7x7y7y7y7z7z7z7{7{7{7|7|7|7|7}7}7}7~7~7","o8o9o9o:o:o;o;o<o<o=o=o>o>o?o?o@o@oAoAoAoBoBoCoCoDoDoEoEoFoFoGoGoHoHoIoIoJoJoKoKoLoLoMoMoNoNoOoOoOoPoPoQoQoRoRoSoSoToToUoUoVoVoWoWoXoXoYoYoZoZo[o[o]n]n]n^m^m^m_m_m`m`mamambmbmcmcmdmdmememfmfmgmgmhmhmh",],
-"clear()",
-["}NzNxNuNrNoNlNjMgMdMaM_M[MXMUMRMPMMMJMGMDMBN?N<N9N6N4N1N.N+O)O&O#O P$P'P)P,Q/Q2Q5Q7Q:Q=Q@QCQEQHQKQNQQQSQVQYQ]Q`QbQeQhPkPmOpOsNvNyN{N~N{NyMvMsMpMnMkMhMeMbM`M]MYMVMSMPMNMKMHMEMBM@M=M:M7M4M2M/N,N*N'N%O!O",],
 "kbd()",
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
 "diner()",
@@ -7021,7 +7073,7 @@ var glyphData = [
 ["I!F D!B#B&D'E)E,E/E3D5A5>4;484653719/;->-A-D.G/J0M1O3R5T6W8Z:]<`=b?dAgCiDkFmFpFsEvCwBzD|G}J}M~P~S~V~Y~]}_|`y^w[vYuYrZp]m_k`hbfdcf`g^iZkXmUnRoPpMqJrGrDrAq>o<n:l8j6g5d4a4^4Z3X2X/X,Y*[(]&[#Y!V!S!P M J I#",],
 "blinn()",
 ["%$%&$($*#,#.!0!2 5 7 9 ; = ? B D F H!J!L#N$P%R&T&V(X)Z*[,^-_/a0b2d4e5f7h9i;j=k>m@nBoDoFpHqJrLrNsPtRtTtVuXu[u^u`ubtdtfsgqipkolmnlpkrjshufvewcxay_z]{[|Y|W}T~R~P~N~L~J~H~F}C}A}?}=};}9|7|4|2|0{.{,z*z(y&x(",".[.^/`/b0d1f1h2j2k2k2i2g3f4g4i5k6m6n7p8r9t9s9q9o9m:k;j<l=m=o>q?s@uAvBuBsBqBoBmBkBkCmDoDqErFtGvHxIyJwJuJsJqJoJnLoMqNsOtPvQxRyS{SySwSuSsSqTpUrUtWuXwYxZyZw[v[t[r]p^q_s`uavcwcucscqdqerftguhuisjqkokmlkljmh","<O=O>P>P?P?Q?Q@R@R@SASATBTBTCUCUCVDVDVEWEWFWFXGXGXHXHYIYIYJYJZKZLZLZMZM[N[N[O[O]P]Q]Q]R]R]S]T]T]U]U]V]W]W]X]X]Y]Y]Z[[[[[][][^Z^Z_Z_Z`ZaZaZbYbYcYcYdYdXdXeXeWeWfVfVgUgUgThThShSiSiRiRiQjQjQjPjOjOjNjOjOjP",],
-"strawberry()",
+"bumpmap()",
 ["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",], 
 ];
 

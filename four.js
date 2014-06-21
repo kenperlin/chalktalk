@@ -329,6 +329,23 @@
       renderer.camera.updateProjectionMatrix();
    });
 
+/*
+   Need to handle other types as well (vec3, vec4, etc.).
+*/
+   function shaderValueType(value) {
+      return "f";
+   }
+
+   THREE.ShaderMaterial.prototype.declareUniform = function(name, value) {
+      if (this.uniforms[name] === undefined)
+         this.uniforms[name] = { type: shaderValueType(value), value: value };
+   }
+
+   THREE.ShaderMaterial.prototype.setUniform = function(name, value) {
+      this.declareUniform(name, value);
+      this.uniforms[name].value = value;
+   }
+
    THREE.Object3D.prototype.setMaterial = function(material) {
       this.material = material;
       for (var i = 0 ; i < this.children.length ; i++)

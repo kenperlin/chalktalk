@@ -9,6 +9,145 @@ setup reportlayers that splits up branches better
 tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
 */
 
+
+// registerGlyph("lVase()", [
+//     [[-1.66159,13.875737],[-1.773634,14.286565],[-2.232532,14.504875],[-2.633714,14.614487],[-3.070594,14.615677],[-3.498048,14.483365],[-3.678558,14.076684],[-3.479754,13.682373],[-3.100546,13.459269],[-2.85367,13.10176],[-2.68442,12.702419],[-2.560581,12.287059],[-2.485761,11.860182],[-2.484919,11.425528],[-2.588226,11.004243],[-2.781088,10.614342]],
+
+//     [[-3.086771,10.303958],[-3.478233,10.114137],[-3.894185,9.992596],[-4.31274,9.880862],[-4.728153,9.757847],[-5.136792,9.613643],[-5.536255,9.446097],[-5.924712,9.253421],[-6.271939,8.992089],[-6.521691,8.634408],[-6.674899,8.228305],[-6.768432,7.805017],[-6.80059,7.372539],[-6.786154,6.939474],[-6.727722,6.509922],[-6.631971,6.087371],[-6.508676,5.671851],[-6.353594,5.267213],[-6.18102,4.869829],[-5.987867,4.481976],[-5.783412,4.100031],[-5.569773,3.723125],[-5.349677,3.349965],[-5.124971,2.979564],[-4.897169,2.611061],[-4.667585,2.243666],[-4.437463,1.876609],[-4.208097,1.509079],[-3.980914,1.14019],[-3.757889,0.768786],[-3.541163,0.393612],[-3.337092,0.0114851],[-3.147408,-0.378178],[-2.984881,-0.77981],[-2.849218,-1.191744],[-2.75617,-1.614331],[-2.716251,-2.048807],[-2.744254,-2.473773]],
+
+//     [[-2.799989,-2.931666],[-3.214532,-3.033745],[-3.606484,-3.216313],[-3.875476,-3.567537],[-3.999723,-3.972642],[-4.022671,-4.434893],[-0.0741333,-4.4159]]
+
+// ]);
+
+
+vaseShader = {
+
+    uniforms : {
+        "time": { type: "f", value: 0 },
+    },
+
+    vertexShader : [
+
+        "varying vec3 vNormal;",
+       "varying vec2 vUv; ",
+       "varying vec3 vPosition;",
+       // "varying vec3 vecNormal;",
+
+       " void main() {",
+       "    vUv = uv;",
+       "    vPosition = position;",
+       "     vNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;",
+       // "     vecNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
+
+       "     gl_Position = projectionMatrix *",
+       "                   modelViewMatrix *",
+       "                   vec4(position,1.0);",
+       " }",
+        
+            
+
+    ].join("\n"),
+
+    fragmentShader : [
+        "\
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }\
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }\
+        vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }\
+        float noise(vec3 P) {\
+        vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));\
+        vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);\
+        vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);\
+        vec4 iz0 = i0.zzzz, iz1 = i1.zzzz;\
+        vec4 ixy = permute(permute(ix) + iy), ixy0 = permute(ixy + iz0), ixy1 = permute(ixy + iz1);\
+        vec4 gx0 = ixy0 * (1.0 / 7.0), gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;\
+        vec4 gx1 = ixy1 * (1.0 / 7.0), gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;\
+        gx0 = fract(gx0); gx1 = fract(gx1);\
+        vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0), sz0 = step(gz0, vec4(0.0));\
+        vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1), sz1 = step(gz1, vec4(0.0));\
+        gx0 -= sz0 * (step(0.0, gx0) - 0.5); gy0 -= sz0 * (step(0.0, gy0) - 0.5);\
+        gx1 -= sz1 * (step(0.0, gx1) - 0.5); gy1 -= sz1 * (step(0.0, gy1) - 0.5);\
+        vec3 g0 = vec3(gx0.x,gy0.x,gz0.x), g1 = vec3(gx0.y,gy0.y,gz0.y),\
+        g2 = vec3(gx0.z,gy0.z,gz0.z), g3 = vec3(gx0.w,gy0.w,gz0.w),\
+        g4 = vec3(gx1.x,gy1.x,gz1.x), g5 = vec3(gx1.y,gy1.y,gz1.y),\
+        g6 = vec3(gx1.z,gy1.z,gz1.z), g7 = vec3(gx1.w,gy1.w,gz1.w);\
+        vec4 norm0 = taylorInvSqrt(vec4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3)));\
+        vec4 norm1 = taylorInvSqrt(vec4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7)));\
+        g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;\
+        g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;\
+        vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),\
+            dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
+            vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
+            dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
+            return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
+        }\
+        float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
+        float turbulence(vec3 P) {\
+            float f = 0., s = 1.;\
+            for (int i = 0 ; i < 9 ; i++) {\
+                f += abs(noise(s * P)) / s;\
+                s *= 2.;\
+                P = vec3(.866 * P.x + .5 * P.z, P.y, -.5 * P.x + .866 * P.z);\
+            }\
+            return f;\
+        }\
+        varying vec2 vUv;\
+        uniform float time;\
+        varying vec3 vPosition;\
+        void main(void) {\
+           gl_FragColor = vec4(   vec3(1.0,.8,.2)  *  turbulence(vPosition) ,1.0 );\
+        }"
+    ].join("\n")
+}
+
+
+
+vaseMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        time: {
+            type: "f",
+            value: 0.0
+        },
+    },
+    vertexShader:   vaseShader.vertexShader,
+    fragmentShader: vaseShader.fragmentShader,
+});
+
+registerGlyph("lVase()", [
+    [[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502]],
+[[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298]],
+[[-3.214532,13.201209],[-3.606484,13.383478],[-3.875476,13.734126],[-3.999723,14.138567],[-4.022671,14.60006],[-0.0741333,14.581098]]
+
+]);
+
+
+// registerGlyph("lVase()", ["e-b,_+[*Y)V(S'P&M%J$G#D!A > ; 8 5#2$0&.)-++.)1(4(7':'='@'C'F(I*L,N.O2P5Q8R;Q>QAPDPGOJNMMPLSLVLYM]N_P_S_V]YZ[W]T^R_O`LaIbFbCc?c<d9e6f4g2i0l/o0r1t3w5y8{:|=}@}D}G}J~M~P~S~V~Y~]~a}d}g}j|lznxpurssptmvjwgxe"]);
+
+function lVase() {
+
+    // console.log('ok');
+
+    var node = root.addNode();
+
+    var body = node.addLathe( [
+            [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159]      ], 32);
+
+    body.material = vaseMaterial;
+    // body.material.side = THREE.DoubleSide;
+    body.scale.set(.2,.2,.2);
+    for(var i = 0 ; i < body.geometry.faces.length ; i++){
+        var face = body.geometry.faces[i];
+        var temp = face.a;
+        var temp2 = face.c;
+        face.a = temp2;
+        face.c = temp;
+    }
+    body.rotation.x = -Math.PI/2;
+    geometrySketch(node);
+    // console.log(body);
+}
+
 barleyField = {
     
     setup:function(){
@@ -141,7 +280,7 @@ barleyField = {
 }
 
 
-registerGlyph("makeBarley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
+registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
 
 THREE.Object3D.prototype.addBarley = function() {
@@ -151,7 +290,7 @@ THREE.Object3D.prototype.addBarley = function() {
   return plane;
 }
 
-function makeBarley() {
+function barley() {
 	var a = root.addBarley();
 	geometrySketch(a);
 	a.update = function() {
@@ -310,7 +449,7 @@ fragPlane = {
 }
 
 
-registerGlyph("shaderPlane()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
+registerGlyph("shader()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
 );
 
 THREE.Object3D.prototype.addFragPlane = function() {
@@ -320,7 +459,7 @@ THREE.Object3D.prototype.addFragPlane = function() {
   return plane;
 }
 
-function shaderPlane() {
+function shader() {
 	var a = root.addFragPlane();
 	geometrySketch(a);
 	a.update = function() {
@@ -414,7 +553,7 @@ function tree() {
 }
 
 
-registerGlyph("noiseBaller()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
+registerGlyph("noiseball()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
 );
 
 THREE.Object3D.prototype.addNoiseBall = function() {
@@ -424,7 +563,7 @@ THREE.Object3D.prototype.addNoiseBall = function() {
   return ball;
 }
 
-function noiseBaller() {
+function noiseball() {
 	var a = root.addNoiseBall();
 	geometrySketch(a);
 	a.update = function() {
