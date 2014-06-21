@@ -361,6 +361,7 @@ function corona() {
 
 
 var slicedFragmentShader = ["\
+   uniform float spinAngle;\
    void main(void) {\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
@@ -376,9 +377,9 @@ var slicedFragmentShader = ["\
 	    nn = normalize(vec3(-dzdx,0.,1.));\
          }\
          float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3,.3,.3), nn));\
-         float X =  x * cos(value) + z * sin(value);\
+         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
          float Y =  y;\
-         float Z = -x * sin(value) + z * cos(value);\
+         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
          float tu = turbulence(vec3(.9*X,.9*Y,.9*Z + 8.));\
          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
@@ -391,8 +392,6 @@ var slicedFragmentShader = ["\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
-      float cc = .5 + .5 * cos(4. * 2. * 3.14159 * vPosition.x);\
-      color += vec3(cc,cc,cc);\
       gl_FragColor = vec4(color,alpha);\
    }\
 "].join("\n");
@@ -405,9 +404,15 @@ registerGlyph("sliced()",[
 function sliced() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
    sketch.mouseDrag = function(x, y) {}
-   sketch.spin = 0;
-   sketch.onClick = function() { this.spin = 1 - this.spin; }
-   sketch.update = function(elapsed) { this.value -= elapsed * this.spin; }
+   sketch.spinRate = 0;
+   sketch.spinAngle = 0;
+   sketch.addUniform('spinAngle');
+   sketch.onClick = function() {
+      this.spinRate = -1 - this.spinRate;
+   }
+   sketch.update = function(elapsed) {
+      this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+   }
 }
 
 

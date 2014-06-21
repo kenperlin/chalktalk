@@ -329,6 +329,16 @@
       renderer.camera.updateProjectionMatrix();
    });
 
+   THREE.ShaderMaterial.prototype.addUniform = function(name, type) {
+      if (type === undefined)
+         type = "f";
+      this.uniforms[name] = { type: type, value: 0.0 };
+   }
+
+   THREE.ShaderMaterial.prototype.setUniform = function(name, value) {
+      this.uniforms[name].value = value;
+   }
+
    THREE.Object3D.prototype.setMaterial = function(material) {
       this.material = material;
       for (var i = 0 ; i < this.children.length ; i++)

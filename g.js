@@ -4236,7 +4236,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      var str = sk(I).portName[i];
                      var A = sk(I).portXY(i);
                      lineWidth(1);
-                     sk(I).duringSketch(function(S) {
+                     sk(I).duringSketch(function() {
                         color(portColor);
                         fillRect(A[0] - 5, A[1] - 5, 10, 10);
                      });
@@ -4487,11 +4487,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.untransformY2D = function(x, y) {
          return (y - this.y2D) / this.scale();
       }
-      this.duringSketch = function(drawFunction) {
+      this.duringSketch = function(callbackFunction) {
          if (this.sketchProgress < 1) {
             _g.save();
             _g.globalAlpha = 1 - this.styleTransition;
-            drawFunction(this);
+            this.duringSketchCallbackFunction = collbackFunction;
+            this.duringSketchCallbackFunction();
             _g.restore();
          }
       }
@@ -6581,6 +6582,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	       this.glyphSketch = null;
          }
       }
+      this.addUniform = function(name, type) {
+         this.geometry.material.addUniform(name, type);
+      }
+      this.setUniform = function(name, value) {
+         this.geometry.material.setUniform(name, value);
+      }
       this.geometry = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
@@ -6646,11 +6653,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // THINGS RELATED TO WEBGL AND SHADERS.
 
-function addUniform(material, uName, uType) {
-   if (uType === undefined) uType = "f";
-   material.uniforms[uName] = { type: uType, value: 0.0 };
-}
-
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
       uniforms: {},
@@ -6659,7 +6661,7 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 
    var u = "alpha mx my time value".split(' ');
    for (var i = 0 ; i < u.length ; i++)
-      addUniform(material, u[i]);
+      material.addUniform(u[i]);
 
    material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
 
