@@ -329,13 +329,20 @@
       renderer.camera.updateProjectionMatrix();
    });
 
-   THREE.ShaderMaterial.prototype.addUniform = function(name, type) {
-      if (type === undefined)
-         type = "f";
-      this.uniforms[name] = { type: type, value: 0.0 };
+/*
+   Need to handle other types as well (vec3, vec4, etc.).
+*/
+   function shaderValueType(value) {
+      return "f";
+   }
+
+   THREE.ShaderMaterial.prototype.declareUniform = function(name, value) {
+      if (this.uniforms[name] === undefined)
+         this.uniforms[name] = { type: shaderValueType(value), value: value };
    }
 
    THREE.ShaderMaterial.prototype.setUniform = function(name, value) {
+      this.declareUniform(name, value);
       this.uniforms[name].value = value;
    }
 

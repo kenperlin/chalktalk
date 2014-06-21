@@ -406,7 +406,6 @@ function sliced() {
    sketch.mouseDrag = function(x, y) {}
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
-   sketch.addUniform('spinAngle');
    sketch.onClick = function() {
       this.spinRate = -1 - this.spinRate;
    }

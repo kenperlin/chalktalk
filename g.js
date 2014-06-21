@@ -6582,9 +6582,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	       this.glyphSketch = null;
          }
       }
-      this.addUniform = function(name, type) {
-         this.geometry.material.addUniform(name, type);
-      }
       this.setUniform = function(name, value) {
          this.geometry.material.setUniform(name, value);
       }
@@ -6661,7 +6658,7 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 
    var u = "alpha mx my time value".split(' ');
    for (var i = 0 ; i < u.length ; i++)
-      material.addUniform(u[i]);
+      material.declareUniform(u[i], 0.0);
 
    material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
 
