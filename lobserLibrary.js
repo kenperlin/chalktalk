@@ -141,7 +141,7 @@ barleyField = {
 }
 
 
-registerGlyph("makeBarley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
+registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
 
 THREE.Object3D.prototype.addBarley = function() {
@@ -151,7 +151,7 @@ THREE.Object3D.prototype.addBarley = function() {
   return plane;
 }
 
-function makeBarley() {
+function barley() {
 	var a = root.addBarley();
 	geometrySketch(a);
 	a.update = function() {
@@ -310,7 +310,7 @@ fragPlane = {
 }
 
 
-registerGlyph("shaderPlane()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
+registerGlyph("shader()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
 );
 
 THREE.Object3D.prototype.addFragPlane = function() {
@@ -320,7 +320,7 @@ THREE.Object3D.prototype.addFragPlane = function() {
   return plane;
 }
 
-function shaderPlane() {
+function shader() {
 	var a = root.addFragPlane();
 	geometrySketch(a);
 	a.update = function() {
@@ -414,7 +414,7 @@ function tree() {
 }
 
 
-registerGlyph("noiseBaller()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
+registerGlyph("noiseball()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
 );
 
 THREE.Object3D.prototype.addNoiseBall = function() {
@@ -424,7 +424,7 @@ THREE.Object3D.prototype.addNoiseBall = function() {
   return ball;
 }
 
-function noiseBaller() {
+function noiseball() {
 	var a = root.addNoiseBall();
 	geometrySketch(a);
 	a.update = function() {
