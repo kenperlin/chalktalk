@@ -177,14 +177,14 @@
 
          var state = this.choice.value;
 
-         this.afterSketch(function(S) {
+         this.afterSketch(function() {
             switch (state) {
             case 1:
             case 2:
-               if (S.time === undefined) {
-                  S.time = time;
-                  S.T = 0;
-                  S.walkT = 0;
+               if (this.time === undefined) {
+                  this.time = time;
+                  this.T = 0;
+                  this.walkT = 0;
                }
                break;
             }
@@ -285,14 +285,14 @@
 
          m.restore();
 
-         this.afterSketch(function(S) {
+         this.afterSketch(function() {
             switch (state) {
             case 1:
             case 2:
-               S.T += time - S.time;
+               this.T += time - this.time;
                if (state == 2)
-                  S.walkT += time - S.time;
-               S.time = time;
+                  this.walkT += time - this.time;
+               this.time = time;
                break;
             }
          });
@@ -322,19 +322,19 @@
       this.render = function(elapsed) {
          var sc = this.size / 180;
 
-         this.afterSketch(function(S) {
-            if (S.portLocation.length == 0) {
-               switch (S.selection) {
+         this.afterSketch(function() {
+            if (this.portLocation.length == 0) {
+               switch (this.selection) {
                case 0:
-                  S.addPort("lo", -.62 * sc, 0);
-                  S.addPort("hi",  .62 * sc, 0);
+                  this.addPort("lo", -.62 * sc, 0);
+                  this.addPort("hi",  .62 * sc, 0);
                   break;
                case 1:
-                  S.addPort("lo", 0, -.62 * sc);
-                  S.addPort("hi", 0,  .62 * sc);
+                  this.addPort("lo", 0, -.62 * sc);
+                  this.addPort("hi", 0,  .62 * sc);
                   break;
                }
-               S.addPort("t", 0, 0);
+               this.addPort("t", 0, 0);
             }
          });
 
@@ -362,20 +362,19 @@
             break;
          }
 
-         this.afterSketch(function(S) {
+         this.afterSketch(function() {
             textHeight(12);
-            switch (S.selection) {
+            switch (this.selection) {
             case 0:
-               mText(roundedString(S.lo), [-.6,0], 1, .5);
-               mText(roundedString(S.hi), [ .6,0], 0, .5);
+               mText(roundedString(this.lo), [-.6,0], 1, .5);
+               mText(roundedString(this.hi), [ .6,0], 0, .5);
                break;
             case 1:
-               mText(roundedString(S.lo), [0,-.6], .5, 0);
-               mText(roundedString(S.hi), [0, .6], .5, 1);
+               mText(roundedString(this.lo), [0,-.6], .5, 0);
+               mText(roundedString(this.hi), [0, .6], .5, 1);
                break;
             }
          });
-
          m.restore();
       }
    }
@@ -452,12 +451,12 @@
 
             var x0 = 0, y0 = 0, x1, y1, r1, x2, y2, r2;
 
-            this.afterSketch(function(S) {
-               if (S.n1 < S.n2) {
+            this.afterSketch(function() {
+               if (this.n1 < this.n2) {
                   color('rgba(0,128,255,.1)');
                   fillRect(-w/2,y0,w,w/2);
                }
-               else if (S.n1 > S.n2) {
+               else if (this.n1 > this.n2) {
                   color('rgba(0,128,255,.1)');
                   fillRect(-w/2,-w/2,w,w/2);
                }
@@ -499,7 +498,7 @@
             line(-w/2,0,w/2,0);
             drawCurve([ [x1,y1], [0,0], [x2,y2] ]);
 
-            this.afterSketch(function(S) {
+            this.afterSketch(function() {
                arrow(0,0, x2,y2);
                drawOval(x1-w/100,y1-w/100,w/50,w/50);
 
@@ -507,10 +506,10 @@
                fillOval(x1-w/100,y1-w/100,w/50,w/50);
 
                color('rgb(160,160,160)');
-               text("n1 = " + roundedString(S.n1), w/60 - w/2, -w/30, 0, 0.5);
+               text("n1 = " + roundedString(this.n1), w/60 - w/2, -w/30, 0, 0.5);
 
                color('rgb(128,152,255)');
-               text("n2 = " + roundedString(S.n2), w/60 - w/2,  w/30, 0, 0.5);
+               text("n2 = " + roundedString(this.n2), w/60 - w/2,  w/30, 0, 0.5);
 
                line(0,-h/4,0,h/4);
 
@@ -552,39 +551,39 @@
             line(-w/2 + w / 26     , this.Y + this.H + w / 20,
                  -w/2 + w / 26 * 25, this.Y + this.H + w / 20);
 
-            this.afterSketch(function(S) {
+            this.afterSketch(function() {
 
-               var w=S.width, h=S.height, X=S.X, Y=S.Y;
-               var W=S.W, H=S.H, s=S.s, x=S.mouseX, y=S.mouseY;
+               var w=this.width, h=this.height, X=this.X, Y=this.Y;
+               var W=this.W, H=this.H, s=this.s, x=this.mouseX, y=this.mouseY;
                var saveTextHeight = _g.textHeight;
                _g.textHeight = w/20;
 
                if (x >= X && x < X + W && y >= Y && y < Y + W*4/6) {
-                  S.col = Math.floor(6 * (x - X) / W);
-                  S.row = Math.floor(6 * (y - Y) / W);
+                  this.col = Math.floor(6 * (x - X) / W);
+                  this.row = Math.floor(6 * (y - Y) / W);
                }
                else if (y >= Y + W*4/6) {
                   var n = Math.max(0, Math.min(23, 26 * (x+w/2) / w - 1));
-                  S.col = Math.floor(n % 6);
-                  S.row = Math.floor(n / 6);
+                  this.col = Math.floor(n % 6);
+                  this.row = Math.floor(n / 6);
                }
 
                for (var j = 0 ; j < 4 ; j++)
                   line(X, Y + j * s, X + W, Y + j * s);
                for (var i = 0 ; i < 6 ; i++)
                   line(X + i * s, Y, X + i * s, Y + H);
-               fillRect(X + S.col * s, Y + S.row * s, s, s);
+               fillRect(X + this.col * s, Y + this.row * s, s, s);
 
                for (var n = 0 ; n < 24 ; n++) {
-                  if (n == S.row * 6 + S.col)
+                  if (n == this.row * 6 + this.col)
                      fillRect((n + 1) * w / 26 - w/2, Y + H + w/20, w/26, w/26);
                   drawRect((n + 1) * w / 26 - w/2, Y + H + w/20, w/26, w/26);
                }
 
                text("col:", w/40 - w/2, Y + w/20);
                text("row:", w/40 - w/2, Y + w/20 + w/10);
-               text(S.col, w/40 + w/7 - w/2, Y + w/20);
-               text(S.row, w/40 + w/7 - w/2, Y + w/20 + w/10);
+               text(this.col, w/40 + w/7 - w/2, Y + w/20);
+               text(this.row, w/40 + w/7 - w/2, Y + w/20 + w/10);
 
                _g.textHeight = saveTextHeight;
             });
@@ -644,8 +643,8 @@
             drawColorCurve('#00e000', greenCurve);
             drawColorCurve('blue', blueCurve);
 
-            this.afterSketch(function(S) {
-               var x = max(-w/2, min(w/2, S.mouseX));
+            this.afterSketch(function() {
+               var x = max(-w/2, min(w/2, this.mouseX));
                var ty = yHi + w/32;
                color(defaultPenColor);
                textHeight(w/48);
@@ -693,19 +692,19 @@
             drawOval(-d-w/4, -w/4, w/2, w/2, 40, TAU*1/6, TAU*7/6);
             drawOval( d-w/4, -w/4, w/2, w/2, 40, TAU*2/6, TAU*8/6);
 
-            this.afterSketch(function(S) {
+            this.afterSketch(function() {
 
                color('blue');
-               drawPolygon(S.region);
+               drawPolygon(this.region);
 
-               if (S.mouseX < -w/2 || S.mouseY < -h/2)
+               if (this.mouseX < -w/2 || this.mouseY < -h/2)
                   return;
 
                color('red');
                var x0 = -w*0.35;
                var y0 = -h*0.35;
-               var x1 = S.mouseX;
-               var y1 = S.mouseY;
+               var x1 = this.mouseX;
+               var y1 = this.mouseY;
                var dx = x1-x0, dy = y1-y0, d = Math.sqrt(dx*dx + dy*dy);
                dx /= d;
                dy /= d;
@@ -714,7 +713,7 @@
                fillOval(x0-w*0.01,y0-w*0.01,w*0.02,w*0.02);
                arrow(x0, y0, x1, y1);
 
-               var p = rayCurve(x0, y0, dx, dy, S.region);
+               var p = rayCurve(x0, y0, dx, dy, this.region);
                if (p.length >= 2 && d > len(p[1][0]-x0, p[1][1]-y0)) {
                   color('blue');
                   lineWidth(6);
@@ -796,7 +795,7 @@
                         [ox+x1, oy+y1],
                         [ox+x2, oy+y2] ]);
 
-            this.afterSketch(function(S) {
+            this.afterSketch(function() {
                var r = w/40;
                fillPolygon([ [ox-x1, oy+y1],
                              [ox-x2, oy+y2],
@@ -811,8 +810,8 @@
             break;
          }
 
-         this.afterSketch(function(S) {
-            S.drawText(_g);
+         this.afterSketch(function() {
+            this.drawText(_g);
          });
       }
    }
@@ -875,9 +874,9 @@
       this.render = function(elapsed) {
          var sc = this.size / 400;
 
-         this.afterSketch(function(S) {
-            if (S.portLocation.length == 0) {
-               S.addPort("Y", -sc, 0);
+         this.afterSketch(function() {
+            if (this.portLocation.length == 0) {
+               this.addPort("Y", -sc, 0);
             }
          });
 
@@ -1077,11 +1076,11 @@
          mCurve([[0,.3],[0,-.3]]);
          mCurve([[-.3,0],[.3,0]]);
 
-         this.afterSketch(function(S) {
-            if (S.portLocation.length == 0) {
-               S.addPort("x", -.5,.3);
-               S.addPort("y", -.5,-.3);
-               S.addPort("o", .5,0);
+         this.afterSketch(function() {
+            if (this.portLocation.length == 0) {
+               this.addPort("x", -.5,.3);
+               this.addPort("y", -.5,-.3);
+               this.addPort("o", .5,0);
             }
          });
 
@@ -1146,10 +1145,10 @@
       this.render = function(elapsed) {
          var sc = this.size / 400;
 
-         this.afterSketch(function(S) {
-            if (S.portLocation.length == 0) {
-               S.addPort("H", -.25 * sc * S.hubWidth, sc);
-               S.addPort("S",  .25 * sc * S.hubWidth, sc);
+         this.afterSketch(function() {
+            if (this.portLocation.length == 0) {
+               this.addPort("H", -.25 * sc * this.hubWidth, sc);
+               this.addPort("S",  .25 * sc * this.hubWidth, sc);
             }
          });
 

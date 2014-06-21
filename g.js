@@ -4240,19 +4240,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                         color(portColor);
                         fillRect(A[0] - 5, A[1] - 5, 10, 10);
                      });
-                     sk(I).afterSketch(function(S) {
+                     sk(I).afterSketch(function() {
                         var tw = max(portHeight, textWidth(str) + 10);
-                        S.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
-                                           A[0] + tw/2, A[1] + portHeight/2];
-                        var B = S.portBounds[i];
-                        if (S == sk() && isHover() || linkAtCursor != null) {
-                           color(S==outSketch && i==outPort ? portHighlightColor
-                                                            : portBgColor);
+                        this.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
+                                              A[0] + tw/2, A[1] + portHeight/2];
+                        var B = this.portBounds[i];
+                        if (this == sk() && isHover() || linkAtCursor != null) {
+                           color(this==outSketch && i==outPort ? portHighlightColor
+                                                               : portBgColor);
                            fillRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                            color(portColor);
                            text(str, A[0], A[1], .5, .55);
                         }
-                        color(S==inSketch && i==inPort ? 'red' : portColor);
+                        color(this==inSketch && i==inPort ? 'red' : portColor);
                         drawRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                      });
                   }
@@ -4495,7 +4495,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             _g.restore();
          }
       }
-      this.afterSketch = function(drawFunction) {
+      this.afterSketch = function(collbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
 	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
@@ -4504,7 +4504,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                   : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
-            drawFunction(this);
+            this.afterSketchCallbackFunction = collbackFunction;
+            this.afterSketchCallbackFunction();
             _g.restore();
          }
       }
@@ -5090,14 +5091,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 	 color(backgroundColor);
          drawRect(-this.width/2,-this.height/2,this.width,this.height);
-         this.afterSketch(function(S) {
-            if (S.imageObj === undefined)
+         this.afterSketch(function() {
+            if (this.imageObj === undefined)
                return;
-            var s = S.scale();
-	    if (S.fadeAway > 0)
-	       _g.globalAlpha = S.fadeAway;
-            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
-                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
+            var s = this.scale();
+	    if (this.fadeAway > 0)
+	       _g.globalAlpha = this.fadeAway;
+            _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
+                                        this.y2D - this.height * s / 2,
+					this.width * s, this.height * s);
          });
       }
    }

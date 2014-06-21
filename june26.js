@@ -426,8 +426,8 @@ function Grid() {
             mCurve([[-1,0], [1, 0]]);
             mCurve([[ 0,1], [0, -1]]);
          }
-	 this.afterSketch(function(S) {
-	    if (S.gridMode != 3) {
+	 this.afterSketch(function() {
+	    if (this.gridMode != 3) {
                mCurve([[-1, f], [1, f]]);
                mCurve([[-1,-f], [1,-f]]);
                mCurve([[-f,1], [-f,-1]]);
@@ -435,7 +435,7 @@ function Grid() {
             }
 	    var uColor = 'rgb(255,64,64)';
 	    var vColor = 'rgb(64,255,64)';
-	    switch (S.gridMode) {
+	    switch (this.gridMode) {
             case 3:
             case 2:
 	       var d = 1/20;
@@ -455,7 +455,7 @@ function Grid() {
 	             mCurve([[u*f,v*f,t0] , [u*f,(v+d)*f,tv]]);
                   }
                }
-	       if (S.gridMode == 3)
+	       if (this.gridMode == 3)
 	          break;
 	    case 1:
 	       lineWidth(4);
