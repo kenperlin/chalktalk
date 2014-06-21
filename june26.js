@@ -391,6 +391,8 @@ var slicedFragmentShader = ["\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
+      float cc = .5 + .5 * cos(4. * 2. * 3.14159 * vPosition.x);\
+      color += vec3(cc,cc,cc);\
       gl_FragColor = vec4(color,alpha);\
    }\
 "].join("\n");

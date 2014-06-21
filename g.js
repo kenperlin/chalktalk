@@ -6644,18 +6644,23 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // THINGS RELATED TO WEBGL AND SHADERS.
 
+function addUniform(material, uName, uType) {
+   if (uType === undefined) uType = "f";
+   material.uniforms[uName] = { type: uType, value: 0.0 };
+}
+
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
-      uniforms: {
-         alpha: { type: "f", value: 1.0 },
-         mx   : { type: "f", value: 1.0 },
-         my   : { type: "f", value: 1.0 },
-         time : { type: "f", value: 0.0 },
-         value: { type: "f", value: 0.0 },
-      },
+      uniforms: {},
       vertexShader: vertexShader,
-      fragmentShader: fragmentShaderHeader.concat(fragmentShader),
    });
+
+   var u = "alpha mx my time value".split(' ');
+   for (var i = 0 ; i < u.length ; i++)
+      addUniform(material, u[i]);
+
+   material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
+
    var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
    root.add(mesh);
 
@@ -6683,13 +6688,15 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
 var defaultVertexShader = ["\
-   varying vec3 vNormal;\
    varying float x;\
    varying float y;\
+   varying vec3 vPosition;\
+   varying vec3 vNormal;\
    void main() {\
       x = 2. * uv.x - 1.;\
       y = 2. * uv.y - 1.;\
       vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
    }\
 "].join("\n");
@@ -6748,6 +6755,8 @@ var fragmentShaderHeader = ["\
       }\
       return f;\
    }\
+   varying vec3 vNormal;\
+   varying vec3 vPosition;\
    varying float x;\
    varying float y;\
    uniform float mx;\
