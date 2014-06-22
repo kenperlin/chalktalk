@@ -1377,8 +1377,6 @@
 
       isCodeWidget = ! isCodeWidget;
 
-      console.log("TOGGLE CODE WIDGET " + (isCodeWidget ? "ON" : "OFF"));
-
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
@@ -3240,6 +3238,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // HANDLE MOUSE MOVE FOR THE SKETCH PAGE.
 
       this.mouseMove = function(x, y) {
+
+         this.moveX = x;
+         this.moveY = y;
 
          if (isFakeMouseDown) {
             this.mouseDrag(x, y);
@@ -5595,6 +5596,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.yTravel = 0;
          this.xPrevious = x;
          this.yPrevious = y;
+         this.xVary = 0;
+         this.yVary = 0;
       }
 
       this.ppi = 20; // PIXELS PER INCREMENT, WHEN DRAGGING TO CHANGE VALUE.
@@ -5620,6 +5623,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
          this.xPrevious = x;
          this.yPrevious = y;
+
+	 this.xVary = max(this.xVary, abs(x - this.xDown));
+	 this.yVary = max(this.yVary, abs(y - this.yDown));
       }
 
       this.mouseUp = function(x, y) {
@@ -5629,7 +5635,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             inSketch = null;
             inPort = -1;
          }
-         else if (abs(x - this.xDown) > 2 * abs(y - this.yDown)) {
+         else if (this.xVary > this.yVary) {
             if (x > this.xDown) {
                this.value = "" + (parseFloat(this.value) / 10);
                this.increment /= 10;
@@ -6630,7 +6636,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
       }
       this.setUniform = function(name, value) {
-         this.geometry.material.setUniform(name, value);
+         if (isDef(this.geometry.material.uniforms[name]))
+            this.geometry.material.uniforms[name].value = value;
       }
       this.geometry = null;
    }
@@ -6697,7 +6704,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // THINGS RELATED TO WEBGL AND SHADERS.
 
-function addShaderPlaneSketch(vertexShader, fragmentShader) {
+function addPlaneShaderSketch(vertexShader, fragmentShader) {
+   return addGeometryShaderSketch(new THREE.PlaneGeometry(50,50), vertexShader, fragmentShader);
+}
+
+function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
       uniforms: {},
       vertexShader: vertexShader,
@@ -6705,11 +6716,32 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 
    var u = "alpha mx my time value".split(' ');
    for (var i = 0 ; i < u.length ; i++)
-      material.declareUniform(u[i], 0.0);
+      material.uniforms[u[i]] = { type: "f", value: 0 };
+
+// FIND CUSTOM UNIFORMS:
+
+   var typeInfo = "float f 0 vec3 v2 [0,0] vec3 v3 [0,0,0]".split(' ');
+   var declarations = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split(";");
+   for (var i = 0 ; i < declarations.length ; i++) {
+      var declaration = declarations[i].trim();
+      if (declaration.length > 0) {
+
+         var words = declaration.split(" ");
+	 if (words[0] == 'uniform') {
+            var type = words[1];
+            var name = words[2];
+	    for (var n = 0 ; n < typeInfo.length ; n += 3)
+	       if (type == typeInfo[n]) {
+	          material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
+	          break;
+               }
+         }
+      }
+   }
 
    material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
 
-   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
+   var mesh = new THREE.Mesh(geometry,material);
    root.add(mesh);
 
    mesh.sketch = geometrySketch(mesh);
