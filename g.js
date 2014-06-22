@@ -6655,7 +6655,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // THINGS RELATED TO WEBGL AND SHADERS.
 
-function addShaderPlaneSketch(vertexShader, fragmentShader) {
+function addPlaneShaderSketch(vertexShader, fragmentShader) {
+   return addGeometryShaderSketch(new THREE.PlaneGeometry(50,50), vertexShader, fragmentShader);
+}
+
+function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
       uniforms: {},
       vertexShader: vertexShader,
@@ -6683,7 +6687,7 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 
    material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
 
-   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
+   var mesh = new THREE.Mesh(geometry,material);
    root.add(mesh);
 
    mesh.sketch = geometrySketch(mesh);

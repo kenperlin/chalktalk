@@ -334,7 +334,7 @@ registerGlyph("planet()",[
    [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
-function planet() { addShaderPlaneSketch(defaultVertexShader, planetFragmentShader); }
+function planet() { addPlaneShaderSketch(defaultVertexShader, planetFragmentShader); }
 
 var marbleFragmentShader = ["\
    void main(void) {\
@@ -363,7 +363,7 @@ registerGlyph("marble()",[
 ]);
 
 function marble() {
-   var sketch = addShaderPlaneSketch(defaultVertexShader, marbleFragmentShader);
+   var sketch = addPlaneShaderSketch(defaultVertexShader, marbleFragmentShader);
    sketch.code = [
       ["stripe", "sin(x)"],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
@@ -411,7 +411,7 @@ registerGlyph("corona()",[
 ]);
 
 function corona() {
-   var sketch = addShaderPlaneSketch(defaultVertexShader, coronaFragmentShader);
+   var sketch = addPlaneShaderSketch(defaultVertexShader, coronaFragmentShader);
    sketch.code = [
       ["radial", "r = radius(x,y)"],
       ["color grad", "grad(r)"],
@@ -464,7 +464,7 @@ registerGlyph("sliced()",[
 ]);
 
 function sliced() {
-   var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
+   var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
    sketch.mouseDrag = function(x, y) {}
 /*
    sketch.code = [
