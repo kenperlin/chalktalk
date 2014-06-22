@@ -30,6 +30,7 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
    registerGlyph("lVase()", lVaseShape);
 
    function lVase() {
+
       var node = root.addNode();
       // node.addCylinder();
       // node.setMaterial(whiteMaterial);
@@ -56,7 +57,7 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
             .scale(12.2);
 
         sketch.geometry.rotation.x = 1.5;
-
+       
         // body.material = vaseMaterial;
         // body.material.side = THREE.DoubleSide;
 
@@ -68,6 +69,9 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
             face.a = temp2;
             face.c = temp;
         }
+         sketch.geometry.geometry.computeFaceNormals();
+        sketch.geometry.geometry.computeVertexNormals();
+
 
         // body.rotation.x = -Math.PI/2;
         
@@ -85,6 +89,13 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
       sketch.onClick = function(x, y) { this.fadeTime = time; }
 
       sketch.update = function(elapsed) {
+
+        if(this.Glyph == undefined){
+            this.Glyph = sketch.glyphSketch;
+            lVaseShape = this.Glyph.sp;
+        }
+
+        // console.log(this.Glyph);
         // var sx = sketchPage.mouseX/100;
         // var sy = sketchPage.mouseY/100;
         // sketch.geometry.material.uniforms['mx'].value = time*.5;
@@ -103,7 +114,7 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
      if (isDef(this.fadeTime)) {
         var t = min(1, (time - this.fadeTime) / 2.0);
         this.value = t;
-        _g.globalAlpha = sCurve(1 - t);
+        _g.globalAlpha = sCurve(1 - t) * (1-t);
         if (t > 1)
            return;
          }
@@ -206,18 +217,44 @@ vaseShader = {
     ].join("\n")
 }
 
-
 var myFragmentShader = ["\
-  void main(void) {\
-    float t = mod(time,1.0);\
-    float c = .5+noise(10.*vPosition);\
-    float a = 3.14 - atan(vPosition.x,vPosition.y);\
-    float ma = mx-1.;\
-    if(a > mix(0.,6.28,value))\
-        c=0.;\
-   gl_FragColor = vec4(   vec3(c)   , alpha );\
+   void main(void) {\
+        float t = mod(time,1.0);\
+        float bc = 1.;\
+        float a = 3.14 - atan(vPosition.x,vPosition.y);\
+        float ma = mx-1.;\
+        if(a > mix(0.,6.29,value))\
+            bc=0.;\
+        vec3 point = 5.*vPosition;\
+        vec3 normal = normalize(vNormal);\
+        float s =  .3 + max(0.,dot(vec3(.3), normal));\
+        float tu =  turbulence(point) ;\
+        float c = pow(.5 + .5 * sin(7. * point.y + 4. * tu), .1);\
+        vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+        if (vNormal.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), normal), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+        }\
+        else {\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), normal), 7.);\
+            color += vec3(h, h*.8, h*.6);\
+        }\
+      gl_FragColor = vec4(color*bc,alpha);\
    }\
 "].join("\n");
+
+
+// var myFragmentShader = ["\
+//   void main(void) {\
+//     float t = mod(time,1.0);\
+//     float c = .5+noise(10.*vPosition);\
+//     float a = 3.14 - atan(vPosition.x,vPosition.y);\
+//     float ma = mx-1.;\
+//     if(a > mix(0.,6.28,value))\
+//         c=0.;\
+//    gl_FragColor = vec4(   vec3(c)   , alpha );\
+//    }\
+// "].join("\n");
 
 
 // vaseMaterial = new THREE.ShaderMaterial({
