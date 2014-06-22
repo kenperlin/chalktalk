@@ -72,23 +72,26 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
         // body.rotation.x = -Math.PI/2;
         
 
-      // sketch.mouseDown = function(x, y) {
-      //    this.downX = x;
-      //    this.downY = y;
-      // }
-      // sketch.mouseDrag = function(x, y) {
-      //    console.log((this.downX - x) + " " + (this.downY - y));
-      // }
-      // sketch.mouseUp = function(x, y) {
-      // }
+      sketch.mouseDown = function(x, y) {
+         this.downX = x;
+         this.downY = y;
+      }
+      sketch.mouseDrag = function(x, y) {
+         console.log((this.downX - x) + " " + (this.downY - y));
+      }
+      sketch.mouseUp = function(x, y) {
+      }
 
       sketch.onClick = function(x, y) { this.fadeTime = time; }
 
       sketch.update = function(elapsed) {
         // var sx = sketchPage.mouseX/100;
         // var sy = sketchPage.mouseY/100;
+        // sketch.geometry.material.uniforms['mx'].value = time*.5;
+
         sketch.geometry.getMatrix().translate(11.3,-20,0.0)
                 .rotateX(-PI/2)
+                .rotateZ(-PI/2)
                 .scale(4.1,4.1,3.68);
          // console.log("x: " + sx + " y: " + sy + " " );
          var x0 = lerp(.7,this.xlo,this.xhi);
@@ -98,8 +101,9 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
          // console.log("x: " + sketchPage.x + " y: " + sketchPage.y);
 
      if (isDef(this.fadeTime)) {
-        var t = (time - this.fadeTime) / 0.5;
-        _g.globalAlpha = max(0, sCurve(1 - t));
+        var t = min(1, (time - this.fadeTime) / 2.0);
+        this.value = t;
+        _g.globalAlpha = sCurve(1 - t);
         if (t > 1)
            return;
          }
@@ -205,9 +209,13 @@ vaseShader = {
 
 var myFragmentShader = ["\
   void main(void) {\
+    float t = mod(time,1.0);\
     float c = .5+noise(10.*vPosition);\
-    float p = mx;\
-   gl_FragColor = vec4(   vec3(c)*vec3(p)    , alpha );\
+    float a = 3.14 - atan(vPosition.x,vPosition.y);\
+    float ma = mx-1.;\
+    if(a > mix(0.,6.28,value))\
+        c=0.;\
+   gl_FragColor = vec4(   vec3(c)   , alpha );\
    }\
 "].join("\n");
 
