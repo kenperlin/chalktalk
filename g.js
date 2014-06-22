@@ -5548,6 +5548,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.yTravel = 0;
          this.xPrevious = x;
          this.yPrevious = y;
+         this.xVary = 0;
+         this.yVary = 0;
       }
 
       this.ppi = 20; // PIXELS PER INCREMENT, WHEN DRAGGING TO CHANGE VALUE.
@@ -5573,6 +5575,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
          this.xPrevious = x;
          this.yPrevious = y;
+
+	 this.xVary = max(this.xVary, abs(x - this.xDown));
+	 this.yVary = max(this.yVary, abs(y - this.yDown));
       }
 
       this.mouseUp = function(x, y) {
@@ -5582,7 +5587,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             inSketch = null;
             inPort = -1;
          }
-         else if (abs(x - this.xDown) > 2 * abs(y - this.yDown)) {
+         else if (this.xVary > this.yVary) {
             if (x > this.xDown) {
                this.value = "" + (parseFloat(this.value) / 10);
                this.increment /= 10;
@@ -6659,6 +6664,22 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var u = "alpha mx my time value".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.declareUniform(u[i], 0.0);
+
+// FIND CUSTOM UNIFORMS:
+
+   var unis = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split("uniform");
+   for (var i = 0 ; i < unis.length ; i++) {
+      var str = unis[i].trim();
+      if (str.length > 0) {
+         var type = "";
+         var decl = str.split(" ");
+	 switch (decl[0]) {
+	 case "float": type = "f"; break;
+	 case "vec2": type = "v2"; break;
+	 case "vec3": type = "v3"; break;
+	 }
+      }
+   }
 
    material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
 

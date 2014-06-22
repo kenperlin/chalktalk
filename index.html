@@ -299,7 +299,20 @@
       }
    }
    Bird.prototype = new Sketch;
-
+/*
+   function David() {
+      this.labels = "david1".split(' ');
+      this.render = function(elapsed) {
+         var sc = this.size / 400;
+         m.save();
+	 m.scale(sc);
+	 mCurve([[-1, 1],[0,-1],[1, 1]]);
+	 mCurve([[-1,-1],[0, 1],[1,-1]]);
+         m.restore();
+      }
+   }
+   David.prototype = new Sketch;
+*/
    function Control() {
       this.labels = "slideX slideY".split(' ');
 
@@ -940,6 +953,46 @@
    };
    Graph.prototype = new Sketch;
 
+   function Func() {
+      this.labels = "exp".split(' ');
+
+      this.s = -1;
+      this.code = [["exp", "exp(x)"]];
+      this.EXP = [[-1,-.2],[-.67,-.18],[-.33,-.12],[0,0],[.25,.33],[.375,.6],[.45,1]];
+
+      this.render = function(elapsed) {
+         var sc = this.size / 400;
+	 var s = this.selection;
+         if (s != this.s) {
+            this.clearPorts();
+            this.addPort("x", -sc, 0);
+            this.addPort("f",  sc, 0);
+            this.s = s;
+         }
+
+         m.save();
+         m.scale(sc);
+
+         var x = this.getInFloat("x");
+         var f = null;
+         try {
+            eval("f = (" + this.code[0][1] + ")");
+         } catch (e) {}
+	 if (f != null)
+            this.setOutValue("f", f);
+
+         _g.lineWidth /= 3;
+	 mLine([ 0,1],[0,-1]);
+	 mLine([-1,0],[1, 0]);
+         _g.lineWidth *= 3;
+
+	 mCurve(this.EXP);
+
+	 m.restore();
+      }
+   }
+   Func.prototype = new Sketch;
+
    function Logic() {
       this.labels = "buf and or xor not nand nor xnor".split(' ');
 
@@ -956,13 +1009,6 @@
       this.s = -1;
 
       this.prevTime = 0;
-
-      this.delayBuffer = (function() {
-         var buf = [];
-         for (var i = 0 ; i < 1000 ; i++)
-            buf.push(0);
-         return buf;
-      })();
 
       this.timerStart = 0;
       this.value = 0;
@@ -1349,7 +1395,7 @@
    }
 
 //                       1      2       3      4     5      6      7
-   var sketchTypes = ( "Bird Control Diagram Graph Logic Physics Shape3D IO Marker Grid" ).split(' ');
+   var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid" ).split(' ');
 
    var pages = [
       ["page0", sketchTypes.concat(["Noises"])],
