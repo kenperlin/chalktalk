@@ -4236,23 +4236,23 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      var str = sk(I).portName[i];
                      var A = sk(I).portXY(i);
                      lineWidth(1);
-                     sk(I).duringSketch(function(S) {
+                     sk(I).duringSketch(function() {
                         color(portColor);
                         fillRect(A[0] - 5, A[1] - 5, 10, 10);
                      });
-                     sk(I).afterSketch(function(S) {
+                     sk(I).afterSketch(function() {
                         var tw = max(portHeight, textWidth(str) + 10);
-                        S.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
-                                           A[0] + tw/2, A[1] + portHeight/2];
-                        var B = S.portBounds[i];
-                        if (S == sk() && isHover() || linkAtCursor != null) {
-                           color(S==outSketch && i==outPort ? portHighlightColor
-                                                            : portBgColor);
+                        this.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
+                                              A[0] + tw/2, A[1] + portHeight/2];
+                        var B = this.portBounds[i];
+                        if (this == sk() && isHover() || linkAtCursor != null) {
+                           color(this==outSketch && i==outPort ? portHighlightColor
+                                                               : portBgColor);
                            fillRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                            color(portColor);
                            text(str, A[0], A[1], .5, .55);
                         }
-                        color(S==inSketch && i==inPort ? 'red' : portColor);
+                        color(this==inSketch && i==inPort ? 'red' : portColor);
                         drawRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
                      });
                   }
@@ -4487,15 +4487,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.untransformY2D = function(x, y) {
          return (y - this.y2D) / this.scale();
       }
-      this.duringSketch = function(drawFunction) {
+      this.duringSketch = function(callbackFunction) {
          if (this.sketchProgress < 1) {
             _g.save();
             _g.globalAlpha = 1 - this.styleTransition;
-            drawFunction(this);
+            this.duringSketchCallbackFunction = collbackFunction;
+            this.duringSketchCallbackFunction();
             _g.restore();
          }
       }
-      this.afterSketch = function(drawFunction) {
+      this.afterSketch = function(collbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
 	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
@@ -4504,7 +4505,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                   : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
-            drawFunction(this);
+            this.afterSketchCallbackFunction = collbackFunction;
+            this.afterSketchCallbackFunction();
             _g.restore();
          }
       }
@@ -5090,14 +5092,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 	 color(backgroundColor);
          drawRect(-this.width/2,-this.height/2,this.width,this.height);
-         this.afterSketch(function(S) {
-            if (S.imageObj === undefined)
+         this.afterSketch(function() {
+            if (this.imageObj === undefined)
                return;
-            var s = S.scale();
-	    if (S.fadeAway > 0)
-	       _g.globalAlpha = S.fadeAway;
-            _g.drawImage(S.imageObj, S.x2D - S.width * s / 2,
-                                     S.y2D - S.height * s / 2, S.width * s, S.height * s);
+            var s = this.scale();
+	    if (this.fadeAway > 0)
+	       _g.globalAlpha = this.fadeAway;
+            _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
+                                        this.y2D - this.height * s / 2,
+					this.width * s, this.height * s);
          });
       }
    }
@@ -5545,6 +5548,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.yTravel = 0;
          this.xPrevious = x;
          this.yPrevious = y;
+         this.xVary = 0;
+         this.yVary = 0;
       }
 
       this.ppi = 20; // PIXELS PER INCREMENT, WHEN DRAGGING TO CHANGE VALUE.
@@ -5570,6 +5575,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
          this.xPrevious = x;
          this.yPrevious = y;
+
+	 this.xVary = max(this.xVary, abs(x - this.xDown));
+	 this.yVary = max(this.yVary, abs(y - this.yDown));
       }
 
       this.mouseUp = function(x, y) {
@@ -5579,7 +5587,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             inSketch = null;
             inPort = -1;
          }
-         else if (abs(x - this.xDown) > 2 * abs(y - this.yDown)) {
+         else if (this.xVary > this.yVary) {
             if (x > this.xDown) {
                this.value = "" + (parseFloat(this.value) / 10);
                this.increment /= 10;
@@ -6579,6 +6587,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	       this.glyphSketch = null;
          }
       }
+      this.setUniform = function(name, value) {
+         this.geometry.material.setUniform(name, value);
+      }
       this.geometry = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
@@ -6646,16 +6657,32 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 function addShaderPlaneSketch(vertexShader, fragmentShader) {
    var material = new THREE.ShaderMaterial({
-      uniforms: {
-         alpha: { type: "f", value: 1.0 },
-         mx   : { type: "f", value: 1.0 },
-         my   : { type: "f", value: 1.0 },
-         time : { type: "f", value: 0.0 },
-         value: { type: "f", value: 0.0 },
-      },
+      uniforms: {},
       vertexShader: vertexShader,
-      fragmentShader: fragmentShaderHeader.concat(fragmentShader),
    });
+
+   var u = "alpha mx my time value".split(' ');
+   for (var i = 0 ; i < u.length ; i++)
+      material.declareUniform(u[i], 0.0);
+
+// FIND CUSTOM UNIFORMS:
+
+   var unis = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split("uniform");
+   for (var i = 0 ; i < unis.length ; i++) {
+      var str = unis[i].trim();
+      if (str.length > 0) {
+         var type = "";
+         var decl = str.split(" ");
+	 switch (decl[0]) {
+	 case "float": type = "f"; break;
+	 case "vec2": type = "v2"; break;
+	 case "vec3": type = "v3"; break;
+	 }
+      }
+   }
+
+   material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
+
    var mesh = new THREE.Mesh(new THREE.PlaneGeometry(50,50),material);
    root.add(mesh);
 
@@ -6683,13 +6710,15 @@ function addShaderPlaneSketch(vertexShader, fragmentShader) {
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
 var defaultVertexShader = ["\
-   varying vec3 vNormal;\
    varying float x;\
    varying float y;\
+   varying vec3 vPosition;\
+   varying vec3 vNormal;\
    void main() {\
       x = 2. * uv.x - 1.;\
       y = 2. * uv.y - 1.;\
       vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
    }\
 "].join("\n");
@@ -6748,6 +6777,8 @@ var fragmentShaderHeader = ["\
       }\
       return f;\
    }\
+   varying vec3 vNormal;\
+   varying vec3 vPosition;\
    varying float x;\
    varying float y;\
    uniform float mx;\

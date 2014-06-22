@@ -7,6 +7,61 @@
     Then they can all be dragged together to show the fractal sum of 1/f noise.
 */
 
+   var davidShape = [
+      [ [ -1, -1 ], [0,  1], [ 1, -1] ],
+      [ [ -1,  1 ], [0, -1], [ 1,  1] ],
+   ];
+
+   registerGlyph("david()", davidShape);
+
+   function david() {
+      var node = root.addNode();
+      node.addCylinder();
+      node.setMaterial(whiteMaterial);
+
+      var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
+
+      sketch.mouseDown = function(x, y) {
+         this.downX = x;
+         this.downY = y;
+      }
+      sketch.mouseDrag = function(x, y) {
+         console.log((this.downX - x) + " " + (this.downY - y));
+      }
+      sketch.mouseUp = function(x, y) {
+      }
+
+      sketch.onClick = function(x, y) { this.fadeTime = time; }
+
+      sketch.update = function(elapsed) {
+         var x0 = (this.xlo + this.xhi) / 2;
+         var y0 = (this.ylo + this.yhi) / 2;
+         var r  = (this.xhi - this.xlo) / 2;
+         _g.save();
+
+	 if (isDef(this.fadeTime)) {
+	    var t = (time - this.fadeTime) / 0.5;
+	    _g.globalAlpha = max(0, sCurve(1 - t));
+	    if (t > 1)
+	       return;
+         }
+
+         for (var i = 0 ; i < davidShape.length ; i++) {
+            _g.beginPath();
+            for (var j = 0 ; j < davidShape[i].length ; j++) {
+               var x = x0 + r * davidShape[i][j][0];
+               var y = y0 + r * davidShape[i][j][1];
+               if (j == 0)
+                  _g.moveTo(x, y);
+               else
+                  _g.lineTo(x, y);
+            }
+            _g.stroke();
+         }
+         _g.restore();
+      }
+   }
+
    registerGlyph("cup()", [
 
       // TEMPLATE TO MATCH FOR THE FREEHAND SKETCH OF THE COFFEE CUP.
@@ -184,7 +239,7 @@
 
       this.onSwipe = function(dx, dy) {
          var mode = pieMenuIndex(dx, dy);
-	 if (mode == 1 || mode == 3)
+         if (mode == 1 || mode == 3)
             for (var n = 0 ; n < this.freqs.length ; n++)
                this.freqs[n] *= (mode == 1 ? 2 : 0.5);
       }
@@ -286,10 +341,15 @@ var marbleFragmentShader = ["\
       float t = value == 0. ? 0. :\
                 value == 1. ? 0. :\
                 value == 2. ? .7 * noise(vec3(x,y,0.)) :\
-		value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
-		              .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) ;\
+                value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
+                value == 4. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
+                              .0 ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (value > 0.)\
+      if (value == 5.) {\
+         float b = noise(vec3(4.*x,4.*y,0));\
+         s = .5 + b;\
+      }\
+      else if (value > 0.)\
          s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
@@ -310,6 +370,7 @@ function marble() {
       ["add noise", "pstripe(x + noise(x,y,z))"],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
+      ["noise", ".5 + .5 * noise(x,y,z))"],
    ];
 }
 
@@ -325,12 +386,12 @@ var coronaFragmentShader = ["\
          if (value == 2.)\
             r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
          else if (value == 3.) {\
-	    float ti = time*.3;\
-	    float t = mod(ti, 1.);\
+            float ti = time*.3;\
+            float t = mod(ti, 1.);\
             float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1* t    +2.));\
             float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*(t-1.)+2.));\
-	    r = min(1., r + 0.2 * mix(u0, u1, t));\
-	 }\
+            r = min(1., r + 0.2 * mix(u0, u1, t));\
+         }\
          s = (1. - r) / (1. - b);\
       }\
       if (r0 < b)\
@@ -361,33 +422,35 @@ function corona() {
 
 
 var slicedFragmentShader = ["\
+   uniform float spinAngle;\
    void main(void) {\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
       float zp = dzdx * (x - mx * 1.3 + .3);\
       if (zp < -z)\
-	 rr = 1.;\
+         rr = 1.;\
       vec3 color = vec3(0.,0.,0.);\
       if (rr < 1.) {\
          vec3 nn = vec3(x, y, z);\
          if (zp < z) {\
             z = zp;\
-	    nn = normalize(vec3(-dzdx,0.,1.));\
+            nn = normalize(vec3(-dzdx,0.,1.));\
          }\
          float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3,.3,.3), nn));\
-         float X =  x * cos(value) + z * sin(value);\
+         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
          float Y =  y;\
-         float Z = -x * sin(value) + z * cos(value);\
-         float tu = turbulence(vec3(.9*X,.9*Y,.9*Z + 8.));\
+         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
+         vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
+         float tu = ( value>1. ? noise(P) : turbulence(P) );\
          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
          if (nn.x > 0.) {\
             float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
             color += vec3(h*.4, h*.7, h);\
-	 }\
-	 else {\
-	    float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
+         }\
+         else {\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
@@ -403,9 +466,20 @@ registerGlyph("sliced()",[
 function sliced() {
    var sketch = addShaderPlaneSketch(defaultVertexShader, slicedFragmentShader);
    sketch.mouseDrag = function(x, y) {}
-   sketch.spin = 0;
-   sketch.onClick = function() { this.spin = 1 - this.spin; }
-   sketch.update = function(elapsed) { this.value -= elapsed * this.spin; }
+/*
+   sketch.code = [
+      ["marble", "marble()"],
+      ["noise", "noise()"],
+   ];
+*/
+   sketch.spinRate = 0;
+   sketch.spinAngle = 0;
+   sketch.onClick = function() {
+      this.spinRate = -1 - this.spinRate;
+   }
+   sketch.update = function(elapsed) {
+      this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+   }
 }
 
 
@@ -420,64 +494,64 @@ function Grid() {
       var f = 2/3;
       m.save();
          m.scale(this.size / 400);
-	 if (this.gridMode != 3) {
+         if (this.gridMode != 3) {
             mCurve([[-1,0], [1, 0]]);
             mCurve([[ 0,1], [0, -1]]);
          }
-	 this.afterSketch(function(S) {
-	    if (S.gridMode != 3) {
+         this.afterSketch(function() {
+            if (this.gridMode != 3) {
                mCurve([[-1, f], [1, f]]);
                mCurve([[-1,-f], [1,-f]]);
                mCurve([[-f,1], [-f,-1]]);
                mCurve([[ f,1], [ f,-1]]);
             }
-	    var uColor = 'rgb(255,64,64)';
-	    var vColor = 'rgb(64,255,64)';
-	    switch (S.gridMode) {
+            var uColor = 'rgb(255,64,64)';
+            var vColor = 'rgb(64,255,64)';
+            switch (this.gridMode) {
             case 3:
             case 2:
-	       var d = 1/20;
-	       var e = d/2;
-	       lineWidth(0.5);
-	       for (var u = -1 ; u <= 1 + d/2 ; u += d)
-	       for (var v = -1 ; v <= 1 + d/2 ; v += d) {
-	          var t0 = noise2(u  , v  )*f;
-	          var tu = noise2(u+d, v  )*f;
-	          var tv = noise2(u  , v+d)*f;
-		  if (u < 1) {
-		     color(uColor);
-	             mCurve([[u*f,v*f,t0] , [(u+d)*f,v*f,tu]]);
+               var d = 1/20;
+               var e = d/2;
+               lineWidth(0.5);
+               for (var u = -1 ; u <= 1 + d/2 ; u += d)
+               for (var v = -1 ; v <= 1 + d/2 ; v += d) {
+                  var t0 = noise2(u  , v  )*f;
+                  var tu = noise2(u+d, v  )*f;
+                  var tv = noise2(u  , v+d)*f;
+                  if (u < 1) {
+                     color(uColor);
+                     mCurve([[u*f,v*f,t0] , [(u+d)*f,v*f,tu]]);
                   }
-		  if (v < 1) {
-		     color(vColor);
-	             mCurve([[u*f,v*f,t0] , [u*f,(v+d)*f,tv]]);
+                  if (v < 1) {
+                     color(vColor);
+                     mCurve([[u*f,v*f,t0] , [u*f,(v+d)*f,tv]]);
                   }
                }
-	       if (S.gridMode == 3)
-	          break;
-	    case 1:
-	       lineWidth(4);
-	       color(vColor);
-	       for (var u = -1 ; u <= 1 ; u += 1)
-	       for (var v = -1 ; v <= 1 ; v += 1) {
-	          var t0 = noise2(u, v    );
-	          var t1 = noise2(u, v+.01);
-		  var s = .1 * (t1 - t0) / .01;
-	          mCurve([[u*f,v*f-.1,-s] , [u*f,v*f+.1,s]]);
+               if (this.gridMode == 3)
+                  break;
+            case 1:
+               lineWidth(4);
+               color(vColor);
+               for (var u = -1 ; u <= 1 ; u += 1)
+               for (var v = -1 ; v <= 1 ; v += 1) {
+                  var t0 = noise2(u, v    );
+                  var t1 = noise2(u, v+.01);
+                  var s = .1 * (t1 - t0) / .01;
+                  mCurve([[u*f,v*f-.1,-s] , [u*f,v*f+.1,s]]);
                }
-	    case 0:
-	       lineWidth(4);
-	       color(uColor);
-	       for (var u = -1 ; u <= 1 ; u += 1)
-	       for (var v = -1 ; v <= 1 ; v += 1) {
-	          var t0 = noise2(u    , v);
-	          var t1 = noise2(u+.01, v);
-		  var s = .1 * (t1 - t0) / .01;
-	          mCurve([[u*f-.1,v*f,-s] , [u*f+.1,v*f,s]]);
+            case 0:
+               lineWidth(4);
+               color(uColor);
+               for (var u = -1 ; u <= 1 ; u += 1)
+               for (var v = -1 ; v <= 1 ; v += 1) {
+                  var t0 = noise2(u    , v);
+                  var t1 = noise2(u+.01, v);
+                  var s = .1 * (t1 - t0) / .01;
+                  mCurve([[u*f-.1,v*f,-s] , [u*f+.1,v*f,s]]);
                }
-	       break;
-	    }
-	 });
+               break;
+            }
+         });
       m.restore();
    }
 }
