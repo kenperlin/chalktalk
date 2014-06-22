@@ -338,17 +338,15 @@ function planet() { addPlaneShaderSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = value == 0. ? 0. :\
-                value == 1. ? 0. :\
+      float t = value == 0. ? .0 :\
+                value == 1. ? .0 :\
                 value == 2. ? .7 * noise(vec3(x,y,0.)) :\
                 value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
                 value == 4. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
                               .0 ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (value == 5.) {\
-         float b = noise(vec3(4.*x,4.*y,0));\
-         s = .5 + b;\
-      }\
+      if (value == 5.) \
+         s = .5 + noise(vec3(3.*x,3.*y,10.));\
       else if (value > 0.)\
          s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
@@ -396,7 +394,7 @@ var coronaFragmentShader = ["\
       }\
       if (r0 < b)\
          s *= (r0 - a) / (b - a);\
-      vec3 color = vec3(s,s,s);\
+      vec3 color = vec3(s);\
       if (value >= 1.) {\
          s = s * s * s;\
          color = vec3(s,s*s,s*s*s);\
@@ -430,14 +428,14 @@ var slicedFragmentShader = ["\
       float zp = dzdx * (x - mx * 1.3 + .3);\
       if (zp < -z)\
          rr = 1.;\
-      vec3 color = vec3(0.,0.,0.);\
+      vec3 color = vec3(0.);\
       if (rr < 1.) {\
          vec3 nn = vec3(x, y, z);\
          if (zp < z) {\
             z = zp;\
             nn = normalize(vec3(-dzdx,0.,1.));\
          }\
-         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3,.3,.3), nn));\
+         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\
          float X =  x * cos(spinAngle) + z * sin(spinAngle);\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
@@ -466,12 +464,6 @@ registerGlyph("sliced()",[
 function sliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
    sketch.mouseDrag = function(x, y) {}
-/*
-   sketch.code = [
-      ["marble", "marble()"],
-      ["noise", "noise()"],
-   ];
-*/
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
    sketch.onClick = function() {

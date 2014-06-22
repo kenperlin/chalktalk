@@ -1377,8 +1377,6 @@
 
       isCodeWidget = ! isCodeWidget;
 
-      console.log("TOGGLE CODE WIDGET " + (isCodeWidget ? "ON" : "OFF"));
-
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
@@ -3240,6 +3238,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // HANDLE MOUSE MOVE FOR THE SKETCH PAGE.
 
       this.mouseMove = function(x, y) {
+
+         this.moveX = x;
+         this.moveY = y;
 
          if (isFakeMouseDown) {
             this.mouseDrag(x, y);
@@ -6588,7 +6589,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
       }
       this.setUniform = function(name, value) {
-         this.geometry.material.setUniform(name, value);
+         if (isDef(this.geometry.material.uniforms[name]))
+            this.geometry.material.uniforms[name].value = value;
       }
       this.geometry = null;
    }
@@ -6667,21 +6669,26 @@ function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
 
    var u = "alpha mx my time value".split(' ');
    for (var i = 0 ; i < u.length ; i++)
-      material.declareUniform(u[i], 0.0);
+      material.uniforms[u[i]] = { type: "f", value: 0 };
 
 // FIND CUSTOM UNIFORMS:
 
-   var unis = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split("uniform");
-   for (var i = 0 ; i < unis.length ; i++) {
-      var str = unis[i].trim();
-      if (str.length > 0) {
-         var type = "";
-         var decl = str.split(" ");
-	 switch (decl[0]) {
-	 case "float": type = "f"; break;
-	 case "vec2": type = "v2"; break;
-	 case "vec3": type = "v3"; break;
-	 }
+   var typeInfo = "float f 0 vec3 v2 [0,0] vec3 v3 [0,0,0]".split(' ');
+   var declarations = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split(";");
+   for (var i = 0 ; i < declarations.length ; i++) {
+      var declaration = declarations[i].trim();
+      if (declaration.length > 0) {
+
+         var words = declaration.split(" ");
+	 if (words[0] == 'uniform') {
+            var type = words[1];
+            var name = words[2];
+	    for (var n = 0 ; n < typeInfo.length ; n += 3)
+	       if (type == typeInfo[n]) {
+	          material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
+	          break;
+               }
+         }
       }
    }
 
