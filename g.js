@@ -3439,10 +3439,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isk()) sk().moveCursor(+1);
             break;
          case U_ARROW:
-            if (isk()) sk().moveLine(+1);
+            if (isk()) sk().moveLine(-1);
             break;
          case D_ARROW:
-            if (isk()) sk().moveLine(-1);
+            if (isk()) sk().moveLine(+1);
             break;
          case 'command':
             isCommandPressed = false;
@@ -4808,7 +4808,46 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.moveLine = function(incr) {
          if (this.code != null && isCodeWidget) {
-            // move cursor in code widget
+            var currentPos = codeTextArea.selectionStart;
+            var lines = codeTextArea.value.split(/\r?\n/);
+
+            // find which line the cursor is in
+            var charCount = 0, currentLine = 0;
+            for ( ; currentLine < lines.length; currentLine++) {
+               var currentLineLength = lines[currentLine].length + 1;
+               if (currentPos < charCount + currentLineLength) {
+                  console.log("on line " + currentLine);
+                  break;
+               }
+               charCount += currentLineLength;
+            }
+
+            var nextLine = currentLine + incr;
+            if (nextLine >= 0 && nextLine < lines.length) {
+               var posOnLine = currentPos - charCount;
+
+               // move to the beginning of the next line
+               if (incr < 0) {
+                  codeTextArea.selectionStart -= posOnLine + lines[nextLine].length + 1;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               } else if (incr > 0) {
+                  codeTextArea.selectionStart += lines[currentLine].length - posOnLine + 1;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               }
+
+               // move cursor to same spot in line as before
+               if (posOnLine <= lines[nextLine].length) {
+                  codeTextArea.selectionStart += posOnLine;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               } else {
+                  codeTextArea.selectionStart += lines[nextLine].length;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               }
+            } else {
+               // this keeps the cursor from losing focus
+               codeTextArea.selectionStart = codeTextArea.selectionStart;
+               codeTextArea.selectionEnd = codeTextArea.selectionStart;
+            }
          } else {
             // move cursor in normal text area
          }
@@ -7074,7 +7113,7 @@ var glyphData = [
 "blinn()",
 ["%$%&$($*#,#.!0!2 5 7 9 ; = ? B D F H!J!L#N$P%R&T&V(X)Z*[,^-_/a0b2d4e5f7h9i;j=k>m@nBoDoFpHqJrLrNsPtRtTtVuXu[u^u`ubtdtfsgqipkolmnlpkrjshufvewcxay_z]{[|Y|W}T~R~P~N~L~J~H~F}C}A}?}=};}9|7|4|2|0{.{,z*z(y&x(",".[.^/`/b0d1f1h2j2k2k2i2g3f4g4i5k6m6n7p8r9t9s9q9o9m:k;j<l=m=o>q?s@uAvBuBsBqBoBmBkBkCmDoDqErFtGvHxIyJwJuJsJqJoJnLoMqNsOtPvQxRyS{SySwSuSsSqTpUrUtWuXwYxZyZw[v[t[r]p^q_s`uavcwcucscqdqerftguhuisjqkokmlkljmh","<O=O>P>P?P?Q?Q@R@R@SASATBTBTCUCUCVDVDVEWEWFWFXGXGXHXHYIYIYJYJZKZLZLZMZM[N[N[O[O]P]Q]Q]R]R]S]T]T]U]U]V]W]W]X]X]Y]Y]Z[[[[[][][^Z^Z_Z_Z`ZaZaZbYbYcYcYdYdXdXeXeWeWfVfVgUgUgThThShSiSiRiRiQjQjQjPjOjOjNjOjOjP",],
 "bumpmap()",
-["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",], 
+["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",],
 ];
 
 var glyphs = [];
