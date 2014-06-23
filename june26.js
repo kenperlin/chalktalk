@@ -21,33 +21,14 @@
 
       var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
 
-      sketch.mouseDown = function(x, y) {
-         this.downX = x;
-         this.downY = y;
-      }
-      sketch.mouseDrag = function(x, y) {
-         console.log((this.downX - x) + " " + (this.downY - y));
-      }
-      sketch.mouseUp = function(x, y) {
-      }
+      sketch.mouseDown = function(x, y) { }
+      sketch.mouseDrag = function(x, y) { }
+      sketch.mouseUp = function(x, y) { }
 
       sketch.onClick = function(x, y) { this.fadeTime = time; }
 
-      sketch.update = function(elapsed) {
-         var x0 = (this.xlo + this.xhi) / 2;
-         var y0 = (this.ylo + this.yhi) / 2;
-         var r  = (this.xhi - this.xlo) / 2;
-         _g.save();
-
-	 if (isDef(this.fadeTime)) {
-	    var t = (time - this.fadeTime) / 0.5;
-	    _g.globalAlpha = max(0, sCurve(1 - t));
-	    if (t > 1)
-	       return;
-         }
-
+      sketch.render = function(elapsed) {
          for (var i = 0 ; i < davidShape.length ; i++) {
-            _g.beginPath();
             for (var j = 0 ; j < davidShape[i].length ; j++) {
                var x = x0 + r * davidShape[i][j][0];
                var y = y0 + r * davidShape[i][j][1];
