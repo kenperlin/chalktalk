@@ -71,7 +71,7 @@ var pVaseFragmentShader = ["\
    void main(void) {\
         vec3 point = 5. * vPosition;\
         float a = -atan(point.x,point.y);\
-        float sweep = a > .1 && a < t || t > 2. ? 1. : 0.;\
+        float sweep = a > .1 && a < t || t > 3.14159 ? 1. : 0.;\
         float ma = mx-1.;\
         vec3 normal = normalize(vNormal);\
         float s = .3 + max(0.,dot(vec3(.3), normal));\
