@@ -20,6 +20,118 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
 // ]);
 
 
+   // var kenTestFragmentShader = ["\
+   //    uniform float t;\
+   //    void main(void) {\
+   //       vec3 point = 20. * vPosition;\
+   // float c = .5 + .5 * noise(5. * point);\
+   // vec3 color = vec3(c);\
+   //       float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
+   //       gl_FragColor = vec4(sweep * color, alpha);\
+   //    }\
+   // "].join('\n');
+
+   // function KenTest() {
+   //    this.labels = "can".split(' ');
+   //    this.render = function(elapsed) {
+   //       m.save();
+   // m.scale(this.size / 400);
+   // mCurve([ [-1,1], [-1,-1], [1,-1], [1,1] ]);
+   //       m.restore();
+   //    }
+   //    this.onClick = function(x, y) {
+   //       this.fadeAway = 1.0;
+   // glyphSketch.color = 'rgba(0,0,0,.01)';
+   //       var sketch = addGeometryShaderSketch(cylinderGeometry(32), defaultVertexShader, kenTestFragmentShader);
+   // sketch.startTime = time;
+   // sketch.update = function() {
+   //    var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+   //    this.geometry.getMatrix().scale(scale);
+   //    this.setUniform('t', (time - this.startTime) / 0.5);
+   // }
+   //    }
+   // }
+   // KenTest.prototype = new Sketch;
+
+
+var pVaseFragmentShader = ["\
+      uniform float t;\
+      void main(void) {\
+         vec3 point = 20. * vPosition;\
+         float c = .5 + .5 * noise(5. * point);\
+         vec3 color = vec3(c);\
+         float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
+         gl_FragColor = vec4(sweep * color, alpha);\
+      }\
+   "].join('\n');
+
+function pVase() {
+
+  this.labels = "can".split(' ');
+
+  this.render = function(elapsed) {
+    m.save();
+    m.scale(this.size / 400);
+    mCurve(lVaseShape[0]);
+    mCurve(lVaseShape[1]);
+    mCurve(lVaseShape[2]);
+    m.restore();
+  }
+
+  this.onClick = function(x, y) {
+
+    this.fadeAway = 1.0;
+
+    glyphSketch.color = 'rgba(0,0,0,.01)';
+    // var sketch = addGeometryShaderSketch(cylinderGeometry(32), defaultVertexShader, kenTestFragmentShader);
+
+
+    var tnode = new THREE.Mesh();
+
+    var body = tnode.addLathe( [
+      [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
+      ], 32);
+
+    var geo = body.geometry;
+
+    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+
+    console.log(sketch);
+    sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
+      .rotateX(PI/2)
+      .scale(12.2);
+
+    sketch.geometry.rotation.x = 1.5;
+
+    // body.material = vaseMaterial;
+    // body.material.side = THREE.DoubleSide;
+
+    // body.scale.set(.2,.2,.2);
+    for(var i = 0 ; i < body.geometry.faces.length ; i++){
+      var face = body.geometry.faces[i];
+      var temp = face.a;
+      var temp2 = face.c;
+      face.a = temp2;
+      face.c = temp;
+    }
+    sketch.geometry.geometry.computeFaceNormals();
+    sketch.geometry.geometry.computeVertexNormals();
+
+
+    sketch.startTime = time;
+
+    sketch.update = function() {
+      var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+      this.geometry.getMatrix().scale(scale);
+      this.setUniform('t', (time - this.startTime) / 0.5);
+    }
+  }
+}
+
+pVase.prototype = new Sketch;
+
+/////
+
    var lVaseShape =  [
     [[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502],[-3.086771,-0.114626]],
     [[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298],[-3.214532,13.201209]],
@@ -27,113 +139,113 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
 
     ];
 
-   registerGlyph("lVase()", lVaseShape);
+   // registerGlyph("lVase()", lVaseShape);
 
-   function lVase() {
+   // function lVase() {
 
-      var node = root.addNode();
-      // node.addCylinder();
-      // node.setMaterial(whiteMaterial);
+   //    var node = root.addNode();
+   //    // node.addCylinder();
+   //    // node.setMaterial(whiteMaterial);
 
-      // var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
+   //    // var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
 
 
-        var tnode = new THREE.Mesh();
+   //      var tnode = new THREE.Mesh();
 
-        var body = tnode.addLathe( [
-                [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
-                ], 32);
+   //      var body = tnode.addLathe( [
+   //              [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
+   //              ], 32);
 
        
 
-        var geo = body.geometry;
+   //      var geo = body.geometry;
 
 
-        var sketch = addGeometryShaderSketch(geo, defaultVertexShader, myFragmentShader);
+   //      var sketch = addGeometryShaderSketch(geo, defaultVertexShader, myFragmentShader);
 
-        console.log(sketch);
-        sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
-            .rotateX(PI/2)
-            .scale(12.2);
+   //      console.log(sketch);
+   //      sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
+   //          .rotateX(PI/2)
+   //          .scale(12.2);
 
-        sketch.geometry.rotation.x = 1.5;
+   //      sketch.geometry.rotation.x = 1.5;
        
-        // body.material = vaseMaterial;
-        // body.material.side = THREE.DoubleSide;
+   //      // body.material = vaseMaterial;
+   //      // body.material.side = THREE.DoubleSide;
 
-        // body.scale.set(.2,.2,.2);
-        for(var i = 0 ; i < body.geometry.faces.length ; i++){
-            var face = body.geometry.faces[i];
-            var temp = face.a;
-            var temp2 = face.c;
-            face.a = temp2;
-            face.c = temp;
-        }
-         sketch.geometry.geometry.computeFaceNormals();
-        sketch.geometry.geometry.computeVertexNormals();
+   //      // body.scale.set(.2,.2,.2);
+   //      for(var i = 0 ; i < body.geometry.faces.length ; i++){
+   //          var face = body.geometry.faces[i];
+   //          var temp = face.a;
+   //          var temp2 = face.c;
+   //          face.a = temp2;
+   //          face.c = temp;
+   //      }
+   //       sketch.geometry.geometry.computeFaceNormals();
+   //      sketch.geometry.geometry.computeVertexNormals();
 
 
-        // body.rotation.x = -Math.PI/2;
+   //      // body.rotation.x = -Math.PI/2;
         
 
-      sketch.mouseDown = function(x, y) {
-         this.downX = x;
-         this.downY = y;
-      }
-      sketch.mouseDrag = function(x, y) {
-         console.log((this.downX - x) + " " + (this.downY - y));
-      }
-      sketch.mouseUp = function(x, y) {
-      }
+   //    sketch.mouseDown = function(x, y) {
+   //       this.downX = x;
+   //       this.downY = y;
+   //    }
+   //    sketch.mouseDrag = function(x, y) {
+   //       console.log((this.downX - x) + " " + (this.downY - y));
+   //    }
+   //    sketch.mouseUp = function(x, y) {
+   //    }
 
-      sketch.onClick = function(x, y) { this.fadeTime = time; }
+   //    sketch.onClick = function(x, y) { this.fadeTime = time; }
 
-      sketch.update = function(elapsed) {
+   //    sketch.update = function(elapsed) {
 
-        if(this.Glyph == undefined){
-            this.Glyph = sketch.glyphSketch;
-            lVaseShape = this.Glyph.sp;
-        }
+   //      if(this.Glyph == undefined){
+   //          this.Glyph = sketch.glyphSketch;
+   //          lVaseShape = this.Glyph.sp;
+   //      }
 
-        // console.log(this.Glyph);
-        // var sx = sketchPage.mouseX/100;
-        // var sy = sketchPage.mouseY/100;
-        // sketch.geometry.material.uniforms['mx'].value = time*.5;
+   //      // console.log(this.Glyph);
+   //      // var sx = sketchPage.mouseX/100;
+   //      // var sy = sketchPage.mouseY/100;
+   //      // sketch.geometry.material.uniforms['mx'].value = time*.5;
 
-        sketch.geometry.getMatrix().translate(11.3,-20,0.0)
-                .rotateX(-PI/2)
-                .rotateZ(-PI/2)
-                .scale(4.1,4.1,3.68);
-         // console.log("x: " + sx + " y: " + sy + " " );
-         var x0 = lerp(.7,this.xlo,this.xhi);
-         var y0 = lerp(.16,this.ylo,this.yhi);
-         var r  = (this.xhi - this.xlo) / 2;
-         _g.save();
-         // console.log("x: " + sketchPage.x + " y: " + sketchPage.y);
+   //      sketch.geometry.getMatrix().translate(11.3,-20,0.0)
+   //              .rotateX(-PI/2)
+   //              .rotateZ(-PI/2)
+   //              .scale(4.1,4.1,3.68);
+   //       // console.log("x: " + sx + " y: " + sy + " " );
+   //       var x0 = lerp(.7,this.xlo,this.xhi);
+   //       var y0 = lerp(.16,this.ylo,this.yhi);
+   //       var r  = (this.xhi - this.xlo) / 2;
+   //       _g.save();
+   //       // console.log("x: " + sketchPage.x + " y: " + sketchPage.y);
 
-     if (isDef(this.fadeTime)) {
-        var t = min(1, (time - this.fadeTime) / 2.0);
-        this.value = t;
-        _g.globalAlpha = sCurve(1 - t) * (1-t);
-        if (t > 1)
-           return;
-         }
+   //   if (isDef(this.fadeTime)) {
+   //      var t = min(1, (time - this.fadeTime) / 2.0);
+   //      this.value = t;
+   //      _g.globalAlpha = sCurve(1 - t) * (1-t);
+   //      if (t > 1)
+   //         return;
+   //       }
 
-         for (var i = 0 ; i < lVaseShape.length ; i++) {
-            _g.beginPath();
-            for (var j = 0 ; j < lVaseShape[i].length ; j++) {
-               var x = x0 + r * lVaseShape[i][j][0]/7;
-               var y = y0 + r * lVaseShape[i][j][1]/7;
-               if (j == 0)
-                  _g.moveTo(x, y);
-               else
-                  _g.lineTo(x, y);
-            }
-            _g.stroke();
-         }
-         _g.restore();
-      }
-   }
+   //       for (var i = 0 ; i < lVaseShape.length ; i++) {
+   //          _g.beginPath();
+   //          for (var j = 0 ; j < lVaseShape[i].length ; j++) {
+   //             var x = x0 + r * lVaseShape[i][j][0]/7;
+   //             var y = y0 + r * lVaseShape[i][j][1]/7;
+   //             if (j == 0)
+   //                _g.moveTo(x, y);
+   //             else
+   //                _g.lineTo(x, y);
+   //          }
+   //          _g.stroke();
+   //       }
+   //       _g.restore();
+   //    }
+   // }
 
 
 vaseShader = {
@@ -419,7 +531,7 @@ barleyField = {
             if(i>0){
               thing.position.x = 50-Math.random()*100;
               thing.position.y = (Math.random()*10);
-              thing.position.z = thing.position.y*-9;
+              thing.position.z = 50+thing.position.y*-9;
               field.toGrow.push(thing);
               thing.grow = .001;
               thing.scale.set(.001,.001,.001);
@@ -440,10 +552,10 @@ barleyField = {
 
     draw:function(time){
        
-        offset = count*omouseX*.1;
+        offset = count*-.25*.1;
         
         for(var i = 0 ; i < things.length ; i++){
-            things[i].bones[1]._rotation.z = omouseY*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
+            things[i].bones[1]._rotation.z = .25*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
 
         }
 
@@ -467,7 +579,7 @@ function barley() {
   var a = root.addBarley();
 
   this.grow = false;
-  a.switcher = 0;
+  a.switcher = 1;
 
   sketch = geometrySketch(a);
 
@@ -477,19 +589,32 @@ function barley() {
   }
 
   sketch.mouseDrag = function(x, y) {
-      this.downX - x
-      console.log((this.downX - x) + " " + (this.downY - y));
+      var change = x - this.downX;
+
+      if(sketch.countUp==undefined){
+        sketch.countUp = 0;
+        sketch.countDown = 0;
+      }
+
+      if(change > 0)
+        this.countUp+=change*.01;
+      if(change < 0){
+        this.countDown+=change*.01;
+      }
+
+      console.log(change);
+      // console.log((this.downX - x) + " " + (this.downY - y));
   }
 
   a.update = function() {
 
-    // console.log(this);
+    // console.log(mouseX + " " + mouseY);
 
-    this.getMatrix().translate(0,-4.2,0).scale(0.2);
-    offset = time*mouseX*.002;
+    this.getMatrix().translate(0,-4.2,0).scale(0.2).rotateX(.2);
+    offset = time*444*.002;
         
     for(var i = 0 ; i < this.things.length ; i++){
-        this.things[i].bones[1]._rotation.z = (mouseY*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
+        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
 
     }
 
@@ -504,17 +629,19 @@ function barley() {
 
 
     if(this.switcher>0){
-      if(sketch.countUp==undefined)
-        sketch.countUp=-50;
       for(var i = 0 ; i < sketch.geometry.toGrow.length ; i++){
         var gs = sketch.countUp;
         var bar = sketch.geometry.toGrow[i];
-        if(sketch.countUp > bar.position.x && bar.grow<1)
-          bar.grow+=.1
+
+        if(sketch.countUp > bar.position.x && bar.position.x > 0 && bar.grow < 1)
+          bar.grow+=.1;
+        if(sketch.countDown < bar.position.x && bar.position.x < 0 && bar.grow < 1)
+          bar.grow+=.1;
+
         bar.scale.set(bar.grow,bar.grow,bar.grow);
       }
-      if(sketch.countUp<50)
-        sketch.countUp+=1;
+      // if(sketch.countUp<50)
+      //   sketch.countUp+=1;
     }
 
   }
