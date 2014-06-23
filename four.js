@@ -361,8 +361,13 @@
       this.matrixWorldNeedsUpdate = true;
    }
 
+   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
+   function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
+   function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
+   function globeGeometry(m, n) { return new THREE.SphereGeometry(1, m, n); }
+
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
-      var geometry = new THREE.TorusGeometry( 1, r, m, n );
+      var geometry = torusGeometry(r, m, n);
       var child = new THREE.Mesh( geometry, blackMaterial );
       this.add(child);
       return child;
@@ -381,7 +386,7 @@
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
       var child = new node();
-      var geometry = new THREE.CylinderGeometry(1, 1, 2, n, 1, false);
+      var geometry = cylinderGeometry(n);
       var mesh = new THREE.Mesh(geometry, blackMaterial);
       mesh.rotation.x = PI / 2;
       child.add(mesh);
@@ -391,7 +396,7 @@
    }
 
    THREE.Object3D.prototype.addCube = function() {
-      var geometry = new THREE.BoxGeometry(2, 2, 2);
+      var geometry = cubeGeometry();
       var child = new THREE.Mesh(geometry, blackMaterial);
       this.add(child);
       return child;
@@ -400,7 +405,7 @@
    THREE.Object3D.prototype.addGlobe = function(m, n) {
       if (m === undefined) m = 32;
       if (n === undefined) n = floor(m / 2);
-      var geometry = new THREE.SphereGeometry(1, m, n);
+      var geometry = globeGeometry(m, n);
       var child = new THREE.Mesh(geometry, blackMaterial);
       this.add(child);
       return child;

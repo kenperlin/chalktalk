@@ -37,21 +37,12 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
 
       // var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
 
-/*
-        glyphSketch = sk().clone();
-        var profile = glyphSketch.sp;
-*/
 
         var tnode = new THREE.Mesh();
 
-        var body = tnode.addLathe(
-/*
-		profile[0]
-*/
-	[
+        var body = tnode.addLathe( [
                 [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
-                ]
-		, 32);
+                ], 32);
 
        
 
@@ -98,12 +89,12 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
       sketch.onClick = function(x, y) { this.fadeTime = time; }
 
       sketch.update = function(elapsed) {
-/*
+
         if(this.Glyph == undefined){
             this.Glyph = sketch.glyphSketch;
             lVaseShape = this.Glyph.sp;
         }
-*/
+
         // console.log(this.Glyph);
         // var sx = sketchPage.mouseX/100;
         // var sy = sketchPage.mouseY/100;
@@ -128,13 +119,11 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
            return;
          }
 
-         var profile = lVaseShape;
-
-         for (var i = 0 ; i < profile.length ; i++) {
+         for (var i = 0 ; i < lVaseShape.length ; i++) {
             _g.beginPath();
-            for (var j = 0 ; j < profile[i].length ; j++) {
-               var x = x0 + r * profile[i][j][0]/7;
-               var y = y0 + r * profile[i][j][1]/7;
+            for (var j = 0 ; j < lVaseShape[i].length ; j++) {
+               var x = x0 + r * lVaseShape[i][j][0]/7;
+               var y = y0 + r * lVaseShape[i][j][1]/7;
                if (j == 0)
                   _g.moveTo(x, y);
                else
@@ -326,7 +315,7 @@ barleyField = {
     
     setup:function(){
 
-    	field = new THREE.Object3D();
+        field = new THREE.Object3D();
 
         tree = new TREE();
         
@@ -417,16 +406,26 @@ barleyField = {
 
         geo.bones.push(bone);
 
+
         things = [];
+        field.toGrow = [];
+
+
 
         for(var i = 0 ; i < 200 ; i++){
             var thing = new THREE.SkinnedMesh(geo,material,false);
             // thing.scale = new THREE.Vector3(5,5,5);
             thing.id=i;
-            thing.position.x = 50-Math.random()*100;
-            thing.position.y = (Math.random()*10);
-            thing.position.z = 50+-thing.position.y*9;
+            if(i>0){
+              thing.position.x = 50-Math.random()*100;
+              thing.position.y = (Math.random()*10);
+              thing.position.z = thing.position.y*-9;
+              field.toGrow.push(thing);
+              thing.grow = .001;
+              thing.scale.set(.001,.001,.001);
+            }
             thing.position.y+=20;
+            
             field.add(thing);
             things.push(thing);
         }
@@ -453,7 +452,6 @@ barleyField = {
     }
 }
 
-
 registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
 
@@ -465,23 +463,71 @@ THREE.Object3D.prototype.addBarley = function() {
 }
 
 function barley() {
-	var a = root.addBarley();
-	geometrySketch(a);
-	a.update = function() {
-		this.getMatrix().translate(0,-2,0).scale(0.08);
-		 offset = time*mouseX*.002;
+
+  var a = root.addBarley();
+
+  this.grow = false;
+  a.switcher = 0;
+
+  sketch = geometrySketch(a);
+
+  sketch.mouseDown = function(x, y) {
+     this.downX = x;
+     this.downY = y;
+  }
+
+  sketch.mouseDrag = function(x, y) {
+      this.downX - x
+      console.log((this.downX - x) + " " + (this.downY - y));
+  }
+
+  a.update = function() {
+
+    // console.log(this);
+
+    this.getMatrix().translate(0,-4.2,0).scale(0.2);
+    offset = time*mouseX*.002;
         
-        for(var i = 0 ; i < this.things.length ; i++){
-            this.things[i].bones[1]._rotation.z = (mouseY*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
+    for(var i = 0 ; i < this.things.length ; i++){
+        this.things[i].bones[1]._rotation.z = (mouseY*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
 
-        }
+    }
+
+    if (isDef(this.fadeTime)) {
+      var t = min(1, (time - this.fadeTime) / 2.0);
+      this.value = t;
+      _g.globalAlpha = sCurve(1 - t) * (1-t);
+    }
+
+    // console.log(this);
 
 
-	}
+
+    if(this.switcher>0){
+      if(sketch.countUp==undefined)
+        sketch.countUp=-50;
+      for(var i = 0 ; i < sketch.geometry.toGrow.length ; i++){
+        var gs = sketch.countUp;
+        var bar = sketch.geometry.toGrow[i];
+        if(sketch.countUp > bar.position.x && bar.grow<1)
+          bar.grow+=.1
+        bar.scale.set(bar.grow,bar.grow,bar.grow);
+      }
+      if(sketch.countUp<50)
+        sketch.countUp+=1;
+    }
+
+  }
+
+  sketch.onClick = function(x, y) { 
+    console.log(a.switcher);
+    a.switcher += 1;
+    this.fadeTime = time; 
+    this.grow = true;
+    
+  }
+
 }
-
-
-
 
 fragPlane = {
     
@@ -504,7 +550,7 @@ fragPlane = {
                " void main() {",
                "    vUv = uv;",
                "     vNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;",
-               // "     vecNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
+               // "     vecNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
 
                "     gl_Position = projectionMatrix *",
                "                   modelViewMatrix *",
@@ -8009,4 +8055,3 @@ MicrophoneSample.prototype.visualize = function() {
   // }
   requestAnimFrame(this.visualize.bind(this));
 };
-

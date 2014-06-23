@@ -104,10 +104,9 @@
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
    function blinn() { image('blinn.png', 2.4); }
    function diner() { image('red_fox_diner.jpg', 0.8); }
-   function face() { image('smiling-cat.jpg', 0.35); }
+   function face() { image('smiling_cat.jpg', 0.35); }
    function kwa() { image('kwalado.jpg'); }
-   function mit() { image('tangible_media_lab.jpg'); }
-   function bumpmap() { image('blinn-strawberry.jpg', 0.7); }
+   function bumpmap() { image('strawberry.jpg', 0.7); }
    function vase() { image('vase.png', 0.7); }
 
    function unitCube() {
@@ -121,6 +120,38 @@
    function unitTube() {
       drawUnitTube();
    }
+
+   var kenTestFragmentShader = ["\
+      uniform float t;\
+      void main(void) {\
+         vec3 point = 20. * vPosition;\
+	 vec3 color = vec3(.5 + .5 * noise(5. * point));\
+         float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
+         gl_FragColor = vec4(sweep * color, alpha);\
+      }\
+   "].join('\n');
+
+   function KenTest() {
+      this.labels = "can".split(' ');
+      this.render = function(elapsed) {
+         m.save();
+	 m.scale(this.size / 400);
+	 mCurve([ [-1,1], [-1,-1], [1,-1], [1,1] ]);
+         m.restore();
+      }
+      this.onClick = function(x, y) {
+         this.fadeAway = 1.0;
+	 glyphSketch.color = 'rgba(0,0,0,.01)';
+         var sketch = addGeometryShaderSketch(cylinderGeometry(32), defaultVertexShader, kenTestFragmentShader);
+	 sketch.startTime = time;
+	 sketch.update = function() {
+	    var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+	    this.geometry.getMatrix().scale(scale);
+	    this.setUniform('t', (time - this.startTime) / 0.5);
+	 }
+      }
+   }
+   KenTest.prototype = new Sketch;
 
    function Bird() {
       this.T = 0;
@@ -299,20 +330,20 @@
       }
    }
    Bird.prototype = new Sketch;
-/*
+
    function David() {
       this.labels = "david1".split(' ');
       this.render = function(elapsed) {
          var sc = this.size / 400;
          m.save();
 	 m.scale(sc);
-	 mCurve([[-1, 1],[0,-1],[1, 1]]);
 	 mCurve([[-1,-1],[0, 1],[1,-1]]);
+	 mCurve([[-1, 1],[0,-1],[1, 1]]);
          m.restore();
       }
    }
    David.prototype = new Sketch;
-*/
+
    function Control() {
       this.labels = "slideX slideY".split(' ');
 
@@ -954,11 +985,23 @@
    Graph.prototype = new Sketch;
 
    function Func() {
-      this.labels = "exp".split(' ');
+      this.labels = "exp sin".split(' ');
+
+      function makeCurve(f) {
+         var curve = [];
+         for (var t = -1 ; t <= 1 ; t += .1)
+	    curve.push([t, f(t)]);
+	 return curve;
+      }
 
       this.s = -1;
-      this.code = [["exp", "exp(x)"]];
-      this.EXP = [[-1,-.2],[-.67,-.18],[-.33,-.12],[0,0],[.25,.33],[.375,.6],[.45,1]];
+      this.code = [
+         ["exp", "exp(x)"],
+         ["sin", "sin(x)"],
+      ];
+
+      this.EXP = makeCurve(function(x) { return exp(x - 1); });
+      this.SIN = makeCurve(function(x) { return sin(PI * x) * .5; });
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
@@ -986,7 +1029,10 @@
 	 mLine([-1,0],[1, 0]);
          _g.lineWidth *= 3;
 
-	 mCurve(this.EXP);
+         switch (this.code[s][0]) {
+	 case "exp": mCurve(this.EXP); break;
+	 case "sin": mCurve(this.SIN); break;
+	 }
 
 	 m.restore();
       }
@@ -1398,7 +1444,7 @@
    var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid" ).split(' ');
 
    var pages = [
-      ["page0", sketchTypes.concat(["Noises"])],
+      ["page0", sketchTypes.concat(["Noises"]).concat(["KenTest"])],
       ["page1", sketchTypes],
       ["page2", sketchTypes],
       ["page3", sketchTypes],
