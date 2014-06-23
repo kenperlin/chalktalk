@@ -1644,6 +1644,11 @@
       }
       this.mouseUp = function(x, y) {
          path.push([x,y]);
+	 var kw = w - 3*s/2;
+         return (x > (this.x - kw/2) || x < (this.x + kw/2) ||
+                 y > (this.y - s*13.05) || y < (this.y + s*2.5));
+      }
+      this.keyClick = function(x, y) {
          return this.keyPressed != null && this.key != null;
       }
       this.dismissClick = function(x, y) {
@@ -2955,8 +2960,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isKeyboard() && !keyboard.dismissClick(x,y) && keyboard.mouseUp(x,y)) {
-            this.handleTextChar(keyboard.key);
-            return;
+            if (!keyboard.keyClick(x,y)) {
+                return;
+            } else {
+                this.handleTextChar(keyboard.key);
+                return;
+            }
          }
 
          if (isBottomGesture) {
