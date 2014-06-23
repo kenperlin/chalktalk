@@ -54,28 +54,54 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
    // KenTest.prototype = new Sketch;
 
 
-var pVaseFragmentShader = ["\
-      uniform float t;\
-      void main(void) {\
-         vec3 point = 20. * vPosition;\
-         float c = .5 + .5 * noise(5. * point);\
-         vec3 color = vec3(c);\
-         float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
-         gl_FragColor = vec4(sweep * color, alpha);\
-      }\
-   "].join('\n');
+// var pVaseFragmentShader = ["\
+//       uniform float t;\
+//       void main(void) {\
+//          vec3 point = 20. * vPosition;\
+//          float c = .5 + .5 * noise(5. * point);\
+//          vec3 color = vec3(c);\
+//          float sweep = atan(point.x, -point.y) < t ? 1. : 0.;\
+//          gl_FragColor = vec4(sweep * color, alpha);\
+//       }\
+//    "].join('\n');
 
-function pVase() {
+
+var pVaseFragmentShader = ["\
+   uniform float t;\
+   void main(void) {\
+        vec3 point = 5. * vPosition;\
+        float a = -atan(point.x,point.y);\
+        float sweep = a > .1 && a < t || t > 2. ? 1. : 0.;\
+        float ma = mx-1.;\
+        vec3 normal = normalize(vNormal);\
+        float s = .3 + max(0.,dot(vec3(.3), normal));\
+        float tu = turbulence(point) ;\
+        float c = pow(.5 + .5 * sin(7. * point.y + 4. * tu), .1);\
+        vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+        if (vNormal.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), normal), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+        }\
+        else {\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), normal), 7.);\
+            color += vec3(h, h*.8, h*.6);\
+        }\
+      gl_FragColor = vec4(color*sweep,alpha);\
+   }\
+"].join("\n");
+
+function PVase() {
 
   this.labels = "can".split(' ');
 
   this.render = function(elapsed) {
     m.save();
     m.scale(this.size / 400);
-    mCurve(lVaseShape[0]);
-    mCurve(lVaseShape[1]);
-    mCurve(lVaseShape[2]);
-    m.restore();
+    // mCurve([ [1,1], [-1,-1], [1,-1]]);
+    // mCurve([[1,-1],[1,1] ])
+   mCurve([[0.129879,0.871339],[0.118959,0.911377],[0.0736839,0.932526],[0.034521,0.942733],[-0.00830282,0.94241],[-0.0495007,0.927813],[-0.0638067,0.886885],[-0.0421678,0.850065],[-0.0050293,0.828285],[0.0175018,0.791921],[0.0333861,0.752768],[0.0448524,0.711961],[0.0512502,0.670059],[0.0493105,0.627687],[0.0380184,0.586781],[0.0164934,0.550038],[-0.0154051,0.522049],[-0.0547736,0.505917]]);
+mCurve([[-0.0547736,0.505917],[-0.0954771,0.494447],[-0.136388,0.483518],[-0.176805,0.470973],[-0.216871,0.457225],[-0.256804,0.443503],[-0.296805,0.428668],[-0.327872,0.399691],[-0.348802,0.362617],[-0.363737,0.323017],[-0.375422,0.282316],[-0.383482,0.240741],[-0.388032,0.198647],[-0.389108,0.156325],[-0.386651,0.114058],[-0.380602,0.0721527], [-0.371009,0.0308988],[-0.357728,-0.00931361],[-0.341286,-0.048323],[-0.322118,-0.086074],[-0.300868,-0.122689],[-0.278113,-0.158384],[-0.254214,-0.193322],[-0.22946,-0.227659],[-0.20408,-0.261535],[-0.178274,-0.295086],[-0.152226,-0.328451],[-0.126139,-0.361785],[-0.100227,-0.395254],[-0.0747584,-0.429064],[-0.0502781,-0.463599],[-0.0274611,-0.49926],[-0.00719704,-0.536432]]);
+mCurve([[-0.00719704,-0.536432],[0.00970687,-0.575302],[0.0218883,-0.615756],[0.0280333,-0.658085],[0.0257941,-0.699317],[0.0221494,-0.74537],[-0.0162775,-0.757614],[-0.0558051,-0.773485],[-0.0824925,-0.807541],[-0.0952201,-0.846889],[-0.0978507,-0.892108],[0.289949,-0.895665]]);    m.restore();
   }
 
   this.onClick = function(x, y) {
@@ -99,9 +125,9 @@ function pVase() {
     console.log(sketch);
     sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
       .rotateX(PI/2)
-      .scale(12.2);
+      .scale(1.2);
 
-    sketch.geometry.rotation.x = 1.5;
+    // sketch.geometry.rotation.x = 1.5;
 
     // body.material = vaseMaterial;
     // body.material.side = THREE.DoubleSide;
@@ -117,18 +143,18 @@ function pVase() {
     sketch.geometry.geometry.computeFaceNormals();
     sketch.geometry.geometry.computeVertexNormals();
 
-
     sketch.startTime = time;
 
     sketch.update = function() {
       var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().scale(scale);
+      this.geometry.getMatrix().translate(sketchPage.x/100,(sketchPage.y/100)-15,0.0).
+      rotateX(-PI/2).rotateZ(PI/2).scale(scale/8);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
   }
 }
 
-pVase.prototype = new Sketch;
+PVase.prototype = new Sketch;
 
 /////
 
