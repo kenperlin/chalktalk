@@ -125,8 +125,7 @@
       uniform float t;\
       void main(void) {\
          vec3 point = 20. * vPosition;\
-	 float c = .5 + .5 * noise(5. * point);\
-	 vec3 color = vec3(c);\
+	 vec3 color = vec3(.5 + .5 * noise(5. * point));\
          float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
          gl_FragColor = vec4(sweep * color, alpha);\
       }\
