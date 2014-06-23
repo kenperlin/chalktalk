@@ -1652,6 +1652,7 @@
              y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
             isKeyboardMode = false;
             setTextMode(false);
+            if (isCodeWidget) toggleCodeWidget();
             return true;
          } else {
             return false;
@@ -3440,8 +3441,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (isk()) sk().moveCursor(+1);
             break;
          case U_ARROW:
+            if (isk()) sk().moveLine(-1);
             break;
          case D_ARROW:
+            if (isk()) sk().moveLine(+1);
             break;
          case 'command':
             isCommandPressed = false;
@@ -4797,7 +4800,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.mouseMove = function(x, y) {}
       this.mouseUp = function(x, y) {}
       this.moveCursor = function(incr) {
-         var hasCodeBubble = this.code != null && isCodeWidget;
          if (this.code != null && isCodeWidget) {
             var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
             codeTextArea.selectionStart = newPos;
@@ -4805,6 +4807,52 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          } else {
             this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
         }
+      }
+      this.moveLine = function(incr) {
+         if (this.code != null && isCodeWidget) {
+            var currentPos = codeTextArea.selectionStart;
+            var lines = codeTextArea.value.split(/\r?\n/);
+
+            // find which line the cursor is in
+            var charCount = 0, currentLine = 0;
+            for ( ; currentLine < lines.length; currentLine++) {
+               var currentLineLength = lines[currentLine].length + 1;
+               if (currentPos < charCount + currentLineLength) {
+                  console.log("on line " + currentLine);
+                  break;
+               }
+               charCount += currentLineLength;
+            }
+
+            var nextLine = currentLine + incr;
+            if (nextLine >= 0 && nextLine < lines.length) {
+               var posOnLine = currentPos - charCount;
+
+               // move to the beginning of the next line
+               if (incr < 0) {
+                  codeTextArea.selectionStart -= posOnLine + lines[nextLine].length + 1;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               } else if (incr > 0) {
+                  codeTextArea.selectionStart += lines[currentLine].length - posOnLine + 1;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               }
+
+               // move cursor to same spot in line as before
+               if (posOnLine <= lines[nextLine].length) {
+                  codeTextArea.selectionStart += posOnLine;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               } else {
+                  codeTextArea.selectionStart += lines[nextLine].length;
+                  codeTextArea.selectionEnd = codeTextArea.selectionStart;
+               }
+            } else {
+               // this keeps the cursor from losing focus
+               codeTextArea.selectionStart = codeTextArea.selectionStart;
+               codeTextArea.selectionEnd = codeTextArea.selectionStart;
+            }
+         } else {
+            // move cursor in normal text area
+         }
       }
       this.nPorts = 0;
       this.offsetSelection = function(d) { this.selection += d; }
@@ -6712,7 +6760,7 @@ function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
          this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
          this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
       }
-      this.material.uniforms['alpha'].value = S.fadeAway == 0 ? 1 : S.fadeAway;
+      this.material.uniforms['alpha'].value = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
       this.material.uniforms['value'].value = isDef(S.selectedIndex) ? S.selectedIndex : isDef(S.value) ? S.value : 0;
    }
    return mesh.sketch;
@@ -7087,8 +7135,6 @@ var glyphData = [
 ["`0^0Z0X0U0R0P/M/K/H/E/C/@0>0;19263442607.9,;*=)?'A%C$E#G!J L O Q T W!Y#[%^'`)a+c-d0e2f5h7i9j<k>lAlCmFnHnKoMoPpSpUpXpZp^papcofohnkmmkojqhsguewdyb{`|^}Z}X~U~R~P~M}K|IzGxDwBv@t>r<q:o8m7j6h5e4c4`4^3Z3X3U3",":V:V;V;V<V<V<V=V=V>V>V?V?V?V@W@WAWAWAWBWBWCWCWCXDXDXEXEXEXFXFXGYGYGYHYHYIYIYIYJYJYKYKYKYLZLZMZMZMZNZNZOZOZPZPZPZQZQZRZRZRZSZSZTZTZUZUZUZVZVZWZWZWZXZXZYZYZZZZZZZ[Z[Z]Y]Y]Y^Y^Y^Y_X_X_X`W`W`WaWaWaVbVbVbU","9C9C9C9C9C9C9B8B8B8B8B8B8B8B8B9B9B9B9B9B9B9B:B:B:B:B:B:B:B:B;B;A;A;A;A;A;A;A;A;A<A<A<@<@<@<@<@<@<@=@=@=@=@=@=@=@=?>?>?>?>?>?>?>?>?????????????????@?@?@?@?@?@?@?A?A?A?A?A?A?A?B?B?B?B?B?B?B?B?C?C?C?C?C?","Y<Y<Y<Y<Y<Y<Z<Z<Z<Z<Z<Z<Z<Z<Z<[<[<[<[<[<[<[<[<]<]<]<]<]<]<]<]<]<^<^<^<^<^<^<^<^<_<_<_<_<_<_<_<_<_=_=`=`=`=`=`=`=`=`=`=`=a=a=a=a=a=a=a=a=a=b=b=b>b>b>b>b>b>b>b>b>b>b>b>b?b?b?b?c?c?c?c?c?c?c@c@c@c@c@c@c@",],
 "kwa()",
 ["K H E C @!>#<%:&8(5*3+1-0/.1-4,6+9*;*>)@)C(F(H'K'N'P'S(U)X*Z,]._/b1d3e5g7h:i<j?kBlDlGmImLnOnQoToWoYo]n_mbldkgjiilinhqfseucvax_y]zY{W|T}R}O~L~J~G~D}B}?{=z:y8x6v3u1s/q.o,m*k(i'g%d$b#_!]!Y V T Q N L I!F!","B!A!@!@!?!?!>!=!=!<!<!;!:!:!9!9 8 7 7 6 5 5 4 4 3 2 2 1 1!0!/!/!.!.!-#-#,#,$+$+$*%)%)%(%(&(&''''&(&(&)%)%*%*$+$+$,#,#-#-!.!.!/ / 0 1 1 2 2 3 4 4 5 6 6 7 7 8 9 9!9!:!;!;#<#<#=#=$>$>$?%?%@%@%A&A&A'B'B'C","W*V*T*S*Q*P*N*M*K*J*H*G*E*D*B+A,@-@.?/?1?2>4=5<6<7;9;:;<;=;?:@:B:C:E:F:H;I;J<L=M>N?O@PBQCQDRFSGSHSJSKSMSNSPSQRSRTRVQWQYQZP]P^O_O`MaLbKdJdIeHfFfEfCgBhAh?i>j=k;k:k8k7j5j4i3h1h0g/e.d-c-a-`,_+]+[*Z*X*W*V)","ImImInInInInInInInInIoIoIoIoIoIoIoIoIpIpIpIpIpIpIpIpIqIqIqHqHqHqHqHqHqHqHqHrHrHrHrHrHrGrGrGsGsGsGsGsGsGsGsGsGsGtGtFtFtFtFtFtFtFtFtFuFuFuFuFuFuFuFuFvFvFvFvFvFvFvFvFvEwEwEwEwEwEwEwEwEwExExExExExExExExEx","dldldldmdmdmdmdmdndndndndodododododpdpdpdpdpdqdqdqdqdqdrdrdrdrdsdsdsdsdsdtdtdtdtdtdudueueueuevevevevevewewewewewexexexexexeyfyfyfyfyfzfzfzfzfzgzg{g{g{g{g{g{g{h|h|h|h|h|h|h|h|i}i}i}i}i}i}i}j~j~j~j~i~i~",],
-"mit()",
-["!f!d!c!a!`!^!]!Z!X!W!U!T!R!Q!O!N!L!K!I!H!F!E!C!B!@!?!= < ; 9 8 7!8#9#:%;%<&='>(?)@*A+C-C.D.F0G1H2I3J3I4H5G6F6E7C7B8A:A:?;><==<=;>9>8?8@7@8@:@;@=@?@@@B@C@E@F@H@I@K@L@N@O@Q@R@T@U@W@X@Z@[@^@_@a@bAdAeAfAh","E7E7E7F7F7F7F7G7G7G7G7G7H7H7H7H7I7I7I7I7I7J7J7J7J7J7K7K7K7K7L7L7L7L7L7M7M7M7M7N7N7N7N7N7O7O7O7O7P7P7P7P7P7Q7Q7Q7Q7R7R7R7R7R7S7S7S7S7T7T7T7T7T7U7U7U7U7V7V7V7V7V7W7W7W7W7W7X7X7X7X7Y7Y7Y7Y7Y7Z7Z7Z7Z7[7[7","EfEfEfFfFfFfFfFfGfGfGfGfHfHfHfHfHfIfIfIfIfJfJfJfJfJfKfKfKfKfKfLfLfLfLfMfMfMfMfMfNfNfNfNfOfOfOfOfOfPfPfPfPfPfPfPfQfQfQfQfQfRfRfRfRfRfSfSfSfSfTfTfTfTfTfUfUfUfUfVfVfVfVfVfWfWeWeWeWeWeXeXeXeXeYeYeYeYeYeZe","O7O8O8O9O9O9O:O:O;O;O<O<O=O=O>O>O?O?O@O@OAOAOBOBOCOCOCODODPEPEPFPFPGPGPHPHPIPIPJPJPKPKPKPLPLPMPMPNPNPOPOPPPPPQPQPRPRPSPSPSPTQTQUQUQVQVQWQWQXQXQYQYQZQZQ[Q[Q]Q]Q]Q^Q^Q_Q_Q`Q`QaQaQbQbQcQcQdQdQePePePfPfPg","_7`7`7`7a7a7a7b7b7b7b7c7c7c7d7d7d7e7e7e7f7f7f7f7g7g7g7h7h7h7i7i7i7j7j7j7j7k7k7k7l7l7l7m7m7m7n7n7n7o7o7o7o7p7p7p7q7q7q7r7r7r7s7s7s7s7t7t7t7u7u7u7v7v7v7w7w7w7w7x7x7x7y7y7y7z7z7z7{7{7{7|7|7|7|7}7}7}7~7~7","o8o9o9o:o:o;o;o<o<o=o=o>o>o?o?o@o@oAoAoAoBoBoCoCoDoDoEoEoFoFoGoGoHoHoIoIoJoJoKoKoLoLoMoMoNoNoOoOoOoPoPoQoQoRoRoSoSoToToUoUoVoVoWoWoXoXoYoYoZoZo[o[o]n]n]n^m^m^m_m_m`m`mamambmbmcmcmdmdmememfmfmgmgmhmhmh",],
 "kbd()",
 ["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
 "diner()",
@@ -7098,7 +7144,7 @@ var glyphData = [
 "blinn()",
 ["%$%&$($*#,#.!0!2 5 7 9 ; = ? B D F H!J!L#N$P%R&T&V(X)Z*[,^-_/a0b2d4e5f7h9i;j=k>m@nBoDoFpHqJrLrNsPtRtTtVuXu[u^u`ubtdtfsgqipkolmnlpkrjshufvewcxay_z]{[|Y|W}T~R~P~N~L~J~H~F}C}A}?}=};}9|7|4|2|0{.{,z*z(y&x(",".[.^/`/b0d1f1h2j2k2k2i2g3f4g4i5k6m6n7p8r9t9s9q9o9m:k;j<l=m=o>q?s@uAvBuBsBqBoBmBkBkCmDoDqErFtGvHxIyJwJuJsJqJoJnLoMqNsOtPvQxRyS{SySwSuSsSqTpUrUtWuXwYxZyZw[v[t[r]p^q_s`uavcwcucscqdqerftguhuisjqkokmlkljmh","<O=O>P>P?P?Q?Q@R@R@SASATBTBTCUCUCVDVDVEWEWFWFXGXGXHXHYIYIYJYJZKZLZLZMZM[N[N[O[O]P]Q]Q]R]R]S]T]T]U]U]V]W]W]X]X]Y]Y]Z[[[[[][][^Z^Z_Z_Z`ZaZaZbYbYcYcYdYdXdXeXeWeWfVfVgUgUgThThShSiSiRiRiQjQjQjPjOjOjNjOjOjP",],
 "bumpmap()",
-["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",], 
+["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",],
 ];
 
 var glyphs = [];
