@@ -1380,6 +1380,7 @@
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
+      codeSelector = null;
       if (isCodeWidget) {
          var options = "";
          for (var i = 0 ; i < code().length ; i++)
@@ -3114,7 +3115,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    if (this.isClick && isHover() && isDef(sk().onClick))
 	       sk().onClick(x, y);
 
-	    if (! this.isClick && isDef(sk().onSwipe))
+	    if (! this.isClick && isk() && isDef(sk().onSwipe))
 	       sk().onSwipe(x - this.xDown, y - this.yDown);
          }
 
@@ -4504,12 +4505,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (this.sketchProgress < 1) {
             _g.save();
             _g.globalAlpha = 1 - this.styleTransition;
-            this.duringSketchCallbackFunction = collbackFunction;
+            this.duringSketchCallbackFunction = callbackFunction;
             this.duringSketchCallbackFunction();
             _g.restore();
          }
       }
-      this.afterSketch = function(collbackFunction) {
+      this.afterSketch = function(callbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
 	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
@@ -4518,7 +4519,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                   : this.styleTransition) * fade;
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
-            this.afterSketchCallbackFunction = collbackFunction;
+            this.afterSketchCallbackFunction = callbackFunction;
             this.afterSketchCallbackFunction();
             _g.restore();
          }
@@ -6054,9 +6055,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   a.outValue[0] = a.inValue[0];
                else
                   try {
-                     var result = eval(a.text.replace(/x/g, '('+value(a.inValue[0])+')')
-                                             .replace(/y/g, '('+value(a.inValue[1])+')')
-                                             .replace(/z/g, '('+value(a.inValue[2])+')'));
+                     var x = value(a.inValue[0]);
+                     var y = value(a.inValue[1]);
+                     var z = value(a.inValue[2]);
+                     var result = eval(a.text);
                      if (isNumber(parseFloat(result)))
                         a.outValue[0] = result;
                   } catch (e) { }

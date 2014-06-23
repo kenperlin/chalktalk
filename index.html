@@ -985,7 +985,18 @@
    Graph.prototype = new Sketch;
 
    function Func() {
-      this.labels = "exp sin".split(' ');
+      this.s = -1;
+
+      this.code = [
+         ["cos", "cos(x)"],
+         ["exp", "exp(x)"],
+         ["sin", "sin(x)"],
+         ["sqr", "x * x"],
+      ];
+
+      this.labels = [];
+      for (var i = 0 ; i < this.code.length ; i++)
+         this.labels.push(this.code[i][0]);
 
       function makeCurve(f) {
          var curve = [];
@@ -994,45 +1005,44 @@
 	 return curve;
       }
 
-      this.s = -1;
-      this.code = [
-         ["exp", "exp(x)"],
-         ["sin", "sin(x)"],
+      var curves = [
+         makeCurve(function(x) { return cos(PI * x) / PI; }),
+         makeCurve(function(x) { return exp(x - 1); }),
+         makeCurve(function(x) { return sin(PI * x) / PI; }),
+         makeCurve(function(x) { return x * x; }),
       ];
-
-      this.EXP = makeCurve(function(x) { return exp(x - 1); });
-      this.SIN = makeCurve(function(x) { return sin(PI * x) * .5; });
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
-	 var s = this.selection;
-         if (s != this.s) {
-            this.clearPorts();
+
+         if (this.nPorts == 0) {
             this.addPort("x", -sc, 0);
             this.addPort("f",  sc, 0);
-            this.s = s;
          }
+
+	 var s = this.selection;
+	 if (isDef(this.selectedIndex))
+            this.selection = this.selectedIndex;
+         else
+            this.selectedIndex = this.selection;
 
          m.save();
          m.scale(sc);
 
          var x = this.getInFloat("x");
-         var f = null;
+         var result = null;
          try {
-            eval("f = (" + this.code[0][1] + ")");
+            eval("result = (" + this.code[s][1] + ")");
          } catch (e) {}
-	 if (f != null)
-            this.setOutValue("f", f);
+	 if (result != null)
+            this.setOutValue("f", result);
 
          _g.lineWidth /= 3;
 	 mLine([ 0,1],[0,-1]);
 	 mLine([-1,0],[1, 0]);
          _g.lineWidth *= 3;
 
-         switch (this.code[s][0]) {
-	 case "exp": mCurve(this.EXP); break;
-	 case "sin": mCurve(this.SIN); break;
-	 }
+         mCurve(curves[s]);
 
 	 m.restore();
       }

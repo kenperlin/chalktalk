@@ -362,6 +362,7 @@
    }
 
    function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
+   function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
    function globeGeometry(m, n) { return new THREE.SphereGeometry(1, m, n); }
@@ -377,7 +378,7 @@
       var points = [];
       for (var i = 0 ; i < p.length ; i++)
          points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
-      var geometry = new THREE.LatheGeometry( points, nSegments );
+      var geometry = latheGeometry( points, nSegments );
       var child = new THREE.Mesh(geometry, blackMaterial);
       this.add(child);
       return child;
