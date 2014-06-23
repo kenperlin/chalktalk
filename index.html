@@ -985,11 +985,23 @@
    Graph.prototype = new Sketch;
 
    function Func() {
-      this.labels = "exp".split(' ');
+      this.labels = "exp sin".split(' ');
+
+      function makeCurve(f) {
+         var curve = [];
+         for (var t = -1 ; t <= 1 ; t += .1)
+	    curve.push([t, f(t)]);
+	 return curve;
+      }
 
       this.s = -1;
-      this.code = [["exp", "exp(x)"]];
-      this.EXP = [[-1,-.2],[-.67,-.18],[-.33,-.12],[0,0],[.25,.33],[.375,.6],[.45,1]];
+      this.code = [
+         ["exp", "exp(x)"],
+         ["sin", "sin(x)"],
+      ];
+
+      this.EXP = makeCurve(function(x) { return exp(x - 1); });
+      this.SIN = makeCurve(function(x) { return sin(PI * x) * .5; });
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
@@ -1017,7 +1029,10 @@
 	 mLine([-1,0],[1, 0]);
          _g.lineWidth *= 3;
 
-	 mCurve(this.EXP);
+         switch (this.code[s][0]) {
+	 case "exp": mCurve(this.EXP); break;
+	 case "sin": mCurve(this.SIN); break;
+	 }
 
 	 m.restore();
       }
