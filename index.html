@@ -991,7 +991,7 @@
          ["cos", "cos(x)"],
          ["exp", "exp(x)"],
          ["sin", "sin(x)"],
-         ["sqr", "sqr(x)"],
+         ["sqr", "x * x"],
       ];
 
       this.labels = [];
@@ -1014,27 +1014,28 @@
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
-	 var s = this.selection;
-         if (s != this.selectedIndex) {
-            this.clearPorts();
+
+         if (this.nPorts == 0) {
             this.addPort("x", -sc, 0);
             this.addPort("f",  sc, 0);
-	    if (isDef(this.selectedIndex))
-               this.selection = this.selectedIndex;
-            else
-               this.selectedIndex = this.selection;
          }
+
+	 var s = this.selection;
+	 if (isDef(this.selectedIndex))
+            this.selection = this.selectedIndex;
+         else
+            this.selectedIndex = this.selection;
 
          m.save();
          m.scale(sc);
 
          var x = this.getInFloat("x");
-         var f = null;
+         var result = null;
          try {
-            eval("f = (" + this.code[0][1] + ")");
+            eval("result = (" + this.code[s][1] + ")");
          } catch (e) {}
-	 if (f != null)
-            this.setOutValue("f", f);
+	 if (result != null)
+            this.setOutValue("f", result);
 
          _g.lineWidth /= 3;
 	 mLine([ 0,1],[0,-1]);
