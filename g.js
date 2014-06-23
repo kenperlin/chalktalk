@@ -1380,6 +1380,7 @@
       codeElement = document.getElementById('code');
       codeElement.innerHTML = "";
 
+      codeSelector = null;
       if (isCodeWidget) {
          var options = "";
          for (var i = 0 ; i < code().length ; i++)
@@ -3105,7 +3106,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    if (this.isClick && isHover() && isDef(sk().onClick))
 	       sk().onClick(x, y);
 
-	    if (! this.isClick && isDef(sk().onSwipe))
+	    if (! this.isClick && isk() && isDef(sk().onSwipe))
 	       sk().onSwipe(x - this.xDown, y - this.yDown);
          }
 
