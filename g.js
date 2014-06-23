@@ -1652,6 +1652,7 @@
              y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
             isKeyboardMode = false;
             setTextMode(false);
+            if (isCodeWidget) toggleCodeWidget();
             return true;
          } else {
             return false;
