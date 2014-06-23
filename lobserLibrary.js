@@ -1,140 +1,110 @@
-// TREE.js - requires THREE.js
-/*
-
-TODO:
-
-** - setup search function so that "all" applies to limbs and branches
-double check 'magic' edges on surface maker
-setup reportlayers that splits up branches better
-tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
-*/
 
 
-// registerGlyph("lVase()", [
-//     [[-1.66159,13.875737],[-1.773634,14.286565],[-2.232532,14.504875],[-2.633714,14.614487],[-3.070594,14.615677],[-3.498048,14.483365],[-3.678558,14.076684],[-3.479754,13.682373],[-3.100546,13.459269],[-2.85367,13.10176],[-2.68442,12.702419],[-2.560581,12.287059],[-2.485761,11.860182],[-2.484919,11.425528],[-2.588226,11.004243],[-2.781088,10.614342]],
 
-//     [[-3.086771,10.303958],[-3.478233,10.114137],[-3.894185,9.992596],[-4.31274,9.880862],[-4.728153,9.757847],[-5.136792,9.613643],[-5.536255,9.446097],[-5.924712,9.253421],[-6.271939,8.992089],[-6.521691,8.634408],[-6.674899,8.228305],[-6.768432,7.805017],[-6.80059,7.372539],[-6.786154,6.939474],[-6.727722,6.509922],[-6.631971,6.087371],[-6.508676,5.671851],[-6.353594,5.267213],[-6.18102,4.869829],[-5.987867,4.481976],[-5.783412,4.100031],[-5.569773,3.723125],[-5.349677,3.349965],[-5.124971,2.979564],[-4.897169,2.611061],[-4.667585,2.243666],[-4.437463,1.876609],[-4.208097,1.509079],[-3.980914,1.14019],[-3.757889,0.768786],[-3.541163,0.393612],[-3.337092,0.0114851],[-3.147408,-0.378178],[-2.984881,-0.77981],[-2.849218,-1.191744],[-2.75617,-1.614331],[-2.716251,-2.048807],[-2.744254,-2.473773]],
+var lVaseShape =  [
+[[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502],[-3.086771,-0.114626]],
+[[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298],[-3.214532,13.201209]],
+[[-3.214532,13.201209],[-3.606484,13.383478],[-3.875476,13.734126],[-3.999723,14.138567],[-4.022671,14.60006],[-0.0741333,14.581098]]
 
-//     [[-2.799989,-2.931666],[-3.214532,-3.033745],[-3.606484,-3.216313],[-3.875476,-3.567537],[-3.999723,-3.972642],[-4.022671,-4.434893],[-0.0741333,-4.4159]]
+];
 
-// ]);
+registerGlyph("lVase()", lVaseShape);
 
+function lVase() {
 
-   var lVaseShape =  [
-    [[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502],[-3.086771,-0.114626]],
-    [[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298],[-3.214532,13.201209]],
-    [[-3.214532,13.201209],[-3.606484,13.383478],[-3.875476,13.734126],[-3.999723,14.138567],[-4.022671,14.60006],[-0.0741333,14.581098]]
+  var node = root.addNode();
+  
+    var tnode = new THREE.Mesh();
 
-    ];
+    var body = tnode.addLathe( [
 
-   registerGlyph("lVase()", lVaseShape);
+            [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
+            ], 32);
 
-   function lVase() {
+   
 
-      var node = root.addNode();
-      // node.addCylinder();
-      // node.setMaterial(whiteMaterial);
-
-      // var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
+    var geo = body.geometry;
 
 
-        var tnode = new THREE.Mesh();
+    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, vaseFragmentShader);
 
-        var body = tnode.addLathe( [
-                [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
-                ], 32);
+    console.log(sketch);
+    sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
+        .rotateX(PI/2)
+        .scale(12.2);
 
-       
+    sketch.geometry.rotation.x = 1.5;
+   
+    // body.material = vaseMaterial;
+    // body.material.side = THREE.DoubleSide;
 
-        var geo = body.geometry;
+    // body.scale.set(.2,.2,.2);
+    for(var i = 0 ; i < body.geometry.faces.length ; i++){
+        var face = body.geometry.faces[i];
+        var temp = face.a;
+        var temp2 = face.c;
+        face.a = temp2;
+        face.c = temp;
+    }
+     sketch.geometry.geometry.computeFaceNormals();
+    sketch.geometry.geometry.computeVertexNormals();
 
 
-        var sketch = addGeometryShaderSketch(geo, defaultVertexShader, myFragmentShader);
+    // body.rotation.x = -Math.PI/2;
+    
 
-        console.log(sketch);
-        sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
-            .rotateX(PI/2)
-            .scale(12.2);
+  sketch.mouseDown = function(x, y) {
+     this.downX = x;
+     this.downY = y;
+  }
+  sketch.mouseDrag = function(x, y) {
+     console.log((this.downX - x) + " " + (this.downY - y));
+  }
+  sketch.mouseUp = function(x, y) {
+  }
 
-        sketch.geometry.rotation.x = 1.5;
-       
-        // body.material = vaseMaterial;
-        // body.material.side = THREE.DoubleSide;
+  sketch.onClick = function(x, y) { this.fadeTime = time; }
 
-        // body.scale.set(.2,.2,.2);
-        for(var i = 0 ; i < body.geometry.faces.length ; i++){
-            var face = body.geometry.faces[i];
-            var temp = face.a;
-            var temp2 = face.c;
-            face.a = temp2;
-            face.c = temp;
+  sketch.update = function(elapsed) {
+
+    // var sx = sketchPage.mouseX/100;
+    // var sy = sketchPage.mouseY/100;
+    // sketch.geometry.material.uniforms['mx'].value = time*.5;
+
+    sketch.geometry.getMatrix().translate(11.3,-20,0.0)
+            .rotateX(-PI/2)
+            .rotateZ(-PI/2)
+            .scale(4.1,4.1,3.68);
+     // console.log("x: " + sx + " y: " + sy + " " );
+     var x0 = lerp(.7,this.xlo,this.xhi);
+     var y0 = lerp(.16,this.ylo,this.yhi);
+     var r  = (this.xhi - this.xlo) / 2;
+     _g.save();
+     // console.log("x: " + sketchPage.x + " y: " + sketchPage.y);
+
+ if (isDef(this.fadeTime)) {
+    var t = min(1, (time - this.fadeTime) / 2.0);
+    this.value = t;
+    _g.globalAlpha = sCurve(1 - t) * (1-t);
+    if (t > 1)
+       return;
+     }
+
+     for (var i = 0 ; i < lVaseShape.length ; i++) {
+        _g.beginPath();
+        for (var j = 0 ; j < lVaseShape[i].length ; j++) {
+           var x = x0 + r * lVaseShape[i][j][0]/7;
+           var y = y0 + r * lVaseShape[i][j][1]/7;
+           if (j == 0)
+              _g.moveTo(x, y);
+           else
+              _g.lineTo(x, y);
         }
-         sketch.geometry.geometry.computeFaceNormals();
-        sketch.geometry.geometry.computeVertexNormals();
-
-
-        // body.rotation.x = -Math.PI/2;
-        
-
-      sketch.mouseDown = function(x, y) {
-         this.downX = x;
-         this.downY = y;
-      }
-      sketch.mouseDrag = function(x, y) {
-         console.log((this.downX - x) + " " + (this.downY - y));
-      }
-      sketch.mouseUp = function(x, y) {
-      }
-
-      sketch.onClick = function(x, y) { this.fadeTime = time; }
-
-      sketch.update = function(elapsed) {
-
-        if(this.Glyph == undefined){
-            this.Glyph = sketch.glyphSketch;
-            lVaseShape = this.Glyph.sp;
-        }
-
-        // console.log(this.Glyph);
-        // var sx = sketchPage.mouseX/100;
-        // var sy = sketchPage.mouseY/100;
-        // sketch.geometry.material.uniforms['mx'].value = time*.5;
-
-        sketch.geometry.getMatrix().translate(11.3,-20,0.0)
-                .rotateX(-PI/2)
-                .rotateZ(-PI/2)
-                .scale(4.1,4.1,3.68);
-         // console.log("x: " + sx + " y: " + sy + " " );
-         var x0 = lerp(.7,this.xlo,this.xhi);
-         var y0 = lerp(.16,this.ylo,this.yhi);
-         var r  = (this.xhi - this.xlo) / 2;
-         _g.save();
-         // console.log("x: " + sketchPage.x + " y: " + sketchPage.y);
-
-     if (isDef(this.fadeTime)) {
-        var t = min(1, (time - this.fadeTime) / 2.0);
-        this.value = t;
-        _g.globalAlpha = sCurve(1 - t) * (1-t);
-        if (t > 1)
-           return;
-         }
-
-         for (var i = 0 ; i < lVaseShape.length ; i++) {
-            _g.beginPath();
-            for (var j = 0 ; j < lVaseShape[i].length ; j++) {
-               var x = x0 + r * lVaseShape[i][j][0]/7;
-               var y = y0 + r * lVaseShape[i][j][1]/7;
-               if (j == 0)
-                  _g.moveTo(x, y);
-               else
-                  _g.lineTo(x, y);
-            }
-            _g.stroke();
-         }
-         _g.restore();
-      }
-   }
-
+        _g.stroke();
+     }
+     _g.restore();
+  }
+}
 
 vaseShader = {
 
@@ -217,7 +187,7 @@ vaseShader = {
     ].join("\n")
 }
 
-var myFragmentShader = ["\
+var vaseFragmentShader = ["\
    void main(void) {\
         float t = mod(time,1.0);\
         float bc = 1.;\
@@ -243,79 +213,11 @@ var myFragmentShader = ["\
    }\
 "].join("\n");
 
-
-// var myFragmentShader = ["\
-//   void main(void) {\
-//     float t = mod(time,1.0);\
-//     float c = .5+noise(10.*vPosition);\
-//     float a = 3.14 - atan(vPosition.x,vPosition.y);\
-//     float ma = mx-1.;\
-//     if(a > mix(0.,6.28,value))\
-//         c=0.;\
-//    gl_FragColor = vec4(   vec3(c)   , alpha );\
-//    }\
-// "].join("\n");
-
-
-// vaseMaterial = new THREE.ShaderMaterial({
-//     uniforms: {
-//         time: {
-//             type: "f",
-//             value: 0.0
-//         },
-//     },
-//     vertexShader:   vaseShader.vertexShader,
-//     fragmentShader: vaseShader.fragmentShader,
-// });
-
-
-// registerGlyph("lVase()", [
-//     [[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502]],
-// [[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298]],
-// [[-3.214532,13.201209],[-3.606484,13.383478],[-3.875476,13.734126],[-3.999723,14.138567],[-4.022671,14.60006],[-0.0741333,14.581098]]
-
-// ]);
-
-
-// // registerGlyph("lVase()", ["e-b,_+[*Y)V(S'P&M%J$G#D!A > ; 8 5#2$0&.)-++.)1(4(7':'='@'C'F(I*L,N.O2P5Q8R;Q>QAPDPGOJNMMPLSLVLYM]N_P_S_V]YZ[W]T^R_O`LaIbFbCc?c<d9e6f4g2i0l/o0r1t3w5y8{:|=}@}D}G}J~M~P~S~V~Y~]~a}d}g}j|lznxpurssptmvjwgxe"]);
-
-// function lVase() {
-
-//     // console.log('ok');
-
-//     // var node = root.addNode();
-
-//     var node = new THREE.Mesh();
-
-//     var body = node.addLathe( [
-//             [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
-//             ], 32);
-
-//     var geo = body.geometry;
-
-//     var sketch = addGeometryShaderSketch(geo, defaultVertexShader, myFragmentShader);
-
-//     // body.material = vaseMaterial;
-//     // body.material.side = THREE.DoubleSide;
-
-//     // body.scale.set(.2,.2,.2);
-//     for(var i = 0 ; i < body.geometry.faces.length ; i++){
-//         var face = body.geometry.faces[i];
-//         var temp = face.a;
-//         var temp2 = face.c;
-//         face.a = temp2;
-//         face.c = temp;
-//     }
-//     body.rotation.x = -Math.PI/2;
-//     // geometrySketch(node);
-//     // console.log(body);
-// }
-
 barleyField = {
     
     setup:function(){
 
-    	field = new THREE.Object3D();
+    	  field = new THREE.Object3D();
 
         tree = new TREE();
         
@@ -406,16 +308,25 @@ barleyField = {
 
         geo.bones.push(bone);
 
+
         things = [];
+        field.toGrow = [];
+
+
 
         for(var i = 0 ; i < 200 ; i++){
             var thing = new THREE.SkinnedMesh(geo,material,false);
             // thing.scale = new THREE.Vector3(5,5,5);
             thing.id=i;
-            thing.position.x = 50-Math.random()*100;
-            thing.position.y = (Math.random()*10);
-            thing.position.z = 50+-thing.position.y*9;
+            if(i>0){
+              thing.position.x = 50-Math.random()*100;
+              thing.position.y = (Math.random()*10);
+              thing.position.z = thing.position.y*-9;
+              field.toGrow.push(thing);
+              thing.scale.set(.001,.001,.001);
+            }
             thing.position.y+=20;
+            
             field.add(thing);
             things.push(thing);
         }
@@ -442,7 +353,6 @@ barleyField = {
     }
 }
 
-
 registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
 
@@ -454,23 +364,57 @@ THREE.Object3D.prototype.addBarley = function() {
 }
 
 function barley() {
+
 	var a = root.addBarley();
-	geometrySketch(a);
+
+  this.grow = false;
+  a.switcher = 0;
+
+	sketch = geometrySketch(a);
+
 	a.update = function() {
-		this.getMatrix().translate(0,-2,0).scale(0.08);
-		 offset = time*mouseX*.002;
+
+    // console.log(this);
+
+		this.getMatrix().translate(0,-8,0).scale(0.3);
+		offset = time*mouseX*.002;
         
-        for(var i = 0 ; i < this.things.length ; i++){
-            this.things[i].bones[1]._rotation.z = (mouseY*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
+    for(var i = 0 ; i < this.things.length ; i++){
+        this.things[i].bones[1]._rotation.z = (mouseY*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
 
-        }
+    }
 
+    if (isDef(this.fadeTime)) {
+      var t = min(1, (time - this.fadeTime) / 2.0);
+      this.value = t;
+      _g.globalAlpha = sCurve(1 - t) * (1-t);
+    }
+
+    // console.log(this);
+
+    if(this.switcher>1){
+      if(sketch.countUp==undefined)
+        sketch.countUp=0.001;
+      for(var i = 0 ; i < sketch.geometry.toGrow.length ; i++){
+        var gs = sketch.countUp;
+        sketch.geometry.toGrow[i].scale.set(gs,gs,gs);
+      }
+      if(sketch.countUp<1)
+        sketch.countUp+=.01;
+    }
 
 	}
+
+  sketch.onClick = function(x, y) { 
+    console.log(a.switcher);
+    a.switcher += 1;
+    this.fadeTime = time; 
+    this.switcher += 1;
+    this.grow = true;
+    
+  }
+
 }
-
-
-
 
 fragPlane = {
     
@@ -611,7 +555,6 @@ fragPlane = {
     }
 }
 
-
 registerGlyph("shader()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
 );
 
@@ -630,7 +573,6 @@ function shader() {
 		this.shaderMaterial.uniforms['time'].value = time*.1;
 	}
 }
-
 
 palmTree = {
 
@@ -691,9 +633,6 @@ palmTree = {
     }
 }
 
-
-
-
 registerGlyph("tree()",["FrFoGlHjHgIeIbJ`J]KYKWLTLRMOMMNJNGOEOBP@P=P:Q8Q5R3Q2N2K2I1F1D1A1>1<09070401///,/).'.$.!-!/%0'1*1,1/122427393<4?4A5D5F5I5L5N6Q6T6V6Y6[6_6b5d5g5i5l4o4q4t4w4y4|4}4{4x4v3s3p3n3k4i4f4c4a4^4Z4X4U5S5P5M5K5H5",]
 );
 
@@ -715,7 +654,6 @@ function tree() {
 	}
 }
 
-
 registerGlyph("noiseball()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
 );
 
@@ -735,7 +673,6 @@ function noiseball() {
 
 	}
 }
-
 
 noiseBall = {
     
@@ -1029,9 +966,6 @@ noiseBall = {
         
     }
 }
-
-
-
 
 var Joint = function(params){
 
