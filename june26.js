@@ -469,14 +469,12 @@ function Grid() {
          if (this.gridMode != 3) {
             mCurve([[-1,0], [1, 0]]);
             mCurve([[ 0,1], [0, -1]]);
+            mCurve([[-1, f], [1, f]]);
+            mCurve([[-1,-f], [1,-f]]);
+            mCurve([[-f,1], [-f,-1]]);
+            mCurve([[ f,1], [ f,-1]]);
          }
          this.afterSketch(function() {
-            if (this.gridMode != 3) {
-               mCurve([[-1, f], [1, f]]);
-               mCurve([[-1,-f], [1,-f]]);
-               mCurve([[-f,1], [-f,-1]]);
-               mCurve([[ f,1], [ f,-1]]);
-            }
             var uColor = 'rgb(255,64,64)';
             var vColor = 'rgb(64,255,64)';
             switch (this.gridMode) {

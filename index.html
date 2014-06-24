@@ -81,7 +81,9 @@
    registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
    registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
-   registerGlyph("long_nose()",   [ [[-1,.5],[1,.5]],[[1,.5],[1,-.5]], [[-1,.5],[.8,.3],[1,-.5]] ]);
+   registerGlyph("long_nose()", [ [[-1,.5],[1,.5]],[[1,.5],[1,-.5]], [[-1,.5],[.8,.3],[1,-.5]] ]);
+   registerGlyph("tron()"     , [ [[0,-1.5],[0,-1]], makeOval(-.5,-1, 1,.25, 32, PI/2, PI/2 + TAU) ]);
+   registerGlyph("fantasia()" , [ [[-1,.6],[0,.35],[1,.6]], [[-.4,.35],[-.4,-0.9],[.4,-0.9],[.4,.35]] ]);
 
    function cube()     { geometrySketch(root.addCube()); }
    function cylinder() { geometrySketch(root.addCylinder()); }
@@ -107,9 +109,11 @@
    function blinn() { image('blinn.png', 2.4); }
    function diner() { image('red_fox_diner.jpg', 0.8); }
    function face() { image('smiling_cat.jpg', 0.35); }
+   function fantasia() { image('fantasia.jpg', 0.3); }
    function kwa() { image('kwalado.jpg'); }
    function long_nose() { image('long_nose.jpg'); }
    function bumpmap() { image('strawberry.jpg', 0.7); }
+   function tron() { image('tron.jpg', 0.5); }
    function vase() { image('vase.png', 0.7); }
 
    function unitCube() {
