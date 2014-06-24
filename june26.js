@@ -1,47 +1,6 @@
 /*
-    Examples for June 26, 2014 talk.
-
-    cup() shows a coffee cup and swirling cream that illustrates the onset of turbulence.
-
-    Noises/noise1D allows copies 1D noise to be successively frequency doubled.
-    Then they can all be dragged together to show the fractal sum of 1/f noise.
+    For June 26, 2014 talk.
 */
-
-   var davidShape = [
-      [ [ -1, -1 ], [0,  1], [ 1, -1] ],
-      [ [ -1,  1 ], [0, -1], [ 1,  1] ],
-   ];
-
-   registerGlyph("david()", davidShape);
-
-   function david() {
-      var node = root.addNode();
-      node.addCylinder();
-      node.setMaterial(whiteMaterial);
-
-      var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
-
-      sketch.mouseDown = function(x, y) { }
-      sketch.mouseDrag = function(x, y) { }
-      sketch.mouseUp = function(x, y) { }
-
-      sketch.onClick = function(x, y) { this.fadeTime = time; }
-
-      sketch.render = function(elapsed) {
-         for (var i = 0 ; i < davidShape.length ; i++) {
-            for (var j = 0 ; j < davidShape[i].length ; j++) {
-               var x = x0 + r * davidShape[i][j][0];
-               var y = y0 + r * davidShape[i][j][1];
-               if (j == 0)
-                  _g.moveTo(x, y);
-               else
-                  _g.lineTo(x, y);
-            }
-            _g.stroke();
-         }
-         _g.restore();
-      }
-   }
 
    registerGlyph("cup()", [
 
@@ -319,14 +278,12 @@ function planet() { addPlaneShaderSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = value == 0. ? .0 :\
-                value == 1. ? .0 :\
-                value == 2. ? .7 * noise(vec3(x,y,0.)) :\
-                value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
-                value == 4. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
-                              .0 ;\
+      float t = value == 3. ? .7 * noise(vec3(x,y,0.)) :\
+                value == 4. ? .5 * fractal(vec3(x,y,5.)) :\
+                value == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
+		              .0 ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (value == 5.) \
+      if (value == 2.) \
          s = .5 + noise(vec3(3.*x,3.*y,10.));\
       else if (value > 0.)\
          s = pow(s, .1);\
@@ -346,10 +303,10 @@ function marble() {
    sketch.code = [
       ["stripe", "sin(x)"],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["noise", ".5 + .5 * noise(x,y,z))"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
-      ["noise", ".5 + .5 * noise(x,y,z))"],
    ];
 }
 
@@ -470,14 +427,12 @@ function Grid() {
          if (this.gridMode != 3) {
             mCurve([[-1,0], [1, 0]]);
             mCurve([[ 0,1], [0, -1]]);
+            mCurve([[-1, f], [1, f]]);
+            mCurve([[-1,-f], [1,-f]]);
+            mCurve([[-f,1], [-f,-1]]);
+            mCurve([[ f,1], [ f,-1]]);
          }
          this.afterSketch(function() {
-            if (this.gridMode != 3) {
-               mCurve([[-1, f], [1, f]]);
-               mCurve([[-1,-f], [1,-f]]);
-               mCurve([[-f,1], [-f,-1]]);
-               mCurve([[ f,1], [ f,-1]]);
-            }
             var uColor = 'rgb(255,64,64)';
             var vColor = 'rgb(64,255,64)';
             switch (this.gridMode) {

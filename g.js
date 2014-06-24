@@ -109,6 +109,10 @@
       }
    }
 
+   function scrimColor(alpha) {
+      return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
+   }
+
    var mouseMoveEvent = null;
 
    function initEventHandlers(canvas) {
@@ -979,6 +983,7 @@
    }
 
    function sketch(x, y, isLine) {
+
       if (! isk())
          return;
 
@@ -2695,6 +2700,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function SketchPage() {
       this.fadeAway = 0;
       this.sketches = [];
+      this.scaleRate = 0;
 
       this.createTextSketch = function(text) {
          this.keyDown(64 + 9);            // enter text insertion mode
@@ -2900,6 +2906,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (isTogglingMenuType)
             return;
+
+	 if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
+	    outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
 
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
@@ -3160,8 +3169,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // SCALE CURRENT SKETCH.
 
       this.doScale = function(x, y) {
-         if (isk())
-            sk().scale(pow(16, (y - this.my) / -height()));
+         if (isk()) {
+            sk().scaleRate = lerp(0.01, sk().scaleRate, y > this.yDown ? -1.01 : 1.01);
+            sk().scale(pow(1.1, sk().scaleRate));
+         }
       }
 
       // TRANSLATE CURRENT SKETCH.
@@ -3272,7 +3283,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                 break;
             case "translating": this.doTranslate(x, y); break;
             case "rotating"   : this.doRotate(x, y); break;
-            case "scaling"    : this.doScale(x, y); break;
+//          case "scaling"    : this.doScale(x, y); break;
             }
 
             this.mx = x;
@@ -3322,7 +3333,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.doRotate(x, y);
             break;
          case 's':
-            this.doScale(x, y);
+	    sketchAction = "scaling";
             break;
          case 't':
             this.doTranslate(x, y);
@@ -3640,8 +3651,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 'b':
          case 'r':
-         case 's':
          case 't':
+            break;
+         case 's':
+	    sketchAction = null;
             break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
@@ -3706,7 +3719,26 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          outPort = inPort = -1;
       }
 
+      this.scaleSelectedSketch = function() {
+         if (isk()) {
+            if (sketchAction == "scaling") {
+	       if (this.scaleRate < 1)
+                  this.scaleRate = lerp(0.1, this.scaleRate, 1);
+            }
+	    else if (this.scaleRate > 0) {
+               if ((this.scaleRate = lerp(0.1, this.scaleRate, 0)) < .01)
+	          this.scaleRate = 0;
+	    }
+	    if (this.scaleRate > 0) {
+	       console.log(this.scaleRate);
+               sk().scale(pow(this.yDown > this.moveY ? 1.015 : 1/1.015, this.scaleRate));
+	    }
+	 }
+      }
+
       this.animate = function(elapsed) {
+
+         this.scaleSelectedSketch();
 
          var w = width();
          var h = height();
@@ -4328,11 +4360,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                lineWidth(1);
 
-               color(backgroundColor == 'white' ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.08)');
+               color(scrimColor(.24));
                line(x, y, x + w, y);
                line(x, y, x, y + h);
 
-               color(backgroundColor == 'white' ? 'rgba(0,0,0,.24)' : 'rgba(255,255,255,.24)');
+               color(scrimColor(.48));
                line(x + w, y, x + w, y + h);
                line(x, y + h, x + w, y + h);
             }
@@ -4531,6 +4563,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.portBounds = [];
          this.inValue = [];
          this.outValue = [];
+         this.defaultValue = [];
       }
       this.addPort = function(name, x, y) {
          this.portName[this.nPorts] = name;
@@ -4584,6 +4617,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          return (this.ylo + this.yhi) / 2;
       }
       this.dSum = 0;
+      this.defaultValue = [];
       this.deleteChar = function() {
          var hasCodeBubble = this.code != null && isCodeWidget;
          var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
@@ -4743,15 +4777,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
       this.fadeAway = 0;
-      this.getInIndex = function(s) { return getIndex(this.in, s); }
+      this.getDefaultFloat = function(name) {
+         return parseFloat(this.getDefaultValue(name));
+      }
+      this.getDefaultValue = function(name) {
+         var j = getIndex(this.portName, name);
+         if (j < 0) return 0;
+         var value = this.defaultValue[j];
+         return ! isDef(value) || value == null ? "0" : value;
+      }
       this.getInFloat = function(name) {
          return parseFloat(this.getInValue(name));
       }
+      this.getInIndex = function(s) { return getIndex(this.in, s); }
       this.getInValue = function(name) {
          var j = getIndex(this.portName, name);
          if (j < 0) return 0;
          var value = this.inValue[j];
-         return value == null ? "0" : value;
+         return ! isDef(value) || value == null ? "0" : value;
       }
       this.glyphTrace = null;
       this.trace = [];
@@ -4790,6 +4833,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.is3D = false;
       this.isCard = false;
       this.isGroup = function() { return this.children.length > 0; }
+      this.isDefaultValue = function(name) {
+         var j = getIndex(this.portName, name);
+         return j >= 0 ? isDef(this.DefaultValue[j]) : false;
+      }
       this.isInValue = function(name) {
          var j = getIndex(this.portName, name);
          return j >= 0 ? isDef(this.inValue[j]) : false;
@@ -4949,6 +4996,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.scene = null;
       this.selection = 0;
+      this.setDefaultValue = function(name, value) {
+         var j = getIndex(this.portName, name);
+	 if (j >= 0)
+	    this.defaultValue[j] = value;
+      }
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)
@@ -5373,8 +5425,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                else {
                   deleteSketch(this);
-                  sketchPage.createTextSketch(glyph.name);
-                  setTextMode(true);
+	          if (glyph.name != 'del') {
+                     sketchPage.createTextSketch(glyph.name);
+                     setTextMode(true);
+                  }
                }
 
             }
@@ -6039,13 +6093,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          // DRAW WIDGET THAT TOGGLES WHETHER TO SHOW OVERLAY.
-
+/*
          annotateStart();
-         var _a_ = This().mouseX >= width() - margin && This().mouseY <= margin ? '.2' : '.1';
-         color('rgba(128,128,128,' + _a_ + ')');
+         var _a_ = This().mouseX >= width() - margin && This().mouseY <= margin ? .2 : .1;
+	 color(scrimColor(_a_));
          fillRect(width() - margin - 1, 1, margin, margin);
          annotateEnd();
-
+*/
          // PROPAGATE LINK VALUES.
 
          for (var I = 0 ; I < nsk() ; I++) {
@@ -6366,6 +6420,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().out = [];
       sk().inValue = [];
       sk().outValue = [];
+      sk().defaultValue = [];
       sk().portBounds = [];
       sk().portLocation = [];
       sk().zoom = sketchPage.zoom;
