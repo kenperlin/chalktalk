@@ -1307,6 +1307,7 @@
    var isFakeMouseDown = false;
    var isKeyboardMode = false;
    var isMakingGlyph = false;
+   var isManualScaling = false;
    var isMouseOverBackground = true;
    var isNumeric = false;
    var isPieMenu = false;
@@ -3169,10 +3170,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // SCALE CURRENT SKETCH.
 
       this.doScale = function(x, y) {
-         if (isk()) {
-            sk().scaleRate = lerp(0.01, sk().scaleRate, y > this.yDown ? -1.01 : 1.01);
-            sk().scale(pow(1.1, sk().scaleRate));
-         }
+	 if (isk())
+	    sk().scale(pow(16, (y - this.my) / -height()));
       }
 
       // TRANSLATE CURRENT SKETCH.
@@ -3283,7 +3282,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                 break;
             case "translating": this.doTranslate(x, y); break;
             case "rotating"   : this.doRotate(x, y); break;
-//          case "scaling"    : this.doScale(x, y); break;
+            case "scaling"    : this.doScale(x, y); break;
             }
 
             this.mx = x;
@@ -3333,7 +3332,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.doRotate(x, y);
             break;
          case 's':
-	    sketchAction = "scaling";
+	    isManualScaling = true;
+            this.doScale(x, y);
             break;
          case 't':
             this.doTranslate(x, y);
@@ -3655,6 +3655,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 's':
 	    sketchAction = null;
+	    isManualScaling = false;
             break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
@@ -3720,7 +3721,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.scaleSelectedSketch = function() {
-         if (isk()) {
+
+         if (isk() && ! isManualScaling) {
             if (sketchAction == "scaling") {
 	       if (this.scaleRate < 1)
                   this.scaleRate = lerp(0.1, this.scaleRate, 1);
@@ -5922,12 +5924,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isShowingGlyphs = true;
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
-
-         var saveAlpha = _g.globalAlpha;
-         _g.globalAlpha = 1;
-         color(backgroundColor);
-         fillRect(0,0,w,10);
-         _g.globalAlpha = saveAlpha;
 
          if (! isShowingGlyphs)
             This().animate(This().elapsed);
