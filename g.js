@@ -983,6 +983,7 @@
    }
 
    function sketch(x, y, isLine) {
+
       if (! isk())
          return;
 

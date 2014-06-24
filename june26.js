@@ -1,48 +1,6 @@
 /*
-    Examples for June 26, 2014 talk.
-
-    cup() shows a coffee cup and swirling cream that illustrates the onset of turbulence.
-
-    Noises/noise1D allows copies 1D noise to be successively frequency doubled.
-    Then they can all be dragged together to show the fractal sum of 1/f noise.
+    For June 26, 2014 talk.
 */
-
-   var davidShape = [
-      [ [ -1, -1 ], [0,  1], [ 1, -1] ],
-      [ [ -1,  1 ], [0, -1], [ 1,  1] ],
-   ];
-/*
-   registerGlyph("david()", davidShape);
-*/
-
-   function david() {
-      var node = root.addNode();
-      node.addCylinder();
-      node.setMaterial(whiteMaterial);
-
-      var sketch = geometrySketch(node, [0.1,0,0,-PI/2,0.9]);
-
-      sketch.mouseDown = function(x, y) { }
-      sketch.mouseDrag = function(x, y) { }
-      sketch.mouseUp = function(x, y) { }
-
-      sketch.onClick = function(x, y) { this.fadeTime = time; }
-
-      sketch.render = function(elapsed) {
-         for (var i = 0 ; i < davidShape.length ; i++) {
-            for (var j = 0 ; j < davidShape[i].length ; j++) {
-               var x = x0 + r * davidShape[i][j][0];
-               var y = y0 + r * davidShape[i][j][1];
-               if (j == 0)
-                  _g.moveTo(x, y);
-               else
-                  _g.lineTo(x, y);
-            }
-            _g.stroke();
-         }
-         _g.restore();
-      }
-   }
 
    registerGlyph("cup()", [
 
