@@ -81,6 +81,8 @@
    registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
    registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
+   registerGlyph("long_nose()",   [ [[-1,.5],[1,.5]],[[1,.5],[1,-.5]], [[-1,.5],[.8,.3],[1,-.5]] ]);
+
    function cube()     { geometrySketch(root.addCube()); }
    function cylinder() { geometrySketch(root.addCylinder()); }
    function globe()    { geometrySketch(root.addGlobe()); }
@@ -106,6 +108,7 @@
    function diner() { image('red_fox_diner.jpg', 0.8); }
    function face() { image('smiling_cat.jpg', 0.35); }
    function kwa() { image('kwalado.jpg'); }
+   function long_nose() { image('long_nose.jpg'); }
    function bumpmap() { image('strawberry.jpg', 0.7); }
    function vase() { image('vase.png', 0.7); }
 
@@ -349,8 +352,6 @@
 
       this.lo = 0;
       this.hi = 1;
-      this.loP = [0,0];
-      this.hiP = [0,0];
       this.t = 0.5;
 
       this.mouseDrag = function(x, y) {
@@ -379,6 +380,8 @@
                   break;
                }
                this.addPort("t", 0, 0);
+	       this.setDefaultValue("lo", 0);
+	       this.setDefaultValue("hi", 1);
             }
          });
 
@@ -386,8 +389,8 @@
          if (this.isInValue("t"))
             t = max(0, min(1, this.getInFloat("t")));
 
-         this.lo = this.isInValue("lo") ? this.getInFloat("lo") : 0;
-         this.hi = this.isInValue("hi") ? this.getInFloat("hi") : 1;
+         this.lo = this.isInValue("lo") ? this.getInFloat("lo") : this.getDefaultValue("lo");
+         this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
 
          this.setOutValue("t", lerp(t, this.lo, this.hi));
 
@@ -407,7 +410,7 @@
          }
 
          this.afterSketch(function() {
-            textHeight(12);
+            textHeight(16);
             switch (this.selection) {
             case 0:
                mText(roundedString(this.lo), [-.6,0], 1, .5);
@@ -1380,21 +1383,22 @@
          ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
          ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
          ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
-         ["noise", "return 5 * noise(3 * x * time)"],
-         ["fractal", "return 5 * fractal(3 * x * time)"],
-         ["turbulence", "return 5 * turbulence(3 * x * time)"],
+         ["noise", "return 3 * noise(3 * x * time)"],
+         ["fractal", "return 3 * fractal(3 * x * time)"],
+         ["turbulence", "return 5 * turbulence(3 * x * time) - 1.5"],
       ];
       this.savedCode = "";
       this.savedX = "";
       this.savedY = "";
       this.savedZ = "";
+      this.audioShape = null;
 
       this.cleanup = function() {
          setAudioSignal(function(t) { return 0; });
       }
 
       this.render = function(elapsed) {
-         var cs = isDef(codeSelector) ? codeSelector.selectedIndex : 0;
+         var cs = isDef(codeSelector) && codeSelector != null ? codeSelector.selectedIndex : 0;
          var t = 1/3;
          m.save();
             m.scale(this.size / 400);
@@ -1414,7 +1418,7 @@
 	                         "y=(" + (isDef(this.in[1]) ? this.inValue[1] : 0) + ")," +
 	                         "z=(" + (isDef(this.in[2]) ? this.inValue[2] : 0) + ");" ;
 
-               // MAKE SURE CODE IS VALID.
+               // MAKE SURE THE CODE IS VALID.
 
 	       var isError = false;
 	       try {
@@ -1425,15 +1429,27 @@
 	          eval(var_xyz + c);
                } catch (e) { isError = true; console.log("aha"); }
 
-               // IF IT IS, SEND THE FUNCTION TO THE AUDIO PROCESSOR.
+               // IF IT IS, SEND THE FUNCTION TO THE OUTPUT.
 
+               this.audioShape = null;
 	       if (! isError) {
 		  var i = code.indexOf("return ");
 		  if (i < 0)
 		     code = "return " + code;
-	          setAudioSignal(new Function("time", var_xyz + code));
+                  var audioFunction = new Function("time", var_xyz + code);
+	          setAudioSignal(audioFunction);
+
+                  this.audioShape = [];
+		  for (var t = 0 ; t <= 1 ; t += .01)
+		     this.audioShape.push([2*t-1, audioFunction(t/100)/TAU]);
 	       }
 	    }
+	    this.afterSketch(function() {
+	       if (this.audioShape != null) {
+	          lineWidth(1);
+	          mCurve(this.audioShape);
+               }
+	    });
          m.restore();
       }
    }
@@ -1454,7 +1470,7 @@
    var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid PVase" ).split(' ');
 
    var pages = [
-      ["page0", sketchTypes.concat(["Noises"]).concat(["KenTest"])],
+      ["page0", sketchTypes.concat(["Noises"])],
       ["page1", sketchTypes],
       ["page2", sketchTypes],
       ["page3", sketchTypes],

@@ -2901,6 +2901,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTogglingMenuType)
             return;
 
+	 if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
+	    outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
+
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
          this.y = y;
@@ -4531,6 +4534,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.portBounds = [];
          this.inValue = [];
          this.outValue = [];
+         this.defaultValue = [];
       }
       this.addPort = function(name, x, y) {
          this.portName[this.nPorts] = name;
@@ -4584,6 +4588,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          return (this.ylo + this.yhi) / 2;
       }
       this.dSum = 0;
+      this.defaultValue = [];
       this.deleteChar = function() {
          var hasCodeBubble = this.code != null && isCodeWidget;
          var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
@@ -4743,15 +4748,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
       this.fadeAway = 0;
-      this.getInIndex = function(s) { return getIndex(this.in, s); }
+      this.getDefaultFloat = function(name) {
+         return parseFloat(this.getDefaultValue(name));
+      }
+      this.getDefaultValue = function(name) {
+         var j = getIndex(this.portName, name);
+         if (j < 0) return 0;
+         var value = this.defaultValue[j];
+         return ! isDef(value) || value == null ? "0" : value;
+      }
       this.getInFloat = function(name) {
          return parseFloat(this.getInValue(name));
       }
+      this.getInIndex = function(s) { return getIndex(this.in, s); }
       this.getInValue = function(name) {
          var j = getIndex(this.portName, name);
          if (j < 0) return 0;
          var value = this.inValue[j];
-         return value == null ? "0" : value;
+         return ! isDef(value) || value == null ? "0" : value;
       }
       this.glyphTrace = null;
       this.trace = [];
@@ -4790,6 +4804,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.is3D = false;
       this.isCard = false;
       this.isGroup = function() { return this.children.length > 0; }
+      this.isDefaultValue = function(name) {
+         var j = getIndex(this.portName, name);
+         return j >= 0 ? isDef(this.DefaultValue[j]) : false;
+      }
       this.isInValue = function(name) {
          var j = getIndex(this.portName, name);
          return j >= 0 ? isDef(this.inValue[j]) : false;
@@ -4949,6 +4967,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       this.scene = null;
       this.selection = 0;
+      this.setDefaultValue = function(name, value) {
+         var j = getIndex(this.portName, name);
+	 if (j >= 0)
+	    this.defaultValue[j] = value;
+      }
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)
@@ -5373,8 +5396,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                else {
                   deleteSketch(this);
-                  sketchPage.createTextSketch(glyph.name);
-                  setTextMode(true);
+	          if (glyph.name != 'del') {
+                     sketchPage.createTextSketch(glyph.name);
+                     setTextMode(true);
+                  }
                }
 
             }
@@ -6366,6 +6391,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().out = [];
       sk().inValue = [];
       sk().outValue = [];
+      sk().defaultValue = [];
       sk().portBounds = [];
       sk().portLocation = [];
       sk().zoom = sketchPage.zoom;

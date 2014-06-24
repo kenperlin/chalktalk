@@ -11,8 +11,9 @@
       [ [ -1, -1 ], [0,  1], [ 1, -1] ],
       [ [ -1,  1 ], [0, -1], [ 1,  1] ],
    ];
-
+/*
    registerGlyph("david()", davidShape);
+*/
 
    function david() {
       var node = root.addNode();
@@ -319,14 +320,12 @@ function planet() { addPlaneShaderSketch(defaultVertexShader, planetFragmentShad
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = value == 0. ? .0 :\
-                value == 1. ? .0 :\
-                value == 2. ? .7 * noise(vec3(x,y,0.)) :\
-                value == 3. ? .5 * fractal(vec3(x,y,5.)) :\
-                value == 4. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
-                              .0 ;\
+      float t = value == 3. ? .7 * noise(vec3(x,y,0.)) :\
+                value == 4. ? .5 * fractal(vec3(x,y,5.)) :\
+                value == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
+		              .0 ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (value == 5.) \
+      if (value == 2.) \
          s = .5 + noise(vec3(3.*x,3.*y,10.));\
       else if (value > 0.)\
          s = pow(s, .1);\
@@ -346,10 +345,10 @@ function marble() {
    sketch.code = [
       ["stripe", "sin(x)"],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["noise", ".5 + .5 * noise(x,y,z))"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
-      ["noise", ".5 + .5 * noise(x,y,z))"],
    ];
 }
 
