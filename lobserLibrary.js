@@ -66,6 +66,123 @@ tree.appendTree - doesn't know what 'this' is - wtf fucking fuck seriously
 //    "].join('\n');
 
 
+// var boringSlicedFragmentShader = ["\
+//    uniform float spinAngle;\
+//    void main(void) {\
+//       float rr = x*x + y*y;\
+//       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+//       float dzdx = -1.3;\
+//       float zp = dzdx * (x - mx * 1.3 + .3);\
+//       if (zp < -z)\
+//          rr = 1.;\
+//       vec3 color = vec3(0.);\
+//       if (rr < 1.) {\
+//          vec3 nn = vec3(x, y, z);\
+//          if (zp < z) {\
+//             z = zp;\
+//             nn = normalize(vec3(-dzdx,0.,1.));\
+//          }\
+//          float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\
+//          float X =  x * cos(spinAngle) + z * sin(spinAngle);\
+//          float Y =  y;\
+//          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
+//          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
+//          float tu = ( value>1. ? noise(P) : turbulence(P) );\
+//          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
+//          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+//          if (value > 0.) {\
+//             float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
+//             color += vec3(h*120.4, h*.7, h);\
+//          }\
+//          else {\
+//             float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
+//             color += vec3(h, h*.8, h*.6);\
+//          }\
+//       }\
+//       gl_FragColor = vec4(color,alpha);\
+//    }\
+// "].join("\n");
+//floor of sin(20*x) floor(20*Z) mod 2.
+//mod(floor(mod(10*X,2)),2.)
+
+var boringSlicedFragmentShader = ["\
+uniform float spinAngle;\
+   void main(void) {\
+      float rr = x*x + y*y;\
+      float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+      float dzdx = -1.3;\
+      float zp = dzdx * (x - mx * 1.3 + .3);\
+      if (zp < -z)\
+         rr = 1.;\
+      vec3 color = vec3(0.);\
+      if (rr < 1.) {\
+         vec3 nn = vec3(x, y, z);\
+         if (zp < z) {\
+            z = zp;\
+            nn = normalize(vec3(-dzdx,0.,1.));\
+         }\
+         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\
+         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
+         float Y =  y;\
+         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
+         vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
+         float tu = ( value>1. ? noise(P) : turbulence(P) );\
+         float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
+         color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+          if (value > -1.) {\
+            float checker = mod(floor(5.*X)+floor(5.*Y)+floor(5.*Z),2.);\
+            color = vec3((checker+.25)*.5);\
+          }\
+          if(value > 0.){\
+            float tube = .5+.5*sin(X*20.)*sin(Y*20.)*sin(Z*20.);\
+            color = vec3(tube);\
+          }\
+          if(value > 1.){\
+            float col = sin(X*30.+sin(sin(X*30.0)*2.0+Y*9.0)*2.0);\
+             color = vec3(col);\
+          }\
+          if(value > 2.){\
+            vec3 rand = vec3(fract(sin((sin(X*6.3)*2.1)*cos(Z*3.14))*3.33));\
+            color = vec3(rand);\
+          }\
+          else {\
+             float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
+             color += vec3(h*0.4, h*.7, h);\
+          }\
+       }\
+       gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
+
+registerGlyph("boringSliced()",[
+   makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
+   makeOval( 0, -1, 1, 1, 32,  PI*2.0, PI*0.5),
+]);
+
+function boringSliced() {
+   var sketch = addPlaneShaderSketch(defaultVertexShader, boringSlicedFragmentShader);
+   if(!sketch.switcher)
+      sketch.switcher = 0;
+   sketch.mouseDrag = function(x, y) {}
+   sketch.spinRate = 0;
+   sketch.spinAngle = 0;
+   sketch.onClick = function() {
+      this.spinRate = -1 - this.spinRate;
+      if(this.spinRate>=0)
+        this.switcher++;
+      if(this.switcher>3)
+        this.switcher = 0;
+   }
+   sketch.update = function(elapsed) {
+      this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+      this.setUniform('value', this.switcher);
+   }
+}
+
+
+
+
+
 
 
 var pVaseFragmentShader = ["\
@@ -613,6 +730,8 @@ NoisePlane = new THREE.Object3D();
         
         var plane = new THREE.PlaneGeometry(100,90,80,50);
         this.matOpac = 0;
+        this.waveAmount = 0;
+        this.noiseFreq = 1;
         this.mater = new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:THREE.VertexColors,transparent: true, opacity: 1});
         this.plane = new THREE.Mesh(plane,this.mater);
         this.add(this.plane);
@@ -632,8 +751,8 @@ NoisePlane = new THREE.Object3D();
         for(var i = 0 ; i < this.plane.geometry.vertices.length ; i++){
             var v = this.plane.geometry.vertices[i];
             v.z = noise(
-                (v.x*.01)+mouseX*.01,
-                (v.y*.01)-mouseY*.01,
+                (v.x*.01*this.noiseFreq)+mouseX*.01,
+                (v.y*.01*this.noiseFreq)-mouseY*.01,
                 1
                 )*10;
         }
@@ -701,31 +820,41 @@ function barley() {
 
   a.update = function() {
 
-    // console.log(mouseX + " " + mouseY);
+    var nP = sketch.geometry.noisePlane;
 
-    if(a.switcher>1 && a.speeder<1){
+    if(a.switcher>1 && a.switcher<3 || a.switcher>4){
       if(!this.now)
         this.now = time;
-      a.speeder+=.01;
+      a.speeder+=nP.waveAmount;
+      if(nP.waveAmount<.06)
+        nP.waveAmount+=.002;
     }
-
-
 
     sketch.geometry.noisePlane.draw(time);
-    var nP = sketch.geometry.noisePlane;
     nP.position.y=10;
 
-    if(a.switcher>2 && nP.matOpac < 1){
+    if(a.switcher>2 && nP.matOpac < 1 && a.switcher<4){
       nP.matOpac += .01;
     }
-
-    // console.log(a.speeder);
+    if(a.switcher>3){
+      nP.noiseFreq = mouseY/100;
+    }
+    if(a.switcher > 4 && nP.matOpac > 0){
+      nP.matOpac -= .01;
+    }
 
     this.getMatrix().translate(0,-4.2,0).scale(0.2).rotateX(.2);
-    offset = a.speeder*mouseX*.01;//(this.now-time)*444*.002;
-        
+
+    var offset = 0;
+
+    if(a.switcher < 3 || a.switcher>4)
+      offset = a.speeder;//(this.now-time)*444*.002;
+    else
+      offset = mouseX*.01;//(this.now-time)*444*.002;
+
+            
     for(var i = 0 ; i < this.things.length ; i++){
-        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(things[i].position.x/100+offset,things[i].position.y/100,things[i].position.z/100);
+        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(nP.noiseFreq*things[i].position.x/100+offset,nP.noiseFreq*things[i].position.y/100,things[i].position.z/100);
 
     }
 
@@ -734,10 +863,6 @@ function barley() {
       this.value = t;
       _g.globalAlpha = sCurve(1 - t) * (1-t);
     }
-
-    // console.log(this);
-
-
 
     if(this.switcher>0){
       for(var i = 0 ; i < sketch.geometry.toGrow.length ; i++){
