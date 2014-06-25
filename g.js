@@ -1782,6 +1782,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       eval("addSketch(new " + sketchTypes[i] + "())");
    }
 
+   function sketchTypeToCode(type, selection) {
+      return "sg('" + type + "','" + selection + "')";
+   }
+
    function registerSketch(type) {
 
       // CREATE A TEMPORARY INSTANCE OF THIS SKETCH TYPE.
@@ -1803,7 +1807,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // REGISTER THE GLYPH.
 
-         var code = "sg('" + type + "','" + sk().labels[n] + "')";
+         var code = sketchTypeToCode(type, sk().labels[n]);
          registerGlyph(code, glyphInfo);
       }
 
