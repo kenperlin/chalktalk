@@ -3578,8 +3578,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 'del':
             if (isk())
-               if (isShiftPressed) {
-                  deleteSketch(sk());
+               if (! (sk() instanceof SimpleSketch) || isShiftPressed) {
+                  sk().fadeAway = 1.0;
                   setTextMode(false);
                }
                else

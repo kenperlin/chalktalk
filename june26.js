@@ -245,22 +245,22 @@
 */
 
 var planetFragmentShader = ["\
-   void main(void) {\
-      float z = sqrt(1.-x*x-y*y);\
-      float cRot = cos(.2*time), sRot = sin(.2*time);\
-      float cVar = cos(.1*time), sVar = sin(.1*time);\
-      vec3 pt = vec3(cRot*x+sRot*z+cVar, y, -sRot*x+cRot*z+sVar);\
-      float g = turbulence(pt);                      /* CLOUDS */\
-      vec2 v = .6 * vec2(x,y);                       /* SHAPE  */\
-      float d = 1. - 4.1 * dot(v,v);\
-      float s = .3*x + .3*y + .9*z; s *= s; s *= s;  /* LIGHT  */\
-      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\
-      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);  /* FIRE   */\
-      f = f > 0. ? 1. : 1. - f * f * f;\
-      if (d <= 0.1)\
-         f *= (g + 5.) / 3.;\
-      vec3 color = vec3(d*f*f*.85, d*f, d*.7);       /* COLOR  */\
-      gl_FragColor = vec4(color,alpha);\
+   void main(void) {\n\
+      float z = sqrt(1.-x*x-y*y);\n\
+      float cRot = cos(.2*time), sRot = sin(.2*time);\n\
+      float cVar = cos(.1*time), sVar = sin(.1*time);\n\
+      vec3 pt = vec3(cRot*x+sRot*z+cVar, y, -sRot*x+cRot*z+sVar);\n\
+      float g = turbulence(pt);                      /* CLOUDS */\n\
+      vec2 v = .6 * vec2(x,y);                       /* SHAPE  */\n\
+      float d = 1. - 4.1 * dot(v,v);\n\
+      float s = .3*x + .3*y + .9*z; s *= s; s *= s;  /* LIGHT  */\n\
+      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\n\
+      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);  /* FIRE   */\n\
+      f = f > 0. ? 1. : 1. - f * f * f;\n\
+      if (d <= 0.1)\n\
+         f *= (g + 5.) / 3.;\n\
+      vec3 color = vec3(d*f*f*.85, d*f, d*.7);       /* COLOR  */\n\
+      gl_FragColor = vec4(color,alpha*min(1.,10.*d));\n\
    }\
 "].join("\n");
 
@@ -269,7 +269,12 @@ registerGlyph("planet()",[
    [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
-function planet() { addPlaneShaderSketch(defaultVertexShader, planetFragmentShader); }
+function planet() {
+   var sketch = addPlaneShaderSketch(defaultVertexShader, planetFragmentShader);
+   sketch.code = [
+      [ "", planetFragmentShader ],
+   ];
+}
 
 var marbleFragmentShader = ["\
    void main(void) {\
@@ -319,9 +324,9 @@ var coronaFragmentShader = ["\
          else if (value == 3.) {\
             float ti = time*.3;\
             float t = mod(ti, 1.);\
-            float u0 = turbulence(vec3(x*(1.-.5*t), y*(1.-.5*t), .1* t    +2.));\
-            float u1 = turbulence(vec3(x*(2.-   t), y*(2.-   t), .1*(t-1.)+2.));\
-            r = min(1., r + 0.2 * mix(u0, u1, t));\
+            float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\
+            float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));\
+            r = min(1., r - .1 + 0.3 * mix(u0, u1, t));\
          }\
          s = (1. - r) / (1. - b);\
       }\
@@ -329,10 +334,10 @@ var coronaFragmentShader = ["\
          s *= (r0 - a) / (b - a);\
       vec3 color = vec3(s);\
       if (value >= 1.) {\
-         s = s * s * s;\
-         color = vec3(s,s*s,s*s*s);\
+         float ss = s * s;\
+         color = s*vec3(1.,ss,ss*ss);\
       }\
-      gl_FragColor = vec4(color,alpha);\
+      gl_FragColor = vec4(color,alpha*s);\
    }\
 "].join("\n");
 
