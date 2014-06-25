@@ -2918,8 +2918,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    return;
          }
 
-         if (isBottomGesture)
+         if (isBottomGesture) {
+            _g.panX += x - this.xDown;
             return;
+         }
 
 /*
          if (isTogglingExpertMode)
@@ -3004,10 +3006,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isBottomGesture = false;
             if (y < height() - 100)
                clearSketchPage();
-            else if (x < this.xDown - 100)
-               setPage(pageIndex - 1);
-            else if (x > this.xDown + 100)
-               setPage(pageIndex + 1);
             return;
          }
 
