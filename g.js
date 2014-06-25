@@ -1566,7 +1566,7 @@
       'blue',
       'magenta',
    ];
-   function paletteX(i) { return 30; }
+   function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
       var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
@@ -3865,7 +3865,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin)
+            if (This().mouseX < margin - _g.panX)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
