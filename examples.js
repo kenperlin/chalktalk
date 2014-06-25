@@ -514,26 +514,45 @@
             break;
 
          case "scan":
+	    this.code = [
+	       ["artist", "light 1  : (-1,0,0)\n"
+	                + "light 2  : ( 1,1,0)\n"
+			+ "color    : yellow\n"
+			+ "shininess: 10\n"
+			+ "..."
+		        ],
+	       ["programmer", "color = program(point) {\n"
+	                    + "\n"
+	                    + "   THIS IS ALWAYS\n"
+			    + "   THE SAME PROGRAM.\n"
+	                    + "\n"
+			    + "}"
+			    ],
+	    ];
             if (sel != this.sel) {
                this.sel = sel;
                this.clearPorts();
             }
 
             if (this.row === undefined) {
+               this.nRows = 4;
+               this.nCols = 6;
                this.row = 0;
                this.col = 0;
                this.X = -w/4;
                this.Y = -h/2;
                this.s = w/12;
-               this.W = this.s * 6;
-               this.H = this.s * 4;
+               this.W = this.s * this.nCols;
+               this.H = this.s * this.nRows;
                this.x1 = -w/2;
                this.y1 = -h/2;
             }
 
-            drawRect(this.X, this.Y, 6 * this.s, 4 * this.s);
-            line(-w/2 + w / 26     , this.Y + this.H + w / 20,
-                 -w/2 + w / 26 * 25, this.Y + this.H + w / 20);
+            var nr = this.nRows, nc = this.nCols, nrc = nr * nc;
+
+            drawRect(this.X, this.Y, nc * this.s, this.nRows * this.s);
+            line(-w/2 + w / (nrc+2)          , this.Y + this.H + w / (nrc-nr),
+                 -w/2 + w / (nrc+2) * (nrc+1), this.Y + this.H + w / (nrc-nr));
 
             this.afterSketch(function() {
 
@@ -542,26 +561,26 @@
                var saveTextHeight = _g.textHeight;
                _g.textHeight = w/20;
 
-               if (x >= X && x < X + W && y >= Y && y < Y + W*4/6) {
+               if (x >= X && x < X + W && y >= Y && y < Y + W*nr/nc) {
                   this.col = Math.floor(6 * (x - X) / W);
                   this.row = Math.floor(6 * (y - Y) / W);
                }
-               else if (y >= Y + W*4/6) {
+               else if (y >= Y + W*nr/nc) {
                   var n = Math.max(0, Math.min(23, 26 * (x+w/2) / w - 1));
-                  this.col = Math.floor(n % 6);
-                  this.row = Math.floor(n / 6);
+                  this.col = Math.floor(n % nc);
+                  this.row = Math.floor(n / nc);
                }
 
-               for (var j = 0 ; j < 4 ; j++)
+               for (var j = 0 ; j < nr ; j++)
                   line(X, Y + j * s, X + W, Y + j * s);
-               for (var i = 0 ; i < 6 ; i++)
+               for (var i = 0 ; i < nc ; i++)
                   line(X + i * s, Y, X + i * s, Y + H);
                fillRect(X + this.col * s, Y + this.row * s, s, s);
 
-               for (var n = 0 ; n < 24 ; n++) {
-                  if (n == this.row * 6 + this.col)
-                     fillRect((n + 1) * w / 26 - w/2, Y + H + w/20, w/26, w/26);
-                  drawRect((n + 1) * w / 26 - w/2, Y + H + w/20, w/26, w/26);
+               for (var n = 0 ; n < nrc ; n++) {
+                  if (n == this.row * nc + this.col)
+                     fillRect((n + 1) * w / (nrc+2) - w/2, Y + H + w/(nrc-nr), w/(nrc+2), w/(nrc+2));
+                  drawRect((n + 1) * w / (nrc+2) - w/2, Y + H + w/(nrc-nr), w/(nrc+2), w/(nrc+2));
                }
 
                text("col:", w/40 - w/2, Y + w/20);
