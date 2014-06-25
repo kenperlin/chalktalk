@@ -1566,7 +1566,7 @@
       'blue',
       'magenta',
    ];
-   function paletteX(i) { return 30; }
+   function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
       var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
@@ -2918,8 +2918,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    return;
          }
 
-         if (isBottomGesture)
+         if (isBottomGesture) {
+            _g.panX += x - this.xDown;
             return;
+         }
 
 /*
          if (isTogglingExpertMode)
@@ -3004,10 +3006,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isBottomGesture = false;
             if (y < height() - 100)
                clearSketchPage();
-            else if (x < this.xDown - 100)
-               setPage(pageIndex - 1);
-            else if (x > this.xDown + 100)
-               setPage(pageIndex + 1);
             return;
          }
 
@@ -3865,7 +3863,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin)
+            if (This().mouseX < margin - _g.panX)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
@@ -3924,7 +3922,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             var h = floor(21 * rows);
 
-            codeElement.style.left = x - w/2 + 10;
+            codeElement.style.left = x + _g.panX - w/2 + 10;
             codeElement.style.top = y + 5;
 
             // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
@@ -7058,6 +7056,7 @@ var fragmentShaderHeader = ["\
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+      _g.panX = 0;
 
       if (isCodeWidget)
          toggleCodeWidget();
