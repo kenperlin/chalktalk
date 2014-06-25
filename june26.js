@@ -370,7 +370,7 @@ var slicedFragmentShader = ["\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
-      float zp = dzdx * (x - mx * 1.3 + .3);\
+      float zp = dzdx * (x - mx * 1.3 - .2);\
       if (zp < -z)\
          rr = 1.;\
       vec3 color = vec3(0.);\
@@ -385,8 +385,19 @@ var slicedFragmentShader = ["\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
-         float tu = ( value>1. ? noise(P) : turbulence(P) );\
-         float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
+         /* float tu = ( value>1. ? noise(P) : turbulence(P) );\
+            float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1); */\
+         float t = value == 3. ? .7 * noise(vec3(X,Y,Z)) :\
+                   value == 4. ? .5 * fractal(vec3(X,Y,Z)) :\
+                   value == 5. ? .4 * (turbulence(vec3(X*1.5,Y*1.5,Z*1.5))+1.8) :\
+   		                 .0 ;\
+         float c = .5 + .5*cos(7.*X+6.*t);\
+	 if (value == 0.)\
+	    c = .2 + .8 * c;\
+         else if (value == 2.)\
+            c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\
+         else\
+            c = pow(c, .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
          if (nn.x > 0.) {\
             float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
@@ -408,11 +419,27 @@ registerGlyph("sliced()",[
 
 function sliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
+   sketch.code = [
+      ["stripe", "sin(x)"],
+      ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["noise", ".5 + .5 * noise(x,y,z))"],
+      ["add noise", "pstripe(x + noise(x,y,z))"],
+      ["add fractal", "pstripe(x + fractal(x,y,z))"],
+      ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
+   ];
    sketch.mouseDrag = function(x, y) {}
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
+/*
    sketch.onClick = function() {
       this.spinRate = -1 - this.spinRate;
+   }
+*/
+   sketch.onSwipe = function(dx, dy) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 1: this.spinRate = -1; break;
+      case 3: this.spinRate =  0; break;
+      }
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
