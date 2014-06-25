@@ -4011,6 +4011,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       this.showGlyphs = function() {
          _g.save();
+
+         color('rgba(255,255,255,.15)');
+         fillRect(-_g.panX - 100, 0, width() + 200, height());
+
          _g.strokeStyle = 'rgba(0,0,0,.3)';
          _g.font = '8pt Trebuchet MS';
          _g.lineWidth = 1;
@@ -5918,7 +5922,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
-            fillRect(-_g.panX, 0, w, h);
+            fillRect(-_g.panX - 100, 0, w + 200, h);
          }
 
          // START OFF CURRENT GUIDED SKETCH, IF NECESSARY
@@ -5956,9 +5960,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
 
-         if (! isShowingGlyphs)
-            This().animate(This().elapsed);
-         else if (isExpertMode)
+         This().animate(This().elapsed);
+
+         if (isShowingGlyphs && isExpertMode)
             sketchPage.showGlyphs();
 
          for (var I = 0 ; I < nsk() ; I++)
