@@ -7058,6 +7058,7 @@ var fragmentShaderHeader = ["\
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+      _g.panX = 0;
 
       if (isCodeWidget)
          toggleCodeWidget();
