@@ -1428,7 +1428,11 @@
 
          codeTextArea.onclick = function(event) {
             setTextMode(true);
+/*
+   DISABLED FOR JUNE 26 TALK -KP
+
             isKeyboardMode = true;
+*/
          };
       }
    }
@@ -6753,13 +6757,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sketch.tY = y;
       sketch.geometry = g;
 
-      if(g.material!=undefined){
-         if (g.material == blackMaterial) {
-            var C = colorToRGB(sketchColor());
-            g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
-                                             .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
-                                             .setSpecular(0,0,0,1));
-         }
+      if (g.material == blackMaterial) {
+         var C = colorToRGB(sketchColor());
+         g.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
+                                          .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+                                          .setSpecular(0,0,0,1));
       }
 
       addSketch(sketch);
@@ -6771,24 +6773,28 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 // THINGS RELATED TO WEBGL AND SHADERS.
 
+
+function gl() { return renderer.context; }
+function isValidVertexShader  (string) { return isValidShader(gl().VERTEX_SHADER  , string); }
+function isValidFragmentShader(string) { return isValidShader(gl().FRAGMENT_SHADER, string); }
+function isValidShader(type, string) {
+   string = "precision highp float;\n" + string;
+   var shader = gl().createShader(type);
+   gl().shaderSource(shader, string);
+   gl().compileShader(shader);
+   return gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+};
+
 function addPlaneShaderSketch(vertexShader, fragmentShader) {
    return addGeometryShaderSketch(new THREE.PlaneGeometry(50,50), vertexShader, fragmentShader);
 }
 
-function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
-   var material = new THREE.ShaderMaterial({
-      uniforms: {},
-      vertexShader: vertexShader,
-   });
+function addUniforms(material, string) {
 
-   var u = "alpha mx my time value".split(' ');
-   for (var i = 0 ; i < u.length ; i++)
-      material.uniforms[u[i]] = { type: "f", value: 0 };
-
-// FIND CUSTOM UNIFORMS:
+   // PARSE THE FRAGMENT SHADER CODE TO FIND CUSTOM UNIFORMS:
 
    var typeInfo = "float f 0 vec3 v2 [0,0] vec3 v3 [0,0,0]".split(' ');
-   var declarations = fragmentShader.substring(0, fragmentShader.indexOf("void main")).split(";");
+   var declarations = string.substring(0, string.indexOf("void main")).split(";");
    for (var i = 0 ; i < declarations.length ; i++) {
       var declaration = declarations[i].trim();
       if (declaration.length > 0) {
@@ -6805,8 +6811,33 @@ function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
          }
       }
    }
+}
 
-   material.fragmentShader = fragmentShaderHeader.concat(fragmentShader);
+function formFragmentShader(string) {
+
+   // PREPEND THE HEADER OF PREDEFINED THINGS:
+
+   return fragmentShaderHeader.concat(string);
+}
+
+function shaderMaterial(vertexShader, fragmentShaderString) {
+   var material = new THREE.ShaderMaterial({
+      uniforms: {},
+      vertexShader: vertexShader,
+   });
+
+   var u = "alpha mx my time value".split(' ');
+   for (var i = 0 ; i < u.length ; i++)
+      material.uniforms[u[i]] = { type: "f", value: 0 };
+
+   addUniforms(material, fragmentShaderString);
+   material.fragmentShader = formFragmentShader(fragmentShaderString);
+
+   return material;
+}
+
+function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
+   var material = shaderMaterial(vertexShader, fragmentShader);
 
    var mesh = new THREE.Mesh(geometry,material);
    root.add(mesh);
@@ -6816,7 +6847,7 @@ function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
 
    mesh.update = function() {
       var S = this.sketch;
-      this.getMatrix().scale(0.05);
+      this.getMatrix().scale(1/20);
       this.material.uniforms['time'].value = time;
       if (S.x == 0) {
          S.x = (S.xlo + S.xhi)/2;

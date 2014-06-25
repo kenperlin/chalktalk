@@ -274,6 +274,13 @@ function planet() {
    sketch.code = [
       [ "", planetFragmentShader ],
    ];
+
+   sketch.update = function() {
+      if (isCodeWidget && sketch.fragmentShader != codeTextArea.value 
+                       && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
+	 sketch.geometry.material = shaderMaterial(defaultVertexShader,
+                                                   sketch.fragmentShader = codeTextArea.value);
+   }
 }
 
 var marbleFragmentShader = ["\
