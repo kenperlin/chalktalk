@@ -115,6 +115,11 @@
 
    var mouseMoveEvent = null;
 
+   function clientX(event) {
+      if (isDef(_g.panX)) return event.clientX - _g.panX;
+      return event.clientX;
+   }
+
    function initEventHandlers(canvas) {
       function getHandle(canvas) { return window[canvas.id]; }
 
@@ -170,7 +175,6 @@
       // MOUSE PRESSED.
 
       canvas.onmousedown = function(event) {
-
          if (event.which == 3) {
             isRightButtonPressed = true;
          }
@@ -189,17 +193,17 @@
 
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
-         handle.mouseX = event.clientX - r.left;
+         handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
          handle.mousePressedAtX = handle.mouseX;
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
 
-         if ( handle.mouseX >= 0 && handle.mouseX <= r.right - r.left &&
-              handle.mouseY >= 0 && handle.mouseY <= r.bottom - r.top &&
-              isDef(handle.mouseDown) )
+         if (isDef(handle.mouseDown))
             handle.mouseDown(handle.mouseX, handle.mouseY);
+
+         _g.lastX = event.clientX;
       };
 
       // MAKE SURE BROWSER CATCHES RIGHT CLICK.
@@ -247,7 +251,7 @@
 
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
-         handle.mouseX = event.clientX - r.left;
+         handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
          handle.mousePressed = false;
 
@@ -324,6 +328,8 @@
 
          if (isDef(handle.mouseUp))
             handle.mouseUp(handle.mouseX, handle.mouseY);
+
+         _g.lastX = event.clientX;
       }
 
       // MOUSE IS MOVED.
@@ -337,7 +343,7 @@
 
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
-         handle.mouseX = event.clientX - r.left;
+         handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
 
          if (isPullDown)
@@ -361,9 +367,7 @@
 
          // MOUSE IS BEING MOVED WITHOUT BUTTONS PRESSED.
 
-         else if (handle.mouseX >= 0 && handle.mouseX <= r.right - r.left &&
-                  handle.mouseY >= 0 && handle.mouseY <= r.bottom - r.top &&
-                  isDef(handle.mouseMove))
+         else if (isDef(handle.mouseMove))
             handle.mouseMove(handle.mouseX, handle.mouseY);
 
          // WHILE SKETCHING: ADVANCE SKETCH AT SAME RATE AS MOUSE MOVEMENT.
@@ -377,6 +381,10 @@
             _g.mouseX = handle.mouseX;
             _g.mouseY = handle.mouseY;
          }
+
+         if (isPanning) _g.panX += event.clientX - _g.lastX;
+
+         _g.lastX = event.clientX;
       }
    }
 
@@ -1310,6 +1318,7 @@
    var isManualScaling = false;
    var isMouseOverBackground = true;
    var isNumeric = false;
+   var isPanning = false;
    var isPieMenu = false;
    var isPullDown = false;
    var isRightButtonPressed = false;
@@ -2803,10 +2812,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
+/*       ENABLE EXPERT MODE BY CLICKING ON TOP RIGHT
          if (x >= width() - margin && y < margin) {
             isTogglingExpertMode = true;
             return;
          }
+*/
 
          if (x >= width() - margin && y >= height() - margin) {
             isTogglingMenuType = true;
@@ -2910,8 +2921,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isBottomGesture)
             return;
 
+/*
          if (isTogglingExpertMode)
             return;
+*/
 
          if (isTogglingMenuType)
             return;
@@ -2998,11 +3011,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
+/*
          if (isTogglingExpertMode) {
             isTogglingExpertMode = false;
             isExpertMode = ! isExpertMode;
             return;
          }
+*/
 
          if (isTogglingMenuType) {
             isTogglingMenuType = false;
@@ -3200,8 +3215,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
       }
 
-      // PAN THE SKETCH PAGE
-
       this.panX = 0;
       this.panY = 0;
       this.zoom = 1;
@@ -3334,7 +3347,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.groupMouseMove(x, y);
             break;
          case 'p':
-            this.doPan(x, y);
+            //this.doPan(x, y);
             break;
          case 'r':
             this.doRotate(x, y);
@@ -3435,6 +3448,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 'u':
             unloadGlyphArray(characterGlyphData);
+            break;
+         case 'p':
+            isPanning = true;
             break;
          }
       }
@@ -3651,6 +3667,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isCreatingTextGlyphData = ! isCreatingTextGlyphData;
             break;
          case 'p':
+            isPanning = false;
             break;
          case 'q':
             isTest = ! isTest;
@@ -4989,10 +5006,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                this.groupPath[i][0] = sx(this.groupPath[i][0]);
                this.groupPath[i][1] = sy(this.groupPath[i][1]);
             }
-            this.xlo = zpx(sx(izpx(this.xlo)));
-            this.ylo = zpy(sy(izpy(this.ylo)));
-            this.xhi = zpx(sx(izpx(this.xhi)));
-            this.yhi = zpy(sy(izpy(this.yhi)));
+            this.xlo = sx(this.xlo);
+            this.ylo = sy(this.ylo);
+            this.xhi = sx(this.xhi);
+            this.yhi = sy(this.yhi);
 
             for (var i = 0 ; i < this.children.length ; i++) {
                this.children[i].textX = sx(this.children[i].textX);
@@ -5140,7 +5157,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
-         return zpx(x);
+         return x;
       }
       this.ty = function() {
          var y = this.tY;
@@ -5152,7 +5169,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
-         return zpy(y);
+         return y;
       }
       this.value = null;
       this.x = 0;
@@ -5283,10 +5300,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             xhi = max(xhi, this.sp0[i][0]);
             yhi = max(yhi, this.sp0[i][1]);
          }
-         xlo = zpx(xlo);
-         ylo = zpy(ylo);
-         xhi = zpx(xhi);
-         yhi = zpy(yhi);
 
          // PARSE FOR VARIOUS KINDS OF SWIPE ACTION UPON ANOTHER SKETCH.
 
@@ -5310,16 +5323,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   // FOR X AND Y, TEST WHETHER FIRST AND LAST POINT OF STROKE:
                   // IS TO THE LEFT, MIDDLE OR RIGHT OF THE SKETCH.
 
-                  var x0 = zpx(sk().sp0[  1][0]), x0L = x0 < sk(I).xlo,
+                  var x0 = sk().sp0[  1][0], x0L = x0 < sk(I).xlo,
                                                   x0H = x0 > sk(I).xhi,
                                                   x0M = ! x0L && ! x0H;
-                  var y0 = zpy(sk().sp0[  1][1]), y0L = y0 < sk(I).ylo,
+                  var y0 = sk().sp0[  1][1], y0L = y0 < sk(I).ylo,
                                                   y0H = y0 > sk(I).yhi,
                                                   y0M = ! y0L && ! y0H;
-                  var xn = zpx(sk().sp0[n-1][0]), xnL = xn < sk(I).xlo,
+                  var xn = sk().sp0[n-1][0], xnL = xn < sk(I).xlo,
                                                   xnH = xn > sk(I).xhi,
                                                   xnM = ! xnL && ! xnH;
-                  var yn = zpy(sk().sp0[n-1][1]), ynL = yn < sk(I).ylo,
+                  var yn = sk().sp0[n-1][1], ynL = yn < sk(I).ylo,
                                                   ynH = yn > sk(I).yhi,
                                                   ynM = ! ynL && ! ynH;
 
@@ -5339,7 +5352,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
-                  xy = [ zpx(xy[0]), zpy(xy[1]) ];
+                  xy = [ xy[0], xy[1] ];
                   xy = sk(I).xformInverse(xy);
                   sk(I).sp0.push(xy);
                   sk(I).sp.push([xy[0], xy[1], i == 1 ? 0 : 1]);
@@ -5887,15 +5900,27 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                isPieMenu = false;
          }
 
+         _g = g;
+
+         if (!isDef(_g.panX)) _g.panX = 0;
+
          // CLEAR THE CANVAS
 
-         _g = g;
-         _g.clearRect(0, 0, w, h);
+         _g.clearRect(-_g.panX - 100, 0, w + 200, h);
          _g.inSketch = false;
+
+         // DO ACTUAL CANVAS PANNING
+
+         _g.resetTransform();
+         _g.translate(_g.panX, 0, 0);
+
+         // PAN 3D OBJECTS TOO
+
+         root.position.x = _g.panX / 275;
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
-            fillRect(0, 0, w, h);
+            fillRect(-_g.panX, 0, w, h);
          }
 
          // START OFF CURRENT GUIDED SKETCH, IF NECESSARY
@@ -5959,10 +5984,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      ylo = min(ylo, sk(I).sp[i][1]);
                      yhi = max(yhi, sk(I).sp[i][1]);
                   }
-                  xlo = izpx(xlo);
-                  ylo = izpy(ylo);
-                  xhi = izpx(xhi);
-                  yhi = izpy(yhi);
 
                   // PORTS EXTEND THE BOUNDING BOX OF A SKETCH.
 
@@ -5992,10 +6013,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      ylo = yhi = sk(I).cy();
                   }
 
-                  sk(I).xlo = zpx(xlo - sketchPadding);
-                  sk(I).ylo = zpy(ylo - sketchPadding);
-                  sk(I).xhi = zpx(xhi + sketchPadding);
-                  sk(I).yhi = zpy(yhi + sketchPadding);
+                  sk(I).xlo = xlo - sketchPadding;
+                  sk(I).ylo = ylo - sketchPadding;
+                  sk(I).xhi = xhi + sketchPadding;
+                  sk(I).yhi = yhi + sketchPadding;
                }
 
                sk(I).isMouseOver = sk(I).parent == null &&
@@ -6155,24 +6176,39 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
          if (! isShowingGlyphs) {
+            lineWidth(1);
+
             _g.save();
 
             _g.globalAlpha = 1.0;
 
-            _g.beginPath();
-            _g.moveTo(0, h - margin);
-            _g.lineTo(1280, h - margin);
-            _g.lineTo(1280, h);
-            _g.lineTo(0, h);
-            _g.fillStyle = 'rgba(128,128,128,0.15)';
-            _g.fill();
-            _g.moveTo(0, h);
+            leftX = 0 - _g.panX;
+            rightX = 1280 - _g.panX;
 
             _g.beginPath();
-            _g.moveTo(0, h);
-            _g.lineTo(1280, h);
+            _g.moveTo(leftX, h - margin);
+            _g.lineTo(rightX, h - margin);
+            _g.lineTo(rightX, h);
+            _g.lineTo(leftX, h);
+            _g.fillStyle = 'rgba(128,128,128,0.15)';
+            _g.fill();
+            _g.moveTo(leftX, h);
+
+            _g.beginPath();
+            _g.moveTo(leftX, h);
+            _g.lineTo(rightX, h);
             _g.strokeStyle = 'rgba(128,128,128,0.3)';
             _g.stroke();
+
+            notchSeparation = 100;
+            offset = _g.panX % notchSeparation;
+            for (i = leftX + offset; i < rightX; i+= notchSeparation) {
+               _g.beginPath();
+               _g.moveTo(i, h);
+               _g.lineTo(i, h - margin);
+               _g.strokeStyle = 'rgba(128,128,128,0.3)';
+               _g.stroke();
+            }
 
             _g.restore();
          }
