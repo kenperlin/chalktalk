@@ -3924,7 +3924,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             var h = floor(21 * rows);
 
-            codeElement.style.left = x - w/2 + 10;
+            codeElement.style.left = x + _g.panX - w/2 + 10;
             codeElement.style.top = y + 5;
 
             // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
