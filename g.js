@@ -1566,7 +1566,7 @@
       'blue',
       'magenta',
    ];
-   function paletteX(i) { return 30; }
+   function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
       var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
@@ -2918,8 +2918,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	    return;
          }
 
-         if (isBottomGesture)
+         if (isBottomGesture) {
+            _g.panX += x - this.xDown;
             return;
+         }
 
 /*
          if (isTogglingExpertMode)
@@ -3004,10 +3006,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isBottomGesture = false;
             if (y < height() - 100)
                clearSketchPage();
-            else if (x < this.xDown - 100)
-               setPage(pageIndex - 1);
-            else if (x > this.xDown + 100)
-               setPage(pageIndex + 1);
             return;
          }
 
@@ -3865,7 +3863,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin)
+            if (This().mouseX < margin - _g.panX)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
@@ -3924,7 +3922,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             var h = floor(21 * rows);
 
-            codeElement.style.left = x - w/2 + 10;
+            codeElement.style.left = x + _g.panX - w/2 + 10;
             codeElement.style.top = y + 5;
 
             // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
@@ -4020,12 +4018,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          line(0, y0, width(), y0);
          line(0, height()-1, width(), height()-1);
 
-         var t = 5 * floor(sketchPage.mx / (glyphsW/2)) +
+         var t = 5 * floor((sketchPage.mx + _g.panX) / (glyphsW/2)) +
                  5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : 'rgb(0,100,240)';
-            var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5);
+            var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5) - _g.panX;
             var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
             var txt = glyphs[i].name;
             var j0 = txt.indexOf('(');
@@ -4050,7 +4048,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
-            var x = (glyphsW*3/16) + glyphsW * floor(i / 10);
+            var x = (glyphsW*3/16) + glyphsW * floor(i / 10) - _g.panX;
             var y =  5 + (i % 10) * (height() - glyphsH) / 10;
             var selected = t >= i && t < i+1;
             _g.strokeStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
@@ -5953,7 +5951,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk(I).dSum = 0;
             }
 
-         if (! isPullDown && This().mouseX < glyphsW && This().mouseY >= h - glyphsH)
+         if (! isPullDown && (This().mouseX + _g.panX) < glyphsW && This().mouseY >= h - glyphsH)
             isShowingGlyphs = true;
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
@@ -7058,6 +7056,7 @@ var fragmentShaderHeader = ["\
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+      _g.panX = 0;
 
       if (isCodeWidget)
          toggleCodeWidget();
