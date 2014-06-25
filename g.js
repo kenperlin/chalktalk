@@ -3863,7 +3863,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin - _g.panX)
+            if (This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
                drawPieMenu();
@@ -5955,7 +5955,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk(I).dSum = 0;
             }
 
-         if (! isPullDown && (This().mouseX + _g.panX) < glyphsW && This().mouseY >= h - glyphsH)
+         if (! isPullDown && (This().mouseX + _g.panX) < glyphsW && This().mouseY >= h - glyphsH && ! isBottomGesture)
             isShowingGlyphs = true;
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
