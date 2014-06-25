@@ -274,6 +274,15 @@
    function Control() {
       this.labels = "slideX slideY".split(' ');
 
+      this.flip = 1;
+
+      this.computeStatistics = function() {
+         var c = this.glyphTrace[1-this.selection];
+         var y0 = c[0][1];
+         var y1 = c[c.length - 1][1];
+	 this.flip = y0 > y1 ? 1 : -1;
+      }
+
       this.lo = 0;
       this.hi = 1;
       this.t = 0.5;
@@ -289,6 +298,7 @@
       }
 
       this.render = function(elapsed) {
+
          var sc = this.size / 180;
 
          this.afterSketch(function() {
@@ -325,10 +335,10 @@
          switch (this.selection) {
          case 0:
             mLine([-.5,0],[.5,0]);
-            mLine([x,-.20],[x,.20]);
+            mLine([x,-.20*this.flip],[x,.20*this.flip]);
             break;
          case 1:
-            mLine([0,-.5],[0,.5]);
+            mLine([0,-.5*this.flip],[0,.5*this.flip]);
             mLine([-.20,x],[.20,x]);
             break;
          }
@@ -350,6 +360,9 @@
       }
    }
    Control.prototype = new Sketch;
+
+   registerGlyph(sketchTypeToCode('Control', 'slideX'), [ [[-.5,0],[.5,0]], [[0,-.2],[0,.2]] ]);
+   registerGlyph(sketchTypeToCode('Control', 'slideY'), [ [[0,-.5],[0,.5]], [[-.2,0],[.2,0]] ]);
 
    function Diagram() {
       this.labels =

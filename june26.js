@@ -151,10 +151,9 @@
    }
 
    function Noises() {
-      this.labels = "noise1D".split(' ');
+      this.labels = "noise1D absns1D".split(' ');
 
       this.freqs = [1];
-      this.isAbs = false;
       this.mode = "none";
       this.mouseX = 0;
       this.mouseY = 0;
@@ -171,10 +170,6 @@
          if (isDef(this.dragX))
             this.t0 -= 2 * (x - this.dragX) / (this.xhi - this.xlo);
          this.dragX = x;
-      }
-
-      this.onClick = function(x, y) {
-         this.isAbs = ! this.isAbs;
       }
 
       this.onSwipe = function(dx, dy) {
@@ -205,7 +200,7 @@
                for (var n = 0 ; n < this.freqs.length ; n++) {
                   var freq = this.freqs[n];
                   var f = noise2((this.t0 + t) * freq, 200 * freq) / freq;
-                  signal += this.isAbs ? abs(f) : f;
+                  signal += this.selection == 1 ? abs(f) : f;
                }
                c.push([t, signal]);
             }
