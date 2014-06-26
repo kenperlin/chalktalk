@@ -291,7 +291,7 @@ function PVase() {
     sketch.update = function() {
       // console.log(mouseY);
       var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(-5,-12,0.0).
+      this.geometry.getMatrix().translate(-2,-12,0.0).
       rotateX(-PI/2).rotateZ(PI/2).scale(scale/7);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
