@@ -130,22 +130,26 @@ uniform float spinAngle;\
          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
           if (value > -1.) {\
-            float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
+            float checker = .5;\
             color = vec3((checker+.25)*.5);\
           }\
           if (value > 0.) {\
+            float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
+            color = vec3((checker+.25)*.5);\
+          }\
+          if (value > 1.) {\
             float checker = mod(floor(5.*X)+floor(5.*Y)+floor(5.*Z),2.);\
             color = vec3((checker+.25)*.5);\
           }\
-          if(value > 1.){\
+          if(value > 2.){\
             float tube = .5+.5*sin(X*20.)*sin(Y*20.)*sin(Z*20.);\
             color = vec3(tube);\
           }\
-          if(value > 2.){\
+          if(value > 3.){\
             float col = sin(X*30.+sin(sin(X*30.0)*2.0+Y*9.0)*2.0);\
              color = vec3(col);\
           }\
-          if(value > 3.){\
+          if(value > 4.){\
             vec3 rand = vec3(fract(sin((sin(X*6.3)*2.1)*cos(Z*3.14))*3.33));\
             color = vec3(rand);\
           }\
@@ -171,6 +175,7 @@ function boringSliced() {
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
     sketch.code = [
+      ["sphere", ""],
       ["stripes", "mod ( floor(X) , 2 )"],
       ["checker", "mod( floor(X)+floor(Y)+floor(Z) , 2 )"],
       ["dots", "0.5 + 0.5 * sin(X)*sin(Y)*sin(Z)"],
@@ -193,7 +198,7 @@ function boringSliced() {
         case 3: 
            if(this.spinRate>=0)
             this.switcher++;
-          if(this.switcher>4)
+          if(this.switcher>5)
             this.switcher = 0;
           break;
       }
