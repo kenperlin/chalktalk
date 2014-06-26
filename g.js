@@ -4037,7 +4037,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.showGlyphs = function() {
          _g.save();
 
-         color('rgba(255,255,255,.15)');
+         color('rgba(0,0,0,.8)');
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
          _g.strokeStyle = 'rgba(0,0,0,.3)';
