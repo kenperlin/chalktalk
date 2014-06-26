@@ -308,7 +308,7 @@ registerGlyph("marble()",[
 function marble() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, marbleFragmentShader);
    sketch.code = [
-      ["stripe", "sin(x)"],
+      ["stripe", ".5 + .5 * sin(x)"],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
       ["noise", ".5 + .5 * noise(x,y,z))"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
@@ -421,8 +421,8 @@ function sliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
    sketch.code = [
       ["noise", ".5 + .5 * noise(x,y,z))"],
-      ["stripe", "sin(x)"],
-      ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
+      ["stripe", ".5 + .5 * sin(x)"],
+      ["pinstripe", "pstripe(x) = pow(.5 + .5 * sin(x), 0.1)"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
       ["fractal", "fractal(x,y,z))"],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],

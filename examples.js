@@ -47,7 +47,7 @@
    function unitTube() {
       drawUnitTube();
    }
-
+/*
    var kenTestFragmentShader = ["\
       uniform float t;\
       void main(void) {\
@@ -57,7 +57,6 @@
          gl_FragColor = vec4(sweep * color, alpha);\
       }\
    "].join('\n');
-
    function KenTest() {
       this.labels = "can".split(' ');
       this.render = function(elapsed) {
@@ -79,7 +78,7 @@
       }
    }
    KenTest.prototype = new Sketch;
-
+*/
    function Bird() {
       this.T = 0;
       this.walkT = 0;
