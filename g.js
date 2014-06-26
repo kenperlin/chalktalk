@@ -7058,7 +7058,11 @@ var fragmentShaderHeader = ["\
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
-      _g.panX = 0;
+      // SAVE PAN VALUE FOR PREVIOUS PAGE
+      pages[pageIndex][2] = _g.panX;
+
+      // RESTORE PAN VALUE FOR NEXT PAGE
+      _g.panX = pages[index][2];
 
       if (isCodeWidget)
          toggleCodeWidget();
