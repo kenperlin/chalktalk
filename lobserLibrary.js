@@ -271,9 +271,9 @@ mCurve([[-0.00719704,-0.536432],[0.00970687,-0.575302],[0.0218883,-0.615756],[0.
     var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
 
     console.log(sketch);
-    sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
-      .rotateX(PI/2)
-      .scale(1.2);
+    // sketch.geometry.getMatrix().translate(sketchPage.x/100,sketchPage.y/100,0.0)
+    //   .rotateX(PI/2)
+    //   .scale(1.2);
 
     // sketch.geometry.rotation.x = 1.5;
 
@@ -294,8 +294,9 @@ mCurve([[-0.00719704,-0.536432],[0.00970687,-0.575302],[0.0218883,-0.615756],[0.
     sketch.startTime = time;
 
     sketch.update = function() {
+      // console.log(mouseY);
       var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(sketchPage.x/100,(sketchPage.y/100)-20,0.0).
+      this.geometry.getMatrix().translate(sketchPage.x/100,.5-(sketchPage.y/21),0.0).
       rotateX(-PI/2).rotateZ(PI/2).scale(scale/7);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
