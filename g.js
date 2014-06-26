@@ -2921,7 +2921,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (isBottomGesture) {
             // IF DRAGGING TO QUICK SWITCH PAGES
-            if (isShiftPressed) return;
+            if (isShiftPressed) {
+               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+               return;
+            }
             _g.panX += x - this.xDown;
             return;
          }
@@ -3006,10 +3011,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isBottomGesture) {
-            if (isShiftPressed) {
-               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
-               setPage(pageNumber);
-            } else if (y < height() - 100) {
+            if (y < height() - 100) {
                clearSketchPage();
             }
             isBottomGesture = false;
@@ -5899,8 +5901,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
 
-
-
          var w = width(), h = height();
 
          keyboard.x = w / 2;
@@ -6194,12 +6194,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          // DRAW PAGE NUMBER IF QUICK SWITCHING PAGES
          if (isBottomGesture && isShiftPressed) {
             _g.save();
-            _g.font = "30px Arial";
+            _g.font = "15px Arial";
             _g.fillStyle = "#FFFFFF";
 
             pageNumber = floor(((This().mouseX + _g.panX) / w) * pages.length);
 
-            _g.fillText(pageNumber, This().mouseX, h - margin - 10);
+            _g.fillText(pageNumber, This().mouseX - 7, h - margin - 10);
             _g.restore();
          }
 
