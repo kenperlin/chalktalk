@@ -7099,6 +7099,12 @@ var fragmentShaderHeader = ["\
       var slide = document.getElementById('slide');
       slide.innerHTML = document.getElementById(pageName).innerHTML;
 
+      // START VIDEO ON NEW SLIDE
+      vidElements = slide.getElementsByClassName("vid");
+      if (vidElements.length == 1) {
+         vidElements[0].play();
+      }
+
       if (audiencePopup != null)
          audiencePopup.document.getElementById('slide').innerHTML =
             document.getElementById(pageName).innerHTML;
