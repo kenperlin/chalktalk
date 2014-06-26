@@ -2920,6 +2920,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isBottomGesture) {
+            // IF DRAGGING TO QUICK SWITCH PAGES
+            if (isShiftPressed) return;
             _g.panX += x - this.xDown;
             return;
          }
@@ -3006,7 +3008,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isBottomGesture) {
             if (isShiftPressed) {
                pageNumber = floor((x / width()) * pages.length);
-               console.log(pageNumber);
                setPage(pageNumber);
             } else if (y < height() - 100) {
                clearSketchPage();
