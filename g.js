@@ -1480,7 +1480,7 @@
       + " <canvas id='sketch_canvas' width=1280 height=720 tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
-      + " <hr id='background' size=1000 color='" + backgroundColor + "'>"
+      + " <hr id='background' size=1024 color='" + backgroundColor + "'>"
       + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
@@ -6196,28 +6196,32 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             rightX = 1280 - _g.panX;
 
             _g.beginPath();
-            _g.moveTo(leftX, h - margin);
-            _g.lineTo(rightX, h - margin);
-            _g.lineTo(rightX, h);
-            _g.lineTo(leftX, h);
-            _g.fillStyle = 'rgba(128,128,128,0.15)';
-            _g.fill();
-            _g.moveTo(leftX, h);
-
-            _g.beginPath();
             _g.moveTo(leftX, h);
             _g.lineTo(rightX, h);
-            _g.strokeStyle = 'rgba(128,128,128,0.3)';
+            _g.strokeStyle = scrimColor(0.2);
             _g.stroke();
 
-            notchSeparation = 100;
-            offset = _g.panX % notchSeparation;
-            for (i = leftX + offset; i < rightX; i+= notchSeparation) {
+            if (this.mouseY >= h - margin || isBottomGesture) {
+
                _g.beginPath();
-               _g.moveTo(i, h);
-               _g.lineTo(i, h - margin);
-               _g.strokeStyle = 'rgba(128,128,128,0.3)';
-               _g.stroke();
+               _g.moveTo(leftX, h - margin);
+               _g.lineTo(rightX, h - margin);
+               _g.lineTo(rightX, h-1);
+               _g.lineTo(leftX, h-1);
+               _g.fillStyle = scrimColor(0.05);
+               _g.fill();
+
+               var ns = margin;
+               offset = _g.panX % ns;
+               for (i = leftX + offset; i < rightX; i+= ns) {
+                  _g.beginPath();
+                  _g.moveTo(i, h-1);
+                  _g.lineTo(i, h - margin);
+                  _g.lineTo(i + ns/2, h - margin);
+                  _g.lineTo(i + ns/2, h-1);
+                  _g.fillStyle = scrimColor(.05);
+                  _g.fill();
+               }
             }
 
             _g.restore();

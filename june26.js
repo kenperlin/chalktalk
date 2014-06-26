@@ -385,17 +385,17 @@ var slicedFragmentShader = ["\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
-         /* float tu = ( value>1. ? noise(P) : turbulence(P) );\
-            float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1); */\
          float t = value == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\
-                   value == 4. ? 0.5 * fractal(vec3(X,Y,Z)) :\
-                   value == 5. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
+                   value == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\
+                   value == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
    		                 0.0 ;\
          float c = .5 + .5*cos(7.*X+6.*t);\
-	 if (value == 0.)\
+	 if (value == 1.)\
 	    c = .2 + .8 * c;\
-         else if (value == 2.)\
+         else if (value == 0.)\
             c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\
+         else if (value == 4.)\
+            c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\
          else\
             c = pow(c, .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
@@ -408,7 +408,7 @@ var slicedFragmentShader = ["\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
-      gl_FragColor = vec4(color,alpha*sign(z));\
+      gl_FragColor = vec4(color,alpha*(rr<1.?1.:0.));\
    }\
 "].join("\n");
 
@@ -420,10 +420,11 @@ registerGlyph("sliced()",[
 function sliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
    sketch.code = [
+      ["noise", ".5 + .5 * noise(x,y,z))"],
       ["stripe", "sin(x)"],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
-      ["noise", ".5 + .5 * noise(x,y,z))"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
+      ["fractal", "fractal(x,y,z))"],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
    ];
@@ -437,8 +438,8 @@ function sliced() {
 */
    sketch.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy)) {
-      case 1: this.spinRate = -1; break;
-      case 3: this.spinRate =  0; break;
+      case 1: this.spinRate = -.5 - this.spinRate; break;
+      case 3: this.spinRate =   0; break;
       }
    }
    sketch.update = function(elapsed) {
@@ -467,6 +468,9 @@ function Grid() {
             mCurve([[ f,1], [ f,-1]]);
          }
          this.afterSketch(function() {
+
+	    function n2(x, y) { return noise2(x, y + 10); }
+
             var uColor = 'rgb(255,64,64)';
             var vColor = 'rgb(64,255,64)';
             switch (this.gridMode) {
@@ -477,9 +481,9 @@ function Grid() {
                lineWidth(0.5);
                for (var u = -1 ; u <= 1 + d/2 ; u += d)
                for (var v = -1 ; v <= 1 + d/2 ; v += d) {
-                  var t0 = noise2(u  , v  )*f;
-                  var tu = noise2(u+d, v  )*f;
-                  var tv = noise2(u  , v+d)*f;
+                  var t0 = n2(u  , v  )*f;
+                  var tu = n2(u+d, v  )*f;
+                  var tv = n2(u  , v+d)*f;
                   if (u < 1) {
                      color(uColor);
                      mCurve([[u*f,v*f,t0] , [(u+d)*f,v*f,tu]]);
@@ -496,8 +500,8 @@ function Grid() {
                color(vColor);
                for (var u = -1 ; u <= 1 ; u += 1)
                for (var v = -1 ; v <= 1 ; v += 1) {
-                  var t0 = noise2(u, v    );
-                  var t1 = noise2(u, v+.01);
+                  var t0 = n2(u, v    );
+                  var t1 = n2(u, v+.01);
                   var s = .1 * (t1 - t0) / .01;
                   mCurve([[u*f,v*f-.1,-s] , [u*f,v*f+.1,s]]);
                }
@@ -506,8 +510,8 @@ function Grid() {
                color(uColor);
                for (var u = -1 ; u <= 1 ; u += 1)
                for (var v = -1 ; v <= 1 ; v += 1) {
-                  var t0 = noise2(u    , v);
-                  var t1 = noise2(u+.01, v);
+                  var t0 = n2(u    , v);
+                  var t1 = n2(u+.01, v);
                   var s = .1 * (t1 - t0) / .01;
                   mCurve([[u*f-.1,v*f,-s] , [u*f+.1,v*f,s]]);
                }
