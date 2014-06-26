@@ -355,6 +355,20 @@
                mText(roundedString(this.hi), [0, .6], .5, 1);
                break;
             }
+
+	    if (this.lo == floor(this.lo) && this.hi == floor(this.hi)) {
+	       for (var i = this.lo + 1 ; i < this.hi ; i++) {
+	          var t = (i - this.lo) / (this.hi - this.lo) - .5;
+	          switch (this.selection) {
+		  case 0:
+		     mLine([t,-.02],[t,.02]);
+		     break;
+		  case 1:
+		     mLine([-.02,t],[.02,t]);
+		     break;
+	          }
+	       }
+	    }
          });
          m.restore();
       }
@@ -948,9 +962,10 @@
 
       this.code = [
          ["cos", "cos(x)"],
-         ["exp", "exp(x)"],
+         ["exp", "pow(2,8+x/12)"],
          ["sin", "sin(x)"],
          ["sqr", "x * x"],
+         ["floor", "floor(x-.5)"],
       ];
 
       this.labels = [];
@@ -969,6 +984,7 @@
          makeCurve(function(x) { return exp(x - 1); }),
          makeCurve(function(x) { return sin(PI * x) / PI; }),
          makeCurve(function(x) { return x * x; }),
+         makeCurve(function(x) { return (floor(x)+.5); }),
       ];
 
       this.render = function(elapsed) {
