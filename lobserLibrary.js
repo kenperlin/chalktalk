@@ -131,7 +131,7 @@ uniform float spinAngle;\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
           if (value > -1.) {\
             float checker = .5;\
-            color = vec3((checker+.25)*.5);\
+            color = vec3(s);\
           }\
           if (value > 0.) {\
             float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
@@ -209,12 +209,6 @@ function boringSliced() {
    }
 }
 
-
-
-
-
-
-
 var pVaseFragmentShader = ["\
    uniform float t;\
    void main(void) {\
@@ -247,11 +241,11 @@ function PVase() {
   this.render = function(elapsed) {
     m.save();
     m.scale(this.size / 400);
+        mCurve([ [-1,1], [0,-1], [1,1]]);
+
     // mCurve([ [1,1], [-1,-1], [1,-1]]);
     // mCurve([[1,-1],[1,1] ])
-   mCurve([[0.129879,0.871339],[0.118959,0.911377],[0.0736839,0.932526],[0.034521,0.942733],[-0.00830282,0.94241],[-0.0495007,0.927813],[-0.0638067,0.886885],[-0.0421678,0.850065],[-0.0050293,0.828285],[0.0175018,0.791921],[0.0333861,0.752768],[0.0448524,0.711961],[0.0512502,0.670059],[0.0493105,0.627687],[0.0380184,0.586781],[0.0164934,0.550038],[-0.0154051,0.522049],[-0.0547736,0.505917]]);
-mCurve([[-0.0547736,0.505917],[-0.0954771,0.494447],[-0.136388,0.483518],[-0.176805,0.470973],[-0.216871,0.457225],[-0.256804,0.443503],[-0.296805,0.428668],[-0.327872,0.399691],[-0.348802,0.362617],[-0.363737,0.323017],[-0.375422,0.282316],[-0.383482,0.240741],[-0.388032,0.198647],[-0.389108,0.156325],[-0.386651,0.114058],[-0.380602,0.0721527], [-0.371009,0.0308988],[-0.357728,-0.00931361],[-0.341286,-0.048323],[-0.322118,-0.086074],[-0.300868,-0.122689],[-0.278113,-0.158384],[-0.254214,-0.193322],[-0.22946,-0.227659],[-0.20408,-0.261535],[-0.178274,-0.295086],[-0.152226,-0.328451],[-0.126139,-0.361785],[-0.100227,-0.395254],[-0.0747584,-0.429064],[-0.0502781,-0.463599],[-0.0274611,-0.49926],[-0.00719704,-0.536432]]);
-mCurve([[-0.00719704,-0.536432],[0.00970687,-0.575302],[0.0218883,-0.615756],[0.0280333,-0.658085],[0.0257941,-0.699317],[0.0221494,-0.74537],[-0.0162775,-0.757614],[-0.0558051,-0.773485],[-0.0824925,-0.807541],[-0.0952201,-0.846889],[-0.0978507,-0.892108],[0.289949,-0.895665]]);    m.restore();
+    m.restore();
   }
 
   this.onClick = function(x, y) {
@@ -265,7 +259,7 @@ mCurve([[-0.00719704,-0.536432],[0.00970687,-0.575302],[0.0218883,-0.615756],[0.
     var tnode = new THREE.Mesh();
 
     var body = tnode.addLathe( [
-[-1.491413,0,13.880116],[-1.607697,0,14.306492],[-2.089839,0,14.531703],[-2.50689,0,14.640397],[-2.962928,0,14.636961],[-3.401649,0,14.481519],[-3.553996,0,14.045668],[-3.323561,0,13.653563],[-2.928067,0,13.421634],[-2.688131,0,13.034384],[-2.518976,0,12.617439],[-2.39687,0,12.182876],[-2.328739,0,11.73666],[-2.349396,0,11.285434],[-2.469646,0,10.849821],[-2.698869,0,10.458542],[-3.038561,0,10.160478],[-3.457801,0,9.988686],[-3.891258,0,9.866547],[-4.326921,0,9.750155],[-4.757331,0,9.61657],[-5.184,0,9.470156],[-5.609247,0,9.324032],[-6.035222,0,9.16605],[-6.366066,0,8.857471],[-6.588955,0,8.462668],[-6.747993,0,8.040961],[-6.872433,0,7.607528],[-6.95826,0,7.16479],[-7.006721,0,6.716524],[-7.018176,0,6.265835],[-6.992012,0,5.815731],[-6.927592,0,5.369472],[-6.825437,0,4.930154],[-6.684001,0,4.501926],[-6.508907,0,4.086509],[-6.304791,0,3.684494],[-6.078497,0,3.294573],[-5.836168,0,2.914455],[-5.581665,0,2.542393],[-5.318061,0,2.176736],[-5.047787,0,1.815988],[-4.77297,0,1.458693],[-4.495586,0,1.103391],[-4.217786,0,0.748413],[-3.941841,0,0.391994],[-3.670623,0,0.031944],[-3.409929,0,-0.335818],[-3.166947,0,-0.715582],[-2.951152,0,-1.111428],[-2.77114,0,-1.525359],[-2.641419,0,-1.956159],[-2.57598,0,-2.406934],[-2.599825,0,-2.846015],[-2.638638,0,-3.336436],[-3.047851,0,-3.466827],[-3.468786,0,-3.635845],[-3.752984,0,-3.998514],[-3.888522,0,-4.417527],[-3.916535,0,-4.899075],[0.213201,0,-4.936954],[0.203555,0,-4.593784],[-1.936806,0,-3.570133],[-2.169454,0,-2.686071],[-2.402102,0,-1.476302],[-2.960457,0,-0.59224],[-3.891049,0,0.664059],[-4.914699,0,2.199535],[-6.217528,0,4.898251],[-6.264057,0,7.550438],[-5.845291,0,8.387971],[-4.588992,0,9.132444],[-3.193105,0,9.59774],[-2.495161,0,10.202624],[-2.076395,0,11.179746],[-1.611099,0,12.529104],[-1.47151,0,13.227048],[-1.491413,0,13.880116]      ], 32);
+      [-1.491413,0,13.880116],[-1.607697,0,14.306492],[-2.089839,0,14.531703],[-2.50689,0,14.640397],[-2.962928,0,14.636961],[-3.401649,0,14.481519],[-3.553996,0,14.045668],[-3.323561,0,13.653563],[-2.928067,0,13.421634],[-2.688131,0,13.034384],[-2.518976,0,12.617439],[-2.39687,0,12.182876],[-2.328739,0,11.73666],[-2.349396,0,11.285434],[-2.469646,0,10.849821],[-2.698869,0,10.458542],[-3.038561,0,10.160478],[-3.457801,0,9.988686],[-3.891258,0,9.866547],[-4.326921,0,9.750155],[-4.757331,0,9.61657],[-5.184,0,9.470156],[-5.609247,0,9.324032],[-6.035222,0,9.16605],[-6.366066,0,8.857471],[-6.588955,0,8.462668],[-6.747993,0,8.040961],[-6.872433,0,7.607528],[-6.95826,0,7.16479],[-7.006721,0,6.716524],[-7.018176,0,6.265835],[-6.992012,0,5.815731],[-6.927592,0,5.369472],[-6.825437,0,4.930154],[-6.684001,0,4.501926],[-6.508907,0,4.086509],[-6.304791,0,3.684494],[-6.078497,0,3.294573],[-5.836168,0,2.914455],[-5.581665,0,2.542393],[-5.318061,0,2.176736],[-5.047787,0,1.815988],[-4.77297,0,1.458693],[-4.495586,0,1.103391],[-4.217786,0,0.748413],[-3.941841,0,0.391994],[-3.670623,0,0.031944],[-3.409929,0,-0.335818],[-3.166947,0,-0.715582],[-2.951152,0,-1.111428],[-2.77114,0,-1.525359],[-2.641419,0,-1.956159],[-2.57598,0,-2.406934],[-2.599825,0,-2.846015],[-2.638638,0,-3.336436],[-3.047851,0,-3.466827],[-3.468786,0,-3.635845],[-3.752984,0,-3.998514],[-3.888522,0,-4.417527],[-3.916535,0,-4.899075],[0.213201,0,-4.936954],[0.203555,0,-4.593784],[-1.936806,0,-3.570133],[-2.169454,0,-2.686071],[-2.402102,0,-1.476302],[-2.960457,0,-0.59224],[-3.891049,0,0.664059],[-4.914699,0,2.199535],[-6.217528,0,4.898251],[-6.264057,0,7.550438],[-5.845291,0,8.387971],[-4.588992,0,9.132444],[-3.193105,0,9.59774],[-2.495161,0,10.202624],[-2.076395,0,11.179746],[-1.611099,0,12.529104],[-1.47151,0,13.227048],[-1.491413,0,13.880116]      ], 32);
 
     var geo = body.geometry;
 
@@ -532,73 +526,6 @@ var myFragmentShader = ["\
 "].join("\n");
 
 
-// var myFragmentShader = ["\
-//   void main(void) {\
-//     float t = mod(time,1.0);\
-//     float c = .5+noise(10.*vPosition);\
-//     float a = 3.14 - atan(vPosition.x,vPosition.y);\
-//     float ma = mx-1.;\
-//     if(a > mix(0.,6.28,value))\
-//         c=0.;\
-//    gl_FragColor = vec4(   vec3(c)   , alpha );\
-//    }\
-// "].join("\n");
-
-
-// vaseMaterial = new THREE.ShaderMaterial({
-//     uniforms: {
-//         time: {
-//             type: "f",
-//             value: 0.0
-//         },
-//     },
-//     vertexShader:   vaseShader.vertexShader,
-//     fragmentShader: vaseShader.fragmentShader,
-// });
-
-
-// registerGlyph("lVase()", [
-//     [[-1.66159,-3.68055],[-1.773634,-4.090704],[-2.232532,-4.308656],[-2.633714,-4.418088],[-3.070594,-4.419276],[-3.498048,-4.287182],[-3.678558,-3.881167],[-3.479754,-3.487502],[-3.100546,-3.264764],[-2.85367,-2.907842],[-2.68442,-2.509155],[-2.560581,-2.094476],[-2.485761,-1.668299],[-2.484919,-1.234358],[-2.588226,-0.813763],[-2.781088,-0.424502]],
-// [[-3.086771,-0.114626],[-3.478233,0.0748838],[-3.894185,0.196225],[-4.31274,0.307776],[-4.728153,0.430589],[-5.136792,0.574557],[-5.536255,0.741828],[-5.924712,0.934189],[-6.271939,1.195092],[-6.521691,1.552186],[-6.674899,1.957623],[-6.768432,2.380217],[-6.80059,2.811987],[-6.786154,3.244341],[-6.727722,3.673189],[-6.631971,4.095047],[-6.508676,4.509886],[-6.353594,4.913861],[-6.18102,5.310594],[-5.987867,5.69781],[-5.783412,6.079129],[-5.569773,6.455417],[-5.349677,6.827965],[-5.124971,7.197759],[-4.897169,7.565658],[-4.667585,7.93245],[-4.437463,8.298906],[-4.208097,8.665833],[-3.980914,9.034117],[-3.757889,9.404912],[-3.541163,9.779471],[-3.337092,10.160972],[-3.147408,10.549996],[-2.984881,10.95097],[-2.849218,11.362228],[-2.75617,11.784122],[-2.716251,12.217886],[-2.744254,12.642155],[-2.799989,13.099298]],
-// [[-3.214532,13.201209],[-3.606484,13.383478],[-3.875476,13.734126],[-3.999723,14.138567],[-4.022671,14.60006],[-0.0741333,14.581098]]
-
-// ]);
-
-
-// // registerGlyph("lVase()", ["e-b,_+[*Y)V(S'P&M%J$G#D!A > ; 8 5#2$0&.)-++.)1(4(7':'='@'C'F(I*L,N.O2P5Q8R;Q>QAPDPGOJNMMPLSLVLYM]N_P_S_V]YZ[W]T^R_O`LaIbFbCc?c<d9e6f4g2i0l/o0r1t3w5y8{:|=}@}D}G}J~M~P~S~V~Y~]~a}d}g}j|lznxpurssptmvjwgxe"]);
-
-// function lVase() {
-
-//     // console.log('ok');
-
-//     // var node = root.addNode();
-
-//     var node = new THREE.Mesh();
-
-//     var body = node.addLathe( [
-//             [-1.66159,0,13.875737],[-1.773634,0,14.286565],[-2.232532,0,14.504875],[-2.633714,0,14.614487],[-3.070594,0,14.615677],[-3.498048,0,14.483365],[-3.678558,0,14.076684],[-3.479754,0,13.682373],[-3.100546,0,13.459269],[-2.85367,0,13.10176],[-2.68442,0,12.702419],[-2.560581,0,12.287059],[-2.485761,0,11.860182],[-2.484919,0,11.425528],[-2.588226,0,11.004243],[-2.781088,0,10.614342],[-3.086771,0,10.303958],[-3.478233,0,10.114137],[-3.894185,0,9.992596],[-4.31274,0,9.880862],[-4.728153,0,9.757847],[-5.136792,0,9.613643],[-5.536255,0,9.446097],[-5.924712,0,9.253421],[-6.271939,0,8.992089],[-6.521691,0,8.634408],[-6.674899,0,8.228305],[-6.768432,0,7.805017],[-6.80059,0,7.372539],[-6.786154,0,6.939474],[-6.727722,0,6.509922],[-6.631971,0,6.087371],[-6.508676,0,5.671851],[-6.353594,0,5.267213],[-6.18102,0,4.869829],[-5.987867,0,4.481976],[-5.783412,0,4.100031],[-5.569773,0,3.723125],[-5.349677,0,3.349965],[-5.124971,0,2.979564],[-4.897169,0,2.611061],[-4.667585,0,2.243666],[-4.437463,0,1.876609],[-4.208097,0,1.509079],[-3.980914,0,1.14019],[-3.757889,0,0.768786],[-3.541163,0,0.393612],[-3.337092,0,0.0114851],[-3.147408,0,-0.378178],[-2.984881,0,-0.77981],[-2.849218,0,-1.191744],[-2.75617,0,-1.614331],[-2.716251,0,-2.048807],[-2.744254,0,-2.473773],[-2.799989,0,-2.931666],[-3.214532,0,-3.033745],[-3.606484,0,-3.216313],[-3.875476,0,-3.567537],[-3.999723,0,-3.972642],[-4.022671,0,-4.434893],[-0.0741333,0,-4.4159],[-1.66159,0,13.875737]
-//             ], 32);
-
-//     var geo = body.geometry;
-
-//     var sketch = addGeometryShaderSketch(geo, defaultVertexShader, myFragmentShader);
-
-//     // body.material = vaseMaterial;
-//     // body.material.side = THREE.DoubleSide;
-
-//     // body.scale.set(.2,.2,.2);
-//     for(var i = 0 ; i < body.geometry.faces.length ; i++){
-//         var face = body.geometry.faces[i];
-//         var temp = face.a;
-//         var temp2 = face.c;
-//         face.a = temp2;
-//         face.c = temp;
-//     }
-//     body.rotation.x = -Math.PI/2;
-//     // geometrySketch(node);
-//     // console.log(body);
-// }
-
 barleyField = {
     
     setup:function(){
@@ -740,6 +667,137 @@ barleyField = {
     }
 }
 
+
+
+registerGlyph("noiseFloor()",["9;8<6>5@4B3D2F0H/J.L-N,P*R)T(V'X%Z$]#_!b d!d%d'd)d,d.d1d3d5d8d:d<d?dAcCcFcHcJbMbObQbTbVbXb[b^b`bcbebgbjblanaqasauaxaza|a~a|_{]zZyXxVwTvRvOuMtKsIqGpEoCnAm?l=k;i;f;d;b;_;];Z;W;U;S;P;N;L;I;G;E;B;@;>;;;9<","9I9J:K:L:L;M;M<N<O=O>P>P?P@Q@PAPAOANBNBMBLBKBKBJCICHCHDGEGEGFHFHGIHIHJHKIKILIMJMJNJOKOKPLQLQMRNRNRORPRPQQQQPRORORNSMSLSLTKTJTJUIUHUHVGVFWFWFXFXGXHYHYIYJZJZKZL[M[M[N]N]O^P_P_Q`QaQaQbQcQcPdPdOdNeNeMeLeK",]
+);
+
+THREE.Object3D.prototype.addNoiseFloor = function() {
+  var plane = barleyField.setup();
+  var noisePlane = NoisePlane.setup();
+  plane.noisePlane = noisePlane;
+  plane.add(noisePlane);
+  this.add(plane);
+  this.noisePlane = noisePlane;
+  return plane;
+}
+
+function noiseFloor() {
+
+  var a = root.addNoiseFloor();
+
+  
+
+  this.grow = false;
+  a.switcher = 1;
+  a.speeder = 0;
+
+  var sketch = geometrySketch(a);
+
+  // console.log(sketch);
+
+  sketch.mouseDown = function(x, y) {
+     this.downX = x;
+     this.downY = y;
+  }
+
+  sketch.mouseDrag = function(x, y) {
+      var change = x - this.downX;
+
+      if(sketch.countUp==undefined){
+        sketch.countUp = 0;
+        sketch.countDown = 0;
+      }
+
+      if(change > 0)
+        this.countUp+=change*.01;
+      if(change < 0){
+        this.countDown+=change*.01;
+      }
+
+      // console.log(change);
+      // console.log((this.downX - x) + " " + (this.downY - y));
+  }
+
+  a.update = function() {
+
+    var nP = sketch.geometry.noisePlane;
+
+    if(a.switcher>1 && a.switcher<3 || a.switcher>4){
+      if(!this.now)
+        this.now = time;
+      a.speeder+=nP.waveAmount;
+      if(nP.waveAmount<.06)
+        nP.waveAmount+=.002;
+    }
+
+    sketch.geometry.noisePlane.draw(time);
+    nP.position.y=10;
+
+    if(a.switcher>2 && nP.matOpac < 1 && a.switcher<4){
+      nP.matOpac += .1;
+    }
+    // if(a.switcher>3){
+    //   nP.noiseFreq = mouseY/100;
+    // }
+    // if(a.switcher > 4 && nP.matOpac > 0){
+    //   nP.matOpac -= .1;
+    // }
+
+    // this.getMatrix().translate(0,-4.2,0).scale(0.2).rotateX(.2);
+
+    // var offset = 0;
+
+    // if(a.switcher < 3 || a.switcher>4)
+    //   offset = a.speeder;//(this.now-time)*444*.002;
+    // else
+      offset = mouseX*.01;//(this.now-time)*444*.002;
+
+            
+    for(var i = 0 ; i < this.things.length ; i++){
+        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(nP.noiseFreq*things[i].position.x/100+offset,nP.noiseFreq*things[i].position.y/100,things[i].position.z/100);
+
+    }
+
+    if (isDef(this.fadeTime)) {
+      var t = min(1, (time - this.fadeTime) / 2.0);
+      this.value = t;
+      _g.globalAlpha = sCurve(1 - t) * (1-t);
+    }
+      for(var i = 0 ; i < sketch.geometry.children.length-1 ; i++){
+        var sc = .0001;
+        sketch.geometry.children[i].scale.set(sc,sc,sc);
+      }
+    // if(this.switcher>-1){
+    //   for(var i = 0 ; i < sketch.geometry.things.length ; i++){
+    //     var gs = sketch.countUp;
+    //     var bar = sketch.geometry.toGrow[i];
+
+    //     if(sketch.countUp > bar.position.x && bar.position.x > 0 && bar.grow < 1)
+    //       bar.grow+=.1;
+    //     if(sketch.countDown < bar.position.x && bar.position.x < 0 && bar.grow < 1)
+    //       bar.grow+=.1;
+
+    //     bar.scale.set(0.0001,.0001,.0001);
+    //   }
+    //   // if(sketch.countUp<50)
+    //   //   sketch.countUp+=1;
+    // }
+
+  }
+
+  sketch.onClick = function(x, y) { 
+    // console.log(a.switcher);
+
+    a.switcher += 1;
+    this.fadeTime = time; 
+    this.grow = true;
+    
+  }
+}
+
+
+
 registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
 
@@ -753,65 +811,6 @@ THREE.Object3D.prototype.addBarley = function() {
   this.plane = plane;
   return plane;
 }
-
-
-NoisePlane = new THREE.Object3D();
-
-    
-    NoisePlane.setup=function(){
-        
-        var plane = new THREE.PlaneGeometry(100,90,80,50);
-        this.matOpac = 0;
-        this.waveAmount = 0;
-        this.noiseFreq = 1;
-        this.mater = new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:THREE.VertexColors,transparent: true, opacity: 1});
-        this.plane = new THREE.Mesh(plane,this.mater);
-        this.add(this.plane);
-        return this;
-        
-    }
-    
-    NoisePlane.draw=function(time){
-
-        // this.matOpac = Math.sin(time);
-        this.mater.opacity = this.matOpac;
-
-        this.plane.geometry.verticesNeedUpdate = true;
-        this.plane.geometry.normalsNeedUpdate = true;
-        this.plane.geometry.colorsNeedUpdate = true;
-
-        for(var i = 0 ; i < this.plane.geometry.vertices.length ; i++){
-            var v = this.plane.geometry.vertices[i];
-            v.z = noise(
-                (v.x*.01*this.noiseFreq)+mouseX*.01,
-                (v.y*.01*this.noiseFreq)-mouseY*.01,
-                1
-                )*10;
-        }
-        
-        this.plane.rotation.x = 4.81;
-
-        
-        var faceIndices = [ 'a', 'b', 'c', 'd' ];
-        this.plane.geometry.computeFaceNormals();
-        this.plane.geometry.computeVertexNormals();
-        
-         for(var i = 0 ; i < this.plane.geometry.faces.length ; i++){
-            for(var j = 0 ; j < 3 ; j++){
-              f = this.plane.geometry.faces[i];
-              var v = this.plane.geometry.vertices[f[faceIndices[j]]];
-              f.vertexColors[j] = new THREE.Color(
-                20*noise(v.z*.003)+1,
-                20*noise(v.z*.003)+.8,
-                20*noise(v.z*.003)+.3
-              );
-            } 
-        }
-    }
-
-
-
-
 
 function barley() {
 
@@ -924,12 +923,65 @@ function barley() {
   }
 }
 
+
+NoisePlane = new THREE.Object3D();
+
+    
+    NoisePlane.setup=function(){
+        
+        var plane = new THREE.PlaneGeometry(100,90,80,50);
+        this.matOpac = 0;
+        this.waveAmount = 0;
+        this.noiseFreq = 1;
+        this.mater = new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:THREE.VertexColors,transparent: true, opacity: 1});
+        this.plane = new THREE.Mesh(plane,this.mater);
+        this.add(this.plane);
+        return this;
+        
+    }
+    
+    NoisePlane.draw=function(time){
+
+        // this.matOpac = Math.sin(time);
+        this.mater.opacity = this.matOpac;
+
+        this.plane.geometry.verticesNeedUpdate = true;
+        this.plane.geometry.normalsNeedUpdate = true;
+        this.plane.geometry.colorsNeedUpdate = true;
+
+        for(var i = 0 ; i < this.plane.geometry.vertices.length ; i++){
+            var v = this.plane.geometry.vertices[i];
+            v.z = noise(
+                (v.x*.01*this.noiseFreq)+mouseX*.01,
+                (v.y*.01*this.noiseFreq)-mouseY*.01,
+                1
+                )*10;
+        }
+        
+        this.plane.rotation.x = 4.81;
+
+        
+        var faceIndices = [ 'a', 'b', 'c', 'd' ];
+        this.plane.geometry.computeFaceNormals();
+        this.plane.geometry.computeVertexNormals();
+        
+         for(var i = 0 ; i < this.plane.geometry.faces.length ; i++){
+            for(var j = 0 ; j < 3 ; j++){
+              f = this.plane.geometry.faces[i];
+              var v = this.plane.geometry.vertices[f[faceIndices[j]]];
+              f.vertexColors[j] = new THREE.Color(
+                20*noise(v.z*.003)+1,
+                20*noise(v.z*.003)+.8,
+                20*noise(v.z*.003)+.3
+              );
+            } 
+        }
+    }
+
 fragPlane = {
     
     setup:function(){
         
-      
-
         lightShader = {
 
             uniforms : {
