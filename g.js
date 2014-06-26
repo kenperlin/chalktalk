@@ -3563,6 +3563,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
 
          switch (letter) {
+         case '!':
+            clearSketchPage();
+            break;
          case PAGE_UP:
             break;
          case PAGE_DN:
