@@ -732,13 +732,14 @@ function noiseFloor() {
     }
 
     sketch.geometry.noisePlane.draw(time);
-    nP.position.y=10;
+    // nP.position.y=10;
+    nP.rotation.x=.3;
 
-    if(a.switcher>2 && nP.matOpac < 1 && a.switcher<4){
+    if(a.switcher>-1 && nP.matOpac < 1 && a.switcher<4){
       nP.matOpac += .1;
     }
     // if(a.switcher>3){
-    //   nP.noiseFreq = mouseY/100;
+      nP.noiseFreq = mouseY/50;
     // }
     // if(a.switcher > 4 && nP.matOpac > 0){
     //   nP.matOpac -= .1;
@@ -751,7 +752,8 @@ function noiseFloor() {
     // if(a.switcher < 3 || a.switcher>4)
     //   offset = a.speeder;//(this.now-time)*444*.002;
     // else
-      offset = mouseX*.01;//(this.now-time)*444*.002;
+    nP.scale.set(.05,.05,.05);
+    offset = mouseX*.01;//(this.now-time)*444*.002;
 
             
     for(var i = 0 ; i < this.things.length ; i++){
