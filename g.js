@@ -1308,6 +1308,7 @@
    var isAltPressed = false;
    var isAudioSignal= false;
    var isBottomGesture = false;
+   var isBottomHover = false;
    var isCommandPressed = false;
    var isControlPressed = false;
    var isDrawingSketch2D = false;
@@ -3281,6 +3282,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          this.moveX = x;
          this.moveY = y;
+
+         if (y >= height() - margin && ! isShowingGlyphs) {
+            isBottomHover = true;
+         } else {
+            isBottomHover = false;
+         }
 
          if (isFakeMouseDown) {
             this.mouseDrag(x, y);
@@ -5881,7 +5888,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
             isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
-            bgClickCount == 1 ? 'cell' : 'crosshair';
+            bgClickCount == 1 ? 'cell' :
+            isBottomGesture ? '-webkit-grabbing' :
+            isBottomHover ? '-webkit-grab' : 'crosshair';
 
          var w = width(), h = height();
 
