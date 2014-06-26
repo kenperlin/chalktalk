@@ -133,7 +133,7 @@ uniform float spinAngle;\
             float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
             color = vec3((checker+.25)*.5);\
           }\
-          if (value > -0.) {\
+          if (value > 0.) {\
             float checker = mod(floor(5.*X)+floor(5.*Y)+floor(5.*Z),2.);\
             color = vec3((checker+.25)*.5);\
           }\
@@ -171,11 +171,11 @@ function boringSliced() {
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
     sketch.code = [
-      ["stripes", "mod(floor(5.*X),2)"],
-      ["checker", "mod(floor(5*X)+floor(5*Y)+floor(5*Z),2)"],
-      ["dots", ".5+.5*sin(X*20.)*sin(Y*20.)*sin(Z*20.)"],
-      ["waves", "sin(X*30.+sin(sin(X*30.0)*2.0+Y*9.0)*2.0)"],
-      ["cartoon wood", "vec3(fract(sin((sin(X*6.3)*2.1)*cos(Z*3.14))*3.33))"],
+      ["stripes", "mod ( floor(X) , 2 )"],
+      ["checker", "mod( floor(X)+floor(Y)+floor(Z) , 2 )"],
+      ["dots", "0.5 + 0.5 * sin(X)*sin(Y)*sin(Z)"],
+      ["waves", "sin(X + sin(2 * sin(X) + 9*Y))"],
+      ["cartoon wood", "fract(sin(sin(6 * X) * cos(3 * Z)))"],
    ];
    // sketch.onClick = function() {
    //    this.spinRate = -1 - this.spinRate;
@@ -200,7 +200,7 @@ function boringSliced() {
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
-      this.setUniform('value', this.switcher);
+      //this.setUniform('value', this.switcher);
    }
 }
 
