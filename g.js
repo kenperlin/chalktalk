@@ -1333,6 +1333,7 @@
    var isTextMode = false;
    var isTogglingExpertMode = false;
    var isTogglingMenuType = false;
+   var isVideoOnScreen = false;
    var loopFlag = 1000;
    var margin = 50;
    var menuType = 0;
@@ -5899,7 +5900,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       document.body.scrollTop = 0;
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
-            isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
+            (isVideoPlaying && ! isBottomGesture) || isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
             bgClickCount == 1 ? 'cell' :
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
@@ -7123,8 +7124,11 @@ var fragmentShaderHeader = ["\
 
       // START VIDEO ON NEW SLIDE
       vidElements = slide.getElementsByClassName("vid");
-      if (vidElements.length == 1) {
+      if (vidElements.length > 0) {
          vidElements[0].play();
+         isVideoPlaying = true;
+      } else {
+         isVideoPlaying = false;
       }
 
       if (audiencePopup != null)
