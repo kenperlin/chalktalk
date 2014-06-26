@@ -18,16 +18,40 @@
 </head>
 <body onLoad=gStart()>
 
-<div id=page0>
+<div id=title_page>
    <center>
    <table width=1280>
-   <tr height=250></tr>
+   <tr height=200></tr>
    <tr>
      <td>
         <center>
         <font color=white size=10>
-        <big><b>My Textured Past</b></big>
-        <p>
+        Early experiences and
+	<br>
+        current influences
+	<br>
+        in computer graphics
+        <br>&nbsp;<p>
+        <i><small>Ken Perlin</small></i>
+        </font>
+        </center>
+        </td>
+     </tr>
+   </table>
+   <tr height=1000></tr>
+   </center>
+</div>
+
+<div id=page0>
+   <center>
+   <table width=1280>
+   <tr height=218></tr>
+   <tr>
+     <td>
+        <center>
+        <font color=white size=10>
+        <big><b>My Textured Life</b></big>
+        <p>&nbsp;<p>
         <i><small>Ken Perlin</small></i>
         </font>
         </center>
@@ -351,6 +375,7 @@
    var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid Lattice PVase Noises" ).split(' ');
 
    var pages = [
+      ["title_page", sketchTypes, 0],
       ["page0", sketchTypes, 0],
       ["page1", sketchTypes, 0],
       ["page2", sketchTypes, 0],
