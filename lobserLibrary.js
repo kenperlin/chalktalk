@@ -136,26 +136,32 @@ uniform float spinAngle;\
           if (value > 0.) {\
             float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
             color = vec3((checker+.25)*.5);\
+            color *= s;\
           }\
           if (value > 1.) {\
             float checker = mod(floor(5.*X)+floor(5.*Y)+floor(5.*Z),2.);\
             color = vec3((checker+.25)*.5);\
+            color *= s;\
           }\
           if(value > 2.){\
             float tube = .5+.5*sin(X*20.)*sin(Y*20.)*sin(Z*20.);\
             color = vec3(tube);\
+            color *= s;\
           }\
           if(value > 3.){\
             float col = sin(X*30.+sin(sin(X*30.0)*2.0+Y*9.0)*2.0);\
              color = vec3(col);\
+             color *= s;\
           }\
           if(value > 4.){\
             vec3 rand = vec3(fract(sin((sin(X*6.3)*2.1)*cos(Z*3.14))*3.33));\
             color = vec3(rand);\
+            color *= s;\
           }\
           else {\
              float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
              color += vec3(h*0.4, h*.7, h);\
+             color *= s;\
           }\
        }\
        gl_FragColor = vec4(color,alpha);\
