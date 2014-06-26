@@ -964,7 +964,7 @@ NoisePlane = new THREE.Object3D();
             var v = this.plane.geometry.vertices[i];
             v.z = noise(
                 (v.x*.01*this.noiseFreq)-mouseX*.01,
-                (v.y*.01*this.noiseFreq)-mouseY*.01,
+                (v.y*.01*this.noiseFreq)+mouseY*.01,
                 1
                 )*10;
         }
