@@ -761,7 +761,7 @@ function noiseFloor() {
 
             
     for(var i = 0 ; i < this.things.length ; i++){
-        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(nP.noiseFreq*things[i].position.x/100+offset,nP.noiseFreq*things[i].position.y/100,things[i].position.z/100);
+        this.things[i].bones[1]._rotation.z = (444*.001)*4*noise(nP.noiseFreq*things[i].position.x/10+offset,nP.noiseFreq*things[i].position.y/100,things[i].position.z/100);
 
     }
 
@@ -963,7 +963,7 @@ NoisePlane = new THREE.Object3D();
         for(var i = 0 ; i < this.plane.geometry.vertices.length ; i++){
             var v = this.plane.geometry.vertices[i];
             v.z = noise(
-                (v.x*.01*this.noiseFreq)+mouseX*.01,
+                (v.x*.01*this.noiseFreq)-mouseX*.01,
                 (v.y*.01*this.noiseFreq)-mouseY*.01,
                 1
                 )*10;
