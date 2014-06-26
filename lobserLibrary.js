@@ -121,7 +121,7 @@ uniform float spinAngle;\
             z = zp;\
             nn = normalize(vec3(-dzdx,0.,1.));\
          }\
-         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\
+         float s = rr >= 1. ? 0. : .4 + max(0., dot(vec3(.2), nn)) + max(0., dot(vec3(-.1), nn));\
          float X =  x * cos(spinAngle) + z * sin(spinAngle);\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
