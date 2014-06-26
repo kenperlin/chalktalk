@@ -3012,6 +3012,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isBottomGesture) {
+            if (isShiftPressed) {
+               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+            }
             if (y < height() - 100) {
                clearSketchPage();
             }
@@ -6204,15 +6209,22 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          requestAnimFrame(function() { tick(g); });
 
          // DRAW PAGE NUMBER IF QUICK SWITCHING PAGES
-         if (isBottomGesture && isShiftPressed) {
-            _g.save();
+         if (isBottomHover && isShiftPressed) {
             _g.font = "15px Arial";
-            _g.fillStyle = "#FFFFFF";
-
+            numberSpacing = w / pages.length;
             pageNumber = floor(((This().mouseX + _g.panX) / w) * pages.length);
 
-            _g.fillText(pageNumber, This().mouseX - 7, h - margin - 10);
-            _g.restore();
+            for (pn = 0; pn < pages.length; pn++) {
+               _g.save();
+
+               alpha = pageNumber == pn ? 0.8 : 0.1;
+               _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+
+               centerValue = pn < 10 ? 0.4 : 0.3;
+               _g.fillText(pn, (pn + centerValue) * numberSpacing - _g.panX, h - 8);
+
+               _g.restore();
+            }
          }
 
 	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
@@ -6242,8 +6254,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                _g.fillStyle = scrimColor(0.05);
                _g.fill();
 
-               var ns = margin;
-               offset = _g.panX % ns;
+               var ns = isShiftPressed ? (w / pages.length * 2) : margin;
+               offset = isShiftPressed ? 0 : _g.panX % ns;
                for (i = leftX + offset; i < rightX; i+= ns) {
                   _g.beginPath();
                   _g.moveTo(i, h-1);

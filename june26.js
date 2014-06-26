@@ -506,6 +506,18 @@ function Grid() {
    this.labels = "grid".split(' ');
    this.gridMode = -1;
    this.is3D = true;
+/*
+   this.xShift = 0;
+   this.mouseDown = function(x, y) {
+      this.xDrag = x;
+   }
+   this.mouseDrag = function(x, y) {
+      if (this.gridMode == 3) {
+         this.xShift += x - this.xDrag;
+         this.xDrag = x;
+      }
+   }
+*/
    this.onSwipe = function(dx, dy) {
       this.gridMode = pieMenuIndex(dx, dy);
    }
