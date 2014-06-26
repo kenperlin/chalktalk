@@ -111,7 +111,7 @@ uniform float spinAngle;\
       float rr = x*x + y*y;\
       float z = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
-      float zp = dzdx * (x - mx * 1.3 + .3);\
+      float zp = dzdx * (x - mx * 1.3 - .2);\
       if (zp < -z)\
          rr = 1.;\
       vec3 color = vec3(0.);\
@@ -166,12 +166,26 @@ function boringSliced() {
    sketch.mouseDrag = function(x, y) {}
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
-   sketch.onClick = function() {
-      this.spinRate = -1 - this.spinRate;
-      if(this.spinRate>=0)
-        this.switcher++;
-      if(this.switcher>3)
-        this.switcher = 0;
+   // sketch.onClick = function() {
+   //    this.spinRate = -1 - this.spinRate;
+   //    if(this.spinRate>=0)
+   //      this.switcher++;
+   //    if(this.switcher>3)
+   //      this.switcher = 0;
+   // }
+   sketch.onSwipe = function(dx, dy) {
+
+      switch (pieMenuIndex(dx, dy)) {
+        case 1: 
+          this.spinRate = -1 - this.spinRate;; 
+          break;
+        case 3: 
+           if(this.spinRate>=0)
+            this.switcher++;
+          if(this.switcher>3)
+            this.switcher = 0;
+          break;
+      }
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
@@ -834,13 +848,13 @@ function barley() {
     nP.position.y=10;
 
     if(a.switcher>2 && nP.matOpac < 1 && a.switcher<4){
-      nP.matOpac += .01;
+      nP.matOpac += .1;
     }
     if(a.switcher>3){
       nP.noiseFreq = mouseY/100;
     }
     if(a.switcher > 4 && nP.matOpac > 0){
-      nP.matOpac -= .01;
+      nP.matOpac -= .1;
     }
 
     this.getMatrix().translate(0,-4.2,0).scale(0.2).rotateX(.2);
