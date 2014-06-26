@@ -3451,6 +3451,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          case 'cap':
             isShiftPressed = true;
             return;
+         case '+':
+            isShowingGlyphs = true;
+            break;
          case 'spc':
             isSpacePressed = true;
             return;
@@ -3639,6 +3642,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 'cap':
             isShiftPressed = false;
+            break;
+         case '+':
+            isShowingGlyphs = false;
             break;
          case 'a':
             isShowingPresenterView = false;
@@ -5975,10 +5981,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk(I).dSum = 0;
             }
 
+/*
          if (! isPullDown && (This().mouseX + _g.panX) < glyphsW && This().mouseY >= h - glyphsH && ! isBottomGesture)
             isShowingGlyphs = true;
          else if (This().mouseY < height() - glyphsH)
             isShowingGlyphs = false;
+*/
 
          This().animate(This().elapsed);
 
