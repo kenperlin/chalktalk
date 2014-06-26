@@ -3603,12 +3603,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             break;
          case 'del':
             if (isk())
-               if (! (sk() instanceof SimpleSketch) || isShiftPressed) {
+               if (isShiftPressed)
+                  sk().removeLastStroke();
+               else {
                   sk().fadeAway = 1.0;
                   setTextMode(false);
                }
                else
-                  sk().removeLastStroke();
             setTextMode(false);
             break;
          case 'spc':

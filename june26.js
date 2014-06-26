@@ -387,10 +387,10 @@ var slicedFragmentShader = ["\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
          /* float tu = ( value>1. ? noise(P) : turbulence(P) );\
             float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1); */\
-         float t = value == 3. ? .7 * noise(vec3(X,Y,Z)) :\
-                   value == 4. ? .5 * fractal(vec3(X,Y,Z)) :\
-                   value == 5. ? .4 * (turbulence(vec3(X*1.5,Y*1.5,Z*1.5))+1.8) :\
-   		                 .0 ;\
+         float t = value == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\
+                   value == 4. ? 0.5 * fractal(vec3(X,Y,Z)) :\
+                   value == 5. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
+   		                 0.0 ;\
          float c = .5 + .5*cos(7.*X+6.*t);\
 	 if (value == 0.)\
 	    c = .2 + .8 * c;\
@@ -408,7 +408,7 @@ var slicedFragmentShader = ["\
             color += vec3(h, h*.8, h*.6);\
          }\
       }\
-      gl_FragColor = vec4(color,alpha);\
+      gl_FragColor = vec4(color,alpha*sign(z));\
    }\
 "].join("\n");
 
