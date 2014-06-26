@@ -291,7 +291,7 @@ function PVase() {
     sketch.update = function() {
       // console.log(mouseY);
       var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(sketchPage.x/100,.5-(sketchPage.y/21),0.0).
+      this.geometry.getMatrix().translate(-5,-12,0.0).
       rotateX(-PI/2).rotateZ(PI/2).scale(scale/7);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
@@ -674,7 +674,7 @@ registerGlyph("noiseFloor()",["9;8<6>5@4B3D2F0H/J.L-N,P*R)T(V'X%Z$]#_!b d!d%d'd)
 
 THREE.Object3D.prototype.addNoiseFloor = function() {
   var plane = barleyField.setup();
-  var noisePlane = NoisePlane.setup();
+  var noisePlane = NoisePlane.setup({x:1,y:1,z:1});
   plane.noisePlane = noisePlane;
   plane.add(noisePlane);
   this.add(plane);
@@ -685,8 +685,6 @@ THREE.Object3D.prototype.addNoiseFloor = function() {
 function noiseFloor() {
 
   var a = root.addNoiseFloor();
-
-  
 
   this.grow = false;
   a.switcher = 1;
@@ -797,8 +795,6 @@ function noiseFloor() {
     
   }
 }
-
-
 
 registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
 );
@@ -929,7 +925,13 @@ function barley() {
 NoisePlane = new THREE.Object3D();
 
     
-    NoisePlane.setup=function(){
+    NoisePlane.setup=function(args){
+
+        if(args==undefined) args = {};
+        this.cX = args.x || 1;
+        this.cY = args.y || .8;
+        this.cZ = args.z || .3;
+
         
         var plane = new THREE.PlaneGeometry(100,90,80,50);
         this.matOpac = 0;
@@ -943,6 +945,7 @@ NoisePlane = new THREE.Object3D();
     }
     
     NoisePlane.draw=function(time){
+
 
         // this.matOpac = Math.sin(time);
         this.mater.opacity = this.matOpac;
@@ -972,9 +975,9 @@ NoisePlane = new THREE.Object3D();
               f = this.plane.geometry.faces[i];
               var v = this.plane.geometry.vertices[f[faceIndices[j]]];
               f.vertexColors[j] = new THREE.Color(
-                20*noise(v.z*.003)+1,
-                20*noise(v.z*.003)+.8,
-                20*noise(v.z*.003)+.3
+                20*noise(v.z*.003)+this.cX,
+                20*noise(v.z*.003)+this.cY,
+                20*noise(v.z*.003)+this.cZ
               );
             } 
         }
