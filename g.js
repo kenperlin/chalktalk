@@ -3007,7 +3007,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (isBottomGesture) {
             if (isShiftPressed) {
-               pageNumber = floor((x / width()) * pages.length);
+               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
                setPage(pageNumber);
             } else if (y < height() - 100) {
                clearSketchPage();
@@ -6197,7 +6197,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             _g.font = "30px Arial";
             _g.fillStyle = "#FFFFFF";
 
-            pageNumber = floor((This().mouseX / w) * pages.length);
+            pageNumber = floor(((This().mouseX + _g.panX) / w) * pages.length);
 
             _g.fillText(pageNumber, This().mouseX, h - margin - 10);
             _g.restore();
