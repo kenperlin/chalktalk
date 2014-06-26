@@ -6221,7 +6221,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
                centerValue = pn < 10 ? 0.4 : 0.3;
-               _g.fillText(pn, (pn + centerValue) * numberSpacing, h - 8);
+               _g.fillText(pn, (pn + centerValue) * numberSpacing - _g.panX, h - 8);
 
                _g.restore();
             }
