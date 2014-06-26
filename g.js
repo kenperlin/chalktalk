@@ -2920,6 +2920,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isBottomGesture) {
+            // IF DRAGGING TO QUICK SWITCH PAGES
+            if (isShiftPressed) return;
             _g.panX += x - this.xDown;
             return;
          }
@@ -3004,9 +3006,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isBottomGesture) {
-            isBottomGesture = false;
-            if (y < height() - 100)
+            if (isShiftPressed) {
+               pageNumber = floor((x / width()) * pages.length);
+               setPage(pageNumber);
+            } else if (y < height() - 100) {
                clearSketchPage();
+            }
+            isBottomGesture = false;
             return;
          }
 
@@ -5893,6 +5899,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
 
+
+
          var w = width(), h = height();
 
          keyboard.x = w / 2;
@@ -6183,8 +6191,19 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          requestAnimFrame(function() { tick(g); });
 
-	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
+         // DRAW PAGE NUMBER IF QUICK SWITCHING PAGES
+         if (isBottomGesture && isShiftPressed) {
+            _g.save();
+            _g.font = "30px Arial";
+            _g.fillStyle = "#FFFFFF";
 
+            pageNumber = floor((This().mouseX / w) * pages.length);
+
+            _g.fillText(pageNumber, This().mouseX, h - margin - 10);
+            _g.restore();
+         }
+
+	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
          if (! isShowingGlyphs) {
             lineWidth(1);
 
