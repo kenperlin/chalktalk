@@ -3755,7 +3755,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	          this.scaleRate = 0;
 	    }
 	    if (this.scaleRate > 0) {
-	       console.log(this.scaleRate);
                sk().scale(pow(this.yDown > this.moveY ? 1.015 : 1/1.015, this.scaleRate));
 	    }
 	 }
@@ -4904,7 +4903,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             for ( ; currentLine < lines.length; currentLine++) {
                var currentLineLength = lines[currentLine].length + 1;
                if (currentPos < charCount + currentLineLength) {
-                  console.log("on line " + currentLine);
                   break;
                }
                charCount += currentLineLength;
