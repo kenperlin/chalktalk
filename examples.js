@@ -962,7 +962,7 @@
 
       this.code = [
          ["cos", "cos(x)"],
-         ["exp", "pow(2,8+x/12)"],
+         ["pow2", "pow(2, x)"],
          ["sin", "sin(x)"],
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
@@ -1370,7 +1370,7 @@
       }
 
       this.render = function(elapsed) {
-         var cs = isDef(codeSelector) && codeSelector != null ? codeSelector.selectedIndex : 0;
+         var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
          var t = 1/3;
          m.save();
             m.scale(this.size / 400);
