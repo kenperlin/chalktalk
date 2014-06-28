@@ -47,38 +47,7 @@
    function unitTube() {
       drawUnitTube();
    }
-/*
-   var kenTestFragmentShader = ["\
-      uniform float t;\
-      void main(void) {\
-         vec3 point = 20. * vPosition;\
-	 vec3 color = vec3(.5 + .5 * noise(5. * point));\
-         float sweep = atan(point.z, -point.x) < t ? 1. : 0.;\
-         gl_FragColor = vec4(sweep * color, alpha);\
-      }\
-   "].join('\n');
-   function KenTest() {
-      this.labels = "can".split(' ');
-      this.render = function(elapsed) {
-         m.save();
-	 m.scale(this.size / 400);
-	 mCurve([ [-1,1], [-1,-1], [1,-1], [1,1] ]);
-         m.restore();
-      }
-      this.onClick = function(x, y) {
-         this.fadeAway = 1.0;
-	 glyphSketch.color = 'rgba(0,0,0,.01)';
-         var sketch = addGeometryShaderSketch(cylinderGeometry(32), defaultVertexShader, kenTestFragmentShader);
-	 sketch.startTime = time;
-	 sketch.update = function() {
-	    var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-	    this.geometry.getMatrix().scale(scale);
-	    this.setUniform('t', (time - this.startTime) / 0.5);
-	 }
-      }
-   }
-   KenTest.prototype = new Sketch;
-*/
+
    function Bird() {
       this.T = 0;
       this.walkT = 0;

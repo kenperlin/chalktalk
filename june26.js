@@ -285,14 +285,14 @@ function planet() {
 
 var marbleFragmentShader = ["\
    void main(void) {\
-      float t = value == 3. ? .7 * noise(vec3(x,y,0.)) :\
-                value == 4. ? .5 * fractal(vec3(x,y,5.)) :\
-                value == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
+      float t = selectedIndex == 3. ? .7 * noise(vec3(x,y,0.)) :\
+                selectedIndex == 4. ? .5 * fractal(vec3(x,y,5.)) :\
+                selectedIndex == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
 		              .0 ;\
       float s = .5 + .5*cos(7.*x+6.*t);\
-      if (value == 2.) \
+      if (selectedIndex == 2.) \
          s = .5 + noise(vec3(3.*x,3.*y,10.));\
-      else if (value > 0.)\
+      else if (selectedIndex > 0.)\
          s = pow(s, .1);\
       vec3 color = vec3(s,s*s,s*s*s);\
       gl_FragColor = vec4(color,alpha);\
@@ -326,9 +326,9 @@ var coronaFragmentShader = ["\
       float r0 = sqrt(x*x + y*y);\
       if (r0 > a && r0 <= 1.) {\
          float r = r0;\
-         if (value == 2.)\
+         if (selectedIndex == 2.)\
             r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
-         else if (value == 3.) {\
+         else if (selectedIndex == 3.) {\
             float ti = time*.3;\
             float t = mod(ti, 1.);\
             float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\
@@ -340,7 +340,7 @@ var coronaFragmentShader = ["\
       if (r0 < b)\
          s *= (r0 - a) / (b - a);\
       vec3 color = vec3(s);\
-      if (value >= 1.) {\
+      if (selectedIndex >= 1.) {\
          float ss = s * s;\
          color = s*vec3(1.,ss,ss*ss);\
       }\
@@ -385,16 +385,16 @@ var slicedFragmentShader = ["\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
-         float t = value == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\
-                   value == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\
-                   value == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
+         float t = selectedIndex == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\
+                   selectedIndex == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\
+                   selectedIndex == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
    		                 0.0 ;\
          float c = .5 + .5*cos(7.*X+6.*t);\
-	 if (value == 1.)\
+	 if (selectedIndex == 1.)\
 	    c = .2 + .8 * c;\
-         else if (value == 0.)\
+         else if (selectedIndex == 0.)\
             c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\
-         else if (value == 4.)\
+         else if (selectedIndex == 4.)\
             c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\
          else\
             c = pow(c, .1);\

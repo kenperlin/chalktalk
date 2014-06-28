@@ -126,34 +126,34 @@ uniform float spinAngle;\
          float Y =  y;\
          float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
-         float tu = ( value>1. ? noise(P) : turbulence(P) );\
+         float tu = ( selectedIndex>1. ? noise(P) : turbulence(P) );\
          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\
          color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
-          if (value > -1.) {\
+          if (selectedIndex > -1.) {\
             float checker = .5;\
             color = vec3(s);\
           }\
-          if (value > 0.) {\
+          if (selectedIndex > 0.) {\
             float checker = mod(floor(5.*X)+floor(5.*X)+floor(5.*X),2.);\
             color = vec3((checker+.25)*.5);\
             color *= s;\
           }\
-          if (value > 1.) {\
+          if (selectedIndex > 1.) {\
             float checker = mod(floor(5.*X)+floor(5.*Y)+floor(5.*Z),2.);\
             color = vec3((checker+.25)*.5);\
             color *= s;\
           }\
-          if(value > 2.){\
+          if(selectedIndex > 2.){\
             float tube = .5+.5*sin(X*20.)*sin(Y*20.)*sin(Z*20.);\
             color = vec3(tube);\
             color *= s;\
           }\
-          if(value > 3.){\
+          if(selectedIndex > 3.){\
             float col = sin(X*30.+sin(sin(X*30.0)*2.0+Y*9.0)*2.0);\
              color = vec3(col);\
              color *= s;\
           }\
-          if(value > 4.){\
+          if(selectedIndex > 4.){\
             vec3 rand = vec3(fract(sin((sin(X*6.3)*2.1)*cos(Z*3.14))*3.33));\
             color = vec3(rand);\
             color *= s;\
@@ -211,7 +211,6 @@ function boringSliced() {
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
-      //this.setUniform('value', this.switcher);
    }
 }
 

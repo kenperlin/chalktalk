@@ -6919,7 +6919,7 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
       vertexShader: vertexShader,
    });
 
-   var u = "alpha mx my time value".split(' ');
+   var u = "alpha mx my selectedIndex time".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: 0 };
 
@@ -6951,7 +6951,7 @@ function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
          this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
       }
       this.material.uniforms['alpha'].value = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
-      this.material.uniforms['value'].value = isDef(S.selectedIndex) ? S.selectedIndex : isDef(S.value) ? S.value : 0;
+      this.material.uniforms['selectedIndex'].value = isDef(S.selectedIndex) ? S.selectedIndex : 0;
    }
    return mesh.sketch;
 }
@@ -7033,7 +7033,7 @@ var fragmentShaderHeader = ["\
    uniform float mx;\
    uniform float my;\
    uniform float time;\
-   uniform float value;\
+   uniform float selectedIndex;\
    uniform float alpha;\
 "].join("\n");
 
