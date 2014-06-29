@@ -159,7 +159,7 @@
       this.mouseY = 0;
       this.t0 = 0;
 
-      this.hitOnUp = function(sketch) {
+      this.onDropOnto = function(sketch) {
          if (sketch instanceof Noises) {
             this.freqs = this.freqs.concat(sketch.freqs);
             deleteSketch(sketch);

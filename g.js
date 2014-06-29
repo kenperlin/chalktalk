@@ -238,11 +238,13 @@
                sketchPage.figureOutLink();
 	       break;
             case "translating":
-	       if (isDef(sk().hitOnUp)) {
-	          var sketches = sk().intersectingSketches();
-		  for (var i = 0 ; i < sketches.length ; i++)
-		     sk().hitOnUp(sketches[i]);
-	       }
+	       var s = sk().intersectingSketches();
+	       for (var i = 0 ; i < s.length ; i++) {
+	          if (isDef(sk().onDropOnto))
+		     sk().onDropOnto(s[i]);
+	          if (isDef(s[i].onDroppedOnto))
+		     s[i].onDroppedOnto(sk());
+               }
 	       break;
             }
             sketchAction = null;
