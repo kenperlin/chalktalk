@@ -3705,8 +3705,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	       visible_sp = null;
 	    else if (isk()) {
 	       visible_sp = sk().sp;
-	       for (var i = 1 ; i < visible_sp.length ; i++)
-	          console.log(visible_sp[i]);
+	       for (var i = 0 ; i < visible_sp.length ; i++)
+	          console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
 	    }
             break;
          case 'b':
