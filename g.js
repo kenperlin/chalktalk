@@ -3701,9 +3701,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isPanning = false;
             break;
          case 'q':
-            isTest = ! isTest;
-            for (var t = 0.0 ; t <= 1.0 ; t += 0.1)
-               console.log(t + " " + ef.encode(t));
+	    if (! isk() || sk().sp == visible_sp)
+	       visible_sp = null;
+	    else if (isk()) {
+	       visible_sp = sk().sp;
+	       for (var i = 1 ; i < visible_sp.length ; i++)
+	          console.log(visible_sp[i]);
+	    }
             break;
          case 'b':
          case 'r':
@@ -5909,6 +5913,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return -1;
    }
 
+   var visible_sp = null;
+
    var tick = function(g) {
       document.body.scrollTop = 0;
       if (isDef(window[g.name].animate)) {
@@ -6229,6 +6235,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
          }
 
+	 if (visible_sp != null) {
+	    annotateStart();
+	    for (var i = 0 ; i < visible_sp.length ; i++) {
+	       color(i == 0 ? 'green' : visible_sp[i][2] == 0 ? 'blue' : 'red');
+	       fillOval(visible_sp[i][0] - 4, visible_sp[i][1] - 4, 8, 8);
+	    }
+	    annotateEnd();
+	 }
+
 	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
          if (! isShowingGlyphs) {
             lineWidth(1);
@@ -6299,8 +6314,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          return this.chars.indexOf(ch) / (this.chars.length - 1);
       }
    }
-
-   var isTest = false;
 
    function isSketchInProgress() {
       return isk() && sk().sketchState == 'in progress';
