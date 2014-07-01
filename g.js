@@ -216,7 +216,9 @@
       }
    }
 
+////////////////////////////////////////////////////////////////////////////////////
 //////////////////////// LOGIC TO SUPPORT PSEUDO-SKETCHING /////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
    var noisy = 1, _nF = 0.03, _nA = 3;
 
@@ -378,6 +380,7 @@
       }
    }
 
+//////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
    function sketchToTrace(sketch) {
@@ -2354,49 +2357,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return [parent.m2x(x), parent.m2y(y)];
    }
 
-// HANDLE TEXT EDITOR POP-UP WINDOW.
-
-   var updateTextEditor = function() {
-      try {
-         eval(textEditorTextArea.value);
-      } catch (e) { }
-   };
-
-   function isTextEditorPopup() {
-      return textEditorPopup != null;
-   }
-
-   function createTextEditorPopup() {
-      var w = _g.canvas.width;
-      var h = _g.canvas.height;
-      textEditorPopup = window.open("", "textEditorPopup", ""
-      +  " width=" + floor(w / 2)
-      +  " height=" + floor(h / 2)
-      );
-      textEditorPopup.document.write( ""
-          + "<head><title>TEXT EDIT</title></head>"
-          + "<body>"
-          + "<textArea rows=40 cols=55 height=100 id=textEditor_text"
-          + " style='background-color:transparent;border:none'"
-          + "</textArea>"
-          + "</body>"
-      );
-      textEditorPopup.blur();
-
-      textEditorTextArea = textEditorPopup.document.getElementById("textEditor_text");
-      textEditorTextArea.onchange = 'console.log("button clicked")';
-      textEditorTextArea.style.borderColor = backgroundColor;
-      textEditorTextArea.style.font="18px courier";
-      textEditorTextArea.style.color="blue";
-      textEditorTextArea.value = "This is some text!";
-      textEditorTextArea.onkeyup = function() { console.log("HI MOM"); }
-   }
-
-   function removeTextEditorPopup() {
-      textEditorPopup.close();
-      textEditorPopup = null;
-   }
-
 // HANDLE AUDIENCE POP-UP WINDOW.
 
    function isAudiencePopup() {
@@ -2461,7 +2421,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
 
-// SUPPORT FOR SKETCHES THAT TURN INTO TRUE 3D GEOMETRY.
+////////////////////////////////////////////////////////////
+/////// SKETCHES THAT MAKE USE OF WEBGL AND SHADERS ////////
+////////////////////////////////////////////////////////////
 
    function GeometrySketch() {
       this.sx = 1;
@@ -2594,8 +2556,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return sketch;
    }
 
-   // SKETCHES THAT MAKE USE OF WEBGL AND SHADERS.
-
    function addPlaneShaderSketch(vertexShader, fragmentShader) {
       return addGeometryShaderSketch(new THREE.PlaneGeometry(50,50), vertexShader, fragmentShader);
    }
@@ -2627,7 +2587,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return mesh.sketch;
    }
 
-   ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
    var _g, time = 0, _startTime = (new Date()).getTime();
 

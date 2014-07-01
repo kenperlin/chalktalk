@@ -8,14 +8,41 @@
 	    this._mS[this._to] = arg;
 	 return this._mS[this._to];
       };
-      this.save = function() {
-         this._mS[this._to+1] = this._mS[this._to++];
+      this.aimX = function(mat) {
+         var A = this._m();
+         var B = mat._m();
+         var X = [B[12] - A[12], B[13] - A[13], B[14] - A[14]];
+         var Z = [A[8], A[9], A[10]];
+         var Y = cross(Z, X);
+         cross(X, Y, Z);
+         return this.setOrientation(X, Y, Z);
       };
-      this.restore = function() {
-         --this._to;
+      this.aimY = function(mat) {
+         var A = this._m();
+         var B = mat._m();
+         var Y = [B[12] - A[12], B[13] - A[13], B[14] - A[14]];
+         var X = [A[0], A[1], A[2]];
+         var Z = cross(X, Y);
+         cross(Y, Z, X);
+         return this.setOrientation(X, Y, Z);
       };
+      this.aimZ = function(mat) {
+         var A = this._m();
+         var B = mat._m();
+         var Z = [B[12] - A[12], B[13] - A[13], B[14] - A[14]];
+         var Y = [A[4], A[5], A[6]];
+         var X = cross(Y, Z);
+         cross(Z, X, Y);
+         return this.setOrientation(X, Y, Z);
+      };
+      this.copy = function(m) {
+         for (var i = 0 ; i < 16 ; i++)
+            this._m()[i] = m._m()[i];
+         return this;
+      }
       this.identity = function() {
-         return this._m(this._id());
+         this._m(this._id());
+         return this;
       };
       this.normalMatrix = function(m) {
          var a = m[0]*m[0] + m[1]*m[1] + m[ 2]*m[ 2],
@@ -26,40 +53,62 @@
 		 m[8]/c,m[9]/c,m[10]/c,0,
 		 0,0,0,1];
       };
-      this.transpose = function(m) {
-         return [m[0],m[4],m[ 8],m[12],
-	         m[1],m[5],m[ 9],m[13],
-		 m[2],m[6],m[10],m[14],
-		 m[3],m[7],m[11],m[15]];
-      };
-      this.translate = function(x,y,z) {
-         this._xf(this._tr(x,y,z));
-      };
-      this.rotateX = function(a) {
-         this._xf(this._rX(a));
-      };
-      this.rotateY = function(a) {
-         this._xf(this._rY(a));
-      };
-      this.rotateZ = function(a) {
-         this._xf(this._rZ(a));
-      };
-      this.scale = function(x,y,z) {
-         if (y === undefined)
-	    z=y=x;
-	 this._xf(this._sc(x,y,z));
-      };
-      this.perspective = function(x,y,z) {
-         this._xf(this._pe(x,y,z));
-      };
       this.normalize = function(v) {
          var x = v[0],y = v[1],z = v[2],r = Math.sqrt(x*x + y*y + z*z);
 	 v[0] /= r;
 	 v[1] /= r;
 	 v[2] /= r;
       };
+      this.perspective = function(x,y,z) {
+         this._xf(this._pe(x,y,z));
+	 return this;
+      };
+      this.restore = function() {
+         --this._to;
+      };
+      this.rotateX = function(a) {
+         this._xf(this._rX(a));
+	 return this;
+      };
+      this.rotateY = function(a) {
+         this._xf(this._rY(a));
+	 return this;
+      };
+      this.rotateZ = function(a) {
+         this._xf(this._rZ(a));
+	 return this;
+      };
+      this.save = function() {
+         this._mS[this._to+1] = this._mS[this._to++];
+      };
+      this.scale = function(x,y,z) {
+         if (y === undefined)
+	    z=y=x;
+	 this._xf(this._sc(x,y,z));
+	 return this;
+      };
+      this.setOrientation = function(X, Y, Z) {
+         this.normalize(X);
+         this.normalize(Y);
+         this.normalize(Z);
+         var v = this._m();
+         v[0] = X[0]; v[1] = X[1]; v[ 2] = X[2];
+         v[4] = Y[0]; v[5] = Y[1]; v[ 6] = Y[2];
+         v[8] = Z[0]; v[9] = Z[1]; v[10] = Z[2];
+	 return this;
+      }
+      this.translate = function(x,y,z) {
+         this._xf(this._tr(x,y,z));
+	 return this;
+      };
+      this.transpose = function(m) {
+         return [m[0],m[4],m[ 8],m[12],
+	         m[1],m[5],m[ 9],m[13],
+		 m[2],m[6],m[10],m[14],
+		 m[3],m[7],m[11],m[15]];
+      };
       this._xf = function(m) {
-         this._m(this._mm(m,this._m()));
+         return this._m(this._mm(m,this._m()));
       };
       this._id = function() {
          return [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
@@ -127,6 +176,14 @@
          return this._mv(this._m(),v);
       }
    };
+   function cross(a,b,c) {
+      if (c === undefined)
+         c = [0,0,0];
+      c[0] = a[1] * b[2] - a[2] * b[1];
+      c[1] = a[2] * b[0] - a[0] * b[2];
+      c[2] = a[0] * b[1] - a[1] * b[0];
+      return c;
+   };
    function dot(a,b) {
       if (a.length < 3 || b.length < 3)
          return a[0]*b[0] + a[1]*b[1];
@@ -154,9 +211,6 @@
       return [a[0] + b[0],a[1] + b[1],a[2] + b[2]];
    };
 
-/*
-   Need a concept of an edge that only draws if it's a silhouette edge.
-*/
    function drawUnitDisk(rgb) { renderUnitDisk(mDrawFace, rgb); }
    function fillUnitDisk(rgb) { renderUnitDisk(mFillFace, rgb); }
    function renderUnitDisk(renderFunction, rgb) {
@@ -178,11 +232,16 @@
 	 renderFunction([[c0,s0,1],[c0,s0,-1],[c1,s1,-1],[c1,s1,1]]);
       }
    }
+   function unitCubeCorners() {
+      for (var i = 0 ; i < pCube.length ; i++)
+         mPoint(pCube[i]);
+   }
    function drawUnitCube(rgb) { renderUnitCube(mDrawFace, rgb); }
    function fillUnitCube(rgb) { renderUnitCube(mFillFace, rgb); }
+   var pCube = [[-1,-1,-1],[ 1,-1,-1],[-1, 1,-1],[ 1, 1,-1],
+                [-1,-1, 1],[ 1,-1, 1],[-1, 1, 1],[ 1, 1, 1]];
    function renderUnitCube(renderFunction, rgb) {
-      var p = [[-1,-1,-1],[ 1,-1,-1],[-1, 1,-1],[ 1, 1,-1],
-               [-1,-1, 1],[ 1,-1, 1],[-1, 1, 1],[ 1, 1, 1]];
+      var p = pCube;
       var f = [[0,1,5,4],[0,2,3,1],[0,4,6,2],[1,3,7,5],[2,6,7,3],[6,4,5,7]];
       for (var i = 0 ; i < f.length ; i++)
          renderFunction([p[f[i][0]],p[f[i][1]],p[f[i][2]],p[f[i][3]]], rgb);
@@ -205,7 +264,7 @@
 
       m.scale(s,-s,s);
    };
-   function invertStandardView(x,y,phi,theta,psi,s) {
+   function standardViewInverse(x,y,phi,theta,psi,s) {
       s *= width()/3.5;
       m.identity();
       m.scale(1/s,-1/s,1/s);
@@ -221,6 +280,10 @@
       var A = m.transform(a);
       var B = m.transform(b);
       line(A[0],A[1],B[0],B[1]);
+   };
+   function mPoint(p) {
+      var P = m.transform(p);
+      _g_moveTo(P[0], P[1]);
    };
    function mDrawFace(c, rgb) {
       if (rgb === undefined) rgb = 'black';
@@ -244,9 +307,9 @@
    }
    function mCurve(c) {
       var cc = [];
-      for (var n = 0 ; n < c.length ; n++) {
+      for (var n = 0 ; n < c.length ; n++)
          cc.push(m.transform(c[n]));
-      curve(cc);
+      drawCurve(cc);
    };
    function mArrow(a,b){
       var A = m.transform(a);
