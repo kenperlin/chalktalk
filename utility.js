@@ -486,6 +486,20 @@
       adjustCurveLength(curve, len, i0);
    }
 
+   // Compute the bounding rectangle for a curve.
+
+   function computeCurveBounds(src, i0) {
+      if (i0 === undefined) i0 = 0;
+      var xlo = 10000, ylo = xlo, xhi = -xlo, yhi = -ylo;
+      for (var n = 0 ; n < src.length ; n++) {
+         xlo = min(xlo, src[n][0]);
+         ylo = min(ylo, src[n][1]);
+         xhi = max(xhi, src[n][0]);
+         yhi = max(yhi, src[n][1]);
+      }
+      return [xlo,ylo,xhi,yhi];
+   }
+
    // Create a curved line.
 
    function createCurve(A, B, curvature, N) {

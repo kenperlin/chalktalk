@@ -426,3 +426,203 @@
       return text;
    }
 
+///////////////////////////// ON SCREEN KEYBOARD //////////////////////////////////
+
+   function OnScreenKeyboard() {
+      this.mx = 0;
+      this.my = 0;
+      this.x = 0;
+      this.y = 0;
+      this.key = null;
+      this.keyPressed = null;
+      this.mouseMove = function(x, y) {
+         this.mx = x;
+         this.my = y;
+      }
+      this.height = function() { return 3 * w / 11; }
+      this.mouseDown = function(x, y) {
+         path = [];
+         path.push([x,y]);
+         this.keyPressed = this.key;
+         return this.keyPressed != null;
+      }
+      this.mouseDrag = function(x, y) {
+         path.push([x,y]);
+         return this.keyPressed != null;
+      }
+      this.mouseUp = function(x, y) {
+         path.push([x,y]);
+         var kw = w - 3*s/2;
+         return (x > (this.x - kw/2) || x < (this.x + kw/2) ||
+                 y > (this.y - s*13.05) || y < (this.y + s*2.5));
+      }
+      this.keyClick = function(x, y) {
+         return this.keyPressed != null && this.key != null;
+      }
+      this.dismissClick = function(x, y) {
+         var kw = w - 3*s/2;
+         if (x < (this.x - kw/2) || x > (this.x + kw/2) ||
+             y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
+            isOnScreenKeyboardMode = false;
+            setTextMode(false);
+            if (isCodeWidget) toggleCodeWidget();
+            return true;
+         } else {
+            return false;
+         }
+      }
+      this.render = function() {
+         _g.save();
+         lineWidth(1);
+         var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
+         var bgColor = backgroundColor=='white' ? 'rgba(0,0,255,.2)' : 'rgba(0,128,255,.5)';
+         color(fgColor);
+         var kw = w - 3*s/2;
+         drawCurve(createRoundRect(this.x - kw/2, this.y - s*13.05, kw, s*15.55, 9));
+         this.key = null;
+         for (var row = 0 ; row < nRows()        ; row++)
+         for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
+            var key = keyAt(row, k);
+            switch (key) {
+            case '\b': key = 'del'; break;
+            case '\n': key = 'ret'; break;
+            case '\f': key = 'shift'; break;
+            case '\L': key = L_ARROW; break;
+            case '\U': key = U_ARROW; break;
+            case '\D': key = D_ARROW; break;
+            case '\R': key = R_ARROW; break;
+            }
+            var x = this.x + X(row, k) - w/2;
+            var y = this.y + Y(row, k);
+            var _x = x-s/4, _y = y-s/4, _w = W(row, k)+s/2, _h = H(row, k)+s/2;
+            isCurrentKey = this.mx >= _x && this.mx < _x + _w &&
+                           this.my >= _y && this.my < _y + _h ;
+            var margin = isCurrentKey && sketchPage.isPressed ? 3 : 1;
+            var c = createRoundRect(_x + margin, _y + margin, _w - 2*margin, _h - 2*margin, 3);
+            if (isCurrentKey) {
+               this.key = key;
+               color(bgColor);
+               fillCurve(c);
+               color(fgColor);
+            }
+            drawCurve(c);
+            var isToRight = row != 1 && k == rowLength(row)-1;
+            var dx = isToRight ? 0.7 : .5;
+            var jx = isToRight ? 0.6 : .5;
+            text(key, x + (_w-s/2) * dx, y + _h/2, jx, .75, 'Arial');
+         }
+/*
+FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
+         color('red');
+         drawCurve(path);
+*/
+         _g.restore();
+      }
+
+      function keys()        { return isShiftPressed ? uc : lc; }
+      function nRows()       { return keys().length;         }
+      function rowLength(row){ return keys()[row].length;  }
+      function keyAt(row, k) { return keys()[row].substring(k, k+1); }
+      function isSpace(row, k) { return row == 4 && k == 0; }
+      function isArrow(row, k) { return row == 4 && k > 0; }
+      function X(row, k) { return 6*s + 3*s*k - 3*s*(3-row)/2 + (row==0 ? 0 : 3*s) + (!isSpace(row,k)?0:4.45*s) + (!isArrow(row,k)?0:16.5*s); }
+      function Y(row, k) { return 3*s*row - s - w/4; }
+      function W(row, k) { x=X(row,k), r=x+3*s;
+                           return isSpace(row,k) ? 14.1*s : row==3&&k==10 ? 4.5*s : (r>w-3*s ? w-s/2 : r)-x-s; }
+      function H(row, k) { return 2 * s; }
+      var w = 550, s = w/45;
+      var lc = ["`1234567890-=\b","qwertyuiop[]\\","asdfghjkl;'\n","zxcvbnm,./\f"," \L\U\D\R"];
+      var uc = ["~!@#$%^&*()_+\b","QWERTYUIOP{}|" ,'ASDFGHJKL:"\n',"ZXCVBNM<>?\f"," \L\U\D\R"];
+      var path = [];
+   }
+
+   var onScreenKeyboard = new OnScreenKeyboard();
+
+////////////////////////////// CODE TEXT EDITOR //////////////////////////////////
+
+   var codeElement,
+       codeSelector,
+       codeTextArea,
+       setCodeAreaText = function() {
+          codeTextArea.value = codeSelector.value;
+          updateF();
+       },
+       updateF = function() {
+          try {
+             eval(codeTextArea.value);
+          } catch (e) { }
+          if (code() != null) {
+             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+             codeSketch.selectedIndex = codeSelector.selectedIndex;
+          }
+       };
+
+   function code() {
+      return codeSketch == null ? null : codeSketch.code;
+   }
+
+   function codeSelectorBgColor() { return 'rgba(0,0,0,0)'; }
+   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : '#c0e0ff'; }
+   function codeTextBgColor() { return 'rgba(0,0,0,0)'; }
+   function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
+
+   function toggleCodeWidget() {
+      if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
+         return;
+
+      isCodeWidget = ! isCodeWidget;
+
+      codeElement = document.getElementById('code');
+      codeElement.innerHTML = "";
+
+      codeSelector = null;
+      if (isCodeWidget) {
+         var options = "";
+         for (var i = 0 ; i < code().length ; i++)
+            options += "<option value='" + code()[i][1] + "'>"
+                     + code()[i][0]
+                     + "</option>";
+
+         codeElement.innerHTML =
+            "<select id=code_selector onchange='setCodeAreaText()'>"
+          + options
+          + "</select>"
+          + "<br>"
+          + "<textArea rows=8 cols=24 id=code_text resize='none'"
+          + " style=';outline-width:0;border-style:none;resize:none'"
+          + " onkeyup='updateF()'>"
+          + "</textArea>";
+
+         codeSelector = document.getElementById("code_selector");
+         codeSelector.style.font="18px courier";
+         codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
+         codeSelector.style.backgroundColor = codeSelectorBgColor();
+         codeSelector.style.color = codeSelectorFgColor();
+         codeSelector.style.borderColor = codeTextFgColor();
+         codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
+         if (isDef(codeSketch.selectedIndex))
+            codeSelector.selectedIndex = codeSketch.selectedIndex;
+
+         codeTextArea = document.getElementById("code_text");
+         codeTextArea.onchange = 'console.log("button clicked")';
+         codeTextArea.style.borderColor = backgroundColor;
+         codeTextArea.style.font="18px courier";
+         codeTextArea.style.backgroundColor=codeTextBgColor();
+         codeTextArea.style.color=codeTextFgColor();
+         codeTextArea.value = code()[codeSelector.selectedIndex][1];
+         if (code().length < 2) {
+            codeTextArea.style.position = "absolute";
+            codeTextArea.style.top = 0;
+         }
+
+         codeTextArea.onclick = function(event) {
+            setTextMode(true);
+
+// ON SCREEN KEYBOARD FOR CODE TEXT IS DISABLED FOR NOW.
+
+//          isOnScreenKeyboardMode = true;
+
+         };
+      }
+   }
+
