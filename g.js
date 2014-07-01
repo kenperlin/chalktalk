@@ -198,14 +198,14 @@
 
          // WHILE PSEUDO-SKETCHING: ADVANCE SKETCH AT SAME RATE AS MOUSE MOVEMENT.
 
-         if (isk() && sk().sketchState == 'in progress' && isSketchDrawingEnabled
+         if (isk() && sk().sketchState == 'in progress' && sk().isDrawingEnabled
                                                         && sk().sketchProgress < 1) {
-            var dx = handle.mouseX - _g.mouseX;
-            var dy = handle.mouseY - _g.mouseY;
+            var dx = handle.mouseX - sk().advanceX;
+            var dy = handle.mouseY - sk().advanceY;
             var t = sqrt(dx*dx + dy*dy) / sk().sketchLength;
             sk().sketchProgress = min(1, sk().sketchProgress + t);
-            _g.mouseX = handle.mouseX;
-            _g.mouseY = handle.mouseY;
+            sk().advanceX = handle.mouseX;
+            sk().advanceY = handle.mouseY;
          }
 
 	 // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
@@ -365,7 +365,6 @@
             _g.lineTo(snx(sk(),xx,yy), sny(sk(),xx,yy));
          }
          _g.lineTo(snx(sk(),cx,cy), sny(sk(),cx,cy));
-         _g.isDrawing = true;
       }
       xPrev = x;
       yPrev = y;
@@ -394,7 +393,7 @@
    function traceComputeBounds(trace) {
       var bounds = [];
       for (var n = 0 ; n < trace.length ; n++)
-         bounds.push(strokeComputeBounds(trace[n]));
+         bounds.push(computeCurveBounds(trace[n]));
       return bounds;
    }
 
@@ -952,7 +951,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    // CREATE AN INSTANCE OF A REGISTERED SKETCH TYPE.
 
    function sg(type, selection) {
-      var bounds = strokeComputeBounds(glyphSketch.sp, 1);
+      var bounds = computeCurveBounds(glyphSketch.sp, 1);
       This().mouseX = (bounds[0] + bounds[2]) / 2;
       This().mouseY = (bounds[1] + bounds[3]) / 2;
 
@@ -1412,100 +1411,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return glyphs[bestMatch];
    }
 
-   var shRadius = 16; // radius of shorthand inner region
-
-   function interpretShorthand() {
-      var stroke = strokes[0];
-      var n = stroke.length;
-      if (len(stroke[n-1][0] - stroke[0][0],
-              stroke[n-1][1] - stroke[0][1]) < shRadius) {
-         if (iOut < n - 5)
-            sketchPage.handleDrawnTextChar(interpretShorthandSegment(stroke, iOut, n));
-         iOut = n;
-      }
-   }
-
-   function interpretShorthandSegment(stroke, i0, i1) {
-      var x = 0, y = 0;
-      for (var i = i0 ; i < i1 ; i++) {
-         x += stroke[i][0] - stroke[0][0];
-         y += stroke[i][1] - stroke[0][1];
-      }
-      var angle = atan2(-y, x);
-      var c = cos(angle), s = sin(angle);
-
-      var xx = 0;
-      var yy = 0;
-      var sgn = 0;
-
-      var iMean = (i0 + i1-1) / 2;
-      for (var i = i0 ; i < i1 ; i++) {
-         var x1 = stroke[i][0] - stroke[0][0];
-         var y1 = stroke[i][1] - stroke[0][1];
-
-         var x2 = x1 * c - y1 * s;
-         var y2 = x1 * s + y1 * c;
-
-         xx += x2 * x2;
-         yy += y2 * y2;
-         sgn += y2 > 0 == i > iMean ? 1 : -1;
-      }
-
-      var ratio = xx / yy;
-      var shape = ratio <  10 ? sgn < 0 ? 0 : 4
-                : ratio < 100 ? sgn < 0 ? 1 : 3
-                : 2;
-
-      var n = floor(8 * angle / TAU + 8.5) % 8;
-      var text = lookupChar(n, shape);
-
-      switch (text) {
-      case R_ARROW: return " ";
-      case L_ARROW: return "del";
-      case U_ARROW: isShiftPressed = ! isShiftPressed; return null;
-      case 'N': isNumeric = ! isNumeric; return null;
-      case D_ARROW: return "ret";
-      }
-
-      return text;
-   }
-
-   function lookupChar(n, shape) {
-      n = shape + 5 * n;
-      var ch = shorthandDictionary.substring(n, n+1);
-      switch (ch) {
-      case ' ': ch = ''; break;
-      case 'C': ch = U_ARROW; break;
-      case 'D': ch = L_ARROW; break;
-      case 'R': ch = D_ARROW; break;
-      case 'S': ch = R_ARROW; break;
-      }
-      return ch;
-   }
-
-   var shorthandDictionary = ""
-      + "klSm."
-      + "}nop~"
-      + "qrCsN"
-      + "/tuv{"
-      + "wxDyz"
-      + " Rab "
-      + "cdefg"
-      + " hij "
-   ;
-
-   function strokeComputeBounds(src, i0) {
-      if (i0 === undefined) i0 = 0;
-      var xlo = 10000, ylo = xlo, xhi = -xlo, yhi = -ylo;
-      for (var n = 0 ; n < src.length ; n++) {
-         xlo = min(xlo, src[n][0]);
-         ylo = min(ylo, src[n][1]);
-         xhi = max(xhi, src[n][0]);
-         yhi = max(yhi, src[n][1]);
-      }
-      return [xlo,ylo,xhi,yhi];
-   }
-
    function strokesComputeBounds(src, i0) {
       if (i0 === undefined) i0 = 0;
       var xlo = 10000, ylo = xlo, xhi = -xlo, yhi = -ylo;
@@ -1790,26 +1695,25 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             fillRect(-_g.panX - 100, 0, w + 200, h);
          }
 
-         // START OFF CURRENT GUIDED SKETCH, IF NECESSARY
+         // START OFF CURRENT PSEUDO-SKETCH, IF NECESSARY
 
-         if (isk() && sk().sketchState == 'start') {
-            _g.isDrawing = false;
-            sk().cursorTransition = 0;
-            sk().styleTransition = 0;
-            sk().sketchLength = 1;
-            sk().sketchProgress = 0;
-            sk().tX = This().mouseX - width()/2;
-            sk().tY = This().mouseY - height()/2;
-            sk().xStart = cursorX = _g.mouseX = This().mouseX;
-            sk().yStart = cursorY = _g.mouseY = This().mouseY;
-            sk().sketchState = 'in progress';
-         }
+         if (isk() && sk().sketchState != 'finished') {
+            if (sk().sketchState == 'start') {
+               sk().cursorTransition = 0;
+               sk().styleTransition = 0;
+               sk().sketchLength = 1;
+               sk().sketchProgress = 0;
+               sk().tX = This().mouseX - width()/2;
+               sk().tY = This().mouseY - height()/2;
+               sk().xStart = cursorX = sk().advanceX = This().mouseX;
+               sk().yStart = cursorY = sk().advanceY = This().mouseY;
+               sk().sketchState = 'in progress';
+            }
 
-         if (isk() && sk().sketchState == 'in progress'
-                   && isSketchDrawingEnabled
-                   && sk().sketchProgress == 0) {
-            _g.mouseX = This().mouseX;
-            _g.mouseY = This().mouseY;
+            if (sk().sketchState == 'in progress' && sk().isDrawingEnabled && sk().sketchProgress == 0) {
+               sk().advanceX = This().mouseX;
+               sk().advanceY = This().mouseY;
+            }
          }
 
          // ANIMATE AND DRAW ALL THE STROKES
@@ -1911,7 +1815,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (isTextMode && time - strokesStartTime >= 0.5)
             isShorthandTimeout = true;
 
-         // HANDLE THE AUDIENCE POPUP VIEW
+         // DRAW LINKS.
 
          if (isAudiencePopup() || ! isShowingOverlay()) {
 
@@ -2182,7 +2086,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       context.fill();
    }
 
-   var isSketchDrawingEnabled = false;
    var letterPressed = '\0';
 
    var textEditorPopup = null, textEditorTextArea;
@@ -2208,7 +2111,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             sketch.cleanup();
 
          sketchPage.sketches.splice(i, 1);
-         _g.isDrawing = false;
 
          var s, j, k;
 
@@ -2324,7 +2226,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sk().portBounds = [];
       sk().portLocation = [];
       sk().zoom = sketchPage.zoom;
-      isSketchDrawingEnabled = false;
+      sk().isDrawingEnabled = false;
       if (sk() instanceof Sketch2D) {
          sk().x2D = This().mouseX;
          sk().y2D = This().mouseY;
@@ -2504,7 +2406,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var sketch = new GeometrySketch();
 
-      var b = strokeComputeBounds(glyphSketch.sp, 1);
+      var b = computeCurveBounds(glyphSketch.sp, 1);
 
       sketchPage.add(glyphSketch);
       glyphSketch.fadeAway = 1.0;
@@ -2595,11 +2497,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+
       // SAVE PAN VALUE FOR PREVIOUS PAGE
+
       pages[pageIndex][2] = _g.panX;
 
       // RESTORE PAN VALUE FOR NEXT PAGE
+
       _g.panX = pages[index][2];
+
+      // MAKE SURE THE CODE WIDGET IS TURNED OFF.
 
       if (isCodeWidget)
          toggleCodeWidget();
@@ -2620,14 +2527,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var slide = document.getElementById('slide');
       slide.innerHTML = document.getElementById(pageName).innerHTML;
 
-      // START VIDEO ON NEW SLIDE
+      // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
+
       vidElements = slide.getElementsByClassName("vid");
-      if (vidElements.length > 0) {
+      if (isVideoPlaying = vidElements.length > 0)
          vidElements[0].play();
-         isVideoPlaying = true;
-      } else {
-         isVideoPlaying = false;
-      }
+
+      // IF THERE IS AN AUDIENCE POP-UP, SET IT TO THE RIGHT PAGE.
 
       if (audiencePopup != null)
          audiencePopup.document.getElementById('slide').innerHTML =
@@ -2642,6 +2548,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       sketchTypeLabels = [];
       for (var n = 0 ; n < sketchTypes.length ; n++)
          registerSketch(sketchTypes[n]);
+
+      // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
       if (sketchPage.scene == null) {
          sketchPage.scene = new THREE.Scene();
@@ -2660,15 +2568,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    function unloadGlyphArray(a) {
-      for (var i = 0 ; i < a.length ; i += 2) {
-         for (var j = 0 ; j < glyphs.length ; ) {
-            if (a[i] == glyphs[j].name) {
-                glyphs.splice(j, 1);
-            } else {
-                j++;
-            }
-         }
-      }
+      for (var i = 0 ; i < a.length ; i += 2)
+         for (var j = 0 ; j < glyphs.length ; j++)
+            if (a[i] == glyphs[j].name)
+                glyphs.splice(j--, 1);
    }
 
 var glyphs = [];
