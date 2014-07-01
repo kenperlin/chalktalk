@@ -951,7 +951,7 @@
          strokes = this.getStrokes();
          this.parsedSrc = [];
          for (var n = 0 ; n < strokes.length ; n++)
-            this.parsedSrc = this.parsedSrc.concat(segmentStroke(strokes[n]));
+            this.parsedSrc = this.parsedSrc.concat(segmentCurve(strokes[n]));
          this.parsed = parseStrokes(this.parsedSrc, this);
 
          var xs     = this.parsed[0][0];

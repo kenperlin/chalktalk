@@ -435,6 +435,57 @@
       return c;
    }
 
+   // Change the length of a curve.
+
+   function adjustCurveLength(curve, targetLength, i0) {
+      var n = curve.length;
+
+      var ratio = targetLength / computeCurveLength(curve, i0);
+
+      var x0 = (curve[1][0] + curve[n-1][0]) / 2;
+      var y0 = (curve[1][1] + curve[n-1][1]) / 2;
+
+      var p = [];
+      for (var i = 0 ; i < n ; i++)
+         p.push([curve[i][0], curve[i][1]]);
+
+      for (var i = 2 ; i <= n-2 ; i++) {
+         var t = 1 - 4*(i-n/2)*(i-n/2)/n/n;
+         var dr = t * (ratio - 1) + 1;
+         p[i][0] = lerp(dr, x0, p[i][0]);
+         p[i][1] = lerp(dr, y0, p[i][1]);
+      }
+
+      for (var i = 2 ; i <= n-2 ; i++) {
+         curve[i][0] = p[i][0];
+         curve[i][1] = p[i][1];
+      }
+   }
+
+   // Bend a curve toward a point, ending up at a target length.
+
+   function bendCurve(curve, pt, len, i0) {
+      if (i0 === undefined) i0 = 0;
+      var n = curve.length;
+      var dx0 = pt[0] - curve[1][0];
+      var dy0 = pt[1] - curve[1][1];
+      var dx1 = pt[0] - curve[n-1][0];
+      var dy1 = pt[1] - curve[n-1][1];
+      if (dx0 * dx0 + dy0 * dy0 < dx1 * dx1 + dy1 * dy1)
+         for (var i = n-2 ; i >= i0 ; i--) {
+            var t = (n-1-i) / (n-2);
+            curve[i][0] += t * dx0;
+            curve[i][1] += t * dy0;
+         }
+      else
+         for (var i = i0 + 1 ; i <= n-1 ; i++) {
+            var t = (i-1) / (n-2);
+            curve[i][0] += t * dx1;
+            curve[i][1] += t * dy1;
+         }
+      adjustCurveLength(curve, len, i0);
+   }
+
    // Create a curved line.
 
    function createCurve(A, B, curvature, N) {
@@ -484,6 +535,18 @@
       return dst;
    }
 
+   // Compute the total geometric length of a curve.
+
+   function computeCurveLength(curve, i0) {
+      var len = 0;
+      for (var i = (isDef(i0) ? i0 : 0) ; i < curve.length - 1 ; i++) {
+         var dx = curve[i+1][0] - curve[i][0];
+         var dy = curve[i+1][1] - curve[i][1];
+         len += sqrt(dx * dx + dy * dy);
+      }
+      return len;
+   }
+
    // Compute the curvature of a curved line from A to B which passes through M.
 
    function computeCurvature(A, M, B) {
@@ -517,6 +580,8 @@
       return aa - ad * ad / dd;
    }
 
+   // Return the point parametric fractional distance t along a curve.
+
    function getPointOnCurve(curve, t) {
       if (t <= 0) return curve[0];
       if (t >= 1) return curve[curve.length-1];
@@ -526,6 +591,8 @@
       return [ lerp(f, curve[i][0], curve[i+1][0]) ,
                lerp(f, curve[i][1], curve[i+1][1]) ];
    }
+
+   // Resample a curve to equal geometric spacing.
 
    function resampleCurve(src, count) {
       if (count === undefined) count = 100;
@@ -546,6 +613,58 @@
          dst.push([lerp(f, src[i-1][0], src[i][0]),
                    lerp(f, src[i-1][1], src[i][1])]);
       }
+      return dst;
+   }
+
+   function segmentCurve(src) {
+
+      // IF SRC POINTS ARE TOO CLOSELY SPACED, SKIP OVER SOME.
+
+      var curve = [];
+      var i = 0;
+      for (var j = i ; j < src.length ; j++) {
+         var dx = src[j][0] - src[i][0];
+         var dy = src[j][1] - src[i][1];
+         if (j == 0 || len(dx, dy) > 2) {
+            curve.push([src[j][0],src[j][1]]);
+            i = j;
+         }
+      }
+
+      // COMPUTE DIRECTIONS BETWEEN SUCCESSIVE POINTS.
+
+      function Dx(j) { return directions[j][0]; }
+      function Dy(j) { return directions[j][1]; }
+
+      var directions = [];
+      for (var i = 1 ; i < curve.length ; i++) {
+         var dx = curve[i][0] - curve[i-1][0];
+         var dy = curve[i][1] - curve[i-1][1];
+         var d = len(dx, dy);
+         directions.push([dx / d, dy / d]);
+      }
+
+      // WHEREVER CURVE BENDS, SPLIT IT.
+
+      var dst = [];
+      for (var j = 0 ; j < directions.length ; j++) {
+         if (j==0 || (Dx(j-1) * Dx(j) + Dy(j-1) * Dy(j) < 0.5))
+            dst.push([]);
+         dst[dst.length-1].push([curve[j][0],curve[j][1]]);
+      }
+
+      // DISCARD ALL SUB-CURVES THAT ARE TOO SMALL.
+
+      for (var n = dst.length - 1 ; n >= 0 ; n--) {
+         var a = dst[n][0];
+         var m = dst[n][floor(dst[n].length / 2)];
+         var b = dst[n][dst[n].length - 1];
+         if (max(distance(a,m),max(distance(m,b),distance(a,b))) < 10)
+            dst.splice(n, 1);
+      }
+
+      // RETURN ARRAY OF CURVES.
+
       return dst;
    }
 

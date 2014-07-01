@@ -118,7 +118,7 @@
 
          this.isPressed = true;
 
-         if (isKeyboard() && keyboard.mouseDown(x,y)) {
+         if (isOnScreenKeyboard() && onScreenKeyboard.mouseDown(x,y)) {
             return;
          }
 
@@ -219,7 +219,7 @@
 
       this.mouseDrag = function(x, y) {
 
-         if (isKeyboard() && keyboard.mouseDrag(x,y)) {
+         if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
          }
 
@@ -310,11 +310,11 @@
             return;
          }
 
-         if (isKeyboard() && !keyboard.dismissClick(x,y) && keyboard.mouseUp(x,y)) {
-            if (!keyboard.keyClick(x,y)) {
+         if (isOnScreenKeyboard() && !onScreenKeyboard.dismissClick(x,y) && onScreenKeyboard.mouseUp(x,y)) {
+            if (!onScreenKeyboard.keyClick(x,y)) {
                 return;
             } else {
-                this.handleTextChar(keyboard.key);
+                this.handleTextChar(onScreenKeyboard.key);
                 return;
             }
          }
@@ -607,8 +607,8 @@
             return;
          }
 
-         if (isKeyboard()) {
-            keyboard.mouseMove(x, y);
+         if (isOnScreenKeyboard()) {
+            onScreenKeyboard.mouseMove(x, y);
          }
 
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
@@ -1284,8 +1284,8 @@
             drawCurve(c);
          }
 
-         if (isKeyboard())
-            keyboard.render();
+         if (isOnScreenKeyboard())
+            onScreenKeyboard.render();
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*

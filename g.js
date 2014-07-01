@@ -196,7 +196,7 @@
          else if (isDef(handle.mouseMove))
             handle.mouseMove(handle.mouseX, handle.mouseY);
 
-         // WHILE AUTO-SKETCHING: ADVANCE SKETCH AT SAME RATE AS MOUSE MOVEMENT.
+         // WHILE PSEUDO-SKETCHING: ADVANCE SKETCH AT SAME RATE AS MOUSE MOVEMENT.
 
          if (isk() && sk().sketchState == 'in progress' && isSketchDrawingEnabled
                                                         && sk().sketchProgress < 1) {
@@ -216,8 +216,7 @@
       }
    }
 
-
-// WRAPPERS FOR DRAWING FUNCTIONS.
+//////////////////////// LOGIC TO SUPPORT PSEUDO-SKETCHING /////////////////////////
 
    var noisy = 1, _nF = 0.03, _nA = 3;
 
@@ -259,8 +258,6 @@
          _g.lineWidth = w;
       return _g.lineWidth;
    }
-
-// OVERRIDE MOVETO AND LINETO TO ACCOMMODATE AUTO-SKETCHING.
 
    var prev_x = 0, prev_y = 0;
 
@@ -381,7 +378,7 @@
       }
    }
 
-////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
    function sketchToTrace(sketch) {
       var src = sketch.sp;
@@ -481,7 +478,7 @@
    var isDrawingSketch2D = false;
    var isExpertMode = true;
    var isFakeMouseDown = false;
-   var isKeyboardMode = false;
+   var isOnScreenKeyboardMode = false;
    var isMakingGlyph = false;
    var isManualScaling = false;
    var isMouseOverBackground = true;
@@ -593,7 +590,7 @@
 /*
    DISABLED FOR JUNE 26 TALK -KP
 
-            isKeyboardMode = true;
+            isOnScreenKeyboardMode = true;
 */
          };
       }
@@ -784,7 +781,7 @@
 
    ];
 
-   function Keyboard() {
+   function OnScreenKeyboard() {
       this.mx = 0;
       this.my = 0;
       this.x = 0;
@@ -819,7 +816,7 @@
          var kw = w - 3*s/2;
          if (x < (this.x - kw/2) || x > (this.x + kw/2) ||
              y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
-            isKeyboardMode = false;
+            isOnScreenKeyboardMode = false;
             setTextMode(false);
             if (isCodeWidget) toggleCodeWidget();
             return true;
@@ -892,7 +889,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var path = [];
    }
 
-   var keyboard = new Keyboard();
+   var onScreenKeyboard = new OnScreenKeyboard();
 
    var cloneObject = null;
    var dataColor = 'rgb(128,128,128)'
@@ -987,6 +984,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
       _g.stroke();
    }
+
+/////////////////////// LINKS AND DATA PORTS ////////////////////////
 
    function computeLinkCurvature(link, C) {
       var a = link[0];
@@ -1102,6 +1101,55 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                             && s.contains(sketchPage.mx, sketchPage.my);
    }
 
+   var linkAtCursor = null;
+   var outSketch = null, inSketch = null;
+   var outPort = -1, inPort = -1;
+
+   function findNearestInPort(sketch) {
+      return sketch == null ? -1 :
+             sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in)
+                                        : findEmptySlot(sketch.in);
+   }
+
+   function findNearestOutPort(sketch) {
+      return sketch.portName.length > 0 ? findNearestPortAtCursor(sketch) : 0;
+   }
+
+   function findNearestPortAtCursor(sketch, slots) {
+      var x = This().mouseX;
+      var y = This().mouseY;
+      var n = -1, ddMin = 10000;
+      for (var i = 0 ; i < sketch.portName.length ; i++)
+         if ((slots === undefined) || slots[i] == null) {
+            var xy = sketch.portXY(i);
+            var dd = (xy[0]-x)*(xy[0]-x) + (xy[1]-y)*(xy[1]-y);
+            if (dd < ddMin) {
+               n = i;
+               ddMin = dd;
+            }
+         }
+      return n;
+   }
+
+   function findPortAtCursor(sketch, slots) {
+      if (sketch instanceof NumericSketch ||
+          sketch instanceof SimpleSketch &&
+                 (! sketch.isNullText() || isDef(sketch.inValue[0])))
+         return sketch.isMouseOver ? 0 : -1;
+      var x = This().mouseX;
+      var y = This().mouseY;
+      for (var i = 0 ; i < sketch.portName.length ; i++)
+         if ((slots === undefined) || slots[i] == null) {
+            var xy = sketch.portXY(i);
+            if ( x >= xy[0] - portHeight/2 && x < xy[0] + portHeight/2 &&
+                 y >= xy[1] - portHeight/2 && y < xy[1] + portHeight/2 )
+               return i;
+         }
+      return -1;
+   }
+
+/////////////////////////////////////////////////////////////////////
+
    function finishDrawingUnfinishedSketch() {
       if (! pullDownIsActive && isk()
                            && ! isHover()
@@ -1159,11 +1207,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    function kbd() {
-      isKeyboardMode = ! isKeyboardMode;
+      isOnScreenKeyboardMode = ! isOnScreenKeyboardMode;
    }
 
-   function isKeyboard() {
-      return isKeyboardMode && isTextMode;
+   function isOnScreenKeyboard() {
+      return isOnScreenKeyboardMode && isTextMode;
    }
 
    function setTextMode(state) {
@@ -1330,62 +1378,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // PACKAGE UP ALL THE PARSED DATA.
 
       return [ [ xs , ys ] , points , lines ];
-   }
-
-   // SEGMENT A STROKE BASED ON WHERE IT HAS SHARP BENDS.
-
-   function segmentStroke(src, i0) {
-      if (i0 === undefined)
-         i0 = 0;
-
-      // IF SRC POINTS ARE TOO CLOSELY SPACED, SKIP OVER SOME.
-
-      var stroke = [];
-      var i = i0;
-      for (var j = i ; j < src.length ; j++) {
-         var dx = src[j][0] - src[i][0];
-         var dy = src[j][1] - src[i][1];
-         if (j == i0 || len(dx, dy) > 2) {
-            stroke.push([src[j][0],src[j][1]]);
-            i = j;
-         }
-      }
-
-      // COMPUTE DIRECTIONS BETWEEN SUCCESSIVE POINTS.
-
-      function Dx(j) { return directions[j][0]; }
-      function Dy(j) { return directions[j][1]; }
-
-      var directions = [];
-      for (var i = 1 ; i < stroke.length ; i++) {
-         var dx = stroke[i][0] - stroke[i-1][0];
-         var dy = stroke[i][1] - stroke[i-1][1];
-         var d = len(dx, dy);
-         directions.push([dx / d, dy / d]);
-      }
-
-      // WHEREVER STROKE BENDS, SPLIT INTO A NEW SUBSTROKE.
-
-      var dst = [];
-      for (var j = 0 ; j < directions.length ; j++) {
-         if (j==0 || (Dx(j-1) * Dx(j) + Dy(j-1) * Dy(j) < 0.5))
-            dst.push([]);
-         dst[dst.length-1].push([stroke[j][0],stroke[j][1]]);
-      }
-
-      // DISCARD ALL SUBSTROKES THAT ARE TOO SMALL.
-
-      for (var n = dst.length - 1 ; n >= 0 ; n--) {
-         var a = dst[n][0];
-         var m = dst[n][floor(dst[n].length / 2)];
-         var b = dst[n][dst[n].length - 1];
-         if (max(distance(a,m),max(distance(m,b),distance(a,b))) < 10)
-            dst.splice(n, 1);
-      }
-
-      // RETURN ARRAY OF SUBSTROKES.
-
-      return dst;
    }
 
    var strokes = [];
@@ -1645,46 +1637,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return textChar;
    }
 
-   // ZOOM AND PAN X
-
-   function zpx(x) {
-      x -= width()/2;
-      x *= sketchPage.zoom;
-      x += sketchPage.panX;
-      x += width()/2;
-      return x;
-   }
-
-   // ZOOM AND PAN Y
-
-   function zpy(y) {
-      y -= height()/2;
-      y *= sketchPage.zoom;
-      y += sketchPage.panY;
-      y += height()/2;
-      return y;
-   }
-
-   // INVERSE ZOOM AND PAN X
-
-   function izpx(x) {
-      x -= width()/2;
-      x -= sketchPage.panX;
-      x /= sketchPage.zoom;
-      x += width()/2;
-      return x;
-   }
-
-   // INVERSE ZOOM AND PAN Y
-
-   function izpy(y) {
-      y -= height()/2;
-      y -= sketchPage.panY;
-      y /= sketchPage.zoom;
-      y += height()/2;
-      return y;
-   }
-
    function doAction(x, y) {
       if (bgClickCount != 1 || ! isHover())
          return false;
@@ -1790,53 +1742,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       context.font = saveFont;
    }
 
-   var linkAtCursor = null;
-   var outSketch = null, inSketch = null;
-   var outPort = -1, inPort = -1;
-
-   function findNearestInPort(sketch) {
-      return sketch == null ? -1 :
-             sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in)
-                                        : findEmptySlot(sketch.in);
-   }
-
-   function findNearestOutPort(sketch) {
-      return sketch.portName.length > 0 ? findNearestPortAtCursor(sketch) : 0;
-   }
-
-   function findNearestPortAtCursor(sketch, slots) {
-      var x = This().mouseX;
-      var y = This().mouseY;
-      var n = -1, ddMin = 10000;
-      for (var i = 0 ; i < sketch.portName.length ; i++)
-         if ((slots === undefined) || slots[i] == null) {
-            var xy = sketch.portXY(i);
-            var dd = (xy[0]-x)*(xy[0]-x) + (xy[1]-y)*(xy[1]-y);
-            if (dd < ddMin) {
-               n = i;
-               ddMin = dd;
-            }
-         }
-      return n;
-   }
-
-   function findPortAtCursor(sketch, slots) {
-      if (sketch instanceof NumericSketch ||
-          sketch instanceof SimpleSketch &&
-                 (! sketch.isNullText() || isDef(sketch.inValue[0])))
-         return sketch.isMouseOver ? 0 : -1;
-      var x = This().mouseX;
-      var y = This().mouseY;
-      for (var i = 0 ; i < sketch.portName.length ; i++)
-         if ((slots === undefined) || slots[i] == null) {
-            var xy = sketch.portXY(i);
-            if ( x >= xy[0] - portHeight/2 && x < xy[0] + portHeight/2 &&
-                 y >= xy[1] - portHeight/2 && y < xy[1] + portHeight/2 )
-               return i;
-         }
-      return -1;
-   }
-
    var visible_sp = null;
 
    var tick = function(g) {
@@ -1850,8 +1755,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          var w = width(), h = height();
 
-         keyboard.x = w / 2;
-         keyboard.y = h * 3 / 4;
+         onScreenKeyboard.x = w / 2;
+         onScreenKeyboard.y = h * 3 / 4;
 
          var prevTime = time;
          time = ((new Date()).getTime() - _startTime) / 1000.0;
@@ -2423,40 +2328,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
 
-   function computeCurveLength(sp, i0, i1) {
-      if (i0 === undefined) i0 = 0;
-      if (i1 === undefined) i1 = sp.length;
-      var len = 0;
-      for (var i = i0 ; i < i1 - 1 ; i++) {
-         var dx = sp[i+1][0] - sp[i][0];
-         var dy = sp[i+1][1] - sp[i][1];
-         len += sqrt(dx * dx + dy * dy);
-      }
-      return len;
-   }
-
-   function bendCurve(sp, pt, len, i0) {
-      if (i0 === undefined) i0 = 0;
-      var n = sp.length;
-      var dx0 = pt[0] - sp[1][0];
-      var dy0 = pt[1] - sp[1][1];
-      var dx1 = pt[0] - sp[n-1][0];
-      var dy1 = pt[1] - sp[n-1][1];
-      if (dx0 * dx0 + dy0 * dy0 < dx1 * dx1 + dy1 * dy1)
-         for (var i = n-2 ; i >= i0 ; i--) {
-            var t = (n-1-i) / (n-2);
-            sp[i][0] += t * dx0;
-            sp[i][1] += t * dy0;
-         }
-      else
-         for (var i = i0 + 1 ; i <= n-1 ; i++) {
-            var t = (i-1) / (n-2);
-            sp[i][0] += t * dx1;
-            sp[i][1] += t * dy1;
-         }
-      adjustLength(sp, len, i0);
-   }
-
    function computeCentroid(parent, sk, pts) {
       var xlo = sk.xlo;
       var ylo = sk.ylo;
@@ -2481,31 +2352,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          y /= sum;
       }
       return [parent.m2x(x), parent.m2y(y)];
-   }
-
-   function adjustLength(sp, targetLength, i0) {
-      var n = sp.length;
-
-      var ratio = targetLength / computeCurveLength(sp, i0);
-
-      var x0 = (sp[1][0] + sp[n-1][0]) / 2;
-      var y0 = (sp[1][1] + sp[n-1][1]) / 2;
-
-      var p = [];
-      for (var i = 0 ; i < n ; i++)
-         p.push([sp[i][0], sp[i][1]]);
-
-      for (var i = 2 ; i <= n-2 ; i++) {
-         var t = 1 - 4*(i-n/2)*(i-n/2)/n/n;
-         var dr = t * (ratio - 1) + 1;
-         p[i][0] = lerp(dr, x0, p[i][0]);
-         p[i][1] = lerp(dr, y0, p[i][1]);
-      }
-
-      for (var i = 2 ; i <= n-2 ; i++) {
-         sp[i][0] = p[i][0];
-         sp[i][1] = p[i][1];
-      }
    }
 
 // HANDLE TEXT EDITOR POP-UP WINDOW.
