@@ -527,6 +527,28 @@
                lerp(f, curve[i][1], curve[i+1][1]) ];
    }
 
+   function resampleCurve(src, count) {
+      if (count === undefined) count = 100;
+
+      var D = [];
+      for (var i = 0 ; i < src.length ; i++)
+         D.push(i == 0 ? 0 : D[i-1] + len(src[i][0]-src[i-1][0],
+                                          src[i][1]-src[i-1][1]));
+      var dst = [];
+      dst.push([src[0][0], src[0][1]]);
+      var i = 1;
+      var sum = D[src.length-1];
+      for (var j = 1 ; j < count ; j++) {
+         var d = sum * j / count;
+         while (D[i] < d && i < src.length-1)
+            i++;
+         var f = (d - D[i-1]) / (D[i] - D[i-1]);
+         dst.push([lerp(f, src[i-1][0], src[i][0]),
+                   lerp(f, src[i-1][1], src[i][1])]);
+      }
+      return dst;
+   }
+
 // VARIOUS MANIPULATIONS OF HTML ELEMENTS.
 
    // Replace the text of an html element:
