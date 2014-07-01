@@ -1,87 +1,39 @@
 
-// GENERAL UTILITY FUNCTIONS:
+///////////// HANDLE THE PIE MENU.
 
-   function arrayToString(a, level) {
-      if (level === undefined)
-         level = 0;
-      var spacer = level == 0 ? " " : "";
-      var str = "[" + spacer;
-      for (var i = 0 ; i < a.length ; i++)
-         str += (a[i] instanceof Array ? arrayToString(a[i], level+1) : a[i])
-              + spacer + (i < a.length-1 ? "," + spacer : "]");
-      return str;
-   }
-   function hexChar(n) {
-      return String.fromCharCode((n < 10 ? 48 : 87) + n);
-   }
-   function hex(n) {
-      return hexChar(n >> 4) + hexChar(n & 15);
-   }
-   function isDef(v) { return ! (v === undefined); }
-   function isNumber(v) { return ! isNaN(v); }
-   function roundedString(v) {
-      if (typeof(v) == 'string')
-         v = parseFloat(v);
-      return "" + ((v < 0 ? -1 : 1) * floor(100 * abs(v) + 0.5) / 100);
-   }
+   // EXTERNAL VARS
 
-// HANDLE PLAYING AN AUDIO SIGNAL:
+   var pieMenuCursorWeight = 0;
+   var pieMenuIsActive = false;
+   var pieMenuStroke = [];
+   var pieMenuX = 0;
+   var pieMenuY = 0;
 
-   var audioNode = null, audioIndex = 0;
+   // INTERNAL VARS
 
-   var setAudioSignal= function(f) {
-      if (audioNode == null) {
-         audioContext = 'AudioContext' in window ? new AudioContext() :
-                        'webkitAudioContext' in window ? new webkitAudioContext() : null;
-         if (audioContext != null) {
-            audioNode = audioContext.createScriptProcessor(1024, 0, 1);
-            audioNode.connect(audioContext.destination);
-         }
-      }
-      if (audioNode != null) {
-         audioNode.onaudioprocess = function(event) {
-            var output = event.outputBuffer;
-            var signal = output.getChannelData(0);
-            if (f instanceof Array)
-               for (var i = 0 ; i < output.length ; i++)
-                  signal[i] = f[audioIndex++ % f.length];
-            else
-               for (var i = 0 ; i < output.length ; i++)
-                  signal[i] = f(audioIndex++ / output.sampleRate);
-         }
-      }
-   }
+   var pieMenuCode = [];
+   var pieMenuMouseX = 0;
+   var pieMenuMouseY = 0;
+   var pieMenuStrokes = null;
+   var pieMenuXDown = 0;
+   var pieMenuYDown = 0;
 
-// INITIALIZE HANDLING OF KEYBOARD AND MOUSE EVENTS ON A CANVAS:
-
-   function startPullDown(x, y) {
-      if (pullDownLabels.length > 0) {
-         isPullDown = true;
-         pullDownSelection = -1;
-         sketchLabelSelection = -1;
-         pullDownX = x;
-         pullDownY = y;
-      }
-   }
-
-   function startPieMenu(x, y) {
+   function pieMenuStart(x, y) {
       pieMenuStrokes = null;
-      isPieMenu = true;
+      pieMenuIsActive = true;
       pieMenuX = pieMenuMouseX = pieMenuXDown = x;
       pieMenuY = pieMenuMouseY = pieMenuYDown = y;
    }
 
-   function endPieMenu() {
+   function pieMenuEnd() {
 
       pieMenuStrokes = segmentStroke(pieMenuStroke);
       pieMenuStroke = [];
 
       pieMenuCode = [];
-      for (var n = 1 ; n < pieMenuStrokes.length ; n++) {
-         var s = pieMenuStrokes[n];
-         var angle = atan2(pieMenuYDown - s[0][1], s[0][0] - pieMenuXDown);
-         pieMenuCode.push(floor(PMA + 0.5 + PMA * angle / TAU) % PMA);
-      }
+      for (var n = 1 ; n < pieMenuStrokes.length ; n++)
+         pieMenuCode.push(pieMenuIndex(pieMenuStrokes[n][0][0] - pieMenuXDown,
+	                               pieMenuStrokes[n][0][1] - pieMenuYDown, 8));
       if (pieMenuCode.length > 0) {
          var index = 0;
          if (pieMenuCode.length > 1)
@@ -98,6 +50,293 @@
       pieMenuCursorWeight = 1;
    }
 
+   function pieMenuUpdate(x, y) {
+      if (pieMenuCursorWeight > 0) {
+         pieMenuCursorWeight = max(0, pieMenuCursorWeight - This().elapsed);
+         pieMenuX = lerp(pieMenuCursorWeight, x, pieMenuXDown);
+         pieMenuY = lerp(pieMenuCursorWeight, y, pieMenuYDown);
+         if (pieMenuCursorWeight == 0) {
+            pieMenuIsActive = false;
+	    pieMenuXDown = width() / 2;
+	    pieMenuYDown = height() / 2;
+         }
+      }
+   }
+
+   function pieMenuDraw() {
+      var w = width(), h = height();
+      var R = 130, r = 30;
+
+      var x0 = pieMenuXDown;
+      var y0 = pieMenuYDown;
+
+      var mouseX = This().mouseX;
+      var mouseY = This().mouseY;
+
+      if (sketchPage.isPressed) {
+         var r0 = len(pieMenuMouseX - x0, pieMenuMouseY - y0);
+         if (r0 < R - r/2) {
+            var r1 = len(mouseX - x0, mouseY - y0);
+            if (r1 > r0) {
+               pieMenuMouseX = mouseX;
+               pieMenuMouseY = mouseY;
+            }
+         }
+         else {
+            mouseX = pieMenuMouseX;
+            mouseY = pieMenuMouseY;
+         }
+      }
+
+      var P = [];
+      var choice = -1;
+      for (var n = 0 ; n < PMA ; n++) {
+         var theta = TAU * n / PMA;
+         P.push([x0 + R * cos(theta), y0 - R * sin(theta)]);
+         if (len(P[n][0] - mouseX, P[n][1] - mouseY) < r)
+            choice = n;
+      }
+
+      lineWidth(1);
+      textHeight(10);
+
+      if (choice >= 0) {
+         color('blue');
+         fillOval(x0 - 4, y0 - 4, 8, 8);
+      }
+      for (var n = 0 ; n < PMA ; n++) {
+         color('blue');
+         if (choice < 0)
+            line(x0, y0, P[n][0], P[n][1]);
+         else if (choice == 0) {
+            if (n < pageActionLabels.length) {
+               line(P[0][0], P[0][1], P[n][0], P[n][1]);
+               color('rgba(0,0,255,0.2)');
+               line(x0, y0, P[n][0], P[n][1]);
+            }
+         }
+         else if (choice-1 < sketchTypeLabels.length) {
+            if ((n - choice + PMA) % PMA < sketchTypeLabels[choice-1].length) {
+               line(P[choice][0], P[choice][1], P[n][0], P[n][1]);
+               color('rgba(0,0,255,0.2)');
+               line(x0, y0, P[n][0], P[n][1]);
+            }
+         }
+      }
+
+      var str;
+      for (var n = 0 ; n < PMA ; n++) {
+         color(n == choice ? 'rgba(0,0,255,0.05)' : backgroundColor);
+         fillOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
+         color('blue');
+         drawOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
+
+         if (choice < 0)
+            str = (n == 0 ? "page" : sketchTypes[n-1]);
+         else if (choice == 0)
+            str = pageActionLabels[n];
+         else if (choice-1 < sketchTypeLabels.length)
+            str = sketchTypeLabels[choice-1][(n - choice + PMA) % PMA];
+
+         if (isDef(str))
+            text(str, P[n][0], P[n][1], .5, .5);
+      }
+   }
+
+///////////// HANDLE THE PULL DOWN MENU.
+
+   var pullDownIsActive = false;
+   var pullDownLabels = [];
+   var pullDownSelection = -1;
+   var pullDownX = 0;
+   var pullDownY = 0;
+
+   function pullDownStart(x, y) {
+      if (pullDownLabels.length > 0) {
+         pullDownIsActive = true;
+         pullDownSelection = -1;
+         sketchLabelSelection = -1;
+         pullDownX = x;
+         pullDownY = y;
+      }
+   }
+
+   function pullDownUpdate() {
+      if (pullDownSelection >= 0) {
+
+         // AFTER PULLDOWN OVER THE PAGE BACKGROUND
+
+         if (pullDownLabels == pagePullDownLabels) {
+
+            // BASIC MENU ACTIONS FOR ANY PAGE
+
+            if (pullDownSelection < pageActionLabels.length) {
+               selectSketchPageAction(pullDownSelection);
+            }
+
+            // CREATE A NEW SKETCH OF SOME TYPE
+
+            else {
+               This().mouseX = pullDownX;
+               This().mouseY = pullDownY;
+               addSketchOfType(pullDownSelection - pageActionLabels.length);
+               sk().setSelection(max(0, sketchLabelSelection));
+            }
+         }
+
+         // AFTER PULLDOWN OVER A SKETCH
+
+         else {
+
+            // BASIC MENU ACTIONS FOR ANY SKETCH TYPE
+
+            if (pullDownSelection < sketchActionLabels.length) {
+               sketchAction = sketchActionLabels[pullDownSelection];
+               sketchPage.mx = This().mouseX;
+               sketchPage.my = This().mouseY;
+               switch(sketchAction) {
+               case "text":
+                  toggleTextMode(sk());
+                  break;
+               case "parsing":
+                  sk().parse();
+                  sketchAction = null;
+                  break;
+               case "deleting":
+                  deleteSketch(sk());
+                  sketchAction = null;
+                  break;
+               }
+            }
+
+            // GROUP-SPECIFIC ACTIONS
+
+            else if (sk().isGroup()) {
+               switch (pullDownLabels[pullDownSelection]) {
+               case 'ungroup':
+                  sketchPage.toggleGroup();
+                  break;
+               }
+            }
+
+            // PREPARE FOR MOUSE MOVE RESPONSE SPECIFIC TO THIS SKETCH TYPE
+
+            else {
+               sk().setSelection(pullDownSelection - sketchActionLabels.length);
+            }
+         }
+
+      }
+
+      pullDownIsActivePressed = false;
+      pullDownIsActive = false;
+   }
+
+   function pullDownDraw() {
+
+      // PH IS THE PULLDOWN CELL HEIGHT.  IT CONTROLS THE SIZE OF THE PULLDOWN.
+
+      var PH = 30;
+
+      var isPageMenu = pullDownLabels == pagePullDownLabels;
+
+      var n = pullDownLabels.length;
+      var x = pullDownX, y = pullDownY, w = PH * 5, h = PH * n;
+      var mx = This().mouseX, my = This().mouseY;
+
+      if (mx >= x && mx < x + w) {
+         var t = (my - y) / PH;
+         pullDownSelection = t < 0 || t >= pullDownLabels.length ? -1 : floor(t);
+      }
+      else if (!(mx >= x + w && isPageMenu &&
+          pullDownSelection >= pageActionLabels.length &&
+          sketchTypeLabels[pullDownSelection - pageActionLabels.length].length > 0))
+         pullDownSelection = -1;
+
+      function drawMenu(x, y, labels, selection) {
+         var w = PH * 5;
+         var h = PH * labels.length;
+
+         // DRAW A SHADOW BEHIND THE MENU.
+
+         color(backgroundColor == 'white' ? 'rgba(0,0,0,.02)' : 'rgba(255,255,255,.02)');
+         for (var i = 0 ; i < 10 ; i += 2)
+            fillRect(x + PH/2 + i, y + PH/2 + i, w - 2 * i, h - 2 * i);
+
+         // FILL THE MENU WITH ITS BACKGROUND COLOR.
+
+         color(backgroundColor == 'white' ? 'rgb(247,251,255)' : 'rgb(8,4,0)');
+         fillRect(x, y, w, h);
+
+         // HIGHLIGHT THE CURRENT SELECTION.
+
+         if (selection >= 0) {
+            color(backgroundColor == 'white' ? 'rgba(0,128,255,.2)' : 'rgba(255,128,0.2)');
+            fillRect(x, y + PH * selection, w, PH);
+         }
+
+         // DRAW ALL THE TEXT LABELS.
+
+         color(defaultPenColor);
+         textHeight(PH * 3 / 5);
+         for (var row = 0 ; row < labels.length ; row++)
+            text(labels[row], x + PH/7, y + PH/2 + PH * row, 0, .55);
+
+         // DARKEN THE RIGHT AND BOTTOM EDGES.
+
+         lineWidth(1);
+
+         color(scrimColor(.24));
+         line(x, y, x + w, y);
+         line(x, y, x, y + h);
+
+         color(scrimColor(.48));
+         line(x + w, y, x + w, y + h);
+         line(x, y + h, x + w, y + h);
+      }
+
+      drawMenu(x, y, pullDownLabels, pullDownSelection);
+
+      // DRAW SEPARATOR BETWEEN FIXED CHOICES AND VARIABLE CHOICES.
+
+      var actionLabels =
+         pullDownLabels == pagePullDownLabels ? pageActionLabels
+                                              : sketchActionLabels;
+
+      color(backgroundColor == 'white' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.28)');
+      fillRect(x, y + actionLabels.length * PH, w - 1, 1);
+
+      // IF SELECTED SKETCH TYPE CONTAINS OPTIONS, SHOW THE SECONDARY MENU.
+
+      if (pullDownLabels == pagePullDownLabels) {
+         for (var n = 0 ; n < sketchTypeLabels.length ; n++)
+            if (sketchTypeLabels[n].length > 0) {
+               var nn = pageActionLabels.length + n;
+
+               // DRAW A SMALL RIGHT ARROW TO SHOW THIS SKETCH TYPE HAS OPTIONS.
+
+               color('rgb(128,128,128)');
+               var ax = x + w - PH*7/10;
+               var ay = y + PH * nn + PH/4;
+               fillPolygon([ [ax, ay], [ax + PH/2-1, ay + PH/4], [ax, ay + PH/2] ]);
+
+               // FOR SELECTED SKETCH TYPE, SHOW WHAT THE OPTIONS ARE.
+
+               if (nn == pullDownSelection) {
+                  var tx = x+w, ty = y + PH*nn;
+                  var nRows = sketchTypeLabels[n].length;
+                  sketchLabelSelection = -1;
+                  if ( mx >= tx && mx < tx + w &&
+                       my >= ty && my < ty + PH * nRows )
+                     sketchLabelSelection = floor((my - ty) / PH);
+                  drawMenu(tx, ty, sketchTypeLabels[n], sketchLabelSelection);
+               }
+            }
+      }
+   }
+
+////////////////////////////////////////////
+
    function selectSketchPageAction(index) {
       switch (pageActionLabels[index]) {
       case "text"      : toggleTextMode(); break;
@@ -113,12 +352,14 @@
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
    }
 
-   var mouseMoveEvent = null;
-
    function clientX(event) {
       if (isDef(_g.panX)) return event.clientX - _g.panX;
       return event.clientX;
    }
+
+// INITIALIZE HANDLING OF KEYBOARD AND MOUSE EVENTS ON A CANVAS:
+
+   var mouseMoveEvent = null;
 
    function initEventHandlers(canvas) {
       function getHandle(canvas) { return window[canvas.id]; }
@@ -188,7 +429,7 @@
          if (sketchAction != null)
             return;
 
-         if (isPullDown)
+         if (pullDownIsActive)
             return;
 
          var handle = getHandle(this);
@@ -213,7 +454,7 @@
          try {
             if (isMouseOverBackground)
                pullDownLabels = pagePullDownLabels;
-            startPullDown(handle.mouseX, handle.mouseY);
+            pullDownStart(handle.mouseX, handle.mouseY);
          } catch (e) {}
          return false;
       };
@@ -233,19 +474,19 @@
             return;
 
          if (sketchAction != null) {
-	    switch (sketchAction) {
-	    case "linking":
+            switch (sketchAction) {
+            case "linking":
                sketchPage.figureOutLink();
-	       break;
+               break;
             case "translating":
-	       var s = sk().intersectingSketches();
-	       for (var i = 0 ; i < s.length ; i++) {
-	          if (isDef(sk().onDropOnto))
-		     sk().onDropOnto(s[i]);
-	          if (isDef(s[i].onDroppedOnto))
-		     s[i].onDroppedOnto(sk());
+               var s = sk().intersectingSketches();
+               for (var i = 0 ; i < s.length ; i++) {
+                  if (isDef(sk().onDropOnto))
+                     sk().onDropOnto(s[i]);
+                  if (isDef(s[i].onDroppedOnto))
+                     s[i].onDroppedOnto(sk());
                }
-	       break;
+               break;
             }
             sketchAction = null;
             return;
@@ -257,74 +498,10 @@
          handle.mouseY = event.clientY - r.top;
          handle.mousePressed = false;
 
-         // HANDLE PULLDOWN MENU SELECTION ACTION.
+         // UPDATE PULLDOWN MENU SELECTION ACTION.
 
-         if (isPullDown) {
-            if (pullDownSelection >= 0)
-
-               // AFTER PULLDOWN OVER THE PAGE BACKGROUND
-
-               if (pullDownLabels == pagePullDownLabels) {
-
-                  // BASIC MENU ACTIONS FOR ANY PAGE
-
-                  if (pullDownSelection < pageActionLabels.length) {
-                     selectSketchPageAction(pullDownSelection);
-                  }
-
-                  // CREATE A NEW SKETCH OF SOME TYPE
-
-                  else {
-                     This().mouseX = pullDownX;
-                     This().mouseY = pullDownY;
-                     addSketchOfType(pullDownSelection - pageActionLabels.length);
-                     sk().setSelection(max(0, sketchLabelSelection));
-                  }
-               }
-
-               // AFTER PULLDOWN OVER A SKETCH
-
-               else {
-
-                  // BASIC MENU ACTIONS FOR ANY SKETCH TYPE
-
-                  if (pullDownSelection < sketchActionLabels.length) {
-                     sketchAction = sketchActionLabels[pullDownSelection];
-                     sketchPage.mx = This().mouseX;
-                     sketchPage.my = This().mouseY;
-                     switch(sketchAction) {
-                     case "text":
-                        toggleTextMode(sk());
-                        break;
-                     case "parsing":
-                        sk().parse();
-                        sketchAction = null;
-                        break;
-                     case "deleting":
-                        deleteSketch(sk());
-                        sketchAction = null;
-                        break;
-                     }
-                  }
-
-                  // GROUP-SPECIFIC ACTIONS
-
-                  else if (sk().isGroup()) {
-                     switch (pullDownLabels[pullDownSelection]) {
-                     case 'ungroup':
-                        sketchPage.toggleGroup();
-                        break;
-                     }
-                  }
-
-                  // PREPARE FOR MOUSE MOVE RESPONSE SPECIFIC TO THIS SKETCH TYPE
-
-                  else {
-                     sk().setSelection(pullDownSelection - sketchActionLabels.length);
-                  }
-               }
-            isPullDownPressed = false;
-            isPullDown = false;
+         if (pullDownIsActive) {
+            pullDownUpdate();
             return;
          }
 
@@ -348,7 +525,7 @@
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
 
-         if (isPullDown)
+         if (pullDownIsActive)
             return;
 
          // MOUSE IS BEING DRAGGED.
@@ -390,424 +567,6 @@
       }
    }
 
-// HANDLE SET OPERATIONS:
-
-   function Set() {
-      this.debug = false;
-      this.add = function(item) {
-         if (! this.contains(item))
-            this.push(item);
-      }
-
-      this.remove = function(item) {
-         var index = this.indexOf(item);
-         if (index >= 0)
-            this.splice(index, 1);
-      }
-
-      this.contains = function(item) {
-         return this.indexOf(item) >= 0;
-      }
-
-      this.indexOf = function(item) {
-         for (var i = 0 ; i < this.length ; i++)
-            if (equals(item, this[i]))
-               return i;
-         return -1;
-      }
-
-      function equals(a, b) {
-         if (a instanceof Array) {
-            for (var i = 0 ; i < a.length ; i++)
-               if (! equals(a[i], b[i]))
-                  return false;
-            return true;
-         }
-         return a == b;
-      }
-
-      this.toString = function() {
-         var str = "[";
-         for (var i = 0 ; i < this.length ; i++)
-            str += this[i] + (i<this.length-1 ? "," : "]");
-         return str;
-      }
-   }
-   Set.prototype = new Array;
-
-// WRAPPER FOR MATRIX FUNCTIONS
-
-   function save() { _g.save(); }
-   function restore() { _g.restore(); }
-   function identity() { _g.setTransform(1,0,0,0,1,0); }
-   function translate(x, y) { _g.translate(x, y); }
-   function rotate(a) { _g.rotate(a); }
-   function scale(x, y) { if (! isDef(y)) y = x; _g.scale(x,y); }
-
-// PHYSICS
-
-   // Physics objects must inherit from "Clonable" for cloning to work properly.
-
-   function Clonable() { }
-
-   function Spring() {
-      this.P = 0;
-      this.V = 0;
-      this.F = 0;
-      this.mass = 1.0;
-      this.damping = 1.0;
-
-      this.getPosition = function()  { return this.P; }
-      this.setDamping  = function(t) { this.damping = t; }
-      this.setForce    = function(t) { this.F = t; }
-      this.setMass     = function(t) { this.mass = Math.max(0.001, t); }
-
-      this.update      = function(elapsed) {
-         this.V += (this.F - this.P) / this.mass * elapsed;
-         this.P  = (this.P + this.V) * (1 - this.damping * elapsed);
-      }
-   }
-   Spring.prototype = new Clonable;
-
-// MATH CONSTANTS AND UTILITY FUNCTIONS
-
-   var PI = Math.PI;
-   var TAU = 2 * PI;
-
-   function abs(a) { return Math.abs(a); }
-   function asin(a) { return Math.asin(a); }
-   function atan(a) { return Math.atan(a); }
-   function atan2(a, b) { return Math.atan2(a, b); }
-   function cos(t) { return Math.cos(t); }
-   function cotan(t) { return Math.cotan(t); }
-   function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
-   function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
-   function isEqualArray(a, b) {
-      if (a === undefined || b === undefined ||
-          a == null || b == null || a.length != b.length)
-         return false;
-      for (var i = 0 ; i < a.length ; i++)
-         if (a[i] != b[i])
-            return false;
-      return true;
-   }
-   function floor(t) { return Math.floor(t); }
-   function ik(a, b, C, D) {
-      var cc = dot(C,C), x = (1 + (a*a - b*b)/cc) / 2, y = dot(C,D)/cc;
-      for (var i = 0 ; i < 3 ; i++) D[i] -= y * C[i];
-      y = sqrt(max(0,a*a - cc*x*x) / dot(D,D));
-      for (var i = 0 ; i < 3 ; i++) D[i] = x * C[i] + y * D[i];
-   }
-   function len(x, y) {
-      if (y === undefined)
-         return sqrt(x[0] * x[0] + x[1] * x[1]);
-      return sqrt(x * x + y * y);
-   }
-
-   function lerp(t, a, b) { return a + t * (b - a); }
-   function max(a,b) { return Math.max(a,b); }
-   function min(a,b) { return Math.min(a,b); }
-
-   var noise2P = [], noise2U = [], noise2V = [];
-   function fractal(x) {
-      var value = 0;
-      for (var f = 1 ; f <= 512 ; f *= 2)
-         value += noise2(x * f, 0.03 * x * f) / f;
-      return value;
-   }
-   function turbulence(x) {
-      var value = 0;
-      for (var f = 1 ; f <= 512 ; f *= 2)
-         value += abs(noise2(x * f, 0.03 * x * f) / f);
-      return value;
-   }
-   function noise(x) { return noise2(x, 0.03 * x); }
-   function noise2(x, y) {
-      if (noise2P.length == 0) {
-         var p = noise2P, u = noise2U, v = noise2V, i, j;
-         for (i = 0 ; i < 256 ; i++) {
-            p[i] = i;
-            u[i] = 2 * random() - 1;
-            v[i] = 2 * random() - 1;
-            var s = sqrt(u[i]*u[i] + v[i]*v[i]);
-            u[i] /= s;
-            v[i] /= s;
-         }
-         while (--i) {
-            var k = p[i];
-            p[i] = p[j = floor(256 * random())];
-            p[j] = k;
-         }
-         for (i = 0 ; i < 256 + 2 ; i++) {
-            p[256 + i] = p[i];
-            u[256 + i] = u[i];
-            v[256 + i] = v[i];
-         }
-      }
-      var P = noise2P, U = noise2U, V = noise2V;
-      x = (x + 4096) % 256;
-      y = (y + 4096) % 256;
-      var i = floor(x), u = x - i, s = sCurve(u);
-      var j = floor(y), v = y - j, t = sCurve(v);
-      var a = P[P[i] + j  ], b = P[P[i+1] + j  ];
-      var c = P[P[i] + j+1], d = P[P[i+1] + j+1];
-      return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
-                     lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
-   }
-   function pieMenuIndex(x,y,n) {
-      if (n === undefined)
-         n = 4;
-      return floor(n+.5-atan2(y,x) / (PI/2)) % n;
-   }
-   function pow(a,b) { return Math.pow(a,b); }
-   var random = function() {
-      var seed = 2;
-      var x = (seed % 30268) + 1;
-      seed  = (seed - (seed % 30268)) / 30268;
-      var y = (seed % 30306) + 1;
-      seed  = (seed - (seed % 30306)) / 30306;
-      var z = (seed % 30322) + 1;
-      return function() {
-         return ( ((x = (171 * x) % 30269) / 30269) +
-                  ((y = (172 * y) % 30307) / 30307) +
-                  ((z = (170 * z) % 30323) / 30323) ) % 1;
-      }
-   }();
-   function round() { return Math.round(); }
-   function sCurve(t) { return max(0, min(1, t * t * (3 - t - t))); }
-   function saw(t) { t = 2*t % 2; return t<1 ? t : 2-t; }
-   function sign(t) { return Math.sign(t); }
-   function sin(t) { return Math.sin(t); }
-   function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
-   function sqrt(t) { return Math.sqrt(t); }
-   function tan(t) { return Math.tan(t); }
-   function value(t) { return isDef(t) ? t : "0"; }
-
-// CHARACTER CONSTANTS AND CONVERSIONS.
-
-   var ALT     = '\u22C0' ;
-   var C_PHI   = '\u03A6' ;
-   var C_THETA = '\u0398' ;
-   var COMMAND = '\u2318' ;
-   var CONTROL = '\u2201' ;
-   var D_ARROW = '\u2193' ;
-   var L_ARROW = '\u2190' ;
-   var PAGE_UP = 'PAGE_UP';
-   var PAGE_DN = 'PAGE_DN';
-   var R_ARROW = '\u2192' ;
-   var S_PHI   = '\u03C6' ;
-   var S_THETA = '\u03B8' ;
-   var U_ARROW = '\u2191' ;
-
-   function charCodeToString(key) {
-      if (isShiftPressed)
-         switch (key) {
-         case 48: return ')'; // SHIFT 1
-         case 49: return '!';
-         case 50: return '@';
-         case 51: return '#';
-         case 52: return '$';
-         case 53: return '%';
-         case 54: return '^';
-         case 55: return '&';
-         case 56: return '*';
-         case 57: return '('; // SHIFT 0
-
-         case 186: return ':';
-         case 187: return '+';
-         case 188: return '<';
-         case 189: return '_';
-         case 190: return '>';
-         case 191: return '?';
-         case 192: return '~';
-         case 219: return '{';
-         case 220: return '|';
-         case 221: return '}';
-         case 222: return '"';
-         }
-
-      switch (key) {
-      case   8: return 'del';
-      case  13: return 'ret';
-      case  16: return 'cap';
-      case  17: return 'control';
-      case  18: return 'alt';
-      case  27: return 'esc';
-      case  32: return 'spc';
-      case  32: return 'spc';
-      case  33: return PAGE_UP;
-      case  34: return PAGE_DN;
-      case  37: return L_ARROW;
-      case  38: return U_ARROW;
-      case  39: return R_ARROW;
-      case  40: return D_ARROW;
-      case  91: return 'command';
-      case 186: return ';';
-      case 187: return '=';
-      case 188: return ',';
-      case 189: return '-';
-      case 190: return '.';
-      case 191: return '/';
-      case 192: return '`';
-      case 219: return '[';
-      case 220: return '\\';
-      case 221: return ']';
-      case 222: return "'";
-      }
-
-      var str = String.fromCharCode(key);
-
-      if (key >= 64 && key < 64 + 32 && ! isShiftPressed)
-         str = str.toLowerCase();
-
-      return str;
-   }
-
-// ARRAY UTILITIES.
-
-   function getIndex(arr, obj) {
-      var i = arr.length;
-      while (--i >= 0 && arr[i] != obj) ;
-         return i;
-   }
-
-   function findEmptySlot(arr) {
-      var n = 0;
-      while (n < arr.length && isDef(arr[n]) && arr[n] != null)
-         n++;
-      return n;
-   }
-
-// 2D GEOMETRY UTILITIES.
-
-   function isInRect(x,y, R) {
-      return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
-   }
-
-   function clipLineToRect(ax,ay, bx,by, R) {
-      var tx = bx < R[0] ? (R[0] - ax) / (bx - ax) :
-               bx > R[2] ? (R[2] - ax) / (bx - ax) : 10000;
-      var ty = by < R[1] ? (R[1] - ay) / (by - ay) :
-               by > R[3] ? (R[3] - ay) / (by - ay) : 10000;
-      var t = max(0, min(1, min(tx, ty)));
-      return [lerp(t, ax, bx), lerp(t, ay, by)];
-   }
-
-   // Create an arc of a circle.
-
-   function createArc(x, y, r, angle0, angle1, n) {
-      var c = [];
-      for (var i = 0 ; i <= n ; i++) {
-         var angle = lerp(i / n, angle0, angle1);
-         c.push([x + r * cos(angle), y + r * sin(angle)]);
-      }
-      return c;
-   }
-
-   function createRoundRect(x, y, w, h, r) {
-      var c = [];
-      c = c.concat(createArc(x+r,y+h-r,r,PI/2,PI,8));
-      c = c.concat([[x,y+h-r],[x,y+r]]);
-      c = c.concat(createArc(x+r,y+r,r,PI,3*PI/2,8));
-      c = c.concat([[x+r,y],[x+w-r,y]]);
-      c = c.concat(createArc(x+w-r,y+r,r,-PI/2,0,8));
-      c = c.concat([[x+w,y+r],[x+w,y+h-r]]);
-      c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
-      c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
-      return c;
-   }
-
-   // Create a curved line.
-
-   function createCurve(A, B, curvature, N) {
-      if (N === undefined)
-         N = 20;
-
-      var ax = A[0], ay = A[1], bx = B[0], by = B[1];
-      var dx = 4 * curvature * (bx - ax);
-      var dy = 4 * curvature * (by - ay);
-
-      var dst = [];
-
-      // STRAIGHT LINE
-
-      if (curvature == 0) {
-         for (var n = 0 ; n <= N ; n++)
-            dst.push([lerp(n/N, ax, bx), lerp(n/N, ay, by)]);
-         return dst;
-      }
-
-      // CIRCULAR LOOP
-
-      if (abs(curvature) == loopFlag) {
-         var mx = (ax + bx) / 2, my = (ay + by) / 2;
-         var rx = (ax - bx) / 2, ry = (ay - by) / 2;
-         var dir = curvature > 0 ? 1 : -1;
-
-         for (var n = 0 ; n <= N ; n++) {
-            var angle = TAU * n / N;
-            var c = cos(angle);
-            var s = sin(angle) * dir;
-            dst.push([ mx + rx * c + ry * s,
-                       my - rx * s + ry * c ]);
-         }
-         return dst;
-      }
-
-      // OPEN CURVE
-
-      for (var n = 0 ; n <= N ; n++) {
-         var t = n / N;
-         var s = lerp(abs(curvature), t, sCurve(t));
-         var e = t * (1 - t);
-         dst.push([lerp(s, ax, bx) - e * dy,
-                   lerp(s, ay, by) + e * dx]);
-      }
-      return dst;
-   }
-
-   // Compute the curvature of a curved line from A to B which passes through M.
-
-   function computeCurvature(A, M, B) {
-      var dx = B[0] - A[0];
-      var dy = B[1] - A[1];
-      var ex = M[0] - (A[0] + B[0]) / 2;
-      var ey = M[1] - (A[1] + B[1]) / 2;
-      return (dx * ey - dy * ex) / (dx * dx + dy * dy);
-   }
-
-   // Return distance squared from point [x,y] to curve c.
-
-   function dsqFromCurve(x, y, c) {
-      var dsq = 100000;
-      for (var i = 0 ; i < c.length - 1 ; i++)
-         dsq = min(dsq, dsqFromLine(x, y, c[i], c[i+1]));
-      return dsq;
-   }
-
-   // Return distance squared from point [x,y] to line segment [a->b].
-
-   function dsqFromLine(x, y, a, b) {
-      var ax = a[0] - x, ay = a[1] - y;
-      var bx = b[0] - x, by = b[1] - y;
-      var dx = bx - ax, dy = by - ay;
-      if (ax * dx + ay * dy > 0 || bx * dx + by * dy < 0)
-         return min(ax * ax + ay * ay, bx * bx + by * by);
-      var aa = ax * ax + ay * ay;
-      var ad = ax * dx + ay * dy;
-      var dd = dx * dx + dy * dy;
-      return aa - ad * ad / dd;
-   }
-
-   function getPointOnCurve(curve, t) {
-      if (t <= 0) return curve[0];
-      if (t >= 1) return curve[curve.length-1];
-      var n = curve.length - 1;
-      var i = floor(t * n);
-      var f = t * n - i;
-      return [ lerp(f, curve[i][0], curve[i+1][0]) ,
-               lerp(f, curve[i][1], curve[i+1][1]) ];
-   }
 
 // WRAPPERS FOR DRAWING FUNCTIONS.
 
@@ -1072,227 +831,10 @@
       }
    }
 
-// 2D GRAPHICS PRIMITIVES.
-
-   function arrow(ax, ay, bx, by, r) {
-      if (! isDef(r))
-         r = 10;
-
-      var angle = Math.atan2(bx - ax, by - ay);
-      var x = r * Math.cos(angle), y = r * Math.sin(angle);
-
-      _g.beginPath();
-      _g_moveTo(ax, ay);
-      _g_lineTo(bx, by);
-      _g.stroke();
-
-      _g_moveTo(bx - x - y, by + y - x);
-      _g_lineTo(bx, by);
-      _g_lineTo(bx + x - y, by - y - x);
-      _g.stroke();
-   }
-
-   function line(ax, ay, bx, by) {
-      _g.beginPath();
-      _g_moveTo(ax, ay);
-      _g_lineTo(bx, by);
-      _g.stroke();
-   }
-
-   function drawClosedCurve(c, i0) {
-      drawCurve(c.concat([c[0]]), i0);
-   }
-
-   function drawCurve(c, i0) {
-      startCurve(c, i0);
-      _g.stroke();
-   }
-
-   function fillCurve(c, i0) {
-      startCurve(c, i0);
-      _g.fill();
-   }
-
-   function startCurve(c, i0) {
-      if (i0 === undefined)
-         i0 = 0;
-      if (c.length <= i0)
-         return;
-      _g.beginPath();
-      _g_moveTo(c[i0][0], c[i0][1]);
-      for (var i = i0 + 1 ; i < c.length ; i++)
-         _g_lineTo(c[i][0], c[i][1]);
-   }
-
-   function color(red, grn, blu) {
-      if (red === undefined)
-         return _g.strokeStyle;
-      _g.strokeStyle = _g.fillStyle = _color(red, grn, blu);
-   }
-
-   function fill(red, grn, blu) {
-      if (red === undefined)
-         return _g.fillStyle;
-      _g.fillStyle = _color(red, grn, blu);
-   }
-
-   function _color(red, grn, blu) {
-      return ! isDef(grn) ? red : "rgba(" + red + "," + grn + "," + blu + ",255)";
-   }
-
-   function drawPolygon(p, x, y, r, isOpen) {
-      makePath(p, x, y, r, isOpen);
-      _g.stroke();
-   }
-
-   function fillPolygon(p, x, y, r) {
-      _g.suppressSketching++;
-      makePath(p, x, y, r);
-      _g.fill();
-      _g.suppressSketching--;
-   }
-
-   function drawRect(x, y, w, h) {
-      makeRectPath(x, y, w, h);
-      _g.stroke();
-   }
-
-   function fillRect(x, y, w, h) {
-      makeRectPath(x, y, w, h);
-      _g.fill();
-   }
-
-   function drawOval(x, y, w, h, n, angle0, angle1) {
-      makeOvalPath(x, y, w, h, n, angle0, angle1);
-      _g.stroke();
-   }
-
-   function fillOval(x, y, w, h, n, angle0, angle1) {
-      makeOvalPath(x, y, w, h, n, angle0, angle1);
-      _g.fill();
-   }
-
-   function drawDiamond(x, y, w, h) {
-      makeDiamondPath(x, y, w, h);
-      _g.stroke();
-   }
-
-   function fillDiamond(x, y, w, h) {
-      makeDiamondPath(x, y, w, h);
-      _g.fill();
-   }
-
-   function drawOctagon(x, y, w, h) {
-      makeOctagonPath(x, y, w, h);
-      _g.stroke();
-   }
-
-   function fillOctagon(x, y, w, h) {
-      makeOctagonPath(x, y, w, h);
-      _g.fill();
-   }
-
-   function makeRectPath(x, y, w, h) {
-      makePath([ [x,y],[x+w,y], [x+w,y+h], [x,y+h] ]);
-   }
-
-   function makeDiamondPath(x, y, w, h) {
-      makePath([ [x,y+h/2],[x+w/2,y], [x+w,y+h/2],[x+w/2,y+h] ]);
-   }
-
-   function makeOctagonPath(x, y, w, h) {
-      var x1 = x+w/4, x2 = x+3*w/4, x3 = x + w,
-          y1 = y+h/4, y2 = y+3*h/4, y3 = y + h;
-      makePath([ [x,y1], [x1,y], [x2,y], [x3,y1], [x3,y2], [x2,y3], [x1,y3], [x,y2] ]);
-   }
-
-   function makeOval(x, y, w, h, n, angle0, angle1) {
-      if (! isDef(n))
-         n = 32;
-      if (! isDef(angle0))
-         angle0 = 0;
-      if (! isDef(angle1))
-         angle1 = 2 * Math.PI;
-
-      var xy = [];
-      for (var i = 0 ; i < n ; i++) {
-         var theta = angle0 + (angle1 - angle0) * i / (n-1);
-         xy.push([x + w/2 + w/2 * Math.cos(theta),
-                  y + h/2 - h/2 * Math.sin(theta)]);
-      }
-      return xy;
-   }
-
-   function makeOvalPath(x, y, w, h, n, angle0, angle1) {
-      makePath(makeOval(x, y, w, h, n, angle0, angle1));
-   }
-
-   function makePath(p, x, y, r, isOpenPath) {
-      if (! isDef(x)) x = 0;
-      if (! isDef(y)) y = 0;
-      if (! isDef(r)) r = 0;
-      var n = p.length;
-      _g.beginPath();
-      if (r == 0) {
-         _g_moveTo(x + p[0][0], y + p[0][1]);
-         for (i = 1 ; i < n ; i++)
-            _g_lineTo(x + p[i][0], y + p[i][1]);
-         if (! isOpenPath)
-            _g_lineTo(x + p[0][0], y + p[0][1]);
-      }
-      else {
-         var s = Math.sin(r);
-         var c = Math.cos(r);
-         _g_moveTo(x + c*p[0][0] + s*p[0][1], y - s*p[0][0] + c*p[0][1]);
-         for (i = 1 ; i < n ; i++)
-            _g_lineTo(x + c*p[i][0] + s*p[i][1], y - s*p[i][0] + c*p[i][1]);
-         if (! isOpenPath)
-            _g_lineTo(x + c*p[0][0] + s*p[0][1], y - s*p[0][0] + c*p[0][1]);
-      }
-   }
-
-   function polygonArea(P) {
-      var area = 0;
-      for (var i = 0 ; i < P.length ; i++) {
-         var j = (i + 1) % P.length;
-         area += (P[i][1] - P[j][1]) * (P[i][0] + P[j][0]) / 2;
-      }
-      return area;
-   }
-
-   function textWidth(str, context) {
-      if (context == undefined)
-         context = _g;
-      return context.measureText(str).width;
-   }
-
-   function textHeight(value) {
-      if (isDef(value))
-         _g.textHeight = value;
-      return _g.textHeight;
-   }
-
-   function text(message, x, y, alignX, alignY, font) {
-      var th = _g.textHeight;
-      if (isDrawingSketch2D) {
-         var xx = x, yy = y;
-         x = sk().transformX2D(xx, yy);
-         y = sk().transformY2D(xx, yy);
-         th *= sk().scale();
-      }
-
-      if (! isDef(alignX))
-         alignX = 0;
-      if (! isDef(alignY))
-         alignY = 1;
-      _g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
-      _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
-   }
-
    function width () { return isDef(_g) ? _g.canvas.width : 1280; }
    function height() { return isDef(_g) ? _g.canvas.height : 720; }
 
-// UTILITY VARIABLES.
+// GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
@@ -1322,8 +864,6 @@
    var isMouseOverBackground = true;
    var isNumeric = false;
    var isPanning = false;
-   var isPieMenu = false;
-   var isPullDown = false;
    var isRightButtonPressed = false;
    var isRightClick = false;
    var isCodeWidget = false;
@@ -1341,20 +881,6 @@
    var menuType = 0;
    var pageActionLabels = "text clone group whiteboard clear".split(' ');
    var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
-   var pieMenuCode = [];
-   var pieMenuCursorWeight = 0;
-   var pieMenuMouseX = 0;
-   var pieMenuMouseY = 0;
-   var pieMenuStroke = [];
-   var pieMenuStrokes = null;
-   var pieMenuX = 0;
-   var pieMenuXDown = 0;
-   var pieMenuY = 0;
-   var pieMenuYDown = 0;
-   var pullDownLabels = [];
-   var pullDownSelection = -1;
-   var pullDownX = 0;
-   var pullDownY = 0;
    var renderer = null;
    var sketchActionLabels="linking translating rotating scaling parsing deleting".split(' ');
    var sketchLabelSelection = -1;
@@ -1377,7 +903,7 @@
           } catch (e) { }
           if (code() != null) {
              code()[codeSelector.selectedIndex][1] = codeTextArea.value;
-	     codeSketch.selectedIndex = codeSelector.selectedIndex;
+             codeSketch.selectedIndex = codeSelector.selectedIndex;
           }
        };
 
@@ -1424,8 +950,8 @@
          codeSelector.style.color = codeSelectorFgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
-	 if (isDef(codeSketch.selectedIndex))
-	    codeSelector.selectedIndex = codeSketch.selectedIndex;
+         if (isDef(codeSketch.selectedIndex))
+            codeSelector.selectedIndex = codeSketch.selectedIndex;
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
@@ -1668,7 +1194,7 @@
       }
       this.mouseUp = function(x, y) {
          path.push([x,y]);
-	 var kw = w - 3*s/2;
+         var kw = w - 3*s/2;
          return (x > (this.x - kw/2) || x < (this.x + kw/2) ||
                  y > (this.y - s*13.05) || y < (this.y + s*2.5));
       }
@@ -1676,7 +1202,7 @@
          return this.keyPressed != null && this.key != null;
       }
       this.dismissClick = function(x, y) {
-	 var kw = w - 3*s/2;
+         var kw = w - 3*s/2;
          if (x < (this.x - kw/2) || x > (this.x + kw/2) ||
              y < (this.y - s*13.05) || y > (this.y + s*2.5)) {
             isKeyboardMode = false;
@@ -1688,13 +1214,13 @@
          }
       }
       this.render = function() {
-         save();
+         _g.save();
          lineWidth(1);
          var fgColor = backgroundColor=='white' ? '#444444' : '#80c0ff';
          var bgColor = backgroundColor=='white' ? 'rgba(0,0,255,.2)' : 'rgba(0,128,255,.5)';
          color(fgColor);
-	 var kw = w - 3*s/2;
-	 drawCurve(createRoundRect(this.x - kw/2, this.y - s*13.05, kw, s*15.55, 9));
+         var kw = w - 3*s/2;
+         drawCurve(createRoundRect(this.x - kw/2, this.y - s*13.05, kw, s*15.55, 9));
          this.key = null;
          for (var row = 0 ; row < nRows()        ; row++)
          for (var k   = 0 ; k   < rowLength(row) ; k++  ) {
@@ -1732,7 +1258,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          color('red');
          drawCurve(path);
 */
-         restore();
+         _g.restore();
       }
 
       function keys()        { return isShiftPressed ? uc : lc; }
@@ -1872,86 +1398,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       _g.stroke();
    }
 
-   function drawPieMenu(x0, y0) {
-      var w = width(), h = height();
-      var R = 130, r = 30;
-
-      if (x0 === undefined) x0 = w / 2;
-      if (y0 === undefined) y0 = h / 2;
-
-      var mouseX = This().mouseX;
-      var mouseY = This().mouseY;
-
-      if (sketchPage.isPressed) {
-         var r0 = len(pieMenuMouseX - x0, pieMenuMouseY - y0);
-         if (r0 < R - r/2) {
-            var r1 = len(mouseX - x0, mouseY - y0);
-            if (r1 > r0) {
-               pieMenuMouseX = mouseX;
-               pieMenuMouseY = mouseY;
-            }
-         }
-         else {
-            mouseX = pieMenuMouseX;
-            mouseY = pieMenuMouseY;
-         }
-      }
-
-      var P = [];
-      var choice = -1;
-      for (var n = 0 ; n < PMA ; n++) {
-         var theta = TAU * n / PMA;
-         P.push([x0 + R * cos(theta), y0 - R * sin(theta)]);
-         if (len(P[n][0] - mouseX, P[n][1] - mouseY) < r)
-            choice = n;
-      }
-
-      lineWidth(1);
-      textHeight(10);
-
-      if (choice >= 0) {
-         color('blue');
-         fillOval(x0 - 4, y0 - 4, 8, 8);
-      }
-      for (var n = 0 ; n < PMA ; n++) {
-         color('blue');
-         if (choice < 0)
-            line(x0, y0, P[n][0], P[n][1]);
-         else if (choice == 0) {
-            if (n < pageActionLabels.length) {
-               line(P[0][0], P[0][1], P[n][0], P[n][1]);
-               color('rgba(0,0,255,0.2)');
-               line(x0, y0, P[n][0], P[n][1]);
-            }
-         }
-         else if (choice-1 < sketchTypeLabels.length) {
-            if ((n - choice + PMA) % PMA < sketchTypeLabels[choice-1].length) {
-               line(P[choice][0], P[choice][1], P[n][0], P[n][1]);
-               color('rgba(0,0,255,0.2)');
-               line(x0, y0, P[n][0], P[n][1]);
-            }
-         }
-      }
-
-      var str;
-      for (var n = 0 ; n < PMA ; n++) {
-         color(n == choice ? 'rgba(0,0,255,0.05)' : backgroundColor);
-         fillOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
-         color('blue');
-         drawOval(P[n][0] - r, P[n][1] - r, r+r, r+r);
-
-         if (choice < 0)
-            str = (n == 0 ? "page" : sketchTypes[n-1]);
-         else if (choice == 0)
-            str = pageActionLabels[n];
-         else if (choice-1 < sketchTypeLabels.length)
-            str = sketchTypeLabels[choice-1][(n - choice + PMA) % PMA];
-
-         if (isDef(str))
-            text(str, P[n][0], P[n][1], .5, .5);
-      }
-   }
-
    function computeLinkCurvature(link, C) {
       var a = link[0];
       var i = link[1];
@@ -2067,7 +1513,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    function finishDrawingUnfinishedSketch() {
-      if (! isPullDown && isk()
+      if (! pullDownIsActive && isk()
                            && ! isHover()
                            && sk().sketchState != 'finished') {
          sk().sketchProgress = 1;
@@ -2653,60 +2099,34 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       if (bgClickCount != 1 || ! isHover())
          return false;
 
-      // IF AFTER A CLICK OVER THE BACKGROUND, DO SPECIAL ACTIONS:
+      // CLICK ON A SKETCH AFTER CLICK OVER THE BACKGROUND: DO SPECIAL ACTIONS.
 
       bgClickCount = 0;
-      var dx = x - clickX;
-      var dy = y - clickY;
 
-      var compassPoint = floor(8 * atan2(dy, dx) / TAU + 4.5) %  8;
-      switch (compassPoint) {
+      var index = pieMenuIndex(clickX - x, clickY - y, 8);
+      switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
          break;
-      case 2:
+      case 6:
          sketchAction = "rotating";     // S -- ROTATE
          break;
-      case 3:
+      case 5:
          toggleTextMode();              // SW -- TOGGLE TEXT MODE
          break;
       case 4:
          sketchAction = "scaling";      // W -- SCALE
          break;
-      case 5:
+      case 3:
          copySketch(sk());              // NW -- CLONE
          sketchAction = "translating";
          break;
-      case 6:
+      case 2:
          sketchAction = "translating";  // N -- TRANSLATE
          break;
       }
 
       return true;
-   }
-
-   function Choice() {
-      this.weights = [];
-      this.set = function(n) {
-         this.value = n;
-         this.update();
-      }
-      this.get = function(i) {
-         return sCurve(this.weights[i]);
-      }
-      this.update = function(delta) {
-         if (delta === undefined)
-            delta = 0;
-
-         while (this.weights.length <= this.value)
-            this.weights.push(0);
-
-         for (var i = 0 ; i < this.weights.length ; i++)
-            this.weights[i] =
-               i == this.value ? min(1, this.weights[i] + 2 * delta)
-                               : max(0, this.weights[i] - delta);
-      }
-      this.set(0);
    }
 
    function findPaletteColorIndex(x, y) {
@@ -2808,20 +2228,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
 
          if (paletteColorIndex >= 0)
-	    return;
+            return;
 
          if (y >= height() - margin) {
             isBottomGesture = true;
             this.xDown = x;
             return;
          }
-
-/*       ENABLE EXPERT MODE BY CLICKING ON TOP RIGHT
-         if (x >= width() - margin && y < margin) {
-            isTogglingExpertMode = true;
-            return;
-         }
-*/
 
          if (x >= width() - margin && y >= height() - margin) {
             isTogglingMenuType = true;
@@ -2836,7 +2249,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.x = x;
          this.y = y;
 
-         if (isPieMenu) {
+         if (pieMenuIsActive) {
             pieMenuStroke = [[x,y]];
             return;
          }
@@ -2890,7 +2303,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk().x = x;
                sk().y = y;
             }
-            if (outPort == -1 || sk() instanceof Number)
+            if (outPort == -1 || sk() instanceof NumericSketch)
                sk().mouseDown(x, y);
          }
 
@@ -2916,10 +2329,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
 
          if (paletteColorIndex >= 0) {
-	    var index = findPaletteColorIndex(x, y);
-	    if (index >= 0)
-	       paletteColorIndex = index;
-	    return;
+            var index = findPaletteColorIndex(x, y);
+            if (index >= 0)
+               paletteColorIndex = index;
+            return;
          }
 
          if (isBottomGesture) {
@@ -2934,22 +2347,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-/*
-         if (isTogglingExpertMode)
-            return;
-*/
-
          if (isTogglingMenuType)
             return;
 
-	 if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
-	    outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
+            outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
 
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
          this.y = y;
 
-         if (isPieMenu) {
+         if (pieMenuIsActive) {
             pieMenuStroke.push([x, y]);
             return;
          }
@@ -2981,7 +2389,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (this.isCreatingGroup)
             return;
 
-         if (isk() && (outPort == -1 || sk() instanceof Number)) {
+         if (isk() && (outPort == -1 || sk() instanceof NumericSketch)) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
                if (sk().travel > clickSize)
@@ -3000,8 +2408,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.isPressed = false;
 
          if (paletteColorIndex >= 0) {
-	    sketchPage.colorIndex = paletteColorIndex;
-	    return;
+            sketchPage.colorIndex = paletteColorIndex;
+            return;
          }
 
          if (isKeyboard() && !keyboard.dismissClick(x,y) && keyboard.mouseUp(x,y)) {
@@ -3026,14 +2434,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             return;
          }
 
-/*
-         if (isTogglingExpertMode) {
-            isTogglingExpertMode = false;
-            isExpertMode = ! isExpertMode;
-            return;
-         }
-*/
-
          if (isTogglingMenuType) {
             isTogglingMenuType = false;
             menuType = (menuType + 1) % 2;
@@ -3042,8 +2442,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          this.isClick = this.travel <= clickSize;
 
-         if (isPieMenu) {
-            endPieMenu();
+         if (pieMenuIsActive) {
+            pieMenuEnd();
             return;
          }
 
@@ -3071,12 +2471,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                return;
             }
 
-	    if (this.isClick)
-	       toggleTextMode();
+            if (this.isClick)
+               toggleTextMode();
 
             else if (! isShorthandMode) {
-	       var glyph = interpretStrokes();
-	       if (glyph != null && ! isCreatingTextGlyphData)
+               var glyph = interpretStrokes();
+               if (glyph != null && ! isCreatingTextGlyphData)
                   sketchPage.handleDrawnTextChar(glyph.name);
             }
 
@@ -3127,7 +2527,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                if (! doAction(x, y)) {
                   sk().isPressed = false;
                   pullDownLabels = sketchActionLabels.concat(sk().labels);
-                  startPullDown(sketchPage.x, sketchPage.y);
+                  pullDownStart(sketchPage.x, sketchPage.y);
                }
                return;
             }
@@ -3160,18 +2560,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isSketchDrawingEnabled = true;
             sk().mouseUp(x, y);
 
-	    if (this.isClick && isHover() && isDef(sk().onClick))
-	       sk().onClick(x, y);
+            if (this.isClick && isHover() && isDef(sk().onClick))
+               sk().onClick(x, y);
 
-	    if (! this.isClick && isk() && isDef(sk().onSwipe))
-	       sk().onSwipe(x - this.xDown, y - this.yDown);
+            if (! this.isClick && isk() && isDef(sk().onSwipe))
+               sk().onSwipe(x - this.xDown, y - this.yDown);
          }
 
          // CLICK OVER BACKGROUND
 
          if (this.isClick && this.isPossibleClickOverBackground) {
 
-            // EXPERT MODE: START PIE MENU.
+            // EXPERT MODE: TWO CLICKS AT THE SAME PLACE TO BRING UP THE PIE MENU.
 
             if (isExpertMode || menuType == 1) {
                switch (++bgClickCount) {
@@ -3181,7 +2581,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                   break;
                case 2:
                   if (len(x - clickX, y - clickY) < 20)
-                     startPieMenu(x, y);
+                     pieMenuStart(x, y);
                   bgClickCount = 0;
                   break;
                }
@@ -3191,7 +2591,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             else {
                pullDownLabels = pagePullDownLabels;
-               startPullDown(sketchPage.x, sketchPage.y);
+               pullDownStart(sketchPage.x, sketchPage.y);
             }
          }
       }
@@ -3208,8 +2608,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // SCALE CURRENT SKETCH.
 
       this.doScale = function(x, y) {
-	 if (isk())
-	    sk().scale(pow(16, (y - this.my) / -height()));
+         if (isk())
+            sk().scale(pow(16, (y - this.my) / -height()));
       }
 
       // TRANSLATE CURRENT SKETCH.
@@ -3222,11 +2622,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                cursorY += y - this.my;
                sk().sp[0] = [sk().xStart = cursorX, sk().yStart = cursorY, 0];
             }
-	    if (isDef(sk().hitOnDrag)) {
-	       var sketches = this.intersectingSketches();
-	       for (var i = 0 ; i < sketches.length ; i++)
-	          sk().hitOnDrag(sketches[i]);
-	    }
+            if (isDef(sk().hitOnDrag)) {
+               var sketches = this.intersectingSketches();
+               for (var i = 0 ; i < sketches.length ; i++)
+                  sk().hitOnDrag(sketches[i]);
+            }
          }
       }
 
@@ -3374,7 +2774,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.doRotate(x, y);
             break;
          case 's':
-	    isManualScaling = true;
+            isManualScaling = true;
             this.doScale(x, y);
             break;
          case 't':
@@ -3701,21 +3101,21 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             isPanning = false;
             break;
          case 'q':
-	    if (! isk() || sk().sp == visible_sp)
-	       visible_sp = null;
-	    else if (isk()) {
-	       visible_sp = sk().sp;
-	       for (var i = 0 ; i < visible_sp.length ; i++)
-	          console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
-	    }
+            if (! isk() || sk().sp == visible_sp)
+               visible_sp = null;
+            else if (isk()) {
+               visible_sp = sk().sp;
+               for (var i = 0 ; i < visible_sp.length ; i++)
+                  console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
+            }
             break;
          case 'b':
          case 'r':
          case 't':
             break;
          case 's':
-	    sketchAction = null;
-	    isManualScaling = false;
+            sketchAction = null;
+            isManualScaling = false;
             break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
@@ -3784,17 +3184,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          if (isk() && ! isManualScaling) {
             if (sketchAction == "scaling") {
-	       if (this.scaleRate < 1)
+               if (this.scaleRate < 1)
                   this.scaleRate = lerp(0.1, this.scaleRate, 1);
             }
-	    else if (this.scaleRate > 0) {
+            else if (this.scaleRate > 0) {
                if ((this.scaleRate = lerp(0.1, this.scaleRate, 0)) < .01)
-	          this.scaleRate = 0;
-	    }
-	    if (this.scaleRate > 0) {
+                  this.scaleRate = 0;
+            }
+            if (this.scaleRate > 0) {
                sk().scale(pow(this.yDown > this.moveY ? 1.015 : 1/1.015, this.scaleRate));
-	    }
-	 }
+            }
+         }
       }
 
       this.animate = function(elapsed) {
@@ -3837,7 +3237,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             lineWidth(sketchLineWidth * lerp(sk().styleTransition, 1, .6)
                                       * this.zoom / sk().zoom);
 
-            save();
+            _g.save();
 
             // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
@@ -3845,7 +3245,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
                   deleteSketch(sk());
-                  restore();
+                  _g.restore();
                   _g.globalAlpha = 1;
                   bgClickCount = 0;
                   I--;
@@ -3887,7 +3287,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                }
             }
 
-            restore();
+            _g.restore();
 
             sketchPage.index = PUSHED_sketchPage_index;
 
@@ -3902,7 +3302,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             if (This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
-               drawPieMenu();
+               pieMenuDraw();
             if (isTextMode && isShorthandMode) {
                color(defaultPenColor);
                lineWidth(1);
@@ -3943,8 +3343,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                cols = max(cols, lines[i].length);
 
             if (code().length > 0)
-	       for (var i = 0 ; i < code().length ; i++)
-	          cols = max(cols, code()[i][0].length + 3);
+               for (var i = 0 ; i < code().length ; i++)
+                  cols = max(cols, code()[i][0].length + 3);
 
             codeTextArea.rows = rows;
             codeTextArea.cols = cols;
@@ -4121,7 +3521,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          isShowingTimeline = isDraggingTimeline ||
                              ! isExpertMode
                           && isDef(This().overlay)
-                          && ! isPullDown
+                          && ! pullDownIsActive
                           && letterPressed == '\0'
                           && This().mouseX < w - 80
                           && This().mouseY >= h - timelineH;
@@ -4371,108 +3771,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // IF IN PULLDOWN MODE, SHOW THE PULLDOWN MENU.
 
-         if (isPullDown) {
-
-            // PH IS THE PULLDOWN CELL HEIGHT.  CONTROLS SIZE OF PULLDOWN.
-
-            var PH = 30;
-
-            var isPageMenu = pullDownLabels == pagePullDownLabels;
-
-            var n = pullDownLabels.length;
-            var x = pullDownX, y = pullDownY, w = PH * 5, h = PH * n;
-            var mx = This().mouseX, my = This().mouseY;
-
-            if (mx >= x && mx < x + w) {
-               var t = (my - y) / PH;
-               pullDownSelection = t < 0 || t >= pullDownLabels.length ? -1 : floor(t);
-            }
-            else if (!(mx >= x + w && isPageMenu &&
-                pullDownSelection >= pageActionLabels.length &&
-                sketchTypeLabels[pullDownSelection - pageActionLabels.length].length > 0))
-               pullDownSelection = -1;
-
-            function drawMenu(x, y, labels, selection) {
-               var w = PH * 5;
-               var h = PH * labels.length;
-
-               // DRAW A SHADOW BEHIND THE MENU.
-
-               color(backgroundColor == 'white' ? 'rgba(0,0,0,.02)' : 'rgba(255,255,255,.02)');
-               for (var i = 0 ; i < 10 ; i += 2)
-                  fillRect(x + PH/2 + i, y + PH/2 + i, w - 2 * i, h - 2 * i);
-
-               // FILL THE MENU WITH ITS BACKGROUND COLOR.
-
-               color(backgroundColor == 'white' ? 'rgb(247,251,255)' : 'rgb(8,4,0)');
-               fillRect(x, y, w, h);
-
-               // HIGHLIGHT THE CURRENT SELECTION.
-
-               if (selection >= 0) {
-                  color(backgroundColor == 'white' ? 'rgba(0,128,255,.2)' : 'rgba(255,128,0.2)');
-                  fillRect(x, y + PH * selection, w, PH);
-               }
-
-               // DRAW ALL THE TEXT LABELS.
-
-               color(defaultPenColor);
-               textHeight(PH * 3 / 5);
-               for (var row = 0 ; row < labels.length ; row++)
-                  text(labels[row], x + PH/7, y + PH/2 + PH * row, 0, .55);
-
-               // DARKEN THE RIGHT AND BOTTOM EDGES.
-
-               lineWidth(1);
-
-               color(scrimColor(.24));
-               line(x, y, x + w, y);
-               line(x, y, x, y + h);
-
-               color(scrimColor(.48));
-               line(x + w, y, x + w, y + h);
-               line(x, y + h, x + w, y + h);
-            }
-
-            drawMenu(x, y, pullDownLabels, pullDownSelection);
-
-            // DRAW SEPARATOR BETWEEN FIXED CHOICES AND VARIABLE CHOICES.
-
-            var actionLabels =
-               pullDownLabels == pagePullDownLabels ? pageActionLabels
-                                                    : sketchActionLabels;
-
-            color(backgroundColor == 'white' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.28)');
-            fillRect(x, y + actionLabels.length * PH, w - 1, 1);
-
-            // IF SELECTED SKETCH TYPE CONTAINS OPTIONS, SHOW THE SECONDARY MENU.
-
-            if (pullDownLabels == pagePullDownLabels) {
-               for (var n = 0 ; n < sketchTypeLabels.length ; n++)
-                  if (sketchTypeLabels[n].length > 0) {
-                     var nn = pageActionLabels.length + n;
-
-                     // DRAW A SMALL RIGHT ARROW TO SHOW THIS SKETCH TYPE HAS OPTIONS.
-
-                     color('rgb(128,128,128)');
-                     var ax = x + w - PH*7/10;
-                     var ay = y + PH * nn + PH/4;
-                     fillPolygon([ [ax, ay], [ax + PH/2-1, ay + PH/4], [ax, ay + PH/2] ]);
-
-                     // FOR SELECTED SKETCH TYPE, SHOW WHAT THE OPTIONS ARE.
-
-                     if (nn == pullDownSelection) {
-                        var tx = x+w, ty = y + PH*nn;
-                        var nRows = sketchTypeLabels[n].length;
-                        sketchLabelSelection = -1;
-                        if ( mx >= tx && mx < tx + w &&
-                             my >= ty && my < ty + PH * nRows )
-                           sketchLabelSelection = floor((my - ty) / PH);
-                        drawMenu(tx, ty, sketchTypeLabels[n], sketchLabelSelection);
-                     }
-                  }
-            }
-         }
+         if (pullDownIsActive)
+            pullDownDraw();
 
          if (isAudiencePopup() && ! isShowingGlyphs) {
             color('rgba(0,32,128,.2)');
@@ -4481,10 +3781,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             _g.fillText(msg, (w - textWidth(msg)) / 2, h - margin);
          }
 
-         if (isSpacePressed)
-            drawPieMenu();
-         else if (isPieMenu && pieMenuCursorWeight == 0)
-            drawPieMenu(pieMenuXDown, pieMenuYDown);
+         if (isSpacePressed || pieMenuIsActive && pieMenuCursorWeight == 0)
+            pieMenuDraw();
 
          if (pieMenuStroke.length > 0) {
             lineWidth(10);
@@ -4610,7 +3908,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.afterSketch = function(callbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
-	    var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
+            var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
             _g.save();
             _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
                                   : this.styleTransition) * fade;
@@ -4888,7 +4186,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          var sketches = [];
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
-	       sketches.push(sk(I));
+               sketches.push(sk(I));
          return sketches;
       }
       this.intersects = function(s) {
@@ -5062,8 +4360,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.selection = 0;
       this.setDefaultValue = function(name, value) {
          var j = getIndex(this.portName, name);
-	 if (j >= 0)
-	    this.defaultValue[j] = value;
+         if (j >= 0)
+            this.defaultValue[j] = value;
       }
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);
@@ -5100,7 +4398,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (! this.isSimple() && ! (this instanceof Sketch2D))
             return;
 
-         if (this instanceof Number)
+         if (this instanceof NumericSketch)
             this.value = text;
 
          this.text = text;
@@ -5136,7 +4434,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.standardView = function(p) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
-	    .5 + this.tx() / width(),
+            .5 + this.tx() / width(),
             .5 - this.ty() / height(),
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
@@ -5146,7 +4444,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       this.standardViewInverse = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardViewInverse(
-	    .5 + this.tx() / width(),
+            .5 + this.tx() / width(),
             .5 - this.ty() / height(),
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
@@ -5265,17 +4563,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.width = this.imageObj.width;
             this.height = this.imageObj.height;
          }
-	 color(backgroundColor);
+         color(backgroundColor);
          drawRect(-this.width/2,-this.height/2,this.width,this.height);
          this.afterSketch(function() {
             if (this.imageObj === undefined)
                return;
             var s = this.scale();
-	    if (this.fadeAway > 0)
-	       _g.globalAlpha = this.fadeAway;
+            if (this.fadeAway > 0)
+               _g.globalAlpha = this.fadeAway;
             _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
                                         this.y2D - this.height * s / 2,
-					this.width * s, this.height * s);
+                                        this.width * s, this.height * s);
          });
       }
    }
@@ -5465,7 +4763,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                if (isNumber(parseInt(glyph.name))) {
                   deleteSketch(this);
-                  var s = new Number();
+                  var s = new NumericSketch();
                   addSketch(s);
                   s.init(glyph.name, this.tX, this.tY);
                   s.textCursor = s.text.length;
@@ -5485,7 +4783,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                else {
                   deleteSketch(this);
-	          if (glyph.name != 'del') {
+                  if (glyph.name != 'del') {
                      sketchPage.createTextSketch(glyph.name);
                      setTextMode(true);
                   }
@@ -5700,7 +4998,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
    SimpleSketch.prototype = new Sketch;
 
-   function Number() {
+   function NumericSketch() {
       this.init = function(str, x, y) {
          this.sp0 = [[0,0]];
          this.sp = [[0,0,0]];
@@ -5749,8 +5047,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.xPrevious = x;
          this.yPrevious = y;
 
-	 this.xVary = max(this.xVary, abs(x - this.xDown));
-	 this.yVary = max(this.yVary, abs(y - this.yDown));
+         this.xVary = max(this.xVary, abs(x - this.xDown));
+         this.yVary = max(this.yVary, abs(y - this.yDown));
       }
 
       this.mouseUp = function(x, y) {
@@ -5777,7 +5075,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.insertText = function(textChar) {
-         Number.prototype.insertText.call(this, textChar);
+         NumericSketch.prototype.insertText.call(this, textChar);
          this.increment = 1;
          var i = this.text.indexOf('.');
          if (i >= 0)
@@ -5786,14 +5084,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.render = function() {
-         Number.prototype.render.call(this);
+         NumericSketch.prototype.render.call(this);
          if (isDef(this.inValue[0])) {
             this.setText(roundedString(this.inValue[0]));
             this.value = this.text;
          }
       }
    }
-   Number.prototype = new SimpleSketch;
+   NumericSketch.prototype = new SimpleSketch;
 
    function isHover() { return isk() && sk().isMouseOver; }
    function isk() { return isDef(sk()) && sk() != null; }
@@ -5897,7 +5195,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    function findPortAtCursor(sketch, slots) {
-      if (sketch instanceof Number ||
+      if (sketch instanceof NumericSketch ||
           sketch instanceof SimpleSketch &&
                  (! sketch.isNullText() || isDef(sketch.inValue[0])))
          return sketch.isMouseOver ? 0 : -1;
@@ -5919,7 +5217,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       document.body.scrollTop = 0;
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
-            (isVideoPlaying && ! isBottomGesture) || isExpertMode && (isPieMenu || isSketchInProgress()) ? 'none' :
+            (isVideoPlaying && ! isBottomGesture) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
             bgClickCount == 1 ? 'cell' :
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
@@ -5933,13 +5231,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          time = ((new Date()).getTime() - _startTime) / 1000.0;
          This().elapsed = time - prevTime;
 
-         if (pieMenuCursorWeight > 0) {
-            pieMenuCursorWeight = max(0, pieMenuCursorWeight - This().elapsed);
-            pieMenuX = lerp(pieMenuCursorWeight, This().mouseX, pieMenuXDown);
-            pieMenuY = lerp(pieMenuCursorWeight, This().mouseY, pieMenuYDown);
-            if (pieMenuCursorWeight == 0)
-               isPieMenu = false;
-         }
+         pieMenuUpdate(This().mouseX, This().mouseY);
 
          _g = g;
 
@@ -5994,13 +5286,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                sk(I).dSum = 0;
             }
 
-/*
-         if (! isPullDown && (This().mouseX + _g.panX) < glyphsW && This().mouseY >= h - glyphsH && ! isBottomGesture)
-            isShowingGlyphs = true;
-         else if (This().mouseY < height() - glyphsH)
-            isShowingGlyphs = false;
-*/
-
          This().animate(This().elapsed);
 
          if (isShowingGlyphs && isExpertMode)
@@ -6012,7 +5297,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // COMPUTE SKETCH BOUNDING BOXES.
 
-         if (! isPullDown) {
+         if (! pullDownIsActive) {
             isMouseOverBackground = true;
             for (var I = 0 ; I < nsk() ; I++) {
                if (! sk(I).isGroup() && sk(I).parent == null) {
@@ -6077,7 +5362,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          // SELECT FRONTMOST SKETCH AT THE CURSOR.
 
-         if (! isPullDown && isFinishedDrawing()
+         if (! pullDownIsActive && isFinishedDrawing()
                           && letterPressed == '\0'
                           && ! sketchPage.isPressed
                           && sketchAction == null)
@@ -6131,7 +5416,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          }
 
          if (isExpertMode) {
-            if (isPieMenu)
+            if (pieMenuIsActive)
                drawCrosshair(pieMenuX, pieMenuY);
             else if (isSketchInProgress())
                drawCrosshair(cursorX, cursorY);
@@ -6141,7 +5426,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
             // DRAW A CURSOR WHERE AUDIENCE SHOULD SEE IT.
 
-            if (isPullDown)
+            if (pullDownIsActive)
                drawCrosshair(pullDownX, pullDownY);
             else if (isSketchInProgress())
                drawCrosshair(cursorX, cursorY);
@@ -6160,14 +5445,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
          }
 
-         // DRAW WIDGET THAT TOGGLES WHETHER TO SHOW OVERLAY.
-/*
-         annotateStart();
-         var _a_ = This().mouseX >= width() - margin && This().mouseY <= margin ? .2 : .1;
-	 color(scrimColor(_a_));
-         fillRect(width() - margin - 1, 1, margin, margin);
-         annotateEnd();
-*/
          // PROPAGATE LINK VALUES.
 
          for (var I = 0 ; I < nsk() ; I++) {
@@ -6235,16 +5512,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             }
          }
 
-	 if (visible_sp != null) {
-	    annotateStart();
-	    for (var i = 0 ; i < visible_sp.length ; i++) {
-	       color(i == 0 ? 'green' : visible_sp[i][2] == 0 ? 'blue' : 'red');
-	       fillOval(visible_sp[i][0] - 4, visible_sp[i][1] - 4, 8, 8);
-	    }
-	    annotateEnd();
-	 }
+         if (visible_sp != null) {
+            annotateStart();
+            for (var i = 0 ; i < visible_sp.length ; i++) {
+               color(i == 0 ? 'green' : visible_sp[i][2] == 0 ? 'blue' : 'red');
+               fillOval(visible_sp[i][0] - 4, visible_sp[i][1] - 4, 8, 8);
+            }
+            annotateEnd();
+         }
 
-	 // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
+         // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
+
          if (! isShowingGlyphs) {
             lineWidth(1);
 
@@ -6290,30 +5568,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    var ef = new EncodedFraction();
-
-   function EncodedFraction() {
-      this.chars = "";
-      for (i = 32 ; i < 127 ; i++) {
-         var ch = String.fromCharCode(i);
-         switch (ch) {
-         case '\\':
-         case '"':
-            break;
-         default:
-            this.chars += ch;
-            break;
-         }
-      }
-      this.encode = function(t) {
-         t = max(0, min(1, t));
-         var i = floor((this.chars.length - 1) * t + 0.5);
-         return this.chars.substring(i, i+1);
-      }
-
-      this.decode = function(ch) {
-         return this.chars.indexOf(ch) / (this.chars.length - 1);
-      }
-   }
 
    function isSketchInProgress() {
       return isk() && sk().sketchState == 'in progress';
@@ -6543,16 +5797,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
 
-   function cloneArray(src) {
-      var dst = [];
-      for (var i = 0 ; i < src.length ; i++)
-         if (src[i] instanceof Array)
-            dst[i] = cloneArray(src[i]);
-         else
-            dst[i] = src[i];
-      return dst;
-   }
-
    function computeCurveLength(sp, i0, i1) {
       if (i0 === undefined) i0 = 0;
       if (i1 === undefined) i1 = sp.length;
@@ -6774,44 +6018,44 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          // TURN OFF ROTATION TO COMPUTE 2D BOUNDING BOX.
 
          var save_rX = this.rX;
-	 this.rX = 0;
+         this.rX = 0;
          this.makeXform();
          this.rX = save_rX;
 
-	 for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
-	    var xy = this.xform(this.sp0[i]);
-	    this.sp[i][0] = xy[0];
-	    this.sp[i][1] = xy[1];
+         for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
+            var xy = this.xform(this.sp0[i]);
+            this.sp[i][0] = xy[0];
+            this.sp[i][1] = xy[1];
          }
 
          var b = [ this.xlo, this.ylo, this.xhi, this.yhi ];
          var x = ( b[0] + b[2] - width()     ) / 2 / pixelsPerUnit;
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
-	             b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+                     b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
          this.geometry.getMatrix()
              .identity()
-	     .translate(x, -y, 0)
-	     .rotateX(-PI*this.rY)
-	     .rotateY( PI*this.rX)
-	     .scale(s * this.sx, s * this.sy, s);
+             .translate(x, -y, 0)
+             .rotateX(-PI*this.rY)
+             .rotateY( PI*this.rX)
+             .scale(s * this.sx, s * this.sy, s);
 
          if (isDef(this.geometry.update))
-	    this.geometry.update(elapsed);
+            this.geometry.update(elapsed);
 
          if (isDef(this.update))
-	    this.update(elapsed);
+            this.update(elapsed);
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
-	                       || this.glyphSketch != null) {
-	    var alpha = this.fadeAway > 0 ? this.fadeAway :
-	                this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
-			sketchPage.fadeAway;
+                               || this.glyphSketch != null) {
+            var alpha = this.fadeAway > 0 ? this.fadeAway :
+                        this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+                        sketchPage.fadeAway;
             this.geometry.material.opacity = sCurve(alpha);
             this.geometry.material.transparent = true;
 
-	    if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
-	       this.glyphSketch = null;
+            if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
+               this.glyphSketch = null;
          }
       }
       this.setUniform = function(name, value) {
@@ -6836,9 +6080,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          var w = b[2] - b[0];
          var x = (b[0] + b[2]) / 2;
          var y = (b[1] + b[3]) / 2;
-	 var dx = xf[0] * w;
-	 var dy = xf[1] * w;
-	 var sc = xf[4];
+         var dx = xf[0] * w;
+         var dy = xf[1] * w;
+         var sc = xf[4];
          b[0] = x + dx - (x - b[0]) * sc;
          b[1] = y + dy - (y - b[1]) * sc;
          b[2] = x + dx + (b[2] - x) * sc;
@@ -6908,13 +6152,13 @@ function addUniforms(material, string) {
       if (declaration.length > 0) {
 
          var words = declaration.split(" ");
-	 if (words[0] == 'uniform') {
+         if (words[0] == 'uniform') {
             var type = words[1];
             var name = words[2];
-	    for (var n = 0 ; n < typeInfo.length ; n += 3)
-	       if (type == typeInfo[n]) {
-	          material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
-	          break;
+            for (var n = 0 ; n < typeInfo.length ; n += 3)
+               if (type == typeInfo[n]) {
+                  material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
+                  break;
                }
          }
       }
@@ -7052,78 +6296,8 @@ var fragmentShaderHeader = ["\
    uniform float alpha;\
 "].join("\n");
 
+///////////////////////////////
 
-
-// VARIOUS MANIPULATIONS OF HTML ELEMENTS.
-
-   // Replace the text of an html element:
-
-   function replaceText(id, newText) {
-      document.getElementById(id).firstChild.nodeValue = newText;
-   }
-
-   // Set the document's background color:
-
-   function setBackgroundColor(color) {
-      document.body.style.background = color;
-   }
-
-   // Give "text-like" style to all the buttons of a document:
-
-   function textlike(tagtype, textColor, hoverColor, pressColor) {
-      var buttons = document.getElementsByTagName(tagtype);
-      for (var i = 0 ; i < buttons.length ; i++) {
-         var b = buttons[i];
-         b.onmousedown = function() { this.style.color = pressColor; };
-         b.onmouseup   = function() { this.style.color = hoverColor; };
-         b.onmouseover = function() { this.style.color = hoverColor; };
-         b.onmouseout  = function() { this.style.color = textColor; };
-         b.style.border = '0px solid black';
-         b.style.outline = '0px solid black';
-         b.style.margin = 0;
-         b.style.padding = 0;
-         b.style.color = textColor;
-         b.style.fontFamily = 'Helvetica';
-         b.style.fontSize = '12pt';
-         b.style.backgroundColor = document.body.style.background;
-      }
-   }
-
-   // Object that makes a button cycle through a set of choices:
-
-   function choice(id,      // id of the button's html tag
-                   data) {  // data is an array of strings
-      this.index = 0;
-      this.data = (typeof data === 'string') ? data.split('|') : data;
-
-      // The button that this choice object will control:
-
-      var button = document.getElementById(id);
-
-      // The button needs to know about this choice object:
-
-      button.choice = this;
-
-      // Initially, set the button's text to the first choice:
-
-      button.firstChild.nodeValue = this.data[0];
-
-      // Every click will set the button's text to the next choice:
-
-      button.onclick = function() {
-         var choice = this.choice;
-         choice.index = (choice.index + 1) % choice.data.length;
-         this.firstChild.nodeValue = choice.data[choice.index];
-      }
-   }
-
-   function getSpan(id) {
-      return document.getElementById(id).firstChild.nodeValue;
-   }
-
-   function setSpan(id, str) {
-      document.getElementById(id).firstChild.nodeValue = str;
-   }
 
    var _g, time = 0, _startTime = (new Date()).getTime();
 
@@ -7207,164 +6381,6 @@ var fragmentShaderHeader = ["\
          }
       }
    }
-
-var characterGlyphData = [
-"a",
-["P*N+L*H*E)C(@'=':'6'3(1).*++)-'0%2$5#8!; > A D G J M P!S#V$Y%]&`(b)e+h,j-m/p1r3u5v8w;x>xAxDwFuIsJpLnMkNhOePcQ`S]TYTVUSVPWMWJXGXDXAX>W;V8U5T2S/R-Q*O(O+O.O1P4R6S9T<V?WAYD[F]I_LaNbQdSfVhXkZm]p^s_u`xa{b~c"],
-"b",
-["3!3!5$6&6(7*7,7/718385878:9<9>9@:C:E;G;I<L<N=P=R>T>W?Y?[?^?a@c@eAgAiAlAnBpBrCuCwDyDxCvCtBrBoBmBkBhCfDdEbF`G^H[JZLXMWOVRUTUVTXT[T^T`TbUdVfWhXiZj]k_kaldlflhljkmkojqishugwfyd{c|`}^}[~Y~W~T~R~P}N|L{JzHxGw"],
-"c",
-["n%l%j%h%f$d$b#_#]!Z!X V T R O M K I G E C!A#?$=%;&9'7(6*5+3-2/10/2.4-6+7*9);(=(?'A'C'E'G'I'L'N'P(R(T(V(X)Z*]*`+a,c.e.g/i0k1m2n4p5r6t8u9w;x<z>{@|B}D~F~H~J~L~O~Q~S~U~W~Y~]~_~a~c~e~g}i}k|m{ozqxswuwwvxuxw"],
-"d",
-["ZRXPUORNONLMJMGMDMAL>M<O9P7R5T3V1X0[0_0b0e0h0j2m3o5r7t9v;x=z?|A}D~G}I{KyMwNtPrQoSmTjTgTdUaU^VZVXVUWRWOWLWIWFVCVAU>T;T8T5S2S0S-S*S'S$R R$R'R*S,S/S2T5T8T;U>UAVCWFWIXLYOYRZT[W]Z^^_``cafbhdkemfphrjtlvnxoz"],
-"e",
-["<B=E>H@JBMDOFQHSKUNUQVTVWVYV]U`TcSeQgOiMkJmHoFpDrAs>s;s8r5q3p0n.l+j)h(e&b%`$]#Y!V S P M J G E!B#?%=&:(8)6+4.2003/5.8-;,>+A+D+F+I+L,O,R,U,X-[-_.b/e1g2j4l6n7q:s<t?uBvEwHxJyMzP{S}U~X~[~_}b|d{gzixlwnuqttr"],
-"f",
-["AXCXEVFTHSJRKPMONMPKQJRHSFTDUBW@X>Y=Z;[9]7]5^2^0^.^,^*]([%Z$Y!W U!T$S&R(Q*P,O.O0O2N4N6N9N;N=N?NANDNFNHNJNLNNNQNSNUNWNYO]O_OaOcOePgPjQlQnQpRrRtRwSyT{U|V~X~Y|Zz[x[v]t]q]o]m]k^i^f]d]b[`[^Z[YYXWVVTTRTPSNT"],
-"g",
-["]']&Z$X!V!S Q N L I G!D#B%@&>(<);,:.909395989;9=9@:B;E<G=I?KALCMFNHMKMMLOJQHRFTDUBV@X=Y;Z9Z6[4[1]/],^*^'^*^,^/^1_4`6`9a;a>b@bCcEdHdJeMeOeReUeWfZf]f`fbfefgfjfmfoerdtcvax`z^|Z}X}V~S~P~N~K~I~F~D}A}?|={;y"],
-"h",
-["< <#<%<'<)=+=,=.=0>2>4>6>8>:?<?>?@?B?D?F?G@I@K@M@O@Q@S@U@W@Y@[@^@`@b@c@e@g@i@k@m@o@q@s@u@w@y@{A|A~A|AzAxAvAtArApBnBlBjBhCgCeDcDaE_F^H[IZKYLWNVOUQUSTUTWSYSZT]U^W^Y_[_^```a`caeagaibkbmbocqcscucvcxczc|c{"],
-"i",
-[" s#q%p&o(n*l+k-i/h0f2e4d6b7a9_:];[=Y>W@VATBRCPENFMHKIIJGLFMDOCPAR?S>T<V:W8X7Z5[3[1]/^-_+_(`&`$a#a%`(`*`,_.^0^2^5]7]9[;[=[?[B[D[F[H[J[M[O[Q[S[V[X[Z[][_[b[d[f[h]j^l_n`parbtcvewgyhzj{l|n|p|s|u|w|y|{{}z~{"],
-"j",
-["a b!b$b%b&c(c)c*c,c-d/d0d1d3d4d5e7e8e9e;e<e>f?f@fBfCfDfFfGgHgJgKgMgNgOgQgRgSgUgVhXhYhZh]h^h_hahbhdhehfhhhigjglgmgngpgqgsgtfuevdwcxbyaz`z_{]{[|Z|X}W}V}T}S}R}P}O}N}L~K~I~H~G~E~D}C}B|@{?{>z=y<y:x9w9v8u8u"],
-"k",
-["? ?#?&?(?*?-@/@1@4@6@9@;A=A@ABAEBGBIBLBNBPBSBUBXBZB]B`BbBeBgBiBlBnBqBsBuBxBzB|C}D{DyEvEtErFoFmFjFhGfHdHaI_J]KZLWMUNSNQONPLRJSHSFUDVBWBVDUFTHRJQLPNOQMRLTJVIXGZE[D^C`BbCdEdHeIfKhMjNkPmRoTpUrWtYuZw]y_z`|"],
-"l",
-["N N!N#N$N$N%N&N'N(N)N*N+N,N-N.N/N0N1N2N2N3O4O5O6O7O8O9O:O;O<O=O>O?O@O@OAOBOCODOEOFOGOHOIOJOKOLOMOMONOOOPOQOROSOTPUPVPWPXPYPZP[P[P]P^P_P`PaPbPcPdPePfPgPhPiPjPjPkPlPmPnPoPpPqPrPsPtPuPvPwPwPxPyPzP{P|P}P~"],
-"m",
-[" )!-#0$4$8%<&?&C&G'K'O(R(V)Z)_)c*f*j*n*l+i,e,a,],X,U-Q.M/J0F1B3?5<8:<7?5B3E1H0L1O3P7R:S>TBUEUIVMVQVTVXV]VaVeViVlVpVrVnVjVfUbT_TZTVURVOVKXGYDZ@]=^9`6c3f0i.l,o*r,t/v3v7x:y>zAzE{I{M|Q|T|X}]}a~e~h~l~p~t~t"],
-"n",
-["( *#+&,),,-/-2.5.8/;/=0@0C0F1I1L1O1R1U1X1[2_2b2e3h3k4n4q5s5v5y5|5}5z5w4t4q4n4k4h4e4b4_4[5X5U6S7P7M7J8G9D:A;?<<>9@7B5D3F2H/K-M,P+R*U(X'Z&^&a&c(e*f-h/i2j5k8l:n=o@oCpEqHqKqNrQrTsWsZt^tatcufuiuluouruuuxw{"],
-"o",
-["]![!Y!V S P M J G D A >#<$:&8)6*3,1./0-2+4*7):(=(@(C(E(H(K(N(Q)T*W+Z,^-`.c/f0h2k3n5p7r9t;v=x@zB{E|H}K}M~P~S}V|Xz[y^wavduguirkpmnnlpiqgrdtat^u[vXvUwRwOwLwIwFwCw@w=v;v8t5s3q0o.m,j*h)e'c&`%]$Y#W T R!O#O%"],
-"p",
-[";$<'<)<,=/=2=5=7=:===@=B>E>H>K>N>P>S?V?Y?[?_?b@eAgAjAmApBsBuBxB{C}C|CyBvBtBqAnAk@i@f@c@`@^@Z@W@T@Q@O@L@I@F?D?A?>?;?8>6>3>0?.@+A(C&D$F!I L N Q!T!V$X&Z'])_+a.b0c3d5d8d;c=c@cCbFbH`K^M]OZQXSVUSVPVNWKWHWEW"],
-"q",
-["V$T#R!O M K!H!F#C#A#>$<&;(9*8,8/717476797;7>7@7C9E:G;I=K>MAMCLEKGJIHJEKCLAM?N<O:O7P5P2P0P-P+P(Q&Q#Q!Q%R'R*R,R/R1R4R6S9S;S>S@TCTETHTJTMTOURUUUWUZV]V`WbWdWgXiXlXnYqYsYvYxY{Z}Z|[z[w]u^r_p`nalbicgdeecg`h_"],
-"r",
-[". /#/%/'0*0,0.00131517192<2>2@2B3E3G3I3K3N3P3R3T3W3Y3[3^3a3c3e3g3j3l3n3q3s3u3w3z3|4~4|4z4w4u4s4q4n4l4j4h4e4c4a4_5]6Z7W7U8S9Q9O9L9J9H9F:D;A;?<==;>9@7A6B4D2E0F/H-J,L+N*P*R)U)W(Y([(^(a(c(e(h(j(l)n)p*p+n,"],
-"s",
-["[ Y X!W!V#U#T$T%S&R'Q'P(O(O)N*N+M,M-M/L0L1L2K3K4J5J6I7I8I:I;I<I=I>I?I@IBJCJDJEKFKGLHLIMJMKNLNMONOOOPPRPSQTQURVRWSXTXUYUZU]U^V_V`WaWbWcWdWeWgWhWiWjVkVlVmVoUpUqUrTsTtSuRvRwQxPxOyNzMzL{K{J|I|H|G}G}F}D}D~"],
-"t",
-["*$+%-&/&1&3&5&8&:&<&>&@&B&D&F%H%J%L%N%P%S%U%W$Y$[#^#`#b#d#f#h!j!l!n p r t s q o m!k!i#g#e$c$a$_%]%Z%X&V&T'R'P'N'K'K)L+M,M.M1N3N5N7N9N;N=N?NANCNENGNINLNNNPNRNTNVNXNZN]N_NaNcNfNhNjNlNnNpOrOtOvOxPzP|P~P|"],
-"u",
-["#&#)#,#/#2#5#8#;#>#A#D#G#J#M#P#R$U%X&[(^)a*d,f-i/k0n2p5q7r:s=s@sCsFsIsLsNqPpSnTkViXfYdZa]_^[`XaVaSbPcMdJdGdDdAd?d<d9d6d3d0d-d*d'd$d d$d'd*d-d0d3d6d9d<d?eAfDfGfJfMfPgSgVgYg]h_ibjekhljnmopprrutwvyx{z}|~"],
-"v",
-["% &#&%(')(**+,,.-0-2.4/507192;3=3?4A5C5E6G7I8K9L:N;P<R=T>V?W@YA[A^B`CbCdDfEhFjGkGnHoIqIsIuJwKyL{M}M}M{NyNwOuPsQqRoSmSkTjUhUfUdUaV_V]WZXXYWZU[S]Q^O_N`L`JaHbFcDdBe@g?h=i;i9j8k6l4m2o1p/q-r+s*t(u&w&x$y#z!"],
-"w",
-[" ,#-$0%3&5'8';)=*@+C,E-H-K-M.P.S.V/Y0[1_2b2d4g4j5l5o6r8r:p;m<k=h>e>b@`A]BZCWCTDQEOELFIGFGDGAIAJCLEMHOJPMQORRSUTWUZW]X`Zb[e]g^j`laocqesfvfwftgrhoilijjgkdkal^m[nXoVoSpPpMqJrHsEsBt?u=v:w8x5z3z0{-}+}(~)~,"],
-"x",
-["5%7':);,>.@1B3E5G8J:L<N?QASDUFVIYK[N^P`SbUdXf[g_iajejhjkinhrgufxcz`{]|Y}V}S}PzNxMuKrKnKkKhJeJaJ^KZLVLSNPOMPJQGSDTAU>W;Y9[6]3_0`-b*d(e%h#h!f%c'b*`-_0]3[6Z9X<W?VBTERHPJOMMPLSJVIZH]F`EdDgCjBm@p?s>v=y<|<~"],
-"y",
-["A B#B%B(B*B,B/B1B3B5B8B:C<C?DADCEEEHFJHKILLMNMPMRLULVJXIYGZE[C[@]>^<_:`8`6`3`1`/`,`*a(a&`$`&`)`+a-a0a2a4a6a9a;a=a@aBaDaFaIaKaMaPaRaTaWaYa[a^aaac`e`h`j`l`n`q_s^u]w[yYzX|V}S}Q}O~M~K~H~F}E{DyCwBuAs@q>p@p"],
-"z",
-["&')),*.,1,4-7/:/=0@0D0G0J0M0Q0T/W/Z.^-a,d+g*j*m(o'r&u&x%{$~#{%x'w)t+r-o/l1j3h5e7c9a<_>[@XAUCSEQGNJLLJNHQFSDVBX@[>^<a9c6e4f1i0k-n,q*s'u%x#y {$z'z)w,v/u1s4s7s9r<r@rCrFrIrMrPrSrVrZr^rardrfsitluowrxtyvzx|",],
-"spc",
-[" T!T#T$T%T&T'T(T)T*T+T+T,T-T.T/T0T1T2T3T4T5T6T7T8T9S:S;S<S=S>S>S?S@SASBSCSDSESFRGRHRIRJRKRLRMRMQNQOQPQQPRPSPTOUOVOWOXOXOYOZN[N]N^N_N`NaNbNcNdMeMfMgMhMiMjMjLkLlLmLnLoKpKqKrKsKtKuKvKwJwJxJyJzJ{J|J}J~J~K"],
-L_ARROW,
-["~g|g{gygxgvgugsgqgpgngmgkfjfhfgeeedebdad_d]d[dYdXcVcUcScRcPcNcMcKcJcHbGbEbDbBb@b?b=a<a:a9a7a6a4`3`1`/`.`,`+`)_(_&_%_#_!_!_#^%]&['Z(Z*Y+X,W.V/U0T2T3S4R6Q7P8O9N;M<L=K>J@JAIBGCFDEEDFCHBIAI@K?L>M=N;N:O9Q8"],
-R_ARROW,
-[" a#a$a&a'a)a*a,a-a/a0a2a3a5a6a8a9a;a<a>a@aAaCaDaFaGaIaJaLaMaOaPaRaSaUaVaXaYa[a^a_aaabadaeagahajakamanap`q`s`t`v`w`y`z`|`}`~_|^{^z]yZxYwYuXtWsVqUpToTnSlRkQjPiOgNfNeMdLcKaJ`I_I]H[GZFXFWEVDUCSBRAQ@P?O>M>"],
-"!",
-["IeJdLcNcPbQbSbUbWbYb[c^c_d`ebfbhcjdkdmdocqcsat`v_w]x[yYzW{V{T|R}P~O~M~K~I~G~E~D}B|A{?z>x=w<u;t;r;p;n<l=k>i?hAgBeCdEdGcIcJcLcNcPcRbR`R_R]RZRXRVRTRRQPQNQMQKQIQGQEQCPAP?P>P<P:P8P6P4P2P1P/P-P+P)P'P%P#P P!"],
-"@",
-["]BXBUBQBMCJCFCBD@G@J@NAQBUDXE]G_J`N`Q^T[VXYU[S]O[M[Q[T[X][`_cagbkbnbq`t]vZxW{T}Q}M~I~F}B|?z<x9u6r4o3k1h/e.a,^+Y*V)R(N(K(G(C(@(<)9*5,2-//,1)3&6$9!<!@ C G!J#N%Q'T)W+[-_/b1e3h6j:l=m@nDoHpKpOqRrVsYt^ubvew"],
-"#",
-["FuEoGiGcH]IVJPKKLEM?N9O3P-Q'R)R/R5R;RARGSMTSUYV`VfVlWqWwXwYq[l[f^`_Y`SaMcGcAd<e6f0h+d._0Y3S6N9J=E@?C9E4F.H(J!J&J,K2L8M>NCPIPOPVP]PcPiQnQtRzS}TwVqWkXeZ_ZX[R]L_FaAb;c5d/e)e#f)f/h5i;k@mFnLoRpXp_qerksqtuv"],
-"$",
-["i?g?d?`>]>X>U=R=N<K<G<D=@==>:@7A4C4F5I8L9O;R>SBSETITLTPTSTVTZU^VaXdYgZj]k`jdgfdgah^hYiVjSjOkLkHkEkBl>l=j=g>c?`@]@XAUAQBNBKCGCDD@D=E9F6G3H/I,J)K&L!M#M'M*M.M1M4M8M;M?MBMFMIMMMPMTMWM[M_NcNfNiNmNpNtNwO{P~"],
-"%",
-["++0*5*:,?.B2D7E<DAAE=G8I3I-J)G&C$>!9 4 /$+()-(2'7'='B'G'L'Q'V&]%b%g$l#q#v!{ |#y&v*q-m1j4f8b;_?ZBVERINLJPFSBW>Z;^7b4f1j.n+q.m2j5f9b=_B]FZKXPVUTZR`ReRjSoUrXu]vbwgwmuqsvpzl}g~b}]{XxSuQrPmPhQcT^XZ]YbYgYlZ"],
-"^",
-[" h!h$g%f&f'e(d)c*b,b-a.`/_0^1]2[3Z4Y5X6W7V8U9T:S;R<P<O=N>M?L@K@IAHBGBFCDDCEBFAG@G?H>I<I;J:K9L8M7N6O6P7Q8Q9R;S<T=U>V?W@XAYBZC[D]E^F_G`HaIbJcKdLeMfNfPgQgRiSjTkUlVmWnWoXpYq[r]s^t_u`vavbxcyczd{f{g|g}h~h~j"],
-"&",
-["hwexcwau_s^q[oYmWjVhTfScQaP_N]MYKWIUHRGPFMEKDHCFBCB@A=A;A8A5A2A/A-C+C(D%F#H K M O#P&Q(R+R.S0S3T6T9T;T>SARCRFQIOKNMMPKRJTHWGYF]D_BaBdAf?h>k<m:o8q7s7v7y7|8~;~=~@~C}E|GzIxKwMtNrPpRnTlVjWhXfZc]a__`]bYdWeV"],
-"*",
-["RLRHRCR>R9P4P/P*P%P!P'O+N0N5N:N?NDKFFFBC=A9?4=0;-80:3=7A:D=H@LDOGRHTDXA[=`:c7g5l2p/t+w({,{0w4t7p:l;h>cA_CZEVIRLPNSRWU[W`Zd^haldpgskwnzr}p{mwitfpcl`h]dZ`W[SXUUXQ]NaKeHhDlAp>s;w8u9q;m>iAeDaG]JXMTPPRKTGW"],
-"(",
-["U T!S#S$R$R%Q&Q'P(P)O*O+N+N,M-M.M/L0L1K2K3K4J5J6J7J8I9I:H;H<H=G>G?G@GAGBFCFDFEEFEGEGEIEJEKELEMENEOEPEQERESETEUEVEWEXEYFZF[F]G^G_G`HaHbIcIcIdJeKfKgLhLiLjMkMlNmNnOnOoPpPqQrQsRtRuSvSvTwTxUyVzV{W{W|X}Y~Y~"],
-")",
-["E F G!G#H#I$J%J&K&L'L(M)M*N*O+O,P-P.Q/Q0R1R2S3S3T4T5U6U7V8V9V:W;W<X=X>X?X@XAXBYCYDYEYFYGYHYIYJYKYLYMYNYOYPYQYRYSYTYUYWYXYYYZX[X[X]W^W_V`VaVbUcUdTeTfSgShSiRjRkQlQmPmPnOoOpNqNrNsMtMuLvLwLxKyKzJ{J{I|I}H~"],
-"cap",
-["Q~Q}Q|Q{QzQyQxQwQvQvQuQtQsQrQqQpQoQnQmQlQkQjQiQhQgPgPfPePdPcPbPaP`P_P^P]P[PZPYPXPWPVPVPUPTPSPRPQPPPOPNPMPLOKOJOIOHOGOGOFOEODOCNBNAN@N?N>N=N<N;M:M:M9M8M7M6M5M4M3M2M1M0M/M.M-M,M+M*M*M)M(M'M&M%M$M#M!M N "],
-"ret",
-["}/~0|1{2z3x3w4u5t5r6q6p7n7l7k7i7h7f7e7c7b7`7_7]7Z7Y7W7V7T8S8Q8P8N9M9K9J9H9G9E9C9B9@9?9=9<9:9997969492919/9.9,9+9)9(9&9%9#9!8 9 : < = ? @!B!C!E#F#H#I#K$L$N$O%Q%S%T%V%W&Y&Z&]&^&`'a'c'd'f'g'i(j(l(m(o(o(n"],
-"_",
-["~P|PzPxQwQuRsRqRoRmRkRiRgRfRdRbR`R^R[RYRWRURSRQRPRNQLQJQHQFQDQBP@P>P=P;P9P7O5O3O1O/N-N+N*N(N&M$M!M!M$M%M'M)M+N-N/N1N3N5O6O8O:O<O>O@OBODOFOHOJOLONOOOQOSNUNWNYN[N^N`NbMcMeMgMiMkMmMoMqMsMuMvLwLyL{L}L~M~O"],
-"=",
-["#`&`)_+_.^1]4]6[9[<[?ZBZDYGYJYMXPXRXUXXW[W^WaVdVgViVlVoVqWtXwXyY|Y{YxYvXsXpWmVkUhUeUbT`T]TYSVRTRQQNPKOINFMDLAL>K<J9I6G4F1F/E,D)D'B$B!A#A&A(@+@.@1@4@7@9@<@?@B@E@H@J@M@P@S@V@Y@[@_@b@e@h@k@m@p@s@u?x?{?~?"],
-"+",
-["F$H!H#H%H(I*I-I/I2I4I7I:J<J?JAJDJFJIKKKNLPLSLULXLZM^M`McMeNgNjOlPoPqPtQvQyQ{Q~P|NzMxKwIuGsFqDoCmAk?i=h;f:d8b6`4_2]1Z/Y-W+U)T&S%R#P%P(P*P-P/P2P4P7P:P<P?PAPDPFPIPKPNPPPSPUPXP[P^PaPcPfOhOkOmOpOrOtNwNyN|N"],
-"{",
-["Z!Y W U T R!Q!O#M#L#J$I%H&F'E)E*D,D-D/D1D2D4D6E7F9G9I:J:L;M;O<P=R>S?T@UAVCWDXFXGXIWKVLUMSMROQPOQNQLQJQIQGQEQDQFQGQIQKQLQNQOSQSRUSVTWUXUZV]V^V`UaTbRcQcPdNeMeLfJgJhHjGkGmGnGpGrGsHuIvJwKxLyNzO{Q|R}T}U~V}"],
-"[",
-["c~a~_~^~[~Y}X}V}U}S}Q}P}N}L}K|I|G|F|D|B|A|?|=|<{<z<x<v<u<s<q<p<n<l<k<i<g<f<d<b<a<_<]<[<Y<W<V<T<R<Q<O<M<L<J<H<G<E<C<B=@=>===;=9=8=6=4=3=1=/=.>,>+>)>'>&?$@$B$D$E$G$I$J$L$N$O$Q$S$T$V$X$Y$[$^$_$a$c$b#a!` "],
-"}",
-["B!D F G I K!M!N!P#Q$S%T&U'W)W*X,X.X/X1X3W4W6V8T8S9R:P;O<M=L>K?JAIBHDHEHGHIIJJKKMLNNOOPPQRQTQVQXQYQ[R]R[RYSWSVSTSRTPTOTMULVLXLYL[L^L`MaMcOdPeQgSgThViWjYkZl[m[o[q[s[tZvYwXyWzV|U}S}R~P~N~L~K}I}G}F|D|B|A|"],
-"]",
-["=~=|?|@|B|D|F|G}I}K}L}N}P}R}S~U~W~X~Z~]~_~`~b~c}c{cycxcvctcscqcocmclcjchcfcecccac`c^c[cYcXcVcTcRcQcOcMcKcJcHcFcEcCcAc?c>c<c:c8c7c5c3c1c0c.d-d+d)d(d&d$d!c b ` ^!]!Z!X!V#U#S#Q#P#N#L#J#I#G#E#C#B#@#>#<#;!"],
-"|",
-["M#M N!N$N&M(M)M+M-M/M1M3M5M7M9M;M=N>N@NBNDOFOHOJOLONOPOQOSOUOWOYP[P^P`PbPdPfPgPiPkPmQoQqQsQuQwQyQzQ|R~R|RzRxRvRtRsRqRoRmRkRiRgReRcRaQ`Q^Q[QYQWPUPSPQPOPMOLOJOHOFODNBN@N>N<N;M9M7M5M3M1M/L-L+L*L(L&L$L!L$"],
-"\\",
-[" $!$#%$&%'&(')(*)+*,+-,.-.-/.0/102132435465758697:8;9<:=;><?=@=A>B?C@CADBECFDGEHFIGJHKILJLKMLNMONPOQPRQSRSRTSUTVUWVXWYXZY[Z][^]^^__`_aabbbccddeeeffgghhiijjkklllmmnnoopppqrqrrssttutwuwvxvywzx{y}y}{~{~z"],
-"'",
-["3~4}4|5{6{8{9{:z:y;y<x=w>w?v@vAuBtCtDsErFqGpGoHoInJmKlLkLjMjNiOhPhQgRgTfTeUeVdWcXbYaY`Z_[_]^]]][]Y^Y_X`WaVaUbTbScRcQcPcNcMcLcKdJdIeHeGfEfDgCgBhAh@i?i>i=i<j;j9k8k7l6l5l4l3l2l0l/l.l-l,l*l)l(l'l&l%l#l!l "],
-"<",
-["}3{3y3w3v4t5r6p6n7m8k9i:g;e;d<b=`=^>[>Y?W?U?T@R@PANBLCKDIEGFEFCGBH@I>J<J:K9L7M5N4O2P0P.Q,Q*R(S&S%T$U!U V#W%W'X)X+Y-Y/Y1Z3Z5[6[8[:]<]>^@^B_D`F`GaIaKbMbOcQcSdUdWeYe[e]f_fagcgehghiikjmjojpjrktkvkxkzl|l~l",],
-">",
-["%:':):+;-;/;1<3<4<6=8>:>;?=??@AACAEAFBHBJCLDMDOEQESFUFWGXGZG]H_HaHcIdJfKhKjKlKmLoLqMsMuMwMyNzO|O~O|OzOyOwOuOsPqPoPmPkQjQhRfReScTaU_U]U[VYVWVUVSVQVOVMVLWJWHXFXEYCZA[@]>]<^:^8_7_5`3`1`/`.a,b*b(c&c%d#e e",],
-",",
-["b b!b#b$b%b&b'b(b*b+b,b-b.b/b0b1b2b3b4b5b6b7b9b:b;b<b=b>a?a@aAaBaC`D`E`F_G_H_I^J^K^L]M]N]O[P[QZRZSYTYUXVXWWXWYVZV[U]U^T_T`TaSaRbRcQdPePfOgOgNhMiMjLkLlKmJmInHnHoHpGqFqErEsDtCtBuBvAwAxAy@z?{?{?}>}>}?~@~"],
-"/",
-["n!n n!m#m$l%k&k&j'i(i)h*g+g,f-e.e/d0d1c2c3b4a5a6`7`8_9^:^:];]<[=[>Z?Y@YAXBXCWDWEVFVGUHTITJSKRLRMQNPOPPOQORNRMSMTLUKVKWJXIYIZH[G]G^F_E`E`DaCbCcBdAeAf@g?h?i>j=k=l<m<m;n:o:p9q8r8s7t6u6v5w5x4y3z3z2{2|1}1~"],
-"?",
-["3,5,7+8*9);(<'='?&@%B%C$E$G$H#J#K#M!O!P!R T U W Y Z ] ^!`!b#c#e$f%g'h(i)i+j,j.k/l1l2l4l6k7k9k:k<j>j?iAiBhDgEfFeHcIbJaK`L^M]N[OYPXQWRWTUUTURVQXPYOZN[M]M_M`LbLcKeKfJhJiJkJmJnJpJrJsIuIvIxJyK{L|M}N}P~Q~Q|"],
-];
-
-var glyphData = [
-"del",
-["~Q}P}P|P{PzPyPxPwPvPuPtPsPrPqPpPoOoOnOmOlOkOjNiNhNgNfNeMdMcMcMbMaM`M_M^M]M[MZMYMXMWMVMUMTMSMSNRNQNPNONNNMNLNKOJOIOHOGOFOEOEODOCOBOAP@P?P>P=P<P;P:P9P8P7P7P6Q5Q4Q3Q2Q1Q0Q/Q.Q-Q,Q+Q*Q)Q)Q(Q'Q&Q%Q$Q#Q!Q Q"],
-"-",
-[" Q#P$P&P(P*P,P.P/P1P3P5P7P8P:P<P>P@PBPCPEPGPIPKPMPNPPPRPTPVPWPYP[P^P`PbPcPePgPiPkPmPnPpOrNsNuMwMyM{M|M~L|L{LyLwLuLsLqLpLnLlLjLhLgMeMcMaM_M]M[MYMWMUMSMQMPMNNLNJNINGNENCNAN@N>O<P:P8P7P5P3Q2Q0Q.Q,Q*Q*R(R"],
-".",
-["J N Q T W [ _ b e h#k$n&p(r)t,u/w1x4z7{:{={@}C}F~I~L~O~R~V~Y~]~`~c}f{hykwnvpssqtnukvhweyb{_{[{X}U}R~O~L~I~F~B~?~<~9~6|3{0z.x+w)u(r'p%n%k$h$e!b!_ [ X U R O K H E!B#?%=&;(:)7+4,2/20/3.5-8-;,>+A*D*G*H'J%"],
-"1",
-["B>B@C?D>E=E<F;G:H9I8I7J6K5L4L2M1N0N/O.O-P+P*Q)Q(Q&R%R$S#T U U!U$U%U&U(U)V*V+V-V.V/V1V2V3W5W6W7W9W:W;W=W>W?WAXBXCXEXFXGXHXJXKXLXNXOXPXRXSYTYVYWYXYZY[Z]Z_Z`ZaZb[d[e[f[h[i[j[l[m[n[p[q[r[t[u[v[x]y]z]{]}]~"],
-"2",
-["42516/7-8,:*;)<'>&@%A%C$E#G#I!K!M!O Q S!T#V$W&X'Y)Z+[,[.]0]2]4[6Z7Y9W;V<U>T?RAQBPDOFNHMILJJLIMGNFPDQBRAR?T>U=W<Y;Z:]:_9a9c9e9g9i9k9m9o9q9s:u:w:x;z;|<}>|?{AzCzEyGyIyKyMyOzQzSzUzWzYz[{^{_|a|c|e|g|i}j}j}"],
-"3",
-["7!8 ; = ? A!C!E#G#J#L#N#P#R#T#W#Y#[#^#`#b#c$a&`'_)]+[-Z.Y0X2W4U6T7S9R;Q=P?OANCMELGKHJJMJOJQJSJUJWJYK[L^M`NbOcQeRfTgVhXiYj]k_kakckelglilkknkpjrhsgufwdxcya{_|]|Z}X}U}S~Q~O~M~K~I~F~D}B|@{?z=y;x:v8u7s5r3p"],
-"4",
-["xKvKsLqLoLlLjLgLeLbL`L]LZLWLULRLPLNMKMINFNDOAO?O=O:O8O5P3P0P.P+P)P'Q)P+N-M.K0I2G4F6D8C:B<A>@@>B<D;F9H7J6K4M2O1P/R-S+T)V&W$X!Y!Y$Y'Y)Y,Z.Z1Z3Z6Z8Z;Z=Z?ZBZDZGZIZLZNZQZSZVZXZ[Z^Z`ZcZeZhZjZmZoZrZt[w[y[|[~"],
-"5",
-["h'f(d)b*_*]+Z+X+U+S+Q*O)M)K(H'F&D%B$@#>!<!9!7 7#7%7'7*7,7.808385878:8<8>8@8C8E8G8I8L8N9P9R;R=Q@QBPDOFNHNJMMMOLQLSLULXMYN[P^Q`SaUbWcYd[d^e`ebfegggigkgngpgrftevdxcza{_}]}Z~X~U~S~Q}O|M|J|H{F{DzBy?x=w;v9v"],
-"6",
-["c d b ` ^!Z#X$V%T&R'P(N)L*J+I,G.E/C1B2A4@6?8?;>==?<A<C<E;G;J:L:N:P9R9U9W9Y9[9_9a9c9e9h9j:l;n<p>q?s@uBwCxEzG{I|J}M~O~Q~S~V~W}Y{[z^y_wavbtcrepfnflfjfhfeddcbb``^_]]Z[XXXVWTWRXPXMXKXIXGXDXBY@Z?[=^<`;a9c9b"],
-"7",
-["0)0+2+3,5,7,8,:,<,=,?,A+B+D+F*G)I)J)L)N(O(Q(S'T'V&X&Y&[%]%_%a$b$d$f$g$i#j#l!m o n!m$l%k&j(i)h+h,g.f/e1d2d4c5b7a8`:`;_<^>]@]A[CZDZFYGXIXJWLVMVOUQURTTTUSWSYRZR]Q^P`PbOcOeNfNhMjMkLmLnLpLrLtLuKwKxJzJ|I}J~"],
-"8",
-["g(d'b&_%[$X$T$Q#N#K#H!E!B ? =#;%9'7*6-5/4245486;8=;?=@@BCCEEHGJHMIPISJVKYK]L`McNeQfSgVhYi]i`icifiiilhogrfucway^zZ{X|U}R~O~L~I~E~B~?}=|<z<w<t=q>n@lBiCgEdGbI`J]LYMWNTPQQNQKRHTFVCXAZ?]<_:`7a4c2e/f-h*i'k%"],
-"9",
-["g)g(e'c&a%_$]#Z!W!U S P N K I G D!B#@$>&<';)9*8-7/616356586:7<8?9@;B=C?EAFCGEHHIJILIOHPGRFTDVBWAY?[=];_:`7a5c4d2e0f.h,j*h,g.f0e2c4b6a8_:^<[=Z?XAWCVFUHTJSLRNQPPSOUNWMYL[K^J`IbGdGgFiDkDmCoBrAt@v?x>z=|;~"],
-"0",
-["=O<P:R9U9W8Z7^6`6c6f6h6k6n7p8s:u<w>x@zB{E|H}J}M~P~R~T|W{Yz]x_waucsdqfoglijjhlflcm`n^oZpXqUqRqPqMpJoHnEmCl@k>j;i9h6f4e2c0a._,]*Z(X'V%T#Q!O L I G D B!?#>%<(;*:-9/827467595<4?4A4D3G2I2L1N0Q/S/V/Y.[._/b/a"],
-"face()",
-["`0^0Z0X0U0R0P/M/K/H/E/C/@0>0;19263442607.9,;*=)?'A%C$E#G!J L O Q T W!Y#[%^'`)a+c-d0e2f5h7i9j<k>lAlCmFnHnKoMoPpSpUpXpZp^papcofohnkmmkojqhsguewdyb{`|^}Z}X~U~R~P~M}K|IzGxDwBv@t>r<q:o8m7j6h5e4c4`4^3Z3X3U3",":V:V;V;V<V<V<V=V=V>V>V?V?V?V@W@WAWAWAWBWBWCWCWCXDXDXEXEXEXFXFXGYGYGYHYHYIYIYIYJYJYKYKYKYLZLZMZMZMZNZNZOZOZPZPZPZQZQZRZRZRZSZSZTZTZUZUZUZVZVZWZWZWZXZXZYZYZZZZZZZ[Z[Z]Y]Y]Y^Y^Y^Y_X_X_X`W`W`WaWaWaVbVbVbU","9C9C9C9C9C9C9B8B8B8B8B8B8B8B8B9B9B9B9B9B9B9B:B:B:B:B:B:B:B:B;B;A;A;A;A;A;A;A;A;A<A<A<@<@<@<@<@<@<@=@=@=@=@=@=@=@=?>?>?>?>?>?>?>?>?????????????????@?@?@?@?@?@?@?A?A?A?A?A?A?A?B?B?B?B?B?B?B?B?C?C?C?C?C?","Y<Y<Y<Y<Y<Y<Z<Z<Z<Z<Z<Z<Z<Z<Z<[<[<[<[<[<[<[<[<]<]<]<]<]<]<]<]<]<^<^<^<^<^<^<^<^<_<_<_<_<_<_<_<_<_=_=`=`=`=`=`=`=`=`=`=`=a=a=a=a=a=a=a=a=a=b=b=b>b>b>b>b>b>b>b>b>b>b>b>b?b?b?b?c?c?c?c?c?c?c@c@c@c@c@c@c@",],
-"kwa()",
-["K H E C @!>#<%:&8(5*3+1-0/.1-4,6+9*;*>)@)C(F(H'K'N'P'S(U)X*Z,]._/b1d3e5g7h:i<j?kBlDlGmImLnOnQoToWoYo]n_mbldkgjiilinhqfseucvax_y]zY{W|T}R}O~L~J~G~D}B}?{=z:y8x6v3u1s/q.o,m*k(i'g%d$b#_!]!Y V T Q N L I!F!","B!A!@!@!?!?!>!=!=!<!<!;!:!:!9!9 8 7 7 6 5 5 4 4 3 2 2 1 1!0!/!/!.!.!-#-#,#,$+$+$*%)%)%(%(&(&''''&(&(&)%)%*%*$+$+$,#,#-#-!.!.!/ / 0 1 1 2 2 3 4 4 5 6 6 7 7 8 9 9!9!:!;!;#<#<#=#=$>$>$?%?%@%@%A&A&A'B'B'C","W*V*T*S*Q*P*N*M*K*J*H*G*E*D*B+A,@-@.?/?1?2>4=5<6<7;9;:;<;=;?:@:B:C:E:F:H;I;J<L=M>N?O@PBQCQDRFSGSHSJSKSMSNSPSQRSRTRVQWQYQZP]P^O_O`MaLbKdJdIeHfFfEfCgBhAh?i>j=k;k:k8k7j5j4i3h1h0g/e.d-c-a-`,_+]+[*Z*X*W*V)","ImImInInInInInInInInIoIoIoIoIoIoIoIoIpIpIpIpIpIpIpIpIqIqIqHqHqHqHqHqHqHqHqHrHrHrHrHrHrGrGrGsGsGsGsGsGsGsGsGsGsGtGtFtFtFtFtFtFtFtFtFuFuFuFuFuFuFuFuFvFvFvFvFvFvFvFvFvEwEwEwEwEwEwEwEwEwExExExExExExExExEx","dldldldmdmdmdmdmdndndndndodododododpdpdpdpdpdqdqdqdqdqdrdrdrdrdsdsdsdsdsdtdtdtdtdtdudueueueuevevevevevewewewewewexexexexexeyfyfyfyfyfzfzfzfzfzgzg{g{g{g{g{g{g{h|h|h|h|h|h|h|h|i}i}i}i}i}i}i}j~j~j~j~i~i~",],
-"kbd()",
-["Q}Q{QyQxQvQtQrQpQnQlQjQhQgQeQcQaQ_Q]QZQXQWPUPSPQPOPMPKPIPHPFPDPBP@P>P<P:P8P7P5P3P1P/P-O,O*O(N&N%N#N N#N%N'N)N+N,N.N0N2N4M6M8M9M;M=M?MAMCMEMGMIMJMLMNMPMRMTMVMXMZM[M^M`NbNdNfOgOiOkPlPnPpPrPtPvPxPzP{P}O}",],
-"diner()",
-["w(t(p(m(j(f(c(`)[)X)U)Q*N*K*G*D*A*>):)7)3)0)-)))&)#) * - 1!4!7#;#>$A$D%H%K%N&R&U&X&]&`&d&g&j%n%q%t%w(x+x.w2w5v8v<v?uBuFuItLtOsSsVsYs^rardrhrkrnrrrurxr{s~t~p~m}j}f}c}`|[|X{U{RzNzKzHzDyAy>y:y7x4x0w-w*w'","x9w9v9u9t9s8r8p8o8n8m8k8j8i8h8f8e8d8c8a7`7_7^7]7Z7Y7X7W6V6T6S7S7R8Q9P9O:N;M;L<K=J>I?H?G@F@EADACBCCACAD@D?E>F>F=G<H;H:H9H7I6I5I4I3I1I0I/I.I,I+I+J+K+M+N+O+P+R+S+T,U,W,X,Y,Z-[-^-_-`-a-b-d-e-f-g-h-j-k-l-l","S6S7S7S8S8S9S9S:S:S;S;S<S<S=S>S>S?S?S@S@SASASBSBSCSCSDSDRERERFRGRGRHRHRISISJSJSKSKSLSLSMSMSNSNSOSOSPSQSQSRSRSSSSSTSTSUSUTVTVTWTWTXTXTYTYTZT[T[T]T]T^T^T_T_T`T`TaUaUbUbUcUcUdUdUeUeUfUfUgUgUhUhUiUiUjUjVk","=G=G=H=H=H=I=I>I>J>J>J>K>K>K>L>L>L>M>M>N>N>N>N>O>O>P>P>P>Q>Q>Q>R>R>R>S>S>T>T>T>U>U>U>V>V>V>W>W>W>X>X>X>Y>Y>Z>Z>Z>[>[>[>]>]>]>^>^>^>_>_>_>`>`?`?a?a?a?b?b?b?c?c?c?d?d?d?e@e@e@f@f@f@g@g@g@h@h@i@i@i@j@j@j","=E=D=C=C=B=A=A=@=@=?=>=>===<=<=;=;=:=9=9=8=8=7=6=6=5=5=4=4=3=2<2<2;3;3:3:4949485857575656656564636362525150505/5/5/6/6/7/8/8/9/9/:/;/;/</=/=/>/>/?/@/@/@/@0@1@1@2@2@3?3?4?4?5?6?6?7?7?8?8>9>9>:>:>;>;><=",],
-"vase()",
-["I!F D!B#B&D'E)E,E/E3D5A5>4;484653719/;->-A-D.G/J0M1O3R5T6W8Z:]<`=b?dAgCiDkFmFpFsEvCwBzD|G}J}M~P~S~V~Y~]}_|`y^w[vYuYrZp]m_k`hbfdcf`g^iZkXmUnRoPpMqJrGrDrAq>o<n:l8j6g5d4a4^4Z3X2X/X,Y*[(]&[#Y!V!S!P M J I#",],
-"blinn()",
-["%$%&$($*#,#.!0!2 5 7 9 ; = ? B D F H!J!L#N$P%R&T&V(X)Z*[,^-_/a0b2d4e5f7h9i;j=k>m@nBoDoFpHqJrLrNsPtRtTtVuXu[u^u`ubtdtfsgqipkolmnlpkrjshufvewcxay_z]{[|Y|W}T~R~P~N~L~J~H~F}C}A}?}=};}9|7|4|2|0{.{,z*z(y&x(",".[.^/`/b0d1f1h2j2k2k2i2g3f4g4i5k6m6n7p8r9t9s9q9o9m:k;j<l=m=o>q?s@uAvBuBsBqBoBmBkBkCmDoDqErFtGvHxIyJwJuJsJqJoJnLoMqNsOtPvQxRyS{SySwSuSsSqTpUrUtWuXwYxZyZw[v[t[r]p^q_s`uavcwcucscqdqerftguhuisjqkokmlkljmh","<O=O>P>P?P?Q?Q@R@R@SASATBTBTCUCUCVDVDVEWEWFWFXGXGXHXHYIYIYJYJZKZLZLZMZM[N[N[O[O]P]Q]Q]R]R]S]T]T]U]U]V]W]W]X]X]Y]Y]Z[[[[[][][^Z^Z_Z_Z`ZaZaZbYbYcYcYdYdXdXeXeWeWfVfVgUgUgThThShSiSiRiRiQjQjQjPjOjOjNjOjOjP",],
-"bumpmap()",
-["O1M1J1G0D0B0?0<192724314/5,6)6'7%9$<#>#A!D!F!I!L#O$Q%T&V'Y([*_+a-c.e0h2j4l6n8o:q<s>u@vBxEyGzI|L}N~Q~T~W~Y}]{`zbydwguitkrmponqlsjuhvfwcxay^{[{X{U|R|P}M}J}H}E}B}?|<{:z7y5x3v1s0q/n/k.h.e/c/`0]0Z1W1T1Q1N1","O7O7O7O7O6O6O6O6O6O5O5N5N5N5N5N5N4N4N4N4M4M3M3M3M3M3M2M2L2L2L2L2L1L1L1L1K1K0K0K0K0K0J0J/J/J/J/J/I/I/I.I.I.I.H.H.H.H.H.G.G.G-G-G-F-F-F-F-F-E-E-E,E,E,D,D,D,D,D,C,C+C+C+C+B+B+B+B+B+B+B+A*A*A*A*A*@*@*@*@*","Q6P6P5P5P5P5P4P4P4P4P3P3P3P3P2P2P2P2P2P1P1P1P1P0P0P0P0P0P/P/P/P/P.P.P.P.P-P-P-P-P,P,P,P,P+P+P+P+P*P*P*P*P)P)P)P)P(P(P(P(P(P'P'P'P'P&P&P&Q&Q&Q&Q%Q%Q%Q%Q$Q$Q$Q$Q$Q#Q#Q#Q#Q!Q!R!R!R!R!R R R R R R R!R!R!R!","Q4Q4Q4Q4Q4Q4R4R3R3R3R3R3R2R2R2R2R2R1R1S1S1S1S0S0S0S0S0T0T0T0T/T/T/T/T/T.U.U.U.U.U.U.U.V.V-V-V-V-V-V-V,W,W,W,W,W,X,X,X,X+X+X+Y+Y+Y+Y+Y+Y+Y+Z+Z+Z+Z+Z+Z+[+[+[+[+]+]+]+]+]+^+^+^+^+_+_+_+_+_+`+`+`+`+`+`+_+",],
-];
 
 var glyphs = [];
 loadGlyphArray(glyphData);
