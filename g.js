@@ -668,7 +668,7 @@
       annotateEnd(context);
    }
 
-   var sketchMenu = [
+   var hotKeyMenu = [
       ['a'  , "toggle audience"],
       ['b'  , "bend line"],
       ['c'  , "toggle card"],
@@ -1669,6 +1669,10 @@
 
          if (isAudiencePopup()) {
 
+	    // MAKE SURE AUDIENCE VIEW HAS THE RIGHT BACKGROUND COLOR.
+
+	    audienceCanvas.style.backgroundColor = backgroundColor;
+
             // DRAW A CURSOR WHERE AUDIENCE SHOULD SEE IT.
 
             if (pullDownIsActive)
@@ -2063,47 +2067,6 @@
          y /= sum;
       }
       return [parent.m2x(x), parent.m2y(y)];
-   }
-
-// HANDLE AUDIENCE POP-UP WINDOW.
-
-   function isAudiencePopup() {
-      return audiencePopup != null;
-   }
-
-   function createAudiencePopup() {
-      var w = _g.canvas.width;
-      var h = _g.canvas.height;
-      audiencePopup = window.open("", "audiencePopup", ""
-      +  " width=" + w
-      +  " height=" + (h+52)
-      );
-      audiencePopup.moveTo(0, 720);
-      audiencePopup.document.write( ""
-      +  " <head><title>SKETCH</title></head>"
-      +  " <body>"
-
-      +  " <table width=" + (w-24) + " height=" + (h+24) + " cellspacing=0 cellpadding=0"
-      +  " style='z-index:1;position:absolute;left:0;top:0;'>"
-      +  " <tr><td id='slide' align=center valign=center>"
-      +  " </td></tr></table>"
-
-      +  " <canvas id=audienceCanvas"
-      +  " width=" + (w - 24)
-      +  " height=" + h
-      +  " style='z-index:1;position:absolute;left:0;top:0;'"
-      +  " tabindex=1></canvas>"
-
-      +  " </body>"
-      );
-      audienceCanvas = audiencePopup.document.getElementById("audienceCanvas");
-      audienceContext = audienceCanvas.getContext("2d");
-      audiencePopup.blur();
-   }
-
-   function removeAudiencePopup() {
-      audiencePopup.close();
-      audiencePopup = null;
    }
 
 // HANDLE FAKE CROSSHAIR CURSOR.
