@@ -37,25 +37,10 @@ var title_page = {
 var page0 = {
    availableSketches: sketchTypes,
    pan: 0,
-   innerHTML: "\
-      <center>\
-      <table width=1280>\
-      <tr height=218></tr>\
-      <tr>\
-        <td>\
-           <center>\
-           <font color=white size=10>\
-           <big><b>My Textured Life</b></big>\
-           <p>&nbsp;<p>\
-           <i><small>Ken Perlin</small></i>\
-           </font>\
-           </center>\
-           </td>\
-        </tr>\
-      </table>\
-      <tr height=1000></tr>\
-      </center>\
-   "
+   template: [
+      ["<big><b>My Textured Life</b></big>"],
+      ["<i><small> Ken Perlin</small></i>"]
+   ],
 };
 
 var page1 = {

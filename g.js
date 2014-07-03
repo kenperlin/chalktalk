@@ -2299,7 +2299,14 @@
 
       sketchPage = sketchBook.setPage(pageIndex);
       var slide = document.getElementById('slide');
-      slide.innerHTML = sketchPages[pageIndex].innerHTML;
+
+      // SET PAGE CONTENT FROM TEMPLATE OR STRAIGHT FROM HTML
+
+      pageObject = sketchPages[pageIndex];
+      if (isDef(pageObject.template))
+         slide.innerHTML = templateToHTML(pageObject.template);
+      else if (isDef(pageObject.innerHTML))
+         slide.innerHTML = pageObject.innerHTML;
 
       // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
 
@@ -2334,6 +2341,39 @@
       }
       renderer.scene = sketchPage.scene;
       root = renderer.scene.root;
+   }
+
+   function templateToHTML(template) {
+      var slideHTML = document.createElement('slide');
+      var center = document.createElement('center');
+      slideHTML.appendChild(center);
+      var table = document.createElement('table');
+      table.setAttribute('width', '1280');
+      var tablePaddingRow = document.createElement('tr');
+      tablePaddingRow.setAttribute('height', '218');
+      table.appendChild(tablePaddingRow);
+      center.appendChild(table);
+
+      for (var i = 0; i < template.length; i++) {
+         var row = document.createElement('tr');
+         for (var j = 0; j < template[i].length; j++) {
+            var column = document.createElement('td');
+            var font = document.createElement('font');
+            font.setAttribute('color', 'white');
+            font.setAttribute('size', '10');
+            font.innerHTML = template[i][j];
+            var innerCenter = document.createElement('center');
+            innerCenter.appendChild(font);
+            column.appendChild(innerCenter);
+            row.appendChild(column);
+         }
+         table.appendChild(row);
+         var spacerRow = document.createElement('tr');
+         spacerRow.setAttribute('height', '50');
+         table.appendChild(spacerRow);
+      }
+
+      return slideHTML.innerHTML;
    }
 
    function loadGlyphArray(a) {
