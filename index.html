@@ -28,6 +28,8 @@
 </head>
 <body onLoad=gStart()>
 
+<div id=blank_page>
+</div>
 <div id=title_page>
    <center>
    <table width=1280>
@@ -385,6 +387,7 @@
    var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid Lattice PVase Noises" ).split(' ');
 
    var pages = [
+      ["blank_page", sketchTypes, 0],
       ["title_page", sketchTypes, 0],
       ["page0", sketchTypes, 0],
       ["page1", sketchTypes, 0],
