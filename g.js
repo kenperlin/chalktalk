@@ -2363,22 +2363,11 @@
 
             var content = template[i][j];
             if (content.indexOf('.mp4') > -1) {
-               var video = document.createElement('video');
-               video.className = 'vid';
-               video.setAttribute('width', '60%');
-               video.setAttribute('height', 'auto');
-               var source = document.createElement('source');
-               source.setAttribute('src', content);
-               video.appendChild(source);
-               innerCenter.appendChild(video);
+               innerCenter.appendChild(videoElement(content));
             } else if (content.indexOf('.jpg') > -1 || content.indexOf('.png') > -1) {
-               // slide contains image
+               innerCenter.appendChild(imageElement(content));
             } else {
-               var font = document.createElement('font');
-               font.setAttribute('color', 'white');
-               font.setAttribute('size', '10');
-               font.innerHTML = content;
-               innerCenter.appendChild(font);
+               innerCenter.appendChild(textElement(content));
             }
 
             column.appendChild(innerCenter);
@@ -2391,6 +2380,32 @@
       }
 
       return slideHTML.innerHTML;
+   }
+
+   function textElement(text) {
+      var font = document.createElement('font');
+      font.setAttribute('color', 'white');
+      font.setAttribute('size', '10');
+      font.innerHTML = text;
+      return font;
+   }
+
+   function imageElement(imageName) {
+      var img = document.createElement('img');
+      img.setAttribute('src', imageName);
+      img.setAttribute('width', '700');
+      return img;
+   }
+
+   function videoElement(videoName) {
+      var video = document.createElement('video');
+      video.className = 'vid';
+      video.setAttribute('width', '60%');
+      video.setAttribute('height', 'auto');
+      var source = document.createElement('source');
+      source.setAttribute('src', videoName);
+      video.appendChild(source);
+      return video;
    }
 
    function loadGlyphArray(a) {

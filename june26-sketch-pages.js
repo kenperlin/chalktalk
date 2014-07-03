@@ -29,20 +29,15 @@ var page1 = {
    pan: 0,
    template: [
       ["videos/modestDevil.mp4"]
-   ],
+   ]
 };
 
 var page2 = {
    availableSketches: sketchTypes,
    pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr height=140></tr>\
-      <tr>\
-         <th><img src=imgs/lightcycles.jpg width=700></th>\
-         </tr>\
-      </table>\
-   "
+   template: [
+      ["imgs/lightcycles.jpg"]
+   ]
 };
 
 var page3 = {
