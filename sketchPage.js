@@ -1249,13 +1249,19 @@
 
             ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
-	    codeElement.x1 = codeSketch.ylo > h + h/2 ? x :
-	       codeSketch.cx() < width() / 2 ? codeSketch.xhi + w/2 : codeSketch.xlo - w/2;
+	    codeElement.x1 = codeSketch.ylo > h + h/2
+	                     ? x
+			     : codeSketch.cx() < width() / 2
+			       ? codeSketch.xhi + w/2
+			       : codeSketch.xlo - w/2;
 
-	    if (codeElement.x === undefined)
-	       codeElement.x = x;
+            x = codeElement.x = codeElement.x === undefined
+	                        ? x
+			        : codeElement.codeSketch != codeSketch
+	                          ? codeElement.x1
+	                          : lerp(0.1, codeElement.x, codeElement.x1);
 
-	    x = codeElement.x = lerp(0.1, codeElement.x, codeElement.x1);
+            codeElement.codeSketch = codeSketch;
 
             //////////////////////////////////////////////////////////////////////////////////////
 
