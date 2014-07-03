@@ -1755,10 +1755,10 @@
          // DRAW PAGE NUMBER IF QUICK SWITCHING PAGES
          if (isBottomHover && isShiftPressed) {
             _g.font = "15px Arial";
-            numberSpacing = w / pages.length;
-            pageNumber = floor(((This().mouseX + _g.panX) / w) * pages.length);
+            numberSpacing = w / sketchPages.length;
+            pageNumber = floor(((This().mouseX + _g.panX) / w) * sketchPages.length);
 
-            for (pn = 0; pn < pages.length; pn++) {
+            for (pn = 0; pn < sketchPages.length; pn++) {
                _g.save();
 
                alpha = pageNumber == pn ? 0.8 : 0.1;
@@ -1808,7 +1808,7 @@
                _g.fillStyle = scrimColor(0.05);
                _g.fill();
 
-               var ns = isShiftPressed ? (w / pages.length * 2) : margin;
+               var ns = isShiftPressed ? (w / sketchPages.length * 2) : margin;
                offset = isShiftPressed ? 0 : _g.panX % ns;
                for (i = leftX + offset; i < rightX; i+= ns) {
                   _g.beginPath();
@@ -2275,11 +2275,11 @@
 
       // SAVE PAN VALUE FOR PREVIOUS PAGE
 
-      pages[pageIndex][2] = _g.panX;
+      sketchPages[pageIndex].pan = _g.panX;
 
       // RESTORE PAN VALUE FOR NEXT PAGE
 
-      _g.panX = pages[index][2];
+      _g.panX = sketchPages[index].pan;
 
       // MAKE SURE THE CODE WIDGET IS TURNED OFF.
 
@@ -2295,12 +2295,11 @@
       if (index === undefined)
          index = pageIndex;
 
-      pageIndex = (index + pages.length) % pages.length;
+      pageIndex = (index + sketchPages.length) % sketchPages.length;
 
       sketchPage = sketchBook.setPage(pageIndex);
-      var pageName = pages[pageIndex][0];
       var slide = document.getElementById('slide');
-      slide.innerHTML = document.getElementById(pageName).innerHTML;
+      slide.innerHTML = sketchPages[pageIndex].innerHTML;
 
       // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
 
@@ -2316,7 +2315,7 @@
 
       // SET SKETCH TYPES FOR THIS PAGE.
 
-      sketchTypes = pages[pageIndex][1];
+      sketchTypes = sketchPages[pageIndex].availableSketches;
       pagePullDownLabels = pageActionLabels.concat(sketchTypes);
       pullDownLabels = pagePullDownLabels;
 

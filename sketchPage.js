@@ -237,7 +237,7 @@
          if (isBottomGesture) {
             // IF DRAGGING TO QUICK SWITCH PAGES
             if (isShiftPressed) {
-               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
+               pageNumber = floor(((x + _g.panX) / width()) * sketchPages.length);
                if (pageNumber != pageIndex)
                   setPage(pageNumber);
                return;
@@ -325,7 +325,7 @@
 
          if (isBottomGesture) {
             if (isShiftPressed) {
-               pageNumber = floor(((x + _g.panX) / width()) * pages.length);
+               pageNumber = floor(((x + _g.panX) / width()) * sketchPages.length);
                if (pageNumber != pageIndex)
                   setPage(pageNumber);
             }
