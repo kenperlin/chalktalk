@@ -1060,8 +1060,8 @@
 
          function xor(a, b) { return a == b ? 0 : 1; }
 
-	 var x = this.binary("i");
-	 var y = this.binary("j");
+	 var x = this.getInValue("i");
+	 var y = this.getInValue("j");
 	 if (s == 0 || s == 4)
 	    x = this.getValue();
 
@@ -1076,8 +1076,8 @@
       }
    }
    var codes = [
-          "x",     "min(x, y)",     "max(x, y)",     "xor(x, y)",
-      "1 - x", "1 - min(x, y)", "1 - max(x, y)", "1 - xor(x, y)"
+      "x>0" , "min(x>0, y>0)",   "max(x>0, y>0)"  , "(x>0)!=(y>0)",
+      "x<=0", "max(x<=0, y<=0)", "min(x<=0, y<=0)", "(x>0)==(y>0)"
    ];
    Logic.prototype = new Sketch;
 
