@@ -201,8 +201,9 @@
                sk().x = x;
                sk().y = y;
             }
-            if (outPort == -1 || sk() instanceof NumericSketch)
+            if (outPort == -1 || sk() instanceof NumericSketch) {
                sk().mouseDown(x, y);
+            }
          }
 
          // START TO DRAW A NEW SIMPLE SKETCH.
@@ -287,7 +288,8 @@
          if (this.isCreatingGroup)
             return;
 
-         if (isk() && (outPort == -1 || sk() instanceof NumericSketch)) {
+         //if (isk() && (outPort == -1 || sk() instanceof NumericSketch)) {
+         if (isk()) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
                if (sk().travel > clickSize)
@@ -295,7 +297,9 @@
                sk().x = x;
                sk().y = y;
             }
-            sk().mouseDrag(x, y);
+            if (outPort == -1 || sk() instanceof NumericSketch) {
+               sk().mouseDrag(x, y);
+            }
          }
       }
 
@@ -421,7 +425,7 @@
 
          if (! isExpertMode) {
             if (this.isClick && this.isFocusOnSketch) {
-               if (! doAction(x, y)) {
+               if (! doSketchAction(x, y)) {
                   sk().isPressed = false;
                   pullDownLabels = sketchActionLabels.concat(sk().labels);
                   pullDownStart(sketchPage.x, sketchPage.y);
@@ -437,14 +441,16 @@
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
             if (bgClickCount == 0 && sk().code != null) {
+	       if (isCodeWidget && codeSketch != sk())
+                  toggleCodeWidget();
                codeSketch = sk();
                toggleCodeWidget();
                return;
             }
 
-            // CLICK ON A SKETCH AFTER A BG CLICK TO DO AN ACTION.
+            // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else if (doAction(x, y))
+            else if (doSketchAction(x, y))
                return;
          }
 
@@ -454,14 +460,18 @@
 
             if (sk().sketchProgress == 1)
                sk().isPressed = false;
-            isSketchDrawingEnabled = true;
+            sk().isDrawingEnabled = true;
             sk().mouseUp(x, y);
 
-            if (this.isClick && isHover() && isDef(sk().onClick))
+            if (this.isClick && isHover() && isDef(sk().onClick)) {
                sk().onClick(x, y);
+	       return;
+            }
 
-            if (! this.isClick && isk() && isDef(sk().onSwipe))
+            if (! this.isClick && isk() && isDef(sk().onSwipe)) {
                sk().onSwipe(x - this.xDown, y - this.yDown);
+	       return;
+            }
          }
 
          // CLICK OVER BACKGROUND
@@ -959,9 +969,6 @@
             if (isk())
                sk().isCard = ! sk().isCard;
             break;
-         case 'd':
-            isSketchDrawingEnabled = true;
-            break;
          case 'e':
             toggleCodeWidget();
             break;
@@ -975,12 +982,6 @@
             break;
          case 'i':
             toggleTextMode();
-            break;
-         case 'k':
-            if (! isTextEditorPopup())
-               createTextEditorPopup();
-            else
-               removeTextEditorPopup();
             break;
          case 'm':
             menuType = (menuType + 1) % 2;
@@ -1029,6 +1030,7 @@
                backgroundColor = 'white';
                defaultPenColor = 'black';
             }
+            document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
             document.getElementById('background').color = backgroundColor;
             sketchPalette[0] = defaultPenColor;
             for (var i = 0 ; i < sketchPage.sketches.length ; i++)
@@ -1153,9 +1155,6 @@
                sk().trace = [];
             }
 
-            if (sk().code != null)
-               eval(sk().code);
-
             if (sk() instanceof Sketch2D) {
                isDrawingSketch2D = true;
                if (sk().x2D == 0) {
@@ -1221,11 +1220,6 @@
             var x = codeSketch.cx();
             var y = 10;
 
-            // MOVE THE BUBBLE IF SKETCH IS CLOSE
-
-            if (codeSketch.ylo < 125)
-               x -= 160 * sk().sc;
-
             // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
             var text = codeTextArea.value;
@@ -1253,6 +1247,18 @@
 
             var h = floor(21 * rows);
 
+            ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
+
+	    codeElement.x1 = codeSketch.ylo > h + h/2 ? x :
+	       codeSketch.cx() < width() / 2 ? codeSketch.xhi + w/2 : codeSketch.xlo - w/2;
+
+	    if (codeElement.x === undefined)
+	       codeElement.x = x;
+
+	    x = codeElement.x = lerp(0.1, codeElement.x, codeElement.x1);
+
+            //////////////////////////////////////////////////////////////////////////////////////
+
             codeElement.style.left = x + _g.panX - w/2 + 10;
             codeElement.style.top = y + 5;
 
@@ -1269,7 +1275,6 @@
                var R = c[c.length-1];
 
                c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-               //c.push([lerp(0.25, codeSketch.xlo, x), codeSketch.ylo]);
                c.push([(codeSketch.xlo + codeSketch.xhi)/2, codeSketch.ylo]);
                c.push(L);
             }
@@ -1556,11 +1561,11 @@
             lineWidth(1);
             textHeight(12);
             var y0 = paletteY(sketchPalette.length);
-            for (var j = 0 ; j < sketchMenu.length ; j++) {
+            for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 20;
-               text(sketchMenu[j][0],  8, y, 0, 0);
-               text(sketchMenu[j][1], 38, y, 0, 0);
-               if (sketchMenu[j][0] == letterPressed)
+               text(hotKeyMenu[j][0],  8, y, 0, 0);
+               text(hotKeyMenu[j][1], 38, y, 0, 0);
+               if (hotKeyMenu[j][0] == letterPressed)
                   drawRect(3, y - 3, 30, 20);
             }
 
@@ -1706,6 +1711,7 @@
       }
 
       this.advanceCurrentSketch = function() {
+
          // AFTER SKETCHING: TRANSITION SKETCH STYLE AND RESTORE CURSOR POSITION.
 
          if (isk() && sk().sketchState == 'in progress')
