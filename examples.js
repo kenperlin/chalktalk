@@ -1067,8 +1067,8 @@
 
          var _outValue = null;
          try {
-            eval("_outValue = (" + this.code[0][1] + ")");
-         } catch (e) {}
+	    eval("_outValue = (" + this.code[0][1] + ")");
+         } catch (e) { }
 	 if (_outValue != null)
             this.setOutValue('o', _outValue);
 

@@ -132,10 +132,12 @@
 
                var s = sk().intersectingSketches();
                for (var i = 0 ; i < s.length ; i++) {
-                  if (isDef(sk().onDropOnto))
+                  if (isDef(sk().onDropOnto)) {
                      sk().onDropOnto(s[i]);
-                  if (isDef(s[i].onDroppedOnto))
+                  }
+                  if (isDef(s[i].onDroppedOnto)) {
                      s[i].onDroppedOnto(sk());
+                  }
                }
                break;
             }
@@ -2213,6 +2215,7 @@
       sketch.tX = x;
       sketch.tY = y;
       sketch.geometry = g;
+      g.sketch = sketch;
 
       if (g.material == blackMaterial) {
          var C = colorToRGB(sketchColor());

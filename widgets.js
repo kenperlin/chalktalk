@@ -549,7 +549,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
        },
        updateF = function() {
           try {
-             eval(codeTextArea.value);
+             eval("(codeSketch.functionToEvalCode = function() {" + codeTextArea.value + "})()" );
           } catch (e) { }
           if (code() != null) {
              code()[codeSelector.selectedIndex][1] = codeTextArea.value;
@@ -561,7 +561,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return codeSketch == null ? null : codeSketch.code;
    }
 
-   function codeSelectorBgColor() { return 'rgba(0,0,0,0)'; }
+   function codeSelectorBgColor() { return backgroundColor === 'white' ? 'rgba(0,0,0,0)' : 'rgba(128,192,255,0.3)'; }
    function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : '#c0e0ff'; }
    function codeTextBgColor() { return 'rgba(0,0,0,0)'; }
    function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
@@ -594,21 +594,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + "</textArea>";
 
          codeSelector = document.getElementById("code_selector");
+         codeSelector.style.backgroundColor = codeSelectorBgColor();
+         codeSelector.style.borderColor = codeTextFgColor();
+         codeSelector.style.color = codeSelectorFgColor();
          codeSelector.style.font="18px courier";
          codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
-         codeSelector.style.backgroundColor = codeSelectorBgColor();
-         codeSelector.style.color = codeSelectorFgColor();
-         codeSelector.style.borderColor = codeTextFgColor();
-         codeSelector.style.backgroundColor = 'rgba(128,192,255,0.3)';
          if (isDef(codeSketch.selectedIndex))
             codeSelector.selectedIndex = codeSketch.selectedIndex;
 
          codeTextArea = document.getElementById("code_text");
          codeTextArea.onchange = 'console.log("button clicked")';
+         codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
-         codeTextArea.style.font="18px courier";
-         codeTextArea.style.backgroundColor=codeTextBgColor();
-         codeTextArea.style.color=codeTextFgColor();
+         codeTextArea.style.color = codeTextFgColor();
+         codeTextArea.style.font = "18px courier";
          codeTextArea.value = code()[codeSelector.selectedIndex][1];
          if (code().length < 2) {
             codeTextArea.style.position = "absolute";
@@ -618,9 +617,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.onclick = function(event) {
             setTextMode(true);
 
-// ON SCREEN KEYBOARD FOR CODE TEXT IS DISABLED FOR NOW.
+            // ON SCREEN KEYBOARD FOR CODE TEXT IS DISABLED FOR NOW.
 
-//          isOnScreenKeyboardMode = true;
+/////////// isOnScreenKeyboardMode = true;
 
          };
       }

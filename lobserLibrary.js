@@ -168,12 +168,12 @@ uniform float spinAngle;\
    }\
 "].join("\n");
 
-registerGlyph("boringSliced()",[
+registerGlyph("bSliced()",[
    makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
    makeOval( 0, -1, 1, 1, 32,  PI*2.0, PI*0.5),
 ]);
 
-function boringSliced() {
+function bSliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, boringSlicedFragmentShader);
    if(!sketch.switcher)
       sketch.switcher = 0;
@@ -674,7 +674,7 @@ barleyField = {
 
 
 
-registerGlyph("noiseFloor()",["9;8<6>5@4B3D2F0H/J.L-N,P*R)T(V'X%Z$]#_!b d!d%d'd)d,d.d1d3d5d8d:d<d?dAcCcFcHcJbMbObQbTbVbXb[b^b`bcbebgbjblanaqasauaxaza|a~a|_{]zZyXxVwTvRvOuMtKsIqGpEoCnAm?l=k;i;f;d;b;_;];Z;W;U;S;P;N;L;I;G;E;B;@;>;;;9<","9I9J:K:L:L;M;M<N<O=O>P>P?P@Q@PAPAOANBNBMBLBKBKBJCICHCHDGEGEGFHFHGIHIHJHKIKILIMJMJNJOKOKPLQLQMRNRNRORPRPQQQQPRORORNSMSLSLTKTJTJUIUHUHVGVFWFWFXFXGXHYHYIYJZJZKZL[M[M[N]N]O^P_P_Q`QaQaQbQcQcPdPdOdNeNeMeLeK",]
+registerGlyph("nFloor()",["9;8<6>5@4B3D2F0H/J.L-N,P*R)T(V'X%Z$]#_!b d!d%d'd)d,d.d1d3d5d8d:d<d?dAcCcFcHcJbMbObQbTbVbXb[b^b`bcbebgbjblanaqasauaxaza|a~a|_{]zZyXxVwTvRvOuMtKsIqGpEoCnAm?l=k;i;f;d;b;_;];Z;W;U;S;P;N;L;I;G;E;B;@;>;;;9<","9I9J:K:L:L;M;M<N<O=O>P>P?P@Q@PAPAOANBNBMBLBKBKBJCICHCHDGEGEGFHFHGIHIHJHKIKILIMJMJNJOKOKPLQLQMRNRNRORPRPQQQQPRORORNSMSLSLTKTJTJUIUHUHVGVFWFWFXFXGXHYHYIYJZJZKZL[M[M[N]N]O^P_P_Q`QaQaQbQcQcPdPdOdNeNeMeLeK",]
 );
 
 THREE.Object3D.prototype.addNoiseFloor = function() {
@@ -687,7 +687,7 @@ THREE.Object3D.prototype.addNoiseFloor = function() {
   return plane;
 }
 
-function noiseFloor() {
+function nFloor() {
 
   var a = root.addNoiseFloor();
 
@@ -1226,28 +1226,29 @@ function tree() {
 }
 
 
-registerGlyph("noiseball()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
+registerGlyph("explode()",["wOxRyUzXz[z_ybxdvfshqkommokqisfudwbx_y[{X{U|R}O}L~I~F~C}@}=};|8z6x4v2t0r.o,m+j)g(e'b&_%[$X#U!S!P!M!J!G#D#A$>%;&8'6)3+1-./,1*3(6&8%;$>#A#D#G!J!M!P S V Y ] `!c#f$h%k&m(o*q-s/u1w4x6z9{<|?}A}D}G}J|M{P{S{V",]
 );
 
 THREE.Object3D.prototype.addNoiseBall = function() {
-  var ball = noiseBall.setup();
+  var ball = explodeBall.setup();
   this.add(ball);
   this.ball = ball;
   return ball;
 }
 
-function noiseball() {
+function explode() {
 	var a = root.addNoiseBall();
 	geometrySketch(a);
 	a.update = function() {
 
 		this.shaderMaterial.uniforms['time'].value = time*.1;
+                this.shaderMaterial.uniforms['alpha'].value = this.sketch.fadeAway == 0 ? 1 : this.sketch.fadeAway;
 
 	}
 }
 
 
-noiseBall = {
+explodeBall = {
     
     setup:function(){
         
@@ -1257,6 +1258,7 @@ noiseBall = {
 
             uniforms : {
                 "time": { type: "f", value: 0 },
+                "alpha": { type: "f", value: 1 },
                 "weight": { type: "f", value: 1 },
                 "tExplosion": { type: "t", value: null },
             },
@@ -1437,6 +1439,7 @@ noiseBall = {
                 "varying vec3 pos;",
                 "varying float ao;",
                 "uniform float time;",
+                "uniform float alpha;",
                 "uniform float weight;",
                 "varying float d;",
 
@@ -1504,9 +1507,9 @@ noiseBall = {
                 g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;\
                 g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;\
             vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),\
-                                   dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
-                              vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
-                                   dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
+                               dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
+                          vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
+                               dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
                 return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
             }\
             float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
@@ -1526,13 +1529,14 @@ noiseBall = {
                 varying float ao;\
                 varying float d;\
                 uniform float time;\
+                uniform float alpha;\
                 float PI = 3.14159265358979323846264;\
                 float random(vec3 scale,float seed){return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);}\
                 void main() {\
                   vec3 color = vec3((((ao)*-190.)*-.1));\
                   vec3 col = vec3(1.5,.3,.1);\
                   float ns = turbulence(vec3(pos.x+(time*3.),pos.y+(time*2.),pos.z+(time*4.)));\
-                  gl_FragColor = vec4( color*col*vec3(ns*1.4,ns*ns*5.,ns*ns*5.), 1.0 );\
+                  gl_FragColor = vec4( color*col*vec3(ns*1.4,ns*ns*5.,ns*ns*5.), alpha );\
                 }"
             ].join("\n")
         }
@@ -1555,6 +1559,10 @@ noiseBall = {
                     type: "f",
                     value: 0.0
                 },
+                alpha: {
+                    type: "f",
+                    value: 1.0
+                },
                 weight: {
                     type: "f",
                     value: 10.0
@@ -1574,11 +1582,7 @@ noiseBall = {
 
     },
     
-    draw:function(time){
-
-        this.shaderMaterial.uniforms['time'].value = time*.1;
-        
-    }
+    draw:function(time) { }
 }
 
 
