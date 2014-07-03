@@ -268,6 +268,22 @@
          }
          context.restore();
       }
+      this.evalCode = function(code) {
+         function defaultToZero(arg) { return arg===undefined ? 0 : arg; }
+
+         if (code.indexOf('return') == -1)
+            code = "return " + code;
+
+         var result = null;
+         try {
+	    result = Function("me","x","y","z", code)(this, defaultToZero(this.inValue[0]),
+			                                    defaultToZero(this.inValue[1]),
+				                            defaultToZero(this.inValue[2]));
+         }
+	 catch (e) { }
+
+         return result;
+      }
       this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
       this.fadeAway = 0;
       this.getDefaultFloat = function(name) {

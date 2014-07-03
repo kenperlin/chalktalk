@@ -1696,36 +1696,44 @@
             }
          }
 
-         // PROPAGATE LINK VALUES.
+         // EVALUATE AND PROPAGATE EXPRESSIONS AND LINKS BETWEEN PORTS.
 
          for (var I = 0 ; I < nsk() ; I++) {
-            var a = sk(I);
-            if (a instanceof SimpleSketch && isDef(a.out[0]))
-               if (a.isNullText())
-                  a.outValue[0] = a.inValue[0];
-               else
-                  try {
-                     var x = value(a.inValue[0]);
-                     var y = value(a.inValue[1]);
-                     var z = value(a.inValue[2]);
-                     var result = eval(a.text);
-                     if (isNumber(parseFloat(result)))
-                        a.outValue[0] = result;
-                  } catch (e) { }
+            var S = sk(I);
 
-            // EACH PORT'S VALUES PROPAGATE FROM ITS INPUT TO ITS OUTPUT.
+	    // SIMPLE SKETCH:
 
-            else for (var i = 0 ; i < a.in.length ; i++)
-               a.outValue[i] = a.inValue[i];
+            if (S instanceof SimpleSketch) {
+
+               // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
+
+               if (S.isNullText()) {
+	          if (isDef(S.out[0]))
+                     S.outValue[0] = S.inValue[0];
+               }
+
+	       // IF TEXT: EVALUATE, THEN PROPAGATE IF THERE IS AN OUTPUT.
+
+               else {
+	          S.evalResult = S.evalCode(S.text);
+		  if (S.evalResult != null && isDef(S.out[0]))
+		     S.outValue[0] = S.evalResult;
+               }
+            }
+
+            // NON-SIMPLE SKETCH: EACH PORT'S VALUES PROPAGATE FROM ITS INPUT TO ITS OWN OUTPUT.
+
+            else for (var i = 0 ; i < S.in.length ; i++)
+               S.outValue[i] = S.inValue[i];
 
             // VALUES PROPAGATE ALONG LINKS.
 
-            for (var i = 0 ; i < a.out.length ; i++)
-               if (isDef(a.out[i])) {
-                  var outValue = value(a.outValue[i]);
-                  for (var k = 0 ; k < a.out[i].length ; k++) {
-                     var b = a.out[i][k][0];
-                     var j = a.out[i][k][1];
+            for (var i = 0 ; i < S.out.length ; i++)
+               if (isDef(S.out[i])) {
+                  var outValue = value(S.outValue[i]);
+                  for (var k = 0 ; k < S.out[i].length ; k++) {
+                     var b = S.out[i][k][0];
+                     var j = S.out[i][k][1];
                      b.inValue[j] = outValue;
                   }
                }
@@ -1961,11 +1969,6 @@
       sketchPage.index = n;
       if (n >= 0)
          pullDownLabels = sketchActionLabels.concat(sk().labels);
-      if (isCodeWidget && sk().code != null) {
-         codeSketch = sk();
-         toggleCodeWidget();
-         toggleCodeWidget();
-      }
    }
 
    function copySketch(s) {
