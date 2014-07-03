@@ -27,16 +27,9 @@ var page0 = {
 var page1 = {
    availableSketches: sketchTypes,
    pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr height=50></tr>\
-      <tr>\
-         <th><video class=vid width='60%' height='auto'>\
-             <source src='videos/modestDevil.mp4'>\
-             </video></th>\
-         </tr>\
-      </table>\
-   "
+   template: [
+      ["videos/modestDevil.mp4"]
+   ],
 };
 
 var page2 = {

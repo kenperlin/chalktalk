@@ -2350,20 +2350,37 @@
       var table = document.createElement('table');
       table.setAttribute('width', '1280');
       var tablePaddingRow = document.createElement('tr');
-      tablePaddingRow.setAttribute('height', '218');
+      tablePaddingRow.setAttribute('height', '50');
       table.appendChild(tablePaddingRow);
       center.appendChild(table);
 
       for (var i = 0; i < template.length; i++) {
          var row = document.createElement('tr');
+
          for (var j = 0; j < template[i].length; j++) {
             var column = document.createElement('td');
-            var font = document.createElement('font');
-            font.setAttribute('color', 'white');
-            font.setAttribute('size', '10');
-            font.innerHTML = template[i][j];
             var innerCenter = document.createElement('center');
-            innerCenter.appendChild(font);
+
+            var content = template[i][j];
+            if (content.indexOf('.mp4') > -1) {
+               var video = document.createElement('video');
+               video.className = 'vid';
+               video.setAttribute('width', '60%');
+               video.setAttribute('height', 'auto');
+               var source = document.createElement('source');
+               source.setAttribute('src', content);
+               video.appendChild(source);
+               innerCenter.appendChild(video);
+            } else if (content.indexOf('.jpg') > -1 || content.indexOf('.png') > -1) {
+               // slide contains image
+            } else {
+               var font = document.createElement('font');
+               font.setAttribute('color', 'white');
+               font.setAttribute('size', '10');
+               font.innerHTML = content;
+               innerCenter.appendChild(font);
+            }
+
             column.appendChild(innerCenter);
             row.appendChild(column);
          }
