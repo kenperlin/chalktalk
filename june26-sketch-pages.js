@@ -9,29 +9,10 @@ var blankPage = {
 var title_page = {
    availableSketches: sketchTypes,
    pan: 0,
-   innerHTML: "\
-      <center>\
-      <table width=1280>\
-      <tr height=200></tr>\
-      <tr>\
-        <td>\
-           <center>\
-           <font color=white size=10>\
-           Early experiences and\
-   	<br>\
-           current influences\
-   	<br>\
-           in computer graphics\
-           <br>&nbsp;<p>\
-           <i><small>Ken Perlin</small></i>\
-           </font>\
-           </center>\
-           </td>\
-        </tr>\
-      </table>\
-      <tr height=1000></tr>\
-      </center>\
-   "
+   template: [
+      ["Early experiences and<br>current influences<br>in computer graphics"],
+      ["<i><small>Ken Perlin</small></i>"]
+   ]
 };
 
 var page0 = {
@@ -39,8 +20,8 @@ var page0 = {
    pan: 0,
    template: [
       ["<big><b>My Textured Life</b></big>"],
-      ["<i><small> Ken Perlin</small></i>"]
-   ],
+      ["<i><small>Ken Perlin</small></i>"]
+   ]
 };
 
 var page1 = {
