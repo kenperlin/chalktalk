@@ -2156,7 +2156,14 @@
 
       sketchPage = sketchBook.setPage(pageIndex);
       var slide = document.getElementById('slide');
-      slide.innerHTML = sketchPages[pageIndex].innerHTML;
+
+      // SET PAGE CONTENT FROM TEMPLATE OR STRAIGHT FROM HTML
+
+      pageObject = sketchPages[pageIndex];
+      if (isDef(pageObject.template))
+         slide.innerHTML = templateToHTML(pageObject.template);
+      else if (isDef(pageObject.innerHTML))
+         slide.innerHTML = pageObject.innerHTML;
 
       // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
 
@@ -2191,6 +2198,71 @@
       }
       renderer.scene = sketchPage.scene;
       root = renderer.scene.root;
+   }
+
+   function templateToHTML(template) {
+      var slideHTML = document.createElement('slide');
+      var center = document.createElement('center');
+      slideHTML.appendChild(center);
+      var table = document.createElement('table');
+      table.setAttribute('width', '1280');
+      var tablePaddingRow = document.createElement('tr');
+      tablePaddingRow.setAttribute('height', '50');
+      table.appendChild(tablePaddingRow);
+      center.appendChild(table);
+
+      for (var i = 0; i < template.length; i++) {
+         var row = document.createElement('tr');
+
+         for (var j = 0; j < template[i].length; j++) {
+            var column = document.createElement('td');
+            var innerCenter = document.createElement('center');
+
+            var content = template[i][j];
+            if (content.indexOf('.mp4') > -1) {
+               innerCenter.appendChild(videoElement(content));
+            } else if (content.indexOf('.jpg') > -1 || content.indexOf('.png') > -1) {
+               innerCenter.appendChild(imageElement(content));
+            } else {
+               innerCenter.appendChild(textElement(content));
+            }
+
+            column.appendChild(innerCenter);
+            row.appendChild(column);
+         }
+         table.appendChild(row);
+         var spacerRow = document.createElement('tr');
+         spacerRow.setAttribute('height', '50');
+         table.appendChild(spacerRow);
+      }
+
+      return slideHTML.innerHTML;
+   }
+
+   function textElement(text) {
+      var font = document.createElement('font');
+      font.setAttribute('color', 'white');
+      font.setAttribute('size', '10');
+      font.innerHTML = text;
+      return font;
+   }
+
+   function imageElement(imageName) {
+      var img = document.createElement('img');
+      img.setAttribute('src', imageName);
+      img.setAttribute('width', '700');
+      return img;
+   }
+
+   function videoElement(videoName) {
+      var video = document.createElement('video');
+      video.className = 'vid';
+      video.setAttribute('width', '60%');
+      video.setAttribute('height', 'auto');
+      var source = document.createElement('source');
+      source.setAttribute('src', videoName);
+      video.appendChild(source);
+      return video;
    }
 
    function loadGlyphArray(a) {
