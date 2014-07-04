@@ -5,11 +5,11 @@ globalStrokes = {
   draw:true,
   switcher:false,
   strokes:[],
-  remember:3,
+  remember:5,
   filler:function(b,x,y){
 
-    var X = (x/1280)-.5;
-    var Y = (y/720) -.5;
+    var X = (x/1280);
+    var Y = (y/720)-.5;
 
     if(this.switcher!=b){
       this.switcher = !this.switcher;
@@ -19,8 +19,8 @@ globalStrokes = {
       }
     }
     if(this.switcher){
-      this.strokes[this.strokes.length-1].push(X*100);
-      this.strokes[this.strokes.length-1].push(Y*100);
+      this.strokes[this.strokes.length-1].push(X*128);
+      this.strokes[this.strokes.length-1].push(Y*72);
 
     }
     if(this.strokes.length>this.remember){
@@ -28,6 +28,13 @@ globalStrokes = {
     }
   },
   returnCoord:function(){
+
+    while(this.strokes[this.strokes.length-1].length < 5){
+      if( this.strokes[this.strokes.length-1].length < 5){
+        console.log(this.strokes[this.strokes.length-1].length);
+        this.strokes.pop();
+      }
+    }
 
     var returnArr = [];
     var avg = 0;
@@ -59,7 +66,7 @@ globalStrokes = {
       var num = this.strokes[this.strokes.length-1][i];
       if(i%2==0){
         var littleArr=[];
-        littleArr.push(num+large);
+        littleArr.push(num-large);
         littleArr.push(0);
       }
       else
@@ -100,7 +107,7 @@ function ArbRevolve() {
     if(globalStrokes!=undefined)
       latheArray = globalStrokes.returnCoord();
 
-    console.log(latheArray);
+    console.log(globalStrokes.strokes);
 
     var body = tnode.addLathe( 
         latheArray
@@ -125,9 +132,9 @@ function ArbRevolve() {
     sketch.startTime = time;
 
     sketch.update = function() {
-      var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(-2,-12,0.0).
-      rotateX(PI/2).rotateZ(PI/2).scale(scale/7);
+      // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+      this.geometry.getMatrix().translate(0,0,0.0).
+      rotateX(PI/2).rotateZ(PI/2).scale(2);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
   }
