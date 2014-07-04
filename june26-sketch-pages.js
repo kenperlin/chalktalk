@@ -27,17 +27,13 @@ var page0 = {
 var page1 = {
    availableSketches: sketchTypes,
    pan: 0,
-   template: [
-      ["videos/modestDevil.mp4"]
-   ]
+   template: "videos/modestDevil.mp4"
 };
 
 var page2 = {
    availableSketches: sketchTypes,
    pan: 0,
-   template: [
-      ["imgs/lightcycles.jpg"]
-   ]
+   template: "imgs/lightcycles.jpg"
 };
 
 var page3 = {

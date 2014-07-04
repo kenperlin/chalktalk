@@ -2304,7 +2304,7 @@
 
       pageObject = sketchPages[pageIndex];
       if (isDef(pageObject.template))
-         slide.innerHTML = templateToHTML(pageObject.template);
+         insertTemplate(pageObject.template, slide);
       else if (isDef(pageObject.innerHTML))
          slide.innerHTML = pageObject.innerHTML;
 
@@ -2343,43 +2343,65 @@
       root = renderer.scene.root;
    }
 
-   function templateToHTML(template) {
-      var slideHTML = document.createElement('slide');
+   function insertTemplate(template, slide) {
+      var parent = document.createElement('parent');
       var center = document.createElement('center');
-      slideHTML.appendChild(center);
       var table = document.createElement('table');
-      table.setAttribute('width', '1280');
       var tablePaddingRow = document.createElement('tr');
-      tablePaddingRow.setAttribute('height', '50');
-      table.appendChild(tablePaddingRow);
+      tablePaddingRow.className = 'padding';
+
+      parent.appendChild(center);
       center.appendChild(table);
+      table.appendChild(tablePaddingRow);
+      table.setAttribute('width', '1280');
 
-      for (var i = 0; i < template.length; i++) {
-         var row = document.createElement('tr');
-
-         for (var j = 0; j < template[i].length; j++) {
-            var column = document.createElement('td');
-            var innerCenter = document.createElement('center');
-
-            var content = template[i][j];
-            if (content.indexOf('.mp4') > -1) {
-               innerCenter.appendChild(videoElement(content));
-            } else if (content.indexOf('.jpg') > -1 || content.indexOf('.png') > -1) {
-               innerCenter.appendChild(imageElement(content));
-            } else {
-               innerCenter.appendChild(textElement(content));
+      if (template instanceof Array)
+         if (template[0] instanceof Array)
+            for (var i = 0; i < template.length; i++) {
+               table.appendChild(row(template[i]));
+               if (i != template.length - 1) {
+                  var spacerRow = document.createElement('tr');
+                  spacerRow.setAttribute('height', '50');
+                  table.appendChild(spacerRow);
+               }
             }
+         else
+            table.appendChild(row(template));
+      else
+         table.appendChild(row(template));
 
-            column.appendChild(innerCenter);
-            row.appendChild(column);
-         }
-         table.appendChild(row);
-         var spacerRow = document.createElement('tr');
-         spacerRow.setAttribute('height', '50');
-         table.appendChild(spacerRow);
-      }
+      slide.innerHTML = parent.innerHTML;
 
-      return slideHTML.innerHTML;
+      // FIND HEIGHT OF CONTENT, THEN SET PADDING ROW ACCORDINGLY
+      var paddingHeight = (height() - slide.clientHeight) / 2;
+      slide.getElementsByClassName('padding')[0].setAttribute('height', paddingHeight);
+   }
+
+   function row(template) {
+      var rowElement = document.createElement('tr');
+      if (template instanceof Array)
+         for (var i = 0; i < template.length; i++)
+            rowElement.appendChild(column(template[i]));
+      else
+         rowElement.appendChild(content(template));
+      return rowElement;
+   }
+
+   function column(template) {
+      var columnElement = document.createElement('td');
+      columnElement.appendChild(content(template));
+      return columnElement;
+   }
+
+   function content(template) {
+      var center = document.createElement('center');
+      if (template.indexOf('.mp4') > -1)
+         center.appendChild(videoElement(template));
+      else if (template.indexOf('.jpg') > -1 || template.indexOf('.png') > -1)
+         center.appendChild(imageElement(template));
+      else
+         center.appendChild(textElement(template));
+      return center;
    }
 
    function textElement(text) {
