@@ -1,4 +1,100 @@
 
+globalStrokes = {
+  draw:true,
+  switcher:false,
+  strokes:[],
+  remember:5,
+  filler:function(b,x,y){
+
+    var X = (x/1280);
+    var Y = (y/720)-.5;
+
+    if(this.switcher!=b){
+      this.switcher = !this.switcher;
+      if(b==true){
+        var newArr = [];
+        this.strokes.push(newArr);
+      }
+    }
+    if(this.switcher){
+      this.strokes[this.strokes.length-1].push(X);
+      this.strokes[this.strokes.length-1].push(Y);
+
+    }
+    if(this.strokes.length>this.remember){
+      this.strokes.shift();
+    }
+  },
+  returnCoord:function(which,off){
+
+    var index = which || 1;
+    var offset = off || 0;
+
+    while(this.strokes[this.strokes.length-1].length < 5){
+      if( this.strokes[this.strokes.length-1].length < 5){
+        console.log(this.strokes[this.strokes.length-1].length);
+        this.strokes.pop();
+      }
+    }
+
+    console.log(which);
+
+    var returnArr = [];
+    var avg = 0;
+
+    for(var i = 0 ; i < this.strokes[this.strokes.length-(index+1)].length ; i+=2){
+      
+      var num = this.strokes[this.strokes.length-(index+1)][i];
+      avg += num;
+
+    }
+
+    avg /= this.strokes[this.strokes.length-(index+1)].length;
+
+    var large = -1e6;
+
+    for(var i = 0 ; i < this.strokes[this.strokes.length-index].length ; i+=1){
+      
+      var num = this.strokes[this.strokes.length-index][i];
+
+      if(large<num)
+        large=num;
+
+    }
+    // console.log(this.strokes);
+    // console.log(large);
+    // avg+=large;
+
+    large-=offset;
+
+    for(var i = 0 ; i < this.strokes[this.strokes.length-index].length ; i++){
+      var num = this.strokes[this.strokes.length-index][i];
+      if(i%2==0){
+        var littleArr=[];
+        littleArr.push((num-large)*128);
+        littleArr.push(0);
+      }
+      else
+        littleArr.push(num*72);
+
+      if(littleArr.length>2)
+        returnArr.push(littleArr);
+    }
+    return returnArr;
+  },
+  returnPath:function(which,off){
+
+    var arr = this.returnCoord(which,off);
+    var returnArray = [];
+
+    for(var i = 0 ; i < arr.length ; i++){
+      var vec = new THREE.Vector3(arr[i][0],arr[i][1],arr[i][2]);
+      returnArray.push(vec);
+    }
+
+    return returnArray;
+  }
+};
 
 THREE.SkinnedMesh = function ( geometry, material, useVertexTexture ) {
 

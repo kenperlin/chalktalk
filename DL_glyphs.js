@@ -1,84 +1,6 @@
 
 ["] ]!]#]$]%]&]'](](])]*]+],]-].^/^0^1^2^3^4^4^5^6^7^8^9^:^;_<_=_>^?^@^A^A^B^C^D^E^F^G^H^I^J^K^L^M^N^O^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^]^]^^^_^`^a^b^c^d^e^f]g]h]i]j]j]k]l]m]n]o]p]q]r]s]t]u]v[w[w[x[y[z[{[|[}[~","]&[%Y&X&W&U&T&S%R%P%O%N%M%K%J%I%G%F%E&D&B&A&A&A'A)A*A+A-A.A/A0A2A3A4A5A7B8B9B;B<B=B>B@BABBBCBEBFBGBIBJBKBLBNBOBPBQBSCTCUCVCXCYCZC]C^C_C`CbCcCdCeCgChCiCkClCmCnCoEoFoGoHnJnKnLnNnOnPnQnSnTnUnVnXnYnZo[o^o"]
 
-globalStrokes = {
-  draw:true,
-  switcher:false,
-  strokes:[],
-  remember:5,
-  filler:function(b,x,y){
-
-    var X = (x/1280);
-    var Y = (y/720)-.5;
-
-    if(this.switcher!=b){
-      this.switcher = !this.switcher;
-      if(b==true){
-        var newArr = [];
-        this.strokes.push(newArr);
-      }
-    }
-    if(this.switcher){
-      this.strokes[this.strokes.length-1].push(X*128);
-      this.strokes[this.strokes.length-1].push(Y*72);
-
-    }
-    if(this.strokes.length>this.remember){
-      this.strokes.shift();
-    }
-  },
-  returnCoord:function(){
-
-    while(this.strokes[this.strokes.length-1].length < 5){
-      if( this.strokes[this.strokes.length-1].length < 5){
-        console.log(this.strokes[this.strokes.length-1].length);
-        this.strokes.pop();
-      }
-    }
-
-    var returnArr = [];
-    var avg = 0;
-
-    for(var i = 0 ; i < this.strokes[this.strokes.length-2].length ; i+=2){
-      
-      var num = this.strokes[this.strokes.length-2][i];
-      avg += num;
-
-    }
-
-    avg /= this.strokes[this.strokes.length-2].length;
-
-    var large = -1e6;
-
-    for(var i = 0 ; i < this.strokes[this.strokes.length-1].length ; i+=1){
-      
-      var num = this.strokes[this.strokes.length-1][i];
-
-      if(large<num)
-        large=num;
-
-    }
-    // console.log(this.strokes);
-    // console.log(large);
-    // avg+=large;
-
-    for(var i = 0 ; i < this.strokes[this.strokes.length-1].length ; i++){
-      var num = this.strokes[this.strokes.length-1][i];
-      if(i%2==0){
-        var littleArr=[];
-        littleArr.push(num-large);
-        littleArr.push(0);
-      }
-      else
-        littleArr.push(num);
-
-      if(littleArr.length>2)
-        returnArr.push(littleArr);
-    }
-    return returnArr;
-  }
-};
-
 
 function ArbRevolve() {
 
@@ -117,7 +39,8 @@ function ArbRevolve() {
 
     var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
 
-    // console.log(sketch);
+    // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
+    console.log(sketch);
 
     // for(var i = 0 ; i < body.geometry.faces.length ; i++){
     //   var face = body.geometry.faces[i];
@@ -141,6 +64,79 @@ function ArbRevolve() {
 }
 
 ArbRevolve.prototype = new Sketch;
+
+
+//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+
+function ArbRevolveHandle() {
+
+  this.labels = "can".split(' ');
+
+  this.render = function(elapsed) {
+    m.save();
+    m.scale(this.size / 400);
+    mCurve([ [0,1], [0,-1]]);
+    mCurve([ [0,1], [-1,1], [-1,-1], [0,-1]]);
+    mCurve([ [-1,1], [-1.5,1], [-1.5,0], [-1,0]]);
+    m.restore();
+  }
+
+  this.onClick = function(x, y) {
+
+    console.log(this);
+
+    this.fadeAway = 1.0;
+
+    glyphSketch.color = 'rgba(0,0,0,.01)';
+
+    var tnode = new THREE.Mesh();
+
+    var latheArray = [];
+    var handleArray = [];
+
+    if(globalStrokes!=undefined){
+      latheArray = globalStrokes.returnCoord(2);
+      handleArray = globalStrokes.returnPath(1,-.08);
+    }
+
+    var body = tnode.addLathe( 
+        latheArray
+      , 32);
+
+    var geo = body.geometry;
+
+    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+
+    console.log(handleArray);
+
+    var curve = new THREE.SplineCurve3(handleArray);
+
+    sketch.geometry.add(new THREE.Mesh(new THREE.TubeGeometry(curve),new THREE.MeshLambertMaterial()));
+    console.log(sketch);
+
+    // for(var i = 0 ; i < body.geometry.faces.length ; i++){
+    //   var face = body.geometry.faces[i];
+    //   var temp = face.a;
+    //   var temp2 = face.c;
+    //   face.a = temp2;
+    //   face.c = temp;
+    // }
+    // sketch.geometry.geometry.computeFaceNormals();
+    // sketch.geometry.geometry.computeVertexNormals();
+
+    sketch.startTime = time;
+
+    sketch.update = function() {
+      // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+      this.geometry.getMatrix().translate(0,0,0.0).
+      rotateX(PI/2).rotateZ(PI*2).scale(2);
+      this.setUniform('t', (time - this.startTime) / 0.5);
+    }
+  }
+}
+
+ArbRevolveHandle.prototype = new Sketch;
 
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
