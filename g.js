@@ -72,6 +72,8 @@
 
       canvas.onmousedown = function(event) {
 
+
+
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
          if ((event.which && event.which !== 1) ||
@@ -92,6 +94,7 @@
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
+
 
          if (isDef(handle.mouseDown))
             handle.mouseDown(handle.mouseX, handle.mouseY);
@@ -173,6 +176,21 @@
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
+
+         //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+         if (handle.mousePressed) {
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
+            // console.log(globalStrokes.strokes);
+
+         }
+         else{
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
+            // console.log(globalStrokes.strokes);
+         }
+
+         //end Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
 
          if (pullDownIsActive)
             return;
@@ -1046,149 +1064,6 @@
             sketch.textY = sk().ty();
          }
       }
-   }
-
-   // CREATE PROPER SEMANTIC LABELING OF A STROKE.
-
-   function parseStrokes(strokes, sketch) {
-
-      // BUILD STATISTICS FOR EACH STROKE.
-
-      var enableSymmetry = [true,true];
-
-      var stats = [];
-      for (var n = 0 ; n < strokes.length ; n++) {
-         var s = strokes[n];
-         var a = s[0], b = s[s.length-1], m = s[floor(s.length/2)];
-
-         // HANDLE LOOPS
-
-         if (distance(a, b) < 20) {
-
-            // ALIGN WITH EITHER THE X OR Y COORDINATE.
-
-            var c = [ (a[0] + b[0]) / 2, (a[1] + b[1]) / 2 ];
-            var p = [m[0], m[1]];
-            var i = abs(p[0] - c[0]) < abs(p[1] - c[1]) ? 0 : 1;
-            p[i] = c[i];
-            enableSymmetry[1-i] = false;
-
-            var aa = s[floor(s.length/4)];
-            var bb = s[floor(s.length*3/4)];
-            var ux = b[0] - a[0], uy = b[1] - a[1];
-            var vx = bb[0] - aa[0], vy = bb[1] - aa[1];
-            var dir = ux * vy < uy * vx ? 1 : -1;
-
-            stats.push([a, p, dir * loopFlag]);
-         }
-         else
-            stats.push([a, b, computeCurvature(a, m, b)]);
-      }
-
-      // ALIGN X,Y COORDS OF STROKE ENDPOINTS WHERE POSSIBLE.
-
-      for (var n = 0 ; n < stats.length ; n++)
-
-         // FOR EACH OF THE STROKE'S TWO ENDPOINTS:
-
-         for (var i = 0 ; i < 2 ; i++) {
-
-            // FIND ALL POINTS WITH AN X OR Y COORDINATE NEAR THIS ONE,
-
-            var p = stats[n][i];
-            var eq = [ [] , [] ];
-            for (m = 0 ; m < stats.length ; m++)
-               for (var j = 0 ; j < 2 ; j++) {
-                  var q = stats[m][j];
-                  for (var a = 0 ; a < 2 ; a++) {
-                     var da = abs(p[ a ] - q[ a ]);
-                     var db = abs(p[1-a] - q[1-a]);
-                     if (da < 20 || da < db / 10)
-                        eq[a].push([m,j]);
-                  }
-               }
-
-            // THEN SET ALL THOSE COORDINATES TO THEIR AVERAGE VALUE.
-
-            for (var a = 0 ; a < 2 ; a++)
-               if (eq[a].length > 1) {
-                  var avg = 0;
-                  for (var k = 0 ; k < eq[a].length ; k++) {
-                     var e = eq[a][k];
-                     avg += stats[e[0]][e[1]][a];
-                  }
-                  avg /= eq[a].length;
-                  for (var k = 0 ; k < eq[a].length ; k++) {
-                     var e = eq[a][k];
-                     stats[e[0]][e[1]][a] = floor(avg + 0.5);
-                  }
-               }
-         }
-
-      // FIND ALL THE COORDS AND SORT THEM.
-
-      var xs = new Set();
-      var ys = new Set();
-      for (var n = 0 ; n < stats.length ; n++)
-         for (var u = 0 ; u < 2 ; u++) {
-            xs.add(stats[n][u][0]);
-            ys.add(stats[n][u][1]);
-         }
-
-      xs.sort(function(a,b) { return a>b; });
-      ys.sort(function(a,b) { return a>b; });
-
-      // SORT ALL POINTS.
-
-      var xys = new Set();
-      for (var n = 0 ; n < stats.length ; n++)
-         for (var u = 0 ; u < 2 ; u++)
-            xys.add(stats[n][u]);
-
-      xys.sort(function(a,b) { return a[0]<b[0] ? -1 : a[0]>b[0] ? 1 : a[1]-b[1]; });
-
-      var points = [];
-      for (var i = 0 ; i < xys.length ; i++)
-         points.push([ xs.indexOf(xys[i][0]) , ys.indexOf(xys[i][1]) ]);
-
-      // LABEL ALL THE LINES, AND ARRANGE THEM IN SORTED ORDER.
-
-      var lines = [];
-      for (var n = 0 ; n < stats.length ; n++) {
-         var s = stats[n];
-         var a = xys.indexOf(s[0]);
-         var b = xys.indexOf(s[1]);
-         var c = abs(s[2]) == loopFlag ? s[2] :
-                 s[2] <= -curvatureCutoff ? -1 : s[2] >= curvatureCutoff ? 1 : 0;
-
-         if (a == b && c == 0)
-            continue; // IGNORE DEGENERATE LINES.
-
-         if (a > b) {
-            var tmp = a;
-            a = b;
-            b = tmp;
-            c = -c;
-         }
-
-         lines.push([a, b, c]);
-      }
-
-      lines.sort(function(a,b) { return a[0]<b[0] ? -1 :
-                                        a[0]>b[0] ?  1 :
-                                        a[1]!=b[1] ? a[1]-b[1] : a[2]-b[2] ; });
-
-      // ENFORCE BILATERAL SYMMETRY.
-
-      if (enableSymmetry[0] && xs.length == 3)
-         xs[1] = (xs[0] + xs[2]) / 2;
-
-      if (enableSymmetry[1] && ys.length == 3)
-         ys[1] = (ys[0] + ys[2]) / 2;
-
-      // PACKAGE UP ALL THE PARSED DATA.
-
-      return [ [ xs , ys ] , points , lines ];
    }
 
    var strokes = [];

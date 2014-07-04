@@ -1,4 +1,4 @@
-var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid Lattice PVase Noises" ).split(' ');
+var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid Lattice PVase ArbRevolve ArbRevolveHandle Noises" ).split(' ');
 
 var blankPage = {
    availableSketches: sketchTypes,

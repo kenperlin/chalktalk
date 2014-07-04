@@ -1077,7 +1077,7 @@
    }
    var codes = [
       "x>0" , "min(x>0, y>0)",   "max(x>0, y>0)"  , "(x>0)!=(y>0)",
-      "x<=0", "max(x<=0, y<=0)", "min(x<=0, y<=0)", "(x>0)==(y>0)"
+      "1 - (x>0)", "1 - min(x>0, y>0)", "1 - max(x>0, y>0)", "(x>0)==(y>0)"
    ];
    Logic.prototype = new Sketch;
 
