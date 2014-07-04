@@ -729,12 +729,11 @@
       this.sp0 = [[0,0]];
       this.sp = [[0,0,0]];
       this.drewFirstLine = false;
-      this.parsed = null;
-      this.parsedSrc = null;
+      this.parsedStrokes = null;
       this.parsedTransition = 0;
 
       this.isParsed = function() {
-         return this.parsed != null;
+         return this.parsedStrokes != null;
       }
 
       this.mouseDown = function(x, y) {
@@ -963,79 +962,7 @@
             console.log("NEED TO IMPLEMENT PARSING A GROUP");
             return;
          }
-
-         strokes = this.getStrokes();
-         this.parsedSrc = [];
-         for (var n = 0 ; n < strokes.length ; n++)
-            this.parsedSrc = this.parsedSrc.concat(segmentCurve(strokes[n]));
-         this.parsed = parseStrokes(this.parsedSrc, this);
-
-         var xs     = this.parsed[0][0];
-         var ys     = this.parsed[0][1];
-         var points = this.parsed[1];
-         var lines  = this.parsed[2];
-
-         // MAKE SURE CENTER OF SCALING IS AT CENTER OF DRAWING.
-/*
-         // This is on-hold until I fix the bounding box bug it causes. -KP
-
-         var B = strokesComputeBounds(this.parsedSrc);
-         this.tX = (B[0] + B[2]) / 2;
-         this.tY = (B[1] + B[3]) / 2;
-*/
-         // MAKE ALL COORDS RELATIVE TO CENTER-OF-SCALING POINT.
-
-         for (var i = 0 ; i < xs.length ; i++)
-            xs[i] -= this.tX;
-         for (var i = 0 ; i < ys.length ; i++)
-            ys[i] -= this.tY;
-
-         for (var n = 0 ; n < this.parsedSrc.length ; n++) {
-            var s = this.parsedSrc[n];
-            for (var i = 0 ; i < s.length ; i++)
-               s[i] = [s[i][0] - this.tX, s[i][1] - this.tY];
-         }
-
-         // CREATE CORRESPONDENCE BETWEEN PARSED-SRC STROKES AND PARSED DATA
-
-         var correspondence = [];
-         for (var n = 0 ; n < this.parsedSrc.length ; n++) {
-            var s = this.parsedSrc[n];
-            var p0 = s[0], pn = s[s.length-1];
-
-            var dMin = 100000, lineIndex = -1, pointOrder = 0;
-
-            for (var index = 0 ; index < lines.length ; index++) {
-               var a = lines[index][0];
-               var b = lines[index][1];
-
-               var aIndex = points[a];
-               var bIndex = points[b];
-
-               var ax = xs[aIndex[0]];
-               var ay = ys[aIndex[1]];
-
-               var bx = xs[bIndex[0]];
-               var by = ys[bIndex[1]];
-
-               var da0 = len(ax - p0[0], ay - p0[1]);
-               var dan = len(ax - pn[0], ay - pn[1]);
-               var db0 = len(bx - p0[0], by - p0[1]);
-               var dbn = len(bx - pn[0], by - pn[1]);
-
-               var order = da0 + dbn < dan + db0 ? 0 : 1;
-               var d = order == 0 ? da0 + dbn : dan + db0;
-               if (d < dMin) {
-                  dMin = d;
-                  lineIndex = index;
-                  pointOrder = order;
-               }
-            }
-            correspondence.push([lineIndex , pointOrder]);
-         }
-         this.parsed.push(correspondence);
-
-         // console.log(arrayToString(this.parsed));
+	 this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
       }
 
       this.xform = function(xy) {
@@ -1061,58 +988,20 @@
 
       this.drawParsed = function() {
          this.parsedTransition = min(1, this.parsedTransition + 0.05);
-         var parsedTransition = sCurve(this.parsedTransition);
-
-         var xs = this.parsed[0][0];
-         var ys = this.parsed[0][1];
-         var points = this.parsed[1];
-         var lines = this.parsed[2];
-         var correspondence = this.parsed[3];
-
-         // RECONSTRUCT COORDINATES OF POINTS.
-
-         this.makeXform();
-
-         var xys = [];
-         for (var n = 0 ; n < points.length ; n++)
-            xys.push( this.xform([ xs[points[n][0]], ys[points[n][1]] ]) );
-
-         // DRAW THE LINES.
+         var transition = sCurve(this.parsedTransition);
 
          annotateStart();
-         lineWidth(sketchLineWidth * lerp(parsedTransition, 1, .6)
-                                   * sketchPage.zoom / this.zoom);
 
-         lineWidth(sketchLineWidth * sketchPage.zoom / this.zoom);
+         lineWidth(sketchLineWidth * lerp(transition, 1, .6) * sketchPage.zoom / this.zoom);
+         this.makeXform();
 
-         for (var n = 0 ; n < this.parsedSrc.length ; n++) {
-            var s = this.parsedSrc[n];
-            var cSrc = [];
-            for (var i = 0 ; i < s.length ; i++)
-               cSrc.push(this.xform(s[i]));
-
-            var lineIndex = correspondence[n][0];
-            var pointOrder = correspondence[n][1];
-
-            var line = lines[lineIndex];
-            var a = line[0];
-            var b = line[1];
-            var s = line[2];
-            var cDst = createCurve(xys[a], xys[b],
-               abs(s)==loopFlag ? s : s * curvatureCutoff);
-
-            var ab = [];
-            for (var u = 0 ; u <= 1 ; u += 0.1) {
-               var t = pointOrder == 0 ? u : 1 - u;
-
-               var src = getPointOnCurve(cSrc, u);
-               var dst = getPointOnCurve(cDst, t);
-
-               ab.push([lerp(parsedTransition, src[0], dst[0]),
-                        lerp(parsedTransition, src[1], dst[1])]);
-            }
-            drawCurve(ab);
-         }
+         var curves = parsedStrokesToCurves(this.parsedStrokes, transition);
+         for (var n = 0 ; n < curves.length ; n++) {
+	    var c = [];
+	    for (var i = 0 ; i < curves[n].length ; i++)
+	       c.push(this.xform(curves[n][i]));
+            drawCurve(c);
+	 }
 
          annotateEnd();
       }
