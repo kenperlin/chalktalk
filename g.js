@@ -72,6 +72,8 @@
 
       canvas.onmousedown = function(event) {
 
+
+
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
          if ((event.which && event.which !== 1) ||
@@ -92,6 +94,7 @@
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
+
 
          if (isDef(handle.mouseDown))
             handle.mouseDown(handle.mouseX, handle.mouseY);
@@ -173,6 +176,21 @@
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
+
+         //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+         if (handle.mousePressed) {
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
+            // console.log(globalStrokes.strokes);
+
+         }
+         else{
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
+            // console.log(globalStrokes.strokes);
+         }
+
+         //end Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
 
          if (pullDownIsActive)
             return;
