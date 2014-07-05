@@ -590,32 +590,92 @@ function Grid() {
 }
 Grid.prototype = new Sketch;
 
+var isCandle = false;
+
 function MothAndCandle() {
    this.labels = "moth candle".split(' ');
    this.is3D = true;
+   this.isAnimating = false;
+   this.mm = new M4();
+   this.mm.identity();
+   this.up = (new M4()).identity().rotateX(PI/2);
+
+   this.onClick = function() {
+      this.isAnimating = true;
+   }
 
    this.render = function(elapsed) {
+
+      function sharpen(t) { return (t < 0 ? -1 : 1) * pow(abs(t), 4.0); }
+
       m.save();
       switch (this.labels[this.selection]) {
+
       case "moth":
+
+         if (this.startTime === undefined)
+            this.startTime = time;
+	 var transition = sCurve(max(0, min(1, 2 * (time - this.startTime) - 1.5)));
+
+         if (this.isAnimating) {
+	    this.mm.translate(0, 15 * elapsed, 0);
+
+            if (isCandle) {
+	       this.mm._m()[12] *= 1 - elapsed;
+	       this.mm._m()[13] *= 1 - elapsed;
+	       this.mm._m()[14] *= 1 - elapsed;
+            }
+
+	    this.mm.rotateX(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
+	    this.mm.rotateZ(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
+	    this.mm.aimZ(this.up);
+	 }
+
+         lineWidth(lerp(transition, 2, 0.5));
+
          m.scale(this.size / 300);
-         m.translate(0,-.2,0);
+	 m._xf(this.mm._m());
 	 m.save();
 	    // ALWAYS TURN TORSO TO FACE VIEW.
 	    m.rotateY(atan2(m._m()[2], m._m()[0]));
-            mCurve(createCurve([-0.01,-0.4],[ 0.01,-0.4], 45.0));
+            mCurve(createCurve([-0.01,-0.6],[ 0.01,-0.6], 45.0));
 	 m.restore();
 
-	 mCurve(createCurve([-0.09, 0.3],[-0.40, 0.0],-0.8).
-	 concat(createCurve([-0.40, 0.0],[-0.06,-0.2],-0.5)));
+	 var flap = sin(6 * TAU * time);
+         lineWidth(2);
 
-	 mCurve(createCurve([ 0.09, 0.3],[ 0.40, 0.0], 0.8).
-	 concat(createCurve([ 0.40, 0.0],[ 0.06,-0.2], 0.5)));
+	 m.save();
+	    m.translate(-0.06,0,0);
+	    if (this.isAnimating)
+	       m.rotateY(flap);
+	    mCurve(createCurve([-0.03, 0.1],[-0.34,-0.2],-0.8).
+	    concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
+	 m.restore();
 
-	 mCurve(createCurve([-0.03, 0.48],[-0.2, 1.0], -0.1));
-	 mCurve(createCurve([ 0.03, 0.48],[ 0.2, 1.0],  0.1));
+	 m.save();
+	    m.translate(0.06,0,0);
+	    if (this.isAnimating)
+	       m.rotateY(-flap);
+	    mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
+	    concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
+	 m.restore();
+
+         lineWidth(lerp(transition, 2, 0.5));
+
+	 mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
+	 mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+
          break;
+
       case "candle":
+
+         // MOTH GOES TO FLAME WHEN CANDLE APPEARS, THEN FORGETS IT WHEN CANDLE DISAPPEARS.
+
+         if (this.glyphTransition > 0.5)
+            isCandle = true;
+         if (this.fadeAway > 0 && this.fadeAway < 1)
+            isCandle = false;
+
          m.scale(this.size / 350);
          m.translate(0,-.1,0);
          mCurve([[-.2,-1],[-.2, .3],[ .2, .3],[ .2,-1]]);
