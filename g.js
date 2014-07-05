@@ -2220,13 +2220,11 @@
 
    function insertTemplate(template, slide) {
       var parent = document.createElement('parent');
-      var center = document.createElement('center');
       var table = document.createElement('table');
       var tablePaddingRow = document.createElement('tr');
       tablePaddingRow.className = 'padding';
 
-      parent.appendChild(center);
-      center.appendChild(table);
+      parent.appendChild(table);
       table.appendChild(tablePaddingRow);
       table.setAttribute('width', '1280');
 
@@ -2246,8 +2244,9 @@
          table.appendChild(row(template));
 
       slide.innerHTML = parent.innerHTML;
+   }
 
-      // FIND HEIGHT OF CONTENT, THEN SET PADDING ROW ACCORDINGLY
+   function resizePadding() {
       var paddingHeight = (height() - slide.clientHeight) / 2;
       slide.getElementsByClassName('padding')[0].setAttribute('height', paddingHeight);
    }
@@ -2269,14 +2268,19 @@
    }
 
    function content(template) {
-      var center = document.createElement('center');
-      if (template.indexOf('.mp4') > -1)
-         center.appendChild(videoElement(template));
-      else if (template.indexOf('.jpg') > -1 || template.indexOf('.png') > -1)
-         center.appendChild(imageElement(template));
-      else
+      if (template.indexOf('.mp4') > -1) {
+         var th = document.createElement('th');
+         th.appendChild(videoElement(template));
+         return th;
+      } else if (template.indexOf('.jpg') > -1 || template.indexOf('.png') > -1) {
+         var th = document.createElement('th');
+         th.appendChild(imageElement(template));
+         return th;
+      } else {
+         var center = document.createElement('center');
          center.appendChild(textElement(template));
-      return center;
+         return center;
+      }
    }
 
    function textElement(text) {
