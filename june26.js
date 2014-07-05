@@ -600,7 +600,11 @@ function MothAndCandle() {
       case "moth":
          m.scale(this.size / 300);
          m.translate(0,-.2,0);
-         mCurve(createCurve([-0.01,-0.4],[ 0.01,-0.4], 45.0));
+	 m.save();
+	    // ALWAYS TURN TORSO TO FACE VIEW.
+	    m.rotateY(atan2(m._m()[2], m._m()[0]));
+            mCurve(createCurve([-0.01,-0.4],[ 0.01,-0.4], 45.0));
+	 m.restore();
 
 	 mCurve(createCurve([-0.09, 0.3],[-0.40, 0.0],-0.8).
 	 concat(createCurve([-0.40, 0.0],[-0.06,-0.2],-0.5)));
