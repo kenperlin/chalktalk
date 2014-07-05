@@ -135,11 +135,11 @@
 
                var s = sk().intersectingSketches();
                for (var i = 0 ; i < s.length ; i++) {
-                  if (isDef(sk().onDropOnto)) {
-                     sk().onDropOnto(s[i]);
+                  if (isDef(sk().over)) {
+                     sk().over(s[i]);
                   }
-                  if (isDef(s[i].onDroppedOnto)) {
-                     s[i].onDroppedOnto(sk());
+                  if (isDef(s[i].under)) {
+                     s[i].under(sk());
                   }
                }
                break;

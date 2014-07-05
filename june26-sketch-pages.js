@@ -19,7 +19,7 @@ var page0 = {
    availableSketches: sketchTypes,
    pan: 0,
    template: [
-      ["<big><b>My Textured Life</b></big>"],
+      ["&nbsp;<p><big><b>My Textured Life</b></big>"],
       ["<i><small>Ken Perlin</small></i>"]
    ]
 };

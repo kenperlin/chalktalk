@@ -1216,83 +1216,10 @@
          // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
-
-            var x = codeSketch.cx();
-            var y = 10;
-
-            // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
-
-            var text = codeTextArea.value;
-
-            var rows = text.replace(/./g,'').length + 2;
-
-            var cols = 10;
-            var lines = text.split('\n');
-            for (var i = 0 ; i < lines.length ; i++)
-               cols = max(cols, lines[i].length);
-
-            if (code().length > 0)
-               for (var i = 0 ; i < code().length ; i++)
-                  cols = max(cols, code()[i][0].length + 3);
-
-            codeTextArea.rows = rows;
-            codeTextArea.cols = cols;
-
-            var w = 12 * cols + 10;
-
-            if (rows > 3)
-               rows += 0.3;
-            if (code().length > 1)
-               rows += 1.2;
-
-            var h = floor(21 * rows);
-
-            ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
-
-	    codeElement.x1 = codeSketch.ylo > h + h/2
-	                     ? x
-			     : codeSketch.cx() < width() / 2
-			       ? codeSketch.xhi + w/2
-			       : codeSketch.xlo - w/2;
-
-            x = codeElement.x = codeElement.x === undefined
-	                        ? x
-			        : codeElement.codeSketch != codeSketch
-	                          ? codeElement.x1
-	                          : lerp(0.1, codeElement.x, codeElement.x1);
-
+	    drawCodeWidget(code(), codeSketch.xlo, codeSketch.ylo,
+	                           codeSketch.xhi, codeSketch.yhi,
+	                           codeElement.codeSketch != codeSketch);
             codeElement.codeSketch = codeSketch;
-
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            codeElement.style.left = x + _g.panX - w/2 + 10;
-            codeElement.style.top = y + 5;
-
-            // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
-
-            var c = createRoundRect(x - w/2, y, w, h, 16);
-
-            // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
-
-            if (codeSketch.ylo > c[c.length-1][1]) {
-
-               var L = c[c.length-1];
-               c.splice(c.length-1, c.length);
-               var R = c[c.length-1];
-
-               c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-               c.push([(codeSketch.xlo + codeSketch.xhi)/2, codeSketch.ylo]);
-               c.push(L);
-            }
-
-            // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
-
-            color('rgba(0,0,255,0.2)');
-            fillCurve(c);
-
-            lineWidth(2);
-            color(codeTextFgColor());
-            drawCurve(c);
          }
 
          if (isOnScreenKeyboard())
