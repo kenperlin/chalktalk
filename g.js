@@ -2186,8 +2186,10 @@
       // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
 
       vidElements = slide.getElementsByClassName("vid");
-      if (isVideoPlaying = vidElements.length > 0)
+      if (isVideoPlaying = vidElements.length > 0) {
+         vidElements[0].onloadeddata = resizePadding;
          vidElements[0].play();
+      }
 
       // IF THERE IS AN AUDIENCE POP-UP, SET IT TO THE RIGHT PAGE.
 
