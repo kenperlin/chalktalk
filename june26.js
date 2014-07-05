@@ -606,6 +606,10 @@ function MothAndCandle() {
 
    this.render = function(elapsed) {
 
+      if (this.startTime === undefined)
+         this.startTime = time;
+      var transition = sCurve(max(0, min(1, 2 * (time - this.startTime) - 1.5)));
+
       function sharpen(t) { return (t < 0 ? -1 : 1) * pow(abs(t), 4.0); }
 
       m.save();
@@ -613,12 +617,13 @@ function MothAndCandle() {
 
       case "moth":
 
-         if (this.startTime === undefined)
-            this.startTime = time;
-	 var transition = sCurve(max(0, min(1, 2 * (time - this.startTime) - 1.5)));
-
          if (this.isAnimating) {
+
+	    // ALWAYS MOVE FORWARD.
+
 	    this.mm.translate(0, 15 * elapsed, 0);
+
+	    // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
 
             if (isCandle) {
 	       this.mm._m()[12] *= 1 - elapsed;
@@ -626,10 +631,17 @@ function MothAndCandle() {
 	       this.mm._m()[14] *= 1 - elapsed;
             }
 
+	    // CONTINUALLY CHANGE DIRECTION.
+
 	    this.mm.rotateX(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
 	    this.mm.rotateZ(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
+
+	    // TRY TO STAY ORIENTED UPRIGHT.
+
 	    this.mm.aimZ(this.up);
 	 }
+
+	 // DRAW TORSO
 
          lineWidth(lerp(transition, 2, 0.5));
 
@@ -640,6 +652,8 @@ function MothAndCandle() {
 	    m.rotateY(atan2(m._m()[2], m._m()[0]));
             mCurve(createCurve([-0.01,-0.6],[ 0.01,-0.6], 45.0));
 	 m.restore();
+
+	 // DRAW LEFT WING
 
 	 var flap = sin(6 * TAU * time);
          lineWidth(2);
@@ -652,6 +666,8 @@ function MothAndCandle() {
 	    concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
 	 m.restore();
 
+	 // DRAW RIGHT WING
+
 	 m.save();
 	    m.translate(0.06,0,0);
 	    if (this.isAnimating)
@@ -659,6 +675,8 @@ function MothAndCandle() {
 	    mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
 	    concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
 	 m.restore();
+
+	 // DRAW LEFT AND RIGHT ANTENNAE
 
          lineWidth(lerp(transition, 2, 0.5));
 
@@ -669,7 +687,7 @@ function MothAndCandle() {
 
       case "candle":
 
-         // MOTH GOES TO FLAME WHEN CANDLE APPEARS, THEN FORGETS IT WHEN CANDLE DISAPPEARS.
+         // MOTHS GO TO FLAME WHEN CANDLE APPEARS, THEN FORGET IT WHEN CANDLE DISAPPEARS.
 
          if (this.glyphTransition > 0.5)
             isCandle = true;
@@ -677,16 +695,22 @@ function MothAndCandle() {
             isCandle = false;
 
          m.scale(this.size / 350);
-         m.translate(0,-.1,0);
-         mCurve([[-.2,-1],[-.2, .3],[ .2, .3],[ .2,-1]]);
 
-         mCurve(createCurve([ .0, .3],[ .0, .5], .05));
+	 // CANDLE
 
-         mCurve(createCurve([   0,1.0],[-.15,0.7], .05).
-	 concat(createCurve([-.15,0.7],[   0,0.4],-.30)));
+         mCurve([[-.2,-1.1],[-.2, .2],[ .2, .2],[ .2,-1.1]]);
 
-         mCurve(createCurve([   0,1.0],[ .15,0.7], -.05).
-	 concat(createCurve([ .15,0.7],[   0,0.4], .30)));
+	 // WICK
+
+         mCurve(createCurve([ .0, .2],[ .0, .4], .05));
+
+	 // FLAME
+
+         mCurve(createCurve([ 0.00,0.9],[-0.15,0.6], 0.05).
+	 concat(createCurve([-0.15,0.6],[ 0.00,0.3],-0.30)));
+
+         mCurve(createCurve([ 0.00,0.9],[ 0.15,0.6],-0.05).
+	 concat(createCurve([ 0.15,0.6],[ 0.00,0.3], 0.30)));
 
          break;
       }
