@@ -1,5 +1,6 @@
 /*
     For June 26, 2014 talk.
+    With more stuff added for July 7 talk.
 */
 
    registerGlyph("cup()", [
@@ -588,4 +589,45 @@ function Grid() {
    }
 }
 Grid.prototype = new Sketch;
+
+function MothAndCandle() {
+   this.labels = "moth candle".split(' ');
+   this.is3D = true;
+
+   this.render = function(elapsed) {
+      m.save();
+      switch (this.labels[this.selection]) {
+      case "moth":
+         m.scale(this.size / 300);
+         m.translate(0,-.2,0);
+         mCurve(createCurve([-0.01,-0.4],[ 0.01,-0.4], 45.0));
+
+	 mCurve(createCurve([-0.09, 0.3],[-0.40, 0.0],-0.8).
+	 concat(createCurve([-0.40, 0.0],[-0.06,-0.2],-0.5)));
+
+	 mCurve(createCurve([ 0.09, 0.3],[ 0.40, 0.0], 0.8).
+	 concat(createCurve([ 0.40, 0.0],[ 0.06,-0.2], 0.5)));
+
+	 mCurve(createCurve([-0.03, 0.48],[-0.2, 1.0], -0.1));
+	 mCurve(createCurve([ 0.03, 0.48],[ 0.2, 1.0],  0.1));
+         break;
+      case "candle":
+         m.scale(this.size / 350);
+         m.translate(0,-.1,0);
+         mCurve([[-.2,-1],[-.2, .3],[ .2, .3],[ .2,-1]]);
+
+         mCurve(createCurve([ .0, .3],[ .0, .5], .05));
+
+         mCurve(createCurve([   0,1.0],[-.15,0.7], .05).
+	 concat(createCurve([-.15,0.7],[   0,0.4],-.30)));
+
+         mCurve(createCurve([   0,1.0],[ .15,0.7], -.05).
+	 concat(createCurve([ .15,0.7],[   0,0.4], .30)));
+
+         break;
+      }
+      m.restore();
+   }
+}
+MothAndCandle.prototype = new Sketch;
 
