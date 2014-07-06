@@ -25,6 +25,7 @@
 
    function SketchPage() {
       this.fadeAway = 0;
+      this.paletteColorDragXY = null;
       this.sketches = [];
       this.scaleRate = 0;
 
@@ -133,8 +134,10 @@
          if (bgClickCount == 1)
             return;
 
-         if (paletteColorIndex >= 0)
+         if (paletteColorIndex >= 0) {
+	    this.paletteColorDragXY = null;
             return;
+         }
 
          if (y >= height() - margin) {
             isBottomGesture = true;
@@ -239,6 +242,8 @@
             var index = findPaletteColorIndex(x, y);
             if (index >= 0)
                paletteColorIndex = index;
+            else
+	       this.paletteColorDragXY = [x,y];
             return;
          }
 
@@ -318,7 +323,12 @@
          this.isPressed = false;
 
          if (paletteColorIndex >= 0) {
-            sketchPage.colorIndex = paletteColorIndex;
+	    if (this.paletteColorDragXY == null)
+               sketchPage.colorIndex = paletteColorIndex;
+            else {
+	       // NEED TO APPLY TO A SKETCH
+	       this.paletteColorDragXY = null;
+            }
             return;
          }
 
@@ -720,7 +730,7 @@
          this.mx = x;
          this.my = y;
 
-         // IF MOUSE MOVES OVER THE COLOR PALETTE, SET THE DRAWING COLOR.
+         // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
          paletteColorIndex = findPaletteColorIndex(x, y);
       }
@@ -1232,6 +1242,12 @@
 
          if (isOnScreenKeyboard())
             onScreenKeyboard.render();
+
+         if (this.paletteColorDragXY != null) {
+	    color(sketchPalette[paletteColorIndex]);
+	    fillRect(this.paletteColorDragXY[0] - 12,
+	             this.paletteColorDragXY[1] - 12, 24, 24);
+	 }
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*

@@ -344,7 +344,7 @@
    Control.prototype = new Sketch;
 
    registerGlyph(sketchTypeToCode('Control', 'slideX'), [ [[-.5,0],[.5,0]], [[0,-.2],[0,.2]] ]);
-   registerGlyph(sketchTypeToCode('Control', 'slideY'), [ [[0,-.5],[0,.5]], [[-.2,0],[.2,0]] ]);
+   //registerGlyph(sketchTypeToCode('Control', 'slideY'), [ [[0,-.5],[0,.5]], [[-.2,0],[.2,0]] ]);
 
    function Diagram() {
       this.labels =
