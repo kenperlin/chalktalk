@@ -7,7 +7,7 @@ globalStrokes = {
   filler:function(b,x,y){
 
     var X = (x/1280);
-    var Y = (y/720)-.5;
+    var Y = (y/1280);
 
     if(this.switcher!=b){
       this.switcher = !this.switcher;
@@ -30,8 +30,8 @@ globalStrokes = {
     var index = which || 1;
     var offset = off || 0;
 
-    while(this.strokes[this.strokes.length-1].length < 5){
-      if( this.strokes[this.strokes.length-1].length < 5){
+    while(this.strokes[this.strokes.length-1].length < 15){
+      if( this.strokes[this.strokes.length-1].length < 15){
         console.log(this.strokes[this.strokes.length-1].length);
         this.strokes.pop();
       }
@@ -71,11 +71,11 @@ globalStrokes = {
       var num = this.strokes[this.strokes.length-index][i];
       if(i%2==0){
         var littleArr=[];
-        littleArr.push((num-large)*128);
+        littleArr.push((num-large));
         littleArr.push(0);
       }
       else
-        littleArr.push(num*72);
+        littleArr.push(num);
 
       if(littleArr.length>2)
         returnArr.push(littleArr);

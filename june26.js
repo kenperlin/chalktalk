@@ -590,7 +590,7 @@ function Grid() {
 }
 Grid.prototype = new Sketch;
 
-var isCandle = false;
+var isCandle = false, candleX, candleY;
 
 function MothAndCandle() {
    this.labels = "moth candle".split(' ');
@@ -599,8 +599,12 @@ function MothAndCandle() {
    this.mm = new M4();
    this.mm.identity();
    this.up = (new M4()).identity().rotateX(PI/2);
+   this.moveMothX = 0;
+   this.moveMothY = 0;
+   this.transitionToCandle = 0;
 
    this.onClick = function() {
+      console.log("AHA " + this.id);
       this.isAnimating = true;
    }
 
@@ -629,12 +633,23 @@ function MothAndCandle() {
 	       this.mm._m()[12] *= 1 - elapsed;
 	       this.mm._m()[13] *= 1 - elapsed;
 	       this.mm._m()[14] *= 1 - elapsed;
+
+               this.transitionToCandle = min(1, this.transitionToCandle + elapsed / 2.0);
+	       var t = sCurve(this.transitionToCandle);
+
+               var x = (this.xlo + this.xhi) / 2;
+               var y = (this.ylo + this.yhi) / 2;
+
+               this.moveMothX += elapsed * max(-10, min(10, candleX - x)) * 200 / this.size;
+               this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * 200 / this.size;
             }
+
+	    m.translate(this.moveMothX, this.moveMothY, 0);
 
 	    // CONTINUALLY CHANGE DIRECTION.
 
-	    this.mm.rotateX(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
-	    this.mm.rotateZ(20 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
+	    this.mm.rotateX(25 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
+	    this.mm.rotateZ(25 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
 
 	    // TRY TO STAY ORIENTED UPRIGHT.
 
@@ -689,8 +704,11 @@ function MothAndCandle() {
 
          // MOTHS GO TO FLAME WHEN CANDLE APPEARS, THEN FORGET IT WHEN CANDLE DISAPPEARS.
 
-         if (this.glyphTransition > 0.5)
+         if (this.glyphTransition > 0.5 && isNumber(this.xlo)) {
+	    candleX = (this.xlo + this.xhi) / 2;
+	    candleY = this.ylo;
             isCandle = true;
+         }
          if (this.fadeAway > 0 && this.fadeAway < 1)
             isCandle = false;
 

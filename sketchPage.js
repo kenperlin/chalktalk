@@ -25,6 +25,7 @@
 
    function SketchPage() {
       this.fadeAway = 0;
+      this.paletteColorDragXY = null;
       this.sketches = [];
       this.scaleRate = 0;
 
@@ -108,6 +109,14 @@
          pullDownLabels = sketchActionLabels.concat(sketch.labels);
       }
 
+      this.getSketchesByLabel = function(label) {
+         var sketches = [];
+	 for (var i = 0 ; i < this.sketches.length ; i++)
+	    if (label == this.sketches[i].labels[this.sketches[i].selection])
+	          sketches.push(this.sketches[i]);
+	 return sketches;
+      }
+
       this.isCreatingGroup = false;
 
       this.isFocusOnLink = false;
@@ -125,8 +134,10 @@
          if (bgClickCount == 1)
             return;
 
-         if (paletteColorIndex >= 0)
+         if (paletteColorIndex >= 0) {
+	    this.paletteColorDragXY = null;
             return;
+         }
 
          if (y >= height() - margin) {
             isBottomGesture = true;
@@ -231,6 +242,8 @@
             var index = findPaletteColorIndex(x, y);
             if (index >= 0)
                paletteColorIndex = index;
+            else
+	       this.paletteColorDragXY = [x,y];
             return;
          }
 
@@ -256,8 +269,10 @@
          if (isTogglingMenuType)
             return;
 
-         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
             outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
+	    this.isClick = false;
+         }
 
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
@@ -295,7 +310,6 @@
          if (this.isCreatingGroup)
             return;
 
-         //if (isk() && (outPort == -1 || sk() instanceof NumericSketch)) {
          if (isk()) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
@@ -317,7 +331,19 @@
          this.isPressed = false;
 
          if (paletteColorIndex >= 0) {
-            sketchPage.colorIndex = paletteColorIndex;
+
+            // MOUSE-UP OVER PALETTE TO SET THE DRAWING COLOR.
+
+	    if (this.paletteColorDragXY == null)
+               sketchPage.colorIndex = paletteColorIndex;
+
+            // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
+
+            else {
+	       if (isk() && sk().isMouseOver)
+	          sk().color = sketchPalette[paletteColorIndex];
+	       this.paletteColorDragXY = null;
+            }
             return;
          }
 
@@ -351,7 +377,8 @@
             return;
          }
 
-         this.isClick = this.travel <= clickSize;
+         if (this.travel > clickSize)
+            this.isClick = false;
 
          if (pieMenuIsActive) {
             pieMenuEnd();
@@ -728,7 +755,7 @@
          this.mx = x;
          this.my = y;
 
-         // IF MOUSE MOVES OVER THE COLOR PALETTE, SET THE DRAWING COLOR.
+         // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
          paletteColorIndex = findPaletteColorIndex(x, y);
       }
@@ -1209,7 +1236,8 @@
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
+            if (this.paletteColorDragXY != null ||
+	        This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
                pieMenuDraw();
@@ -1240,6 +1268,12 @@
 
          if (isOnScreenKeyboard())
             onScreenKeyboard.render();
+
+         if (this.paletteColorDragXY != null) {
+	    color(sketchPalette[paletteColorIndex]);
+	    fillRect(this.paletteColorDragXY[0] - 12,
+	             this.paletteColorDragXY[1] - 12, 24, 24);
+	 }
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*

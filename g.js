@@ -1487,9 +1487,9 @@
          // SELECT FRONTMOST SKETCH AT THE CURSOR.
 
          if (! pullDownIsActive && isFinishedDrawing()
-                          && letterPressed == '\0'
-                          && ! sketchPage.isPressed
-                          && sketchAction == null)
+                                && letterPressed == '\0'
+                                && (! sketchPage.isPressed || sketchPage.paletteColorDragXY != null)
+                                && sketchAction == null)
             for (var I = nsk() - 1 ; I >= 0 ; I--)
                if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
                   selectSketch(I);

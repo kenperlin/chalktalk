@@ -207,8 +207,8 @@
          mouseY = event.clientY;
       }, false);
 
-      renderer.camera = new THREE.PerspectiveCamera(cameraFOV,width()/height(),1,1000);
-      renderer.camera.position.set(0,0,10);
+      renderer.camera = new THREE.PerspectiveCamera(cameraFOV/100,width()/height(),1,2000);
+      renderer.camera.position.set(0,0,10*100);
    }
 
 function gl() { return renderer.context; }

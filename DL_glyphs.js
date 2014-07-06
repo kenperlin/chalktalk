@@ -2,21 +2,44 @@
 ["] ]!]#]$]%]&]'](](])]*]+],]-].^/^0^1^2^3^4^4^5^6^7^8^9^:^;_<_=_>^?^@^A^A^B^C^D^E^F^G^H^I^J^K^L^M^N^O^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^]^]^^^_^`^a^b^c^d^e^f]g]h]i]j]j]k]l]m]n]o]p]q]r]s]t]u]v[w[w[x[y[z[{[|[}[~","]&[%Y&X&W&U&T&S%R%P%O%N%M%K%J%I%G%F%E&D&B&A&A&A'A)A*A+A-A.A/A0A2A3A4A5A7B8B9B;B<B=B>B@BABBBCBEBFBGBIBJBKBLBNBOBPBQBSCTCUCVCXCYCZC]C^C_C`CbCcCdCeCgChCiCkClCmCnCoEoFoGoHnJnKnLnNnOnPnQnSnTnUnVnXnYnZo[o^o"]
 
 
+// registerGlyph("ArbRevolve()",[
+//     [ [1,1], [1,-1]],
+//     [ [1,1], [-1,1], [-1,-1], [1,-1]]
+// ]);
+
+registerGlyph("ArbRevolve()", [ [[1,-1],[1,1]], [[1,-1],[-1,-1],[-1,1],[1,1]] ]);
+
 function ArbRevolve() {
 
-  this.labels = "can".split(' ');
-
-  this.render = function(elapsed) {
-    m.save();
-    m.scale(this.size / 400);
-    mCurve([ [0,1], [0,-1]]);
-    mCurve([ [0,1], [-1,1], [-1,-1], [0,-1]]);
-    m.restore();
-  }
-
-  this.onClick = function(x, y) {
-
     console.log(this);
+
+    // console.log(arrayToString(this.sp));
+    var lathe2 = sk().sp;
+
+    CX = sk().cx();
+    CY = sk().cy();
+
+    var large = -1e6;
+    var largey = -1e6;
+
+    for(var i = 0 ; i < lathe2.length ; i++){
+      if(large<lathe2[i][0])
+        large=lathe2[i][0];
+      if(largey<lathe2[i][2])
+        largey=lathe2[i][2];
+      lathe2[i][2] = lathe2[i][1];
+      lathe2[i][1] = 0;
+
+    }
+     for(var i = 0 ; i < lathe2.length ; i++){
+      lathe2[i][0] -= large;
+      lathe2[i][2] += largey;
+      lathe2[i][0]/=1280;
+      lathe2[i][2]/=1280;
+    }
+    lathe2[0][0] = 0;
+    lathe2[lathe2.length-1][0] = 0;
+    // console.log(lathe2);
 
     this.fadeAway = 1.0;
 
@@ -24,21 +47,31 @@ function ArbRevolve() {
 
     var tnode = new THREE.Mesh();
 
-    var latheArray = [];
+    // var latheArray = [];
 
-    if(globalStrokes!=undefined)
-      latheArray = globalStrokes.returnCoord();
+    // if(globalStrokes!=undefined) {
+    //   latheArray = globalStrokes.returnCoord();
+    //   latheArray[0][0] = 0;
+    //   latheArray[latheArray.length-1][0] = 0;
+    // }
 
-    console.log(globalStrokes.strokes);
+    // console.log(globalStrokes.strokes);
 
     var body = tnode.addLathe( 
-        latheArray
+        lathe2
       , 32);
 
     var geo = body.geometry;
 
-    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+    var body = tnode.addCube();
 
+    root.add(body);
+
+    var sketch = geometrySketch(body);
+
+    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+
+      // var sketch = geometrySketch(a);
     // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
     console.log(sketch);
 
@@ -56,10 +89,92 @@ function ArbRevolve() {
 
     sketch.update = function() {
       // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(0,0,0.0).
-      rotateX(PI/2).rotateZ(PI/2).scale(2);
-      this.setUniform('t', (time - this.startTime) / 0.5);
+      // this.geometry.getMatrix()
+      //              .translate(0,0,0)
+      //  .scale(1)
+      //              .translate(0,0,0)
+      //              .rotateX(PI/2)
+      //  .rotateZ(PI/2)
+      //  ;
+      // this.setUniform('t', (time - this.startTime) / 0.5);
     }
+  console.log("hi");
+
+
+  this.render = function(elapsed) {
+
+    this.glyphTrace = null;
+    finishDrawingUnfinishedSketch();
+
+    m.save();
+    m.scale(this.size / 400);
+    lineWidth(1);
+    mCurve([ [1,1], [1,-1]]);
+    mCurve([ [1,1], [-1,1], [-1,-1], [1,-1]]);
+    m.restore();
+  }
+
+  this.onClick = function(x, y) {
+
+    // console.log(this);
+
+    // console.log(arrayToString(this.sp));
+    // console.log(arrayToString(sk().sp));
+
+
+    // this.fadeAway = 1.0;
+
+    // glyphSketch.color = 'rgba(0,0,0,.01)';
+
+    // var tnode = new THREE.Mesh();
+
+    // var latheArray = [];
+
+    // if(globalStrokes!=undefined) {
+    //   latheArray = globalStrokes.returnCoord();
+    //   latheArray[0][0] = 0;
+    //   latheArray[latheArray.length-1][0] = 0;
+    // }
+
+    // console.log(globalStrokes.strokes);
+
+    // var body = tnode.addLathe( 
+    //     latheArray
+    //   , 32);
+
+    // var geo = body.geometry;
+
+    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+
+    //   // var sketch = geometrySketch(a);
+
+
+    // // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
+    // console.log(sketch);
+
+    // // for(var i = 0 ; i < body.geometry.faces.length ; i++){
+    // //   var face = body.geometry.faces[i];
+    // //   var temp = face.a;
+    // //   var temp2 = face.c;
+    // //   face.a = temp2;
+    // //   face.c = temp;
+    // // }
+    // // sketch.geometry.geometry.computeFaceNormals();
+    // // sketch.geometry.geometry.computeVertexNormals();
+
+    // sketch.startTime = time;
+
+    // sketch.update = function() {
+    //   // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+    //  //  this.geometry.getMatrix()
+    //  //               .translate(1,0,0)
+		  //  // .scale(275)
+    //  //               .translate(0,.18,0)
+    //  //               .rotateX(PI/2)
+		  //  // .rotateZ(PI/2)
+		  //  // ;
+    //  //  this.setUniform('t', (time - this.startTime) / 0.5);
+    // }
   }
 }
 
@@ -255,7 +370,7 @@ function bSliced() {
 var pVaseFragmentShader = ["\
    uniform float t;\
    void main(void) {\
-        vec3 point = 5. * vPosition;\
+        vec3 point = 200. * vPosition;\
         float a = -atan(point.x,point.y);\
         float sweep = a > .1 && a < t || t > 3.14159 ? 1. : 0.;\
         sweep = t > 1. ? 1. :0.;\
@@ -713,7 +828,8 @@ function nFloor() {
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
-registerGlyph("barley()",["M N!N#N$N%N&N'N(N(N)N*N+O,O-O.O/O0O1O2O3O4P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCPCPDPEPFPGPHPIPJPKPLPMPNPOPPPQPQPRPSPTPUPVPWPXPYPZP[P]P^P_P`P`PaPbPcPdPePfPgPhPiPjPkPlPmPnPnPoPpPqPrPsPtOuOvOwOxOyOzO{O|O|O}O~","N&M&M&L'L'K(K(J)J)I)I*H*H+H,H,H-H.I.I/J/K/K/L/M/M/N/O/O/P/Q/Q/R/R0S1S1S2T2T3U3U4U5U5U6U6T7T7S8S8R9R9Q9P:P:O:O;N;M;M;L<K<K<J<J=I=I>J?J?K?K@L@M@M@N@O@O@PAQAQARASASATBUBUBVCVCVDVDUEUFUFTGTGSHSHRIRIQJQJQK",]
+registerGlyph("barley()",
+["P!P P!P#P$P%P&P'P(P)P*P*P+P,P-P.P/P0P1P2P3P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCQDQDQEQFQGQHQIQJQKQLQMQNQOQPQQQRQSQTQUQVQWQXQYQZQ[Q]Q^Q_Q_Q`QaQbQcQdQeQfQgQhQiQjQkQlRmRnRoRpRqRrRsRtRuRvRvRwRxRySzS{S|S}S~T}S}","P#P#P$O$N$N%M%M&L&K'K'J(J)J)I*I+I+I,J-J-J.K.L.L/M/N0N0O0P0Q0Q1R1S1S2S2T3T4T4T5T6T7T8T8S9S9R:Q:Q:P:O;N;N;M;L;L;K<K<J=J>J?J@J@JAJBJCJCKDKDLELEMENENFOFPFQFQFRGSGSGTHTITITJTKTLTMTNTNTOTPSQSQSRRRRSQSQTPTPT","P$Q$R$R%R%S%S&T&T'T'T(U)U)U*U+U+U,T-T-T.S.S/R/R0R0Q0Q1P1P2P2O2O3O4N4N5N5M6M6M7M8M8N9N9O:O:O:P;Q;Q;R;R<S<S<S=T=T>T?T?T@TATBTBSCSCRDRDQEQEQFPFPGOGOGOHNHNININJMJMKMKLLLLLMLNLOLOLPLQMQMQNRNRORORPSPRPQPQOP",]
 );
 
 THREE.Object3D.prototype.addBarley = function() {
