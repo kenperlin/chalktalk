@@ -368,15 +368,57 @@ var page102 = {
    "
 };
 
-var page104 = {
+var page104a = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=200></tr>\
+      <tr><th><font size=10 color=white>2012</font></th></tr>\
+      <tr height=100></tr>\
       <tr>\
-         <th><img src=imgs/see_through.png width=600></th>\
-         <th><img src=imgs/see_through_closeup.png width=500></th>\
+         <th><img src=imgs/sony_glasses.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104b = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>2014</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/ar_headset.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104c = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>2019</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/glasses2.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104d = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>2025</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/contact_lens.jpg width=500></th>\
          </tr>\
       </table>\
    "
@@ -462,7 +504,10 @@ var sketchPages = [
    page101,
    page102,
    blankPage(),
-   page104,
+   page104a,
+   page104b,
+   page104c,
+   page104d,
    page105,
    page106,
    page107
