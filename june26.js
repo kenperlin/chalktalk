@@ -640,8 +640,8 @@ function MothAndCandle() {
                var x = (this.xlo + this.xhi) / 2;
                var y = (this.ylo + this.yhi) / 2;
 
-               this.moveMothX += elapsed * max(-10, min(10, candleX - x));
-               this.moveMothY -= elapsed * max(-10, min(10, candleY - y));
+               this.moveMothX += elapsed * max(-10, min(10, candleX - x)) * 200 / this.size;
+               this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * 200 / this.size;
             }
 
 	    m.translate(this.moveMothX, this.moveMothY, 0);
