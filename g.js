@@ -2178,16 +2178,17 @@
       // SET PAGE CONTENT FROM TEMPLATE OR STRAIGHT FROM HTML
 
       pageObject = sketchPages[pageIndex];
-      if (isDef(pageObject.template))
-         insertTemplate(pageObject.template, slide);
-      else if (isDef(pageObject.innerHTML))
+      if (isDef(pageObject.innerHTML))
          slide.innerHTML = pageObject.innerHTML;
+      else if (isDef(pageObject.template))
+         insertTemplate(pageObject.template, slide);
 
       // IF THERE IS A VIDEO ON THE NEW PAGE, START PLAYING IT.
 
       vidElements = slide.getElementsByClassName("vid");
-      if (isVideoPlaying = vidElements.length > 0)
+      if (isVideoPlaying = vidElements.length > 0) {
          vidElements[0].play();
+      }
 
       // IF THERE IS AN AUDIENCE POP-UP, SET IT TO THE RIGHT PAGE.
 

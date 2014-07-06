@@ -1,14 +1,39 @@
 var sketchTypes = ( "Bird Control Diagram Graph Logic Func Physics Shape3D IO Marker Grid Lattice PVase ArbRevolve ArbRevolveHandle Noises MothAndCandle" ).split(' ');
 
-var blankPage = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: ""
-};
+function blankPage() {
+   return {
+      availableSketches: sketchTypes,
+      pan: 0,
+      innerHTML: ""
+   }
+}
 
 var title_page = {
    availableSketches: sketchTypes,
    pan: 0,
+   innerHTML: "\
+      <center>\
+      <table width=1280>\
+      <tr height=200></tr>\
+      <tr>\
+         <td>\
+            <center>\
+            <font color=white size=10>\
+            Early experiences and\
+            <br>\
+            current influences\
+            <br>\
+            in computer graphics\
+            <br>&nbsp;<p>\
+            <i><small>Ken Perlin</small></i>\
+            </font>\
+            </center>\
+            </td>\
+         </tr>\
+      </table>\
+      <tr height=1000></tr>\
+      </center>\
+   ",
    template: [
       ["Early experiences and<br>current influences<br>in computer graphics"],
       ["<i><small>Ken Perlin</small></i>"]
@@ -18,6 +43,25 @@ var title_page = {
 var page0 = {
    availableSketches: sketchTypes,
    pan: 0,
+   innerHTML: "\
+      <center>\
+      <table width=1280>\
+      <tr height=218></tr>\
+      <tr>\
+         <td>\
+            <center>\
+            <font color=white size=10>\
+            <big><b>My Textured Life</b></big>\
+            <p>&nbsp;<p>\
+            <i><small>Ken Perlin</small></i>\
+            </font>\
+            </center>\
+            </td>\
+         </tr>\
+      </table>\
+      <tr height=1000></tr>\
+      </center>\
+   ",
    template: [
       ["&nbsp;<p><big><b>My Textured Life</b></big>"],
       ["<i><small>Ken Perlin</small></i>"]
@@ -27,12 +71,30 @@ var page0 = {
 var page1 = {
    availableSketches: sketchTypes,
    pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=50></tr>\
+      <tr>\
+         <th><video class=vid width='60%' height='auto'>\
+            <source src='videos/modestDevil.mp4'>\
+            </video></th>\
+         </tr>\
+      </table>\
+   ",
    template: "videos/modestDevil.mp4"
 };
 
 var page2 = {
    availableSketches: sketchTypes,
    pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=140></tr>\
+      <tr>\
+         <th><img src=imgs/lightcycles.jpg width=700></th>\
+         </tr>\
+      </table>\
+   ",
    template: "imgs/lightcycles.jpg"
 };
 
@@ -384,21 +446,21 @@ var sketchPages = [
    page6,
    page7,
    page8,
-   blankPage,
+   blankPage(),
    page10,
    page11,
-   blankPage,
+   blankPage(),
    page13,
    page14,
-   blankPage,
+   blankPage(),
    page16,
    page17,
-   blankPage,
+   blankPage(),
    page19,
    page100,
    page101,
    page102,
-   blankPage,
+   blankPage(),
    page104,
    page105,
    page106,
