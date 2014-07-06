@@ -234,15 +234,22 @@
             return;
          }
 
-         if (isBottomGesture) {
-            // IF DRAGGING TO QUICK SWITCH PAGES
-            if (isShiftPressed) {
-               pageNumber = floor(((x + _g.panX) / width()) * sketchPages.length);
-               if (pageNumber != pageIndex)
-                  setPage(pageNumber);
-               return;
-            }
+         if (x >= width() - margin - _g.panX) {
+            isRightHover = true;
+         } else {
+            isRightHover = false;
+         }
+
+         if (isBottomGesture && ! isShiftPressed) {
             _g.panX += x - this.xDown;
+            return;
+         }
+
+         if (isRightHover && isShiftPressed && ! isBottomGesture) {
+            // DRAGGING TO QUICK SWITCH PAGES
+            pageNumber = floor((y / (height() - margin)) * sketchPages.length);
+            if (pageNumber != pageIndex)
+               setPage(pageNumber);
             return;
          }
 
@@ -324,14 +331,17 @@
          }
 
          if (isBottomGesture) {
-            if (isShiftPressed) {
-               pageNumber = floor(((x + _g.panX) / width()) * sketchPages.length);
-               if (pageNumber != pageIndex)
-                  setPage(pageNumber);
-            }
-            else if (y < height() - 100)
+            if (y < height() - 100)
                sketchPage.clear();
             isBottomGesture = false;
+            return;
+         }
+
+         if (isRightHover && isShiftPressed && ! isBottomGesture) {
+            // CLICKING TO QUICK SWITCH PAGES
+            pageNumber = floor((y / (height() - margin)) * sketchPages.length);
+            if (pageNumber != pageIndex)
+               setPage(pageNumber);
             return;
          }
 
@@ -610,6 +620,12 @@
             isBottomHover = true;
          } else {
             isBottomHover = false;
+         }
+
+         if (x >= width() - margin - _g.panX && y < height() - margin) {
+            isRightHover = true;
+         } else {
+            isRightHover = false;
          }
 
          if (isFakeMouseDown) {
