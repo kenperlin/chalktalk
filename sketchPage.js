@@ -326,7 +326,8 @@
 	    if (this.paletteColorDragXY == null)
                sketchPage.colorIndex = paletteColorIndex;
             else {
-	       // NEED TO APPLY TO A SKETCH
+	       if (isk() && sk().isMouseOver)
+	          sk().color = sketchPalette[paletteColorIndex];
 	       this.paletteColorDragXY = null;
             }
             return;
@@ -1211,7 +1212,8 @@
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
+            if (this.paletteColorDragXY != null ||
+	        This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
                pieMenuDraw();
