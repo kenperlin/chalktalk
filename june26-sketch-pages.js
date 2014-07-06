@@ -436,6 +436,7 @@ var page107 = {
 };
 
 var sketchPages = [
+   blankPage(),
    title_page,
    page0,
    page1,
