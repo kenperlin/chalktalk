@@ -262,8 +262,10 @@
          if (isTogglingMenuType)
             return;
 
-         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]))
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
             outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
+	    this.isClick = false;
+         }
 
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
@@ -301,7 +303,6 @@
          if (this.isCreatingGroup)
             return;
 
-         //if (isk() && (outPort == -1 || sk() instanceof NumericSketch)) {
          if (isk()) {
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
@@ -323,8 +324,14 @@
          this.isPressed = false;
 
          if (paletteColorIndex >= 0) {
+
+            // MOUSE-UP OVER PALETTE TO SET THE DRAWING COLOR.
+
 	    if (this.paletteColorDragXY == null)
                sketchPage.colorIndex = paletteColorIndex;
+
+            // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
+
             else {
 	       if (isk() && sk().isMouseOver)
 	          sk().color = sketchPalette[paletteColorIndex];
@@ -360,7 +367,8 @@
             return;
          }
 
-         this.isClick = this.travel <= clickSize;
+         if (this.travel > clickSize)
+            this.isClick = false;
 
          if (pieMenuIsActive) {
             pieMenuEnd();
