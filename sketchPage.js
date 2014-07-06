@@ -108,6 +108,14 @@
          pullDownLabels = sketchActionLabels.concat(sketch.labels);
       }
 
+      this.getSketchesByLabel = function(label) {
+         var sketches = [];
+	 for (var i = 0 ; i < this.sketches.length ; i++)
+	    if (label == this.sketches[i].labels[this.sketches[i].selection])
+	          sketches.push(this.sketches[i]);
+	 return sketches;
+      }
+
       this.isCreatingGroup = false;
 
       this.isFocusOnLink = false;
