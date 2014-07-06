@@ -63,11 +63,15 @@ function ArbRevolve() {
 
     var geo = body.geometry;
 
-    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+    var body = tnode.addCube();
+
+    root.add(body);
+
+    var sketch = geometrySketch(body);
+
+    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
 
       // var sketch = geometrySketch(a);
-
-
     // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
     console.log(sketch);
 
@@ -85,14 +89,14 @@ function ArbRevolve() {
 
     sketch.update = function() {
       // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix()
-                   .translate(CX*2,-CY,0)
-       .scale(1280)
-                   .translate(0,0,0)
-                   .rotateX(PI/2)
-       .rotateZ(PI/2)
-       ;
-      this.setUniform('t', (time - this.startTime) / 0.5);
+      // this.geometry.getMatrix()
+      //              .translate(0,0,0)
+      //  .scale(1)
+      //              .translate(0,0,0)
+      //              .rotateX(PI/2)
+      //  .rotateZ(PI/2)
+      //  ;
+      // this.setUniform('t', (time - this.startTime) / 0.5);
     }
   console.log("hi");
 
@@ -112,65 +116,65 @@ function ArbRevolve() {
 
   this.onClick = function(x, y) {
 
-    console.log(this);
+    // console.log(this);
 
-    console.log(arrayToString(this.sp));
-    console.log(arrayToString(sk().sp));
-
-
-    this.fadeAway = 1.0;
-
-    glyphSketch.color = 'rgba(0,0,0,.01)';
-
-    var tnode = new THREE.Mesh();
-
-    var latheArray = [];
-
-    if(globalStrokes!=undefined) {
-      latheArray = globalStrokes.returnCoord();
-      latheArray[0][0] = 0;
-      latheArray[latheArray.length-1][0] = 0;
-    }
-
-    console.log(globalStrokes.strokes);
-
-    var body = tnode.addLathe( 
-        latheArray
-      , 32);
-
-    var geo = body.geometry;
-
-    var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
-
-      // var sketch = geometrySketch(a);
+    // console.log(arrayToString(this.sp));
+    // console.log(arrayToString(sk().sp));
 
 
-    // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
-    console.log(sketch);
+    // this.fadeAway = 1.0;
 
-    // for(var i = 0 ; i < body.geometry.faces.length ; i++){
-    //   var face = body.geometry.faces[i];
-    //   var temp = face.a;
-    //   var temp2 = face.c;
-    //   face.a = temp2;
-    //   face.c = temp;
+    // glyphSketch.color = 'rgba(0,0,0,.01)';
+
+    // var tnode = new THREE.Mesh();
+
+    // var latheArray = [];
+
+    // if(globalStrokes!=undefined) {
+    //   latheArray = globalStrokes.returnCoord();
+    //   latheArray[0][0] = 0;
+    //   latheArray[latheArray.length-1][0] = 0;
     // }
-    // sketch.geometry.geometry.computeFaceNormals();
-    // sketch.geometry.geometry.computeVertexNormals();
 
-    sketch.startTime = time;
+    // console.log(globalStrokes.strokes);
 
-    sketch.update = function() {
-      // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix()
-                   .translate(1,0,0)
-		   .scale(275)
-                   .translate(0,.18,0)
-                   .rotateX(PI/2)
-		   .rotateZ(PI/2)
-		   ;
-      this.setUniform('t', (time - this.startTime) / 0.5);
-    }
+    // var body = tnode.addLathe( 
+    //     latheArray
+    //   , 32);
+
+    // var geo = body.geometry;
+
+    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
+
+    //   // var sketch = geometrySketch(a);
+
+
+    // // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
+    // console.log(sketch);
+
+    // // for(var i = 0 ; i < body.geometry.faces.length ; i++){
+    // //   var face = body.geometry.faces[i];
+    // //   var temp = face.a;
+    // //   var temp2 = face.c;
+    // //   face.a = temp2;
+    // //   face.c = temp;
+    // // }
+    // // sketch.geometry.geometry.computeFaceNormals();
+    // // sketch.geometry.geometry.computeVertexNormals();
+
+    // sketch.startTime = time;
+
+    // sketch.update = function() {
+    //   // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
+    //  //  this.geometry.getMatrix()
+    //  //               .translate(1,0,0)
+		  //  // .scale(275)
+    //  //               .translate(0,.18,0)
+    //  //               .rotateX(PI/2)
+		  //  // .rotateZ(PI/2)
+		  //  // ;
+    //  //  this.setUniform('t', (time - this.startTime) / 0.5);
+    // }
   }
 }
 
