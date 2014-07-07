@@ -616,9 +616,7 @@ function MothAndCandle() {
    this.moveMothY = 0;
    this.transitionToCandle = 0;
 
-   this.code = [
-      ["", ""],
-   ];
+   this.code = [ ["", ""] ];
 
    this.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy)) {
@@ -640,7 +638,7 @@ function MothAndCandle() {
       switch (this.labels[this.selection]) {
 
       case "moth":
-         this.code[0][1] = "When I see a light, I go to it.";
+         this.code[0][1] = "When I see a light,\n   I go to it.";
 
          if (this.isAnimating) {
 
