@@ -369,6 +369,22 @@ var page102 = {
    "
 };
 
+var page103 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=50></tr>\
+      <tr><th><font size=10 color=white>The dawn of the age</font></th></tr>\
+      <tr><th><font size=10 color=white>of computer graphics</font></th></tr>\
+      <tr height=50></tr>\
+      <tr>\
+         <th><img src=imgs/gumball_machine.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page104a = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -505,6 +521,7 @@ var sketchPages = [
    page101,
    page102,
    blankPage(),
+   page103,
    page104a,
    page104b,
    page104c,
