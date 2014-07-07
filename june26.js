@@ -604,7 +604,6 @@ function MothAndCandle() {
    this.transitionToCandle = 0;
 
    this.onClick = function() {
-      console.log("AHA " + this.id);
       this.isAnimating = true;
    }
 
