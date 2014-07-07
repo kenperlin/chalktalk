@@ -11,32 +11,54 @@ registerGlyph("ArbRevolve()", [ [[1,-1],[1,1]], [[1,-1],[-1,-1],[-1,1],[1,1]] ])
 
 function ArbRevolve() {
 
-    var lathe2 = cloneArray(sk().sp);
+    // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
-    var xHi = -10000;
-    var yLo =  10000;
-    var yHi = -10000;
-    for(var i = 0 ; i < lathe2.length ; i++){
-       xHi = max(xHi, lathe2[i][0]);
-       yLo = min(yLo, lathe2[i][1]);
-       yHi = max(yHi, lathe2[i][1]);
-       lathe2[i][2] = lathe2[i][1];
-       lathe2[i][1] = 0;
+    var profile = [];
+    var sp = sk().sp, i = 2;
+    var scale = 20 / width();
+    for ( ; sp[i][2] == 1 ; i++) ;
+    for ( ; i < sp.length ; i++)
+       profile.push([ scale * sp[i][0], 0, scale * sp[i][1] ]);
+
+    // SMOOTH OUT THE PROFILE CURVE.
+
+    for (var n = 0 ; n < 3 ; n++)
+       for (var i = 1 ; i < profile.length - 1 ; i++)
+          for (var j = 0 ; j <= 2 ; j += 2)
+             profile[i][j] = (profile[i-1][j] + profile[i+1][j]) / 2;
+
+    // MOVE TO LEFT OF ORIGIN IN X, AND CENTER IN Y.
+
+    var xLo = 10000, xHi = -10000;
+    var yLo = 10000, yHi = -10000;
+    for(var i = 0 ; i < profile.length ; i++){
+       xLo = min(xLo, profile[i][0]);
+       xHi = max(xHi, profile[i][0]);
+       yLo = min(yLo, profile[i][2]);
+       yHi = max(yHi, profile[i][2]);
     }
-
-    for(var i = 0 ; i < lathe2.length ; i++){
-      lathe2[i][0] -= xHi;
-      lathe2[i][2] -= (yLo + yHi) / 2;
-      lathe2[i][0] *= 20 / width();
-      lathe2[i][2] *= 20 / width();
+    for(var i = 0 ; i < profile.length ; i++){
+       profile[i][0] -= xHi;
+       profile[i][2] -= (yLo + yHi) / 2;
     }
-    lathe2[0][0] = lathe2[lathe2.length-1][0] = 0;
+    profile[0][0] = profile[profile.length-1][0] = 0;
 
-    var sketch = geometrySketch(root.addLathe(lathe2, 32));
+    // MAKE A LATHE OBJECT WITH A PRETTY MARBLE TEXTURE.
+
+    var sketch = geometrySketch(root.addLathe(profile, 32));
     sketch.geometry.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
+    // REMEMBER X/Y ASPECT RATIO, AND MOVE OBJECT TO RIGHT BY THAT AMOUNT EACH FRAME.
+
+    sketch.aspectRatio = (xHi-xLo) / (yHi-yLo);
     sketch.update = function() {
-      this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
+      this.geometry.getMatrix().translate(this.aspectRatio,0,0).rotateX(PI/2);
+    }
+
+    sketch.shaderCount = 0;
+    sketch.onClick = function() {
+       var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
+       this.geometry.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
 
@@ -194,9 +216,9 @@ function bSliced() {
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
     sketch.code = [
-      ["sphere", ""],
+      ["sphere", "(X,Y,Z)"],
       ["stripes", "mod ( floor(X) , 2 )"],
-      ["checker", "mod( floor(X)+floor(Y)+floor(Z) , 2 )"],
+      ["checker", "mod(floor(X)+floor(Y)+floor(Z), 2 )"],
       ["dots", "0.5 + 0.5 * sin(X)*sin(Y)*sin(Z)"],
       ["waves", "sin(X + sin(2 * sin(X) + 9*Y))"],
       ["cartoon wood", "fract(sin(sin(6 * X) * cos(3 * Z)))"],

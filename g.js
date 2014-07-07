@@ -425,7 +425,7 @@
       return dst;
    }
 
-   function morphGlyphToSketch() {
+   function morphGlyphToSketch(suppressTransition) {
       function drawTrace(tr) {
          _g.beginPath();
          for (var n = 0 ; n < tr.length ; n++)
@@ -442,7 +442,15 @@
 
       var t = min(1, 2 * sk().glyphTransition);
 
-      if (t == 1) {
+      if (isDef(suppressTransition))
+         t = 0;
+
+      if (t == 0) {
+         drawTrace(sk().glyphTrace);
+         return;
+      }
+
+      else if (t == 1) {
          _g.lineWidth = sketchLineWidth * .6;
          drawTrace(sk().trace);
          return;
@@ -2107,7 +2115,18 @@
       sketch.tY = y;
       sketch.geometry = mesh;
       mesh.sketch = sketch;
+      setMeshUpdateFunction(mesh);
 
+      if (mesh.material == blackMaterial)
+         setMeshMaterialToColor(mesh, sketchColor());
+
+      addSketch(sketch);
+
+      finishDrawingUnfinishedSketch();
+      return sketch;
+   }
+
+   function setMeshUpdateFunction(mesh) {
       mesh.update = function() {
 	 if (this.material.uniforms === undefined)
 	    return;
@@ -2140,48 +2159,27 @@
 
          S.setUniform('selectedIndex', isDef(S.selectedIndex) ? S.selectedIndex : 0);
       }
+   }
 
-      if (mesh.material == blackMaterial) {
-         var C = colorToRGB(sketchColor());
-         mesh.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
-                                             .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
-                                             .setSpecular(0,0,0,1));
-      }
-
-      addSketch(sketch);
-      finishDrawingUnfinishedSketch();
-
-      return sketch;
+   function setMeshMaterialToColor(mesh, color) {
+      var C = colorToRGB(color);
+      mesh.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
+                                          .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+                                          .setSpecular(0,0,0,1));
    }
 
    function addPlaneShaderSketch(vertexShader, fragmentShader) {
-      return addGeometryShaderSketch(new THREE.PlaneGeometry(50,50), vertexShader, fragmentShader);
+      return addGeometryShaderSketch(new THREE.PlaneGeometry(50/20,50/20), vertexShader, fragmentShader);
    }
 
    function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
+      sk().fadeAway = 1.0;
       var material = shaderMaterial(vertexShader, fragmentShader);
-
       var mesh = new THREE.Mesh(geometry,material);
       root.add(mesh);
-
       mesh.sketch = geometrySketch(mesh);
       mesh.sketch.fragmentShader = fragmentShader;
-
-      mesh.update = function() {
-         var S = this.sketch;
-         this.getMatrix().scale(1/20);
-         this.material.uniforms['time'].value = time;
-         if (S.x == 0) {
-            S.x = (S.xlo + S.xhi)/2;
-            S.y = (S.ylo + S.yhi)/2;
-         }
-         if (! S.isClick) {
-            this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
-            this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
-         }
-         this.material.uniforms['alpha'].value = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
-         this.material.uniforms['selectedIndex'].value = isDef(S.selectedIndex) ? S.selectedIndex : 0;
-      }
+      setMeshUpdateFunction(mesh);
       return mesh.sketch;
    }
 

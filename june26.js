@@ -365,6 +365,19 @@ function corona() {
 }
 
 
+var flameFragmentShader = ["\
+   void main(void) {\
+      vec3 p = 4.*vPosition;\
+      float nx = .5 * noise(.1*p);\
+      float ny = .5 * noise(.1*p + vec3(100., 0., 0.));\
+      float s = .5 * p.z + turbulence(vec3(p.x+nx, p.y+ny, p.z+.3*time));\
+      float ss = s * s;\
+      vec3 color = s * vec3(1., ss, ss*ss);\
+      gl_FragColor = vec4(color, alpha);\
+   }\
+"].join("\n");
+
+
 var slicedFragmentShader = ["\
    uniform float spinAngle;\
    void main(void) {\
@@ -629,9 +642,9 @@ function MothAndCandle() {
 	    // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
 
             if (isCandle) {
-	       this.mm._m()[12] *= 1 - elapsed;
-	       this.mm._m()[13] *= 1 - elapsed;
-	       this.mm._m()[14] *= 1 - elapsed;
+	       this.mm._m()[12] *= 1 - elapsed/2;
+	       this.mm._m()[13] *= 1 - elapsed/2;
+	       this.mm._m()[14] *= 1 - elapsed/2;
 
                this.transitionToCandle = min(1, this.transitionToCandle + elapsed / 2.0);
 	       var t = sCurve(this.transitionToCandle);
@@ -639,8 +652,8 @@ function MothAndCandle() {
                var x = (this.xlo + this.xhi) / 2;
                var y = (this.ylo + this.yhi) / 2;
 
-               this.moveMothX += elapsed * max(-10, min(10, candleX - x)) * 200 / this.size;
-               this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * 200 / this.size;
+               this.moveMothX += elapsed * max(-10, min(10, candleX - x)) * min(1, 200 / this.size);
+               this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * min(1, 200 / this.size);
             }
 
 	    m.translate(this.moveMothX, this.moveMothY, 0);
@@ -701,13 +714,16 @@ function MothAndCandle() {
 
       case "candle":
 
-         // MOTHS GO TO FLAME WHEN CANDLE APPEARS, THEN FORGET IT WHEN CANDLE DISAPPEARS.
+         // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
 
-         if (this.glyphTransition > 0.5 && isNumber(this.xlo)) {
+         if (this.glyphTransition >= 0.5 && isNumber(this.xlo)) {
 	    candleX = (this.xlo + this.xhi) / 2;
 	    candleY = this.ylo;
             isCandle = true;
          }
+
+	 // THEY WANDER OFF WHEN THE CANDLE DISAPPEARS.
+
          if (this.fadeAway > 0 && this.fadeAway < 1)
             isCandle = false;
 
@@ -715,19 +731,21 @@ function MothAndCandle() {
 
 	 // CANDLE
 
-         mCurve([[-.2,-1.1],[-.2, .2],[ .2, .2],[ .2,-1.1]]);
+         mCurve([[-.2,-1.1],[-.2,.3]]
+	        .concat(createCurve([-.2,.3],[.2,.2],-.1))
+		.concat([[.2,.2],[.2,-1.1]]));
 
 	 // WICK
 
-         mCurve(createCurve([ .0, .2],[ .0, .4], .05));
+         mCurve(createCurve([ .01, .21],[ .01, .4], .05));
 
 	 // FLAME
 
-         mCurve(createCurve([ 0.00,0.9],[-0.15,0.6], 0.05).
-	 concat(createCurve([-0.15,0.6],[ 0.00,0.3],-0.30)));
+         mCurve(createCurve([ 0.00 ,0.90],[-0.10 ,0.60], 0.08).
+	 concat(createCurve([-0.10 ,0.60],[ 0.00 ,0.30],-0.31)));
 
-         mCurve(createCurve([ 0.00,0.9],[ 0.15,0.6],-0.05).
-	 concat(createCurve([ 0.15,0.6],[ 0.00,0.3], 0.30)));
+         mCurve(createCurve([ 0.00 ,0.90],[ 0.195,0.63], 0.03).
+	 concat(createCurve([ 0.195,0.63],[ 0.00 ,0.30], 0.30)));
 
          break;
       }

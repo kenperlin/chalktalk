@@ -340,8 +340,11 @@
             // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
 
             else {
-	       if (isk() && sk().isMouseOver)
+	       if (isk() && sk().isMouseOver) {
 	          sk().color = sketchPalette[paletteColorIndex];
+		  if (sk() instanceof GeometrySketch)
+                     setMeshMaterialToColor(sk().geometry, sk().color);
+               }
 	       this.paletteColorDragXY = null;
             }
             return;
@@ -1216,9 +1219,11 @@
 
             if (sk().glyphTrace != null && sk().sketchState != 'finished') {
                morphGlyphToSketch();
+
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);
-               if (sk().glyphTransition == 1) {
+
+	       if (sk().glyphTransition == 1) {
                   finishDrawingUnfinishedSketch();
                   sk().glyphTrace = null;
                }
