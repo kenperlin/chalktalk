@@ -37,7 +37,6 @@ function ArbRevolve() {
 
     sketch.update = function() {
       this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
-      this.geometry.material.uniforms['alpha'].value = this.fadeAway == 0 ? 1 : this.fadeAway;
     }
 }
 
@@ -1011,7 +1010,7 @@ fragPlane = {
         //     fragmentShader: lightShader.fragmentShader,
         // });
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {
                     type: "f",
@@ -1023,7 +1022,7 @@ fragPlane = {
         });
 
 
-        sph = new THREE.Mesh(new THREE.PlaneGeometry(50,50),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.PlaneGeometry(50,50),shaderMaterial);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;
         sph.material = shaderMaterial;
@@ -1458,7 +1457,7 @@ explodeBall = {
             ].join("\n")
         }
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
                     type: "t",
@@ -1483,7 +1482,7 @@ explodeBall = {
         });
 
 
-        sph = new THREE.Mesh(new THREE.SphereGeometry(1,200,200),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.SphereGeometry(1,200,200),shaderMaterial);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;
         sph.material = shaderMaterial;
@@ -1773,7 +1772,7 @@ flago = {
         //     fragmentShader: lightShader.fragmentShader,
         // });
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
                     type: "t",
@@ -1793,7 +1792,7 @@ flago = {
             fragmentShader: lightShader.fragmentShader,
         });
 
-        sph = new THREE.Mesh(new THREE.PlaneGeometry(20,10,100,100),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.PlaneGeometry(20,10,100,100),shaderMaterial);
         // sph.scale.set(.1,.1,.1);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;
