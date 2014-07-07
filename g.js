@@ -1350,7 +1350,7 @@
       document.body.scrollTop = 0;
       if (isDef(window[g.name].animate)) {
          document.body.style.cursor =
-            (isVideoPlaying && ! isBottomGesture) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
+            (isVideoPlaying && ! isBottomGesture && ! isRightHover) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
             bgClickCount == 1 ? 'cell' :
             isRightHover && ! isBottomGesture ? 'pointer' :
             isBottomGesture ? '-webkit-grabbing' :
