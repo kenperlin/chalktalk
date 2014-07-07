@@ -619,9 +619,13 @@ function MothAndCandle() {
    this.code = [ ["", ""] ];
 
    this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1:
-         this.isAnimating = true;
+      switch (this.labels[this.selection]) {
+      case "moth":
+         switch (pieMenuIndex(dx, dy)) {
+         case 1:
+            this.isAnimating = true;
+	    break;
+         }
 	 break;
       }
    }
@@ -642,9 +646,14 @@ function MothAndCandle() {
 
          if (this.isAnimating) {
 
+	    if (this.animationThrottle === undefined)
+	       this.animationThrottle = 0;
+	    this.animationThrottle = min(1, this.animationThrottle + elapsed / 0.5);
+	    var animationSpeed = sCurve(this.animationThrottle);
+
 	    // ALWAYS MOVE FORWARD.
 
-	    this.mm.translate(0, 15 * elapsed, 0);
+	    this.mm.translate(0, 15 * elapsed * animationSpeed, 0);
 
 	    // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
 
@@ -667,12 +676,14 @@ function MothAndCandle() {
 
 	    // CONTINUALLY CHANGE DIRECTION.
 
-	    this.mm.rotateX(25 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
-	    this.mm.rotateZ(25 * elapsed * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
+            var turnRate = 25 * elapsed * animationSpeed;
+	    this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
+	    this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
 
 	    // TRY TO STAY ORIENTED UPRIGHT.
 
-	    this.mm.aimZ(this.up);
+            if (animationSpeed == 1)
+	       this.mm.aimZ(this.up);
 	 }
 
 	 // DRAW TORSO
