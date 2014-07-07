@@ -3,9 +3,6 @@
    registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
    registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
-   registerGlyph("long_nose()", [ [[-1,.5],[1,.5]],[[1,.5],[1,-.5]], [[-1,.5],[.8,.3],[1,-.5]] ]);
-   registerGlyph("tron()"     , [ [[0,-1.5],[0,-1]], makeOval(-.5,-1, 1,.25, 32, PI/2, PI/2 + TAU) ]);
-
    function cube()     { geometrySketch(root.addCube()); }
    function cylinder() { geometrySketch(root.addCylinder()); }
    function globe()    { geometrySketch(root.addGlobe()); }
