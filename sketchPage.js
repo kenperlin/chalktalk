@@ -253,12 +253,12 @@
             isRightHover = false;
          }
 
-         if (isBottomGesture && ! isShiftPressed) {
+         if (isBottomGesture) {
             _g.panX += x - this.xDown;
             return;
          }
 
-         if (isRightHover && isShiftPressed && ! isBottomGesture) {
+         if (isRightHover && ! isBottomGesture) {
             // DRAGGING TO QUICK SWITCH PAGES
             pageNumber = floor((y / (height() - margin)) * sketchPages.length);
             if (pageNumber != pageIndex)
@@ -363,7 +363,7 @@
             return;
          }
 
-         if (isRightHover && isShiftPressed && ! isBottomGesture) {
+         if (isRightHover && ! isBottomGesture) {
             // CLICKING TO QUICK SWITCH PAGES
             pageNumber = floor((y / (height() - margin)) * sketchPages.length);
             if (pageNumber != pageIndex)

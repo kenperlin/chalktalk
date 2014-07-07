@@ -1343,7 +1343,7 @@
          document.body.style.cursor =
             (isVideoPlaying && ! isBottomGesture) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
             bgClickCount == 1 ? 'cell' :
-            isRightHover && isShiftPressed ? 'pointer' :
+            isRightHover && ! isBottomGesture ? 'pointer' :
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
 
@@ -1632,22 +1632,21 @@
          // ADJUST X POSITIONS ACCORDING TO PAN VALUE
 
          var leftX = 0 - _g.panX;
-         var rightX = 1280 - _g.panX;
+         var rightX = w - _g.panX;
 
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
-         if (isRightHover && isShiftPressed) {
+         if (isRightHover && ! isBottomGesture) {
             _g.save();
             _g.globalAlpha = 1.0;
             lineWidth(1);
 
             var numberSpacing = (h - margin) / sketchPages.length;
-            var columnWidth = numberSpacing * 1.5;
             for (var i = 0; i < h - margin; i += numberSpacing * 2) {
                _g.beginPath();
-               _g.moveTo(w - columnWidth, i);
-               _g.lineTo(w - columnWidth, i + numberSpacing);
-               _g.lineTo(w, i + numberSpacing);
-               _g.lineTo(w, i);
+               _g.moveTo(rightX - margin, i);
+               _g.lineTo(rightX - margin, i + numberSpacing);
+               _g.lineTo(rightX, i + numberSpacing);
+               _g.lineTo(rightX, i);
                _g.fillStyle = scrimColor(.2);
                _g.fill();
             }
@@ -1659,8 +1658,8 @@
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
                // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
-               var centerRatio = pn < 10 ? 0.6 : 0.73;
-               var numberX = w - _g.panX - columnWidth * centerRatio;
+               var centerRatio = pn < 10 ? 0.57 : 0.65;
+               var numberX = w - _g.panX - margin * centerRatio;
                _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
             }
 
@@ -1678,7 +1677,7 @@
 
          // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
-         if (! isShowingGlyphs && ! (isRightHover && isShiftPressed)) {
+         if (! isShowingGlyphs) {
             _g.save();
             lineWidth(1);
             _g.globalAlpha = 1.0;
