@@ -11,171 +11,33 @@ registerGlyph("ArbRevolve()", [ [[1,-1],[1,1]], [[1,-1],[-1,-1],[-1,1],[1,1]] ])
 
 function ArbRevolve() {
 
-    console.log(this);
+    var lathe2 = cloneArray(sk().sp);
 
-    // console.log(arrayToString(this.sp));
-    var lathe2 = sk().sp;
-
-    CX = sk().cx();
-    CY = sk().cy();
-
-    var large = -1e6;
-    var largey = -1e6;
+    var xHi = -10000;
+    var yLo =  10000;
+    var yHi = -10000;
+    for(var i = 0 ; i < lathe2.length ; i++){
+       xHi = max(xHi, lathe2[i][0]);
+       yLo = min(yLo, lathe2[i][1]);
+       yHi = max(yHi, lathe2[i][1]);
+       lathe2[i][2] = lathe2[i][1];
+       lathe2[i][1] = 0;
+    }
 
     for(var i = 0 ; i < lathe2.length ; i++){
-      if(large<lathe2[i][0])
-        large=lathe2[i][0];
-      if(largey<lathe2[i][2])
-        largey=lathe2[i][2];
-      lathe2[i][2] = lathe2[i][1];
-      lathe2[i][1] = 0;
-
+      lathe2[i][0] -= xHi;
+      lathe2[i][2] -= (yLo + yHi) / 2;
+      lathe2[i][0] *= 20 / width();
+      lathe2[i][2] *= 20 / width();
     }
-     for(var i = 0 ; i < lathe2.length ; i++){
-      lathe2[i][0] -= large;
-      lathe2[i][2] += largey;
-      lathe2[i][0]/=1280;
-      lathe2[i][2]/=1280;
-    }
-    lathe2[0][0] = 0;
-    lathe2[lathe2.length-1][0] = 0;
-    // console.log(lathe2);
+    lathe2[0][0] = lathe2[lathe2.length-1][0] = 0;
 
-    this.fadeAway = 1.0;
-
-    glyphSketch.color = 'rgba(0,0,0,.01)';
-
-    var tnode = new THREE.Mesh();
-
-    // var latheArray = [];
-
-    // if(globalStrokes!=undefined) {
-    //   latheArray = globalStrokes.returnCoord();
-    //   latheArray[0][0] = 0;
-    //   latheArray[latheArray.length-1][0] = 0;
-    // }
-
-    // console.log(globalStrokes.strokes);
-
-    var body = tnode.addLathe( 
-        lathe2
-      , 32);
-
-    var geo = body.geometry;
-
-    var body = tnode.addCube();
-
-    root.add(body);
-
-    var sketch = geometrySketch(body);
-
-    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
-
-      // var sketch = geometrySketch(a);
-    // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
-    console.log(sketch);
-
-    // for(var i = 0 ; i < body.geometry.faces.length ; i++){
-    //   var face = body.geometry.faces[i];
-    //   var temp = face.a;
-    //   var temp2 = face.c;
-    //   face.a = temp2;
-    //   face.c = temp;
-    // }
-    // sketch.geometry.geometry.computeFaceNormals();
-    // sketch.geometry.geometry.computeVertexNormals();
-
-    sketch.startTime = time;
+    var sketch = geometrySketch(root.addLathe(lathe2, 32));
+    sketch.geometry.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
     sketch.update = function() {
-      // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      // this.geometry.getMatrix()
-      //              .translate(0,0,0)
-      //  .scale(1)
-      //              .translate(0,0,0)
-      //              .rotateX(PI/2)
-      //  .rotateZ(PI/2)
-      //  ;
-      // this.setUniform('t', (time - this.startTime) / 0.5);
+      this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
     }
-  console.log("hi");
-
-
-  this.render = function(elapsed) {
-
-    this.glyphTrace = null;
-    finishDrawingUnfinishedSketch();
-
-    m.save();
-    m.scale(this.size / 400);
-    lineWidth(1);
-    mCurve([ [1,1], [1,-1]]);
-    mCurve([ [1,1], [-1,1], [-1,-1], [1,-1]]);
-    m.restore();
-  }
-
-  this.onClick = function(x, y) {
-
-    // console.log(this);
-
-    // console.log(arrayToString(this.sp));
-    // console.log(arrayToString(sk().sp));
-
-
-    // this.fadeAway = 1.0;
-
-    // glyphSketch.color = 'rgba(0,0,0,.01)';
-
-    // var tnode = new THREE.Mesh();
-
-    // var latheArray = [];
-
-    // if(globalStrokes!=undefined) {
-    //   latheArray = globalStrokes.returnCoord();
-    //   latheArray[0][0] = 0;
-    //   latheArray[latheArray.length-1][0] = 0;
-    // }
-
-    // console.log(globalStrokes.strokes);
-
-    // var body = tnode.addLathe( 
-    //     latheArray
-    //   , 32);
-
-    // var geo = body.geometry;
-
-    // var sketch = addGeometryShaderSketch(geo, defaultVertexShader, pVaseFragmentShader);
-
-    //   // var sketch = geometrySketch(a);
-
-
-    // // sketch.geometry.add(new THREE.Mesh(new THREE.SphereGeometry(10,10,10),new THREE.MeshLambertMaterial()));
-    // console.log(sketch);
-
-    // // for(var i = 0 ; i < body.geometry.faces.length ; i++){
-    // //   var face = body.geometry.faces[i];
-    // //   var temp = face.a;
-    // //   var temp2 = face.c;
-    // //   face.a = temp2;
-    // //   face.c = temp;
-    // // }
-    // // sketch.geometry.geometry.computeFaceNormals();
-    // // sketch.geometry.geometry.computeVertexNormals();
-
-    // sketch.startTime = time;
-
-    // sketch.update = function() {
-    //   // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-    //  //  this.geometry.getMatrix()
-    //  //               .translate(1,0,0)
-		  //  // .scale(275)
-    //  //               .translate(0,.18,0)
-    //  //               .rotateX(PI/2)
-		  //  // .rotateZ(PI/2)
-		  //  // ;
-    //  //  this.setUniform('t', (time - this.startTime) / 0.5);
-    // }
-  }
 }
 
 ArbRevolve.prototype = new Sketch;
@@ -366,6 +228,30 @@ function bSliced() {
 }
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+var pVaseFragmentShader2 = ["\
+   void main(void) {\
+        vec3 point = 10. * vPosition;\
+        float a = -atan(point.x,point.y);\
+        float sweep = a > .1 && a < 0. || 4. > 3.14159 ? 1. : 0.;\
+        sweep = 0. > 1. ? 1. :0.;\
+        float ma = mx-1.;\
+        vec3 normal = normalize(vNormal);\
+        float s = .3 + max(0.,dot(vec3(.3), normal));\
+        float tu = turbulence(point) ;\
+        float c = pow(.5 + .5 * sin(7. * point.y + 4. * tu), .1);\
+        vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+        if (vNormal.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), normal), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+        }\
+        else {\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), normal), 7.);\
+            color += vec3(h, h*.8, h*.6);\
+        }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
 
 var pVaseFragmentShader = ["\
    uniform float t;\
@@ -1124,7 +1010,7 @@ fragPlane = {
         //     fragmentShader: lightShader.fragmentShader,
         // });
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {
                     type: "f",
@@ -1136,7 +1022,7 @@ fragPlane = {
         });
 
 
-        sph = new THREE.Mesh(new THREE.PlaneGeometry(50,50),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.PlaneGeometry(50,50),shaderMaterial);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;
         sph.material = shaderMaterial;
@@ -1571,7 +1457,7 @@ explodeBall = {
             ].join("\n")
         }
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
                     type: "t",
@@ -1596,7 +1482,7 @@ explodeBall = {
         });
 
 
-        sph = new THREE.Mesh(new THREE.SphereGeometry(1,200,200),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.SphereGeometry(1,200,200),shaderMaterial);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;
         sph.material = shaderMaterial;
@@ -1886,7 +1772,7 @@ flago = {
         //     fragmentShader: lightShader.fragmentShader,
         // });
 
-        shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 tExplosion: {
                     type: "t",
@@ -1906,7 +1792,7 @@ flago = {
             fragmentShader: lightShader.fragmentShader,
         });
 
-        sph = new THREE.Mesh(new THREE.PlaneGeometry(20,10,100,100),shaderMaterial);
+        var sph = new THREE.Mesh(new THREE.PlaneGeometry(20,10,100,100),shaderMaterial);
         // sph.scale.set(.1,.1,.1);
         // scene.add(sph);
         sph.shaderMaterial = shaderMaterial;

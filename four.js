@@ -45,9 +45,9 @@
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
-      var child = new THREE.Mesh( geometry, blackMaterial );
-      this.add(child);
-      return child;
+      var mesh = new THREE.Mesh( geometry, blackMaterial );
+      this.add(mesh);
+      return mesh;
    }
 
    THREE.Object3D.prototype.addLathe = function(p, nSegments) {
@@ -55,43 +55,43 @@
       for (var i = 0 ; i < p.length ; i++)
          points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
       var geometry = latheGeometry( points, nSegments );
-      var child = new THREE.Mesh(geometry, blackMaterial);
-      this.add(child);
-      return child;
+      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      this.add(mesh);
+      return mesh;
    }
 
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
-      var child = new node();
+      var thing = new node();
       var geometry = cylinderGeometry(n);
       var mesh = new THREE.Mesh(geometry, blackMaterial);
       mesh.rotation.x = PI / 2;
-      child.add(mesh);
-      child.material = blackMaterial;
-      this.add(child);
-      return child;
+      thing.add(mesh);
+      thing.material = blackMaterial;
+      this.add(thing);
+      return thing;
    }
 
    THREE.Object3D.prototype.addCube = function() {
       var geometry = cubeGeometry();
-      var child = new THREE.Mesh(geometry, blackMaterial);
-      this.add(child);
-      return child;
+      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      this.add(mesh);
+      return mesh;
    }
 
    THREE.Object3D.prototype.addGlobe = function(m, n) {
       if (m === undefined) m = 32;
       if (n === undefined) n = floor(m / 2);
       var geometry = globeGeometry(m, n);
-      var child = new THREE.Mesh(geometry, blackMaterial);
-      this.add(child);
-      return child;
+      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      this.add(mesh);
+      return mesh;
    }
 
    THREE.Object3D.prototype.addNode = function() {
-      var child = new THREE.Mesh();
-      this.add(child);
-      return child;
+      var mesh = new THREE.Mesh();
+      this.add(mesh);
+      return mesh;
    }
 
    var PI = Math.PI;
@@ -207,8 +207,8 @@
          mouseY = event.clientY;
       }, false);
 
-      renderer.camera = new THREE.PerspectiveCamera(cameraFOV/100,width()/height(),1,2000);
-      renderer.camera.position.set(0,0,10*100);
+      renderer.camera = new THREE.PerspectiveCamera(cameraFOV/20,width()/height(),1,1100);
+      renderer.camera.position.set(0,0,10*20);
    }
 
 function gl() { return renderer.context; }
