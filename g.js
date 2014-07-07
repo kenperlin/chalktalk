@@ -2021,7 +2021,7 @@
       this.downx = 0;
       this.downy = 0;
       this.cleanup = function() {
-         root.remove(this.geometry);
+         root.remove(this.mesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2055,15 +2055,15 @@
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
-         this.geometry.getMatrix()
+         this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
              .rotateX(-PI*this.rY)
              .rotateY( PI*this.rX)
              .scale(s * this.sx, s * this.sy, s);
 
-         if (isDef(this.geometry.update))
-            this.geometry.update(elapsed);
+         if (isDef(this.mesh.update))
+            this.mesh.update(elapsed);
 
          if (isDef(this.update))
             this.update(elapsed);
@@ -2073,18 +2073,18 @@
             var alpha = this.fadeAway > 0 ? this.fadeAway :
                         this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
                         sketchPage.fadeAway;
-            this.geometry.material.opacity = sCurve(alpha);
-            this.geometry.material.transparent = true;
+            this.mesh.material.opacity = sCurve(alpha);
+            this.mesh.material.transparent = true;
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
       }
       this.setUniform = function(name, value) {
-         if (isDef(this.geometry.material.uniforms[name]))
-            this.geometry.material.uniforms[name].value = value;
+         if (isDef(this.mesh.material.uniforms[name]))
+            this.mesh.material.uniforms[name].value = value;
       }
-      this.geometry = null;
+      this.mesh = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
 
@@ -2129,7 +2129,7 @@
 
       sketch.tX = x;
       sketch.tY = y;
-      sketch.geometry = mesh;
+      sketch.mesh = mesh;
       mesh.sketch = sketch;
       setMeshUpdateFunction(mesh);
 

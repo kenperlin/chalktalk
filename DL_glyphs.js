@@ -53,16 +53,16 @@ function ArbRevolve() {
     // MAKE A LATHE OBJECT WITH A PRETTY MARBLE TEXTURE.
 
     var sketch = geometrySketch(root.addLathe(profile, 32));
-    sketch.geometry.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
+    sketch.mesh.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
     sketch.update = function() {
-      this.geometry.getMatrix().rotateX(PI/2);
+      this.mesh.getMatrix().rotateX(PI/2);
     }
 
     sketch.shaderCount = 0;
     sketch.onClick = function() {
        var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
-       this.geometry.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
+       this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
 
@@ -115,7 +115,7 @@ function ArbRevolveHandle() {
 
     var curve = new THREE.SplineCurve3(handleArray);
 
-    sketch.geometry.add(new THREE.Mesh(new THREE.TubeGeometry(curve),new THREE.MeshLambertMaterial()));
+    sketch.mesh.add(new THREE.Mesh(new THREE.TubeGeometry(curve),new THREE.MeshLambertMaterial()));
     console.log(sketch);
 
     // for(var i = 0 ; i < body.geometry.faces.length ; i++){
@@ -125,14 +125,14 @@ function ArbRevolveHandle() {
     //   face.a = temp2;
     //   face.c = temp;
     // }
-    // sketch.geometry.geometry.computeFaceNormals();
-    // sketch.geometry.geometry.computeVertexNormals();
+    // sketch.mesh.geometry.computeFaceNormals();
+    // sketch.mesh.geometry.computeVertexNormals();
 
     sketch.startTime = time;
 
     sketch.update = function() {
       // var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(0,0,0.0).
+      this.mesh.getMatrix().translate(0,0,0.0).
       rotateX(PI/2).rotateZ(PI*2).scale(2);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
@@ -339,14 +339,14 @@ function PVase() {
       face.a = temp2;
       face.c = temp;
     }
-    sketch.geometry.geometry.computeFaceNormals();
-    sketch.geometry.geometry.computeVertexNormals();
+    sketch.mesh.geometry.computeFaceNormals();
+    sketch.mesh.geometry.computeVertexNormals();
 
     sketch.startTime = time;
 
     sketch.update = function() {
       var scale = (this.xhi - this.xlo) / 16 + sketchPadding;
-      this.geometry.getMatrix().translate(-2,-12,0.0).
+      this.mesh.getMatrix().translate(-2,-12,0.0).
       rotateX(-PI/2).rotateZ(PI/2).scale(scale/7);
       this.setUniform('t', (time - this.startTime) / 0.5);
     }
@@ -661,7 +661,7 @@ function nFloor() {
 
   a.update = function() {
 
-    var nP = sketch.geometry.noisePlane;
+    var nP = sketch.mesh.noisePlane;
 
     if(a.switcher>1 && a.switcher<3 || a.switcher>4){
       if(!this.now)
@@ -671,7 +671,7 @@ function nFloor() {
         nP.waveAmount+=.002;
     }
 
-    sketch.geometry.noisePlane.draw(time);
+    sketch.mesh.noisePlane.draw(time);
     // nP.position.y=10;
     nP.rotation.x=.3;
 
@@ -706,14 +706,14 @@ function nFloor() {
       this.value = t;
       _g.globalAlpha = sCurve(1 - t) * (1-t);
     }
-      for(var i = 0 ; i < sketch.geometry.children.length-1 ; i++){
+      for(var i = 0 ; i < sketch.mesh.children.length-1 ; i++){
         var sc = .0001;
-        sketch.geometry.children[i].scale.set(sc,sc,sc);
+        sketch.mesh.children[i].scale.set(sc,sc,sc);
       }
     // if(this.switcher>-1){
-    //   for(var i = 0 ; i < sketch.geometry.things.length ; i++){
+    //   for(var i = 0 ; i < sketch.mesh.things.length ; i++){
     //     var gs = sketch.countUp;
-    //     var bar = sketch.geometry.toGrow[i];
+    //     var bar = sketch.mesh.toGrow[i];
 
     //     if(sketch.countUp > bar.position.x && bar.position.x > 0 && bar.grow < 1)
     //       bar.grow+=.1;
@@ -794,7 +794,7 @@ function barley() {
 
   a.update = function() {
 
-    var nP = sketch.geometry.noisePlane;
+    var nP = sketch.mesh.noisePlane;
 
     if(a.switcher>1 && a.switcher<3 || a.switcher>4){
       if(!this.now)
@@ -804,7 +804,7 @@ function barley() {
         nP.waveAmount+=.002;
     }
 
-    sketch.geometry.noisePlane.draw(time);
+    sketch.mesh.noisePlane.draw(time);
     nP.position.y=10;
 
     if(a.switcher>2 && nP.matOpac < 1 && a.switcher<4){
@@ -839,9 +839,9 @@ function barley() {
     }
 
     if(this.switcher>0){
-      for(var i = 0 ; i < sketch.geometry.toGrow.length ; i++){
+      for(var i = 0 ; i < sketch.mesh.toGrow.length ; i++){
         var gs = sketch.countUp;
-        var bar = sketch.geometry.toGrow[i];
+        var bar = sketch.mesh.toGrow[i];
 
         if(sketch.countUp > bar.position.x && bar.position.x > 0 && bar.grow < 1)
           bar.grow+=.1;

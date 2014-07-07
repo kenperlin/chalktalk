@@ -279,8 +279,8 @@ function planet() {
    sketch.update = function() {
       if (isCodeWidget && sketch.fragmentShader != codeTextArea.value 
                        && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
-	 sketch.geometry.material = shaderMaterial(defaultVertexShader,
-                                                   sketch.fragmentShader = codeTextArea.value);
+	 sketch.mesh.material = shaderMaterial(defaultVertexShader,
+                                               sketch.fragmentShader = codeTextArea.value);
    }
 }
 

@@ -346,7 +346,7 @@
 	       if (isk() && sk().isMouseOver) {
 	          sk().color = sketchPalette[paletteColorIndex];
 		  if (sk() instanceof GeometrySketch)
-                     setMeshMaterialToColor(sk().geometry, sk().color);
+                     setMeshMaterialToColor(sk().mesh, sk().color);
                }
 	       this.paletteColorDragXY = null;
             }
