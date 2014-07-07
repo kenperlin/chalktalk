@@ -527,6 +527,7 @@ var sketchPages = [
    page104c,
    page104d,
    page105,
+   blankPage(),
    page106,
    page107
 ];
