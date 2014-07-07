@@ -7,18 +7,21 @@
 //     [ [1,1], [-1,1], [-1,-1], [1,-1]]
 // ]);
 
-registerGlyph("ArbRevolve()", [ [[1,-1],[1,1]], [[1,-1],[-1,-1],[-1,1],[1,1]] ]);
+registerGlyph("ArbRevolve()", [
+   [[0,-.5],[ 0, .5]],
+   [[0, .5],[-1, .5]],
+   [[0, .5],[ 1, .5]],
+   [[1,-.5],[-1,-.5],[-1,.5],[1,.5]]
+]);
 
 function ArbRevolve() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
+    var trace = sketchToTrace(sk());
     var profile = [];
-    var sp = sk().sp, i = 2;
-    var scale = 20 / width();
-    for ( ; sp[i][2] == 1 ; i++) ;
-    for ( ; i < sp.length ; i++)
-       profile.push([ scale * sp[i][0], 0, scale * sp[i][1] ]);
+    for (var i = 0 ; i < trace[4].length ; i++)
+       profile.push([ trace[4][i][0], 0, trace[4][i][1] ]);
 
     // SMOOTH OUT THE PROFILE CURVE.
 
@@ -27,19 +30,23 @@ function ArbRevolve() {
           for (var j = 0 ; j <= 2 ; j += 2)
              profile[i][j] = (profile[i-1][j] + profile[i+1][j]) / 2;
 
-    // MOVE TO LEFT OF ORIGIN IN X, AND CENTER IN Y.
+    // MOVE AND SCALE TO MATCH SCREEN POSITION OF DRAWN LINE.
 
     var xLo = 10000, xHi = -10000;
     var yLo = 10000, yHi = -10000;
-    for(var i = 0 ; i < profile.length ; i++){
-       xLo = min(xLo, profile[i][0]);
-       xHi = max(xHi, profile[i][0]);
-       yLo = min(yLo, profile[i][2]);
-       yHi = max(yHi, profile[i][2]);
+    for (var i = 0 ; i < trace[1].length ; i++) {
+       xLo = min(xLo, trace[1][i][0]);
+       xHi = max(xHi, trace[1][i][0]);
+       yLo = min(yLo, trace[1][i][1]);
+       yHi = max(yHi, trace[1][i][1]);
     }
+    var x = (xLo + xHi) / 2;
+    var y = (yLo + yHi) / 2;
+    var scale = 2 / (yHi - yLo + 2 * sketchPadding);
+
     for(var i = 0 ; i < profile.length ; i++){
-       profile[i][0] -= xHi;
-       profile[i][2] -= (yLo + yHi) / 2;
+       profile[i][0] = scale * (profile[i][0] - x);
+       profile[i][2] = scale * (profile[i][2] - y);
     }
     profile[0][0] = profile[profile.length-1][0] = 0;
 
@@ -48,11 +55,8 @@ function ArbRevolve() {
     var sketch = geometrySketch(root.addLathe(profile, 32));
     sketch.geometry.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
-    // REMEMBER X/Y ASPECT RATIO, AND MOVE OBJECT TO RIGHT BY THAT AMOUNT EACH FRAME.
-
-    sketch.aspectRatio = (xHi-xLo) / (yHi-yLo);
     sketch.update = function() {
-      this.geometry.getMatrix().translate(this.aspectRatio,0,0).rotateX(PI/2);
+      this.geometry.getMatrix().rotateX(PI/2);
     }
 
     sketch.shaderCount = 0;
@@ -253,7 +257,7 @@ function bSliced() {
 
 var pVaseFragmentShader2 = ["\
    void main(void) {\
-        vec3 point = 10. * vPosition;\
+        vec3 point = 30. * vPosition;\
         float a = -atan(point.x,point.y);\
         float sweep = a > .1 && a < 0. || 4. > 3.14159 ? 1. : 0.;\
         sweep = 0. > 1. ? 1. :0.;\
