@@ -33,19 +33,12 @@ function ArbRevolve() {
     lathe2[0][0] = lathe2[lathe2.length-1][0] = 0;
 
     var sketch = geometrySketch(root.addLathe(lathe2, 32));
-    var material = shaderMaterial(defaultVertexShader, marbleFragmentShader);
-    sketch.geometry.setMaterial(material);
-
-    var material = shaderMaterial(defaultVertexShader, pVaseFragmentShader2);
-
-    console.log(sketch);
-
-    sketch.geometry.material = material;
+    sketch.geometry.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
     sketch.update = function() {
       this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
+      this.geometry.material.uniforms['alpha'].value = this.fadeAway == 0 ? 1 : this.fadeAway;
     }
-
 }
 
 ArbRevolve.prototype = new Sketch;
