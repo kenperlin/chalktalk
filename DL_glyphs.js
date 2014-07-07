@@ -36,6 +36,12 @@ function ArbRevolve() {
     var material = shaderMaterial(defaultVertexShader, marbleFragmentShader);
     sketch.geometry.setMaterial(material);
 
+    var material = shaderMaterial(defaultVertexShader, pVaseFragmentShader2);
+
+    console.log(sketch);
+
+    sketch.geometry.material = material;
+
     sketch.update = function() {
       this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
     }
@@ -230,6 +236,30 @@ function bSliced() {
 }
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+var pVaseFragmentShader2 = ["\
+   void main(void) {\
+        vec3 point = 10. * vPosition;\
+        float a = -atan(point.x,point.y);\
+        float sweep = a > .1 && a < 0. || 4. > 3.14159 ? 1. : 0.;\
+        sweep = 0. > 1. ? 1. :0.;\
+        float ma = mx-1.;\
+        vec3 normal = normalize(vNormal);\
+        float s = .3 + max(0.,dot(vec3(.3), normal));\
+        float tu = turbulence(point) ;\
+        float c = pow(.5 + .5 * sin(7. * point.y + 4. * tu), .1);\
+        vec3 color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
+        if (vNormal.x > 0.) {\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), normal), 20.);\
+            color += vec3(h*.4, h*.7, h);\
+        }\
+        else {\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), normal), 7.);\
+            color += vec3(h, h*.8, h*.6);\
+        }\
+      gl_FragColor = vec4(color,alpha);\
+   }\
+"].join("\n");
 
 var pVaseFragmentShader = ["\
    uniform float t;\
