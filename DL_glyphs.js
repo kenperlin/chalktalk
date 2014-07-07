@@ -13,8 +13,8 @@ function ArbRevolve() {
 
     var lathe2 = cloneArray(sk().sp);
 
-    var xHi = -100000;
-    var yLo = 10000;
+    var xHi = -10000;
+    var yLo =  10000;
     var yHi = -10000;
     for(var i = 0 ; i < lathe2.length ; i++){
        xHi = max(xHi, lathe2[i][0]);
@@ -24,15 +24,13 @@ function ArbRevolve() {
        lathe2[i][1] = 0;
     }
 
-    var yMid = (yLo + yHi) / 2;
     for(var i = 0 ; i < lathe2.length ; i++){
       lathe2[i][0] -= xHi;
-      lathe2[i][2] -= yMid;
+      lathe2[i][2] -= (yLo + yHi) / 2;
       lathe2[i][0] *= 20 / width();
       lathe2[i][2] *= 20 / width();
     }
-    lathe2[0][0] = 0;
-    lathe2[lathe2.length-1][0] = 0;
+    lathe2[0][0] = lathe2[lathe2.length-1][0] = 0;
 
     var sketch = geometrySketch(root.addLathe(lathe2, 32));
 
@@ -43,11 +41,7 @@ function ArbRevolve() {
     sketch.geometry.material = material;
 
     sketch.update = function() {
-      this.geometry.getMatrix()
-                   .translate(0.5,0,0)
-		   .rotateX(PI/2);
-      this.setUniform('t', (time - this.startTime) / 0.5);
-
+      this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
     }
 
 }
