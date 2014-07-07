@@ -300,11 +300,11 @@
          switch (this.selection) {
          case 0:
             mLine([-.5,0],[.5,0]);
-            mLine([x,-.20*this.flip],[x,.20*this.flip]);
+            mLine([x,-.15*this.flip],[x,.15*this.flip]);
             break;
          case 1:
             mLine([0,-.5*this.flip],[0,.5*this.flip]);
-            mLine([-.20,x],[.20,x]);
+            mLine([-.15,x],[.15,x]);
             break;
          }
 

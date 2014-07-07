@@ -375,8 +375,8 @@ var page103 = {
    innerHTML: "\
       <table width=1280>\
       <tr height=50></tr>\
-      <tr><th><font size=10 color=white>The dawn of the age</font></th></tr>\
-      <tr><th><font size=10 color=white>of computer graphics</font></th></tr>\
+      <tr><th><font size=10 color=white>This is the dawn of</font></th></tr>\
+      <tr><th><font size=10 color=white>the age of computer graphics</font></th></tr>\
       <tr height=50></tr>\
       <tr>\
          <th><img src=imgs/gumball_machine.jpg width=500></th>\
@@ -407,7 +407,7 @@ var page104b = {
       <tr><th><font size=10 color=white>2014</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
-         <th><img src=imgs/ar_headset.jpg width=600></th>\
+         <th><img src=imgs/david_smith_ar_device.png width=500></th>\
          </tr>\
       </table>\
    "
