@@ -158,6 +158,9 @@
          this.x = x;
          this.y = y;
 
+         if (isRightHover)
+            isRightGesture = true;
+
          if (pieMenuIsActive) {
             pieMenuStroke = [[x,y]];
             return;
@@ -258,7 +261,7 @@
             return;
          }
 
-         if (isRightHover && ! isBottomGesture) {
+         if (isRightHover && isRightGesture && ! isBottomGesture) {
             // DRAGGING TO QUICK SWITCH PAGES
             pageNumber = floor((y / (height() - margin)) * sketchPages.length);
             if (pageNumber != pageIndex)
@@ -366,13 +369,15 @@
             return;
          }
 
-         if (isRightHover && ! isBottomGesture) {
+         if (isRightHover && isRightGesture && ! isBottomGesture) {
             // CLICKING TO QUICK SWITCH PAGES
             pageNumber = floor((y / (height() - margin)) * sketchPages.length);
             if (pageNumber != pageIndex)
                setPage(pageNumber);
             return;
          }
+
+         isRightGesture = false;
 
          if (isTogglingMenuType) {
             isTogglingMenuType = false;
