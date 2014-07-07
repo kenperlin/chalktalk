@@ -1649,6 +1649,7 @@
             _g.globalAlpha = 1.0;
             lineWidth(1);
 
+            // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
             var numberSpacing = (h - margin) / sketchPages.length;
             for (var i = 0; i < h - margin; i += numberSpacing * 2) {
                _g.beginPath();
@@ -1660,6 +1661,20 @@
                _g.fill();
             }
 
+            // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+            var currentPageY = pageIndex * numberSpacing;
+            lineWidth(1);
+            _g.globalAlpha = 1.0;
+            _g.beginPath();
+            _g.moveTo(rightX - margin, currentPageY);
+            _g.lineTo(rightX - margin, currentPageY + numberSpacing);
+            _g.lineTo(rightX, currentPageY + numberSpacing);
+            _g.lineTo(rightX, currentPageY);
+            _g.lineTo(rightX - margin, currentPageY);
+            _g.strokeStyle = "rgb(255, 255, 255)";
+            _g.stroke();
+
+            // DRAW PAGE NUMBERS IN SLIDE SWITCHER
             _g.font = "14px Arial";
             var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
             for (var pn = 0; pn < sketchPages.length; pn++) {
