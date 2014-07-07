@@ -516,6 +516,7 @@
    var isPanning = false;
    var isRightClick = false;
    var isRightHover = false;
+   var isRightGesture = false;
    var isCodeWidget = false;
    var isShiftPressed = false;
    var isShorthandMode = false;
