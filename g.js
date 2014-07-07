@@ -2109,14 +2109,14 @@
       mesh.sketch = sketch;
 
       mesh.update = function() {
-	 if (this.material.uniforms === undefined || this.material.uniforms['time'] === undefined)
+	 if (this.material.uniforms === undefined)
 	    return;
 
          var S = this.sketch;
 
 	 // TELL THE MATERIAL ABOUT THE CURRENT TIME.
 
-         this.material.uniforms['time'].value = time;
+         S.setUniform('time', time);
 
 	 // TELL THE MATERIAL WHAT THE CURRENT SKETCH LOCATION IS IN PIXELS.
 
@@ -2128,17 +2128,17 @@
 	 // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
 
          if (! S.isClick) {
-            this.material.uniforms['mx'].value = (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
-            this.material.uniforms['my'].value = (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
+            S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
+            S.setUniform('my', (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
          }
 
 	 // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
 
-         this.material.uniforms['alpha'].value = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
+         S.setUniform('alpha', (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1));
 
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 
-         this.material.uniforms['selectedIndex'].value = isDef(S.selectedIndex) ? S.selectedIndex : 0;
+         S.setUniform('selectedIndex', isDef(S.selectedIndex) ? S.selectedIndex : 0);
       }
 
       if (mesh.material == blackMaterial) {
