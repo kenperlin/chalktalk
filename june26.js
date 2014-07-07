@@ -616,8 +616,16 @@ function MothAndCandle() {
    this.moveMothY = 0;
    this.transitionToCandle = 0;
 
-   this.onClick = function() {
-      this.isAnimating = true;
+   this.code = [
+      ["", ""],
+   ];
+
+   this.onSwipe = function(dx, dy) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 1:
+         this.isAnimating = true;
+	 break;
+      }
    }
 
    this.render = function(elapsed) {
@@ -632,6 +640,7 @@ function MothAndCandle() {
       switch (this.labels[this.selection]) {
 
       case "moth":
+         this.code[0][1] = "When I see a light, I go to it.";
 
          if (this.isAnimating) {
 
@@ -713,6 +722,7 @@ function MothAndCandle() {
          break;
 
       case "candle":
+         this.code[0][1] = "I am a light.";
 
          // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
 
