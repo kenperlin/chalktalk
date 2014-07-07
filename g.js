@@ -507,6 +507,7 @@
    var isNumeric = false;
    var isPanning = false;
    var isRightClick = false;
+   var isRightHover = false;
    var isCodeWidget = false;
    var isShiftPressed = false;
    var isShorthandMode = false;
@@ -1342,6 +1343,7 @@
          document.body.style.cursor =
             (isVideoPlaying && ! isBottomGesture) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
             bgClickCount == 1 ? 'cell' :
+            isRightHover && isShiftPressed ? 'pointer' :
             isBottomGesture ? '-webkit-grabbing' :
             isBottomHover ? '-webkit-grab' : 'crosshair';
 
@@ -1627,23 +1629,42 @@
 
          requestAnimFrame(function() { tick(g); });
 
-         // DRAW PAGE NUMBER IF QUICK SWITCHING PAGES
-         if (isBottomHover && isShiftPressed) {
-            _g.font = "15px Arial";
-            numberSpacing = w / sketchPages.length;
-            pageNumber = floor(((This().mouseX + _g.panX) / w) * sketchPages.length);
+         // ADJUST X POSITIONS ACCORDING TO PAN VALUE
 
-            for (pn = 0; pn < sketchPages.length; pn++) {
-               _g.save();
+         var leftX = 0 - _g.panX;
+         var rightX = 1280 - _g.panX;
 
-               alpha = pageNumber == pn ? 0.8 : 0.1;
+         // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
+         if (isRightHover && isShiftPressed) {
+            _g.save();
+            _g.globalAlpha = 1.0;
+            lineWidth(1);
+
+            var numberSpacing = (h - margin) / sketchPages.length;
+            var columnWidth = numberSpacing * 1.5;
+            for (var i = 0; i < h - margin; i += numberSpacing * 2) {
+               _g.beginPath();
+               _g.moveTo(w - columnWidth, i);
+               _g.lineTo(w - columnWidth, i + numberSpacing);
+               _g.lineTo(w, i + numberSpacing);
+               _g.lineTo(w, i);
+               _g.fillStyle = scrimColor(.2);
+               _g.fill();
+            }
+
+            _g.font = "14px Arial";
+            var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
+            for (var pn = 0; pn < sketchPages.length; pn++) {
+               var alpha = pageNumber == pn ? 0.8 : 0.2;
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
-               centerValue = pn < 10 ? 0.4 : 0.3;
-               _g.fillText(pn, (pn + centerValue) * numberSpacing - _g.panX, h - 8);
-
-               _g.restore();
+               // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+               var centerRatio = pn < 10 ? 0.6 : 0.73;
+               var numberX = w - _g.panX - columnWidth * centerRatio;
+               _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
             }
+
+            _g.restore();
          }
 
          if (visible_sp != null) {
@@ -1657,15 +1678,10 @@
 
          // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
-         if (! isShowingGlyphs) {
-            lineWidth(1);
-
+         if (! isShowingGlyphs && ! (isRightHover && isShiftPressed)) {
             _g.save();
-
+            lineWidth(1);
             _g.globalAlpha = 1.0;
-
-            leftX = 0 - _g.panX;
-            rightX = 1280 - _g.panX;
 
             _g.beginPath();
             _g.moveTo(leftX, h);
@@ -1674,7 +1690,6 @@
             _g.stroke();
 
             if (this.mouseY >= h - margin || isBottomGesture) {
-
                _g.beginPath();
                _g.moveTo(leftX, h - margin);
                _g.lineTo(rightX, h - margin);
@@ -1683,14 +1698,13 @@
                _g.fillStyle = scrimColor(0.05);
                _g.fill();
 
-               var ns = isShiftPressed ? (w / sketchPages.length * 2) : margin;
-               offset = isShiftPressed ? 0 : _g.panX % ns;
-               for (i = leftX + offset; i < rightX; i+= ns) {
+               var offset = _g.panX % margin;
+               for (var i = leftX + offset; i < rightX; i+= margin) {
                   _g.beginPath();
                   _g.moveTo(i, h-1);
                   _g.lineTo(i, h - margin);
-                  _g.lineTo(i + ns/2, h - margin);
-                  _g.lineTo(i + ns/2, h-1);
+                  _g.lineTo(i + margin/2, h - margin);
+                  _g.lineTo(i + margin/2, h-1);
                   _g.fillStyle = scrimColor(.05);
                   _g.fill();
                }
