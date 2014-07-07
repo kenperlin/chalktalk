@@ -33,6 +33,8 @@ function ArbRevolve() {
     lathe2[0][0] = lathe2[lathe2.length-1][0] = 0;
 
     var sketch = geometrySketch(root.addLathe(lathe2, 32));
+    var material = shaderMaterial(defaultVertexShader, marbleFragmentShader);
+    sketch.geometry.setMaterial(material);
 
     sketch.update = function() {
       this.geometry.getMatrix().translate(.5,0,0).rotateX(PI/2)
