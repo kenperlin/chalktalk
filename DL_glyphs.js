@@ -18,8 +18,8 @@ function ArbRevolve() {
     var yHi = -10000;
     for(var i = 0 ; i < lathe2.length ; i++){
        xHi = max(xHi, lathe2[i][0]);
-       yLo = min(yLo, lathe2[i][2]);
-       yHi = max(yHi, lathe2[i][2]);
+       yLo = min(yLo, lathe2[i][1]);
+       yHi = max(yHi, lathe2[i][1]);
        lathe2[i][2] = lathe2[i][1];
        lathe2[i][1] = 0;
     }
@@ -38,7 +38,7 @@ function ArbRevolve() {
 
     sketch.update = function() {
       this.geometry.getMatrix()
-                   .translate(0.5,3,0)
+                   .translate(0.5,0,0)
 		   .rotateX(PI/2)
     }
 
