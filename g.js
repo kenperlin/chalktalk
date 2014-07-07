@@ -1663,7 +1663,7 @@
 
             // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
             var currentPageY = pageIndex * numberSpacing;
-            lineWidth(1);
+            lineWidth(0.75);
             _g.globalAlpha = 1.0;
             _g.beginPath();
             _g.moveTo(rightX - margin, currentPageY);
@@ -1678,7 +1678,7 @@
             _g.font = "14px Arial";
             var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
             for (var pn = 0; pn < sketchPages.length; pn++) {
-               var alpha = pageNumber == pn ? 0.8 : 0.2;
+               var alpha = pageNumber == pn ? 0.8 : 0.35;
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
                // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
