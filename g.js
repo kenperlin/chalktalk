@@ -754,6 +754,8 @@
 
    function registerSketch(type) {
 
+      var names = [];
+
       // CREATE A TEMPORARY INSTANCE OF THIS SKETCH TYPE.
 
       eval("addSketch(new " + type + "())");
@@ -774,12 +776,14 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-         registerGlyph(code, glyphInfo);
+         names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
 
       deleteSketch(sk());
+
+      return names;
    }
 
    // CREATE AN INSTANCE OF A REGISTERED SKETCH TYPE.
@@ -1133,8 +1137,31 @@
       return dst;
    }
 
-   function registerGlyph(name, strokes) {
-       glyphs.push(new Glyph(name, strokes));
+   function unregisterGlyph(indexName) {
+       for (var i = 0 ; i < glyphs.length ; i++)
+          if (indexName == glyphs[i].indexName)
+	     glyphs.splice(i--, 0);
+   }
+
+   function registerGlyph(name, strokes, indexName) {
+       if (indexName === undefined)
+          indexName = name;
+
+       for (var i = 0 ; i < glyphs.length ; i++)
+          if (indexName == glyphs[i].indexName)
+	     return;
+
+       var glyph = new Glyph(name, strokes);
+       glyph.indexName = indexName;
+
+       for (var i = 0 ; i < glyphs.length ; i++)
+          if (indexName < glyphs[i].indexName) {
+	     glyphs.splice(i, 0, glyph);
+	     return glyph.indexName;
+	  }
+
+       glyphs.push(glyph);
+       return glyph.indexName;
    }
 
    function Glyph(name, src) {
@@ -1947,6 +1974,10 @@
          }
          sk().textX += dx;
          sk().textY += dy;
+
+	 if (s instanceof GeometrySketch) {
+	    sk().mesh = s.mesh.clone();
+	 }
       }
    }
 
@@ -2099,6 +2130,24 @@
    }
    GeometrySketch.prototype = new SimpleSketch;
 
+   function addPlaneShaderSketch(vertexShader, fragmentShader) {
+      return addGeometryShaderSketch(new THREE.PlaneGeometry(2.5,2.5), vertexShader, fragmentShader);
+   }
+
+   function createMesh(geometry, vertexShader, fragmentShader) {
+      return new THREE.Mesh(geometry, shaderMaterial(vertexShader, fragmentShader));
+   }
+
+   function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
+      sk().fadeAway = 1.0;
+      var mesh = createMesh(geometry, vertexShader, fragmentShader);
+      root.add(mesh);
+      mesh.sketch = geometrySketch(mesh);
+      mesh.sketch.fragmentShader = fragmentShader;
+      setMeshUpdateFunction(mesh);
+      return mesh.sketch;
+   }
+
    function geometrySketch(mesh, xf) {
 
       var sketch = new GeometrySketch();
@@ -2195,21 +2244,6 @@
                                           .setSpecular(0,0,0,1));
    }
 
-   function addPlaneShaderSketch(vertexShader, fragmentShader) {
-      return addGeometryShaderSketch(new THREE.PlaneGeometry(50/20,50/20), vertexShader, fragmentShader);
-   }
-
-   function addGeometryShaderSketch(geometry, vertexShader, fragmentShader) {
-      sk().fadeAway = 1.0;
-      var material = shaderMaterial(vertexShader, fragmentShader);
-      var mesh = new THREE.Mesh(geometry,material);
-      root.add(mesh);
-      mesh.sketch = geometrySketch(mesh);
-      mesh.sketch.fragmentShader = fragmentShader;
-      setMeshUpdateFunction(mesh);
-      return mesh.sketch;
-   }
-
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
@@ -2218,6 +2252,8 @@
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+      if (index < 0 || index >= sketchPages.length)
+         return;
 
       // SAVE PAN VALUE FOR PREVIOUS PAGE
 
@@ -2274,6 +2310,7 @@
       pullDownLabels = pagePullDownLabels;
 
       sketchTypeLabels = [];
+
       for (var n = 0 ; n < sketchTypes.length ; n++)
          registerSketch(sketchTypes[n]);
 

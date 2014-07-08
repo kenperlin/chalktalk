@@ -1057,7 +1057,7 @@ fragPlane = {
     }
 }
 
-eHREE.Object3D.prototype.addFragPlane = function() {
+THREE.Object3D.prototype.addFragPlane = function() {
   var plane = fragPlane.setup();
   this.add(plane);
   this.plane = plane;

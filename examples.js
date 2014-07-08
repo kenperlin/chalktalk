@@ -1309,7 +1309,7 @@
    Shape3D.prototype = new Sketch;
 
    function IO() {
-      this.labels = "speaker".split(' ');
+      this.labels = "audio".split(' ');
       this.code = [
          ["sin", "sin(2 * PI * x * time)"],
          ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
