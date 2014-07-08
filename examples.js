@@ -1006,13 +1006,9 @@
       this.timerStart = 0;
       this.value = 0;
 
-      this.binary = function(port) {
-         return this.getInFloat(port) > 0;
-      }
-
-      this.getValue = function() {
+      this.getDelayedValue = function(port) {
          if (time > this.timerStart + this.getInFloat("d")) {
-            this.value = this.binary("i");
+            this.value = this.getInValue(port);
             this.timerStart = time;
          }
          return this.value;
@@ -1055,8 +1051,8 @@
          function xor(a, b) { return a == b ? 0 : 1; }
 
          var outValue = this.evalCode(this.code[0][1],
-	     s!=0 && s!=4 ? this.getInValue("i") : this.getValue(),
-	                    this.getInValue("j"));
+	     s % 4 == 0 ? this.getDelayedValue("i") : this.getInValue("i"),
+	                                              this.getInValue("j"));
 
 	 if (outValue != null)
             this.setOutValue('o', outValue);
