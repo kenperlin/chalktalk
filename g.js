@@ -6,6 +6,10 @@
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
    }
 
+   function bgScrimColor(alpha) {
+      return (backgroundColor != 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
+   }
+
    function clientX(event) {
       if (isDef(_g.panX)) return event.clientX - _g.panX;
       return event.clientX;
@@ -487,7 +491,7 @@
 // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
-   var backgroundColor = 'black';
+   var backgroundColor = 'white';
    var bgClickCount = 0;
    var clickSize = 30;
    var clickX = 0;

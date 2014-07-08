@@ -1338,7 +1338,7 @@
       this.showGlyphs = function() {
          _g.save();
 
-         color('rgba(0,0,0,.8)');
+         color(bgScrimColor(.8));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
          _g.strokeStyle = 'rgba(0,0,0,.3)';
@@ -1351,7 +1351,7 @@
          var t = 10 * (floor((sketchPage.mx + _g.panX) / glyphsW) +
                        max(0, min(.99, sketchPage.my / height())));
 
-         var glyphColor = 'rgb(64,160,255)';
+         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)' : 'rgb(64,160,255)';
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
