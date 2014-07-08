@@ -2,19 +2,14 @@
 ["] ]!]#]$]%]&]'](](])]*]+],]-].^/^0^1^2^3^4^4^5^6^7^8^9^:^;_<_=_>^?^@^A^A^B^C^D^E^F^G^H^I^J^K^L^M^N^O^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^]^]^^^_^`^a^b^c^d^e^f]g]h]i]j]j]k]l]m]n]o]p]q]r]s]t]u]v[w[w[x[y[z[{[|[}[~","]&[%Y&X&W&U&T&S%R%P%O%N%M%K%J%I%G%F%E&D&B&A&A&A'A)A*A+A-A.A/A0A2A3A4A5A7B8B9B;B<B=B>B@BABBBCBEBFBGBIBJBKBLBNBOBPBQBSCTCUCVCXCYCZC]C^C_C`CbCcCdCeCgChCiCkClCmCnCoEoFoGoHnJnKnLnNnOnPnQnSnTnUnVnXnYnZo[o^o"]
 
 
-// registerGlyph("ArbRevolve()",[
-//     [ [1,1], [1,-1]],
-//     [ [1,1], [-1,1], [-1,-1], [1,-1]]
-// ]);
-
-registerGlyph("ArbRevolve()", [
+registerGlyph("lathe()", [
    [[0,-.5],[ 0, .5]],
    [[0, .5],[-1, .5]],
    [[0, .5],[ 1, .5]],
-   [[1,-.5],[-1,-.5],[-1,.5],[1,.5]]
+   [[0,-.5],[-1,-.5],[-1,.5],[0,.5]]
 ]);
 
-function ArbRevolve() {
+function lathe() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
@@ -65,8 +60,7 @@ function ArbRevolve() {
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
-
-ArbRevolve.prototype = new Sketch;
+lathe.prototype = new Sketch;
 
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
@@ -611,9 +605,6 @@ barleyField = {
     }
 }
 
-registerGlyph("nFloor()",["9;8<6>5@4B3D2F0H/J.L-N,P*R)T(V'X%Z$]#_!b d!d%d'd)d,d.d1d3d5d8d:d<d?dAcCcFcHcJbMbObQbTbVbXb[b^b`bcbebgbjblanaqasauaxaza|a~a|_{]zZyXxVwTvRvOuMtKsIqGpEoCnAm?l=k;i;f;d;b;_;];Z;W;U;S;P;N;L;I;G;E;B;@;>;;;9<","9I9J:K:L:L;M;M<N<O=O>P>P?P@Q@PAPAOANBNBMBLBKBKBJCICHCHDGEGEGFHFHGIHIHJHKIKILIMJMJNJOKOKPLQLQMRNRNRORPRPQQQQPRORORNSMSLSLTKTJTJUIUHUHVGVFWFWFXFXGXHYHYIYJZJZKZL[M[M[N]N]O^P_P_Q`QaQaQbQcQcPdPdOdNeNeMeLeK",]
-);
-
 THREE.Object3D.prototype.addNoiseFloor = function() {
   var plane = barleyField.setup();
   var noisePlane = NoisePlane.setup({x:1,y:1,z:1});
@@ -1066,10 +1057,7 @@ fragPlane = {
     }
 }
 
-registerGlyph("shader()",["y y&y*z/z3{8{<|A}E}J}N}S~W~]~a~f~j~o}syrtpppkpgpbp^pXpTpOpKpFpBp=p9r4r0s+s't'o'k'f'b']'W'S'N'J&E&A&<&8&3%/%+*+.+3+7+<+A+E+J+N+S+W+]+a+f+j*o*s)w'w't*p-m0i3f6c9_<[?WBTEPHMJIMFPCT@W=Z9^7b3e0i.l+p(s&w#z ~",]
-);
-
-THREE.Object3D.prototype.addFragPlane = function() {
+eHREE.Object3D.prototype.addFragPlane = function() {
   var plane = fragPlane.setup();
   this.add(plane);
   this.plane = plane;

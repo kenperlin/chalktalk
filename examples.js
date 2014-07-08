@@ -24,14 +24,9 @@
    }
 
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
-   function blinn() { image('blinn.png', 2.4); }
    function diner() { image('red_fox_diner.jpg', 0.8); }
    function face() { image('smiling_cat.jpg', 0.35); }
    function kwa() { image('kwalado.jpg'); }
-   function long_nose() { image('long_nose.jpg'); }
-   function bumpmap() { image('strawberry.jpg', 0.7); }
-   function tron() { image('tron.jpg', 0.5); }
-   function vase() { image('vase.png', 0.7); }
 
    function unitCube() {
       drawUnitCube();

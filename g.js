@@ -1733,6 +1733,17 @@
                }
             }
 
+	    // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
+
+	    _g.lineWidth = 0.5;
+	    _g.fillStyle = defaultPenColor;
+	    _g.moveTo(0,0);
+	    _g.lineTo(w-1,0);
+	    _g.lineTo(w-1,h-1);
+	    _g.lineTo(0,h-1);
+	    _g.lineTo(0,0);
+	    _g.stroke();
+
             _g.restore();
          }
       }
