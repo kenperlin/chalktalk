@@ -1054,17 +1054,12 @@
 
          function xor(a, b) { return a == b ? 0 : 1; }
 
-	 var x = this.getInValue("i");
-	 var y = this.getInValue("j");
-	 if (s == 0 || s == 4)
-	    x = this.getValue();
+         var outValue = this.evalCode(this.code[0][1],
+	     s!=0 && s!=4 ? this.getInValue("i") : this.getValue(),
+	                    this.getInValue("j"));
 
-         var _outValue = null;
-         try {
-	    eval("_outValue = (" + this.code[0][1] + ")");
-         } catch (e) { }
-	 if (_outValue != null)
-            this.setOutValue('o', _outValue);
+	 if (outValue != null)
+            this.setOutValue('o', outValue);
 
          m.restore();
       }

@@ -268,20 +268,24 @@
          }
          context.restore();
       }
-      this.evalCode = function(code) {
+      this.evalCode = function(code, x, y, z) {
+
          function defaultToZero(arg) { return arg===undefined ? 0 : arg; }
+
+         if (x === undefined) x = defaultToZero(this.inValue[0]);
+         if (y === undefined) y = defaultToZero(this.inValue[1]);
+         if (z === undefined) z = defaultToZero(this.inValue[2]);
 
          if (code.indexOf('return') == -1)
             code = "return " + code;
 
          var result = null;
          try {
-	    result = Function("me","x","y","z", code)(this, defaultToZero(this.inValue[0]),
+	    result = Function("me","x","y","z", code)(this, x, y, z);
+	                                                    /*defaultToZero(this.inValue[0]),
 			                                    defaultToZero(this.inValue[1]),
-				                            defaultToZero(this.inValue[2]));
-         }
-	 catch (e) { }
-
+				                            defaultToZero(this.inValue[2]));*/
+         } catch (e) { }
          return result;
       }
       this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
@@ -290,7 +294,7 @@
          return parseFloat(this.getDefaultValue(name));
       }
       this.getDefaultValue = function(name) {
-         var j = getIndex(this.portName, name);
+         var j = this.getPortIndex(name);
          if (j < 0) return 0;
          var value = this.defaultValue[j];
          return ! isDef(value) || value == null ? "0" : value;
@@ -305,6 +309,7 @@
          var value = this.inValue[j];
          return ! isDef(value) || value == null ? "0" : value;
       }
+      this.getPortIndex = function(name) { return getIndex(this.portName, name); }
       this.glyphTrace = null;
       this.trace = [];
       this.glyphTransition = 0;

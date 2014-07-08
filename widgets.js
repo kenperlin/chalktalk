@@ -538,6 +538,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    var onScreenKeyboard = new OnScreenKeyboard();
 
+//////////////////////////// NATURAL LANGUGE PARSING /////////////////////////////
+
+   var nlPatterns = [
+      ["I ", "I ..."],
+      ["When ", "When ..."],
+   ];
+
+   function nlParse(text) {
+       for (var n = 0 ; n < nlPatterns.length ; n++) {
+	  var len = nlPatterns[n][0].length;
+	  if (text.length >= len && text.substring(0, len) == nlPatterns[n][0]) {
+	     console.log("NL PATTERN: " + nlPatterns[n][1]);
+	     return true;
+	  }
+       }
+       return false;
+   }
+
 ////////////////////////////// CODE TEXT EDITOR //////////////////////////////////
 
    var codeElement,
@@ -548,11 +566,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           updateF();
        },
        updateF = function() {
+          var text = codeTextArea.value;
+	  if (nlParse(text))
+	     return;
           try {
-             eval("(codeSketch.functionToEvalCode = function() {" + codeTextArea.value + "})()" );
+             eval("(codeSketch.functionToEvalCode = function() {" + text + "})()" );
           } catch (e) { }
           if (code() != null) {
-             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
+             code()[codeSelector.selectedIndex][1] = text;
              codeSketch.selectedIndex = codeSelector.selectedIndex;
           }
        };
@@ -622,6 +643,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 /////////// isOnScreenKeyboardMode = true;
 
          };
+
+	 updateF();
       }
    }
 
