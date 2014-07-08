@@ -367,12 +367,12 @@ function corona() {
 
 var flameFragmentShader = ["\
    void main(void) {\
-      vec3 p = 4.*vPosition;\
+      vec3 p = 20.*vPosition;\
       float nx = .5 * noise(.1*p);\
       float ny = .5 * noise(.1*p + vec3(100., 0., 0.));\
       float s = .5 * p.z + turbulence(vec3(p.x+nx, p.y+ny, p.z+.3*time));\
       float ss = s * s;\
-      vec3 color = s * vec3(1., ss, ss*ss);\
+      vec3 color = 2. * s * vec3(1., ss, ss*ss) * vNormal.z;\
       gl_FragColor = vec4(color, alpha);\
    }\
 "].join("\n");
