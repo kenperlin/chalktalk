@@ -366,6 +366,8 @@
       this.render = function() {
          var w = this.width;
          var h = this.height;
+	 if (isMakingGlyph) h = w;
+
          var sel = (this.selection + 1000 * this.labels.length) % this.labels.length;
 
          if (this.mousePressed)
@@ -1072,34 +1074,6 @@
       "1 - (x>0)", "1 - min(x>0, y>0)", "1 - max(x>0, y>0)", "(x>0)==(y>0)"
    ];
    Logic.prototype = new Sketch;
-
-   function Marker() {
-      this.labels = "arrow".split(' ');
-
-      this.a = [-1,0,0];
-      this.b = [ 1,0,0];
-      this.render = function() {
-         var a = this.a, b = this.b;
-         var d = vecScale(vecDiff(b, a), .1);
-         m.save();
-         mLine(a, b);
-         mLine(b, vecSum(b, [-d[1] - d[0],  d[0] - d[1], 0]));
-         mLine(b, vecSum(b, [ d[1] - d[0], -d[0] - d[1], 0]));
-         m.restore();
-      }
-
-      this.mouseDrag = function(x, y) {
-         m.save();
-         this.standardViewInverse();
-         var p = m.transform([x,y]);
-         if ( normSqr(vecDiff(this.a, p)) < normSqr(vecDiff(this.b, p)) )
-            this.a = p;
-         else
-            this.b = p;
-         m.restore();
-      }
-   }
-   Marker.prototype = new Sketch;
 
    function Adder() {
       this.labels = "adder".split(' ');

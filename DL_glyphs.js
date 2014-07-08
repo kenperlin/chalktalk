@@ -1134,8 +1134,12 @@ palmTree = {
     }
 }
 
+/*
+I'm commenting this out until we figure out how to get it to work again. -KP
+
 registerGlyph("tree()",["FrFoGlHjHgIeIbJ`J]KYKWLTLRMOMMNJNGOEOBP@P=P:Q8Q5R3Q2N2K2I1F1D1A1>1<09070401///,/).'.$.!-!/%0'1*1,1/122427393<4?4A5D5F5I5L5N6Q6T6V6Y6[6_6b5d5g5i5l4o4q4t4w4y4|4}4{4x4v3s3p3n3k4i4f4c4a4^4Z4X4U5S5P5M5K5H5",]
 );
+*/
 
 THREE.Object3D.prototype.addTree = function() {
   var palm = palmTree.setup();

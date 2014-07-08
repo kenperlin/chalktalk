@@ -1351,18 +1351,31 @@
          var t = 10 * (floor((sketchPage.mx + _g.panX) / glyphsW) +
                        max(0, min(.99, sketchPage.my / height())));
 
-         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)' : 'rgb(64,160,255)';
+         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)'      : 'rgb(128,192,255)'    ;
+         var glyphScrim = backgroundColor == 'white' ? 'rgba(0,100,200,.16)' : 'rgba(64,160,255,.16)';
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
 
-            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
-
             var x = (glyphsW*3/16) + glyphsW * floor(i / 10) - _g.panX;
-
-            var y =  ((i % 10) * height()) / 10 + 10;
-
+            var y =  ((i % 10) * height()) / 10 + 3;
 	    var txt = glyphs[i].indexName;
+
+	    color(glyphScrim);
+	    var gX = x - glyphsW*.1, gY = y, gW = glyphsW*.7, gH = glyphsW*.8;
+	    fillRect(gX, gY, gW, gH);
+	    lineWidth(0.5);
+	    color(glyphColor);
+	    if (backgroundColor == 'white') {
+	       line(gX + gW, gY + gH, gX + gW, gY);
+	       line(gX + gW, gY + gH, gX, gY + gH);
+	    }
+	    else {
+	       line(gX, gY, gX + gW, gY);
+	       line(gX, gY, gX, gY + gH);
+	    }
+
+            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
 
             var tw = textWidth(txt);
             _g.fillText(txt, x, y + 10);
