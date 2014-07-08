@@ -1253,61 +1253,6 @@
       return roots;
    }
 
-   function Shape3D() {
-      this.labels = "box".split(' ');
-
-      this.sx = 1;
-      this.sy = 1;
-      function drawLens() {
-         m.save();
-            m.translate(0,0,1);
-            m.scale(.5,.5,.4);
-            m.translate(0,0,1);
-            unitTube();
-            m.translate(0,0,1);
-            unitDisk();
-         m.restore();
-      }
-      this.dragx = 0;
-      this.dragy = 0;
-      this.mouseDown = function(x, y) {
-         this.dragx = x;
-         this.dragy = y;
-      }
-      this.mouseDrag = function(x, y) {
-         this.sx *= (400 + x - this.dragx) / 400;
-         this.sy *= (400 - y + this.dragy) / 400;
-         this.dragx = x;
-         this.dragy = y;
-      }
-      this.mouseUp = function(x,y) {
-      }
-      this.render = function() {
-         m.save();
-         var s = this.size / 400;
-         m.scale(s * this.sx, s * this.sy, s);
-         switch (this.selection) {
-         case 0:
-            unitCube();
-            break;
-         case 1:
-            var a = m.transform([0,0,0]);
-            var b = m.transform([0,0,1.5]);
-            if (b[2] > a[2]) {
-               unitCube();
-               drawLens();
-            }
-            else {
-               drawLens();
-               unitCube();
-            }
-            break;
-         }
-         m.restore();
-      }
-   }
-   Shape3D.prototype = new Sketch;
-
    function IO() {
       this.labels = "audio".split(' ');
       this.code = [

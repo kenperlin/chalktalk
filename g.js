@@ -1939,6 +1939,26 @@
          groupPath = cloneArray(s.groupPath);
       }
 
+      else if (s instanceof GeometrySketch) {
+         addSketch(s.clone());
+         sk().sketchProgress = 1;
+         sk().sketchState = 'finished';
+	 glyphSketch = sk();
+
+         var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
+         root.add(mesh);
+
+         var sketch = geometrySketch(mesh);
+	 mesh.sketch = sketch;
+
+         sketch.fragmentShader = s.mesh.fragmentShader;
+	 addSketch(sketch);
+         sketch.tX += This().mouseX - s.tx();
+         sketch.tY += This().mouseY - s.ty();
+
+	 return;
+      }
+
       addSketch(s.clone());
       sk().sketchProgress = 1;
       sk().sketchState = 'finished';
@@ -1974,10 +1994,6 @@
          }
          sk().textX += dx;
          sk().textY += dy;
-
-	 if (s instanceof GeometrySketch) {
-	    sk().mesh = s.mesh.clone();
-	 }
       }
    }
 
