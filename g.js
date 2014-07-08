@@ -491,7 +491,7 @@
 // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
-   var backgroundColor = 'white';
+   var backgroundColor = 'black';
    var bgClickCount = 0;
    var clickSize = 30;
    var clickX = 0;
