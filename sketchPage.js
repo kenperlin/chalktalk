@@ -816,9 +816,6 @@
          case 'cap':
             isShiftPressed = true;
             return;
-         case '+':
-            isShowingGlyphs = true;
-            break;
          case 'spc':
             isSpacePressed = true;
             return;
@@ -1007,7 +1004,7 @@
             isShiftPressed = false;
             break;
          case '+':
-            isShowingGlyphs = false;
+            isShowingGlyphs = ! isShowingGlyphs;
             break;
          case 'a':
             isShowingPresenterView = false;
@@ -1351,59 +1348,49 @@
          line(0, y0, width(), y0);
          line(0, height()-1, width(), height()-1);
 
-         var t = 5 * floor((sketchPage.mx + _g.panX) / (glyphsW/2)) +
-                 5 * max(0, min(.99, (sketchPage.my - (y0 + 5)) / (glyphsH - 10)));
+         var t = 10 * (floor((sketchPage.mx + _g.panX) / glyphsW) +
+                       max(0, min(.99, sketchPage.my / height())));
 
-         for (var i = 0 ; i < glyphs.length ; i++) {
-            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : 'rgb(0,100,240)';
-            var x = (glyphsW/4) + (glyphsW/2) * floor(i / 5) - _g.panX;
-            var y = height() - glyphsH + (1 + floor(i % 5)) * (glyphsH - 10) / 5;
-            var txt = glyphs[i].name;
-            var j0 = txt.indexOf('(');
-            if (j0 > 0) {
-               var j1 = txt.indexOf(",", j0);
-               if (j1 > 0) {
-                  var j2 = txt.indexOf("'", j1);
-                  if (j2 > 0) {
-                     var j3 = txt.indexOf("'", j2+1);
-                     txt = txt.substring(j2+1, j3);
-                  }
-               }
-               else
-                  txt = txt.substring(0, j0);
-            }
-            var tw = textWidth(txt);
-            _g.fillText(txt, x - tw/2, y);
-            if (i % 10 == 0) {
-               line(x + 60, 0, x + 60, height());
-            }
-         }
+         var glyphColor = 'rgb(64,160,255)';
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
+
+            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
+
             var x = (glyphsW*3/16) + glyphsW * floor(i / 10) - _g.panX;
-            var y =  5 + (i % 10) * (height() - glyphsH) / 10;
+
+            var y =  ((i % 10) * height()) / 10 + 10;
+
+	    var txt = glyphs[i].indexName;
+
+            var tw = textWidth(txt);
+            _g.fillText(txt, x, y + 10);
+
+	    y += 20;
+
             var selected = t >= i && t < i+1;
-            _g.strokeStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
-            _g.fillStyle = selected ? defaultPenColor : 'rgb(0,100,240)';
+            _g.strokeStyle = selected ? defaultPenColor : glyphColor;
+            _g.fillStyle = selected ? defaultPenColor : glyphColor;
             _g.lineWidth = selected ? 2 : 1;
 
             var nn = glyph.data.length;
 
+            var sc = 0.4;
             for (var n = 0 ; n < nn ; n++) {
+
                var d = glyph.data[n];
-               if (t >= i + n / nn)
-                  fillOval(x + d[0][0] * .5 - 3, y + d[0][1] * .5 - 3, 6, 6);
+               if (selected && lerp(n / nn, i, i+1) <= t)
+                  fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
                _g.beginPath();
-               _g.moveTo(x + d[0][0] * .5, y + d[0][1] * .5);
-               for (var j = 1 ; j < d.length ; j++)
-                  if (t > lerp((n + j / d.length) / nn, i, i+1))
-                     _g.lineTo(x + d[j][0] * .5, y + d[j][1] * .5);
+               _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
+               for (var j = 1 ; j < d.length ; j++) {
+                  if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
+		     break;
+                  _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
+               }
                _g.stroke();
             }
-
-            if (t < i+1)
-               break;
          }
          _g.restore();
       }

@@ -1144,8 +1144,12 @@
    }
 
    function registerGlyph(name, strokes, indexName) {
-       if (indexName === undefined)
+       if (indexName === undefined) {
           indexName = name;
+	  var j = indexName.indexOf('(');
+	  if (j > 0)
+	     indexName = indexName.substring(0, j);
+       }
 
        for (var i = 0 ; i < glyphs.length ; i++)
           if (indexName == glyphs[i].indexName)
