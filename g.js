@@ -1,6 +1,8 @@
 
-   function width () { return isDef(_g) ? _g.canvas.width : 1280; }
-   function height() { return isDef(_g) ? _g.canvas.height : 720; }
+   // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
+
+   function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
+   function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
 
    function scrimColor(alpha) {
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
@@ -570,13 +572,13 @@
       // ADD VIEWER ELEMENTS TO DOCUMENT
 
       var viewerHTML = ""
-      + " <div id='slide' width=1280 height=720 tabindex=1"
+      + " <div id='slide' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <div id='scene_div' width=1280 height=720 tabindex=1"
+      + " <div id='scene_div' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id='sketch_canvas' width=1280 height=720 tabindex=1"
+      + " <canvas id='sketch_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
       + " <hr id='background' size=1024 color='" + backgroundColor + "'>"
@@ -587,10 +589,21 @@
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
 
+      // SET ALL THE SCREEN-FILLING ELEMENTS TO THE SIZE OF THE SCREEN.
+
+      slide.width = width();
+      scene_div.width = width();
+      sketch_canvas.width = width();
+
+      slide.height = height();
+      scene_div.height = height();
+      sketch_canvas.height = height();
+
+      background.style.backgroundColor = backgroundColor;
+
       // INITIALIZE THE SKETCH CANVAS
 
       sketch_canvas.animate = function(elapsed) { sketchPage.animate(elapsed); }
-      sketch_canvas.height = 720;
       sketch_canvas.keyDown = function(key) { sketchPage.keyDown(key); }
       sketch_canvas.keyUp = function(key) { sketchPage.keyUp(key); }
       sketch_canvas.mouseDown = function(x, y) { sketchPage.mouseDown(x, y); }
@@ -602,7 +615,6 @@
          window.onbeforeunload = function(e) { sketchBook.onbeforeunload(e); }
          setPage(0);
       }
-      sketch_canvas.width = 1280;
 
       fourStart();
 
@@ -2360,7 +2372,7 @@
 
       parent.appendChild(table);
       table.appendChild(tablePaddingRow);
-      table.setAttribute('width', '1280');
+      table.setAttribute('width', width());
 
       if (template instanceof Array)
          if (template[0] instanceof Array)

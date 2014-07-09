@@ -393,7 +393,7 @@
    function getIndex(arr, obj) {
       var i = arr.length;
       while (--i >= 0 && arr[i] != obj) ;
-         return i;
+      return i;
    }
 
 // 2D GEOMETRY UTILITIES.

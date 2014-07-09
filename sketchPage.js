@@ -1078,20 +1078,21 @@
                backgroundColor = 'white';
                defaultPenColor = 'black';
             }
+
             document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
-            document.getElementById('background').color = backgroundColor;
+
+            background.color = backgroundColor;
+            background.style.backgroundColor = backgroundColor;
             sketchPalette[0] = defaultPenColor;
             for (var i = 0 ; i < sketchPage.sketches.length ; i++)
                if (sketchPage.sketches[i].color == backgroundColor)
                   sketchPage.sketches[i].color = defaultPenColor;
 
-            var codeText = document.getElementById('code_text');
             if (codeText != null) {
                codeText.style.backgroundColor = codeTextBgColor();
                codeText.style.color = codeTextFgColor();
             }
 
-            var codeSelector = document.getElementById('code_selector');
             if (codeSelector != null) {
                codeSelector.style.backgroundColor = codeSelectorBgColor();
                codeSelector.style.color = codeSelectorFgColor();

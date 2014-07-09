@@ -33,7 +33,7 @@
       pieMenuCode = [];
       for (var n = 1 ; n < pieMenuStrokes.length ; n++)
          pieMenuCode.push(pieMenuIndex(pieMenuStrokes[n][0][0] - pieMenuXDown,
-	                               pieMenuStrokes[n][0][1] - pieMenuYDown, 8));
+                                       pieMenuStrokes[n][0][1] - pieMenuYDown, 8));
       if (pieMenuCode.length > 0) {
          var index = 0;
          if (pieMenuCode.length > 1)
@@ -56,8 +56,8 @@
          pieMenuY = lerp(pieMenuCursorWeight, y, pieMenuYDown);
          if (pieMenuCursorWeight == 0) {
             pieMenuIsActive = false;
-	    pieMenuXDown = width() / 2;
-	    pieMenuYDown = height() / 2;
+            pieMenuXDown = width() / 2;
+            pieMenuYDown = height() / 2;
          }
       }
    }
@@ -370,7 +370,7 @@
 
       function lookupChar(n, shape) {
          n = shape + 5 * n;
-	 //        1----2----3----4----5----6----7----8----
+         //        1----2----3----4----5----6----7----8----
          var ch = "klSm.}nop~qrCsN/tuv{wxDyz Rab cdefg hij ".substring(n, n+1);
          switch (ch) {
          case ' ': ch = ''; break;
@@ -545,13 +545,73 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       ["When ", "When ..."],
    ];
 
+   function Sentence() {
+      var articles = "a an the".split(' ');
+      var prepositions = ("about across around atop before behind beside by " +
+                          "from in into of off on over through to under").split(' ');
+
+      this.parse = function(words, i) {
+         this.subject = null;
+         this.predicate = null;
+         this.preposition = null;
+         this.article = null;
+         this.object = null;
+
+         if (i === undefined) i = 0;
+         this.subject = words[i++];
+         this.predicate = words[i++];
+         this.preposition = null;
+         this.article = null;
+         this.object = words[i++];
+
+         var j = getIndex(prepositions, this.object);
+         if (j >= 0) {
+            this.preposition = this.object;
+            this.object = words[i++];
+         }
+
+         j = getIndex(articles, this.object);
+         if (j >= 0) {
+            this.article = this.object;
+            this.object = words[i++];;
+         }
+
+	 return this;
+      }
+
+      this.toString = function() {
+         return (this.subject     == null ? "" : "SUBJECT"     + " [" + this.subject     + "] ") +
+                (this.predicate   == null ? "" : "PREDICATE"   + " [" + this.predicate   + "] ") +
+                (this.preposition == null ? "" : "PREPOSITION" + " [" + this.preposition + "] ") +
+                (this.article     == null ? "" : "ARTICLE"     + " [" + this.article     + "] ") +
+                (this.object      == null ? "" : "OBJECT"      + " [" + this.object      + "] ") ;
+      }
+   }
+
    function nlParse(text) {
+       if (text.charAt(text.length-1) == ".")
+          text = text.substring(0, text.length-1);
+
+       var sentence = new Sentence();
+
        for (var n = 0 ; n < nlPatterns.length ; n++) {
-	  var len = nlPatterns[n][0].length;
-	  if (text.length >= len && text.substring(0, len) == nlPatterns[n][0]) {
-	     console.log("NL PATTERN: " + nlPatterns[n][1]);
-	     return true;
-	  }
+          var len = nlPatterns[n][0].length;
+          if (text.length >= len && text.substring(0, len) == nlPatterns[n][0]) {
+             switch (n) {
+             case 0:
+                var words = text.split(" ");
+                console.log(sentence.parse(words).toString());
+                break;
+             case 1:
+                var clauses   = text.split(",\n");
+                var condition = clauses[0].trim().split(" ");
+                var action    = clauses[1].trim().split(" ");
+                console.log("CONDITION " + sentence.parse(condition, 1).toString());
+                console.log("   ACTION " + sentence.parse(action      ).toString());
+                break;
+             }
+             return true;
+          }
        }
        return false;
    }
@@ -639,7 +699,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
          };
 
-	 updateF();
+         updateF();
       }
    }
 
@@ -733,7 +793,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       +  " width=" + w
       +  " height=" + (h+52)
       );
-      audiencePopup.moveTo(0, 720);
+      audiencePopup.moveTo(0, height());
       audiencePopup.document.write( ""
       +  " <head><title>SKETCH</title></head>"
       +  " <body>"
