@@ -1341,11 +1341,9 @@
          color(bgScrimColor(.8));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
-         _g.strokeStyle = 'rgba(0,0,0,.3)';
+         _g.strokeStyle = scrimColor(.3);
          _g.font = '8pt Trebuchet MS';
          _g.lineWidth = 1;
-         var y0 = height() - glyphsH;
-         line(0, y0, width(), y0);
          line(0, height()-1, width(), height()-1);
 
          var t = 10 * (floor((sketchPage.mx + _g.panX) / glyphsW) +
