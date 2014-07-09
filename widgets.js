@@ -566,14 +566,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           updateF();
        },
        updateF = function() {
-          var text = codeTextArea.value;
-	  if (nlParse(text))
-	     return;
-          try {
-             eval("(codeSketch.functionToEvalCode = function() {" + text + "})()" );
-          } catch (e) { }
+          codeSketch.evalCode(codeTextArea.value);
           if (code() != null) {
-             code()[codeSelector.selectedIndex][1] = text;
+             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
              codeSketch.selectedIndex = codeSelector.selectedIndex;
           }
        };

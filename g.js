@@ -723,6 +723,7 @@
       ['x'  , "toggle expert mode"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
+      ['+'  , "show glyphs"],
       ['spc', "show pie menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],

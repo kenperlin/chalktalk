@@ -270,22 +270,33 @@
       }
       this.evalCode = function(code, x, y, z) {
 
+         // FIRST CHECK FOR A NATURAL LANGUAGE COMMAND.
+
+         if (nlParse(code))
+	    return;
+
+         // IF NO ARGS ARE SUPPLIED, USE VALUES FROM THE SKETCH'S INPUT PORTS.
+
          function defaultToZero(arg) { return arg===undefined ? 0 : arg; }
 
          if (x === undefined) x = defaultToZero(this.inValue[0]);
          if (y === undefined) y = defaultToZero(this.inValue[1]);
          if (z === undefined) z = defaultToZero(this.inValue[2]);
 
+	 // IF NO RETURN STATEMENT, SUPPLY ONE.
+
          if (code.indexOf('return') == -1)
             code = "return " + code;
+
+         // EVAL THE CODE, REFERRING TO THE SKETCH AS "me".
 
          var result = null;
          try {
 	    result = Function("me","x","y","z", code)(this, x, y, z);
-	                                                    /*defaultToZero(this.inValue[0]),
-			                                    defaultToZero(this.inValue[1]),
-				                            defaultToZero(this.inValue[2]));*/
          } catch (e) { }
+
+         // ANY ERROR RESULTS IN A RETURN VALUE OF null.
+
          return result;
       }
       this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
