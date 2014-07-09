@@ -540,6 +540,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 //////////////////////////// NATURAL LANGUGE PARSING /////////////////////////////
 
+   var isShowingNLParse = false;
+
    var nlPatterns = [
       ["I ", "I ..."],
       ["When ", "When ..."],
@@ -580,15 +582,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       this.toString = function() {
-         return (this.subject     == null ? "" : "SUBJECT"     + " [" + this.subject     + "] ") +
-                (this.predicate   == null ? "" : "PREDICATE"   + " [" + this.predicate   + "] ") +
-                (this.preposition == null ? "" : "PREPOSITION" + " [" + this.preposition + "] ") +
-                (this.article     == null ? "" : "ARTICLE"     + " [" + this.article     + "] ") +
-                (this.object      == null ? "" : "OBJECT"      + " [" + this.object      + "] ") ;
+         return (this.subject     == null ? "" : "SUBJECT"     + " [ " + this.subject     + " ] ") +
+                (this.predicate   == null ? "" : "PREDICATE"   + " [ " + this.predicate   + " ] ") +
+                (this.preposition == null ? "" : "PREPOSITION" + " [ " + this.preposition + " ] ") +
+                (this.article     == null ? "" : "ARTICLE"     + " [ " + this.article     + " ] ") +
+                (this.object      == null ? "" : "OBJECT"      + " [ " + this.object      + " ] ") ;
       }
    }
 
+   var nlParseData = [];
+
    function nlParse(text) {
+
        if (text.charAt(text.length-1) == ".")
           text = text.substring(0, text.length-1);
 
@@ -600,20 +605,27 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
              switch (n) {
              case 0:
                 var words = text.split(" ");
-                console.log(sentence.parse(words).toString());
+                nlParseData[0] = sentence.parse(words).toString();
+		nlParseData[1] = "";
                 break;
              case 1:
                 var clauses   = text.split(",\n");
                 var condition = clauses[0].trim().split(" ");
                 var action    = clauses[1].trim().split(" ");
-                console.log("CONDITION " + sentence.parse(condition, 1).toString());
-                console.log("   ACTION " + sentence.parse(action      ).toString());
+                nlParseData[0] = "CONDITION = { " + sentence.parse(condition, 1).toString() + " }";
+                nlParseData[1] = "   ACTION = { " + sentence.parse(action      ).toString() + " }";
                 break;
              }
              return true;
           }
        }
        return false;
+   }
+
+   function showNLParse() {
+      color(defaultPenColor);
+      for (var i = 0 ; i < nlParseData.length ; i++)
+         text(nlParseData[i], 10, 20 + 20 * i);
    }
 
 ////////////////////////////// CODE TEXT EDITOR //////////////////////////////////

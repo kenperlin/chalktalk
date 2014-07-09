@@ -1006,6 +1006,9 @@
          case '+':
             isShowingGlyphs = ! isShowingGlyphs;
             break;
+         case '?':
+            isShowingNLParse = ! isShowingNLParse;
+            break;
          case 'a':
             isShowingPresenterView = false;
             if (! isAudiencePopup())

@@ -1747,6 +1747,9 @@
             annotateEnd();
          }
 
+	 if (isShowingNLParse)
+	    showNLParse();
+
          // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
          if (! isShowingGlyphs) {
