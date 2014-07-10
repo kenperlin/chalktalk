@@ -135,6 +135,17 @@
             return;
          }
 
+	 if (isShowingGlyphs) {
+	    for (var i = 0 ; i < glyphs.length ; i++) {
+	       var b = this.glyphBounds(i);
+	       if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) {
+	          this.isDraggingGlyph = true;
+		  this.iDragged = i;
+		  return;
+	       }
+	    }
+	 }
+
          if (paletteColorIndex >= 0) {
             this.paletteColorDragXY = null;
             return;
@@ -150,16 +161,6 @@
             isTogglingMenuType = true;
             return;
          }
-
-	 if (isShowingGlyphs) {
-	    for (var i = 0 ; i < glyphs.length ; i++) {
-	       var b = this.glyphBounds(i);
-	       if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) {
-	          console.log("MOUSE DOWN AT GLYPH " + i);
-		  break;
-	       }
-	    }
-	 }
 
          this.isClick = true;
          this.isPossibleClickOverBackground = ! isHover();
@@ -248,6 +249,10 @@
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
          this.y = y;
+
+	 if (this.isDraggingGlyph) {
+	    return;
+	 }
 
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
@@ -348,6 +353,12 @@
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+	 if (this.isDraggingGlyph) {
+	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY);
+	    this.isDraggingGlyph = false;
+	    return;
+	 }
 
          if (isSketchDragActionEnabled) {
             endSketchDragAction(x, y);
@@ -1371,6 +1382,12 @@
          return [ x, y, x + glyphsW*.7, y + glyphsW*.8 ];
       }
 
+      this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
+      this.glyphScrim = function() { return backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)'; }
+      this.glyphT = 0;
+      this.isDraggingGlyph = false;
+      this.iDragged = 0;
+
       this.showGlyphs = function() {
          _g.save();
          _g.globalAlpha = 1.0;
@@ -1383,66 +1400,77 @@
          _g.lineWidth = 1;
          line(0, height()-1, width(), height()-1);
 
-         var t = 10 * (floor((this.mx + _g.panX) / glyphsW) +
-                       max(0, min(.99, this.my / height())));
+         this.glyphT = this.isDraggingGlyph
+	             ? this.iDragged + 0.99
+	             : 10 * (floor((this.mx + _g.panX) / glyphsW) +
+                                    max(0, min(.99, this.my / height())));
 
-         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ;
-         var glyphScrim = backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)';
+         for (var i = 0 ; i < glyphs.length ; i++)
+	    this.showGlyph(i);
 
-         for (var i = 0 ; i < glyphs.length ; i++) {
-            var glyph = glyphs[i];
-
-            var bounds = this.glyphBounds(i);
-	    var gX = bounds[0], gY = bounds[1], gW = bounds[2]-bounds[0], gH = bounds[3]-bounds[1];
-	    var x = gX + glyphsW * .1;
-	    var y = gY;
-
-            var txt = glyphs[i].indexName;
-
-            color(glyphScrim);
-            fillRect(gX, gY, gW, gH);
-            lineWidth(0.5);
-            color(glyphColor);
-            if (backgroundColor == 'white') {
-               line(gX + gW, gY + gH, gX + gW, gY);
-               line(gX + gW, gY + gH, gX, gY + gH);
-            }
-            else {
-               line(gX, gY, gX + gW, gY);
-               line(gX, gY, gX, gY + gH);
-            }
-
-            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
-
-            var tw = textWidth(txt);
-            _g.fillText(txt, x, y + 10);
-
-            y += 20;
-
-            var selected = t >= i && t < i+1;
-            _g.strokeStyle = selected ? defaultPenColor : glyphColor;
-            _g.fillStyle = selected ? defaultPenColor : glyphColor;
-            _g.lineWidth = selected ? 2 : 1;
-
-            var nn = glyph.data.length;
-
-            var sc = 0.4;
-            for (var n = 0 ; n < nn ; n++) {
-
-               var d = glyph.data[n];
-               if (selected && lerp(n / nn, i, i+1) <= t)
-                  fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
-               _g.beginPath();
-               _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
-               for (var j = 1 ; j < d.length ; j++) {
-                  if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
-                     break;
-                  _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
-               }
-               _g.stroke();
-            }
+         if (this.isDraggingGlyph) {
+	    this.showGlyph(this.iDragged, This().mouseX, This().mouseY);
          }
+
          _g.restore();
+      }
+
+      this.showGlyph = function(i, cx, cy) {
+         var glyph = glyphs[i];
+	 var b = this.glyphBounds(i);
+	 var gX = b[0], gY = b[1], gW = b[2]-b[0], gH = b[3]-b[1];
+	 if (isDef(cx)) {
+	    gX += cx - (b[0] + b[2]) / 2;
+	    gY += cy - (b[1] + b[3]) / 2;
+         }
+	 var x = gX + glyphsW * .1;
+	 var y = gY;
+	 var t = this.glyphT;
+
+         var txt = glyphs[i].indexName;
+
+         color(this.glyphScrim());
+         fillRect(gX, gY, gW, gH);
+         lineWidth(0.5);
+         color(this.glyphColor());
+         if (backgroundColor == 'white') {
+            line(gX + gW, gY + gH, gX + gW, gY);
+            line(gX + gW, gY + gH, gX, gY + gH);
+         }
+         else {
+            line(gX, gY, gX + gW, gY);
+            line(gX, gY, gX, gY + gH);
+         }
+
+         _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : this.glyphColor();
+
+         var tw = textWidth(txt);
+         _g.fillText(txt, x, y + 10);
+
+         y += 20;
+
+         var selected = t >= i && t < i+1;
+         _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
+         _g.fillStyle = selected ? defaultPenColor : this.glyphColor();
+         _g.lineWidth = selected ? 2 : 1;
+
+         var nn = glyph.data.length;
+
+         var sc = 0.4;
+         for (var n = 0 ; n < nn ; n++) {
+
+            var d = glyph.data[n];
+            if (selected && lerp(n / nn, i, i+1) <= t)
+               fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
+            _g.beginPath();
+            _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
+            for (var j = 1 ; j < d.length ; j++) {
+               if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
+                  break;
+               _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
+            }
+            _g.stroke();
+         }
       }
 
       this.overlay = function() {

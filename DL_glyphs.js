@@ -1514,8 +1514,10 @@ explodeBall = {
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
+/*
 registerGlyph("flag()",["~B}C|E{FzGyIxJvLuMtNsOqPoQnRlSkTiUhUfVdWcXaY`Z^Z[ZYZXZVZT[R[P[OZMYLXJWIVGUEUESEQDPDNELFKHJIIKHLGNFOFQFSGUGVHXIXKYLZN[O]Q^R]T[VZWYXXYVYTYRZQZOZMZK[I[H[F]D]B]@]?]=];]9]7]6]4]2]0[/[-Z+Z*Y(X&X%W$U#T#R!P O",]
 );
+*/
 
 THREE.Object3D.prototype.addFlag = function() {
   var ball = flago.setup();

@@ -1222,8 +1222,10 @@
          var s = new SimpleSketch();
          for (var n = 0 ; n < this.data.length ; n++)
             for (var i = 0 ; i < this.data[n].length ; i++) {
-               var x = this.data[n][i][0] - 50;
-               var y = this.data[n][i][1] - 50;
+               var x1 = this.data[n][i][0] - 50;
+               var y1 = this.data[n][i][1] - 50;
+	       var x = x1 + 3 * noise2(x1 / 30, y1 / 30);
+	       var y = y1 + 3 * noise2(x1 / 30, y1 / 30 + 100);
                s.sp0.push([x,y]);
                s.sp.push([x,y,i>0]);
             }
@@ -1545,9 +1547,6 @@
 
          This().animate(This().elapsed);
 
-         if (isShowingGlyphs && isExpertMode)
-            sketchPage.showGlyphs();
-
          for (var I = 0 ; I < nsk() ; I++)
             if (! sk(I).isSimple())
                sk(I).sketchLength = sk(I).dSum;
@@ -1768,6 +1767,7 @@
          var rightX = w - _g.panX;
 
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
+
          if (isRightHover && ! isBottomGesture) {
             _g.save();
             _g.globalAlpha = 1.0;
@@ -1828,51 +1828,28 @@
 
          // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
-         if (! isShowingGlyphs) {
-            _g.save();
-            lineWidth(1);
-            _g.globalAlpha = 1.0;
+         _g.save();
+         _g.globalAlpha = 1.0;
 
-            _g.beginPath();
-            _g.moveTo(leftX, h);
-            _g.lineTo(rightX, h);
-            _g.strokeStyle = scrimColor(0.2);
-            _g.stroke();
+         if (this.mouseY >= h - margin || isBottomGesture) {
+            color(scrimColor(0.1));
+	    fillRect(_g.panx, h - margin, w, margin - 2);
 
-            if (this.mouseY >= h - margin || isBottomGesture) {
-               _g.beginPath();
-               _g.moveTo(leftX, h - margin);
-               _g.lineTo(rightX, h - margin);
-               _g.lineTo(rightX, h-1);
-               _g.lineTo(leftX, h-1);
-               _g.fillStyle = scrimColor(0.05);
-               _g.fill();
-
-               var offset = _g.panX % margin;
-               for (var i = leftX + offset; i < rightX; i+= margin) {
-                  _g.beginPath();
-                  _g.moveTo(i, h-1);
-                  _g.lineTo(i, h - margin);
-                  _g.lineTo(i + margin/2, h - margin);
-                  _g.lineTo(i + margin/2, h-1);
-                  _g.fillStyle = scrimColor(.05);
-                  _g.fill();
-               }
-            }
-
-            // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
-
-            _g.lineWidth = 0.5;
-            _g.fillStyle = defaultPenColor;
-            _g.moveTo(0,0);
-            _g.lineTo(w-1,0);
-            _g.lineTo(w-1,h-1);
-            _g.lineTo(0,h-1);
-            _g.lineTo(0,0);
-            _g.stroke();
-
-            _g.restore();
+            var offset = _g.panX % margin;
+            for (var x = offset - _g.panX ; x < w - _g.panX ; x += margin)
+	       fillRect(x, h - margin, margin/2, margin - 2);
          }
+
+         // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
+
+         lineWidth(0.5);
+	 color(defaultPenColor);
+	 drawRect(-_g.panX, 0, w-1, h-1);
+
+         _g.restore();
+
+         if (isShowingGlyphs && isExpertMode)
+            sketchPage.showGlyphs();
       }
    }
 
