@@ -1289,16 +1289,26 @@
 
    var isSketchDragEnabled = false;
    var sketchDragMode = 0;
+   var sketchDragActionXY = [0,0];
+   var sketchDragActionSize = [0,0];
 
    function startSketchDragAction(x, y) {
       sketchDragMode = pieMenuIndex(clickX - x, clickY - y, 8);
-      console.log(sketchDragMode);
+      sketchDragActionXY = [x,y];
+      sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
    }
 
    function doSketchDragAction(x, y) {
+      var dx = x - sketchDragActionXY[0];
+      var dy = y - sketchDragActionXY[1];
       switch (sketchDragMode) {
       case 3:
-         console.log("CLONE DRAGGING");
+         if ( abs(dx) > sketchDragActionSize[0] ||
+              abs(dy) > sketchDragActionSize[1] ) {
+	    copySketch(sk());
+            sketchDragActionXY[0] = x;
+            sketchDragActionXY[1] = y;
+         }
          break;
       }
    }
@@ -2003,6 +2013,7 @@
       }
 
       addSketch(s.clone());
+      console.log(s.id + " " + sk().id);
       sk().sketchProgress = 1;
       sk().sketchState = 'finished';
 

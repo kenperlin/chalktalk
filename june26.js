@@ -610,7 +610,6 @@ function MothAndCandle() {
    this.is3D = true;
    this.isAnimating = false;
    this.mm = new M4();
-   this.mm.identity();
    this.up = (new M4()).identity().rotateX(PI/2);
    this.moveMothX = 0;
    this.moveMothY = 0;
@@ -623,7 +622,14 @@ function MothAndCandle() {
       case "moth":
          switch (pieMenuIndex(dx, dy)) {
          case 1:
-            this.isAnimating = true;
+	    this.isAnimating = true;
+	    break;
+         case 3:
+	    for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
+	       var s = sketchPage.sketches[i];
+	       if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
+                  s.isAnimating = true;
+            }
 	    break;
          }
 	 break;
@@ -631,7 +637,6 @@ function MothAndCandle() {
    }
 
    this.render = function(elapsed) {
-
       if (this.startTime === undefined)
          this.startTime = time;
       var transition = sCurve(max(0, min(1, 2 * (time - this.startTime) - 1.5)));
@@ -677,8 +682,8 @@ function MothAndCandle() {
 	    // CONTINUALLY CHANGE DIRECTION.
 
             var turnRate = 25 * elapsed * animationSpeed;
-	    this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5)));
-	    this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 400.5)));
+	    this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 200.5 + 10 * this.id)));
+	    this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5 + 10 * this.id)));
 
 	    // TRY TO STAY ORIENTED UPRIGHT.
 

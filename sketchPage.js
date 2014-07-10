@@ -79,9 +79,6 @@
 
          this.colorIndex = 0;
          this.index = -1;
-         this.isWhiteboard = false;
-         this.mx = 0;
-         this.my = 0;
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
@@ -1021,6 +1018,7 @@
          case 'cap':
             isShiftPressed = false;
             break;
+         case '=':
          case '+':
             isShowingGlyphs = ! isShowingGlyphs;
             break;
@@ -1359,20 +1357,21 @@
 
       this.showGlyphs = function() {
          _g.save();
+         _g.globalAlpha = 1.0;
 
-         color(bgScrimColor(.8));
+         color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
-         _g.strokeStyle = scrimColor(.3);
+         _g.strokeStyle = scrimColor(.6);
          _g.font = '8pt Trebuchet MS';
          _g.lineWidth = 1;
          line(0, height()-1, width(), height()-1);
 
-         var t = 10 * (floor((sketchPage.mx + _g.panX) / glyphsW) +
-                       max(0, min(.99, sketchPage.my / height())));
+         var t = 10 * (floor((this.mx + _g.panX) / glyphsW) +
+                       max(0, min(.99, this.my / height())));
 
-         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)'      : 'rgb(128,192,255)'    ;
-         var glyphScrim = backgroundColor == 'white' ? 'rgba(0,100,200,.16)' : 'rgba(64,160,255,.16)';
+         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ;
+         var glyphScrim = backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)';
 
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
