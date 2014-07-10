@@ -123,6 +123,13 @@
       this.mouseDown = function(x, y) {
 
          this.isPressed = true;
+         this.isClick = true;
+         this.isPossibleClickOverBackground = ! isHover();
+         this.travel = 0;
+         this.xDown = x;
+         this.yDown = y;
+         this.x = x;
+         this.y = y;
 
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDown(x,y)) {
             return;
@@ -161,14 +168,6 @@
             isTogglingMenuType = true;
             return;
          }
-
-         this.isClick = true;
-         this.isPossibleClickOverBackground = ! isHover();
-         this.travel = 0;
-         this.xDown = x;
-         this.yDown = y;
-         this.x = x;
-         this.y = y;
 
          if (isRightHover)
             isRightGesture = true;
@@ -511,7 +510,7 @@
             }
          }
 
-         // EXPERT MODE:
+         // EXPERT MODE: CLICKING ON A SKETCH.
 
          else if (this.isClick && isHover()) {
 
@@ -530,6 +529,9 @@
             else if (doSketchClickAction(x, y))
                return;
          }
+
+	 // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
+
          else if (bgClickCount == 1) {
             bgClickCount = 0;
             return;
