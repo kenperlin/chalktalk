@@ -62,7 +62,7 @@
 
       canvas.onkeypress = function(event) {
          switch (event.keyCode) {
-	 // PREVENT DEFAULT WINDOW ACTION ON BACKSPACE.
+         // PREVENT DEFAULT WINDOW ACTION ON BACKSPACE.
          case 8:
              event.preventDefault();
              break;
@@ -234,10 +234,10 @@
             sk().advanceY = handle.mouseY;
          }
 
-	 // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
+         // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
 
          if (isPanning)
-	    _g.panX += event.clientX - _g.lastX;
+            _g.panX += event.clientX - _g.lastX;
          _g.lastX = event.clientX;
       }
    }
@@ -735,7 +735,7 @@
       ['x'  , "toggle expert mode"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
-      ['+'  , "show glyphs"],
+      ['='  , "show glyphs"],
       ['spc', "show pie menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],
@@ -1038,13 +1038,17 @@
       if (! pullDownIsActive && isk()
                            && ! isHover()
                            && sk().sketchState != 'finished') {
-         sk().sketchProgress = 1;
-         sk().cursorTransition = 1;
-         sk().styleTransition = 1;
-         sk().sketchState = 'finished';
+         finishSketch();
       }
    }
 
+   function finishSketch() {
+      sk().sketchProgress = 1;
+      sk().cursorTransition = 1;
+      sk().styleTransition = 1;
+      sk().sketchState = 'finished';
+   }
+	
    function isFinishedDrawing() {
       return isk() && sk().sketchState == 'finished';
    }
@@ -1099,7 +1103,7 @@
 
    var strokes = [];
    var strokesStartTime = 0;
-   var textGlyph = null;
+   var strokesGlyph = null;
 
    function interpretStrokes() {
       if (strokes.length == 0 || strokes[0].length < 2) {
@@ -1107,16 +1111,16 @@
          return null;
       }
 
-      textGlyph = new Glyph("", strokes);
+      strokesGlyph = new Glyph("", strokes);
       strokes = [];
 
-      if (isCreatingTextGlyphData)
-         console.log(textGlyph.toString());
+      if (isCreatingGlyphData)
+         console.log(strokesGlyph.toString());
 
       var bestMatch = 0;
       var bestScore = 10000000;
       for (var i = 0 ; i < glyphs.length ; i++) {
-         var score = textGlyph.compare(glyphs[i]);
+         var score = strokesGlyph.compare(glyphs[i]);
          if (score < bestScore) {
             bestScore = score;
             bestMatch = i;
@@ -1157,35 +1161,105 @@
    function unregisterGlyph(indexName) {
        for (var i = 0 ; i < glyphs.length ; i++)
           if (indexName == glyphs[i].indexName)
-	     glyphs.splice(i--, 0);
+             glyphs.splice(i--, 0);
    }
 
    function registerGlyph(name, strokes, indexName) {
        if (indexName === undefined) {
           indexName = name;
-	  var j = indexName.indexOf('(');
-	  if (j > 0)
-	     indexName = indexName.substring(0, j);
+          var j = indexName.indexOf('(');
+          if (j > 0)
+             indexName = indexName.substring(0, j);
        }
 
        for (var i = 0 ; i < glyphs.length ; i++)
           if (indexName == glyphs[i].indexName)
-	     return;
+             return;
 
        var glyph = new Glyph(name, strokes);
        glyph.indexName = indexName;
 
        for (var i = 0 ; i < glyphs.length ; i++)
           if (indexName < glyphs[i].indexName) {
-	     glyphs.splice(i, 0, glyph);
-	     return glyph.indexName;
-	  }
+             glyphs.splice(i, 0, glyph);
+             return glyph.indexName;
+          }
 
        glyphs.push(glyph);
        return glyph.indexName;
    }
 
    function Glyph(name, src) {
+
+      this.toString = function() {
+         var str = '"' + this.name + '",\n';
+         str += '[';
+         for (var n = 0 ; n < this.data.length ; n++) {
+            str += '"';
+            for (var i = 0 ; i < this.data[n].length ; i++)
+               str += ef.encode(this.data[n][i][0] / 100)
+                    + ef.encode(this.data[n][i][1] / 100);
+            str += '",';
+         }
+         str += '],';
+         return str;
+      }
+
+      this.compare = function(other) {
+         if (this.data.length != other.data.length)
+            return 1000000;
+         var score = 0;
+         for (var n = 0 ; n < this.data.length ; n++)
+            for (var i = 0 ; i < this.data[n].length ; i++) {
+               var dx = this.data[n][i][0] - other.data[n][i][0];
+               var dy = this.data[n][i][1] - other.data[n][i][1];
+               score += dx * dx + dy * dy;
+            }
+         return score;
+      }
+
+      this.toSimpleSketch = function(tx, ty) {
+         var s = new SimpleSketch();
+         for (var n = 0 ; n < this.data.length ; n++)
+            for (var i = 0 ; i < this.data[n].length ; i++) {
+               var x = this.data[n][i][0] - 50;
+               var y = this.data[n][i][1] - 50;
+               s.sp0.push([x,y]);
+               s.sp.push([x,y,i>0]);
+            }
+         sketchPage.add(s);
+         finishSketch();
+         s.tX = tx;
+         s.tY = ty;
+      }
+
+      this.toSketch = function() {
+
+         // IF GLYPH IS A DIGIT, CREATE A NUMBER OBJECT.
+
+         if (isNumber(parseInt(this.name))) {
+            var s = new NumericSketch();
+            addSketch(s);
+            s.init(this.name, sketchPage.x, sketchPage.y);
+            s.textCursor = s.text.length;
+            setTextMode(true);
+         }
+
+         // IF A '(' IS FOUND, CALL A FUNCTION.
+
+         else if (this.name.indexOf('(') > 0) {
+            eval(this.name);
+         }
+
+         // DEFAULT: CREATE A TEXT OBJECT.
+
+         else {
+            if (this.name != 'del') {
+               sketchPage.createTextSketch(this.name);
+               setTextMode(true);
+            }
+         }
+      }
 
       this.name = name;
       this.data = [];
@@ -1244,36 +1318,9 @@
                                lerp(u, stroke[i-1][1], stroke[i][1])]);
          }
       }
-
-      this.toString = function() {
-         var str = '"' + this.name + '",\n';
-         str += '[';
-         for (var n = 0 ; n < this.data.length ; n++) {
-            str += '"';
-            for (var i = 0 ; i < this.data[n].length ; i++)
-               str += ef.encode(this.data[n][i][0] / 100)
-                    + ef.encode(this.data[n][i][1] / 100);
-            str += '",';
-         }
-         str += '],';
-         return str;
-      }
-
-      this.compare = function(other) {
-         if (this.data.length != other.data.length)
-            return 1000000;
-         var score = 0;
-         for (var n = 0 ; n < this.data.length ; n++)
-            for (var i = 0 ; i < this.data[n].length ; i++) {
-               var dx = this.data[n][i][0] - other.data[n][i][0];
-               var dy = this.data[n][i][1] - other.data[n][i][1];
-               score += dx * dx + dy * dy;
-            }
-         return score;
-      }
    }
 
-   var isCreatingTextGlyphData = false;
+   var isCreatingGlyphData = false;
 
    function shift(textChar) {
       if (isShiftPressed && textChar.length == 1) {
@@ -1305,7 +1352,7 @@
       case 3:
          if ( abs(dx) > sketchDragActionSize[0] ||
               abs(dy) > sketchDragActionSize[1] ) {
-	    copySketch(sk());
+            copySketch(sk());
             sketchDragActionXY[0] = x;
             sketchDragActionXY[1] = y;
          }
@@ -1634,9 +1681,9 @@
 
          if (isAudiencePopup()) {
 
-	    // MAKE SURE AUDIENCE VIEW HAS THE RIGHT BACKGROUND COLOR.
+            // MAKE SURE AUDIENCE VIEW HAS THE RIGHT BACKGROUND COLOR.
 
-	    audienceCanvas.style.backgroundColor = backgroundColor;
+            audienceCanvas.style.backgroundColor = backgroundColor;
 
             // DRAW A CURSOR WHERE AUDIENCE SHOULD SEE IT.
 
@@ -1664,23 +1711,23 @@
          for (var I = 0 ; I < nsk() ; I++) {
             var S = sk(I);
 
-	    // SIMPLE SKETCH:
+            // SIMPLE SKETCH:
 
             if (S instanceof SimpleSketch) {
 
                // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
 
                if (S.isNullText()) {
-	          if (isDef(S.out[0]))
+                  if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
                }
 
-	       // IF TEXT: EVALUATE, THEN PROPAGATE IF THERE IS AN OUTPUT.
+               // IF TEXT: EVALUATE, THEN PROPAGATE IF THERE IS AN OUTPUT.
 
                else {
-	          S.evalResult = S.evalCode(S.text);
-		  if (S.evalResult != null && isDef(S.out[0]))
-		     S.outValue[0] = S.evalResult;
+                  S.evalResult = S.evalCode(S.text);
+                  if (S.evalResult != null && isDef(S.out[0]))
+                     S.outValue[0] = S.evalResult;
                }
             }
 
@@ -1776,8 +1823,8 @@
             annotateEnd();
          }
 
-	 if (isShowingNLParse)
-	    showNLParse();
+         if (isShowingNLParse)
+            showNLParse();
 
          // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
 
@@ -1813,16 +1860,16 @@
                }
             }
 
-	    // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
+            // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
-	    _g.lineWidth = 0.5;
-	    _g.fillStyle = defaultPenColor;
-	    _g.moveTo(0,0);
-	    _g.lineTo(w-1,0);
-	    _g.lineTo(w-1,h-1);
-	    _g.lineTo(0,h-1);
-	    _g.lineTo(0,0);
-	    _g.stroke();
+            _g.lineWidth = 0.5;
+            _g.fillStyle = defaultPenColor;
+            _g.moveTo(0,0);
+            _g.lineTo(w-1,0);
+            _g.lineTo(w-1,h-1);
+            _g.lineTo(0,h-1);
+            _g.lineTo(0,0);
+            _g.stroke();
 
             _g.restore();
          }
@@ -1840,8 +1887,7 @@
              ( isShowingGlyphs || isDef(This().overlay) );
    }
 
-   var glyphsW = 80;
-   var glyphsH = 100;
+   var glyphsW = height() / 10;
    var isShowingGlyphs = false;
 
    var timelineH = 80;
@@ -1992,24 +2038,26 @@
          groupPath = cloneArray(s.groupPath);
       }
 
+      // THIS DOES NOT YET WORK. IT NEEDS TO BE FIXED -- KP.
+
       else if (s instanceof GeometrySketch) {
          addSketch(s.clone());
          sk().sketchProgress = 1;
          sk().sketchState = 'finished';
-	 glyphSketch = sk();
+         glyphSketch = sk();
 
          var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
          root.add(mesh);
 
          var sketch = geometrySketch(mesh);
-	 mesh.sketch = sketch;
+         mesh.sketch = sketch;
 
          sketch.fragmentShader = s.mesh.fragmentShader;
-	 addSketch(sketch);
+         addSketch(sketch);
          sketch.tX += This().mouseX - s.tx();
          sketch.tY += This().mouseY - s.ty();
 
-	 return;
+         return;
       }
 
       addSketch(s.clone());
@@ -2274,30 +2322,30 @@
 
    function setMeshUpdateFunction(mesh) {
       mesh.update = function() {
-	 if (this.material.uniforms === undefined)
-	    return;
+         if (this.material.uniforms === undefined)
+            return;
 
          var S = this.sketch;
 
-	 // TELL THE MATERIAL ABOUT THE CURRENT TIME.
+         // TELL THE MATERIAL ABOUT THE CURRENT TIME.
 
          S.setUniform('time', time);
 
-	 // TELL THE MATERIAL WHAT THE CURRENT SKETCH LOCATION IS IN PIXELS.
+         // TELL THE MATERIAL WHAT THE CURRENT SKETCH LOCATION IS IN PIXELS.
 
          if (S.x == 0) {
             S.x = (S.xlo + S.xhi)/2;
             S.y = (S.ylo + S.yhi)/2;
          }
 
-	 // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
+         // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
 
          if (! S.isClick) {
             S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
             S.setUniform('my', (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
          }
 
-	 // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
+         // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
 
          S.setUniform('alpha', (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1));
 
@@ -2502,4 +2550,5 @@
 
 var glyphs = [];
 loadGlyphArray(glyphData);
+
 

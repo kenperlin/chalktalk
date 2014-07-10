@@ -900,47 +900,16 @@
             return;
          }
 
-         // CLICK TO REINTERPRET SKETCH AS A TEXT CHARACTER.
+         // CLICK TO REINTERPRET SKETCH BY LOOKING UP IN GLYPH DICTIONARY.
 
          if (this.isClick) {
             this.removeLastStroke();
-
             strokes = this.getStrokes();
-
             var glyph = interpretStrokes();
-            if (glyph != null) {
-
-               // IF GLYPH IS A DIGIT, CREATE A NUMBER OBJECT.
-
-               if (isNumber(parseInt(glyph.name))) {
-                  deleteSketch(this);
-                  var s = new NumericSketch();
-                  addSketch(s);
-                  s.init(glyph.name, this.tX, this.tY);
-                  s.textCursor = s.text.length;
-                  setTextMode(true);
-               }
-
-               // IF A '(' IS FOUND, CALL A FUNCTION.
-
-               else if (glyph.name.indexOf('(') > 0) {
-                  glyphSketch = sk();
-                  eval(glyph.name);
-                  deleteSketch(glyphSketch);
-                  return;
-               }
-
-               // DEFAULT: CREATE A TEXT OBJECT.
-
-               else {
-                  deleteSketch(this);
-                  if (glyph.name != 'del') {
-                     sketchPage.createTextSketch(glyph.name);
-                     setTextMode(true);
-                  }
-               }
-
-            }
+            glyphSketch = this;
+            if (glyph != null)
+	       glyph.toSketch();
+            deleteSketch(glyphSketch);
             return;
          }
 

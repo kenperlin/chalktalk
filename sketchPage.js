@@ -108,10 +108,10 @@
 
       this.getSketchesByLabel = function(label) {
          var sketches = [];
-	 for (var i = 0 ; i < this.sketches.length ; i++)
-	    if (label == this.sketches[i].labels[this.sketches[i].selection])
-	          sketches.push(this.sketches[i]);
-	 return sketches;
+         for (var i = 0 ; i < this.sketches.length ; i++)
+            if (label == this.sketches[i].labels[this.sketches[i].selection])
+                  sketches.push(this.sketches[i]);
+         return sketches;
       }
 
       this.isCreatingGroup = false;
@@ -131,12 +131,12 @@
          isSketchDragActionEnabled = false;
          if (bgClickCount == 1) {
             if (isSketchDragActionEnabled = isHover())
-	       startSketchDragAction(x, y);
+               startSketchDragAction(x, y);
             return;
          }
 
          if (paletteColorIndex >= 0) {
-	    this.paletteColorDragXY = null;
+            this.paletteColorDragXY = null;
             return;
          }
 
@@ -150,6 +150,16 @@
             isTogglingMenuType = true;
             return;
          }
+
+	 if (isShowingGlyphs) {
+	    for (var i = 0 ; i < glyphs.length ; i++) {
+	       var b = this.glyphBounds(i);
+	       if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) {
+	          console.log("MOUSE DOWN AT GLYPH " + i);
+		  break;
+	       }
+	    }
+	 }
 
          this.isClick = true;
          this.isPossibleClickOverBackground = ! isHover();
@@ -243,10 +253,10 @@
             return;
          }
 
-	 if (isSketchDragActionEnabled) {
-	    doSketchDragAction(x, y);
-	    return;
-	 }
+         if (isSketchDragActionEnabled) {
+            doSketchDragAction(x, y);
+            return;
+         }
 
          if (bgClickCount == 1)
             return;
@@ -256,7 +266,7 @@
             if (index >= 0)
                paletteColorIndex = index;
             else
-	       this.paletteColorDragXY = [x,y];
+               this.paletteColorDragXY = [x,y];
             return;
          }
 
@@ -284,7 +294,7 @@
 
          if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
             outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
-	    this.isClick = false;
+            this.isClick = false;
          }
 
          if (pieMenuIsActive) {
@@ -339,27 +349,27 @@
 
          this.isPressed = false;
 
-	 if (isSketchDragActionEnabled) {
-	    endSketchDragAction(x, y);
-	    isSketchDragActionEnabled = false;
-	 }
+         if (isSketchDragActionEnabled) {
+            endSketchDragAction(x, y);
+            isSketchDragActionEnabled = false;
+         }
 
          if (paletteColorIndex >= 0) {
 
             // MOUSE-UP OVER PALETTE TO SET THE DRAWING COLOR.
 
-	    if (this.paletteColorDragXY == null)
-               sketchPage.colorIndex = paletteColorIndex;
+            if (this.paletteColorDragXY == null)
+               this.colorIndex = paletteColorIndex;
 
             // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
 
             else {
-	       if (isk() && sk().isMouseOver) {
-	          sk().color = sketchPalette[paletteColorIndex];
-		  if (sk() instanceof GeometrySketch)
+               if (isk() && sk().isMouseOver) {
+                  sk().color = sketchPalette[paletteColorIndex];
+                  if (sk() instanceof GeometrySketch)
                      setMeshMaterialToColor(sk().mesh, sk().color);
                }
-	       this.paletteColorDragXY = null;
+               this.paletteColorDragXY = null;
             }
             return;
          }
@@ -375,7 +385,7 @@
 
          if (isBottomGesture) {
             if (y < height() - 100)
-               sketchPage.clear();
+               this.clear();
             isBottomGesture = false;
             return;
          }
@@ -433,8 +443,8 @@
 
             else if (! isShorthandMode) {
                var glyph = interpretStrokes();
-               if (glyph != null && ! isCreatingTextGlyphData)
-                  sketchPage.handleDrawnTextChar(glyph.name);
+               if (glyph != null && ! isCreatingGlyphData)
+                  this.handleDrawnTextChar(glyph.name);
             }
 
             strokes = [];
@@ -484,7 +494,7 @@
                if (! doSketchClickAction(x, y)) {
                   sk().isPressed = false;
                   pullDownLabels = sketchActionLabels.concat(sk().labels);
-                  pullDownStart(sketchPage.x, sketchPage.y);
+                  pullDownStart(this.x, this.y);
                }
                return;
             }
@@ -497,7 +507,7 @@
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
             if (bgClickCount == 0 && sk().code != null) {
-	       if (isCodeWidget && codeSketch != sk())
+               if (isCodeWidget && codeSketch != sk())
                   toggleCodeWidget();
                codeSketch = sk();
                toggleCodeWidget();
@@ -509,10 +519,10 @@
             else if (doSketchClickAction(x, y))
                return;
          }
-	 else if (bgClickCount == 1) {
-	    bgClickCount = 0;
-	    return;
-	 }
+         else if (bgClickCount == 1) {
+            bgClickCount = 0;
+            return;
+         }
 
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
@@ -525,12 +535,12 @@
 
             if (this.isClick && isHover() && isDef(sk().onClick)) {
                sk().onClick(x, y);
-	       return;
+               return;
             }
 
             if (! this.isClick && isk() && isDef(sk().onSwipe)) {
                sk().onSwipe(x - this.xDown, y - this.yDown);
-	       return;
+               return;
             }
          }
 
@@ -558,7 +568,7 @@
 
             else {
                pullDownLabels = pagePullDownLabels;
-               pullDownStart(sketchPage.x, sketchPage.y);
+               pullDownStart(this.x, this.y);
             }
          }
       }
@@ -945,7 +955,7 @@
 
          switch (letter) {
          case '!':
-            sketchPage.clear();
+            this.clear();
             break;
          case PAGE_UP:
             break;
@@ -963,7 +973,7 @@
             else {
                if (sketchAction != null) {
                   if (sketchAction == "linking")
-                     sketchPage.figureOutLink();
+                     this.figureOutLink();
                   sketchAction = null;
                }
                else {
@@ -1058,7 +1068,7 @@
                sk().isNegated = ! sk().isNegated;
             break;
          case 'o':
-            isCreatingTextGlyphData = ! isCreatingTextGlyphData;
+            isCreatingGlyphData = ! isCreatingGlyphData;
             break;
          case 'p':
             isPanning = false;
@@ -1103,9 +1113,9 @@
             background.color = backgroundColor;
             background.style.backgroundColor = backgroundColor;
             sketchPalette[0] = defaultPenColor;
-            for (var i = 0 ; i < sketchPage.sketches.length ; i++)
-               if (sketchPage.sketches[i].color == backgroundColor)
-                  sketchPage.sketches[i].color = defaultPenColor;
+            for (var i = 0 ; i < this.sketches.length ; i++)
+               if (this.sketches[i].color == backgroundColor)
+                  this.sketches[i].color = defaultPenColor;
 
             if (codeText != null) {
                codeText.style.backgroundColor = codeTextBgColor();
@@ -1178,7 +1188,7 @@
             outPort = -1;
 
          if (this.fadeAway > 0)
-            sketchPage.doFadeAway(elapsed);
+            this.doFadeAway(elapsed);
 
          noisy = 1;
 
@@ -1189,11 +1199,11 @@
 
             _g_sketchStart();
 
-            var PUSHED_sketchPage_index = sketchPage.index;
+            var PUSHED_sketchPage_index = this.index;
 
-            sketchPage.textInputIndex = sketchPage.index;
+            this.textInputIndex = this.index;
 
-            sketchPage.index = I;
+            this.index = I;
 
             sk().updateSelectionWeights(elapsed);
 
@@ -1245,7 +1255,7 @@
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);
 
-	       if (sk().glyphTransition == 1) {
+               if (sk().glyphTransition == 1) {
                   finishDrawingUnfinishedSketch();
                   sk().glyphTrace = null;
                }
@@ -1253,7 +1263,7 @@
 
             _g.restore();
 
-            sketchPage.index = PUSHED_sketchPage_index;
+            this.index = PUSHED_sketchPage_index;
 
             _g_sketchEnd();
          }
@@ -1264,7 +1274,7 @@
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
             if (this.paletteColorDragXY != null ||
-	        This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
+                This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
                pieMenuDraw();
@@ -1287,9 +1297,9 @@
          // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
-	    drawCodeWidget(code(), codeSketch.xlo, codeSketch.ylo,
-	                           codeSketch.xhi, codeSketch.yhi,
-	                           codeElement.codeSketch != codeSketch);
+            drawCodeWidget(code(), codeSketch.xlo, codeSketch.ylo,
+                                   codeSketch.xhi, codeSketch.yhi,
+                                   codeElement.codeSketch != codeSketch);
             codeElement.codeSketch = codeSketch;
          }
 
@@ -1297,10 +1307,10 @@
             onScreenKeyboard.render();
 
          if (this.paletteColorDragXY != null) {
-	    color(sketchPalette[paletteColorIndex]);
-	    fillRect(this.paletteColorDragXY[0] - 12,
-	             this.paletteColorDragXY[1] - 12, 24, 24);
-	 }
+            color(sketchPalette[paletteColorIndex]);
+            fillRect(this.paletteColorDragXY[0] - 12,
+                     this.paletteColorDragXY[1] - 12, 24, 24);
+         }
 
 // PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
 /*
@@ -1355,6 +1365,12 @@
          }
       }
 
+      this.glyphBounds = function(i) {
+         var x = glyphsW / 20 + glyphsW * floor(i / 10) - _g.panX;
+         var y = ((i % 10) * height()) / 10 + glyphsW / 10;
+         return [ x, y, x + glyphsW*.7, y + glyphsW*.8 ];
+      }
+
       this.showGlyphs = function() {
          _g.save();
          _g.globalAlpha = 1.0;
@@ -1376,30 +1392,32 @@
          for (var i = 0 ; i < glyphs.length ; i++) {
             var glyph = glyphs[i];
 
-            var x = (glyphsW*3/16) + glyphsW * floor(i / 10) - _g.panX;
-            var y =  ((i % 10) * height()) / 10 + 3;
-	    var txt = glyphs[i].indexName;
+            var bounds = this.glyphBounds(i);
+	    var gX = bounds[0], gY = bounds[1], gW = bounds[2]-bounds[0], gH = bounds[3]-bounds[1];
+	    var x = gX + glyphsW * .1;
+	    var y = gY;
 
-	    color(glyphScrim);
-	    var gX = x - glyphsW*.1, gY = y, gW = glyphsW*.7, gH = glyphsW*.8;
-	    fillRect(gX, gY, gW, gH);
-	    lineWidth(0.5);
-	    color(glyphColor);
-	    if (backgroundColor == 'white') {
-	       line(gX + gW, gY + gH, gX + gW, gY);
-	       line(gX + gW, gY + gH, gX, gY + gH);
-	    }
-	    else {
-	       line(gX, gY, gX + gW, gY);
-	       line(gX, gY, gX, gY + gH);
-	    }
+            var txt = glyphs[i].indexName;
+
+            color(glyphScrim);
+            fillRect(gX, gY, gW, gH);
+            lineWidth(0.5);
+            color(glyphColor);
+            if (backgroundColor == 'white') {
+               line(gX + gW, gY + gH, gX + gW, gY);
+               line(gX + gW, gY + gH, gX, gY + gH);
+            }
+            else {
+               line(gX, gY, gX + gW, gY);
+               line(gX, gY, gX, gY + gH);
+            }
 
             _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
 
             var tw = textWidth(txt);
             _g.fillText(txt, x, y + 10);
 
-	    y += 20;
+            y += 20;
 
             var selected = t >= i && t < i+1;
             _g.strokeStyle = selected ? defaultPenColor : glyphColor;
@@ -1418,7 +1436,7 @@
                _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
                for (var j = 1 ; j < d.length ; j++) {
                   if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
-		     break;
+                     break;
                   _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
                }
                _g.stroke();
@@ -1501,7 +1519,7 @@
 
          // REMIND THE PRESENTER WHEN INTERFACE IS IN TEXT INSERTION MODE.
 
-         if (isCreatingTextGlyphData) {
+         if (isCreatingGlyphData) {
             color(overlayColor);
             _g.font = 'bold 20pt Calibri';
             var str = "outputting glyphs";
@@ -1631,7 +1649,7 @@
                                   && outPort >= 0) {
 
             if (! isAudiencePopup())
-               drawPossibleLink(outSketch, sketchPage.mx, sketchPage.my);
+               drawPossibleLink(outSketch, this.mx, this.my);
 
             // HIGHLIGHT POTENTIAL TARGET SKETCH FOR THE LINK.
 
@@ -1755,17 +1773,17 @@
          color('rgba(0,32,128,.2)');
          _g.fillText(msg, (w - textWidth(msg)) / 2, 80);
 
-         if (isCreatingTextGlyphData) {
+         if (isCreatingGlyphData) {
             var str = "outputting glyphs";
             _g.fillText(str, (w - textWidth(str)) / 2, 200);
          }
       }
 
       this.drawTextStrokes = function() {
-         if (isCreatingTextGlyphData || This().mousePressed) {
+         if (isCreatingGlyphData || This().mousePressed) {
             var ts = This().mousePressed ? strokes[0]
-                                         : textGlyph == null ? []
-                                         : textGlyph.data[0];
+                                         : strokesGlyph == null ? []
+                                         : strokesGlyph.data[0];
 
             var isShowingShorthand = isShorthandMode && isShorthandTimeout;
 
