@@ -1287,7 +1287,26 @@
       return textChar;
    }
 
-   function doSketchAction(x, y) {
+   var isSketchDragEnabled = false;
+   var sketchDragMode = 0;
+
+   function startSketchDragAction(x, y) {
+      sketchDragMode = pieMenuIndex(clickX - x, clickY - y, 8);
+      console.log(sketchDragMode);
+   }
+
+   function doSketchDragAction(x, y) {
+      switch (sketchDragMode) {
+      case 3:
+         console.log("CLONE DRAGGING");
+         break;
+      }
+   }
+
+   function endSketchDragAction(x, y) {
+   }
+
+   function doSketchClickAction(x, y) {
       if (bgClickCount != 1 || ! isHover())
          return false;
 

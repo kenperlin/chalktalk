@@ -131,8 +131,12 @@
             return;
          }
 
-         if (bgClickCount == 1)
+         isSketchDragActionEnabled = false;
+         if (bgClickCount == 1) {
+            if (isSketchDragActionEnabled = isHover())
+	       startSketchDragAction(x, y);
             return;
+         }
 
          if (paletteColorIndex >= 0) {
 	    this.paletteColorDragXY = null;
@@ -234,9 +238,18 @@
 
       this.mouseDrag = function(x, y) {
 
+         this.travel += len(x - this.x, y - this.y);
+         this.x = x;
+         this.y = y;
+
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
          }
+
+	 if (isSketchDragActionEnabled) {
+	    doSketchDragAction(x, y);
+	    return;
+	 }
 
          if (bgClickCount == 1)
             return;
@@ -276,10 +289,6 @@
             outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
 	    this.isClick = false;
          }
-
-         this.travel += len(x - this.x, y - this.y);
-         this.x = x;
-         this.y = y;
 
          if (pieMenuIsActive) {
             pieMenuStroke.push([x, y]);
@@ -332,6 +341,11 @@
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+	 if (isSketchDragActionEnabled) {
+	    endSketchDragAction(x, y);
+	    isSketchDragActionEnabled = false;
+	 }
 
          if (paletteColorIndex >= 0) {
 
@@ -470,7 +484,7 @@
 
          if (! isExpertMode) {
             if (this.isClick && this.isFocusOnSketch) {
-               if (! doSketchAction(x, y)) {
+               if (! doSketchClickAction(x, y)) {
                   sk().isPressed = false;
                   pullDownLabels = sketchActionLabels.concat(sk().labels);
                   pullDownStart(sketchPage.x, sketchPage.y);
@@ -495,9 +509,13 @@
 
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else if (doSketchAction(x, y))
+            else if (doSketchClickAction(x, y))
                return;
          }
+	 else if (bgClickCount == 1) {
+	    bgClickCount = 0;
+	    return;
+	 }
 
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
