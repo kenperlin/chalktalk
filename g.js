@@ -1235,6 +1235,7 @@
             }
          sketchPage.add(s);
          finishSketch();
+	 s.color = sketchColor();
          s.tX = tx;
          s.tY = ty;
       }
