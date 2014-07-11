@@ -620,6 +620,14 @@
          }
       }
 
+      // TEMPORARILY UNDRAW CURRENT SKETCH.
+
+      this.doUndraw = function(x, y) {
+         if (isk() && sk() instanceof SimpleSketch) {
+	    this.tUndraw = max(0, min(1, (x - this.xDown) / 200));
+	 }
+      }
+
       this.panX = 0;
       this.panY = 0;
       this.zoom = 1;
@@ -721,6 +729,7 @@
             case "translating": this.doTranslate(x, y); break;
             case "rotating"   : this.doRotate(x, y); break;
             case "scaling"    : this.doScale(x, y); break;
+            case "undrawing"  : this.doUndraw(x, y); break;
             }
 
             this.mx = x;
@@ -775,6 +784,9 @@
             break;
          case 't':
             this.doTranslate(x, y);
+            break;
+         case 'u':
+            this.doUndraw(x, y);
             break;
          case 'z':
             this.doZoom(x, y);
@@ -1204,6 +1216,8 @@
             this.doFadeAway(elapsed);
 
          noisy = 1;
+
+         this.trueIndex = this.index;
 
          for (var I = 0 ; I < nsk() ; I++) {
 

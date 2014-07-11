@@ -149,6 +149,9 @@
                   }
                }
                break;
+            case "undrawing":
+	       delete sketchPage.tUndraw;
+	       break;
             }
             sketchAction = null;
             return;
@@ -1379,21 +1382,25 @@
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
          break;
-      case 6:
-         sketchAction = "rotating";     // S -- ROTATE
-         break;
-      case 5:
-         toggleTextMode();              // SW -- TOGGLE TEXT MODE
-         break;
-      case 4:
-         sketchAction = "scaling";      // W -- SCALE
+      case 2:
+         sketchAction = "translating";  // N -- TRANSLATE
          break;
       case 3:
          copySketch(sk());              // NW -- CLONE
          sketchAction = "translating";
          break;
-      case 2:
-         sketchAction = "translating";  // N -- TRANSLATE
+      case 4:
+         sketchAction = "scaling";      // W -- SCALE
+         break;
+      case 5:
+         toggleTextMode();              // SW -- TOGGLE TEXT MODE
+         break;
+      case 6:
+         sketchAction = "rotating";     // S -- ROTATE
+         break;
+      case 7:
+         sketchAction = "undrawing";    // SE -- "UNDRAW" A SIMPLE SKETCH
+	 sketchPage.tUndraw = 0;
          break;
       }
 
@@ -1843,7 +1850,7 @@
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
-         lineWidth(0.5);
+         lineWidth(0.25);
 	 color(defaultPenColor);
 	 drawRect(-_g.panX, 0, w-1, h-1);
 
@@ -1881,17 +1888,33 @@
          var sp = sketch.sp;
          var isCard = sketch.isCard;
 
-         context.beginPath();
          var strokeIndex = -1;
-         for (var i = 0 ; i < sp.length ; i++) {
+
+         var isUndrawing = sketch == sketchPage.sketches[sketchPage.trueIndex]
+	                   && sketchPage.tUndraw !== undefined;
+
+	 var n = sp.length;
+	 if (isUndrawing)
+	    n = max(2, n * sketchPage.tUndraw);
+
+         for (var i = 1 ; i < n ; i++) {
             if (sp[i][2] == 0) {
+               if (i > 1)
+	          context.stroke();
+
+	       if (isUndrawing)
+	          fillOval(sp[i][0] - 5, sp[i][1] - 5, 10, 10);
+
+	       context.beginPath();
                context.moveTo(sp[i][0], sp[i][1]);
+
                strokeIndex++;
                if (strokeIndex < sketch.colorIndex.length)
                   context.strokeStyle = sketchPalette[sketch.colorIndex[strokeIndex]];
             }
             else {
                context.lineTo(sp[i][0], sp[i][1]);
+
                if (isCard && (i == sp.length - 1 || sp[i+1][2] == 0)) {
                   context.stroke();
                   var i0 = i - 1;
