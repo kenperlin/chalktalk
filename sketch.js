@@ -273,7 +273,7 @@
          // FIRST CHECK FOR A NATURAL LANGUAGE COMMAND.
 
          if (nlParse(code))
-	    return;
+            return;
 
          // IF NO ARGS ARE SUPPLIED, USE VALUES FROM THE SKETCH'S INPUT PORTS.
 
@@ -283,7 +283,7 @@
          if (y === undefined) y = defaultToZero(this.inValue[1]);
          if (z === undefined) z = defaultToZero(this.inValue[2]);
 
-	 // IF NO RETURN STATEMENT, SUPPLY ONE.
+         // IF NO RETURN STATEMENT, SUPPLY ONE.
 
          if (code.indexOf('return') == -1)
             code = "return " + code;
@@ -292,7 +292,7 @@
 
          var result = null;
          try {
-	    result = Function("me","x","y","z", code)(this, x, y, z);
+            result = Function("me","x","y","z", code)(this, x, y, z);
          } catch (e) { }
 
          // ANY ERROR RESULTS IN A RETURN VALUE OF null.
@@ -908,7 +908,7 @@
             var glyph = interpretStrokes();
             glyphSketch = this;
             if (glyph != null)
-	       glyph.toSketch();
+               glyph.toSketch();
             deleteSketch(glyphSketch);
             return;
          }
@@ -947,7 +947,7 @@
             console.log("NEED TO IMPLEMENT PARSING A GROUP");
             return;
          }
-	 this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
+         this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
       }
 
       this.xform = function(xy) {
@@ -982,11 +982,11 @@
 
          var curves = parsedStrokesToCurves(this.parsedStrokes, transition);
          for (var n = 0 ; n < curves.length ; n++) {
-	    var c = [];
-	    for (var i = 0 ; i < curves[n].length ; i++)
-	       c.push(this.xform(curves[n][i]));
+            var c = [];
+            for (var i = 0 ; i < curves[n].length ; i++)
+               c.push(this.xform(curves[n][i]));
             drawCurve(c);
-	 }
+         }
 
          annotateEnd();
       }
@@ -1002,7 +1002,75 @@
          annotateStart();
          lineWidth(sketchLineWidth * sketchPage.zoom / this.zoom);
          _g.strokeStyle = this.color;
-         drawSimpleSketch(this);
+
+         if (this.isParsed())
+            this.drawParsed();
+         else {
+            var sp = this.sp;
+            var isCard = this.isCard;
+
+            var strokeIndex = -1;
+
+	    // HANDLE UNDRAWING OPTION.
+
+            var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
+                              && sketchPage.tUndraw !== undefined;
+            var n = sp.length;
+            if (isUndrawing)
+               n = max(2, n * sketchPage.tUndraw);
+
+            // LOOP THROUGH THE sp ARRAY.
+
+            for (var i = 1 ; i < n ; i++) {
+
+               // START DRAWING A STROKE.
+
+               if (sp[i][2] == 0) {
+                  if (i > 1)
+                     _g.stroke();
+
+                  if (isUndrawing)
+                     fillOval(sp[i][0] - 5, sp[i][1] - 5, 10, 10);
+
+                  _g.beginPath();
+                  _g.moveTo(sp[i][0], sp[i][1]);
+
+                  strokeIndex++;
+                  if (strokeIndex < this.colorIndex.length)
+                     _g.strokeStyle = sketchPalette[this.colorIndex[strokeIndex]];
+               }
+
+               // CONTINUE DRAWING A STROKE.
+
+               else {
+                  _g.lineTo(sp[i][0], sp[i][1]);
+
+		  // HANDLE CARD-STYLE RENDERING.
+
+                  if (isCard && (i == sp.length - 1 || sp[i+1][2] == 0)) {
+                     _g.stroke();
+                     var i0 = i - 1;
+                     while (i0 > 1 || sp[i0][2] == 1)
+                        i0--;
+                     _g.fillStyle = this.isNegated ? this.color : backgroundColor;
+                     fillPath(sp, i0, i, _g);
+                     if (this.isNegated)
+                        _g.strokeStyle = backgroundColor;
+                     isCard = false;
+                     _g.beginPath();
+                  }
+               }
+            }
+            _g.stroke();
+         }
+
+         this.drawText(_g);
+
+         if (this.isGroup()) {
+            color('rgba(255,1,0,.07)');
+            fillRect(this.xlo, this.ylo, this.xhi-this.xlo, this.yhi-this.ylo);
+         }
+
          annotateEnd();
       }
    }
