@@ -56,8 +56,11 @@ function lathe() {
 
     sketch.shaderCount = 0;
     sketch.onClick = function() {
-       var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
-       this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
+       this.shaderCount = 0;
+       (function() {
+          var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
+          this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
+       })();
     }
 }
 lathe.prototype = new Sketch;

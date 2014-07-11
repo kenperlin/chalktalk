@@ -2018,27 +2018,36 @@
       // THIS DOES NOT YET WORK. IT NEEDS TO BE FIXED -- KP.
 
       else if (s instanceof GeometrySketch) {
-         addSketch(s.clone());
-         sk().sketchProgress = 1;
-         sk().sketchState = 'finished';
-         glyphSketch = sk();
+	 var x = This().mouseX, y = This().mouseY;
 
          var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
-         root.add(mesh);
+	 root.add(mesh);
 
-         var sketch = geometrySketch(mesh);
+	 var sketch = new GeometrySketch();
+	 sketch.mesh = mesh;
+
+	 var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
+	 var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
+	 sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
+	 sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
          mesh.sketch = sketch;
-
-         sketch.fragmentShader = s.mesh.fragmentShader;
-         addSketch(sketch);
-         sketch.tX += This().mouseX - s.tx();
-         sketch.tY += This().mouseY - s.ty();
-
+	 addSketch(sketch);
+	 sk().fragmentShader = s.fragmentShader;
+	 sk().onClick = s.onClick;
+	 sk().onSwipe = s.onSwipe;
+	 sk().rX = s.rX;
+	 sk().rY = s.rY;
+         sk().sketchProgress = 1;
+         sk().sketchState = 'finished';
+	 sk().sx = s.sx;
+	 sk().sy = s.sy;
+	 sk().update = s.update;
+	 mesh.update = s.mesh.update;
+         finishDrawingUnfinishedSketch();
          return;
       }
 
       addSketch(s.clone());
-      console.log(s.id + " " + sk().id);
       sk().sketchProgress = 1;
       sk().sketchState = 'finished';
 
