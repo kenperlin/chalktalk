@@ -1380,9 +1380,9 @@
       }
 
       this.glyphBounds = function(i) {
-         var x = glyphsW / 20 + glyphsW * floor(i / 10) - _g.panX;
-         var y = ((i % 10) * height()) / 10 + glyphsW / 10;
-         return [ x, y, x + glyphsW*.7, y + glyphsW*.8 ];
+         var x = glyphW() / 20 + glyphW() * floor(i / 10) - _g.panX;
+         var y = ((i % 10) * height()) / 10 + glyphW() / 10;
+         return [ x, y, x + glyphW() * .7, y + glyphW() * .8 ];
       }
 
       this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
@@ -1405,7 +1405,7 @@
 
          this.glyphT = this.isDraggingGlyph
 	             ? this.iDragged + 0.99
-	             : 10 * (floor((this.mx + _g.panX) / glyphsW) +
+	             : 10 * (floor((this.mx + _g.panX) / glyphW()) +
                                     max(0, min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
@@ -1426,7 +1426,7 @@
 	    gX += cx - (b[0] + b[2]) / 2;
 	    gY += cy - (b[1] + b[3]) / 2;
          }
-	 var x = gX + glyphsW * .1;
+	 var x = gX + glyphW() * .1;
 	 var y = gY;
 	 var t = this.glyphT;
 
@@ -1448,7 +1448,7 @@
          _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : this.glyphColor();
 
          var tw = textWidth(txt);
-         _g.fillText(txt, x, y + 10);
+         _g.fillText(txt, gX + 2, y + 10.5);
 
          y += 20;
 
@@ -1837,5 +1837,8 @@
       }
    }
 
+   var glyphW = function() { return height() / 10; }
+
    var sketchPage = sketchBook.setPage(0);
+
 

@@ -101,7 +101,7 @@ function hose() {
        yLo = min(yLo, trace[1][i][1]);
        yHi = max(yHi, trace[1][i][1]);
     }
-    uar x = (xLo + xHi) / 2;
+    var x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
     var scale = 2 / (yHi - yLo + 2 * sketchPadding);
 

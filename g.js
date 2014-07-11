@@ -509,6 +509,7 @@
    var isAudioSignal= false;
    var isBottomGesture = false;
    var isBottomHover = false;
+   var isCodeWidget = false;
    var isCommandPressed = false;
    var isControlPressed = false;
    var isDrawingSketch2D = false;
@@ -523,10 +524,10 @@
    var isRightClick = false;
    var isRightHover = false;
    var isRightGesture = false;
-   var isCodeWidget = false;
    var isShiftPressed = false;
    var isShorthandMode = false;
    var isShorthandTimeout = false;
+   var isShowingGlyphs = false;
    var isSpacePressed = false;
    var isShowingPresenterView = false;
    var isTextMode = false;
@@ -1863,9 +1864,6 @@
       return ! isExpertMode &&
              ( isShowingGlyphs || isDef(This().overlay) );
    }
-
-   var glyphsW = height() / 10;
-   var isShowingGlyphs = false;
 
    var timelineH = 80;
    var isShowingTimeline = false;
