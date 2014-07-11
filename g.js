@@ -2018,31 +2018,34 @@
       // THIS DOES NOT YET WORK. IT NEEDS TO BE FIXED -- KP.
 
       else if (s instanceof GeometrySketch) {
-	 var x = This().mouseX, y = This().mouseY;
-
-         var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
-	 root.add(mesh);
 
 	 var sketch = new GeometrySketch();
-	 sketch.mesh = mesh;
 
+	 var x = This().mouseX, y = This().mouseY;
 	 var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
 	 var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
 	 sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
 	 sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
+
+         var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
+	 root.add(mesh);
          mesh.sketch = sketch;
-	 addSketch(sketch);
-	 sk().fragmentShader = s.fragmentShader;
-	 sk().onClick = s.onClick;
-	 sk().onSwipe = s.onSwipe;
-	 sk().rX = s.rX;
-	 sk().rY = s.rY;
-         sk().sketchProgress = 1;
-         sk().sketchState = 'finished';
-	 sk().sx = s.sx;
-	 sk().sy = s.sy;
-	 sk().update = s.update;
+
+	 sketch.fragmentShader = s.fragmentShader;
+	 sketch.mesh = mesh;
+	 sketch.onClick = s.onClick;
+	 sketch.onSwipe = s.onSwipe;
+	 sketch.rX = s.rX;
+	 sketch.rY = s.rY;
+	 sketch.shaderCount = 0;
+         sketch.sketchProgress = 1;
+         sketch.sketchState = 'finished';
+	 sketch.sx = s.sx;
+	 sketch.sy = s.sy;
+	 sketch.update = s.update;
 	 mesh.update = s.mesh.update;
+
+	 addSketch(sketch);
          finishDrawingUnfinishedSketch();
          return;
       }

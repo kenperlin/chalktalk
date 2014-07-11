@@ -54,13 +54,12 @@ function lathe() {
       this.mesh.getMatrix().rotateX(PI/2);
     }
 
-    sketch.shaderCount = 0;
     sketch.onClick = function() {
-       this.shaderCount = 0;
-       (function() {
-          var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
-          this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
-       })();
+       console.log("AHA OHO");
+       if (this.shaderCount === undefined)
+          this.shaderCount = 0;
+       var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
+       this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
 lathe.prototype = new Sketch;
@@ -128,7 +127,7 @@ function tubeExtrude() {
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
-lathe.prototype = new Sketch;
+tubeExtrude.prototype = new Sketch;
 
 THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var points = [];
