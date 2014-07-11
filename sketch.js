@@ -1017,7 +1017,7 @@
                               && sketchPage.tUndraw !== undefined;
             var n = sp.length;
             if (isUndrawing)
-               n = max(2, n * sketchPage.tUndraw);
+               n = max(2, floor(n * sketchPage.tUndraw));
 
             // LOOP THROUGH THE sp ARRAY.
 
@@ -1062,6 +1062,19 @@
                }
             }
             _g.stroke();
+
+	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
+
+	    if (isUndrawing && n >= 3 && n < sp.length) {
+	       console.log(sp.length + " " + n);
+	       var ax = sp[n-2][0], ay = sp[n-2][1];
+	       var bx = sp[n-1][0], by = sp[n-1][1];
+	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
+	       dx *= 8 / d;
+	       dy *= 8 / d;
+	       line(bx, by, bx - dx - dy, by - dy + dx);
+	       line(bx, by, bx - dx + dy, by - dy - dx);
+	    }
          }
 
          this.drawText(_g);
