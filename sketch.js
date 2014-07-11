@@ -999,8 +999,11 @@
             this.sp[i][1] = xy[1];
          }
 
+         var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
+                           && sketchPage.tUndraw !== undefined;
+
          annotateStart();
-         lineWidth(sketchLineWidth * sketchPage.zoom / this.zoom);
+         lineWidth(isUndrawing ? 2 : sketchLineWidth * sketchPage.zoom / this.zoom);
          _g.strokeStyle = this.color;
 
          if (this.isParsed())
@@ -1030,7 +1033,7 @@
                      _g.stroke();
 
                   if (isUndrawing)
-                     fillOval(sp[i][0] - 5, sp[i][1] - 5, 10, 10);
+                     fillOval(sp[i][0] - 4, sp[i][1] - 4, 8, 8);
 
                   _g.beginPath();
                   _g.moveTo(sp[i][0], sp[i][1]);
@@ -1065,13 +1068,13 @@
 
 	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
 
-	    if (isUndrawing && n >= 3 && n < sp.length) {
+	    if (isUndrawing && n >= 4) {
 	       console.log(sp.length + " " + n);
-	       var ax = sp[n-2][0], ay = sp[n-2][1];
+	       var ax = sp[n-3][0], ay = sp[n-3][1];
 	       var bx = sp[n-1][0], by = sp[n-1][1];
 	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
-	       dx *= 8 / d;
-	       dy *= 8 / d;
+	       dx *= 6 / d;
+	       dy *= 6 / d;
 	       line(bx, by, bx - dx - dy, by - dy + dx);
 	       line(bx, by, bx - dx + dy, by - dy - dx);
 	    }
