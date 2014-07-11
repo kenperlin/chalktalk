@@ -55,7 +55,6 @@ function lathe() {
     }
 
     sketch.onClick = function() {
-       console.log("AHA OHO");
        if (this.shaderCount === undefined)
           this.shaderCount = 0;
        var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
@@ -69,14 +68,14 @@ lathe.prototype = new Sketch;
 
 
 
-registerGlyph("tubeExtrude()", [
+registerGlyph("hose()", [
    [[0,.5],[ 0, -.5]],
    [[0, .5],[-1, .5]],
    [[0, .5],[ 1, .5]],
    [[0,-.5],[-1,-.5],[-1,.5],[0,.5]]
 ]);
 
-function tubeExtrude() {
+function hose() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
@@ -102,7 +101,7 @@ function tubeExtrude() {
        yLo = min(yLo, trace[1][i][1]);
        yHi = max(yHi, trace[1][i][1]);
     }
-    var x = (xLo + xHi) / 2;
+    uar x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
     var scale = 2 / (yHi - yLo + 2 * sketchPadding);
 
@@ -127,7 +126,7 @@ function tubeExtrude() {
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
-tubeExtrude.prototype = new Sketch;
+hose.prototype = new Sketch;
 
 THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var points = [];

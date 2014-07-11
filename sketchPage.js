@@ -1229,6 +1229,7 @@
 
             // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
+            var globalAlpha = _g.globalAlpha;
             if (sk().fadeAway > 0) {
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
