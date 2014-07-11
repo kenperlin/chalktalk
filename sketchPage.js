@@ -1447,16 +1447,27 @@
          var txt = glyphs[i].indexName;
 
          color(this.glyphScrim());
-         fillRect(gX, gY, gW, gH);
+	 var gR = 4;
+	 fillPolygon(createRoundRect(gX, gY, gW, gH, gR));
+
          lineWidth(0.5);
          color(this.glyphColor());
+	 var r2 = 0.707;
          if (backgroundColor == 'white') {
-            line(gX + gW, gY + gH, gX + gW, gY);
-            line(gX + gW, gY + gH, gX, gY + gH);
+            line(gX + gW, gY + gH - gR, gX + gW, gY + gR);
+            line(gX + gW - gR, gY + gH, gX + gR, gY + gH);
+	    var rx = gX + gW - gR + r2 * gR;
+	    var ry = gY + gH - gR + r2 * gR;
+	    line(gX + gW - gR, gY + gH, rx, ry);
+	    line(gX + gW, gY + gH - gR, rx, ry);
          }
          else {
-            line(gX, gY, gX + gW, gY);
-            line(gX, gY, gX, gY + gH);
+            line(gX + gR, gY, gX + gW - gR, gY);
+            line(gX, gY + gR, gX, gY + gH - gR);
+	    var rx = gX + gR - r2 * gR;
+	    var ry = gY + gR - r2 * gR;
+	    line(gX + gR, gY, rx, ry);
+	    line(gX, gY + gR, rx, ry);
          }
 
          _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : this.glyphColor();
