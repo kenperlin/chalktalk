@@ -82,6 +82,7 @@
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
+	 isShowingNLParse = false;
 
          if (renderer != null && isDef(renderer.scene)) {
             var root = renderer.scene.root;
