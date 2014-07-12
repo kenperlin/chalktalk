@@ -1052,7 +1052,7 @@
       sk().styleTransition = 1;
       sk().sketchState = 'finished';
    }
-	
+
    function isFinishedDrawing() {
       return isk() && sk().sketchState == 'finished';
    }
@@ -1513,7 +1513,7 @@
 
          // DO ACTUAL CANVAS PANNING
 
-         _g.resetTransform();
+         _g.setTransform(1,0,0,1,0,0);
          _g.translate(_g.panX, 0, 0);
 
          // PAN 3D OBJECTS TOO
