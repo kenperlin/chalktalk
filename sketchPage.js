@@ -1059,9 +1059,9 @@ console.log("KEY UP = " + key);
             isSpacePressed = false;
             break;
          case 'alt':
-            isAltPressed = false;
-	    if (! isCommandPressed)
+	    if (isAltKeyCopySketchEnabled)
                copySketch(sk());
+            isAltPressed = false;
             break;
          case 'command':
             isCommandPressed = false;

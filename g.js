@@ -510,6 +510,7 @@
    var glyphInfo = [];
    var glyphSketch = null;
    var iOut = 0;
+   var isAltKeyCopySketchEnabled = true;
    var isAltPressed = false;
    var isAudioSignal= false;
    var isBottomGesture = false;
@@ -1866,6 +1867,13 @@
          if (isShowingGlyphs && isExpertMode)
             sketchPage.showGlyphs();
       }
+
+      // MAKE SURE ALT-CMD-J (TO BRING UP CONSOLE) DOES NOT ACCIDENTALLY DO A SKETCH COPY.
+
+      if (isAltPressed && isCommandPressed)
+         isAltKeyCopySketchEnabled = false;
+      else if (!isAltPressed && ! isCommandPressed)
+         isAltKeyCopySketchEnabled = true;
 /*
 
 GLOW AT OUTPUT PORT
