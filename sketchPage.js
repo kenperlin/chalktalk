@@ -834,6 +834,7 @@
       var keyPressed = -1;
 
       this.keyDown = function(key) {
+console.log("KEY DOWN " + key);
 
          // Ignore multiple presses of the same key
 
@@ -965,6 +966,7 @@
       }
 
       this.keyUp = function(key) {
+console.log("KEY UP = " + key);
 
          // Part of logic to account for multiple presses of the same key.
 
@@ -974,6 +976,11 @@
 
          letterPressed = '\0';
          var letter = charCodeToString(key);
+
+	 if (isCommandPressed && key == 91) {
+	    isCommandPressed = false;
+	    return;
+	 }
 
          // Special handling for when in text mode.
 
@@ -1053,7 +1060,8 @@
             break;
          case 'alt':
             isAltPressed = false;
-            copySketch(sk());
+	    if (! isCommandPressed)
+               copySketch(sk());
             break;
          case 'command':
             isCommandPressed = false;
