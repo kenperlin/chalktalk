@@ -1874,6 +1874,23 @@
          isAltKeyCopySketchEnabled = false;
       else if (!isAltPressed && ! isCommandPressed)
          isAltKeyCopySketchEnabled = true;
+
+      // CODE TO TEST ALGORITHM THAT IMPLEMENTS createSpline()
+/*
+      var s = 100 * sin(4 * time);
+      var keys = [ [300-s,100], [300,300], [500,300+s] ];
+
+      color('red');
+      lineWidth(0.7);
+      for (var n = 0 ; n < keys.length - 1 ; n++)
+         line(keys[n][0], keys[n][1], keys[n+1][0], keys[n+1][1]);
+      var spline = createSpline(keys);
+
+      color('green');
+      lineWidth(2);
+      for (var n = 0 ; n < spline.length - 1 ; n++)
+         line(spline[n][0], spline[n][1], spline[n+1][0], spline[n+1][1]);
+*/
 /*
 
 GLOW AT OUTPUT PORT

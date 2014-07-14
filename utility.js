@@ -549,6 +549,49 @@
       return dst;
    }
 
+   // CREATE A SPLINE GUIDED BY A PATH OF KEY POINTS.
+
+   function createSpline(keys, N) {
+      function x(k) { return keys[k][0]; }
+      function y(k) { return keys[k][1]; }
+      function l(k) { return L[k]; }
+      function hermite(a, da, b, db) {
+         return  a * ( 2 * ttt - 3 * tt     + 1)
+	      + da * (     ttt - 2 * tt + t    )
+	      +  b * (-2 * ttt + 3 * tt        )
+	      + db * (     ttt -     tt        );
+      }
+      if (N === undefined)
+         N = (keys.length - 1) * 4;
+      var nk = keys.length;
+
+      var L = [];
+      for (var n = 0 ; n < nk-1 ; n++)
+         L.push(len(x(n+1) - x(n), y(n+1) - y(n)));
+
+      var spline = [];
+      for (var n = 0 ; n < nk-1 ; n++) {
+
+         var dx0 = n > 0 ? (l(n) * (x(n) - x(n-1)) + l(n-1) * (x(n+1) - x(n))) / (l(n-1) + l(n))
+	                 : 3*x(n + 1) - 2*x(n) - x(n + 2);
+         var dy0 = n > 0 ? (l(n) * (y(n) - y(n-1)) + l(n-1) * (y(n+1) - y(n))) / (l(n-1) + l(n))
+	                 : 3*y(n + 1) - 2*y(n) - y(n + 2);
+
+         var dx1 = n < nk-2 ? (l(n+1) * (x(n+1) - x(n)) + l(n) * (x(n+2) - x(n+1))) / (l(n) + l(n+1))
+	                    : 2*x(n + 1) - 3*x(n) + x(n - 1);
+         var dy1 = n < nk-2 ? (l(n+1) * (y(n+1) - y(n)) + l(n) * (y(n+2) - y(n+1))) / (l(n) + l(n+1))
+	                    : 2*y(n + 1) - 3*y(n) + y(n - 1);
+
+	 for (var i = 0 ; i < N ; i++) {
+	    var t = i / N, tt = t * t, ttt = t * tt;
+	    spline.push([ hermite(x(n), dx0*.8, x(n+1), dx1*.8),
+	                  hermite(y(n), dy0*.8, y(n+1), dy1*.8) ]);
+	 }
+      }
+      spline.push([ x(nk-1), y(nk-1) ]);
+      return spline;
+   }
+
    // Compute the total geometric length of a curve.
 
    function computeCurveLength(curve, i0) {
