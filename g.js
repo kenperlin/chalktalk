@@ -1988,8 +1988,6 @@ if (outPort >= 0) {
          groupPath = cloneArray(s.groupPath);
       }
 
-      // THIS DOES NOT YET WORK. IT NEEDS TO BE FIXED -- KP.
-
       else if (s instanceof GeometrySketch) {
 
 	 var sketch = new GeometrySketch();
@@ -2003,8 +2001,10 @@ if (outPort >= 0) {
          var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
 	 root.add(mesh);
          mesh.sketch = sketch;
+	 mesh.update = s.mesh.update;
 
 	 sketch.fragmentShader = s.fragmentShader;
+	 sketch.glyphName = s.glyphName;
 	 sketch.mesh = mesh;
 	 sketch.onClick = s.onClick;
 	 sketch.onSwipe = s.onSwipe;
@@ -2016,7 +2016,6 @@ if (outPort >= 0) {
 	 sketch.sx = s.sx;
 	 sketch.sy = s.sy;
 	 sketch.update = s.update;
-	 mesh.update = s.mesh.update;
 
 	 addSketch(sketch);
          finishDrawingUnfinishedSketch();
