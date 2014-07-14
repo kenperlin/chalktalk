@@ -1915,6 +1915,10 @@ if (outPort >= 0) {
       if (sketch === undefined)
          return;
 
+      // WHENEVER A SKETCH IS DELETED, MAKE SURE WE DON'T STAY IN TEXT MODE.
+
+      setTextMode(false);
+
       for (var j = 0 ; j < sketch.children.length ; j++) {
          var k = sketchPage.findIndex(sketch.children[j]);
          sketchPage.sketches.splice(k, 1);
