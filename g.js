@@ -141,12 +141,14 @@
 
                var s = sk().intersectingSketches();
                for (var i = 0 ; i < s.length ; i++) {
-                  if (isDef(sk().over)) {
+                  if (isDef(sk().over))
                      sk().over(s[i]);
-                  }
-                  if (isDef(s[i].under)) {
+                  if (isDef(s[i].under))
                      s[i].under(sk());
-                  }
+               }
+	       if (s.length > 0) {
+	          console.log(sk().glyphName + " -> " + s[0].glyphName);
+	          deleteSketch(sk());
                }
                break;
             case "undrawing":

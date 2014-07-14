@@ -160,11 +160,9 @@
       this.mouseY = 0;
       this.t0 = 0;
 
-      this.over = function(sketch) {
-         if (sketch instanceof Noises) {
+      this.under = function(sketch) {
+         if (sketch instanceof Noises)
             this.freqs = this.freqs.concat(sketch.freqs);
-            deleteSketch(sketch);
-         }
       }
 
       this.mouseDrag = function(x, y) {

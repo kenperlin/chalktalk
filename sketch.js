@@ -346,7 +346,7 @@
       }
       this.intersectingSketches = function() {
          var sketches = [];
-         for (var I = 0 ; I < nsk() ; I++)
+         for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
                sketches.push(sk(I));
          return sketches;
