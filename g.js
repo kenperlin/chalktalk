@@ -1864,6 +1864,18 @@
          if (isShowingGlyphs && isExpertMode)
             sketchPage.showGlyphs();
       }
+/*
+
+GLOW AT OUTPUT PORT
+
+if (outPort >= 0) {
+   color(scrimColor(.05));
+   for (var n = 0 ; n < 10 ; n++) {
+      var r = 30 - 3 * n;
+      fillOval(This().mouseX - r, This().mouseY - r, 2 * r, 2 * r);
+   }
+}
+*/
    }
 
    var ef = new EncodedFraction();
