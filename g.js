@@ -1266,6 +1266,10 @@
                setTextMode(true);
             }
          }
+
+	 // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
+
+	 sk().glyphName = this.indexName;
       }
 
       this.name = name;
@@ -2331,11 +2335,11 @@
          toggleCodeWidget();
 
       // REMOVE ALL GLYPHS DEFINED FROM PREVIOUS PAGE, IF ANY.
-
+/*
       if (glyphCountBeforePage > 0)
          glyphs.splice(glyphCountBeforePage, glyphs.length - glyphCountBeforePage);
       glyphCountBeforePage = glyphs.length;
-
+*/
       if (index === undefined)
          index = pageIndex;
 

@@ -547,6 +547,16 @@
             sk().isDrawingEnabled = true;
             sk().mouseUp(x, y);
 
+            // BEGINNING OF IMPLEMENTATION OF SENTENCE LOGIC IN DRAWING LANGUAGE.
+/*
+	    var sketches = sk().otherSketchesAt(x,y);
+	    if (sketches.length > 0) {
+	       console.log("SUBJECT = " + sk().indexName);
+	       console.log("PREDICATE = " + sketches[0].indexName);
+	       if (sketches.length > 1)
+	          console.log("OBJECT = " + sketches[1].indexName);
+            }
+*/
             if (this.isClick && isHover() && isDef(sk().onClick)) {
                sk().onClick(x, y);
                return;
@@ -1861,10 +1871,17 @@
             this.showShorthand();
          }
       }
+
+      this.sketchesAt = function(x, y) {
+         var sketches = [];
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I).parent == null && sk(I).contains(x,y))
+               sketches.push(sk(I));
+	 return sketches;
+      }
    }
 
    var glyphW = function() { return height() / 10; }
 
    var sketchPage = sketchBook.setPage(0);
-
 

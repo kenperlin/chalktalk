@@ -480,7 +480,8 @@
          if (this.sp.length > 1) {
             var i = this.sp.length;
             while (--i > 0 && this.sp[i][2] == 1) ;
-            this.sp0.splice(i, this.sp.length-i);
+	    if (this.sp0 !== undefined)
+               this.sp0.splice(i, this.sp.length-i);
             this.sp.splice(i, this.sp.length-i);
          }
       }
@@ -668,6 +669,24 @@
          }
          return y;
       }
+
+      this.xform = function(xy) {
+         return [ this.xf[0] + this.xf[4] * ( this.xf[2] * xy[0] + this.xf[3] * xy[1]),
+                  this.xf[1] + this.xf[4] * (-this.xf[3] * xy[0] + this.xf[2] * xy[1]) ];
+      }
+      this.xformInverse = function(xy) {
+         var x = (xy[0] - this.xf[0]) / this.xf[4];
+         var y = (xy[1] - this.xf[1]) / this.xf[4];
+         return [ this.xf[2] * x - this.xf[3] * y, this.xf[3] * x + this.xf[2] * y ];
+      }
+      this.makeXform = function() {
+         this.xf = [ this.tx(),
+                     this.ty(),
+                     cos(PI * this.rX),
+                     sin(PI * this.rX),
+                     this.scale() ];
+      }
+
       this.value = null;
       this.x = 0;
       this.xStart = 0;
@@ -776,6 +795,25 @@
          if (isTextMode)
             return;
 
+         // WHEN THE STROKE'S LAST POINT LANDS ON ANOTHER SKETCH:
+
+	 if (sk().drewFirstLine) {
+	    var xy = sk().xform(sk().sp0[sk().sp0.length-1]);
+            for (var I = 0 ; I < nsk() ; I++)
+               if (sk(I) != sk() && sk(I).parent == null && sk(I).contains(xy[0], xy[1])) {
+
+                  // EVENTUALLY WE NEED TO APPLY THE CONVERTED OBJECT AS AN ACTION TO THE OTHER OBJECT.
+
+                  var glyphName = sk(I).glyphName;
+		  sk().removeLastStroke();
+	          copySketch(sk());
+	          sk().convertToGlyphSketch();
+		  console.log(sk().glyphName + " -> " + glyphName);
+	          deleteSketch(sk());
+	          return;
+	       }
+	 }
+
          // COMPUTE BOUNDING BOX OF DRAWING.
 
          var xlo =  100000, ylo =  100000;
@@ -790,10 +828,9 @@
          // PARSE FOR VARIOUS KINDS OF SWIPE ACTION UPON ANOTHER SKETCH.
 
          if (isk() && sk() instanceof SimpleSketch && ! sk().drewFirstLine) {
-            var action = null, I = 0;
+            var action = null, n = sk().sp0.length, I = 0;
             for ( ; I < nsk() ; I++)
                if (sk(I) != sk() && sk(I).parent == null) {
-                  var n = sk().sp0.length;
 
                   // FOR X AND Y, TEST WHETHER THIS STROKE EITHER:
                   // SPANS, MEETS OR NESTS IN THE SKETCH.
@@ -840,7 +877,8 @@
                   var xy = sk().sp0[i];
                   xy = [ xy[0], xy[1] ];
                   xy = sk(I).xformInverse(xy);
-                  sk(I).sp0.push(xy);
+		  if (isDef(sk(I).sp0))
+                     sk(I).sp0.push(xy);
                   sk(I).sp.push([xy[0], xy[1], i == 1 ? 0 : 1]);
                }
             }
@@ -904,12 +942,7 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-            strokes = this.getStrokes();
-            var glyph = interpretStrokes();
-            glyphSketch = this;
-            if (glyph != null)
-               glyph.toSketch();
-            deleteSketch(glyphSketch);
+	    this.convertToGlyphSketch();
             return;
          }
 
@@ -926,6 +959,15 @@
          }
 
          this.len = computeCurveLength(this.sp0, 1);
+      }
+
+      this.convertToGlyphSketch = function() {
+         strokes = this.getStrokes();
+         var glyph = interpretStrokes();
+         glyphSketch = this;
+         if (glyph != null)
+            glyph.toSketch();
+         deleteSketch(glyphSketch);
       }
 
       this.getStrokes = function() {
@@ -948,25 +990,6 @@
             return;
          }
          this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
-      }
-
-      this.xform = function(xy) {
-         return [ this.xf[0] + this.xf[4] * ( this.xf[2] * xy[0] + this.xf[3] * xy[1]),
-                  this.xf[1] + this.xf[4] * (-this.xf[3] * xy[0] + this.xf[2] * xy[1]) ];
-      }
-
-      this.xformInverse = function(xy) {
-         var x = (xy[0] - this.xf[0]) / this.xf[4];
-         var y = (xy[1] - this.xf[1]) / this.xf[4];
-         return [ this.xf[2] * x - this.xf[3] * y, this.xf[3] * x + this.xf[2] * y ];
-      }
-
-      this.makeXform = function() {
-         this.xf = [ this.tx(),
-                     this.ty(),
-                     cos(PI * this.rX),
-                     sin(PI * this.rX),
-                     this.scale() ];
       }
 
       // DRAW THE PARSED STROKES.
