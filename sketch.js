@@ -273,7 +273,7 @@
          // FIRST CHECK FOR A NATURAL LANGUAGE COMMAND.
 
          if (nlParse(code))
-	    return;
+            return;
 
          // IF NO ARGS ARE SUPPLIED, USE VALUES FROM THE SKETCH'S INPUT PORTS.
 
@@ -283,7 +283,7 @@
          if (y === undefined) y = defaultToZero(this.inValue[1]);
          if (z === undefined) z = defaultToZero(this.inValue[2]);
 
-	 // IF NO RETURN STATEMENT, SUPPLY ONE.
+         // IF NO RETURN STATEMENT, SUPPLY ONE.
 
          if (code.indexOf('return') == -1)
             code = "return " + code;
@@ -292,7 +292,7 @@
 
          var result = null;
          try {
-	    result = Function("me","x","y","z", code)(this, x, y, z);
+            result = Function("me","x","y","z", code)(this, x, y, z);
          } catch (e) { }
 
          // ANY ERROR RESULTS IN A RETURN VALUE OF null.
@@ -346,7 +346,7 @@
       }
       this.intersectingSketches = function() {
          var sketches = [];
-         for (var I = 0 ; I < nsk() ; I++)
+         for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
                sketches.push(sk(I));
          return sketches;
@@ -480,7 +480,8 @@
          if (this.sp.length > 1) {
             var i = this.sp.length;
             while (--i > 0 && this.sp[i][2] == 1) ;
-            this.sp0.splice(i, this.sp.length-i);
+	    if (this.sp0 !== undefined)
+               this.sp0.splice(i, this.sp.length-i);
             this.sp.splice(i, this.sp.length-i);
          }
       }
@@ -668,6 +669,24 @@
          }
          return y;
       }
+
+      this.xform = function(xy) {
+         return [ this.xf[0] + this.xf[4] * ( this.xf[2] * xy[0] + this.xf[3] * xy[1]),
+                  this.xf[1] + this.xf[4] * (-this.xf[3] * xy[0] + this.xf[2] * xy[1]) ];
+      }
+      this.xformInverse = function(xy) {
+         var x = (xy[0] - this.xf[0]) / this.xf[4];
+         var y = (xy[1] - this.xf[1]) / this.xf[4];
+         return [ this.xf[2] * x - this.xf[3] * y, this.xf[3] * x + this.xf[2] * y ];
+      }
+      this.makeXform = function() {
+         this.xf = [ this.tx(),
+                     this.ty(),
+                     cos(PI * this.rX),
+                     sin(PI * this.rX),
+                     this.scale() ];
+      }
+
       this.value = null;
       this.x = 0;
       this.xStart = 0;
@@ -776,6 +795,25 @@
          if (isTextMode)
             return;
 
+         // WHEN THE STROKE'S LAST POINT LANDS ON ANOTHER SKETCH:
+
+	 if (sk().drewFirstLine) {
+	    var xy = sk().xform(sk().sp0[sk().sp0.length-1]);
+            for (var I = 0 ; I < nsk() ; I++)
+               if (sk(I) != sk() && sk(I).parent == null && sk(I).contains(xy[0], xy[1])) {
+
+                  // EVENTUALLY WE NEED TO APPLY THE CONVERTED OBJECT AS AN ACTION TO THE OTHER OBJECT.
+
+                  var glyphName = sk(I).glyphName;
+		  sk().removeLastStroke();
+	          copySketch(sk());
+	          sk().convertToGlyphSketch();
+		  console.log(sk().glyphName + " -> " + glyphName);
+	          deleteSketch(sk());
+	          return;
+	       }
+	 }
+
          // COMPUTE BOUNDING BOX OF DRAWING.
 
          var xlo =  100000, ylo =  100000;
@@ -790,10 +828,9 @@
          // PARSE FOR VARIOUS KINDS OF SWIPE ACTION UPON ANOTHER SKETCH.
 
          if (isk() && sk() instanceof SimpleSketch && ! sk().drewFirstLine) {
-            var action = null, I = 0;
+            var action = null, n = sk().sp0.length, I = 0;
             for ( ; I < nsk() ; I++)
                if (sk(I) != sk() && sk(I).parent == null) {
-                  var n = sk().sp0.length;
 
                   // FOR X AND Y, TEST WHETHER THIS STROKE EITHER:
                   // SPANS, MEETS OR NESTS IN THE SKETCH.
@@ -840,7 +877,8 @@
                   var xy = sk().sp0[i];
                   xy = [ xy[0], xy[1] ];
                   xy = sk(I).xformInverse(xy);
-                  sk(I).sp0.push(xy);
+		  if (isDef(sk(I).sp0))
+                     sk(I).sp0.push(xy);
                   sk(I).sp.push([xy[0], xy[1], i == 1 ? 0 : 1]);
                }
             }
@@ -904,12 +942,7 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-            strokes = this.getStrokes();
-            var glyph = interpretStrokes();
-            glyphSketch = this;
-            if (glyph != null)
-	       glyph.toSketch();
-            deleteSketch(glyphSketch);
+	    this.convertToGlyphSketch();
             return;
          }
 
@@ -926,6 +959,15 @@
          }
 
          this.len = computeCurveLength(this.sp0, 1);
+      }
+
+      this.convertToGlyphSketch = function() {
+         strokes = this.getStrokes();
+         var glyph = interpretStrokes();
+         glyphSketch = this;
+         if (glyph != null)
+            glyph.toSketch();
+         deleteSketch(glyphSketch);
       }
 
       this.getStrokes = function() {
@@ -947,26 +989,7 @@
             console.log("NEED TO IMPLEMENT PARSING A GROUP");
             return;
          }
-	 this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
-      }
-
-      this.xform = function(xy) {
-         return [ this.xf[0] + this.xf[4] * ( this.xf[2] * xy[0] + this.xf[3] * xy[1]),
-                  this.xf[1] + this.xf[4] * (-this.xf[3] * xy[0] + this.xf[2] * xy[1]) ];
-      }
-
-      this.xformInverse = function(xy) {
-         var x = (xy[0] - this.xf[0]) / this.xf[4];
-         var y = (xy[1] - this.xf[1]) / this.xf[4];
-         return [ this.xf[2] * x - this.xf[3] * y, this.xf[3] * x + this.xf[2] * y ];
-      }
-
-      this.makeXform = function() {
-         this.xf = [ this.tx(),
-                     this.ty(),
-                     cos(PI * this.rX),
-                     sin(PI * this.rX),
-                     this.scale() ];
+         this.parsedStrokes = parseStrokes(this.getStrokes(), this.tX, this.tY);
       }
 
       // DRAW THE PARSED STROKES.
@@ -982,11 +1005,11 @@
 
          var curves = parsedStrokesToCurves(this.parsedStrokes, transition);
          for (var n = 0 ; n < curves.length ; n++) {
-	    var c = [];
-	    for (var i = 0 ; i < curves[n].length ; i++)
-	       c.push(this.xform(curves[n][i]));
+            var c = [];
+            for (var i = 0 ; i < curves[n].length ; i++)
+               c.push(this.xform(curves[n][i]));
             drawCurve(c);
-	 }
+         }
 
          annotateEnd();
       }
@@ -999,10 +1022,94 @@
             this.sp[i][1] = xy[1];
          }
 
+         var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
+                           && sketchPage.tUndraw !== undefined;
+
          annotateStart();
-         lineWidth(sketchLineWidth * sketchPage.zoom / this.zoom);
+         lineWidth(isUndrawing ? 2 : sketchLineWidth * sketchPage.zoom / this.zoom);
          _g.strokeStyle = this.color;
-         drawSimpleSketch(this);
+
+         if (this.isParsed())
+            this.drawParsed();
+         else {
+            var sp = this.sp;
+            var isCard = this.isCard;
+
+            var strokeIndex = -1;
+
+	    // HANDLE UNDRAWING OPTION.
+
+            var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
+                              && sketchPage.tUndraw !== undefined;
+            var n = sp.length;
+            if (isUndrawing)
+               n = max(2, floor(n * sketchPage.tUndraw));
+
+            // LOOP THROUGH THE sp ARRAY.
+
+            for (var i = 1 ; i < n ; i++) {
+
+               // START DRAWING A STROKE.
+
+               if (sp[i][2] == 0) {
+                  if (i > 1)
+                     _g.stroke();
+
+                  if (isUndrawing)
+                     fillOval(sp[i][0] - 4, sp[i][1] - 4, 8, 8);
+
+                  _g.beginPath();
+                  _g.moveTo(sp[i][0], sp[i][1]);
+
+                  strokeIndex++;
+                  if (strokeIndex < this.colorIndex.length)
+                     _g.strokeStyle = sketchPalette[this.colorIndex[strokeIndex]];
+               }
+
+               // CONTINUE DRAWING A STROKE.
+
+               else {
+                  _g.lineTo(sp[i][0], sp[i][1]);
+
+		  // HANDLE CARD-STYLE RENDERING.
+
+                  if (isCard && (i == sp.length - 1 || sp[i+1][2] == 0)) {
+                     _g.stroke();
+                     var i0 = i - 1;
+                     while (i0 > 1 || sp[i0][2] == 1)
+                        i0--;
+                     _g.fillStyle = this.isNegated ? this.color : backgroundColor;
+                     fillPath(sp, i0, i, _g);
+                     if (this.isNegated)
+                        _g.strokeStyle = backgroundColor;
+                     isCard = false;
+                     _g.beginPath();
+                  }
+               }
+            }
+            _g.stroke();
+
+	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
+
+	    if (isUndrawing && n >= 4) {
+	       console.log(sp.length + " " + n);
+	       var ax = sp[n-3][0], ay = sp[n-3][1];
+	       var bx = sp[n-1][0], by = sp[n-1][1];
+	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
+	       dx *= 6 / d;
+	       dy *= 6 / d;
+	       line(bx, by, bx - dx - dy, by - dy + dx);
+	       line(bx, by, bx - dx + dy, by - dy - dx);
+	    }
+         }
+
+         this.drawText(_g);
+
+         if (this.isGroup()) {
+            color('rgba(255,1,0,.07)');
+            fillRect(this.xlo, this.ylo, this.xhi-this.xlo, this.yhi-this.ylo);
+         }
+
          annotateEnd();
       }
    }

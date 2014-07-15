@@ -82,6 +82,7 @@
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
          this.textInputIndex = -1;
+	 isShowingNLParse = false;
 
          if (renderer != null && isDef(renderer.scene)) {
             var root = renderer.scene.root;
@@ -123,6 +124,13 @@
       this.mouseDown = function(x, y) {
 
          this.isPressed = true;
+         this.isClick = true;
+         this.isPossibleClickOverBackground = ! isHover();
+         this.travel = 0;
+         this.xDown = x;
+         this.yDown = y;
+         this.x = x;
+         this.y = y;
 
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDown(x,y)) {
             return;
@@ -134,6 +142,17 @@
                startSketchDragAction(x, y);
             return;
          }
+
+	 if (isShowingGlyphs) {
+	    for (var i = 0 ; i < glyphs.length ; i++) {
+	       var b = this.glyphBounds(i);
+	       if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) {
+	          this.isDraggingGlyph = true;
+		  this.iDragged = i;
+		  return;
+	       }
+	    }
+	 }
 
          if (paletteColorIndex >= 0) {
             this.paletteColorDragXY = null;
@@ -150,24 +169,6 @@
             isTogglingMenuType = true;
             return;
          }
-
-	 if (isShowingGlyphs) {
-	    for (var i = 0 ; i < glyphs.length ; i++) {
-	       var b = this.glyphBounds(i);
-	       if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) {
-	          console.log("MOUSE DOWN AT GLYPH " + i);
-		  break;
-	       }
-	    }
-	 }
-
-         this.isClick = true;
-         this.isPossibleClickOverBackground = ! isHover();
-         this.travel = 0;
-         this.xDown = x;
-         this.yDown = y;
-         this.x = x;
-         this.y = y;
 
          if (isRightHover)
             isRightGesture = true;
@@ -248,6 +249,10 @@
          this.travel += len(x - this.x, y - this.y);
          this.x = x;
          this.y = y;
+
+	 if (this.isDraggingGlyph) {
+	    return;
+	 }
 
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
@@ -348,6 +353,12 @@
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+	 if (this.isDraggingGlyph) {
+	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY);
+	    this.isDraggingGlyph = false;
+	    return;
+	 }
 
          if (isSketchDragActionEnabled) {
             endSketchDragAction(x, y);
@@ -500,7 +511,7 @@
             }
          }
 
-         // EXPERT MODE:
+         // EXPERT MODE: CLICKING ON A SKETCH.
 
          else if (this.isClick && isHover()) {
 
@@ -519,6 +530,9 @@
             else if (doSketchClickAction(x, y))
                return;
          }
+
+	 // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
+
          else if (bgClickCount == 1) {
             bgClickCount = 0;
             return;
@@ -533,6 +547,16 @@
             sk().isDrawingEnabled = true;
             sk().mouseUp(x, y);
 
+            // BEGINNING OF IMPLEMENTATION OF SENTENCE LOGIC IN DRAWING LANGUAGE.
+/*
+	    var sketches = sk().otherSketchesAt(x,y);
+	    if (sketches.length > 0) {
+	       console.log("SUBJECT = " + sk().indexName);
+	       console.log("PREDICATE = " + sketches[0].indexName);
+	       if (sketches.length > 1)
+	          console.log("OBJECT = " + sketches[1].indexName);
+            }
+*/
             if (this.isClick && isHover() && isDef(sk().onClick)) {
                sk().onClick(x, y);
                return;
@@ -605,6 +629,14 @@
                   sk().hitOnDrag(sketches[i]);
             }
          }
+      }
+
+      // TEMPORARILY UNDRAW CURRENT SKETCH.
+
+      this.doUndraw = function(x, y) {
+         if (isk() && sk() instanceof SimpleSketch) {
+	    this.tUndraw = max(0, min(1, (x - this.xDown) / 200));
+	 }
       }
 
       this.panX = 0;
@@ -708,6 +740,7 @@
             case "translating": this.doTranslate(x, y); break;
             case "rotating"   : this.doRotate(x, y); break;
             case "scaling"    : this.doScale(x, y); break;
+            case "undrawing"  : this.doUndraw(x, y); break;
             }
 
             this.mx = x;
@@ -762,6 +795,9 @@
             break;
          case 't':
             this.doTranslate(x, y);
+            break;
+         case 'u':
+            this.doUndraw(x, y);
             break;
          case 'z':
             this.doZoom(x, y);
@@ -939,6 +975,11 @@
          letterPressed = '\0';
          var letter = charCodeToString(key);
 
+	 if (isCommandPressed && key == 91) {
+	    isCommandPressed = false;
+	    return;
+	 }
+
          // Special handling for when in text mode.
 
          if (isTextMode) {
@@ -1016,8 +1057,9 @@
             isSpacePressed = false;
             break;
          case 'alt':
+	    if (isAltKeyCopySketchEnabled)
+               copySketch(sk());
             isAltPressed = false;
-            copySketch(sk());
             break;
          case 'command':
             isCommandPressed = false;
@@ -1192,6 +1234,8 @@
 
          noisy = 1;
 
+         this.trueIndex = this.index;
+
          for (var I = 0 ; I < nsk() ; I++) {
 
             if (sk() == null)
@@ -1216,6 +1260,7 @@
 
             // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
+            var globalAlpha = _g.globalAlpha;
             if (sk().fadeAway > 0) {
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
@@ -1366,10 +1411,16 @@
       }
 
       this.glyphBounds = function(i) {
-         var x = glyphsW / 20 + glyphsW * floor(i / 10) - _g.panX;
-         var y = ((i % 10) * height()) / 10 + glyphsW / 10;
-         return [ x, y, x + glyphsW*.7, y + glyphsW*.8 ];
+         var x = glyphW() / 20 + glyphW() * floor(i / 10) - _g.panX;
+         var y = ((i % 10) * height()) / 10 + glyphW() / 10;
+         return [ x, y, x + glyphW() * .7, y + glyphW() * .8 ];
       }
+
+      this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
+      this.glyphScrim = function() { return backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)'; }
+      this.glyphT = 0;
+      this.isDraggingGlyph = false;
+      this.iDragged = 0;
 
       this.showGlyphs = function() {
          _g.save();
@@ -1383,66 +1434,88 @@
          _g.lineWidth = 1;
          line(0, height()-1, width(), height()-1);
 
-         var t = 10 * (floor((this.mx + _g.panX) / glyphsW) +
-                       max(0, min(.99, this.my / height())));
+         this.glyphT = this.isDraggingGlyph
+	             ? this.iDragged + 0.99
+	             : 10 * (floor((this.mx + _g.panX) / glyphW()) +
+                                    max(0, min(.99, this.my / height())));
 
-         var glyphColor = backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ;
-         var glyphScrim = backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)';
+         for (var i = 0 ; i < glyphs.length ; i++)
+	    this.showGlyph(i);
 
-         for (var i = 0 ; i < glyphs.length ; i++) {
-            var glyph = glyphs[i];
-
-            var bounds = this.glyphBounds(i);
-	    var gX = bounds[0], gY = bounds[1], gW = bounds[2]-bounds[0], gH = bounds[3]-bounds[1];
-	    var x = gX + glyphsW * .1;
-	    var y = gY;
-
-            var txt = glyphs[i].indexName;
-
-            color(glyphScrim);
-            fillRect(gX, gY, gW, gH);
-            lineWidth(0.5);
-            color(glyphColor);
-            if (backgroundColor == 'white') {
-               line(gX + gW, gY + gH, gX + gW, gY);
-               line(gX + gW, gY + gH, gX, gY + gH);
-            }
-            else {
-               line(gX, gY, gX + gW, gY);
-               line(gX, gY, gX, gY + gH);
-            }
-
-            _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : glyphColor;
-
-            var tw = textWidth(txt);
-            _g.fillText(txt, x, y + 10);
-
-            y += 20;
-
-            var selected = t >= i && t < i+1;
-            _g.strokeStyle = selected ? defaultPenColor : glyphColor;
-            _g.fillStyle = selected ? defaultPenColor : glyphColor;
-            _g.lineWidth = selected ? 2 : 1;
-
-            var nn = glyph.data.length;
-
-            var sc = 0.4;
-            for (var n = 0 ; n < nn ; n++) {
-
-               var d = glyph.data[n];
-               if (selected && lerp(n / nn, i, i+1) <= t)
-                  fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
-               _g.beginPath();
-               _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
-               for (var j = 1 ; j < d.length ; j++) {
-                  if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
-                     break;
-                  _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
-               }
-               _g.stroke();
-            }
+         if (this.isDraggingGlyph) {
+	    this.showGlyph(this.iDragged, This().mouseX, This().mouseY);
          }
+
          _g.restore();
+      }
+
+      this.showGlyph = function(i, cx, cy) {
+         var glyph = glyphs[i];
+	 var b = this.glyphBounds(i);
+	 var gX = b[0], gY = b[1], gW = b[2]-b[0], gH = b[3]-b[1];
+	 if (isDef(cx)) {
+	    gX += cx - (b[0] + b[2]) / 2;
+	    gY += cy - (b[1] + b[3]) / 2;
+         }
+	 var x = gX + glyphW() * .1;
+	 var y = gY;
+	 var t = this.glyphT;
+
+         var txt = glyphs[i].indexName;
+
+         color(this.glyphScrim());
+	 var gR = 4;
+	 fillPolygon(createRoundRect(gX, gY, gW, gH, gR));
+
+         lineWidth(0.5);
+         color(this.glyphColor());
+	 var r2 = 0.707;
+         if (backgroundColor == 'white') {
+            line(gX + gW, gY + gH - gR, gX + gW, gY + gR);
+            line(gX + gW - gR, gY + gH, gX + gR, gY + gH);
+	    var rx = gX + gW - gR + r2 * gR;
+	    var ry = gY + gH - gR + r2 * gR;
+	    line(gX + gW - gR, gY + gH, rx, ry);
+	    line(gX + gW, gY + gH - gR, rx, ry);
+         }
+         else {
+            line(gX + gR, gY, gX + gW - gR, gY);
+            line(gX, gY + gR, gX, gY + gH - gR);
+	    var rx = gX + gR - r2 * gR;
+	    var ry = gY + gR - r2 * gR;
+	    line(gX + gR, gY, rx, ry);
+	    line(gX, gY + gR, rx, ry);
+         }
+
+         _g.fillStyle = t >= i && t < i+1 ? defaultPenColor : this.glyphColor();
+
+         var tw = textWidth(txt);
+         _g.fillText(txt, gX + 2, y + 10.5);
+
+         y += 20;
+
+         var selected = t >= i && t < i+1;
+         _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
+         _g.fillStyle = selected ? defaultPenColor : this.glyphColor();
+         _g.lineWidth = selected ? 2 : 1;
+
+         var nn = glyph.data.length;
+
+         var sc = 0.4;
+         for (var n = 0 ; n < nn ; n++) {
+
+            var d = glyph.data[n];
+            if (selected && lerp(n / nn, i, i+1) <= t)
+               fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
+            _g.beginPath();
+            _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
+            for (var j = 1 ; j < d.length ; j++) {
+               if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
+                  break;
+               _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
+            }
+            _g.stroke();
+         }
       }
 
       this.overlay = function() {
@@ -1804,7 +1877,17 @@
             this.showShorthand();
          }
       }
+
+      this.sketchesAt = function(x, y) {
+         var sketches = [];
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I).parent == null && sk(I).contains(x,y))
+               sketches.push(sk(I));
+	 return sketches;
+      }
    }
+
+   var glyphW = function() { return height() / 10; }
 
    var sketchPage = sketchBook.setPage(0);
 

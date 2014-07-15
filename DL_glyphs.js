@@ -54,8 +54,9 @@ function lathe() {
       this.mesh.getMatrix().rotateX(PI/2);
     }
 
-    sketch.shaderCount = 0;
     sketch.onClick = function() {
+       if (this.shaderCount === undefined)
+          this.shaderCount = 0;
        var fragmentShader = this.shaderCount++ % 2 == 0 ? flameFragmentShader : pVaseFragmentShader2;
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
@@ -67,14 +68,14 @@ lathe.prototype = new Sketch;
 
 
 
-registerGlyph("tubeExtrude()", [
+registerGlyph("hose()", [
    [[0,.5],[ 0, -.5]],
    [[0, .5],[-1, .5]],
    [[0, .5],[ 1, .5]],
    [[0,-.5],[-1,-.5],[-1,.5],[0,.5]]
 ]);
 
-function tubeExtrude() {
+function hose() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
@@ -128,7 +129,7 @@ function tubeExtrude() {
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
-lathe.prototype = new Sketch;
+hose.prototype = new Sketch;
 
 THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var points = [];
@@ -1597,8 +1598,10 @@ explodeBall = {
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
+/*
 registerGlyph("flag()",["~B}C|E{FzGyIxJvLuMtNsOqPoQnRlSkTiUhUfVdWcXaY`Z^Z[ZYZXZVZT[R[P[OZMYLXJWIVGUEUESEQDPDNELFKHJIIKHLGNFOFQFSGUGVHXIXKYLZN[O]Q^R]T[VZWYXXYVYTYRZQZOZMZK[I[H[F]D]B]@]?]=];]9]7]6]4]2]0[/[-Z+Z*Y(X&X%W$U#T#R!P O",]
 );
+*/
 
 THREE.Object3D.prototype.addFlag = function() {
   var ball = flago.setup();

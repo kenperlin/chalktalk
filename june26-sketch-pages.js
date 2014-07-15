@@ -1,5 +1,5 @@
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Noises MothAndCandle".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Noises MothAndCandle SplineTest".split(' ');
 
 function blankPage() {
    return {
@@ -472,19 +472,20 @@ var page107 = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=300></tr>\
+      <tr height=50></tr>\
       <tr>\
         <td>\
            <center>\
            <font color=white size=10>\
-           <big><b>Thank you!</b></big>\
    	<br>&nbsp;<p>\
    	<small><small>\
-   	<small><i>special thanks to:</i></small>\
+   	<small><i>special thanks to</i></small>\
+   	<p>\
+	<big>Centre for Digital Media\
    	<p>\
    	David Lobser\
-   	<br>\
-   	Evan Moore\
+   	<p>\
+   	Evan Moore</big>\
    	</small></small>\
            </font>\
            </center>\
@@ -529,5 +530,5 @@ var sketchPages = [
    page105,
    blankPage(),
    page106,
-   page107
+   page107,
 ];
