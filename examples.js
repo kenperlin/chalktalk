@@ -316,15 +316,18 @@
                break;
             }
 
+	    // WHEN BOUNDS ARE INTEGER VALUES, DRAW INTERMEDIATE TICK MARKS.
+
 	    if (this.lo == floor(this.lo) && this.hi == floor(this.hi)) {
 	       for (var i = this.lo + 1 ; i < this.hi ; i++) {
+	          var tw = i % 10 == 0 ? 0.04 : 0.02;
 	          var t = (i - this.lo) / (this.hi - this.lo) - .5;
 	          switch (this.selection) {
 		  case 0:
-		     mLine([t,-.02],[t,.02]);
+		     mLine([t,-tw],[t,tw]);
 		     break;
 		  case 1:
-		     mLine([-.02,t],[.02,t]);
+		     mLine([-tw,t],[tw,t]);
 		     break;
 	          }
 	       }

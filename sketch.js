@@ -686,6 +686,16 @@
                      sin(PI * this.rX),
                      this.scale() ];
       }
+      this.enableFragmentShaderEditing = function() {
+         if (this.code === undefined)
+            this.code = [["", this.fragmentShader]];
+	 this.update = function() {
+            if (isCodeWidget && this.fragmentShader != codeTextArea.value
+                             && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
+               this.mesh.material = shaderMaterial(this.mesh.material.vertexShader,
+                                                   this.fragmentShader = codeTextArea.value);
+	 }
+      }
 
       this.value = null;
       this.x = 0;
