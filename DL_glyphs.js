@@ -47,7 +47,7 @@ function lathe() {
 
     // MAKE A LATHE OBJECT WITH A PRETTY MARBLE TEXTURE.
 
-    var sketch = geometrySketch(root.addTube(profile, 32));
+    var sketch = geometrySketch(root.addLathe(profile, 32));
     sketch.mesh.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
     sketch.update = function() {
@@ -108,11 +108,14 @@ function tubeExtrude() {
        profile[i][0] = scale * (profile[i][0] - x);
        profile[i][2] = scale * (profile[i][2] - y);
     }
-    profile[0][0] = profile[profile.length-1][0] = 0;
+    // profile[0][0] = profile[profile.length-1][0] = 0;
+
+    console.log(lineIntersectionCheck(profile));
+    console.log(profile);
 
     // MAKE A LATHE OBJECT WITH A PRETTY MARBLE TEXTURE.
 
-    var sketch = geometrySketch(root.addLathe(profile, 32));
+    var sketch = geometrySketch(root.addTube(profile, profile.length*9));
     sketch.mesh.setMaterial(shaderMaterial(defaultVertexShader, pVaseFragmentShader2));
 
     sketch.update = function() {
@@ -139,7 +142,7 @@ THREE.Object3D.prototype.addTube = function(p, nSegments) {
 
 function tubeGeometry(points, n) { 
   var curve = new THREE.SplineCurve3(points);
-  return new THREE.TubeGeometry(curve, 100,.1); 
+  return new THREE.TubeGeometry(curve, n,.1); 
 }
 
 

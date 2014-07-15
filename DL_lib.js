@@ -96,6 +96,124 @@ globalStrokes = {
   }
 };
 
+function lineIntersectionCheck(array){
+
+  var crossoverArray = [];
+
+  for(var i = 0 ; i < array.length-1 ; i+=1){
+
+    var TC = array[i];
+    var TC2 = array[i+1];
+
+    for(var j = 0 ; j < array.length-1 ; j+=1){
+
+      if(i==j){
+        j+=2;
+        // continue;
+      }
+      else if(i+1==j){
+        j+=1;
+        // continue;
+      }
+      else if(i-1==j){
+        j+=3;
+        // continue;
+      }
+      else{
+
+        var TBC = array[j];
+        var TBC2 = array[j+1];
+
+        var crosses = checkIntersection(
+          TC[0],TC[2],TC2[0],TC2[2],
+          TBC[0],TBC[2],TBC2[0],TBC2[2]
+        );
+
+        var which = [];
+
+        which.push(i);
+        which.push(j);
+
+        if(crosses>.5){
+          var doit = true;
+          if(crossoverArray.length > 0){
+            for(var k = 0 ; k < crossoverArray.length ; k++){
+              if(which[0]==crossoverArray[k][1]){
+                doit = false;
+              }
+            }
+          }
+          if(doit)
+            crossoverArray.push(which);
+        }
+      }
+    }
+  }
+
+  for(var i = 0 ; i < crossoverArray.length ; i++){
+
+    var crossDir = .2;
+
+    if(i%2==0){
+      crossDir=-.2;
+    }
+
+    softPush(array, crossoverArray[i][0], crossDir);
+    softPush(array, crossoverArray[i][1], -crossDir);
+
+  }
+
+  return crossoverArray;
+
+}
+
+function softPush(array, index, amount){
+
+  array[index][1]+=amount;
+  if(index+1 < array.length)
+     array[index+1][1]+=amount*.9;
+  if(index+2 < array.length)
+     array[index+2][1]+=amount*.5;
+  if(index+3 < array.length)
+     array[index+3][1]+=amount*.1;
+  if(index-1 > 0)
+     array[index-1][1]+=amount*.9;
+  if(index-2 > 0)
+     array[index-2][1]+=amount*.5;
+  if(index-3 > 0)
+     array[index-3][1]+=amount*.1;
+
+}
+
+function checkIntersection(p0_x, p0_y, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y)
+{
+
+    var s1_x, s1_y, s2_x, s2_y;
+
+    s1_x = s1_y = s2_x = s2_y = 0;
+
+    s1_x = p1_x - p0_x;     
+    s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     
+    s2_y = p3_y - p2_y;
+
+    var s, t;
+    s = t = 0;
+
+    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+    {
+        return 1;
+    }
+
+    return 0; 
+}
+
+
+
+
 THREE.SkinnedMesh = function ( geometry, material, useVertexTexture ) {
 
   THREE.Mesh.call( this, geometry, material );
