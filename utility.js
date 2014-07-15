@@ -584,8 +584,8 @@
 
 	 for (var i = 0 ; i < N ; i++) {
 	    var t = i / N, tt = t * t, ttt = t * tt;
-	    spline.push([ hermite(x(n), dx0*.8, x(n+1), dx1*.8),
-	                  hermite(y(n), dy0*.8, y(n+1), dy1*.8) ]);
+	    spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
+	                  hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
 	 }
       }
       spline.push([ x(nk-1), y(nk-1) ]);

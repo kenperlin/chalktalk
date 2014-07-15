@@ -834,7 +834,6 @@
       var keyPressed = -1;
 
       this.keyDown = function(key) {
-console.log("KEY DOWN " + key);
 
          // Ignore multiple presses of the same key
 
@@ -966,7 +965,6 @@ console.log("KEY DOWN " + key);
       }
 
       this.keyUp = function(key) {
-console.log("KEY UP = " + key);
 
          // Part of logic to account for multiple presses of the same key.
 

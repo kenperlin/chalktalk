@@ -514,22 +514,35 @@ function Lattice() {
 }
 Lattice.prototype = new Sketch;
 
+function SplineTest() {
+   this.labels = "spline".split(' ');
+   this.shape = createSpline([
+      [-.3,1.1],
+      [-.3, .9],
+      [-.3, .5],
+      [-.7,-.1],
+      [-.7,-.7],
+      [-.3,-1 ],
+      [ .3,-1 ],
+      [ .7,-.7],
+      [ .7,-.1],
+      [ .3, .5],
+      [ .3, .9],
+      [ .3,1.1],
+   ]);
+   this.render = function(elapsed) {
+      m.save();
+         mCurve(this.shape);
+      m.restore();
+   }
+}
+SplineTest.prototype = new Sketch;
+
 function Grid() {
    this.labels = "grid".split(' ');
    this.gridMode = -1;
    this.is3D = true;
-/*
-   this.xShift = 0;
-   this.mouseDown = function(x, y) {
-      this.xDrag = x;
-   }
-   this.mouseDrag = function(x, y) {
-      if (this.gridMode == 3) {
-         this.xShift += x - this.xDrag;
-         this.xDrag = x;
-      }
-   }
-*/
+
    this.onSwipe = function(dx, dy) {
       this.gridMode = pieMenuIndex(dx, dy);
    }
