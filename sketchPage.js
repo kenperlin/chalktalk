@@ -246,7 +246,9 @@
 
       this.mouseDrag = function(x, y) {
 
-         this.travel += len(x - this.x, y - this.y);
+         var dx = x - this.x;
+         var dy = y - this.y;
+         this.travel += len(dx, dy);
          this.x = x;
          this.y = y;
 
@@ -298,7 +300,7 @@
             return;
 
          if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
-            outSketch.defaultValue[outPort] += floor(this.y/10) - floor(y/10);
+            outSketch.defaultValue[outPort] -= floor(y/10) - floor((y-dy)/10);
             this.isClick = false;
          }
 
