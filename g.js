@@ -146,14 +146,15 @@
                   if (isDef(s[i].under))
                      s[i].under(sk());
                }
+
+	       // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
+
 	       if (s.length > 0) {
 	          console.log(sk().glyphName + " -> " + s[0].glyphName);
 	          deleteSketch(sk());
                }
+
                break;
-            case "undrawing":
-	       delete sketchPage.tUndraw;
-	       break;
             }
             sketchAction = null;
             return;
@@ -2371,12 +2372,14 @@ if (outPort >= 0) {
 
       _g.panX = sketchPages[index].pan;
 
-      // MAKE SURE THE CODE WIDGET IS TURNED OFF.
+      // MAKE SURE SKETCH ACTION, BG-CLICK ACTION, CODE WIDGET, ETC ARE TURNED OFF.
 
+      sketchAction = null;
+      bgClickCount = 0;
       if (isCodeWidget)
          toggleCodeWidget();
 
-      // REMOVE ALL GLYPHS DEFINED FROM PREVIOUS PAGE, IF ANY.
+      // REMOVE ALL GLYPHS DEFINED FROM PREVIOUS PAGE, IF ANY (THIS IS WRONG).
 /*
       if (glyphCountBeforePage > 0)
          glyphs.splice(glyphCountBeforePage, glyphs.length - glyphCountBeforePage);

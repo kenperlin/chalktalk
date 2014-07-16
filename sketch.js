@@ -1032,8 +1032,8 @@
             this.sp[i][1] = xy[1];
          }
 
-         var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
-                           && sketchPage.tUndraw !== undefined;
+         var isUndrawing = sketchAction == "undrawing" &&
+	                   this == sketchPage.sketches[sketchPage.trueIndex];
 
          annotateStart();
          lineWidth(isUndrawing ? 2 : sketchLineWidth * sketchPage.zoom / this.zoom);
@@ -1047,10 +1047,8 @@
 
             var strokeIndex = -1;
 
-	    // HANDLE UNDRAWING OPTION.
+	    // IF UNDRAWING, DRAW ONLY PART OF THE SKETCH.
 
-            var isUndrawing = this == sketchPage.sketches[sketchPage.trueIndex]
-                              && sketchPage.tUndraw !== undefined;
             var n = sp.length;
             if (isUndrawing)
                n = max(2, floor(n * sketchPage.tUndraw));
