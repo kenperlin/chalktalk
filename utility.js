@@ -360,6 +360,51 @@
       return str;
    }
 
+// STRING UTILITIES.
+
+   function variableToValue(str, name, value) {
+
+      var cp = '.'.charCodeAt(0);
+      var c_ = '_'.charCodeAt(0);
+      var c0 = '0'.charCodeAt(0);
+      var c9 = '9'.charCodeAt(0);
+      var ca = 'a'.charCodeAt(0);
+      var cz = 'z'.charCodeAt(0);
+      var cA = 'A'.charCodeAt(0);
+      var cZ = 'Z'.charCodeAt(0);
+
+      for (var i = 0 ; i < str.length - name.length ; i++) {
+
+         // FIND AN OCCURANCE OF name IN THE STRING.
+
+         if (str.substring(i, i + name.length) == name) {
+
+            // NO MATCH IF name IS PRECEDED BY . or _ or 0-9 or a-z or A-Z.
+
+	    if (i > 0) {
+	       var n = str.charCodeAt(i-1);
+	       if (n == cp || n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+	          continue;
+	    }
+
+            // NO MATCH IF name IS FOLLOWED BY _ or 0-9 or a-z or A-Z.
+
+	    if (i + name.length < str.length) {
+	       var n = str.charCodeAt(i-1);
+	       if (n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+	          continue;
+	    }
+
+            // OTHERWISE, DO THE SUBSTITUTION, AND ADJUST i ACCORDINGLY.
+
+	    str = str.substring(0, i) + value + str.substring(i + name.length, str.length);
+	    i += value.length - name.length;
+	 }
+      }
+
+      return str;
+   }
+
 // ARRAY UTILITIES.
 
    function arrayToString(a, level) {

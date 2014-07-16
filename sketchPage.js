@@ -470,11 +470,23 @@
             return;
          }
 
-         // CLICK ON A LINK TO DELETE IT.
-
          if (this.isFocusOnLink && bgClickCount != 1) {
+
+            // CLICK ON A LINK TO DELETE IT.
+
             if (this.isClick)
                deleteLinkAtCursor();
+
+            // DRAGGING A LINK TO A SKETCH THAT HAS AN OPEN CODE EDITOR WINDOW
+	    // CAUSES ALL INSTANCES OF THAT VARIABLE TO BE REPLACED BY ITS VALUE.
+
+            else if (isCodeWidget && codeSketch.contains(x, y)) {
+	       var i = linkAtCursor[3][1];
+	       codeTextArea.value = variableToValue(codeTextArea.value,
+	                                            "xyz".substring(i, i+1),
+	                                            roundedString(codeSketch.inValue[i]));
+               deleteLinkAtCursor();
+	    }
             return;
          }
 
@@ -1882,7 +1894,7 @@
 
       this.sketchesAt = function(x, y) {
          var sketches = [];
-         for (var I = 0 ; I < nsk() ; I++)
+         for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I).parent == null && sk(I).contains(x,y))
                sketches.push(sk(I));
 	 return sketches;
