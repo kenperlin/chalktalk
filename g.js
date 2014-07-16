@@ -1526,7 +1526,7 @@
 
          // PAN 3D OBJECTS TOO
 
-         root.position.x = _g.panX / 275;
+         root.position.x = _g.panX / 305.5;
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
