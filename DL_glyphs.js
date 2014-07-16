@@ -225,23 +225,23 @@ ArbRevolveHandle.prototype = new Sketch;
 var boringSlicedFragmentShader = ["\
     uniform float spinAngle;\
     void main(void) {\
-      float rr = x*x + y*y;\
-      float z = rr >= 1. ? 0. : sqrt(1. - rr);\
+      float rr = dx*dx + dy*dy;\
+      float dz = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
-      float zp = dzdx * (x - mx * 1.3 - .2);\
-      if (zp < -z)\
+      float zp = dzdx * (dx - mx * 1.3 - .2);\
+      if (zp < -dz)\
          rr = 1.;\
       vec3 color = vec3(0.);\
       if (rr < 1.) {\
-         vec3 nn = vec3(x, y, z);\
-         if (zp < z) {\
-            z = zp;\
+         vec3 nn = vec3(dx, dy, dz);\
+         if (zp < dz) {\
+            dz = zp;\
             nn = normalize(vec3(-dzdx,0.,1.));\
          }\
          float s = rr >= 1. ? 0. : .4 + max(0., dot(vec3(.2), nn)) + max(0., dot(vec3(-.1), nn));\
-         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
-         float Y =  y;\
-         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
+         float X =  dx * cos(spinAngle) + dz * sin(spinAngle);\
+         float Y =  dy;\
+         float Z = -dx * sin(spinAngle) + dz * cos(spinAngle);\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
          float tu = ( selectedIndex>1. ? noise(P) : turbulence(P) );\
          float c = pow(.5 + .5 * sin(7. * X + 4. * tu), .1);\

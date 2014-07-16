@@ -2213,6 +2213,10 @@ if (outPort >= 0) {
              .rotateY( PI*this.rX)
              .scale(s * this.sx, s * this.sy, s);
 
+         if (this.inValue[0] !== undefined) this.setUniform("x", this.inValue[0]);
+         if (this.inValue[1] !== undefined) this.setUniform("y", this.inValue[1]);
+         if (this.inValue[2] !== undefined) this.setUniform("z", this.inValue[2]);
+
          if (isDef(this.mesh.update))
             this.mesh.update(elapsed);
 

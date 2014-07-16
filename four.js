@@ -259,7 +259,7 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
       vertexShader: vertexShader,
    });
 
-   var u = "alpha mx my selectedIndex time".split(' ');
+   var u = "alpha mx my selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" ? 1 : 0) };
 
@@ -272,13 +272,13 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
 var defaultVertexShader = ["\
-   varying float x;\
-   varying float y;\
+   varying float dx;\
+   varying float dy;\
    varying vec3 vPosition;\
    varying vec3 vNormal;\
    void main() {\
-      x = 2. * uv.x - 1.;\
-      y = 2. * uv.y - 1.;\
+      dx = 2. * uv.x - 1.;\
+      dy = 2. * uv.y - 1.;\
       vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
       vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
@@ -339,14 +339,17 @@ var fragmentShaderHeader = ["\
       }\
       return f;\
    }\
-   varying vec3 vNormal;\
-   varying vec3 vPosition;\
-   varying float x;\
-   varying float y;\
+   uniform float alpha;\
+   varying float dx;\
+   varying float dy;\
    uniform float mx;\
    uniform float my;\
    uniform float time;\
    uniform float selectedIndex;\
-   uniform float alpha;\
+   varying vec3 vNormal;\
+   varying vec3 vPosition;\
+   uniform float x;\
+   uniform float y;\
+   uniform float z;\
 "].join("\n");
 

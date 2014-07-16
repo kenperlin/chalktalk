@@ -245,20 +245,20 @@
 
 var planetFragmentShader = ["\
    void main(void) {\n\
-      float z = sqrt(1.-x*x-y*y);\n\
+      float dz = sqrt(1.-dx*dx-dy*dy);\n\
       float cRot = cos(.2*time), sRot = sin(.2*time);\n\
       float cVar = cos(.1*time), sVar = sin(.1*time);\n\
-      vec3 pt = vec3(cRot*x+sRot*z+cVar, y, -sRot*x+cRot*z+sVar);\n\
-      float g = turbulence(pt);                      /* CLOUDS */\n\
-      vec2 v = .6 * vec2(x,y);                       /* SHAPE  */\n\
+      vec3 pt = vec3(cRot*dx+sRot*dz+cVar,dy,-sRot*dx+cRot*dz+sVar);\n\
+      float g = turbulence(pt);                         /* CLOUDS */\n\
+      vec2 v = .6 * vec2(dx,dy);                        /* SHAPE  */\n\
       float d = 1. - 4.1 * dot(v,v);\n\
-      float s = .3*x + .3*y + .9*z; s *= s; s *= s;  /* LIGHT  */\n\
+      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */\n\
       d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\n\
-      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);  /* FIRE   */\n\
+      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);     /* FIRE   */\n\
       f = f > 0. ? 1. : 1. - f * f * f;\n\
       if (d <= 0.1)\n\
          f *= (g + 5.) / 3.;\n\
-      vec3 color = vec3(d*f*f*.85, d*f, d*.7);       /* COLOR  */\n\
+      vec3 color = vec3(d*f*f*.85, d*f, d*.7);          /* COLOR  */\n\
       gl_FragColor = vec4(color,alpha*min(1.,10.*d));\n\
    }\
 "].join("\n");
@@ -275,19 +275,19 @@ function planet() {
 }
 
 var marbleFragmentShader = ["\
-   void main(void) {\
-      float t = selectedIndex == 3. ? .7 * noise(vec3(x,y,0.)) :\
-                selectedIndex == 4. ? .5 * fractal(vec3(x,y,5.)) :\
-                selectedIndex == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8) :\
-		              .0 ;\
-      float s = .5 + .5*cos(7.*x+6.*t);\
-      if (selectedIndex == 2.) \
-         s = .5 + noise(vec3(3.*x,3.*y,10.));\
-      else if (selectedIndex > 0.)\
-         s = pow(s, .1);\
-      vec3 color = vec3(s,s*s,s*s*s);\
-      gl_FragColor = vec4(color,alpha);\
-   }\
+   void main(void) {\n\
+      float t = selectedIndex == 3. ? .7 * noise(vec3(dx,dy,0.)) :\n\
+                selectedIndex == 4. ? .5 * fractal(vec3(dx,dy,5.)) :\n\
+                selectedIndex == 5. ? .4 * (turbulence(vec3(dx*1.5,dy*1.5,10.))+1.8)\n\
+		                    : .0 ;\n\
+      float s = .5 + .5*cos(7.*dx+6.*t);\n\
+      if (selectedIndex == 2.) \n\
+         s = .5 + noise(vec3(3.*dx,3.*dy,10.));\n\
+      else if (selectedIndex > 0.)\n\
+         s = pow(s, .1);\n\
+      vec3 color = vec3(s,s*s,s*s*s);\n\
+      gl_FragColor = vec4(color,alpha);\n\
+   }\n\
 "].join("\n");
 
 registerGlyph("marble()",[
@@ -310,32 +310,32 @@ function marble() {
 
 
 var coronaFragmentShader = ["\
-   void main(void) {\
-      float a = .7;\
-      float b = .72;\
-      float s = 0.;\
-      float r0 = sqrt(x*x + y*y);\
-      if (r0 > a && r0 <= 1.) {\
-         float r = r0;\
-         if (selectedIndex == 2.)\
-            r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\
-         else if (selectedIndex == 3.) {\
-            float ti = time*.3;\
-            float t = mod(ti, 1.);\
-            float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\
-            float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));\
-            r = min(1., r - .1 + 0.3 * mix(u0, u1, t));\
-         }\
-         s = (1. - r) / (1. - b);\
-      }\
-      if (r0 < b)\
-         s *= (r0 - a) / (b - a);\
-      vec3 color = vec3(s);\
-      if (selectedIndex >= 1.) {\
-         float ss = s * s;\
-         color = s*vec3(1.,ss,ss*ss);\
-      }\
-      gl_FragColor = vec4(color,alpha*s);\
+   void main(void) {\n\
+      float a = .7;\n\
+      float b = .72;\n\
+      float s = 0.;\n\
+      float r0 = sqrt(dx*dx + dy*dy);\n\
+      if (r0 > a && r0 <= 1.) {\n\
+         float r = r0;\n\
+         if (selectedIndex == 2.)\n\
+            r = min(1., r + 0.2 * turbulence(vec3(dx,dy,0.)));\n\
+         else if (selectedIndex == 3.) {\n\
+            float ti = time*.3;\n\
+            float t = mod(ti, 1.);\n\
+            float u0 = turbulence(vec3(dx*(2.-t)/2., dy*(2.-t)/2., .1* t    +2.));\n\
+            float u1 = turbulence(vec3(dx*(2.-t)   , dy*(2.-t)   , .1*(t-1.)+2.));\n\
+            r = min(1., r - .1 + 0.3 * mix(u0, u1, t));\n\
+         }\n\
+         s = (1. - r) / (1. - b);\n\
+      }\n\
+      if (r0 < b)\n\
+         s *= (r0 - a) / (b - a);\n\
+      vec3 color = vec3(s);\n\
+      if (selectedIndex >= 1.) {\n\
+         float ss = s * s;\n\
+         color = s*vec3(1.,ss,ss*ss);\n\
+      }\n\
+      gl_FragColor = vec4(color,alpha*s);\n\
    }\
 "].join("\n");
 
@@ -369,50 +369,50 @@ var flameFragmentShader = ["\
 
 
 var slicedFragmentShader = ["\
-   uniform float spinAngle;\
-   void main(void) {\
-      float rr = x*x + y*y;\
-      float z = rr >= 1. ? 0. : sqrt(1. - rr);\
-      float dzdx = -1.3;\
-      float zp = dzdx * (x - mx * 1.3 - .2);\
-      if (zp < -z)\
-         rr = 1.;\
-      vec3 color = vec3(0.);\
-      if (rr < 1.) {\
-         vec3 nn = vec3(x, y, z);\
-         if (zp < z) {\
-            z = zp;\
-            nn = normalize(vec3(-dzdx,0.,1.));\
-         }\
-         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\
-         float X =  x * cos(spinAngle) + z * sin(spinAngle);\
-         float Y =  y;\
-         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\
-         vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\
-         float t = selectedIndex == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\
-                   selectedIndex == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\
-                   selectedIndex == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\
-   		                 0.0 ;\
-         float c = .5 + .5*cos(7.*X+6.*t);\
-	 if (selectedIndex == 1.)\
-	    c = .2 + .8 * c;\
-         else if (selectedIndex == 0.)\
-            c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\
-         else if (selectedIndex == 4.)\
-            c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\
-         else\
-            c = pow(c, .1);\
-         color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\
-         if (nn.x > 0.) {\
-            float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\
-            color += vec3(h*.4, h*.7, h);\
-         }\
-         else {\
-            float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\
-            color += vec3(h, h*.8, h*.6);\
-         }\
-      }\
-      gl_FragColor = vec4(color,alpha*(rr<1.?1.:0.));\
+   uniform float spinAngle;\n\
+   void main(void) {\n\
+      float rr = dx*dx + dy*dy;\n\
+      float dz = rr >= 1. ? 0. : sqrt(1. - rr);\n\
+      float dzdx = -1.3;\n\
+      float zp = dzdx * (dx - mx * 1.3 - .2);\n\
+      if (zp < -dz)\n\
+         rr = 1.;\n\
+      vec3 color = vec3(0.);\n\
+      if (rr < 1.) {\n\
+         vec3 nn = vec3(dx, dy, dz);\n\
+         if (zp < dz) {\n\
+            dz = zp;\n\
+            nn = normalize(vec3(-dzdx,0.,1.));\n\
+         }\n\
+         float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\n\
+         float X =  dx * cos(spinAngle) + dz * sin(spinAngle);\n\
+         float Y =  dy;\n\
+         float Z = -dx * sin(spinAngle) + dz * cos(spinAngle);\n\
+         vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\n\
+         float t = selectedIndex == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\n\
+                   selectedIndex == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\n\
+                   selectedIndex == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\n\
+   		                 0.0 ;\n\
+         float c = .5 + .5*cos(7.*X+6.*t);\n\
+	 if (selectedIndex == 1.)\n\
+	    c = .2 + .8 * c;\n\
+         else if (selectedIndex == 0.)\n\
+            c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\n\
+         else if (selectedIndex == 4.)\n\
+            c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\n\
+         else\n\
+            c = pow(c, .1);\n\
+         color = vec3(s*c,s*c*c*.6,s*c*c*c*.3);\n\
+         if (nn.x > 0.) {\n\
+            float h = .2 * pow(dot(vec3(.67,.67,.48), nn), 20.);\n\
+            color += vec3(h*.4, h*.7, h);\n\
+         }\n\
+         else {\n\
+            float h = .2 * pow(dot(vec3(.707,.707,0.), nn), 7.);\n\
+            color += vec3(h, h*.8, h*.6);\n\
+         }\n\
+      }\n\
+      gl_FragColor = vec4(color,alpha*(rr<1.?1.:0.));\n\
    }\
 "].join("\n");
 
