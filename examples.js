@@ -922,14 +922,29 @@
    };
    Graph.prototype = new Sketch;
 
-   var lpx = 0;
-
    function Func() {
       this.s = -1;
-      var elapsed = 1/30;
 
-      function lopass(x,d) {
-         return lpx = lerp(d, lpx, x);
+      function blur(x,d) {
+	 if (sk().lpb === undefined)
+	    sk().lpb = [];
+
+	 sk().lpb.push(x);
+
+	 var n = max(1, floor(30 * d));
+	 while (sk().lpb.length > n)
+	    sk().lpb.splice(0, 1);
+
+	 if (sk().lpb.length < n)
+	    return sk().lpb[sk().lpb.length - 1];
+
+         var sum = 0, wgt = 0;
+         for (var i = 0 ; i < n ; i++) {
+	    var w = .5 + .5 * cos(TAU * (i / n - .5));
+	    sum += w * sk().lpb[i];
+	    wgt += w;
+         }
+         return sum / wgt;
       }
 
       this.code = [
@@ -938,7 +953,7 @@
          ["sin", "sin(x)"],
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
-         ["lopass", "lopass(x,1/30)"],
+         ["blur", "blur(x,1.0)"],
       ];
 
       this.labels = [];
@@ -962,6 +977,7 @@
       ];
 
       this.render = function(elapsed) {
+         this.elapsed = elapsed;
          var sc = this.size / 400;
 
          if (this.nPorts == 0) {
@@ -982,7 +998,6 @@
 
          var x = this.getInFloat("x");
          var y = this.getInFloat("y1") + this.getInFloat("y2");
-	 console.log(x + " " + y);
          var result = null;
          try {
             eval("result = (" + this.code[s][1] + ")");
