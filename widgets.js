@@ -1,4 +1,9 @@
 
+//////////////// DATA USED BY BOTH PIE MENUS AND PULL DOWN MENUS ///////////////
+
+   var pageActionLabels = "text clone group whiteboard clear".split(' ');
+   var sketchTypeLabels = [];
+
 //////////////////////////////////// PIE MENU //////////////////////////////////
 
    // EXTERNAL VARS
@@ -152,11 +157,14 @@
 
 ///////////////////////////////// PULL DOWN MENU //////////////////////////////////
 
+   var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
    var pullDownIsActive = false;
    var pullDownLabels = [];
    var pullDownSelection = -1;
    var pullDownX = 0;
    var pullDownY = 0;
+   var sketchActionLabels = "linking translating rotating scaling parsing deleting".split(' ');
+   var sketchLabelSelection = -1;
 
    function pullDownStart(x, y) {
       if (pullDownLabels.length > 0) {
@@ -353,6 +361,8 @@
 
 ///////////////////////////////// SHORTHAND TEXT //////////////////////////////////
 
+   var iOut = 0;
+   var isNumericShorthandMode = false;
    var shRadius = 16; // radius of shorthand inner region
 
    function interpretShorthand() {
@@ -419,7 +429,7 @@
       case R_ARROW: return " ";
       case L_ARROW: return "del";
       case U_ARROW: isShiftPressed = ! isShiftPressed; return null;
-      case 'N': isNumeric = ! isNumeric; return null;
+      case 'N': isNumericShorthandMode = ! isNumericShorthandMode; return null;
       case D_ARROW: return "ret";
       }
 
@@ -427,6 +437,16 @@
    }
 
 ///////////////////////////// ON SCREEN KEYBOARD //////////////////////////////////
+
+   var isOnScreenKeyboardMode = false;
+
+   function kbd() {
+      isOnScreenKeyboardMode = ! isOnScreenKeyboardMode;
+   }
+
+   function isOnScreenKeyboard() {
+      return isOnScreenKeyboardMode && isTextMode;
+   }
 
    function OnScreenKeyboard() {
       this.mx = 0;
@@ -633,6 +653,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    var codeElement,
        codeSelector,
        codeTextArea,
+       isCodeWidget = false,
        setCodeAreaText = function() {
           codeTextArea.value = codeSelector.value;
           updateF();
@@ -832,4 +853,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       audiencePopup.close();
       audiencePopup = null;
    }
+
+
 

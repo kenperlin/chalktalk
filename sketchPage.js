@@ -1,4 +1,33 @@
 
+var clickSize = 30;
+var codeSketch = null;
+var isAudioSignal = false;
+var isBottomHover = false;
+var isCommandPressed = false;
+var isControlPressed = false;
+var isDrawingSketch2D = false;
+var isFakeMouseDown = false;
+var isManualScaling = false;
+var isPanning = false;
+var isRightGesture = false;
+var isRightHover = false;
+var isShiftPressed = false;
+var isShorthandMode = false;
+var isShorthandTimeout = false;
+var isShowingGlyphs = false;
+var isSpacePressed = false;
+var isTogglingMenuType = false;
+var menuType = 0;
+var paletteColorIndex = 0;
+var sketchToDelete = null;
+
+   function paletteX(i) { return 30 - _g.panX; }
+   function paletteY(i) { return 30 + i * 30; }
+   function paletteR(i) {
+      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
+      return i == index ? 12 : 8;
+   }
+
    function SketchBook() {
       this.onbeforeunload = function(e) {
          if (isAudiencePopup())
@@ -404,7 +433,9 @@
          }
 
          if (isRightHover && isRightGesture && ! isBottomGesture) {
-            // CLICKING TO QUICK SWITCH PAGES
+
+            // CLICK TO SWITCH PAGES QUICKLY.
+
             pageNumber = floor((y / (height() - margin)) * sketchPages.length);
             if (pageNumber != pageIndex)
                setPage(pageNumber);

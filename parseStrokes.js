@@ -1,5 +1,8 @@
 
+   var loopFlag = 1000;
+
    function parseStrokes(strokes, x, y) {
+      var curvatureCutoff = 0.1;
 
       var parsedSrc = [];
       for (var n = 0 ; n < strokes.length ; n++)

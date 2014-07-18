@@ -1,4 +1,6 @@
 
+   var renderer = null;
+
    window.addEventListener('resize', function() {
       renderer.setSize(width(), height());
       renderer.camera.aspect = width() / height();

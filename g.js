@@ -501,58 +501,21 @@
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
-   var clickSize = 30;
    var clickX = 0;
    var clickY = 0;
-   var codeSketch = null;
-   var count = 0;
-   var curvatureCutoff = 0.1;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
    var glyphSketch = null;
-   var iOut = 0;
    var isAltKeyCopySketchEnabled = true;
    var isAltPressed = false;
-   var isAudioSignal= false;
    var isBottomGesture = false;
-   var isBottomHover = false;
-   var isCodeWidget = false;
-   var isCommandPressed = false;
-   var isControlPressed = false;
-   var isDrawingSketch2D = false;
    var isExpertMode = true;
-   var isFakeMouseDown = false;
-   var isOnScreenKeyboardMode = false;
    var isMakingGlyph = false;
-   var isManualScaling = false;
    var isMouseOverBackground = true;
-   var isNumeric = false;
-   var isPanning = false;
-   var isRightClick = false;
-   var isRightHover = false;
-   var isRightGesture = false;
-   var isShiftPressed = false;
-   var isShorthandMode = false;
-   var isShorthandTimeout = false;
-   var isShowingGlyphs = false;
-   var isSpacePressed = false;
    var isShowingPresenterView = false;
    var isTextMode = false;
-   var isTogglingExpertMode = false;
-   var isTogglingMenuType = false;
-   var isVideoOnScreen = false;
-   var loopFlag = 1000;
    var margin = 50;
-   var menuType = 0;
-   var pageActionLabels = "text clone group whiteboard clear".split(' ');
-   var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
-   var paletteColorIndex = 0;
-   var renderer = null;
-   var sketchActionLabels="linking translating rotating scaling parsing deleting".split(' ');
-   var sketchLabelSelection = -1;
    var sketchPadding = 10;
-   var sketchToDelete = null;
-   var sketchTypeLabels = [];
    var sketchTypes = [];
    var sketchAction = null;
 
@@ -676,13 +639,6 @@
 
    var sketchType = 0;
    var pageIndex = 0;
-
-   function paletteX(i) { return 30 - _g.panX; }
-   function paletteY(i) { return 30 + i * 30; }
-   function paletteR(i) {
-      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
-      return i == index ? 12 : 8;
-   }
 
    function colorToRGB(colorName) {
       var R = 0, G = 0, B = 0;
@@ -1078,14 +1034,6 @@
       }
    }
 
-   function kbd() {
-      isOnScreenKeyboardMode = ! isOnScreenKeyboardMode;
-   }
-
-   function isOnScreenKeyboard() {
-      return isOnScreenKeyboardMode && isTextMode;
-   }
-
    function setTextMode(state) {
       isTextMode = state;
       return isTextMode;
@@ -1246,9 +1194,15 @@
 
       this.toSketch = function() {
 
+         // IF A '(' IS FOUND, CALL A FUNCTION.
+
+         if (this.name.indexOf('(') > 0) {
+            eval(this.name);
+         }
+
          // IF GLYPH IS A DIGIT, CREATE A NUMBER OBJECT.
 
-         if (isNumber(parseInt(this.name))) {
+         else if (isNumber(parseInt(this.name))) {
             var s = new NumericSketch();
             addSketch(s);
             s.init(this.name, sketchPage.x, sketchPage.y);
@@ -1256,19 +1210,11 @@
             setTextMode(true);
          }
 
-         // IF A '(' IS FOUND, CALL A FUNCTION.
-
-         else if (this.name.indexOf('(') > 0) {
-            eval(this.name);
-         }
-
          // DEFAULT: CREATE A TEXT OBJECT.
 
-         else {
-            if (this.name != 'del') {
-               sketchPage.createTextSketch(this.name);
-               setTextMode(true);
-            }
+         else if (this.name != 'del') {
+            sketchPage.createTextSketch(this.name);
+            setTextMode(true);
          }
 
 	 // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
@@ -1342,7 +1288,7 @@
          var ch = textChar.charCodeAt(0);
          textChar = String.fromCharCode(ch - 32);
       }
-      else if (isNumeric && textChar.length == 1) {
+      else if (isNumericShorthandMode && textChar.length == 1) {
          var ch = textChar.charCodeAt(0);
          textChar = String.fromCharCode(ch - 64);
       }
@@ -1490,15 +1436,25 @@
    var visible_sp = null;
 
    var tick = function(g) {
-      document.body.scrollTop = 0;
-      if (isDef(window[g.name].animate)) {
-         document.body.style.cursor =
-            (isVideoPlaying && ! isBottomGesture && ! isRightHover) || isExpertMode && (pieMenuIsActive || isSketchInProgress()) ? 'none' :
-            bgClickCount == 1 ? 'cell' :
-            isRightHover && ! isBottomGesture ? 'pointer' :
-            isBottomGesture ? '-webkit-grabbing' :
-            isBottomHover ? '-webkit-grab' : 'crosshair';
 
+      // TURN OFF ALL DOCUMENT SCROLLING.
+
+      document.body.scrollTop = 0;
+
+      if (isDef(window[g.name].animate)) {
+
+         // SET THE CURSOR STYLE.
+
+         document.body.style.cursor =
+	    (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
+	    isExpertMode && (pieMenuIsActive || isSketchInProgress())
+	                                        ? 'none'
+            : bgClickCount == 1                 ? 'cell'
+            : isRightHover && ! isBottomGesture ? 'pointer'
+            : isBottomGesture                   ? '-webkit-grabbing'
+            : isBottomHover                     ? '-webkit-grab'
+	    :                                     'crosshair'
+            ;
          var w = width(), h = height();
 
          onScreenKeyboard.x = w / 2;
@@ -1858,11 +1814,11 @@
          }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
-
+/*
          lineWidth(0.25);
 	 color(defaultPenColor);
 	 drawRect(-_g.panX, 0, w-1, h-1);
-
+*/
          _g.restore();
 
          if (isShowingGlyphs && isExpertMode)
@@ -1941,9 +1897,10 @@ if (outPort >= 0) {
       if (sketch === undefined)
          return;
 
-      // WHENEVER A SKETCH IS DELETED, MAKE SURE WE DON'T STAY IN TEXT MODE.
+      // WHENEVER SELECTED SKETCH IS DELETED, MAKE SURE WE DON'T STAY IN TEXT MODE.
 
-      setTextMode(false);
+      if (sketch == sk())
+         setTextMode(false);
 
       for (var j = 0 ; j < sketch.children.length ; j++) {
          var k = sketchPage.findIndex(sketch.children[j]);

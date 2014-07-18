@@ -922,8 +922,15 @@
    };
    Graph.prototype = new Sketch;
 
+   var lpx = 0;
+
    function Func() {
       this.s = -1;
+      var elapsed = 1/30;
+
+      function lopass(x) {
+         return lpx = lerp(.01, lpx, x);
+      }
 
       this.code = [
          ["cos", "cos(x)"],
@@ -931,6 +938,7 @@
          ["sin", "sin(x)"],
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
+         ["lopass", "lopass(x)"],
       ];
 
       this.labels = [];
@@ -950,6 +958,7 @@
          makeCurve(function(x) { return sin(PI * x) / PI; }),
          makeCurve(function(x) { return x * x; }),
          makeCurve(function(x) { return (floor(x)+.5); }),
+         makeCurve(function(x) { return x<0?1:1-x; }),
       ];
 
       this.render = function(elapsed) {
