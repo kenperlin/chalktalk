@@ -928,8 +928,8 @@
       this.s = -1;
       var elapsed = 1/30;
 
-      function lopass(x) {
-         return lpx = lerp(.01, lpx, x);
+      function lopass(x,d) {
+         return lpx = lerp(d, lpx, x);
       }
 
       this.code = [
@@ -938,7 +938,7 @@
          ["sin", "sin(x)"],
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
-         ["lopass", "lopass(x)"],
+         ["lopass", "lopass(x,1/30)"],
       ];
 
       this.labels = [];
