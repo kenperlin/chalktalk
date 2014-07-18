@@ -1044,7 +1044,6 @@
          isShiftPressed = false;
          if (sketch === undefined) {
             addSketch(new SimpleSketch());
-            sketchPage.textInputIndex = sketchPage.index;
             sk().sketchProgress = 1;
             sk().sketchState = 'finished';
             sk().textX = sk().tX = This().mouseX;
@@ -1412,25 +1411,17 @@
    function annotateStart(context) {
       if (context === undefined)
          context = _g;
-
       saveNoisy = noisy;
       noisy = 0;
-      saveLineWidth = context.lineWidth;
-      saveStrokeStyle = context.strokeStyle;
-      saveFillStyle = context.fillStyle;
-      saveFont = context.font;
+      context.save();
       context.lineWidth = 1;
    }
 
    function annotateEnd(context) {
       if (context === undefined)
          context = _g;
-
       noisy = saveNoisy;
-      context.lineWidth = saveLineWidth;
-      context.strokeStyle = saveStrokeStyle;
-      context.fillStyle = saveFillStyle;
-      context.font = saveFont;
+      context.restore();
    }
 
    var visible_sp = null;
@@ -1440,6 +1431,8 @@
       // TURN OFF ALL DOCUMENT SCROLLING.
 
       document.body.scrollTop = 0;
+
+      // DON'T DO ANYTHING UNTIL THE ANIMATE FUNCTION IS DEFINED.
 
       if (isDef(window[g.name].animate)) {
 
@@ -1468,7 +1461,8 @@
 
          _g = g;
 
-         if (!isDef(_g.panX)) _g.panX = 0;
+         if (! isDef(_g.panX))
+	    _g.panX = 0;
 
          // CLEAR THE CANVAS
 
@@ -1632,9 +1626,6 @@
                   for (var i = 0 ; i < a.out.length ; i++)
                      if (isDef(a.out[i]))
                         for (var k = 0 ; k < a.out[i].length ; k++) {
-                           var b = a.out[i][k][0];
-                           var j = a.out[i][k][1];
-                           var s = a.out[i][k][2];
                            drawLink(a, i, a.out[i][k], true);
                            if (! this.isPressed && isMouseNearCurve(a.out[i][k][4]))
                               linkAtCursor = [a, i, k, a.out[i][k]];
@@ -1722,8 +1713,10 @@
          }
 
          sketchPage.computePortBounds();
+
          if (isShowingOverlay())
             This().overlay();
+
          sketchPage.advanceCurrentSketch();
 
          if (isAudiencePopup() && isShowingPresenterView) {
@@ -1731,8 +1724,6 @@
             audienceContext.fillRect(0, 0, width(), height());
             audienceContext.drawImage(_g.canvas, 0, 0);
          }
-
-         requestAnimFrame(function() { tick(g); });
 
          // ADJUST X POSITIONS ACCORDING TO PAN VALUE
 
@@ -1747,6 +1738,7 @@
             lineWidth(1);
 
             // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
+
             var numberSpacing = (h - margin) / sketchPages.length;
             for (var i = 0; i < h - margin; i += numberSpacing * 2) {
                _g.beginPath();
@@ -1759,6 +1751,7 @@
             }
 
             // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+
             var currentPageY = pageIndex * numberSpacing;
             lineWidth(0.75);
             _g.globalAlpha = 1.0;
@@ -1772,6 +1765,7 @@
             _g.stroke();
 
             // DRAW PAGE NUMBERS IN SLIDE SWITCHER
+
             _g.font = "14px Arial";
             var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
             for (var pn = 0; pn < sketchPages.length; pn++) {
@@ -1814,52 +1808,43 @@
          }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
-/*
+
          lineWidth(0.25);
 	 color(defaultPenColor);
 	 drawRect(-_g.panX, 0, w-1, h-1);
-*/
+
          _g.restore();
 
          if (isShowingGlyphs && isExpertMode)
             sketchPage.showGlyphs();
+
+         // MAKE SURE ALT-CMD-J (TO BRING UP CONSOLE) DOES NOT ACCIDENTALLY DO A SKETCH COPY.
+
+         if (isAltPressed && isCommandPressed)
+            isAltKeyCopySketchEnabled = false;
+         else if (!isAltPressed && ! isCommandPressed)
+            isAltKeyCopySketchEnabled = true;
+
+      // GLOW AT OUTPUT PORT (NOT CURRENTLY BEING USED -KP)
+/*
+         if (outPort >= 0) {
+            color(scrimColor(.05));
+            for (var n = 0 ; n < 10 ; n++) {
+               var r = 30 - 3 * n;
+               fillOval(This().mouseX - r, This().mouseY - r, 2 * r, 2 * r);
+            }
+         }
+*/
+         // TEMPORARY KLUDGE TO FIX AN UNRESOLVED BUG:  THERE IS AN EXTRA _g.stroke() SOMEWHERE.
+
+         _g.lineWidth = 0;
+         _g.strokeStyle = 0;
+	 _g.beginPath();
       }
 
-      // MAKE SURE ALT-CMD-J (TO BRING UP CONSOLE) DOES NOT ACCIDENTALLY DO A SKETCH COPY.
+      // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
 
-      if (isAltPressed && isCommandPressed)
-         isAltKeyCopySketchEnabled = false;
-      else if (!isAltPressed && ! isCommandPressed)
-         isAltKeyCopySketchEnabled = true;
-
-      // CODE TO TEST ALGORITHM THAT IMPLEMENTS createSpline()
-/*
-      var s = 100 * sin(4 * time);
-      var keys = [ [300-s,100], [300,300], [500,300+s] ];
-
-      color('red');
-      lineWidth(0.7);
-      for (var n = 0 ; n < keys.length - 1 ; n++)
-         line(keys[n][0], keys[n][1], keys[n+1][0], keys[n+1][1]);
-      var spline = createSpline(keys);
-
-      color('green');
-      lineWidth(2);
-      for (var n = 0 ; n < spline.length - 1 ; n++)
-         line(spline[n][0], spline[n][1], spline[n+1][0], spline[n+1][1]);
-*/
-/*
-
-GLOW AT OUTPUT PORT
-
-if (outPort >= 0) {
-   color(scrimColor(.05));
-   for (var n = 0 ; n < 10 ; n++) {
-      var r = 30 - 3 * n;
-      fillOval(This().mouseX - r, This().mouseY - r, 2 * r, 2 * r);
-   }
-}
-*/
+      requestAnimFrame(function() { tick(g); });
    }
 
    var ef = new EncodedFraction();
@@ -1920,18 +1905,30 @@ if (outPort >= 0) {
 
          var s, j, k;
 
-         // DELETE OUT LINKS TO THIS SKETCH WITHIN OTHER SKETCHES:
+         //--------- DELETE OUT LINKS TO THIS SKETCH WITHIN OTHER SKETCHES:
+
+	 // FOR EACH ACTIVE IN-PORT OF sketch:
 
          for (var inPort = 0 ; inPort < sketch.in.length ; inPort++)
             if (isDef(sketch.in[inPort])) {
+
+               // LOOP THROUGH ACTIVE OUT-PORTS OF SKETCH s LINKING TO IT.
+
                var s = sketch.in[inPort][0];
                for (var outPort = 0 ; outPort < s.out.length ; outPort++)
+
+                  // FOR EACH ACTIVE OUT-PORT OF s, LOOP THROUGH THE SKETCHES s LINKS TO.
+
                   if (isDef(s.out[outPort]))
                      for (var k = s.out[outPort].length - 1 ; k >= 0 ; k--)
-                        deleteOutLink(s, outPort, k);
+
+                        // WHERE s LINKS TO sketch, REMOVE THAT OUT-LINK.
+
+		        if (s.out[outPort][k][0] == sketch)
+                           deleteOutLink(s, outPort, k);
             }
 
-         // DELETE IN LINKS FROM THIS SKETCH WITHIN OTHER SKETCHES:
+         //--------- DELETE IN LINKS FROM THIS SKETCH WITHIN OTHER SKETCHES:
 
          for (var outPort = 0 ; outPort < sketch.out.length ; outPort++)
             if (isDef(sketch.out[outPort]))

@@ -1,4 +1,6 @@
 
+// GLOBAL VARIABLES PRIMARILY RELATED TO SKETCH PAGES.
+
 var clickSize = 30;
 var codeSketch = null;
 var isAudioSignal = false;
@@ -21,12 +23,16 @@ var menuType = 0;
 var paletteColorIndex = 0;
 var sketchToDelete = null;
 
+// POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
+
    function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
       var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
       return i == index ? 12 : 8;
    }
+
+// THE SKETCH BOOK CONTAINS ALL THE SKETCH PAGES.
 
    function SketchBook() {
       this.onbeforeunload = function(e) {
@@ -51,6 +57,8 @@ var sketchToDelete = null;
    }
 
    var sketchBook = new SketchBook();
+
+// MOST USER INTERACTION IS MEDIATED BY THE CURRENT SKETCH PAGE.
 
    function SketchPage() {
       this.fadeAway = 0;
@@ -110,7 +118,6 @@ var sketchToDelete = null;
          this.index = -1;
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
-         this.textInputIndex = -1;
 	 isShowingNLParse = false;
 
          if (renderer != null && isDef(renderer.scene)) {
@@ -1279,6 +1286,9 @@ var sketchToDelete = null;
 
          noisy = 1;
 
+	 // WHILE BEING DRAWN, EACH SKETCH TEMPORARILY BECOMES, IN TURN, THE CURRENT SKETCH.
+	 // WE CAN LOOK AT sketchPage.trueIndex TO FIND OUT WHAT THE REAL CURRENT SKETCH IS.
+
          this.trueIndex = this.index;
 
          for (var I = 0 ; I < nsk() ; I++) {
@@ -1289,8 +1299,6 @@ var sketchToDelete = null;
             _g_sketchStart();
 
             var PUSHED_sketchPage_index = this.index;
-
-            this.textInputIndex = this.index;
 
             this.index = I;
 

@@ -214,8 +214,7 @@
          context.font = fontHeight + 'pt ' + (this.isParsed() ? 'Consolas'
                                                               : 'Comic Sans MS');
 
-         var isCursor = isTextMode && context == _g
-                                   && this == sk(sketchPage.textInputIndex);
+         var isCursor = isTextMode && context == _g && this == sk(sketchPage.trueIndex);
          if (! isCursor && this.text.length == 0)
             return;
 
@@ -1055,13 +1054,15 @@
 
             // LOOP THROUGH THE sp ARRAY.
 
+            var startedAnyStrokes = false;
             for (var i = 1 ; i < n ; i++) {
 
                // START DRAWING A STROKE.
 
                if (sp[i][2] == 0) {
-                  if (i > 1)
+                  if (startedAnyStrokes)
                      _g.stroke();
+                  startedAnyStrokes = true;
 
                   if (isUndrawing)
                      fillOval(sp[i][0] - 4, sp[i][1] - 4, 8, 8);
@@ -1100,7 +1101,6 @@
 	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
 
 	    if (isUndrawing && n >= 4) {
-	       console.log(sp.length + " " + n);
 	       var ax = sp[n-3][0], ay = sp[n-3][1];
 	       var bx = sp[n-1][0], by = sp[n-1][1];
 	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
