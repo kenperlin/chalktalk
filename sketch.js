@@ -1096,7 +1096,8 @@
                   }
                }
             }
-            _g.stroke();
+	    if (startedAnyStrokes)
+               _g.stroke();
 
 	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
 

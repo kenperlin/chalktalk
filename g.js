@@ -1835,11 +1835,6 @@
             }
          }
 */
-         // TEMPORARY KLUDGE TO FIX AN UNRESOLVED BUG:  THERE IS AN EXTRA _g.stroke() SOMEWHERE.
-
-         _g.lineWidth = 0;
-         _g.strokeStyle = 0;
-	 _g.beginPath();
       }
 
       // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
