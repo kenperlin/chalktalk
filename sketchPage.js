@@ -1250,7 +1250,6 @@ var sketchToDelete = null;
       }
 
       this.scaleSelectedSketch = function() {
-
          if (isk() && ! isManualScaling) {
             if (sketchAction == "scaling") {
                if (this.scaleRate < 1)
@@ -1261,7 +1260,8 @@ var sketchToDelete = null;
                   this.scaleRate = 0;
             }
             if (this.scaleRate > 0) {
-               sk().scale(pow(this.yDown > this.moveY ? 1.015 : 1/1.015, this.scaleRate));
+	       var dy = this.yDown - this.moveY;
+               sk().scale(pow(dy > 0 ? 1.015 : 1/1.015, this.scaleRate * abs(dy) / 100));
             }
          }
       }
