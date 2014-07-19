@@ -700,7 +700,7 @@
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
-      ['spc', "show pie menu"],
+      ['spc', "quick help menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],
       [U_ARROW, "previous page"],

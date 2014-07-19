@@ -1375,7 +1375,7 @@ var sketchToDelete = null;
                 This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
                drawPalette();
             if (isSpacePressed)
-               pieMenuDraw();
+               helpMenuDraw();
             if (isTextMode && isShorthandMode) {
                color(defaultPenColor);
                lineWidth(1);
@@ -1837,7 +1837,7 @@ var sketchToDelete = null;
             _g.fillText(msg, (w - textWidth(msg)) / 2, h - margin);
          }
 
-         if (isSpacePressed || pieMenuIsActive && pieMenuCursorWeight == 0)
+         if (pieMenuIsActive && pieMenuCursorWeight == 0)
             pieMenuDraw();
 
          pieMenuOverlay();

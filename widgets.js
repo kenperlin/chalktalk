@@ -4,6 +4,21 @@
    var pageActionLabels = "text clone group whiteboard clear".split(' ');
    var sketchTypeLabels = [];
 
+/////////////////////////////////// HELP MENU //////////////////////////////////
+
+   function helpMenuDraw() {
+      if (isk()) {
+         var msg = "del, ,translate,copy,scale,text,rotate,undraw".split(",");
+	 var rx = 50 + (sk().xhi - sk().xlo) / 2;
+	 var ry = 50 + (sk().yhi - sk().ylo) / 2;
+	 for (var i = 0 ; i < 8 ; i++) {
+	    var x = sk().cx() + rx * cos(TAU * i / 8);
+	    var y = sk().cy() - ry * sin(TAU * i / 8);
+            text(msg[i], x, y, .5, .5, 'Comic Sans MS');
+	 }
+      }
+   }
+
 //////////////////////////////////// PIE MENU //////////////////////////////////
 
    // EXTERNAL VARS
