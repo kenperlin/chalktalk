@@ -1388,25 +1388,7 @@
       sk().sc = scale * (glyphSketch.xhi - glyphSketch.xlo) / 250;
    }
 
-   var saveNoisy, saveLineWidth, saveStrokeStyle, saveFillStyle, saveFont;
-
-   function dataStart() {
-      saveNoisy = noisy;
-      noisy = 0;
-      saveLineWidth = _g.lineWidth;
-      saveStrokeStyle = _g.strokeStyle;
-      saveFillStyle = _g.fillStyle;
-      _g.lineWidth = dataLineWidth;
-      _g.strokeStyle = dataColor;
-      _g.fillStyle = dataColor;
-   }
-
-   function dataEnd() {
-      noisy = saveNoisy;
-      _g.lineWidth = saveLineWidth;
-      _g.strokeStyle = saveStrokeStyle;
-      _g.fillStyle = saveFillStyle;
-   }
+   var saveNoisy;
 
    function annotateStart(context) {
       if (context === undefined)

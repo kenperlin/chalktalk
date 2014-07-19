@@ -865,39 +865,44 @@
          m.save();
          m.scale(sc);
 
-         var i,y1,y2,scrollAdj;
          mLine([-1,1],[-1,-1]);
 
          if (this.s != this.choice.value)
              resetValues();
          this.s = this.choice.value;
 
-         // record measurement
+         // Record measurement
+
          if (this.isInValue("Y")) {
 
             sinceLastMeasurement += elapsed
 
             if (sinceLastMeasurement > .0625) {
                if (values.length >= 100) {
-                  // expire older records if buffer is full
+
+                  // Expire older records if buffer is full
+
                   values.splice(0,1);
                   scrolledBy += 1;
                }
-               // Capture input
-               recordValue(this.getInValue("Y"));
 
-               //sinceLastMeasurement = 0;
+               // Capture input
+
+               recordValue(this.getInValue("Y"));
             }
          }
 
          // zero line (if one is in range)
+
          if (this.choice.value == 2) {
+
             // LOGIC RANGE, draw the baseline below 0
+
             mLine([-1,-1],[1,-1]);
 
          }
 	 else if (maxval > 0 && minval <= 0) {
-            y1 = -minval/(maxval-minval)*2-1;
+            var y1 = -minval/(maxval-minval)*2-1;
             mLine([-1, y1], [1, y1]);
          }
 	 else if (values.length < 2) {
@@ -905,16 +910,14 @@
          }
 
          // render line graph
-         if (isDef(values) && values.length > 1) {
-            scrollAdj = scrolledBy/100*2;
 
-            dataStart();
-            for (i = 1; i < values.length; i++) {
-               y1 = (values[i-1]-minval)/(maxval-minval)*2-1;
-               y2 = (values[i]-minval)/(maxval-minval)*2-1;
+         if (isDef(values) && values.length > 1) {
+	    lineWidth(1);
+            for (var i = 1 ; i < values.length ; i++) {
+               var y1 = 2 * (values[i-1] - minval) / (maxval - minval) - 1;
+               var y2 = 2 * (values[i  ] - minval) / (maxval - minval) - 1;
                mLine([(i-1)/100*2-1, y1], [i/100*2-1, y2]);
             }
-            dataEnd();
          }
 
          m.restore();
