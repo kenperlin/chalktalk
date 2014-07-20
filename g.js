@@ -501,8 +501,8 @@
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
-   var clickX = 0;
-   var clickY = 0;
+   var bgClickX = 0;
+   var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
    var glyphSketch = null;
@@ -1294,13 +1294,34 @@
       return textChar;
    }
 
+   var isBgActionEnabled = false;
    var isSketchDragEnabled = false;
    var sketchDragMode = 0;
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
+   function startBgAction(x, y) {
+   }
+
+   function doBgAction(x, y) {
+   }
+
+   function endBgAction(x, y) {
+      var x0 = bgClickX;
+      var y0 = bgClickY;
+      var x1 = sketchPage.xDown;
+      var y1 = sketchPage.yDown;
+      var n2 = pieMenuIndex(x - x1, y - y1, 8);
+      if (len(x1 - x0, y1 - y0) < clickSize)
+         console.log("BG ACTION " + n2);
+      else {
+         var n1 = pieMenuIndex(x1 - x0, y1 - y0, 8);
+         console.log("BG ACTION " + n1 + " -> " + n2);
+      }
+   }
+
    function startSketchDragAction(x, y) {
-      sketchDragMode = pieMenuIndex(clickX - x, clickY - y, 8);
+      sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       sketchDragActionXY = [x,y];
       sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
    }
@@ -1331,7 +1352,7 @@
 
       bgClickCount = 0;
 
-      var index = pieMenuIndex(clickX - x, clickY - y, 8);
+      var index = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
@@ -2345,7 +2366,7 @@
 
       // IF THERE IS AN AUDIENCE POP-UP, SET IT TO THE RIGHT PAGE.
 
-      if (audiencePopup != null)
+      if (isAudiencePopup())
          audiencePopup.document.getElementById('slide').innerHTML =
             document.getElementById(pageName).innerHTML;
 
