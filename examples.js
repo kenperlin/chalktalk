@@ -319,8 +319,11 @@
 	    // WHEN BOUNDS ARE INTEGER VALUES, DRAW INTERMEDIATE TICK MARKS.
 
 	    if (this.lo == floor(this.lo) && this.hi == floor(this.hi)) {
-	       for (var i = this.lo + 1 ; i < this.hi ; i++) {
-	          var tw = i % 10 == 0 ? 0.04 : 0.02;
+	       var n = 1;
+	       while (n < (this.hi - this.lo) / 50)
+	          n *= 10;
+	       for (var i = this.lo + n ; i < this.hi ; i += n) {
+	          var tw = i % (10 * n) == 0 ? 0.04 : 0.02;
 	          var t = (i - this.lo) / (this.hi - this.lo) - .5;
 	          switch (this.selection) {
 		  case 0:
