@@ -555,16 +555,19 @@
    var sketchTypes = [];
    var sketchAction = null;
 
+   function importSketch(filename) {
+      var client = new XMLHttpRequest();
+      client.open("GET", filename);
+      client.onloadend = function() {
+         window.eval(client.responseText);
+      }
+      client.send();
+   }
+
    function gStart() {
       // LOAD SKETCHES FROM IMPORT ARRAY
-      for (var i = 0; i < imports.length; i++) {
-         var client = new XMLHttpRequest();
-         client.open('GET', imports[i]);
-         client.onloadend = function() {
-            window.eval(client.responseText);
-         }
-         client.send();
-      }
+      for (var i = 0; i < imports.length; i++)
+         importSketch(imports[i]);
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
