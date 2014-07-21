@@ -1,4 +1,3 @@
-
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
@@ -557,6 +556,15 @@
    var sketchAction = null;
 
    function gStart() {
+      // LOAD SKETCHES FROM IMPORT ARRAY
+      for (var i = 0; i < imports.length; i++) {
+         var client = new XMLHttpRequest();
+         client.open('GET', imports[i]);
+         client.onloadend = function() {
+            window.eval(client.responseText);
+         }
+         client.send();
+      }
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
@@ -2425,9 +2433,6 @@ if (outPort >= 0) {
       pullDownLabels = pagePullDownLabels;
 
       sketchTypeLabels = [];
-
-      for (var n = 0 ; n < sketchTypes.length ; n++)
-         registerSketch(sketchTypes[n]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 

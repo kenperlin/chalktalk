@@ -1,0 +1,174 @@
+var isCandle = false, candleX, candleY;
+
+function MothAndCandle() {
+   this.labels = "moth candle".split(' ');
+   this.is3D = true;
+   this.isAnimating = false;
+   this.mm = new M4();
+   this.up = (new M4()).identity().rotateX(PI/2);
+   this.moveMothX = 0;
+   this.moveMothY = 0;
+   this.transitionToCandle = 0;
+
+   this.code = [ ["", ""] ];
+
+   this.onSwipe = function(dx, dy) {
+      switch (this.labels[this.selection]) {
+      case "moth":
+         switch (pieMenuIndex(dx, dy)) {
+         case 1:
+	    this.isAnimating = true;
+	    break;
+         case 3:
+	    for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
+	       var s = sketchPage.sketches[i];
+	       if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
+                  s.isAnimating = true;
+            }
+	    break;
+         }
+	 break;
+      }
+   }
+
+   this.render = function(elapsed) {
+      if (this.startTime === undefined)
+         this.startTime = time;
+      var transition = sCurve(max(0, min(1, 2 * (time - this.startTime) - 1.5)));
+
+      function sharpen(t) { return (t < 0 ? -1 : 1) * pow(abs(t), 4.0); }
+
+      m.save();
+      switch (this.labels[this.selection]) {
+
+      case "moth":
+         this.code[0][1] = "When I see a light,\n   I go to it.";
+
+         if (this.isAnimating) {
+
+	    if (this.animationThrottle === undefined)
+	       this.animationThrottle = 0;
+	    this.animationThrottle = min(1, this.animationThrottle + elapsed / 0.5);
+	    var animationSpeed = sCurve(this.animationThrottle);
+
+	    // ALWAYS MOVE FORWARD.
+
+	    this.mm.translate(0, 15 * elapsed * animationSpeed, 0);
+
+	    // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
+
+            if (isCandle) {
+	       this.mm._m()[12] *= 1 - elapsed/2;
+	       this.mm._m()[13] *= 1 - elapsed/2;
+	       this.mm._m()[14] *= 1 - elapsed/2;
+
+               this.transitionToCandle = min(1, this.transitionToCandle + elapsed / 2.0);
+	       var t = sCurve(this.transitionToCandle);
+
+               var x = (this.xlo + this.xhi) / 2;
+               var y = (this.ylo + this.yhi) / 2;
+
+               this.moveMothX += elapsed * max(-10, min(10, candleX - x)) * min(1, 200 / this.size);
+               this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * min(1, 200 / this.size);
+            }
+
+	    m.translate(this.moveMothX, this.moveMothY, 0);
+
+	    // CONTINUALLY CHANGE DIRECTION.
+
+            var turnRate = 25 * elapsed * animationSpeed;
+	    this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 200.5 + 10 * this.id)));
+	    this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5 + 10 * this.id)));
+
+	    // TRY TO STAY ORIENTED UPRIGHT.
+
+            if (animationSpeed == 1)
+	       this.mm.aimZ(this.up);
+	 }
+
+	 // DRAW TORSO
+
+         lineWidth(lerp(transition, 2, 0.5));
+
+         m.scale(this.size / 300);
+	 m._xf(this.mm._m());
+	 m.save();
+	    // ALWAYS TURN TORSO TO FACE VIEW.
+	    m.rotateY(atan2(m._m()[2], m._m()[0]));
+            mCurve(createCurve([-0.01,-0.6],[ 0.01,-0.6], 45.0));
+	 m.restore();
+
+	 // DRAW LEFT WING
+
+	 var flap = sin(6 * TAU * time);
+         lineWidth(2);
+
+	 m.save();
+	    m.translate(-0.06,0,0);
+	    if (this.isAnimating)
+	       m.rotateY(flap);
+	    mCurve(createCurve([-0.03, 0.1],[-0.34,-0.2],-0.8).
+	    concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
+	 m.restore();
+
+	 // DRAW RIGHT WING
+
+	 m.save();
+	    m.translate(0.06,0,0);
+	    if (this.isAnimating)
+	       m.rotateY(-flap);
+	    mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
+	    concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
+	 m.restore();
+
+	 // DRAW LEFT AND RIGHT ANTENNAE
+
+         lineWidth(lerp(transition, 2, 0.5));
+
+	 mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
+	 mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+
+         break;
+
+      case "candle":
+         this.code[0][1] = "I am a light.";
+
+         // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
+
+         if (this.glyphTransition >= 0.5 && isNumber(this.xlo)) {
+	    candleX = (this.xlo + this.xhi) / 2;
+	    candleY = this.ylo;
+            isCandle = true;
+         }
+
+	 // THEY WANDER OFF WHEN THE CANDLE DISAPPEARS.
+
+         if (this.fadeAway > 0 && this.fadeAway < 1)
+            isCandle = false;
+
+         m.scale(this.size / 350);
+
+	 // CANDLE
+
+         mCurve([[-.2,-1.1],[-.2,.3]]
+	        .concat(createCurve([-.2,.3],[.2,.2],-.1))
+		.concat([[.2,.2],[.2,-1.1]]));
+
+	 // WICK
+
+         mCurve(createCurve([ .01, .21],[ .01, .4], .05));
+
+	 // FLAME
+
+         mCurve(createCurve([ 0.00 ,0.90],[-0.10 ,0.60], 0.08).
+	 concat(createCurve([-0.10 ,0.60],[ 0.00 ,0.30],-0.31)));
+
+         mCurve(createCurve([ 0.00 ,0.90],[ 0.195,0.63], 0.03).
+	 concat(createCurve([ 0.195,0.63],[ 0.00 ,0.30], 0.30)));
+
+         break;
+      }
+      m.restore();
+   }
+}
+MothAndCandle.prototype = new Sketch;

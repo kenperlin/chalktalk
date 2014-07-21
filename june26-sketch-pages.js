@@ -1,3 +1,7 @@
+var imports = [
+   "sketches/bird.js",
+];
+
 var sketchTypes =
 "Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Noises MothAndCandle SplineTest".split(' ');
 
