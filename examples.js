@@ -42,25 +42,30 @@
 
    function Bird() {
       this.T = 0;
-      this.walkT = 0;
       this.labels = "bird".split(' ');
+      this.isGaze = false;
       this.isTall = false;
+      this.gaze = 0.0;
       this.tall = 0.0;
+      this.walkT = 0;
 
       this.choice = new Choice();
 
       this.onSwipe = function(dx, dy) {
-         switch (pieMenuIndex(dx, dy)) {
+         switch (pieMenuIndex(dx, dy, 8)) {
 	 case 0:
 	    this.choice.set(2);
 	    break;
 	 case 1:
-	    this.isTall = true;
+	    this.isGaze = ! this.isGaze;
 	    break;
 	 case 2:
+	    this.isTall = true;
+	    break;
+	 case 4:
 	    this.choice.set(1);
 	    break;
-	 case 3:
+	 case 6:
 	    this.isTall = false;
 	    break;
 	 }
@@ -71,6 +76,9 @@
 
          this.tall = this.isTall ? min(1, this.tall + 2 * elapsed)
                                  : max(0, this.tall - 2 * elapsed);
+
+         this.gaze = this.isGaze ? min(1, this.gaze + 2 * elapsed)
+                                 : max(0, this.gaze - 2 * elapsed);
 
          var idle = this.choice.get(1);
          var walk = this.choice.get(2);
@@ -159,7 +167,10 @@
 
             m.save();
                m.translate(neckX,neckY,0);
-               m.rotateZ(lookUp);
+	       var rotz = lookUp;
+	       if (sketchPage.moveX !== undefined && isNumber(this.cx()))
+	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.moveY, sketchPage.moveX - this.cx()));
+               m.rotateZ(rotz);
                m.rotateY(lookSide);
                mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
             m.restore();
