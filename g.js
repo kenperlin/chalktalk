@@ -1311,18 +1311,37 @@
       var y0 = bgClickY;
       var x1 = sketchPage.xDown;
       var y1 = sketchPage.yDown;
-      var n2 = pieMenuIndex(x - x1, y - y1, 8);
-      if (len(x1 - x0, y1 - y0) < clickSize)
-         console.log("BG ACTION " + n2);
+      if (len(x1 - x0, y1 - y0) < clickSize) {
+         var n = pieMenuIndex(x - x1, y - y1, 8);
+         console.log("BG DOUBLE CLICK");
+      }
       else {
-         var n1 = pieMenuIndex(x1 - x0, y1 - y0, 8);
+         var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
 
-	 var target = null;
-	 var sketches = sketchPage.sketchesAt(x, y);
-	 if (sketches.length > 0)
-	    target = sketches[0].glyphName;
+         // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
 
-         console.log("BG ACTION " + n1 + " -> " + n2 + (target==null ? "" : " [" + target + "]"));
+         if (len(x - x1, y - y1) < clickSize)
+            console.log("BG CLICK ACTION " + n1);
+         else {
+	    var s = null;
+	    var sketches = sketchPage.sketchesAt(x, y);
+	    if (sketches.length > 0)
+	       s = sketches[0];
+
+            // n2 = POSITION OF START OF SWIPE WRT END OF SWIPE.
+
+            if (s == null) {
+               var n2 = pieMenuIndex(x1 - x, y1 - y, 8);
+               console.log("BG SWIPE ACTION " + n1 + " " + n2);
+            }
+
+            // n2 = POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
+
+	    else {
+	       var n2 = pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8);
+               console.log("BG SKETCH SWIPE ACTION " + n1 + " " + n2 + " [" + s.glyphName + "]");
+            }
+         }
       }
    }
 
