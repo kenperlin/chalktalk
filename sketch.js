@@ -775,6 +775,7 @@
       this.drewFirstLine = false;
       this.parsedStrokes = null;
       this.parsedTransition = 0;
+      this.glyphName = "simple sketch";
 
       this.isParsed = function() {
          return this.parsedStrokes != null;

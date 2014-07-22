@@ -1316,7 +1316,13 @@
          console.log("BG ACTION " + n2);
       else {
          var n1 = pieMenuIndex(x1 - x0, y1 - y0, 8);
-         console.log("BG ACTION " + n1 + " -> " + n2);
+
+	 var target = null;
+	 var sketches = sketchPage.sketchesAt(x, y);
+	 if (sketches.length > 0)
+	    target = sketches[0].glyphName;
+
+         console.log("BG ACTION " + n1 + " -> " + n2 + (target==null ? "" : " [" + target + "]"));
       }
    }
 
