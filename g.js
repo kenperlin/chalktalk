@@ -1320,29 +1320,37 @@
 
          // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
 
-         if (len(x - x1, y - y1) < clickSize)
-            console.log("BG CLICK ACTION " + n1);
+         if (len(x - x1, y - y1) < clickSize) {
+	    bgGesture(n1);
+	    return;
+         }
+
+	 var sketches = sketchPage.sketchesAt(x, y);
+	 if (sketches.length == 0)
+
+            // POSITION OF START OF SWIPE WRT END OF SWIPE.
+
+            bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
+
          else {
-	    var s = null;
-	    var sketches = sketchPage.sketchesAt(x, y);
-	    if (sketches.length > 0)
-	       s = sketches[0];
 
-            // n2 = POSITION OF START OF SWIPE WRT END OF SWIPE.
+            // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
 
-            if (s == null) {
-               var n2 = pieMenuIndex(x1 - x, y1 - y, 8);
-               console.log("BG SWIPE ACTION " + n1 + " " + n2);
-            }
-
-            // n2 = POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
-
-	    else {
-	       var n2 = pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8);
-               console.log("BG SKETCH SWIPE ACTION " + n1 + " " + n2 + " [" + s.glyphName + "]");
-            }
+            var s = sketches[0];
+            bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
          }
       }
+   }
+
+   // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+
+   function bgGesture(n1, n2, s) {
+      if (n2 === undefined)
+         console.log("BG CLICK " + n1);
+      else if (s === undefined)
+         console.log("BG SWIPE " + n1 + " " + n2);
+      else
+         console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
 
    function startSketchDragAction(x, y) {
