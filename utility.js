@@ -441,6 +441,16 @@
       return i;
    }
 
+   function sample(arr, t) {
+      t = max(0, min(0.999, t));
+      var n = arr.length;
+      if (n == 1)
+         return arr[0];
+      var i = floor((n-1) * t);
+      var f = (n-1) * t - i;
+      return lerp(f, arr[i], arr[i+1]);
+   }
+
 // 2D GEOMETRY UTILITIES.
 
    function isInRect(x,y, R) {

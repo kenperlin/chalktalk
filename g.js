@@ -1355,15 +1355,27 @@
 
    function startSketchDragAction(x, y) {
       sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-      sketchDragActionXY = [x,y];
-      sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
+      switch (sketchDragMode) {
+      case 2:
+         sk().motionPath = [[x],[y]];
+         sketchPage.isDefiningMotion = true;
+         break;
+      case 3:
+         sketchDragActionXY = [x,y];
+         sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
+	 break;
+      }
    }
 
    function doSketchDragAction(x, y) {
-      var dx = x - sketchDragActionXY[0];
-      var dy = y - sketchDragActionXY[1];
       switch (sketchDragMode) {
+      case 2:
+         sk().motionPath[0].push(x);
+         sk().motionPath[1].push(y);
+         break;
       case 3:
+         var dx = x - sketchDragActionXY[0];
+         var dy = y - sketchDragActionXY[1];
          if ( abs(dx) > sketchDragActionSize[0] ||
               abs(dy) > sketchDragActionSize[1] ) {
             copySketch(sk());
@@ -1375,6 +1387,11 @@
    }
 
    function endSketchDragAction(x, y) {
+      switch (sketchDragMode) {
+      case 2:
+         delete sketchPage.isDefiningMotion;
+	 break;
+      }
    }
 
    function doSketchClickAction(x, y) {
@@ -1710,30 +1727,26 @@
          for (var I = 0 ; I < nsk() ; I++) {
             var S = sk(I);
 
-            // SIMPLE SKETCH:
+            // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
 
-            if (S instanceof SimpleSketch) {
-
-               // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
-
-               if (S.isNullText()) {
+            if (S.isNullText()) {
+	       if (S instanceof SimpleSketch) {
                   if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
-               }
+	       }
+	       else {
+                 for (var i = 0 ; i < S.in.length ; i++)
+                    S.outValue[i] = S.inValue[i];
+	       }
+	    }
 
-               // IF TEXT: EVALUATE, THEN PROPAGATE IF THERE IS AN OUTPUT.
+            // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
 
-               else {
-                  S.evalResult = S.evalCode(S.text);
-                  if (S.evalResult != null && isDef(S.out[0]))
-                     S.outValue[0] = S.evalResult;
-               }
-            }
-
-            // NON-SIMPLE SKETCH: EACH PORT'S VALUES PROPAGATE FROM ITS INPUT TO ITS OWN OUTPUT.
-
-            else for (var i = 0 ; i < S.in.length ; i++)
-               S.outValue[i] = S.inValue[i];
+	    else {
+               S.evalResult = S.evalCode(S.text);
+               if (S.evalResult != null && isDef(S.out[0]))
+                  S.outValue[0] = S.evalResult;
+	    }
 
             // VALUES PROPAGATE ALONG LINKS.
 
@@ -2345,7 +2358,7 @@
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-   var _g, time = 0, _startTime = (new Date()).getTime();
+   var _g, time = 0, _startTime = (new Date()).getTime(), motion = 0;
 
    var glyphCountBeforePage = 0;
 

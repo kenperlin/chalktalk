@@ -654,6 +654,8 @@
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
+	 if (this.motionPath !== undefined)
+	    x += sample(this.motionPath[0], motion) - this.motionPath[0][0];
          return x;
       }
       this.ty = function() {
@@ -666,6 +668,8 @@
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
+	 if (this.motionPath !== undefined)
+	    y += sample(this.motionPath[1], motion) - this.motionPath[1][0];
          return y;
       }
 

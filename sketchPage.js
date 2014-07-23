@@ -1376,9 +1376,21 @@ var sketchToDelete = null;
 
             _g.restore();
 
-            this.index = PUSHED_sketchPage_index;
-
             _g_sketchEnd();
+
+	    if (this.isDefiningMotion !== undefined) {
+	       var X = sk().motionPath[0];
+	       var Y = sk().motionPath[1];
+	       _g.strokeStyle = 'rgba(255,255,255,0.5)';
+	       _g.lineWidth = 5;
+               _g.beginPath();
+	       _g.moveTo(X[0], Y[0]);
+	       for (var i = 1 ; i < sk().motionPath[0].length ; i++)
+	          _g.lineTo(X[i], Y[i]);
+               _g.stroke();
+	    }
+
+            this.index = PUSHED_sketchPage_index;
          }
 
          noisy = 0;
