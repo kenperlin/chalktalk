@@ -1509,10 +1509,10 @@ var sketchToDelete = null;
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
-         _g.strokeStyle = scrimColor(.6);
+         //_g.strokeStyle = scrimColor(.6);
          _g.font = '8pt Trebuchet MS';
-         _g.lineWidth = 1;
-         line(0, height()-1, width(), height()-1);
+         //_g.lineWidth = 1;
+         //line(0, height()-1, width(), height()-1);
 
          this.glyphT = this.isDraggingGlyph
 	             ? this.iDragged + 0.99
@@ -1522,9 +1522,8 @@ var sketchToDelete = null;
          for (var i = 0 ; i < glyphs.length ; i++)
 	    this.showGlyph(i);
 
-         if (this.isDraggingGlyph) {
+         if (this.isDraggingGlyph)
 	    this.showGlyph(this.iDragged, This().mouseX, This().mouseY);
-         }
 
          _g.restore();
       }
