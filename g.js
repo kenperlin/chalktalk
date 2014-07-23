@@ -501,8 +501,8 @@
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
    var bgClickCount = 0;
-   var clickX = 0;
-   var clickY = 0;
+   var bgClickX = 0;
+   var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphInfo = [];
    var glyphSketch = null;
@@ -1294,13 +1294,67 @@
       return textChar;
    }
 
+   var isBgActionEnabled = false;
    var isSketchDragEnabled = false;
    var sketchDragMode = 0;
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
+   function startBgAction(x, y) {
+   }
+
+   function doBgAction(x, y) {
+   }
+
+   function endBgAction(x, y) {
+      var x0 = bgClickX;
+      var y0 = bgClickY;
+      var x1 = sketchPage.xDown;
+      var y1 = sketchPage.yDown;
+      if (len(x1 - x0, y1 - y0) < clickSize) {
+         var n = pieMenuIndex(x - x1, y - y1, 8);
+         console.log("BG DOUBLE CLICK");
+      }
+      else {
+         var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
+
+         // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
+
+         if (len(x - x1, y - y1) < clickSize) {
+	    bgGesture(n1);
+	    return;
+         }
+
+	 var sketches = sketchPage.sketchesAt(x, y);
+	 if (sketches.length == 0)
+
+            // POSITION OF START OF SWIPE WRT END OF SWIPE.
+
+            bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
+
+         else {
+
+            // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
+
+            var s = sketches[0];
+            bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
+         }
+      }
+   }
+
+   // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+
+   function bgGesture(n1, n2, s) {
+      if (n2 === undefined)
+         console.log("BG CLICK " + n1);
+      else if (s === undefined)
+         console.log("BG SWIPE " + n1 + " " + n2);
+      else
+         console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
+   }
+
    function startSketchDragAction(x, y) {
-      sketchDragMode = pieMenuIndex(clickX - x, clickY - y, 8);
+      sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       sketchDragActionXY = [x,y];
       sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
    }
@@ -1331,7 +1385,7 @@
 
       bgClickCount = 0;
 
-      var index = pieMenuIndex(clickX - x, clickY - y, 8);
+      var index = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
@@ -2349,7 +2403,7 @@
 
       // IF THERE IS AN AUDIENCE POP-UP, SET IT TO THE RIGHT PAGE.
 
-      if (audiencePopup != null)
+      if (isAudiencePopup())
          audiencePopup.document.getElementById('slide').innerHTML =
             document.getElementById(pageName).innerHTML;
 

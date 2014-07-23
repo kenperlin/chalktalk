@@ -173,9 +173,14 @@ var sketchToDelete = null;
          }
 
          isSketchDragActionEnabled = false;
+         isBgActionEnabled = false;
          if (bgClickCount == 1) {
             if (isSketchDragActionEnabled = isHover())
                startSketchDragAction(x, y);
+            else {
+               isBgActionEnabled = true;
+               startBgAction(x, y);
+            }
             return;
          }
 
@@ -301,6 +306,11 @@ var sketchToDelete = null;
             return;
          }
 
+         if (isBgActionEnabled) {
+            doBgAction(x, y);
+            return;
+         }
+
          if (bgClickCount == 1)
             return;
 
@@ -401,6 +411,11 @@ var sketchToDelete = null;
          if (isSketchDragActionEnabled) {
             endSketchDragAction(x, y);
             isSketchDragActionEnabled = false;
+         }
+
+         if (isBgActionEnabled) {
+            endBgAction(x, y);
+            isBgActionEnabled = false;
          }
 
          if (paletteColorIndex >= 0) {
@@ -629,11 +644,11 @@ var sketchToDelete = null;
             if (isExpertMode || menuType == 1) {
                switch (++bgClickCount) {
                case 1:
-                  clickX = x;
-                  clickY = y;
+                  bgClickX = x;
+                  bgClickY = y;
                   break;
                case 2:
-                  if (len(x - clickX, y - clickY) < 20)
+                  if (len(x - bgClickX, y - bgClickY) < 20)
                      pieMenuStart(x, y);
                   bgClickCount = 0;
                   break;

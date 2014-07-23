@@ -167,21 +167,85 @@ function lineIntersectionCheck(array){
 
 }
 
+function distance(pt1x,pt1y,pt2x,pt2y){
+  var dx = Math.abs(pt1x-pt2x);
+  var dy = Math.abs(pt1y-pt2y);
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+function findMinMax(array, index, amount){
+  var low = 1e6;
+  var high = -1e6;
+  var distances = [];
+  if(amount>0){
+    for(var i = index ; i < array.length-1 ; i++){
+      var dist = distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
+      if(i<index+10 && dist<2)
+      distances.push(dist);
+    }
+  }
+  else{
+    for(var i = index ; i >0 ; i--){
+      var dist = distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
+      if(i<index+10 && dist<2)
+      distances.push(dist);
+    }
+  }
+  for(var i = 0 ; i < distances.length ; i++){
+    if(distances[i]>high)
+      high=distances[i];
+    if(distances[i]<low)
+      low=distances[i];
+  }
+  return [low,high];
+}
+
 function softPush(array, index, amount){
 
-  array[index][1]+=amount;
-  if(index+1 < array.length)
-     array[index+1][1]+=amount*.9;
-  if(index+2 < array.length)
-     array[index+2][1]+=amount*.5;
-  if(index+3 < array.length)
-     array[index+3][1]+=amount*.1;
-  if(index-1 > 0)
-     array[index-1][1]+=amount*.9;
-  if(index-2 > 0)
-     array[index-2][1]+=amount*.5;
-  if(index-3 > 0)
-     array[index-3][1]+=amount*.1;
+  for(var i = index ; i < array.length-1 ; i++){
+    var dist = distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
+    var dropoff = (index-i)*.1;
+   
+    var minMax = findMinMax(array,index,10);
+    var mapped = THREE.Math.mapLinear(i,index,index+10,1,0);
+    var mappedD = THREE.Math.mapLinear(dist,minMax[0],minMax[1],1,0);
+
+    if(mapped>0 && mappedD>0){
+      console.log(mappedD);
+      array[i][1]-=THREE.Math.smootherstep(mappedD,0,1)*amount;
+    }
+
+  }
+
+
+  for(var i = index-1 ; i > 0 ; i--){
+    var dist = distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
+    var dropoff = (index-i)*.1;
+    
+    var minMax = findMinMax(array,index,10);
+    var mapped = THREE.Math.mapLinear(i,index,index-10,1,0);
+    var mappedD = THREE.Math.mapLinear(dist,minMax[0],minMax[1],1,0);
+
+    if(mapped>0 && mappedD>0){
+      console.log(mappedD);
+      array[i][1]-=THREE.Math.smootherstep(mappedD,0,1)*amount;
+    }
+
+  }
+
+  // array[index][1]+=amount;
+  // if(index+1 < array.length)
+  //    array[index+1][1]+=amount*.9;
+  // if(index+2 < array.length)
+  //    array[index+2][1]+=amount*.5;
+  // if(index+3 < array.length)
+  //    array[index+3][1]+=amount*.1;
+  // if(index-1 > 0)
+  //    array[index-1][1]+=amount*.9;
+  // if(index-2 > 0)
+  //    array[index-2][1]+=amount*.5;
+  // if(index-3 > 0)
+  //    array[index-3][1]+=amount*.1;
 
 }
 
