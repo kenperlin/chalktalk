@@ -2370,7 +2370,7 @@
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-   var _g, time = 0, _startTime = (new Date()).getTime(), motion = 0;
+   var _g, time = 0, _startTime = (new Date()).getTime(), motion = 1;
 
    var glyphCountBeforePage = 0;
 

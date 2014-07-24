@@ -151,6 +151,26 @@
       }
    }
 
+   function Motion() {
+      this.labels = "motion".split(' ');
+      this.dragValue = 1;
+
+      this.mouseDrag = function(x, y) {
+         this.dragValue = (x - this.xlo) / (this.xhi - this.xlo);
+      }
+
+      this.render = function(elapsed) {
+         motion = max(0, min(1, isDef(this.in[0]) ? this.inValue[0] : this.dragValue));
+         m.save();
+	    m.scale(this.size / 400);
+	    mLine([-1,0],[1,0]);
+	    var x = 2 * motion - 1;
+	    mCurve([[x-.4,.4],[x,0],[x-.4,-.4]]);
+         m.restore();
+      }
+   }
+   Motion.prototype = new Sketch;
+
    function Noises() {
       this.labels = "noise1D absns1D".split(' ');
 

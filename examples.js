@@ -244,6 +244,8 @@
    David.prototype = new Sketch;
 
    function Control() {
+      this.code = [["","x"]];
+
       this.labels = "slideX slideY".split(' ');
 
       this.flip = 1;
@@ -298,7 +300,8 @@
          this.lo = this.isInValue("lo") ? this.getInFloat("lo") : this.getDefaultValue("lo");
          this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
 
-         this.setOutValue("t", lerp(t, this.lo, this.hi));
+         var value = lerp(t, this.lo, this.hi);
+         this.setOutValue("t", value);
 
          m.save();
          m.scale(sc);
