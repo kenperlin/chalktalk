@@ -1177,8 +1177,8 @@
          var s = new SimpleSketch();
          for (var n = 0 ; n < this.data.length ; n++)
             for (var i = 0 ; i < this.data[n].length ; i++) {
-               var x1 = this.data[n][i][0] - 50;
-               var y1 = this.data[n][i][1] - 50;
+               var x1 = 1.5 * this.data[n][i][0] - 50;
+               var y1 = 1.5 * this.data[n][i][1] - 50;
 	       var x = x1 + 3 * noise2(x1 / 30, y1 / 30);
 	       var y = y1 + 3 * noise2(x1 / 30, y1 / 30 + 100);
                s.sp0.push([x,y]);

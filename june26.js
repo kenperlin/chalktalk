@@ -719,7 +719,8 @@ function MothAndCandle() {
 
          lineWidth(lerp(transition, 2, 0.5));
 
-         m.scale(this.size / 300);
+         m.scale(this.size / 250);
+         m.translate(0,-.1,0);
 	 m._xf(this.mm._m());
 	 m.save();
 	    // ALWAYS TURN TORSO TO FACE VIEW.
