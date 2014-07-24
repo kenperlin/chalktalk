@@ -154,10 +154,14 @@
    function Motion() {
       this.labels = "motion".split(' ');
       this.dragValue = 1;
-      var d = 0.2;
+      var d = 0.4;
 
       this.mouseDrag = function(x, y) {
-         this.dragValue = (x - this.xlo) / (this.xhi - this.xlo);
+         var xlo = this.xlo + sketchPadding;
+         var xhi = this.xhi - sketchPadding;
+	 var x0 = lerp(d/4, xlo, xhi);
+	 var x1 = lerp(1-d/4, xlo, xhi);
+         this.dragValue = (x - x0) / (x1 - x0);
       }
 
       this.render = function(elapsed) {
@@ -166,7 +170,7 @@
 	    m.scale(this.size / 400);
 	    mLine([-1,0],[1,0]);
 	    var x = (2-d) * motion - (1-d);
-	    mCurve([[x-d,d],[x,0],[x-d,-d]]);
+	    mCurve(makeOval(x-d,-d/2,d,d,20,TAU,0));
          m.restore();
       }
    }
