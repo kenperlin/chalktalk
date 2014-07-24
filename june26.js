@@ -154,6 +154,7 @@
    function Motion() {
       this.labels = "motion".split(' ');
       this.dragValue = 1;
+      var d = 0.2;
 
       this.mouseDrag = function(x, y) {
          this.dragValue = (x - this.xlo) / (this.xhi - this.xlo);
@@ -164,8 +165,8 @@
          m.save();
 	    m.scale(this.size / 400);
 	    mLine([-1,0],[1,0]);
-	    var x = 2 * motion - 1;
-	    mCurve([[x-.4,.4],[x,0],[x-.4,-.4]]);
+	    var x = (2-d) * motion - (1-d);
+	    mCurve([[x-d,d],[x,0],[x-d,-d]]);
          m.restore();
       }
    }

@@ -975,6 +975,7 @@
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
          ["blur", "blur(x,1.0)"],
+         ["saw", "x-floor(x)"],
       ];
 
       this.labels = [];
@@ -983,7 +984,7 @@
 
       function makeCurve(f) {
          var curve = [];
-         for (var t = -1 ; t <= 1 ; t += .1)
+         for (var t = -1 ; t <= 1 ; t += .03)
 	    curve.push([t, f(t)]);
 	 return curve;
       }
@@ -995,6 +996,7 @@
          makeCurve(function(x) { return x * x; }),
          makeCurve(function(x) { return (floor(x)+.5); }),
          makeCurve(function(x) { return x<0?1:1-x; }),
+         makeCurve(function(x) { return x - floor(x); }),
       ];
 
       this.render = function(elapsed) {
@@ -1017,7 +1019,7 @@
          m.save();
          m.scale(sc);
 
-         var x = this.getInFloat("x");
+         var x = this.isInValue("x") ? this.getInFloat("x") : time;
          var y = this.getInFloat("y1") + this.getInFloat("y2");
          var result = null;
          try {
