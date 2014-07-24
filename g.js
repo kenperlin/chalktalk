@@ -1357,7 +1357,14 @@
       sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       switch (sketchDragMode) {
       case 2:
-         sk().motionPath = [[x],[y]];
+         if (motion == 0 || sk().motionPath === undefined)
+            sk().motionPath = [[x],[y]];
+         else {
+            var t = max(0, min(1, motion));
+	    var i = floor(t * sk().motionPath[0].length);
+            sk().motionPath[0].splice(i, Number.MAX_VALUE);
+            sk().motionPath[1].splice(i, Number.MAX_VALUE);
+         }
          sketchPage.isDefiningMotion = true;
          break;
       case 3:

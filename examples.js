@@ -54,7 +54,8 @@
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy, 8)) {
 	 case 0:
-	    this.choice.set(2);
+	    this.choice.state(2);
+	    this.isGaze = false;
 	    break;
 	 case 1:
 	    this.isGaze = ! this.isGaze;
@@ -63,7 +64,7 @@
 	    this.isTall = true;
 	    break;
 	 case 4:
-	    this.choice.set(1);
+	    this.choice.state(1);
 	    break;
 	 case 6:
 	    this.isTall = false;
@@ -75,13 +76,13 @@
          this.choice.update(elapsed);
 
          this.tall = this.isTall ? min(1, this.tall + 2 * elapsed)
-                                 : max(0, this.tall - 2 * elapsed);
+                                 : max(0, this.tall - elapsed);
 
          this.gaze = this.isGaze ? min(1, this.gaze + 2 * elapsed)
-                                 : max(0, this.gaze - 2 * elapsed);
+                                 : max(0, this.gaze - elapsed);
 
-         var idle = this.choice.get(1);
-         var walk = this.choice.get(2);
+         var idle = this.choice.value(1);
+         var walk = this.choice.value(2);
 
          // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
 
@@ -101,7 +102,7 @@
 
          // T CONTROLS WALK, IS ZERO UNTIL SKETCH IS FINISHED.
 
-         var state = this.choice.value;
+         var state = this.choice.state();
 
          this.afterSketch(function() {
             switch (state) {
@@ -168,8 +169,8 @@
             m.save();
                m.translate(neckX,neckY,0);
 	       var rotz = lookUp;
-	       if (sketchPage.moveX !== undefined && isNumber(this.cx()))
-	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.moveY, sketchPage.moveX - this.cx()));
+	       if (sketchPage.x !== undefined && isNumber(this.cx()))
+	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
                m.rotateZ(rotz);
                m.rotateY(lookSide);
                mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
@@ -828,7 +829,7 @@
          sinceLastMeasurement = 1000;
          values = [];
 
-         switch (that.choice.value) {
+         switch (that.choice.state()) {
          case 0:       // AUTO RANGE
             minval = null;
             maxval = null;
@@ -854,7 +855,7 @@
 
             values.push(v);
 
-            if (that.choice.value == 0) {        // AUTO RANGE
+            if (that.choice.state() == 0) {        // AUTO RANGE
                // update min/max
                if (values.length == 1 || minval === null || maxval === null) {
                   minval = v;
@@ -881,9 +882,9 @@
 
          mLine([-1,1],[-1,-1]);
 
-         if (this.s != this.choice.value)
+         if (this.s != this.choice.state())
              resetValues();
-         this.s = this.choice.value;
+         this.s = this.choice.state();
 
          // Record measurement
 
@@ -908,7 +909,7 @@
 
          // zero line (if one is in range)
 
-         if (this.choice.value == 2) {
+         if (this.choice.state() == 2) {
 
             // LOGIC RANGE, draw the baseline below 0
 

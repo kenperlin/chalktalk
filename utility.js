@@ -92,27 +92,34 @@
 // CHOICE SELECTION WITH CONTINUOUS TRANSITION WEIGHTS.
 
    function Choice() {
-      this.weights = [];
-      this.set = function(n) {
-         this.value = n;
-         this.update();
+      this.flip = function() {
+         this.set(1 - this.stateValue);
       }
-      this.get = function(i) {
+      this.value = function(i) {
+         if (i === undefined) i = 0;
          return sCurve(this.weights[i]);
+      }
+      this.state = function(n) {
+         if (n !== undefined) {
+            this.stateValue = n;
+            this.update();
+         }
+	 return this.stateValue;
       }
       this.update = function(delta) {
          if (delta === undefined)
             delta = 0;
 
-         while (this.weights.length <= this.value)
+         while (this.weights.length <= this.stateValue)
             this.weights.push(0);
 
          for (var i = 0 ; i < this.weights.length ; i++)
             this.weights[i] =
-               i == this.value ? min(1, this.weights[i] + 2 * delta)
-                               : max(0, this.weights[i] - delta);
+               i == this.stateValue ? min(1, this.weights[i] + 2 * delta)
+                                    : max(0, this.weights[i] - delta);
       }
-      this.set(0);
+      this.weights = [];
+      this.state(0);
    }
 
 // ENCODE A FRACTIONAL AMOUNT AS A PRINTABLE CHARACTER (HAS ABOUT 2 SIG. DIGITS PRECISION).

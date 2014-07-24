@@ -772,8 +772,8 @@ var sketchToDelete = null;
 
       this.mouseMove = function(x, y) {
 
-         this.moveX = x;
-         this.moveY = y;
+         this.x = x;
+         this.y = y;
 
          if (y >= height() - margin && ! isShowingGlyphs) {
             isBottomHover = true;
@@ -1378,14 +1378,14 @@ var sketchToDelete = null;
 
             _g_sketchEnd();
 
-	    if (this.isDefiningMotion !== undefined) {
+	    if (this.isDefiningMotion !== undefined && sk().motionPath !== undefined) {
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
 	       _g.strokeStyle = 'rgba(255,255,255,0.5)';
 	       _g.lineWidth = 5;
                _g.beginPath();
 	       _g.moveTo(X[0], Y[0]);
-	       for (var i = 1 ; i < sk().motionPath[0].length ; i++)
+	       for (var i = 1 ; i < X.length ; i++)
 	          _g.lineTo(X[i], Y[i]);
                _g.stroke();
 	    }
