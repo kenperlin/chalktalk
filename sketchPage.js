@@ -1491,9 +1491,10 @@ var sketchToDelete = null;
       }
 
       this.glyphBounds = function(i) {
-         var x = glyphW() / 20 + glyphW() * floor(i / 10) - _g.panX;
-         var y = ((i % 10) * height()) / 10 + glyphW() / 10;
-         return [ x, y, x + glyphW() * .7, y + glyphW() * .8 ];
+         var ht = height() / 10;
+         var x = ht / 20 + ht * floor(i / 10) - _g.panX;
+         var y = ((i % 10) * height()) / 10 + ht / 10;
+         return [ x, y, x + ht * .7, y + ht * .8 ];
       }
 
       this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
@@ -1509,15 +1510,12 @@ var sketchToDelete = null;
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
-         //_g.strokeStyle = scrimColor(.6);
          _g.font = '8pt Trebuchet MS';
-         //_g.lineWidth = 1;
-         //line(0, height()-1, width(), height()-1);
 
          this.glyphT = this.isDraggingGlyph
 	             ? this.iDragged + 0.99
-	             : 10 * (floor((this.mx + _g.panX) / glyphW()) +
-                                    max(0, min(.99, this.my / height())));
+	             : 10 * (floor((this.mx + _g.panX) / (height()/10)) +
+                             max(0, min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
 	    this.showGlyph(i);
@@ -1536,7 +1534,7 @@ var sketchToDelete = null;
 	    gX += cx - (b[0] + b[2]) / 2;
 	    gY += cy - (b[1] + b[3]) / 2;
          }
-	 var x = gX + glyphW() * .1;
+	 var x = gX + (height()/10) * .1;
 	 var y = gY;
 	 var t = this.glyphT;
 
@@ -1571,7 +1569,7 @@ var sketchToDelete = null;
          var tw = textWidth(txt);
          _g.fillText(txt, gX + 2, y + 10.5);
 
-         y += 20;
+         y += height() / 45;
 
          var selected = t >= i && t < i+1;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
@@ -1580,7 +1578,7 @@ var sketchToDelete = null;
 
          var nn = glyph.data.length;
 
-         var sc = 0.4;
+         var sc = height() / 2000;
          for (var n = 0 ; n < nn ; n++) {
 
             var d = glyph.data[n];
@@ -1942,7 +1940,6 @@ var sketchToDelete = null;
             if (isDef(ts) && ts.length > 0) {
                _g.lineWidth = isShowingShorthand ? 2 : 4;
                _g.beginPath();
-               //_g.strokeStyle = 'red';
                var i0 = isShowingShorthand ? iOut : 0;
                if (ts.length > i0) {
                   _g.moveTo(ts[i0][0], ts[i0][1]);
@@ -1965,8 +1962,6 @@ var sketchToDelete = null;
 	 return sketches;
       }
    }
-
-   var glyphW = function() { return height() / 10; }
 
    var sketchPage = sketchBook.setPage(0);
 
