@@ -1378,7 +1378,7 @@ var sketchToDelete = null;
 
             _g_sketchEnd();
 
-	    if (this.definingMotion == sk().colorId && sk().motionPath !== undefined) {
+	    if (this.definingMotion == sk().colorId && sk().motionPath.length > 0) {
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
 	       _g.strokeStyle = 'rgba(' + paletteRGB[sk().colorId][0] + ',' +

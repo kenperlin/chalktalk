@@ -154,23 +154,22 @@
    function Motion() {
       this.labels = "motion".split(' ');
       this.dragValue = 1;
-      var d = 0.4;
+      var d = 0.3;
 
       this.mouseDrag = function(x, y) {
-         var xlo = this.xlo + sketchPadding;
-         var xhi = this.xhi - sketchPadding;
-	 var x0 = lerp(d/4, xlo, xhi);
-	 var x1 = lerp(1-d/4, xlo, xhi);
+         var x0 = this.xlo + sketchPadding;
+         var x1 = this.xhi - sketchPadding;
          this.dragValue = (x - x0) / (x1 - x0);
       }
 
       this.render = function(elapsed) {
          motion[this.colorId] = max(0, min(1, isDef(this.in[0]) ? this.inValue[0] : this.dragValue));
          m.save();
-	    m.scale(this.size / 400);
+	    m.scale(this.size / 360);
 	    mLine([-1,0],[1,0]);
-	    var x = (2-d) * motion[this.colorId] - (1-d);
-	    mCurve(makeOval(x-d,-d/2,d,d,20,TAU,0));
+	    mCurve([[1-d,d],[1,0],[1-d,-d]]);
+	    m.translate(2 * motion[this.colorId] - 1, 0, 0);
+	    mLine([0,d],[0,-d]);
          m.restore();
       }
    }

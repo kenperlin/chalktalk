@@ -396,6 +396,7 @@
       this.m2s = function(p) { return [ this.m2x(p[0]), this.m2y(p[1]) ]; }
       this.m2x = function(x) { return (x - this.tx()) / this.scale(); }
       this.m2y = function(y) { return (y - this.ty()) / this.scale(); }
+      this.motionPath = [];
       this.mouseDown = function(x, y) {}
       this.mouseDrag = function(x, y) {}
       this.mouseMove = function(x, y) {}
@@ -674,7 +675,7 @@
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
-	 if (this.motionPath !== undefined)
+	 if (this.motionPath.length > 0)
 	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
       }
@@ -688,7 +689,7 @@
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
-	 if (this.motionPath !== undefined)
+	 if (this.motionPath.length > 0)
 	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
       }
