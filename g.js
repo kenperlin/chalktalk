@@ -659,7 +659,7 @@
       if (context == undefined)
          context = _g;
 
-      var w = width(), h = height(), nc = sketchPalette.length;
+      var w = width(), h = height(), nc = palette.length;
 
       annotateStart(context);
       for (var n = 0 ; n < nc ; n++) {
@@ -667,7 +667,7 @@
          var y = paletteY(n);
          var r = paletteR(n);
 
-         context.fillStyle = sketchPalette[n];
+         context.fillStyle = palette[n];
          context.beginPath();
          context.moveTo(x - r, y - r);
          context.lineTo(x + r, y - r);
@@ -1433,7 +1433,7 @@
    }
 
    function findPaletteColorIndex(x, y) {
-      for (var n = 0 ; n < sketchPalette.length ; n++) {
+      for (var n = 0 ; n < palette.length ; n++) {
          var dx = x - paletteX(n);
          var dy = y - paletteY(n);
             if (dx * dx + dy * dy < 20 * 20)
@@ -2366,7 +2366,7 @@
    var _g, time = 0, _startTime = (new Date()).getTime();
 
    var motion = [];
-   for (var i = 0 ; i < sketchPalette.length ; i++)
+   for (var i = 0 ; i < palette.length ; i++)
       motion.push(1);
 
    var glyphCountBeforePage = 0;

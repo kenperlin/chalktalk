@@ -1,5 +1,5 @@
 
-   var sketchPaletteRGB = [
+   var paletteRGB = [
       [255,255,255],
       [128, 50, 25],
       [255,  0,  0],
@@ -9,11 +9,11 @@
       [255,  0,255],
    ];
 
-   var sketchPalette = [];
-   for (var i = 0 ; i < sketchPaletteRGB.length ; i++)
-      sketchPalette.push('rgb(' + sketchPaletteRGB[i][0] + ',' +
-                                  sketchPaletteRGB[i][1] + ',' +
-                                  sketchPaletteRGB[i][2] + ')' );
+   var palette = [];
+   for (var i = 0 ; i < paletteRGB.length ; i++)
+      palette.push('rgb(' + paletteRGB[i][0] + ',' +
+                                  paletteRGB[i][1] + ',' +
+                                  paletteRGB[i][2] + ')' );
 /*
       'white',
       'rgb(128,50,25)',
@@ -25,12 +25,12 @@
    ];
 */
 
-   function sketchColor() { return sketchPalette[sketchPage.colorId]; }
+   function sketchColor() { return palette[sketchPage.colorId]; }
 
    function Sketch() {
       this.setColorId = function(i) {
          this.colorId = i;
-	 this.color = sketchPalette[i];
+	 this.color = palette[i];
       }
       this.transformX2D = function(x, y) {
          var angle = 2 * this.rX;
@@ -1097,7 +1097,7 @@
 
                   strokeIndex++;
                   if (strokeIndex < this.colorIndex.length)
-                     _g.strokeStyle = sketchPalette[this.colorIndex[strokeIndex]];
+                     _g.strokeStyle = palette[this.colorIndex[strokeIndex]];
                }
 
                // CONTINUE DRAWING A STROKE.

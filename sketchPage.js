@@ -1221,7 +1221,7 @@ var sketchToDelete = null;
 
             background.color = backgroundColor;
             background.style.backgroundColor = backgroundColor;
-            sketchPalette[0] = defaultPenColor;
+            palette[0] = defaultPenColor;
             for (var i = 0 ; i < this.sketches.length ; i++)
                if (this.sketches[i].color == backgroundColor)
                   this.sketches[i].setColorId(0);
@@ -1381,9 +1381,9 @@ var sketchToDelete = null;
 	    if (this.definingMotion == sk().colorId && sk().motionPath !== undefined) {
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
-	       _g.strokeStyle = 'rgba(' + sketchPaletteRGB[sk().colorId][0] + ',' +
-	                                  sketchPaletteRGB[sk().colorId][1] + ',' +
-	                                  sketchPaletteRGB[sk().colorId][2] + ', 0.5)';
+	       _g.strokeStyle = 'rgba(' + paletteRGB[sk().colorId][0] + ',' +
+	                                  paletteRGB[sk().colorId][1] + ',' +
+	                                  paletteRGB[sk().colorId][2] + ', 0.5)';
 	       _g.lineWidth = 5;
                _g.beginPath();
 	       _g.moveTo(X[0], Y[0]);
@@ -1434,7 +1434,7 @@ var sketchToDelete = null;
             onScreenKeyboard.render();
 
          if (this.paletteColorDragXY != null) {
-            color(sketchPalette[paletteColorId]);
+            color(palette[paletteColorId]);
             fillRect(this.paletteColorDragXY[0] - 12,
                      this.paletteColorDragXY[1] - 12, 24, 24);
          }
@@ -1742,7 +1742,7 @@ var sketchToDelete = null;
             color(overlayColor);
             lineWidth(1);
             textHeight(12);
-            var y0 = paletteY(sketchPalette.length);
+            var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 20;
                text(hotKeyMenu[j][0],  8, y, 0, 0);
