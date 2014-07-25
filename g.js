@@ -1403,6 +1403,7 @@
       bgClickCount = 0;
 
       var index = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
+      console.log("index = " + index);
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE

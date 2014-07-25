@@ -345,6 +345,9 @@
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
+      this.hasMotionPath = function() {
+         return this.motionPath.length > 0 && this.motionPath[0].length > 1;
+      }
       this.id;
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
@@ -675,7 +678,7 @@
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
-	 if (this.motionPath.length > 0)
+	 if (this.hasMotionPath())
 	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
       }
@@ -689,7 +692,7 @@
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
-	 if (this.motionPath.length > 0)
+	 if (this.hasMotionPath())
 	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
       }

@@ -526,26 +526,60 @@
 
    // Bend a curve toward a point, ending up at a target length.
 
-   function bendCurve(curve, pt, len, i0) {
+   function bendCurve(curve, pt, totalLength, i0) {
       if (i0 === undefined) i0 = 0;
+
       var n = curve.length;
-      var dx0 = pt[0] - curve[1][0];
-      var dy0 = pt[1] - curve[1][1];
-      var dx1 = pt[0] - curve[n-1][0];
-      var dy1 = pt[1] - curve[n-1][1];
-      if (dx0 * dx0 + dy0 * dy0 < dx1 * dx1 + dy1 * dy1)
+
+      // FIND NEAREST POINT ON CURVE.
+
+      var ddMin = Number.MAX_VALUE, im = 0;
+      for (var i = 0 ; i < n ; i++) {
+         var dx = curve[i][0] - pt[0];
+         var dy = curve[i][1] - pt[1];
+         var dd = dx * dx + dy * dy;
+         if (dd < ddMin) {
+	    ddMin = dd;
+	    im = i;
+	 }
+      }
+
+      // IF NOT AT THE ENDS, THEN WARP MIDDLE OF CURVE.
+
+      if (im > n/8 && im < n*7/8) {
+         var dx = pt[0] - curve[im][0];
+         var dy = pt[1] - curve[im][1];
+	 for (var i = i0+1 ; i < n-1 ; i++) {
+            var t = i < im ? sCurve((i-i0 ) / (im-i0 ))
+	                   : sCurve((n-1-i) / (n-1-im));
+	    curve[i][0] += t * dx;
+	    curve[i][1] += t * dy;
+	 }
+         return;
+      }
+      return;
+
+      // IF AT THE ENDS, THEN MOVE ONE ENDPOINT AND PRESERVE LENGTH.
+
+      var ax = curve[i0 ][0], ay = curve[i0 ][1];
+      var bx = curve[n-1][0], by = curve[n-1][1];
+
+      var dxa = pt[0] - ax, dya = pt[1] - ay;
+      var dxb = pt[0] - bx, dyb = pt[1] - by;
+
+      if (dxa * dxa + dya * dya < dxb * dxb + dyb * dyb)
          for (var i = n-2 ; i >= i0 ; i--) {
             var t = (n-1-i) / (n-2);
-            curve[i][0] += t * dx0;
-            curve[i][1] += t * dy0;
+            curve[i][0] += t * dxa;
+            curve[i][1] += t * dya;
          }
       else
          for (var i = i0 + 1 ; i <= n-1 ; i++) {
             var t = (i-1) / (n-2);
-            curve[i][0] += t * dx1;
-            curve[i][1] += t * dy1;
+            curve[i][0] += t * dxb;
+            curve[i][1] += t * dyb;
          }
-      adjustCurveLength(curve, len, i0);
+      adjustCurveLength(curve, totalLength, i0);
    }
 
    // Compute the bounding rectangle for a curve.

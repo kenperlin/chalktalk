@@ -683,7 +683,38 @@ var sketchToDelete = null;
       // TRANSLATE CURRENT SKETCH.
 
       this.doTranslate = function(x, y) {
+         console.log("XXX");
          if (isk()) {
+	    console.log("AHA");
+	    if (sk().hasMotionPath()) {
+	       console.log("A " + sk().motionPath[0].length);
+
+	       var X = sk().motionPath[0];
+	       var Y = sk().motionPath[1];
+	       var x0 = X[0];
+	       var y0 = Y[0];
+
+	       var curve = [], totalLength = 0;
+	       for (var i = 0 ; i < X.length ; i++) {
+	          curve.push([X[i] - x0,Y[i] - y0]);
+		  if (i > 0)
+		     totalLength += len(X[i]-X[i-1],Y[i],Y[i-1]);
+               }
+
+               bendCurve(curve, [x - sk().tX, y - sk().tY], totalLength);
+
+               X = [];
+               Y = [];
+	       for (var i = 0 ; i < curve.length ; i++) {
+	          X.push(curve[i][0] + x0);
+	          Y.push(curve[i][1] + y0);
+               }
+	       sk().motionPath = [X, Y];
+
+	       console.log("B " + sk().motionPath[0].length);
+
+	       return;
+	    }
             sk().translate(x - this.mx, y - this.my);
             if (isSketchInProgress()) {
                cursorX += x - this.mx;
@@ -1305,6 +1336,7 @@ var sketchToDelete = null;
 	 // WE CAN LOOK AT sketchPage.trueIndex TO FIND OUT WHAT THE REAL CURRENT SKETCH IS.
 
          this.trueIndex = this.index;
+	 var skTrue = sk();
 
          for (var I = 0 ; I < nsk() ; I++) {
 
@@ -1378,7 +1410,7 @@ var sketchToDelete = null;
 
             _g_sketchEnd();
 
-	    if (this.definingMotion == sk().colorId && sk().motionPath.length > 0) {
+	    if (sk().hasMotionPath() && skTrue.hasMotionPath() && sk().colorId == skTrue.colorId) {
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
 	       _g.strokeStyle = 'rgba(' + paletteRGB[sk().colorId][0] + ',' +
