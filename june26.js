@@ -165,11 +165,11 @@
       }
 
       this.render = function(elapsed) {
-         motion = max(0, min(1, isDef(this.in[0]) ? this.inValue[0] : this.dragValue));
+         motion[this.colorId] = max(0, min(1, isDef(this.in[0]) ? this.inValue[0] : this.dragValue));
          m.save();
 	    m.scale(this.size / 400);
 	    mLine([-1,0],[1,0]);
-	    var x = (2-d) * motion - (1-d);
+	    var x = (2-d) * motion[this.colorId] - (1-d);
 	    mCurve(makeOval(x-d,-d/2,d,d,20,TAU,0));
          m.restore();
       }

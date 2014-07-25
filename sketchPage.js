@@ -20,7 +20,7 @@ var isShowingGlyphs = false;
 var isSpacePressed = false;
 var isTogglingMenuType = false;
 var menuType = 0;
-var paletteColorIndex = 0;
+var paletteColorId = 0;
 var sketchToDelete = null;
 
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
@@ -28,7 +28,7 @@ var sketchToDelete = null;
    function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
-      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
+      var index = paletteColorId >= 0 ? paletteColorId : sketchPage.colorId;
       return i == index ? 12 : 8;
    }
 
@@ -114,7 +114,7 @@ var sketchToDelete = null;
          if (isCodeWidget)
             toggleCodeWidget();
 
-         this.colorIndex = 0;
+         this.colorId = 0;
          this.index = -1;
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
@@ -195,7 +195,7 @@ var sketchToDelete = null;
 	    }
 	 }
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
             this.paletteColorDragXY = null;
             return;
          }
@@ -314,10 +314,10 @@ var sketchToDelete = null;
          if (bgClickCount == 1)
             return;
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
             var index = findPaletteColorIndex(x, y);
             if (index >= 0)
-               paletteColorIndex = index;
+               paletteColorId = index;
             else
                this.paletteColorDragXY = [x,y];
             return;
@@ -418,18 +418,18 @@ var sketchToDelete = null;
             isBgActionEnabled = false;
          }
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
 
             // MOUSE-UP OVER PALETTE TO SET THE DRAWING COLOR.
 
             if (this.paletteColorDragXY == null)
-               this.colorIndex = paletteColorIndex;
+               this.colorId = paletteColorId;
 
             // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
 
             else {
                if (isk() && sk().isMouseOver) {
-                  sk().color = sketchPalette[paletteColorIndex];
+                  sk().setColorId(paletteColorId);
                   if (sk() instanceof GeometrySketch)
                      setMeshMaterialToColor(sk().mesh, sk().color);
                }
@@ -893,7 +893,7 @@ var sketchToDelete = null;
 
          // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
-         paletteColorIndex = findPaletteColorIndex(x, y);
+         paletteColorId = findPaletteColorIndex(x, y);
       }
 
       var altCmdState = 0;
@@ -1224,7 +1224,7 @@ var sketchToDelete = null;
             sketchPalette[0] = defaultPenColor;
             for (var i = 0 ; i < this.sketches.length ; i++)
                if (this.sketches[i].color == backgroundColor)
-                  this.sketches[i].color = defaultPenColor;
+                  this.sketches[i].setColorId(0);
 
             if (codeText != null) {
                codeText.style.backgroundColor = codeTextBgColor();
@@ -1378,10 +1378,12 @@ var sketchToDelete = null;
 
             _g_sketchEnd();
 
-	    if (this.isDefiningMotion !== undefined && sk().motionPath !== undefined) {
+	    if (this.definingMotion == sk().colorId && sk().motionPath !== undefined) {
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
-	       _g.strokeStyle = 'rgba(255,255,255,0.5)';
+	       _g.strokeStyle = 'rgba(' + sketchPaletteRGB[sk().colorId][0] + ',' +
+	                                  sketchPaletteRGB[sk().colorId][1] + ',' +
+	                                  sketchPaletteRGB[sk().colorId][2] + ', 0.5)';
 	       _g.lineWidth = 5;
                _g.beginPath();
 	       _g.moveTo(X[0], Y[0]);
@@ -1432,7 +1434,7 @@ var sketchToDelete = null;
             onScreenKeyboard.render();
 
          if (this.paletteColorDragXY != null) {
-            color(sketchPalette[paletteColorIndex]);
+            color(sketchPalette[paletteColorId]);
             fillRect(this.paletteColorDragXY[0] - 12,
                      this.paletteColorDragXY[1] - 12, 24, 24);
          }

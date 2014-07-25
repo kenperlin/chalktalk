@@ -1186,7 +1186,7 @@
             }
          sketchPage.add(s);
          finishSketch();
-	 s.color = sketchColor();
+	 s.setColorId(sketchPage.colorId);
          s.tX = tx;
          s.tY = ty;
       }
@@ -1357,15 +1357,8 @@
       sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
       switch (sketchDragMode) {
       case 2:
-         if (motion == 0 || sk().motionPath === undefined)
-            sk().motionPath = [[x],[y]];
-         else {
-            var t = max(0, min(1, motion));
-	    var i = floor(t * sk().motionPath[0].length);
-            sk().motionPath[0].splice(i, Number.MAX_VALUE);
-            sk().motionPath[1].splice(i, Number.MAX_VALUE);
-         }
-         sketchPage.isDefiningMotion = true;
+         sk().motionPath = [[x],[y]];
+         sketchPage.definingMotion = sk().colorId;
          break;
       case 3:
          sketchDragActionXY = [x,y];
@@ -1396,7 +1389,7 @@
    function endSketchDragAction(x, y) {
       switch (sketchDragMode) {
       case 2:
-         delete sketchPage.isDefiningMotion;
+         delete sketchPage.definingMotion;
 	 break;
       }
    }
@@ -2099,7 +2092,7 @@
    function addSketch(sketch) {
       sketchPage.add(sketch);
       sk().id = globalSketchId++;
-      sk().color = sketchColor();
+      sk().setColorId(sketchPage.colorId);
       sk().sketchState = 'start';
       sk().children = [];
       sk().in = [];
@@ -2370,7 +2363,11 @@
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-   var _g, time = 0, _startTime = (new Date()).getTime(), motion = 1;
+   var _g, time = 0, _startTime = (new Date()).getTime();
+
+   var motion = [];
+   for (var i = 0 ; i < sketchPalette.length ; i++)
+      motion.push(1);
 
    var glyphCountBeforePage = 0;
 

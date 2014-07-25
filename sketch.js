@@ -1,5 +1,20 @@
 
-   var sketchPalette = [
+   var sketchPaletteRGB = [
+      [255,255,255],
+      [128, 50, 25],
+      [255,  0,  0],
+      [255,255,  0],
+      [  0,255,  0],
+      [  0,  0,255],
+      [255,  0,255],
+   ];
+
+   var sketchPalette = [];
+   for (var i = 0 ; i < sketchPaletteRGB.length ; i++)
+      sketchPalette.push('rgb(' + sketchPaletteRGB[i][0] + ',' +
+                                  sketchPaletteRGB[i][1] + ',' +
+                                  sketchPaletteRGB[i][2] + ')' );
+/*
       'white',
       'rgb(128,50,25)',
       'red',
@@ -8,10 +23,15 @@
       'blue',
       'magenta',
    ];
+*/
 
-   function sketchColor() { return sketchPalette[sketchPage.colorIndex]; }
+   function sketchColor() { return sketchPalette[sketchPage.colorId]; }
 
    function Sketch() {
+      this.setColorId = function(i) {
+         this.colorId = i;
+	 this.color = sketchPalette[i];
+      }
       this.transformX2D = function(x, y) {
          var angle = 2 * this.rX;
          return this.x2D + this.scale() * (cos(angle)*x + sin(angle)*y);
@@ -85,7 +105,7 @@
          return dst;
       }
       this.code = null;
-      this.color = sketchColor();
+      this.setColorId(sketchPage.colorindex);
       this.colorIndex = [];
       this.computeGroupBounds = function() {
          this.xlo = this.ylo =  10000;
@@ -655,7 +675,7 @@
             x += cx;
          }
 	 if (this.motionPath !== undefined)
-	    x += sample(this.motionPath[0], motion) - this.motionPath[0][0];
+	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
       }
       this.ty = function() {
@@ -669,7 +689,7 @@
             y += cy;
          }
 	 if (this.motionPath !== undefined)
-	    y += sample(this.motionPath[1], motion) - this.motionPath[1][0];
+	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
       }
 
