@@ -254,7 +254,8 @@
       mDrawFace([[-1,-1],[1,-1],[1,1],[-1,1]]);
    }
    function standardView(x,y,phi,theta,psi,s) {
-      s *= width()/3.5;
+      m.identity();
+
       m.translate(width()*x,height()*(1-y),0);
       m.perspective(0,0,-width()*2);
 
@@ -262,11 +263,13 @@
       m.rotateY(theta);
       m.rotateZ(psi);
 
+      s *= width();
       m.scale(s,-s,s);
    };
    function standardViewInverse(x,y,phi,theta,psi,s) {
-      s *= width()/3.5;
       m.identity();
+
+      s *= width();
       m.scale(1/s,-1/s,1/s);
 
       m.rotateZ(-psi);

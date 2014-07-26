@@ -2354,7 +2354,7 @@
          // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
 
          if (! S.isClick) {
-            S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
+            S.setUniform('mx',-(S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
             S.setUniform('my', (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
          }
 
@@ -2368,7 +2368,7 @@
 
          // TELL THE MATERIAL THE SIZE OF ONE PIXEL, IN TEXTURE SPACE.
 
-         S.setUniform('pixelSize', 0.5 / (S.xhi - S.xlo));
+         S.setUniform('pixelSize', 3 / (S.xhi - S.xlo));
       }
    }
 

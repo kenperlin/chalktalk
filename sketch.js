@@ -625,7 +625,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            .25 * this.scale());
+            this.scale() / 14);
       }
       this.standardViewInverse = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
@@ -635,7 +635,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            .25 * this.scale());
+            this.scale() / 14);
       }
       this.tX = 0;
       this.tY = 0;
