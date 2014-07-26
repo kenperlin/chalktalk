@@ -2309,11 +2309,11 @@
 
       // FORCE THE BOUNDING RECTANGLE TO BE A SQUARE.
 
-      var r = (b[2] - b[0] + b[3] - b[1]) / 4;
-      b[0] = x - r;
-      b[1] = y - r;
-      b[2] = x + r;
-      b[3] = y + r;
+      var r = (b[2] - b[0] + b[3] - b[1]) / 3.0;
+      b[0] = x - r + sketchPadding;
+      b[1] = y - r + sketchPadding;
+      b[2] = x + r - sketchPadding;
+      b[3] = y + r - sketchPadding;
 
       sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
       sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];

@@ -295,7 +295,6 @@ function planet() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, planetFragmentShader);
    sketch.code = [["planet", planetFragmentShader],["flame", flameFragmentShader]];
    sketch.enableFragmentShaderEditing();
-   sketch.update = function() { this.mesh.getMatrix().scale(1.3); }
 }
 
 var marbleFragmentShader = ["\
