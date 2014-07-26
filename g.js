@@ -246,7 +246,7 @@
          _g.lastX = event.clientX;
       }
 
-      ttState = new tt.State();
+      //ttState = new tt.State();
    }
 
    var ttState;
@@ -1487,7 +1487,7 @@
       ttData.push(0);
 
    var tick = function(g) {
-
+/*
       tt.pollState(ttState);
       for (var i = 0 ; i < 1024 ; i++)
          ttData[i] = ttState.hmd.forces[i];
@@ -1495,8 +1495,7 @@
       var ttMax = 0;
       for (var i = 0 ; i < 1024 ; i++)
          ttMax = max(ttMax, ttData[i]);
-      //console.log(ttMax);
-
+*/
       // TURN OFF ALL DOCUMENT SCROLLING.
 
       document.body.scrollTop = 0;
@@ -2366,6 +2365,10 @@
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 
          S.setUniform('selectedIndex', isDef(S.selectedIndex) ? S.selectedIndex : 0);
+
+         // TELL THE MATERIAL THE SIZE OF ONE PIXEL, IN TEXTURE SPACE.
+
+         S.setUniform('pixelSize', 0.5 / (S.xhi - S.xlo));
       }
    }
 
