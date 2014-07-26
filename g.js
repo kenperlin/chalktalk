@@ -194,7 +194,6 @@
          if (handle.mousePressed) {
             globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
             // console.log(globalStrokes.strokes);
-
          }
          else{
             globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
@@ -246,7 +245,11 @@
             _g.panX += event.clientX - _g.lastX;
          _g.lastX = event.clientX;
       }
+
+      ttState = new tt.State();
    }
+
+   var ttState;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////// LOGIC TO SUPPORT PSEUDO-SKETCHING /////////////////////////
@@ -1403,7 +1406,6 @@
       bgClickCount = 0;
 
       var index = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-      console.log("index = " + index);
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
@@ -1480,7 +1482,20 @@
 
    var visible_sp = null;
 
+   var ttData = [];
+   for (var i = 0 ; i < 1024 ; i++)
+      ttData.push(0);
+
    var tick = function(g) {
+
+      tt.pollState(ttState);
+      for (var i = 0 ; i < 1024 ; i++)
+         ttData[i] = ttState.hmd.forces[i];
+
+      var ttMax = 0;
+      for (var i = 0 ; i < 1024 ; i++)
+         ttMax = max(ttMax, ttData[i]);
+      //console.log(ttMax);
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 

@@ -4,6 +4,7 @@
 var clickSize = 30;
 var codeSketch = null;
 var isAudioSignal = false;
+var isBgDragActionEnabled = false;
 var isBottomHover = false;
 var isCommandPressed = false;
 var isControlPressed = false;
@@ -17,9 +18,11 @@ var isShiftPressed = false;
 var isShorthandMode = false;
 var isShorthandTimeout = false;
 var isShowingGlyphs = false;
+var isSketchDragActionEnabled = false;
 var isSpacePressed = false;
 var isTogglingMenuType = false;
 var menuType = 0;
+var needToStartSketchDragAction = false;
 var paletteColorId = 0;
 var sketchToDelete = null;
 
@@ -176,7 +179,7 @@ var sketchToDelete = null;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
             if (isSketchDragActionEnabled = isHover())
-               startSketchDragAction(x, y);
+               needToStartSketchDragAction = true;
             else {
                isBgActionEnabled = true;
                startBgAction(x, y);
@@ -302,6 +305,10 @@ var sketchToDelete = null;
          }
 
          if (isSketchDragActionEnabled) {
+	    if (needToStartSketchDragAction) {
+	       startSketchDragAction(this.xDown, this.yDown);
+	       needToStartSketchDragAction = false;
+	    }
             doSketchDragAction(x, y);
             return;
          }
@@ -683,12 +690,8 @@ var sketchToDelete = null;
       // TRANSLATE CURRENT SKETCH.
 
       this.doTranslate = function(x, y) {
-         console.log("XXX");
          if (isk()) {
-	    console.log("AHA");
 	    if (sk().hasMotionPath()) {
-	       console.log("A " + sk().motionPath[0].length);
-
 	       var X = sk().motionPath[0];
 	       var Y = sk().motionPath[1];
 	       var x0 = X[0];
@@ -710,8 +713,6 @@ var sketchToDelete = null;
 	          Y.push(curve[i][1] + y0);
                }
 	       sk().motionPath = [X, Y];
-
-	       console.log("B " + sk().motionPath[0].length);
 
 	       return;
 	    }

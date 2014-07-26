@@ -557,7 +557,8 @@
 	 }
          return;
       }
-      return;
+
+      //return;
 
       // IF AT THE ENDS, THEN MOVE ONE ENDPOINT AND PRESERVE LENGTH.
 
@@ -567,19 +568,21 @@
       var dxa = pt[0] - ax, dya = pt[1] - ay;
       var dxb = pt[0] - bx, dyb = pt[1] - by;
 
-      if (dxa * dxa + dya * dya < dxb * dxb + dyb * dyb)
+      if (dxa * dxa + dya * dya < dxb * dxb + dyb * dyb) {
+         console.log("AHA");
          for (var i = n-2 ; i >= i0 ; i--) {
             var t = (n-1-i) / (n-2);
             curve[i][0] += t * dxa;
             curve[i][1] += t * dya;
          }
-      else
+      }
+      else 
          for (var i = i0 + 1 ; i <= n-1 ; i++) {
             var t = (i-1) / (n-2);
             curve[i][0] += t * dxb;
             curve[i][1] += t * dyb;
          }
-      adjustCurveLength(curve, totalLength, i0);
+      //adjustCurveLength(curve, totalLength, i0);
    }
 
    // Compute the bounding rectangle for a curve.
