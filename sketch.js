@@ -12,8 +12,8 @@
    var palette = [];
    for (var i = 0 ; i < paletteRGB.length ; i++)
       palette.push('rgb(' + paletteRGB[i][0] + ',' +
-                                  paletteRGB[i][1] + ',' +
-                                  paletteRGB[i][2] + ')' );
+                            paletteRGB[i][1] + ',' +
+                            paletteRGB[i][2] + ')' );
 /*
       'white',
       'rgb(128,50,25)',
@@ -617,7 +617,7 @@
       this.sketchState = 'finished';
       this.styleTransition = 0;
       this.sp = [];
-      this.standardView = function(p) {
+      this.standardView = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
             .5 + this.tx() / width(),

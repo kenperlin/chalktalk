@@ -2325,7 +2325,7 @@
       setMeshUpdateFunction(mesh);
 
       if (mesh.material == blackMaterial)
-         setMeshMaterialToColor(mesh, sketchColor());
+         setMeshMaterialToRGB(mesh, paletteRGB[sketchPage.colorId]);
 
       addSketch(sketch);
 
@@ -2372,10 +2372,12 @@
       }
    }
 
-   function setMeshMaterialToColor(mesh, color) {
-      var C = colorToRGB(color);
-      mesh.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
-                                          .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+   function setMeshMaterialToRGB(mesh, rgb) {
+      var r = rgb[0] / 255;
+      var g = rgb[1] / 255;
+      var b = rgb[2] / 255;
+      mesh.setMaterial(new phongMaterial().setAmbient(.3*r,.3*g,.3*b)
+                                          .setDiffuse(.5*r,.5*g,.5*b)
                                           .setSpecular(0,0,0,1));
    }
 

@@ -438,7 +438,7 @@ var sketchToDelete = null;
                if (isk() && sk().isMouseOver) {
                   sk().setColorId(paletteColorId);
                   if (sk() instanceof GeometrySketch)
-                     setMeshMaterialToColor(sk().mesh, sk().color);
+                     setMeshMaterialToRGB(sk().mesh, paletteRGB[sk().colorId]);
                }
                this.paletteColorDragXY = null;
             }
