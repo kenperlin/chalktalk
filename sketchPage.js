@@ -601,8 +601,11 @@ var sketchToDelete = null;
 
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else if (doSketchClickAction(x, y))
-               return;
+            else {
+	       if (doSketchClickAction(x, y)) {
+                  return;
+               }
+            }
          }
 
 	 // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
@@ -1314,8 +1317,6 @@ var sketchToDelete = null;
       }
 
       this.animate = function(elapsed) {
-
-         this.scaleSelectedSketch();
 
          var w = width();
          var h = height();
