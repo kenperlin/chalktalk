@@ -37,7 +37,7 @@ function lathe() {
     }
     var x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
-    var scale = 2 / (yHi - yLo + 2 * sketchPadding);
+    var scale = 1.5 / (yHi - yLo + 2 * sketchPadding);
 
     for(var i = 0 ; i < profile.length ; i++){
        profile[i][0] = scale * (profile[i][0] - x);
@@ -103,7 +103,7 @@ function hose() {
     }
     var x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
-    var scale = 2 / (yHi - yLo + 2 * sketchPadding);
+    var scale = 1.5 / (yHi - yLo + 2 * sketchPadding);
 
     for(var i = 0 ; i < profile.length ; i++){
        profile[i][0] = scale * (profile[i][0] - x);
