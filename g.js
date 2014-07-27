@@ -2263,8 +2263,8 @@
    }
    GeometrySketch.prototype = new SimpleSketch;
 
-   function addPlaneShaderSketch(vertexShader, fragmentShader) {
-      return addGeometryShaderSketch(new THREE.PlaneGeometry(2,2), vertexShader, fragmentShader);
+   function addPlaneShaderSketch(vertexShader, fragmentShader, n) {
+      return addGeometryShaderSketch(new THREE.PlaneGeometry(2,2,n,n), vertexShader, fragmentShader);
    }
 
    function addSphereShaderSketch(vertexShader, fragmentShader) {

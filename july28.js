@@ -73,3 +73,28 @@ function rays() {
 }
 registerGlyph("rays()",[ [ [1,-1],[-1,-1],[-1,1],[1,1]], ]);
 
+
+var ttgridFragmentShader = [
+,'   void main(void) {'
+,'      float c = clamp(50. * vPosition.z, .2, 1.);'
+,'      gl_FragColor = vec4(c,c,c,alpha);'
+,'   }'
+].join("\n");
+
+function ttgrid() {
+   var sketch = addPlaneShaderSketch(defaultVertexShader, ttgridFragmentShader, 31);
+   sketch.code = [["", ttgridFragmentShader]];
+   sketch.enableFragmentShaderEditing();
+   sketch.update = function() {
+      var geometry = this.mesh.geometry;
+      geometry.verticesNeedUpdate = true;
+      geometry.dynamic = true;
+      for (var i = 0 ; i < 1024 ; i++) {
+         var col = i % 32;
+         var row = floor(i / 32);
+         geometry.vertices[32 * (31-row) + col].z = ttForce[i];
+      }
+   }
+}
+registerGlyph("ttgrid()",[ [ [-1,-1],[-1,1],[1,1],[1,-1]], ]);
+
