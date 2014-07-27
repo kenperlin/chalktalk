@@ -245,11 +245,7 @@
             _g.panX += event.clientX - _g.lastX;
          _g.lastX = event.clientX;
       }
-
-      //ttState = new tt.State();
    }
-
-   var ttState;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////// LOGIC TO SUPPORT PSEUDO-SKETCHING /////////////////////////
@@ -1482,20 +1478,30 @@
 
    var visible_sp = null;
 
-   var ttData = [];
+   var ttForce = [];
    for (var i = 0 ; i < 1024 ; i++)
-      ttData.push(0);
+      ttForce.push(0);
+
+   function ttTick() {
+      if (tt !== undefined && tt.myState === undefined)
+         tt.waitForDomReady(document, function() {
+            tt.load(function(error) {
+               tt.myState = new tt.State();
+            });
+         });
+      if (tt.myState !== undefined) {
+         tt.pollState(tt.myState);
+         for (var i = 0 ; i < 1024 ; i++)
+            ttForce[i] = tt.myState.hmd.forces[i] / 4096;
+      }
+   }
 
    var tick = function(g) {
-/*
-      tt.pollState(ttState);
-      for (var i = 0 ; i < 1024 ; i++)
-         ttData[i] = ttState.hmd.forces[i];
 
-      var ttMax = 0;
-      for (var i = 0 ; i < 1024 ; i++)
-         ttMax = max(ttMax, ttData[i]);
-*/
+      // HANDLE THE TACTONIC SENSOR, IF ANY.
+
+      ttTick();
+
       // TURN OFF ALL DOCUMENT SCROLLING.
 
       document.body.scrollTop = 0;
