@@ -909,7 +909,8 @@
 
             // JOIN: APPEND STROKE TO sk(I), INVERT sk(I) XFORM FOR EACH PT OF STROKE.
 
-            if (action == "joining" && isk() && isDef(sk(I))) {
+            if (action == "joining" && isk() && isDef(sk(I))
+	                            && ! (sk(I) instanceof GeometrySketch)) {
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
