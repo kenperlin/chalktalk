@@ -684,11 +684,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function code() {
       return codeSketch == null ? null : codeSketch.code;
    }
-
-   function codeSelectorBgColor() { return backgroundColor === 'white' ? 'rgba(0,0,0,0)' : 'rgba(128,192,255,0.3)'; }
-   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : '#c0e0ff'; }
-   function codeTextBgColor() { return 'rgba(0,0,0,0)'; }
-   function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
+   function codeSelectorBgColor() {
+      return backgroundColor === 'white' ? 'rgba(0,0,0,0)'
+                                         : 'rgba(128,192,255,' + (0.3 * codeSketch.fade()) + ')';
+   }
+   function codeSelectorFgColor() {
+      return backgroundColor === 'white' ? bgScrimColor(codeSketch.fade())
+                                         : 'rgba(192,224,255,' + codeSketch.fade() + ')';
+   }
+   function codeTextBgColor() {
+      return 'rgba(0,0,0,0)';
+   }
+   function codeTextFgColor() {
+      return (backgroundColor == 'white' ? 'rgba(0,128,255,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
+   }
 
    function toggleCodeWidget() {
       if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
@@ -772,6 +781,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeTextArea.rows = rows;
       codeTextArea.cols = cols;
 
+      codeTextArea.style.color = codeTextFgColor();
+
+      codeSelector.style.backgroundColor = codeSelectorBgColor();
+      codeSelector.style.borderColor = codeTextFgColor();
+      codeSelector.style.color = codeSelectorFgColor();
+
       var w = 12 * cols + 10;
 
       if (rows > 3)
@@ -800,11 +815,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeElement.style.left = x + _g.panX - w/2 + 10;
       codeElement.style.top = y + 5;
 
-      // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
+      // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
       var c = createRoundRect(x - w/2, y, w, h, 16);
 
-      // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
+      // IF THERE'S ENOUGH ROOM, ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
       if (ylo > c[c.length-1][1]) {
 
@@ -817,9 +832,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          c.push(L);
       }
 
-      // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+      // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
-      color('rgba(0,0,255,0.2)');
+      var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
+
+      color('rgba(0,0,255,' + (0.2 * fade) + ')');
       fillCurve(c);
 
       lineWidth(2);

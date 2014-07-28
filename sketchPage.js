@@ -73,7 +73,7 @@ var sketchToDelete = null;
 
       this.doFadeAway = function(elapsed) {
          this.fadeAway = max(0.0, this.fadeAway - elapsed / 0.25);
-         _g.globalAlpha = this.fadeAway * this.fadeAway;
+         _g.globalAlpha = this.fadeAway;
          if (this.fadeAway == 0.0) {
             this.clearAfterFadeAway();
             _g.sketchProgress = 1;
@@ -1373,7 +1373,7 @@ var sketchToDelete = null;
                   I--;
                   continue;
                }
-               _g.globalAlpha = sk().fadeAway;
+               _g.globalAlpha = sk().fade();
             }
 
             if (sk().glyphTrace != null && sk().sketchState != 'finished') {

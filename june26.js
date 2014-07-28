@@ -397,7 +397,7 @@ var slicedFragmentShader = ["\
       float rr = dx*dx + dy*dy;\n\
       float dz = rr >= 1. ? 0. : sqrt(1. - rr);\n\
       float dzdx = -1.3;\n\
-      float zp = dzdx * (dx - mx * 1.3 - .2);\n\
+      float zp = dzdx * (dx + mx * 1.3 - .2);\n\
       if (zp < -dz)\n\
          rr = 1.;\n\
       vec3 color = vec3(0.);\n\

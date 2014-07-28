@@ -28,6 +28,9 @@
    function sketchColor() { return palette[sketchPage.colorId]; }
 
    function Sketch() {
+      this.fade = function() {
+         return this.fadeAway == 0 ? 1 : this.fadeAway;
+      }
       this.setColorId = function(i) {
          this.colorId = i;
 	 this.color = palette[i];
@@ -58,10 +61,9 @@
       this.afterSketch = function(callbackFunction) {
          var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
-            var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
             _g.save();
             _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
-                                  : this.styleTransition) * fade;
+                                  : this.styleTransition) * this.fade();
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
             this.afterSketchCallbackFunction = callbackFunction;
@@ -253,8 +255,7 @@
             var x = x1;
             var y = y1 + 1.3 * fontHeight * (n - 0.5 * (this.textStrs.length-1));
             var tx = x - .5 * tw;
-            if (this.fadeAway > 0)
-               context.globalAlpha = this.fadeAway;
+            context.globalAlpha = this.fade();
             context.fillText(str, tx, y + .35 * fontHeight);
 
             // IF A TEXT CURSOR X,Y HAS BEEN SPECIFIED, RESET THE TEXT CURSOR.
@@ -787,8 +788,7 @@
             if (this.imageObj === undefined)
                return;
             var s = this.scale();
-            if (this.fadeAway > 0)
-               _g.globalAlpha = this.fadeAway;
+            _g.globalAlpha = this.fade();
             _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
                                         this.y2D - this.height * s / 2,
                                         this.width * s, this.height * s);
