@@ -228,7 +228,7 @@ var boringSlicedFragmentShader = ["\
       float rr = dx*dx + dy*dy;\
       float dz = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
-      float zp = dzdx * (dx - mx * 1.3 - .2);\
+      float zp = dzdx * (dx + mx * 1.3 - .2);\
       if (zp < -dz)\
          rr = 1.;\
       vec3 color = vec3(0.);\
@@ -1256,14 +1256,13 @@ THREE.Object3D.prototype.addNoiseBall = function() {
 }
 
 function explode() {
-	var a = root.addNoiseBall();
-	geometrySketch(a);
-	a.update = function() {
-
-		this.shaderMaterial.uniforms['time'].value = time*.1;
-                this.shaderMaterial.uniforms['alpha'].value = this.sketch.fadeAway == 0 ? 1 : this.sketch.fadeAway;
-
-	}
+   var a = root.addNoiseBall();
+   geometrySketch(a);
+   a.update = function() {
+      this.shaderMaterial.uniforms['time'].value = time*.1;
+      this.shaderMaterial.uniforms['alpha'].value = this.sketch.fade();
+      a.getMatrix().scale(0.6);
+   }
 }
 
 explodeBall = {

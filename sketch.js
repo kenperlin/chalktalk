@@ -788,10 +788,12 @@
             if (this.imageObj === undefined)
                return;
             var s = this.scale();
-            _g.globalAlpha = this.fade();
+            var saveAlpha = _g.globalAlpha;
+            _g.globalAlpha = this.fade() * this.styleTransition;
             _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
                                         this.y2D - this.height * s / 2,
                                         this.width * s, this.height * s);
+            _g.globalAlpha = saveAlpha;
          });
       }
    }
@@ -1006,7 +1008,10 @@
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();
-         deleteSketch(glyphSketch);
+         if (sk() instanceof Picture)
+	    glyphSketch.fadeAway = 1;
+         else
+            deleteSketch(glyphSketch);
       }
 
       this.getStrokes = function() {

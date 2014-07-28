@@ -22,7 +22,7 @@ var pixelsFragmentShader = [
 ,'      return edge(.5 * (1. - u*u - v*v));'
 ,'   }'
 ,'   void main(void) {'
-,'      float D = disk(-.5,-.5, 1., 1., mx+dx,my+dy);'
+,'      float D = disk(-.6,-.6, 1.2, 1.2, mx+dx,my+dy);'
 ,'      float xx = mix(dx, dx/8. - mx, D);'
 ,'      float yy = mix(dy, dy/8. - my, D);'
 ,'      float T = max(rect(-.2, -.9,  .4, 1.7, xx,yy),'

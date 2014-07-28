@@ -421,7 +421,7 @@ var page104c = {
       <tr><th><font size=10 color=white>2014</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
-         <th><img src=imgs/valve_vr_room.jpg width=500></th>\
+         <th><img src=imgs/valve_vr_room.jpg width=600></th>\
          </tr>\
       </table>\
    "
