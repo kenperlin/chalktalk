@@ -427,6 +427,20 @@ var page103 = {
    "
 };
 
+var page104 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2011</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/arcade.png width=670></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page104a = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -446,7 +460,7 @@ var page104b = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2013</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/david_smith_ar_device.png width=500></th>\
@@ -583,6 +597,7 @@ var sketchPages = [
    page102c,
    blankPage(),
    page103,
+   page104,
    page104a,
    page104b,
    page104c,
