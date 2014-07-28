@@ -228,7 +228,7 @@ var boringSlicedFragmentShader = ["\
       float rr = dx*dx + dy*dy;\
       float dz = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
-      float zp = dzdx * (dx + mx * 1.3 - .2);\
+      float zp = dzdx * (dx - mx * 1.3 - .2);\
       if (zp < -dz)\
          rr = 1.;\
       vec3 color = vec3(0.);\

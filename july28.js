@@ -22,11 +22,12 @@ var pixelsFragmentShader = [
 ,'      return edge(.5 * (1. - u*u - v*v));'
 ,'   }'
 ,'   void main(void) {'
-,'      float D = disk(-.6,-.6, 1.2, 1.2, mx+dx,my+dy);'
-,'      float xx = mix(dx, dx/8. - mx, D);'
-,'      float yy = mix(dy, dy/8. - my, D);'
-,'      float T = max(rect(-.2, -.9,  .4, 1.7, xx,yy),'
-,'                    rect(-.9,  .5, 1.8,  .4, xx,yy));'
+,'      float r = 60. * pixelSize;'
+,'      float D = disk(-r+mx,-r+my, r+r, r+r, dx,dy);'
+,'      float xx = mix(dx, dx/8. + mx, D);'
+,'      float yy = mix(dy, dy/8. + my, D);'
+,'      float T = max(rect(-.4, -.9,  .8, 1.8, xx,yy),'
+,'                    rect(-.9,  .2, 1.8,  .8, xx,yy));'
 ,'      gl_FragColor = vec4(T * marble(xx,yy), alpha);'
 ,'   }'
 ].join("\n");
@@ -97,4 +98,5 @@ function ttgrid() {
    }
 }
 registerGlyph("ttgrid()",[ [ [-1,-1],[-1,1],[1,1],[1,-1]], ]);
+
 

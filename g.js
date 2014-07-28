@@ -2360,8 +2360,8 @@
          // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
 
          if (! S.isClick) {
-            S.setUniform('mx',-(S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
-            S.setUniform('my', (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
+            S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
+            S.setUniform('my',-(S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
          }
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
