@@ -1418,11 +1418,28 @@ var sketchToDelete = null;
 	       _g.strokeStyle = 'rgba(' + paletteRGB[sk().colorId][0] + ',' +
 	                                  paletteRGB[sk().colorId][1] + ',' +
 	                                  paletteRGB[sk().colorId][2] + ', 0.5)';
+
+               // DRAW MOTION PATH
+
 	       _g.lineWidth = 5;
                _g.beginPath();
 	       _g.moveTo(X[0], Y[0]);
 	       for (var i = 1 ; i < X.length ; i++)
 	          _g.lineTo(X[i], Y[i]);
+
+               // DRAW ARROWHEAD AT END OF MOTION PATH
+
+               if (X.length > 4) {
+	          var n = X.length;
+	          var dx = X[n - 1] - X[n - 4];
+	          var dy = Y[n - 1] - Y[n - 4];
+	          var d = len(dx, dy);
+	          var r = width() / 50;
+		  _g.moveTo(X[n-1] - (dx+dy) * r / d, Y[n-1] - (dy-dx) * r / d);
+		  _g.lineTo(X[n-1], Y[n-1]);
+		  _g.lineTo(X[n-1] - (dx-dy) * r / d, Y[n-1] - (dy+dx) * r / d);
+	       }
+
                _g.stroke();
 	    }
 
