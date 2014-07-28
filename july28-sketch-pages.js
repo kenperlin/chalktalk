@@ -488,7 +488,7 @@ var page104d = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2019</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2019-2021</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/glasses2.jpg width=600></th>\
@@ -506,6 +506,19 @@ var page104e = {
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/contact_lens.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104f = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/rainbows_end.jpg width=350></th>\
          </tr>\
       </table>\
    "
@@ -603,6 +616,7 @@ var sketchPages = [
    page104c,
    page104d,
    page104e,
+   page104f,
    page105,
    blankPage(),
    page106,
