@@ -1429,15 +1429,18 @@ var sketchToDelete = null;
 
                // DRAW ARROWHEAD AT END OF MOTION PATH
 
-               if (X.length > 4) {
-	          var n = X.length;
-	          var dx = X[n - 1] - X[n - 4];
-	          var dy = Y[n - 1] - Y[n - 4];
+	       var n = X.length;
+               for (var i = n - 1 ; i >= 0 ; i--) {
+	          var dx = X[n-1] - X[i];
+	          var dy = Y[n-1] - Y[i];
 	          var d = len(dx, dy);
-	          var r = width() / 50;
-		  _g.moveTo(X[n-1] - (dx+dy) * r / d, Y[n-1] - (dy-dx) * r / d);
-		  _g.lineTo(X[n-1], Y[n-1]);
-		  _g.lineTo(X[n-1] - (dx-dy) * r / d, Y[n-1] - (dy+dx) * r / d);
+	          if (d > clickSize) {
+	             d *= 50 / width();
+		     _g.moveTo(X[n-1] - (dx+dy) / d, Y[n-1] - (dy-dx) / d);
+		     _g.lineTo(X[n-1], Y[n-1]);
+		     _g.lineTo(X[n-1] - (dx-dy) / d, Y[n-1] - (dy+dx) / d);
+		     break;
+	          }
 	       }
 
                _g.stroke();
