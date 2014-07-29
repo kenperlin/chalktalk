@@ -2,7 +2,8 @@
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
-   function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+   //function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+   function height() { return 720; }
 
    function scrimColor(alpha) {
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
