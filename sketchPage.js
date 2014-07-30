@@ -304,7 +304,7 @@ var sketchToDelete = null;
             return;
          }
 
-         if (isSketchDragActionEnabled) {
+         if (isSketchDragActionEnabled && this.travel > clickSize) {
 	    if (needToStartSketchDragAction) {
 	       startSketchDragAction(this.xDown, this.yDown);
 	       needToStartSketchDragAction = false;
