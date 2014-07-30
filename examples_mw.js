@@ -79,7 +79,12 @@ var tworaysFragmentShader = [
 ,'      vec4 S = vec4(0.,0.,-10.5,1.);'
 ,'      float t = raySphere(V, W, S);'
 ,'      vec3 c = t==0. ? vec3(0.,0.,0.) : shadeSphere(W,V+t*W,S);'
-,'      gl_FragColor = vec4(c, alpha);'
+,'      vec3 V2 = vec3(0.,0.,0.);'
+,'      vec3 W2 = normalize(vec3(dx,dy,-8.));'
+,'      vec4 S2 = vec4(mx,my,-8.5,1.);'
+,'      float t2 = raySphere(V2, W2, S2);'
+,'      vec3 c2 = t2==0. ? vec3(0.,0.,0.) : shadeSphere(W2,V2+t2*W2,S2);'
+,'      gl_FragColor = vec4(c2, alpha);'
 ,'   }'
 ].join("\n");
 
