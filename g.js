@@ -2,8 +2,8 @@
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
-   //function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
-   function height() { return 720; }
+   function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+   //function height() { return 720; }
 
    function scrimColor(alpha) {
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
@@ -1479,9 +1479,7 @@
 
    var visible_sp = null;
 
-   var ttForce = [];
-   for (var i = 0 ; i < 1024 ; i++)
-      ttForce.push(0);
+   var ttForce = newZeroArray(1024);
 
    function ttTick() {
       if (tt !== undefined && tt.myState === undefined)

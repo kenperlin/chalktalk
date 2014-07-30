@@ -458,6 +458,48 @@
       return lerp(f, arr[i], arr[i+1]);
    }
 
+   function newZeroArray(size) {
+      var dst = [];
+      for (var i = 0 ; i < size ; i++)
+         dst.push(0);
+      return dst;
+   }
+
+// IMAGE PROCESSING.
+
+   function imageEnlarge(src, dst) {
+      if (this.tmp === undefined)
+         this.tmp = newZeroArray(dst.length);
+
+      function index(i,j,w) { return max(0,min(w-1,i)) + w * max(0,min(w-1,j)); }
+
+      var w = floor(sqrt(src.length));
+
+      for (var row = 0 ; row < w ; row++)
+      for (var col = 0 ; col < w ; col++) {
+         var i0 = index(row  , col  , w);
+         var i1 = index(row+1, col  , w);
+         var i2 = index(row  , col+1, w);
+         var i3 = index(row+1, col+1, w);
+         var j = index(2*row, 2*col, 2*w);
+         this.tmp[j      ] =  src[i0];
+         this.tmp[j+1    ] = (src[i0] + src[i1]) / 2;
+         this.tmp[j  +2*w] = (src[i0] + src[i2]) / 2;
+         this.tmp[j+1+2*w] = (src[i0] + src[i1] + src[i2] + src[i3]) / 4;
+      }
+
+      var wt = [1/6,1/3,1/3,1/6];
+
+      for (var row = 0 ; row < 2*w ; row++)
+      for (var col = 0 ; col < 2*w ; col++) {
+         var sum = 0;
+         for (var u = -1 ; u <= 2 ; u++)
+         for (var v = -1 ; v <= 2 ; v++)
+            sum += this.tmp[index(col+u, row+v, 2*w)] * wt[u+1] * wt[v+1];
+         dst[index(col, row, 2*w)] =  sum;
+      }
+   }
+
 // 2D GEOMETRY UTILITIES.
 
    function isInRect(x,y, R) {
@@ -539,9 +581,9 @@
          var dy = curve[i][1] - pt[1];
          var dd = dx * dx + dy * dy;
          if (dd < ddMin) {
-	    ddMin = dd;
-	    im = i;
-	 }
+            ddMin = dd;
+            im = i;
+         }
       }
 
       // IF NOT AT THE ENDS, THEN WARP MIDDLE OF CURVE.
@@ -549,12 +591,12 @@
       if (im > n/8 && im < n*7/8) {
          var dx = pt[0] - curve[im][0];
          var dy = pt[1] - curve[im][1];
-	 for (var i = i0+1 ; i < n-1 ; i++) {
+         for (var i = i0+1 ; i < n-1 ; i++) {
             var t = i < im ? sCurve((i-i0 ) / (im-i0 ))
-	                   : sCurve((n-1-i) / (n-1-im));
-	    curve[i][0] += t * dx;
-	    curve[i][1] += t * dy;
-	 }
+                           : sCurve((n-1-i) / (n-1-im));
+            curve[i][0] += t * dx;
+            curve[i][1] += t * dy;
+         }
          return;
       }
 
@@ -656,9 +698,9 @@
       function l(k) { return L[k]; }
       function hermite(a, da, b, db) {
          return  a * ( 2 * ttt - 3 * tt     + 1)
-	      + da * (     ttt - 2 * tt + t    )
-	      +  b * (-2 * ttt + 3 * tt        )
-	      + db * (     ttt -     tt        );
+              + da * (     ttt - 2 * tt + t    )
+              +  b * (-2 * ttt + 3 * tt        )
+              + db * (     ttt -     tt        );
       }
       if (N === undefined)
          N = (keys.length - 1) * 4;
@@ -672,20 +714,20 @@
       for (var n = 0 ; n < nk-1 ; n++) {
 
          var dx0 = n > 0 ? (l(n) * (x(n) - x(n-1)) + l(n-1) * (x(n+1) - x(n))) / (l(n-1) + l(n))
-	                 : 3*x(n + 1) - 2*x(n) - x(n + 2);
+                         : 3*x(n + 1) - 2*x(n) - x(n + 2);
          var dy0 = n > 0 ? (l(n) * (y(n) - y(n-1)) + l(n-1) * (y(n+1) - y(n))) / (l(n-1) + l(n))
-	                 : 3*y(n + 1) - 2*y(n) - y(n + 2);
+                         : 3*y(n + 1) - 2*y(n) - y(n + 2);
 
          var dx1 = n < nk-2 ? (l(n+1) * (x(n+1) - x(n)) + l(n) * (x(n+2) - x(n+1))) / (l(n) + l(n+1))
-	                    : 2*x(n + 1) - 3*x(n) + x(n - 1);
+                            : 2*x(n + 1) - 3*x(n) + x(n - 1);
          var dy1 = n < nk-2 ? (l(n+1) * (y(n+1) - y(n)) + l(n) * (y(n+2) - y(n+1))) / (l(n) + l(n+1))
-	                    : 2*y(n + 1) - 3*y(n) + y(n - 1);
+                            : 2*y(n + 1) - 3*y(n) + y(n - 1);
 
-	 for (var i = 0 ; i < N ; i++) {
-	    var t = i / N, tt = t * t, ttt = t * tt;
-	    spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
-	                  hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
-	 }
+         for (var i = 0 ; i < N ; i++) {
+            var t = i / N, tt = t * t, ttt = t * tt;
+            spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
+                          hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
+         }
       }
       spline.push([ x(nk-1), y(nk-1) ]);
       return spline;

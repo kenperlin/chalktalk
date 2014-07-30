@@ -281,7 +281,7 @@ var defaultVertexShader = ["\
    void main() {\
       dx = 2. * uv.x - 1.;\
       dy = 2. * uv.y - 1.;\
-      vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);\
       vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
    }\

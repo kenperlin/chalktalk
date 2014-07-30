@@ -57,11 +57,11 @@ var raysFragmentShader = [
 ,'      return max(vec3(1.,0.,0.) * d, vec3(1.,1.,1.) * s);'
 ,'   }'
 ,'   void main(void) {'
-,'      vec3 v = vec3(0.,0.,0.);'
-,'      vec3 w = normalize(vec3(dx,dy,-10.));'
-,'      vec4 s = vec4(0.,0.,-10.5,1.);'
-,'      float t = raySphere(v, w, s);'
-,'      vec3 c = t==0. ? vec3(0.,0.,0.) : shadeSphere(w,v+t*w,s);'
+,'      vec3 V = vec3(0.,0.,0.);'
+,'      vec3 W = normalize(vec3(dx,dy,-10.));'
+,'      vec4 S = vec4(0.,0.,-10.5,1.);'
+,'      float t = raySphere(V, W, S);'
+,'      vec3 c = t==0. ? vec3(0.,0.,0.) : shadeSphere(W,V+t*W,S);'
 ,'      gl_FragColor = vec4(c, alpha);'
 ,'   }'
 ].join("\n");
@@ -77,24 +77,34 @@ registerGlyph("rays()",[ [ [1,-1],[-1,-1],[-1,1],[1,1]], ]);
 
 var ttgridFragmentShader = [
 ,'   void main(void) {'
-,'      float c = clamp(50. * vPosition.z, .2, 1.);'
+,'      vec3 L1 = normalize(vec3(-1.,-1.,-.5));'
+,'      vec3 L2 = normalize(vec3( 1., 1., .5));'
+,'      float c = clamp(.1 * max(0.,dot(L1,vNormal)) + .8 * max(0.,dot(L2,vNormal)), .2, 1.);'
 ,'      gl_FragColor = vec4(c,c,c,alpha);'
 ,'   }'
 ].join("\n");
 
+
 function ttgrid() {
-   var sketch = addPlaneShaderSketch(defaultVertexShader, ttgridFragmentShader, 31);
+   var sketch = addPlaneShaderSketch(defaultVertexShader, ttgridFragmentShader, 63);
    sketch.code = [["", ttgridFragmentShader]];
    sketch.enableFragmentShaderEditing();
    sketch.update = function() {
+      if (this.forceImage === undefined)
+         this.forceImage = newZeroArray(64 * 64);
+      imageEnlarge(ttForce, this.forceImage);
       var geometry = this.mesh.geometry;
       geometry.verticesNeedUpdate = true;
+      geometry.normalsNeedUpdate = true;
       geometry.dynamic = true;
-      for (var i = 0 ; i < 1024 ; i++) {
-         var col = i % 32;
-         var row = floor(i / 32);
-         geometry.vertices[32 * (31-row) + col].z = ttForce[i];
+      for (var i = 0 ; i < this.forceImage.length ; i++) {
+         var col = i % 64;
+         var row = floor(i / 64);
+         var j = 64 * (64-1-row) + col;
+         geometry.vertices[j].z = this.forceImage[i];
       }
+      geometry.computeFaceNormals();
+      geometry.computeVertexNormals();
    }
 }
 registerGlyph("ttgrid()",[ [ [-1,-1],[-1,1],[1,1],[1,-1]], ]);
