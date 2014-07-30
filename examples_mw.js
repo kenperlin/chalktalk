@@ -1,62 +1,45 @@
 
 
-// XPLANET
 
-var xplanetFragmentShader = ["\
-   void main(void) {\n\
-      float mtime = 1.0 + time*0.1;\n\
-      float dz = sqrt(1.-dx*dx-dy*dy);\n\
-      float cRot = cos(.2*mtime), sRot = sin(.2*mtime);\n\
-      float cVar = cos(.1*mtime), sVar = sin(.1*mtime);\n\
-      vec3 pt = vec3(cRot*dx+sRot*dz+cVar,dy,-sRot*dx+cRot*dz+sVar);\n\
-      float g = turbulence(pt);                         /* CLOUDS */\n\
-      vec2 v = .6 * vec2(dx,dy);                        /* SHAPE  */\n\
-      float d = 1. - 4.1 * dot(v,v);\n\
-      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */\n\
-      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\n\
-      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);     /* FIRE   */\n\
-      f = f > 0. ? 1. : 1. - f * f * f;\n\
-      if (d <= 0.1)\n\
-         f *= (g + 5.) / 3.;\n\
-      vec3 color = vec3(d*f*.35, d*f*.7, d*f);          /* COLOR  */\n\
-      gl_FragColor = vec4(color,alpha*min(1.,10.*d));\n\
-   }\
-"].join("\n");
-
-registerGlyph("xplanet()",[
-   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [0, -1], [0,1]], 
-]);
-
-function xplanet() {
-   var sketch = addPlaneShaderSketch(defaultVertexShader, xplanetFragmentShader);
-   sketch.code = [["xplanet", xplanetFragmentShader],["flame", flameFragmentShader]];
-   sketch.enableFragmentShaderEditing();
-}
-
-
-// YPLANET
 
 var yplanetFragmentShader = ["\
    void main(void) {\n\
-      float mtime = 1.0 + time*0.2;\n\
-      float dz = sqrt(1.-dx*dx-dy*dy);\n\
-      float cRot = cos(.2*mtime), sRot = sin(.2*mtime);\n\
-      float cVar = cos(.1*mtime), sVar = sin(.1*mtime);\n\
-      vec3 pt = vec3(cRot*dx+sRot*dz+cVar,dy,-sRot*dx+cRot*dz+sVar);\n\
-      float g = turbulence(vPosition);\n\
-      // float g = turbulence(pt);                         /* CLOUDS */\n\
-      vec2 v = .6 * vec2(dx,dy);                        /* SHAPE  */\n\
-      float d = 1. - 4.1 * dot(v,v);\n\
-      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */\n\
-      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\n\
-      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);     /* FIRE   */\n\
-      f = f > 0. ? 1. : 1. - f * f * f;\n\
-      if (d <= 0.1)\n\
-         f *= (g + 5.) / 3.;\n\
-      // vec3 color = vec3(d*f*f*.99, d*f*.3, d*f*.3);          /* COLOR  */\n\
-      vec3 color = vec3(g*g, g*g, g*g); \n\
-      gl_FragColor = vec4(color,1.0);\n\
+      float mtime = time*0.001;\n\
+      //\n\
+      vec3 eyept = vec3(0.0, 0.0, 1.0);\n\
+      vec3 moonpt = vec3(100.0, 50.0, 0.0);\n\
+      vec3 turb1pt = vPosition + vec3(mtime,0.0,0.0) + vec3(50.0,20.0,-31.0);\n\
+      vec3 turb2pt = vec3(x*3.0, y*3.0, z*3.0) + vec3(mtime,0.0,0.0);\n\
+      //\n\
+      float t1 = turbulence(turb1pt);\n\
+      float t2 = turbulence(turb2pt);\n\
+      //\n\
+      // float landamp = t1 < 0.2 ? 0.0 : t1;\n\
+      float landamp = smoothstep(0.15, 0.45, t1*t1);\n\
+      float oceanamp = 1.0 - landamp;\n\
+      float cloudamp = t2*t2;\n\
+      float coronaamp = 0.1 - min(0.1, dot(eyept, vNormal));\n\
+      float lightamp = smoothstep(0.0, 0.2, t2*t2*t2);\n\
+      //\n\
+      vec3 oceanc = vec3(0.0, 0.0, .05);\n\
+      vec3 landc  = vec3(0.15, 0.15, 0.25);\n\
+      vec3 cloudc = vec3(1.0, 1.0, 1.0);\n\
+      vec3 lightc = vec3(0.5, 0.3, 0.2);\n\
+      vec3 coronac = vec3(0.0, 0.0, 0.3);\n\
+      //\n\
+      float dfamp = abs(dot(vNormal, normalize((moonpt-vPosition))));\n\
+      vec3 color = vec3(0.0,0.0,0.0);\n\
+      if (t1 < 0.0) {\n\
+        color = vec3(1.0,0.0,0.0);\n\
+      }\n\
+      else {\n\
+        color = (landamp * landc) + (oceanamp * oceanc);\n\
+        // color = color * dfamp;\n\
+        // color += mix(color, cloudc, cloudamp);\n\
+        color += lightc * min(lightamp, landamp);\n\
+        color = clamp(color, 0.0, 1.0);\n\
+      }\n\
+      gl_FragColor = vec4(color, alpha);\n\
    }\
 "].join("\n");
 
