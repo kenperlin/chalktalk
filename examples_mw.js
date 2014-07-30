@@ -56,3 +56,43 @@ function yplanet() {
 
 
 
+
+var tworaysFragmentShader = [
+,'   float raySphere(vec3 V, vec3 W, vec4 S) {'
+,'      vec3 P = V - S.xyz;'
+,'      float b = 2. * dot(P, W);'
+,'      float c = dot(P, P) - S.w * S.w;'
+,'      float d = b*b - 4.*c;'
+,'      return d < 0. ? 0. : (-b - sqrt(d)) / 2.;'
+,'   }'
+,'   vec3 shadeSphere(vec3 W, vec3 P, vec4 S) {'
+,'      vec3 N = (P - S.xyz) / S.w;'
+,'      vec3 R = W - 2. * N * dot(W, N);'
+,'      vec3 L = normalize(vec3(1.,1.,.5));'
+,'      float d = .2 + max(0., dot(L, N));'
+,'      float s = pow(max(0.,dot(L, R)), 5.);'
+,'      return max(vec3(1.,0.,0.) * d, vec3(1.,1.,1.) * s);'
+,'   }'
+,'   void main(void) {'
+,'      vec3 V = vec3(0.,0.,0.);'
+,'      vec3 W = normalize(vec3(dx,dy,-10.));'
+,'      vec4 S = vec4(0.,0.,-10.5,1.);'
+,'      float t = raySphere(V, W, S);'
+,'      vec3 c = t==0. ? vec3(0.,0.,0.) : shadeSphere(W,V+t*W,S);'
+,'      gl_FragColor = vec4(c, alpha);'
+,'   }'
+].join("\n");
+
+function tworays() {
+   var sketch = addPlaneShaderSketch(defaultVertexShader, tworaysFragmentShader);
+   sketch.code = [["",tworaysFragmentShader]];
+   sketch.enableFragmentShaderEditing();
+   sketch.mouseDrag = function() { }
+}
+registerGlyph("rays()",[ [ [1,-1],[-1,-1],[-1,1],[1,1]], ]);
+
+
+registerGlyph("tworays()",[
+   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
+   makeOval(-1,  0, 1, 1, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
+]);

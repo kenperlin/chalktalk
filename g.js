@@ -2267,7 +2267,7 @@
    }
 
    function addSphereShaderSketch(vertexShader, fragmentShader) {
-       return addGeometryShaderSketch(new THREE.SphereGeometry(3.0, 21.0, 21.0), vertexShader, fragmentShader);
+       return addGeometryShaderSketch(new THREE.SphereGeometry(1.0, 21.0, 21.0), vertexShader, fragmentShader);
    }
 
    function createMesh(geometry, vertexShader, fragmentShader) {
