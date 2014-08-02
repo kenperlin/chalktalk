@@ -1240,6 +1240,17 @@ var sketchToDelete = null;
          case 'x':
             isExpertMode = ! isExpertMode;
             break;
+         case 'y':
+	    var P = [];
+	    for (var i = 1 ; i < sk(0).sp0.length ; i++)
+	       P.push([sk(0).tX + sk(0).sp0[i][0],
+	               sk(0).tY + sk(0).sp0[i][1]]);
+	    var Q = [];
+	    for (var i = 1 ; i < sk(1).sp0.length ; i++)
+	       Q.push([sk(1).tX + sk(1).sp0[i][0],
+	               sk(1).tY + sk(1).sp0[i][1]]);
+	    console.log(bestFit(P, Q));
+	    break;
          case 'z':
             break;
          case '-':

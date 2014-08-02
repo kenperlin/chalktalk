@@ -487,8 +487,8 @@ function Lattice() {
          ;
       else if (this.showCube) {
          this.showNoise = true;
-	 var d = 1/20;
-	 for (var dz = 0 ; dz < .99 ; dz += 1/20)
+	 var d = 1/16;
+	 for (var dz = 0 ; dz < .99 ; dz += d)
 	 for (var dy = 0 ; dy < .99 ; dy += d)
 	 for (var dx = 0 ; dx < .99 ; dx += d) {
              var x = -2 + dx;

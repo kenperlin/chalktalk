@@ -1499,7 +1499,7 @@
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
-      ttTick();
+      //ttTick();
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 

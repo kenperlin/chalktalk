@@ -104,7 +104,7 @@
             this.stateValue = n;
             this.update();
          }
-	 return this.stateValue;
+         return this.stateValue;
       }
       this.update = function(delta) {
          if (delta === undefined)
@@ -186,6 +186,39 @@
    function cotan(t) { return Math.cotan(t); }
    function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+   function gauss(A) { /* From http://martin-thoma.com */
+      // Solve a linear system of equations given by an nxn matrix.
+      var n = A.length;
+      for (var i=0; i<n; i++) {
+         // Search for maximum in this column.
+         var maxRow = i, maxEl = Math.abs(A[i][i]);
+         for (var k=i+1; k<n; k++)
+            if (Math.abs(A[k][i]) > maxEl) {
+               maxEl = Math.abs(A[k][i]);
+               maxRow = k;
+            }
+         // Swap maximum row with current row (column by column).
+         for (var k=i; k<n+1; k++) {
+            var tmp = A[maxRow][k];
+            A[maxRow][k] = A[i][k];
+            A[i][k] = tmp;
+         }
+         // Make all rows below this one 0 in current column.
+         for (k=i+1; k<n; k++) {
+            var c = -A[k][i] / A[i][i];
+            for(var j=i; j<n+1; j++)
+               A[k][j] = i==j ? 0 : A[k][j] + c * A[i][j];
+         }
+      }
+      // Solve equation Ax=b for an upper triangular matrix A.
+      var x = new Array(n);
+      for (var i=n-1; i>-1; i--) {
+         x[i] = A[i][n] / A[i][i];
+         for (var k=i-1; k>-1; k--)
+            A[k][n] -= A[k][i] * x[i];
+      }
+      return x; // Return nx1 result vector.
+   }
    function isEqualArray(a, b) {
       if (a === undefined || b === undefined ||
           a == null || b == null || a.length != b.length)
@@ -388,25 +421,25 @@
 
             // NO MATCH IF name IS PRECEDED BY . or _ or 0-9 or a-z or A-Z.
 
-	    if (i > 0) {
-	       var n = str.charCodeAt(i-1);
-	       if (n == cp || n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
-	          continue;
-	    }
+            if (i > 0) {
+               var n = str.charCodeAt(i-1);
+               if (n == cp || n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+                  continue;
+            }
 
             // NO MATCH IF name IS FOLLOWED BY _ or 0-9 or a-z or A-Z.
 
-	    if (i + name.length < str.length) {
-	       var n = str.charCodeAt(i-1);
-	       if (n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
-	          continue;
-	    }
+            if (i + name.length < str.length) {
+               var n = str.charCodeAt(i-1);
+               if (n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+                  continue;
+            }
 
             // OTHERWISE, DO THE SUBSTITUTION, AND ADJUST i ACCORDINGLY.
 
-	    str = str.substring(0, i) + value + str.substring(i + name.length, str.length);
-	    i += value.length - name.length;
-	 }
+            str = str.substring(0, i) + value + str.substring(i + name.length, str.length);
+            i += value.length - name.length;
+         }
       }
 
       return str;
@@ -502,43 +535,6 @@
 
 // 2D GEOMETRY UTILITIES.
 
-   function isInRect(x,y, R) {
-      return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
-   }
-
-   function clipLineToRect(ax,ay, bx,by, R) {
-      var tx = bx < R[0] ? (R[0] - ax) / (bx - ax) :
-               bx > R[2] ? (R[2] - ax) / (bx - ax) : 10000;
-      var ty = by < R[1] ? (R[1] - ay) / (by - ay) :
-               by > R[3] ? (R[3] - ay) / (by - ay) : 10000;
-      var t = max(0, min(1, min(tx, ty)));
-      return [lerp(t, ax, bx), lerp(t, ay, by)];
-   }
-
-   // Create an arc of a circle.
-
-   function createArc(x, y, r, angle0, angle1, n) {
-      var c = [];
-      for (var i = 0 ; i <= n ; i++) {
-         var angle = lerp(i / n, angle0, angle1);
-         c.push([x + r * cos(angle), y + r * sin(angle)]);
-      }
-      return c;
-   }
-
-   function createRoundRect(x, y, w, h, r) {
-      var c = [];
-      c = c.concat(createArc(x+r,y+h-r,r,PI/2,PI,8));
-      c = c.concat([[x,y+h-r],[x,y+r]]);
-      c = c.concat(createArc(x+r,y+r,r,PI,3*PI/2,8));
-      c = c.concat([[x+r,y],[x+w-r,y]]);
-      c = c.concat(createArc(x+w-r,y+r,r,-PI/2,0,8));
-      c = c.concat([[x+w,y+r],[x+w,y+h-r]]);
-      c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
-      c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
-      return c;
-   }
-
    // Change the length of a curve.
 
    function adjustCurveLength(curve, targetLength, i0) {
@@ -625,6 +621,62 @@
             curve[i][1] += t * dyb;
          }
       //adjustCurveLength(curve, totalLength, i0);
+   }
+
+   // FIND x,y,scale FOR Q TO BEST FIT P.
+
+   function bestFit(P, Q, i0) {
+      var A = [ 0,0,0,0,0,0,0,0,0,0 ];
+      var n = min(P.length, Q.length);
+      for (var i = (i0 === undefined ? 0 : i0) ; i < n ; i++) {
+         var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];
+         A[0] += 1;
+         A[1] += 1;
+         A[2] += qx * qx + qy * qy;
+         A[3] += 2 * qx;
+         A[4] += 0;
+         A[5] += 2 * qy;
+         A[6] -= 2 * px;
+         A[7] -= 2 * py;
+         A[8] -= 2 * qx*px + 2*qy*py;
+         A[9] += px * px + py * py;
+      }
+      return gauss([ [2*A[0],   A[5],   A[4], -A[6]],
+                     [  A[5], 2*A[1],   A[3], -A[7]],
+                     [  A[4],   A[3], 2*A[2], -A[8]] ]);
+   }
+
+   function clipLineToRect(ax,ay, bx,by, R) {
+      var tx = bx < R[0] ? (R[0] - ax) / (bx - ax) :
+               bx > R[2] ? (R[2] - ax) / (bx - ax) : 10000;
+      var ty = by < R[1] ? (R[1] - ay) / (by - ay) :
+               by > R[3] ? (R[3] - ay) / (by - ay) : 10000;
+      var t = max(0, min(1, min(tx, ty)));
+      return [lerp(t, ax, bx), lerp(t, ay, by)];
+   }
+
+   // Create an arc of a circle.
+
+   function createArc(x, y, r, angle0, angle1, n) {
+      var c = [];
+      for (var i = 0 ; i <= n ; i++) {
+         var angle = lerp(i / n, angle0, angle1);
+         c.push([x + r * cos(angle), y + r * sin(angle)]);
+      }
+      return c;
+   }
+
+   function createRoundRect(x, y, w, h, r) {
+      var c = [];
+      c = c.concat(createArc(x+r,y+h-r,r,PI/2,PI,8));
+      c = c.concat([[x,y+h-r],[x,y+r]]);
+      c = c.concat(createArc(x+r,y+r,r,PI,3*PI/2,8));
+      c = c.concat([[x+r,y],[x+w-r,y]]);
+      c = c.concat(createArc(x+w-r,y+r,r,-PI/2,0,8));
+      c = c.concat([[x+w,y+r],[x+w,y+h-r]]);
+      c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
+      c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
+      return c;
    }
 
    // Compute the bounding rectangle for a curve.
@@ -733,6 +785,16 @@
       return spline;
    }
 
+   // Compute the curvature of a curved line from A to B which passes through M.
+
+   function computeCurvature(A, M, B) {
+      var dx = B[0] - A[0];
+      var dy = B[1] - A[1];
+      var ex = M[0] - (A[0] + B[0]) / 2;
+      var ey = M[1] - (A[1] + B[1]) / 2;
+      return (dx * ey - dy * ex) / (dx * dx + dy * dy);
+   }
+
    // Compute the total geometric length of a curve.
 
    function computeCurveLength(curve, i0) {
@@ -743,16 +805,6 @@
          len += sqrt(dx * dx + dy * dy);
       }
       return len;
-   }
-
-   // Compute the curvature of a curved line from A to B which passes through M.
-
-   function computeCurvature(A, M, B) {
-      var dx = B[0] - A[0];
-      var dy = B[1] - A[1];
-      var ex = M[0] - (A[0] + B[0]) / 2;
-      var ey = M[1] - (A[1] + B[1]) / 2;
-      return (dx * ey - dy * ex) / (dx * dx + dy * dy);
    }
 
    // Return distance squared from point [x,y] to curve c.
@@ -788,6 +840,10 @@
       var f = t * n - i;
       return [ lerp(f, curve[i][0], curve[i+1][0]) ,
                lerp(f, curve[i][1], curve[i+1][1]) ];
+   }
+
+   function isInRect(x,y, R) {
+      return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
    }
 
    // Resample a curve to equal geometric spacing.

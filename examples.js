@@ -244,7 +244,7 @@
    David.prototype = new Sketch;
 
    function Control() {
-      this.code = [["","x"]];
+      //this.code = [["","x"]];
 
       this.labels = "slideX slideY".split(' ');
 
