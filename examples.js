@@ -251,7 +251,7 @@
       this.flip = 1;
 
       this.computeStatistics = function() {
-         var c = this.glyphTrace[1-this.selection];
+         var c = this.sketchTrace[1-this.selection];
          var y0 = c[0][1];
          var y1 = c[c.length - 1][1];
 	 this.flip = y0 > y1 ? 1 : -1;
@@ -1157,7 +1157,7 @@
       this.labels = "swing".split(' ');
 
       this.computeStatistics = function() {
-         var b = traceComputeBounds(this.glyphTrace);
+         var b = traceComputeBounds(this.sketchTrace);
          this.hubWidth = 10 * (b[0][2] - b[0][0]) / this.size;
          this.radius = 5 * (b[2][2] - b[2][0] + b[2][3] - b[2][1]) / 2 / this.size;
          this.ht = 8.5 * ((b[2][1]+b[2][3])/2 - b[1][1]) / this.size;

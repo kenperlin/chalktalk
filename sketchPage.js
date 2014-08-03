@@ -1240,13 +1240,6 @@ var sketchToDelete = null;
          case 'x':
             isExpertMode = ! isExpertMode;
             break;
-         case 'y':
-	    var xyz = bestFit(sk(0).sp0, sk(1).sp0, 1);
-	    for (var i = 1 ; i < sk(1).sp0.length ; i++) {
-	       sk(1).sp0[i][0] = xyz[2] * sk(1).sp0[i][0] + xyz[0];
-	       sk(1).sp0[i][1] = xyz[2] * sk(1).sp0[i][1] + xyz[1];
-	    }
-	    break;
          case 'z':
             break;
          case '-':
@@ -1383,7 +1376,7 @@ var sketchToDelete = null;
                _g.globalAlpha = sk().fade();
             }
 
-            if (sk().glyphTrace != null && sk().sketchState != 'finished') {
+            if (sk().sketchTrace != null && sk().sketchState != 'finished') {
                sk().trace = [];
             }
 
@@ -1403,15 +1396,15 @@ var sketchToDelete = null;
                m.restore();
             }
 
-            if (sk().glyphTrace != null && sk().sketchState != 'finished') {
-               morphGlyphToSketch();
+            if (sk().sketchTrace != null && sk().sketchState != 'finished') {
+               morphSketchToGlyphSketch();
 
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);
 
                if (sk().glyphTransition == 1) {
                   finishDrawingUnfinishedSketch();
-                  sk().glyphTrace = null;
+                  sk().sketchTrace = null;
                }
             }
 

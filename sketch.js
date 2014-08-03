@@ -59,7 +59,7 @@
          }
       }
       this.afterSketch = function(callbackFunction) {
-         var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
+         var isg = this.sketchTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
             _g.save();
             _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
@@ -341,7 +341,7 @@
          return ! isDef(value) || value == null ? "0" : value;
       }
       this.getPortIndex = function(name) { return getIndex(this.portName, name); }
-      this.glyphTrace = null;
+      this.sketchTrace = null;
       this.trace = [];
       this.glyphTransition = 0;
       this.groupPath = [];
@@ -727,6 +727,7 @@
 
       this.value = null;
       this.x = 0;
+      this.xyz = [];
       this.xStart = 0;
       this.xf = [0,0,1,0,1];
       this.y = 0;

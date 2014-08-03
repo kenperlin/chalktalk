@@ -344,7 +344,12 @@
          return;
       }
 
-      if (sk().glyphTrace != null) {
+      if (sk().xyz.length > 0) {
+         x = sk().xyz[2] * x + sk().xyz[0];
+         y = sk().xyz[2] * y + sk().xyz[1];
+      }
+
+      if (sk().sketchTrace != null) {
          if (sk().sketchState != 'finished' && sk().glyphTransition < 0.5)
             buildTrace(sk().trace, x, y, isLine);
          else {
@@ -437,7 +442,7 @@
       return dst;
    }
 
-   function morphGlyphToSketch(suppressTransition) {
+   function morphSketchToGlyphSketch(suppressTransition) {
       function drawTrace(tr) {
          _g.beginPath();
          for (var n = 0 ; n < tr.length ; n++)
@@ -458,18 +463,30 @@
          t = 0;
 
       if (t == 0) {
-         drawTrace(sk().glyphTrace);
+         drawTrace(sk().sketchTrace);
          return;
       }
 
-      else if (t == 1) {
-         _g.lineWidth = sketchLineWidth * .6;
-         drawTrace(sk().trace);
+      if (t == 1)
          return;
-      }
 
-      var A = sk().glyphTrace;
+      var A = sk().sketchTrace;
       var B = resampleTrace(sk().trace);
+
+      // ADJUST FINAL SKETCH TO CREATE BEST FIT.
+
+      if (sk().xyz.length == 0) {
+         var x = 0, y = 0, z = 0, w = 0;
+         for (var n = 0 ; n < B.length ; n++) {
+            var xyz = bestFit(A[n], B[n]);
+	    var t = computeCurveLength(A[n]);
+	    x += t * xyz[0];
+	    y += t * xyz[1];
+	    z += t * xyz[2];
+	    w += t;
+         }
+	 sk().xyz = [x / w, y / w, z / w];
+      }
 
       var s = sCurve(t);
       var C = [];
@@ -779,7 +796,7 @@
       sk().width = bounds[2] - bounds[0];
       sk().height = bounds[3] - bounds[1];
       sk().setSelection(selection);
-      sk().glyphTrace = resampleTrace(sketchToTrace(glyphSketch));
+      sk().sketchTrace = resampleTrace(sketchToTrace(glyphSketch));
       sk().glyphTransition = 0;
       sk().trace = [];
 
