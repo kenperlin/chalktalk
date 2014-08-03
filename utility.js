@@ -626,20 +626,18 @@
 
    function bestFit(P, Q) {
       var n = min(P.length, Q.length);
-      var A = [ n,n,0,0,0,0,0,0,0,0 ];
+      var a=0, b=0, c=0, d=0, e=0, f=0;
       for (var i = 0 ; i < n ; i++) {
-         var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];
-         A[2] += qx * qx + qy * qy;
-         A[3] += 2 * qy;
-         A[4] += 2 * qx;
-         A[6] -= 2 * px;
-         A[7] -= 2 * py;
-         A[8] -= 2 * qx*px + 2*qy*py;
-         A[9] += px * px + py * py;
+         var px = P[i][0], py = P[i][1],
+	     qx = Q[i][0], qy = Q[i][1];
+         a += qx * qx + qy * qy;
+         b += qx;
+         c += qy;
+         d += px;
+         e += py;
+         f += qx * px + qy * py;
       }
-      return gauss([ [2*A[0],   A[5],   A[4], -A[6]],
-                     [  A[5], 2*A[1],   A[3], -A[7]],
-                     [  A[4],   A[3], 2*A[2], -A[8]] ]);
+      return gauss([[n,0,b,d], [0,n,c,e], [b,c,a,f] ]);
    }
 
    function clipLineToRect(ax,ay, bx,by, R) {
