@@ -186,7 +186,7 @@
    function cotan(t) { return Math.cotan(t); }
    function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
-   function gauss(A) { /* From http://martin-thoma.com */
+   function solve(A) { /* From http://martin-thoma.com */
       // Solve a system of linear equations given as an n x n+1 matrix.
       var n = A.length;
       for (var i=0; i<n; i++) {
@@ -625,11 +625,9 @@
    // FIND x,y,scale FOR CURVE P TO BEST FIT CURVE Q.
 
    function bestFit(P, Q) {
-      var n = min(P.length, Q.length);
-      var a=0, b=0, c=0, d=0, e=0, f=0;
+      var n = min(P.length, Q.length), a=0, b=0, c=0, d=0, e=0, f=0;
       for (var i = 0 ; i < n ; i++) {
-         var px = P[i][0], py = P[i][1],
-	     qx = Q[i][0], qy = Q[i][1];
+         var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];
          a += px;
          b += py;
          c += qx;
@@ -637,7 +635,7 @@
          e += px * px + py * py;
          f += px * qx + py * qy;
       }
-      return gauss([ [n,0,a,c], [0,n,b,d], [a,b,e,f] ]);
+      return solve([ [n,0,a,c], [0,n,b,d], [a,b,e,f] ]);
    }
 
    function clipLineToRect(ax,ay, bx,by, R) {
