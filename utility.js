@@ -622,7 +622,7 @@
       //adjustCurveLength(curve, totalLength, i0);
    }
 
-   // FIND x,y,scale FOR CURVE Q TO BEST FIT CURVE P.
+   // FIND x,y,scale FOR CURVE P TO BEST FIT CURVE Q.
 
    function bestFit(P, Q) {
       var n = min(P.length, Q.length);
@@ -630,14 +630,14 @@
       for (var i = 0 ; i < n ; i++) {
          var px = P[i][0], py = P[i][1],
 	     qx = Q[i][0], qy = Q[i][1];
-         a += qx * qx + qy * qy;
-         b += qx;
-         c += qy;
-         d += px;
-         e += py;
-         f += qx * px + qy * py;
+         a += px;
+         b += py;
+         c += qx;
+         d += qy;
+         e += px * px + py * py;
+         f += px * qx + py * qy;
       }
-      return gauss([[n,0,b,d], [0,n,c,e], [b,c,a,f] ]);
+      return gauss([ [n,0,a,c], [0,n,b,d], [a,b,e,f] ]);
    }
 
    function clipLineToRect(ax,ay, bx,by, R) {

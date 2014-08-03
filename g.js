@@ -478,7 +478,7 @@
       if (sk().xyz.length == 0) {
          var x = 0, y = 0, z = 0, w = 0;
          for (var n = 0 ; n < B.length ; n++) {
-            var xyz = bestFit(A[n], B[n]);
+            var xyz = bestFit(B[n], A[n]);
 	    var t = computeCurveLength(A[n]);
 	    x += t * xyz[0];
 	    y += t * xyz[1];
