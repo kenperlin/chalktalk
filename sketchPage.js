@@ -1258,12 +1258,12 @@ var sketchToDelete = null;
             background.style.backgroundColor = backgroundColor;
             palette[0] = defaultPenColor;
             for (var i = 0 ; i < this.sketches.length ; i++)
-               if (this.sketches[i].color == backgroundColor)
+               if (this.sketches[i].colorId == 0)
                   this.sketches[i].setColorId(0);
 
-            if (codeText != null) {
-               codeText.style.backgroundColor = codeTextBgColor();
-               codeText.style.color = codeTextFgColor();
+            if (codeTextArea != null) {
+               codeTextArea.style.backgroundColor = codeTextBgColor();
+               codeTextArea.style.color = codeTextFgColor();
             }
 
             if (codeSelector != null) {
