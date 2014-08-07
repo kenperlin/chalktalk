@@ -86,7 +86,7 @@
 
          // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
 
-         if (this.xlo > width()) {
+         if (this.xlo > width() - _g.panX) {
             sketchToDelete = this;
             return;
          }
