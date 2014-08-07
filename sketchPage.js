@@ -1664,10 +1664,8 @@ var sketchToDelete = null;
 
          // SHOW THE GLYPH DICTIONARY
 
-         if (isShowingGlyphs) {
+         if (isShowingGlyphs)
             this.showGlyphs();
-            return;
-         }
 
          // SHOW THE TIMELINE
 
@@ -1691,7 +1689,8 @@ var sketchToDelete = null;
 
          // DRAW THE COLOR PALETTE
 
-         drawPalette();
+         if (! isShowingGlyphs)
+            drawPalette();
 
          color(overlayColor);
 
@@ -1792,7 +1791,7 @@ var sketchToDelete = null;
 
          // IF NOT IN TEXT INSERTION MODE, SHOW THE AVAILABLE KEYBOARD SHORTCUTS.
 
-         if (! isTextMode) {
+         if (! isShowingGlyphs && ! isTextMode) {
             color(overlayColor);
             lineWidth(1);
             textHeight(12);
