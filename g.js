@@ -1363,7 +1363,7 @@
       if (n2 === undefined)
          console.log("BG CLICK " + n1);
       else if (s === undefined)
-         console.log("BG SWIPE " + n1 + " " + n2);
+         setPage(8 * n1 + n2);
       else
          console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
