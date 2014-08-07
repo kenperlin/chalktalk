@@ -559,6 +559,7 @@ function Lattice() {
 }
 Lattice.prototype = new Sketch;
 
+/*
 function SplineTest() {
    this.labels = "spline".split(' ');
    this.shape = createSpline([
@@ -582,6 +583,7 @@ function SplineTest() {
    }
 }
 SplineTest.prototype = new Sketch;
+*/
 
 function Grid() {
    this.labels = "grid".split(' ');

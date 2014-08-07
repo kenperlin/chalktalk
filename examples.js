@@ -317,17 +317,16 @@
             mLine([-.15,x],[.15,x]);
             break;
          }
-
          this.afterSketch(function() {
             textHeight(16);
             switch (this.selection) {
             case 0:
-               mText(roundedString(this.lo), [-.6,0], 1, .5);
-               mText(roundedString(this.hi), [ .6,0], 0, .5);
+               this.drawValue(this.lo, m.transform([-.6, 0]), 1, .5);
+               this.drawValue(this.hi, m.transform([ .6, 0]), 0, .5);
                break;
             case 1:
-               mText(roundedString(this.lo), [0,-.6], .5, 0);
-               mText(roundedString(this.hi), [0, .6], .5, 1);
+               this.drawValue(this.lo, m.transform([0, -.6]), .5, 0);
+               this.drawValue(this.hi, m.transform([0,  .6]), .5, 1);
                break;
             }
 
@@ -788,10 +787,18 @@
 
             var x2 = x1 + (dx2 * cb + dy2 * sb);
             var y2 = y1 + (dy2 * cb - dx2 * sb);
-
+/*
             drawCurve([ [ox-x2, oy+y2],
                         [ox-x1, oy+y1],
                         [ox+x0, oy+y0],
+                        [ox+x1, oy+y1],
+                        [ox+x2, oy+y2] ]);
+*/
+            drawCurve([ [ox-x0, oy+y0],
+                        [ox-x1, oy+y1],
+                        [ox-x2, oy+y2] ]);
+
+            drawCurve([ [ox+x0, oy+y0],
                         [ox+x1, oy+y1],
                         [ox+x2, oy+y2] ]);
 
@@ -1092,14 +1099,14 @@
             this.clearPorts();
             if (s % 4 == 0) {
                this.addPort("i", -.5 * sc, 0);
-               this.addPort("d",   0, 0);
+               this.addPort("d",        0, 0);
             }
             else {
                var x = s % 4 < 3 ? -.5 : -.65;
                this.addPort("i", x * sc,  .2 * sc);
                this.addPort("j", x * sc, -.2 * sc);
             }
-            this.addPort("o", s < 4 ? .5 * sc : .6 * sc, 0);
+            this.addPort("o", sc * (s < 4 ? .5 : .6), 0);
          }
 
          function xor(a, b) { return a == b ? 0 : 1; }

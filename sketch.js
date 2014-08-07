@@ -28,6 +28,10 @@
    function sketchColor() { return palette[sketchPage.colorId]; }
 
    function Sketch() {
+      this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
+      this.adjustY = function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; }
+      this.adjustXY = function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; }
+
       this.fade = function() {
          return this.fadeAway == 0 ? 1 : this.fadeAway;
       }
@@ -197,6 +201,10 @@
          context.restore();
       }
       this.drawFirstLine = false;
+      this.drawValue = function(value, xy, ax, ay) {
+         var P = this.adjustXY(xy);
+         text(roundedString(value), P[0], P[1], ax, ay);
+      }
       this.drawText = function(context) {
          var fontSize = floor(24 * this.scale());
 
@@ -472,17 +480,19 @@
          if (isDef(this.portLocation[i])) {
             if (this instanceof Sketch2D) {
                var p = this.portLocation[i];
-               return [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
+               p = [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
+	       return this.adjustXY(p);
             }
             else {
                m.save();
                this.standardView();
-               var xy = m.transform(this.portLocation[i]);
+               var p = this.portLocation[i];
+               var xy = m.transform(p);
                m.restore();
-               return xy;
+	       return this.adjustXY(xy);
             }
          }
-         return [this.cx(),this.cy()];
+         return this.adjustXY([this.cx(),this.cy()]);
       }
       this.rX = 0;
       this.rY = 0;

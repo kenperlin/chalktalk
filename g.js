@@ -344,10 +344,8 @@
          return;
       }
 
-      if (sk().xyz.length > 0) {
-         x = sk().xyz[2] * x + sk().xyz[0];
-         y = sk().xyz[2] * y + sk().xyz[1];
-      }
+      x = sk().adjustX(x);
+      y = sk().adjustY(y);
 
       if (sk().sketchTrace != null) {
          if (sk().sketchState != 'finished' && sk().glyphTransition < 0.5)
