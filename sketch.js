@@ -201,6 +201,10 @@
          context.restore();
       }
       this.drawFirstLine = false;
+      this.drawLabel = function(label, xy, ax, ay) {
+         var P = this.adjustXY(xy);
+         text(label, P[0], P[1], ax, ay);
+      }
       this.drawValue = function(value, xy, ax, ay) {
          var P = this.adjustXY(xy);
          text(roundedString(value), P[0], P[1], ax, ay);

@@ -548,6 +548,8 @@ PVase.prototype = new Sketch;
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
+var count = 0;
+
 barleyField = {
     
     setup:function(){

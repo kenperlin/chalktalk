@@ -1340,7 +1340,19 @@ var sketchToDelete = null;
          this.trueIndex = this.index;
 	 var skTrue = sk();
 
+	 function xOnStrip(x) { return x * margin / h - _g.panX; }
+         function yOnStrip(y) { return y * margin / h + h - margin; }
+
+	 var isOnStrip = isBottomGesture || this.y >= h - margin;
+	 var isNearStrip = isBottomGesture || this.y >= h - 2 * margin;
+
          for (var I = 0 ; I < nsk() ; I++) {
+
+            // DO NOT RENDER ANY GEOMETRY SKETCH THAT IS PANNED OFF THE SCREEN.
+
+            if ( sk(I) instanceof GeometrySketch &&
+	         sk(I).xlo !== undefined && (sk(I).xhi + _g.panX < 0 || sk(I).xlo + _g.panX > w) )
+               continue;
 
             if (sk() == null)
                break;
@@ -1446,10 +1458,39 @@ var sketchToDelete = null;
                _g.stroke();
 	    }
 
+	    // ADD SKETCH TO THE PANORAMA ALONG THE BOTTOM STRIP.
+
+            if (isNearStrip) {
+	       lineWidth(_g.lineWidth * margin / h);
+	       _g.beginPath();
+	       for (var i = 0 ; i < sk().sp.length ; i++) {
+	          var x = xOnStrip(sk().sp[i][0]);
+	          var y = yOnStrip(sk().sp[i][1]);
+	          if (sk().sp[i][2] == 0)
+	             _g.moveTo(x, y);
+	          else
+	             _g.lineTo(x, y);
+               }
+            }
+            _g.stroke();
+
             this.index = PUSHED_sketchPage_index;
          }
 
          noisy = 0;
+
+	 // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA ALONG THE BOTTOM STRIP.
+
+         if (isNearStrip) {
+	    var x0 = xOnStrip(  - _g.panX), y0 = yOnStrip(0);
+	    var x1 = xOnStrip(w - _g.panX), y1 = yOnStrip(h) - 2;
+	    color(scrimColor(isOnStrip ? .06 : .12));
+	    fillRect(x0, y0, x1 - x0, y1 - y0);
+	    if (isOnStrip) {
+	       color(scrimColor(1));
+	       drawRect(x0, y0, x1 - x0, y1 - y0);
+            }
+         }
 
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)

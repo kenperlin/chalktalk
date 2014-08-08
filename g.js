@@ -390,17 +390,25 @@
          }
       }
 
-      if (! isLine)
-         _g.moveTo(snx(sk(),cx,cy), sny(sk(),cx,cy));
+      if (! isLine) {
+         var sx = snx(sk(), cx, cy);
+	 var sy = sny(sk(), cx, cy);
+         _g.moveTo(sx, sy);
+      }
 
       else if (d > 0) {
          for (var i = 20 ; i < d ; i += 20) {
             var xx = lerp(i/d, xPrev, cx);
             var yy = lerp(i/d, yPrev, cy);
-            _g.lineTo(snx(sk(),xx,yy), sny(sk(),xx,yy));
+	    var sx = snx(sk(), xx, yy);
+	    var sy = sny(sk(), xx, yy);
+            _g.lineTo(sx, sy);
          }
-         _g.lineTo(snx(sk(),cx,cy), sny(sk(),cx,cy));
+         var sx = snx(sk(), cx, cy);
+	 var sy = sny(sk(), cx, cy);
+         _g.lineTo(sx, sy);
       }
+
       xPrev = x;
       yPrev = y;
 
@@ -1360,8 +1368,13 @@
    // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
 
    function bgGesture(n1, n2, s) {
-      if (n2 === undefined)
-         console.log("BG CLICK " + n1);
+      if (n2 === undefined) {
+         console.log(n1);
+         switch (n1) {
+	 case 2: setPage(pageIndex - 1); break;
+	 case 6: setPage(pageIndex + 1); break;
+	 }
+      }
       else if (s === undefined)
          setPage(8 * n1 + n2);
       else
@@ -1884,12 +1897,13 @@
          _g.globalAlpha = 1.0;
 
          if (this.mouseY >= h - margin || isBottomGesture) {
-            color(scrimColor(0.1));
-	    fillRect(_g.panx, h - margin, w, margin - 2);
+            color(scrimColor(0.06));
+	    fillRect(-_g.panX, h - margin, w, margin - 2);
 
-            var offset = _g.panX % margin;
-            for (var x = offset - _g.panX ; x < w - _g.panX ; x += margin)
-	       fillRect(x, h - margin, margin/2, margin - 2);
+            color(scrimColor(0.03));
+	    var dx = margin / 2;
+            for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
+	       fillRect(x, h - margin, dx/2, margin - 2);
          }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
