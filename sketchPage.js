@@ -24,6 +24,7 @@ var isTogglingMenuType = false;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;
+var showingLiveData = false;
 var sketchToDelete = null;
 
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
@@ -95,6 +96,7 @@ var sketchToDelete = null;
          this.keyUp(27);
          return sk();
       }
+
       this.createLink = function() {
 
          // AVOID CREATING DUPLICATE LINKS.
@@ -130,6 +132,7 @@ var sketchToDelete = null;
                   root.remove(i);
          }
       }
+
       this.clear();
 
       this.findIndex = function(sketch) {
@@ -337,7 +340,7 @@ var sketchToDelete = null;
          }
 
          if (isBottomGesture) {
-            _g.panX += x - this.xDown;
+            _g.panX = min(0, _g.panX + x - this.xDown);
             return;
          }
 
@@ -457,6 +460,10 @@ var sketchToDelete = null;
          if (isBottomGesture) {
             if (y < height() - 100)
                this.clear();
+/*
+            else if (this.travel <= clickSize)
+	       _g.panX = min(0, -(x - margin/2) * height() / margin);
+*/
             isBottomGesture = false;
             return;
          }
@@ -1190,6 +1197,9 @@ var sketchToDelete = null;
             if (isk())
                sk().isCard = ! sk().isCard;
             break;
+         case 'd':
+	    showingLiveData = (showingLiveData + 1) % 3;
+            break;
          case 'e':
             toggleCodeWidget();
             break;
@@ -1340,11 +1350,11 @@ var sketchToDelete = null;
          this.trueIndex = this.index;
 	 var skTrue = sk();
 
-	 function xOnStrip(x) { return x * margin / h - _g.panX; }
-         function yOnStrip(y) { return y * margin / h + h - margin; }
+	 function xOnPanStrip(x) { return x * margin / h - _g.panX; }
+         function yOnPanStrip(y) { return y * margin / h + h - margin; }
 
-	 var isOnStrip = isBottomGesture || this.y >= h - margin;
-	 var isNearStrip = isBottomGesture || this.y >= h - 2 * margin;
+	 var isOnPanStrip = isBottomGesture || this.y >= h - margin;
+	 var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
 
          for (var I = 0 ; I < nsk() ; I++) {
 
@@ -1458,18 +1468,33 @@ var sketchToDelete = null;
                _g.stroke();
 	    }
 
-	    // ADD SKETCH TO THE PANORAMA ALONG THE BOTTOM STRIP.
+	    // ADD SKETCH TO THE PANORAMA STRIP.
 
-            if (isNearStrip) {
-	       lineWidth(_g.lineWidth * margin / h);
-	       _g.beginPath();
-	       for (var i = 0 ; i < sk().sp.length ; i++) {
-	          var x = xOnStrip(sk().sp[i][0]);
-	          var y = yOnStrip(sk().sp[i][1]);
-	          if (sk().sp[i][2] == 0)
-	             _g.moveTo(x, y);
-	          else
-	             _g.lineTo(x, y);
+            if (isNearPanStrip) {
+	       if (sk() instanceof GeometrySketch) {
+	          var x0 = xOnPanStrip(min(sk().sp[0][0], sk().sp[1][0]));
+	          var y0 = yOnPanStrip(min(sk().sp[0][1], sk().sp[1][1]));
+	          var x1 = xOnPanStrip(max(sk().sp[0][0], sk().sp[1][0]));
+	          var y1 = yOnPanStrip(max(sk().sp[0][1], sk().sp[1][1]));
+		  color(scrimColor(.2));
+	          _g.beginPath();
+	          _g.moveTo(x0, y0);
+	          _g.lineTo(x1, y0);
+	          _g.lineTo(x1, y1);
+	          _g.lineTo(x0, y1);
+	          _g.fill();
+	       }
+	       else {
+	          lineWidth(_g.lineWidth * margin / h);
+	          _g.beginPath();
+	          for (var i = 0 ; i < sk().sp.length ; i++) {
+	             var x = xOnPanStrip(sk().sp[i][0]);
+	             var y = yOnPanStrip(sk().sp[i][1]);
+	             if (sk().sp[i][2] == 0)
+	                _g.moveTo(x, y);
+	             else
+	                _g.lineTo(x, y);
+                  }
                }
             }
             _g.stroke();
@@ -1479,14 +1504,14 @@ var sketchToDelete = null;
 
          noisy = 0;
 
-	 // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA ALONG THE BOTTOM STRIP.
+	 // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA STRIP.
 
-         if (isNearStrip) {
-	    var x0 = xOnStrip(  - _g.panX), y0 = yOnStrip(0);
-	    var x1 = xOnStrip(w - _g.panX), y1 = yOnStrip(h) - 2;
-	    color(scrimColor(isOnStrip ? .06 : .12));
+         if (isNearPanStrip) {
+	    var x0 = xOnPanStrip(  - _g.panX), y0 = yOnPanStrip(0);
+	    var x1 = xOnPanStrip(w - _g.panX), y1 = yOnPanStrip(h) - 2;
+	    color(scrimColor(isOnPanStrip ? .06 : .12));
 	    fillRect(x0, y0, x1 - x0, y1 - y0);
-	    if (isOnStrip) {
+	    if (isOnPanStrip) {
 	       color(scrimColor(1));
 	       drawRect(x0, y0, x1 - x0, y1 - y0);
             }

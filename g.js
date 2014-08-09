@@ -243,7 +243,7 @@
          // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
 
          if (isPanning)
-            _g.panX += event.clientX - _g.lastX;
+            _g.panX = min(0, _g.panX + event.clientX - _g.lastX);
          _g.lastX = event.clientX;
       }
    }
@@ -705,7 +705,7 @@
       ['a'  , "toggle audience"],
       ['b'  , "bend line"],
       ['c'  , "toggle card"],
-      ['d'  , "start drawing"],
+      ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['g'  , "group/ungroup"],
       ['h'  , "home"],
@@ -740,6 +740,7 @@
    var groupPath = [];
    var linkDeleteColor = 'rgba(255,0,0,.1)';
    var linkHighlightColor = 'rgba(0,192,96,.2)';
+   var liveDataColor = 'rgb(128,192,255)'
    var overlayColor = 'rgb(0,64,255)';
    var overlayScrim = 'rgba(0,64,255,.25)';
    var portColor = 'rgb(0,192,96)';
@@ -840,6 +841,32 @@
       var j = link[3][1];
       link[3][2] = computeCurvature(a.portXY(i), C, b.portXY(j));
       link[3][3] = undefined;
+   }
+
+   var portDataValues = [], outSketchPrev = null, outPortPrev = -1;
+
+   function drawPortData(sketch, port, dataValues) {
+      var lo = 100000, hi = -100000;
+      for (var i = 0 ; i < dataValues.length ; i++) {
+         lo = min(lo, dataValues[i]);
+         hi = max(hi, dataValues[i]);
+      }
+      if (hi - lo < 0.1)
+         return;
+
+      var xy = sketch.portXY(port);
+
+      lineWidth(1);
+      _g.beginPath();
+      for (var i = 0 ; i < dataValues.length ; i++) {
+         var x = xy[0] + 2 * i;
+         var y = xy[1] - 2 * 30 * dataValues[i];
+	 if (i == 0)
+            _g.moveTo(x, y);
+         else
+            _g.lineTo(x, y);
+      }
+      _g.stroke();
    }
 
    function drawLink(a, i, linkData, isVisible) {
@@ -1435,6 +1462,15 @@
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
          break;
+      case 1:
+         if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
+                                          && ! (sk() instanceof NumericSketch )) {
+	    console.log("SIMPLE SKETCH");
+	 }
+	 else {
+	    console.log("NOT SIMPLE SKETCH");
+	 }
+	 break;
       case 2:
          sketchAction = "translating";  // N -- TRANSLATE
          break;
@@ -1808,6 +1844,52 @@
                      b.inValue[j] = outValue;
                   }
                }
+         }
+
+	 // IF SHOWING LIVE DATA
+
+         if (showingLiveData > 0) {
+
+	    if (showingLiveData >= 1) {
+
+	       // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
+
+	       if (outSketch != outSketchPrev || outPort != outPortPrev)
+	          portDataValues = [];
+	       outSketchPrev = outSketch;
+	       outPortPrev = outPort;
+
+	       if (outSketch != null && outPort >= 0 && ! (outSketch instanceof NumericSketch)) {
+	          var val = outSketch.outValue[outPort];
+	          portDataValues.push(val == false ? 0 : val == true ? 1 : val);
+                  color(liveDataColor);
+	          drawPortData(outSketch, outPort, portDataValues);
+               }
+            }
+
+	    if (showingLiveData >= 2)
+	       for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
+	          var s = sketchPage.sketches[I];
+	          for (var i = 0 ; i < s.portName.length ; i++)
+	             if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
+		        var xy = s.portXY(i);
+		        var str = roundedString(s.outValue[i]);
+
+                        textHeight(20);
+			color(backgroundColor);
+			var _sw = textWidth(str);
+			var _sh = textHeight();
+			_g.beginPath();
+			_g.moveTo(xy[0] - _sw/2, xy[1] - _sh/2);
+			_g.lineTo(xy[0] + _sw/2, xy[1] - _sh/2);
+			_g.lineTo(xy[0] + _sw/2, xy[1] + _sh/2);
+			_g.lineTo(xy[0] - _sw/2, xy[1] + _sh/2);
+			_g.fill();
+
+			color(liveDataColor);
+		        text(str, xy[0], xy[1], .5, .5);
+		     }
+	       }
          }
 
          sketchPage.computePortBounds();
