@@ -1495,9 +1495,9 @@ var sketchToDelete = null;
 	             else
 	                _g.lineTo(x, y);
                   }
+                  _g.stroke();
                }
             }
-            _g.stroke();
 
             this.index = PUSHED_sketchPage_index;
          }
