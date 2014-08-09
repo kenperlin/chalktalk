@@ -360,8 +360,8 @@
 
    function Diagram() {
       this.labels =
-         "refract scan rgb circles ".concat(
-         "square circle triangle flap").split(' ');
+         //"refract scan rgb circles square circle triangle flap".split(' ');
+         "square circle triangle flap".split(' ');
 
       this.isWandering = false;
 

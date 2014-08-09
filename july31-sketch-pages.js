@@ -1,5 +1,5 @@
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket".split(' ');
 
 function blankPage() {
    return {
@@ -417,8 +417,8 @@ var page103 = {
    innerHTML: "\
       <table width=1280>\
       <tr height=50></tr>\
-      <tr><th><font size=10 color=white>This is the dawn of</font></th></tr>\
-      <tr><th><font size=10 color=white>the age of computer graphics</font></th></tr>\
+      <tr><th><font size=10 color=black>This is the dawn of</font></th></tr>\
+      <tr><th><font size=10 color=black>the age of computer graphics</font></th></tr>\
       <tr height=50></tr>\
       <tr>\
          <th><img src=imgs/gumball_machine.jpg width=500></th>\
@@ -640,6 +640,7 @@ var sketchPages = [
    page102b,
    blankPage(),
    page102c,
+   page103,
    blankPage(),
    page106a,
    page106b,
