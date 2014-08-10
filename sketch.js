@@ -32,6 +32,11 @@
       this.adjustY = function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; }
       this.adjustXY = function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; }
 
+      this.unadjustX = function(x) { return this.xyz.length == 0 ? x : (x - this.xyz[0]) / this.xyz[2]; }
+      this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
+      this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
+
+
       this.fade = function() {
          return this.fadeAway == 0 ? 1 : this.fadeAway;
       }

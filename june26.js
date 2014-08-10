@@ -374,6 +374,7 @@ function corona() {
       ["turbulence", "grad(r + turbulence(P))"],
       ["animate", "grad(r + turbulence(P(time)))"],
    ];
+   sketch.selectedIndex = 3;
 }
 
 

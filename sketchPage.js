@@ -264,6 +264,8 @@ var sketchToDelete = null;
 
          this.isFocusOnSketch = false;
          if (isk() && sk().isMouseOver) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
                this.isFocusOnSketch = ! (sk() instanceof SimpleSketch) || sk().isGroup();
                sk().isPressed = true;
@@ -285,6 +287,8 @@ var sketchToDelete = null;
             addSketch(new SimpleSketch());
             sk().sketchProgress = 1;
             sk().sketchState = 'finished';
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             sk().mouseDown(x, y);
          }
       }
@@ -393,6 +397,8 @@ var sketchToDelete = null;
             return;
 
          if (isk()) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
                if (sk().travel > clickSize)
@@ -507,7 +513,7 @@ var sketchToDelete = null;
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 
                if (isHover())
-                  sk().setTextCursor(x, y);
+                  sk().setTextCursor(sk().unadjustX(x), sk().unadjustY(y));
 
                // CLICK NOT ON STROKE TURNS OFF TEXT MODE.
 
@@ -609,7 +615,7 @@ var sketchToDelete = null;
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
             else {
-	       if (doSketchClickAction(x, y)) {
+	       if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) {
                   return;
                }
             }
@@ -625,6 +631,8 @@ var sketchToDelete = null;
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
          if (isk()) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
 
             if (sk().sketchProgress == 1)
                sk().isPressed = false;
