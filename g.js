@@ -1224,14 +1224,14 @@
          return score;
       }
 
-      this.toSimpleSketch = function(tx, ty) {
+      this.toSimpleSketch = function(tx, ty, sc) {
          var s = new SimpleSketch();
          for (var n = 0 ; n < this.data.length ; n++)
             for (var i = 0 ; i < this.data[n].length ; i++) {
-               var x1 = 1.5 * this.data[n][i][0] - 50;
-               var y1 = 1.5 * this.data[n][i][1] - 50;
-	       var x = x1 + 3 * noise2(x1 / 30, y1 / 30);
-	       var y = y1 + 3 * noise2(x1 / 30, y1 / 30 + 100);
+               var x1 = sc * this.data[n][i][0] - 50;
+               var y1 = sc * this.data[n][i][1] - 50;
+	       var x = x1 + 2*sc * noise2(x1 / 30, y1 / 30);
+	       var y = y1 + 2*sc * noise2(x1 / 30, y1 / 30 + 100);
                s.sp0.push([x,y]);
                s.sp.push([x,y,i>0]);
             }
@@ -1269,6 +1269,7 @@
 
 	 // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
 
+	 sk().glyph = this;
 	 sk().glyphName = this.indexName;
       }
 
@@ -1465,11 +1466,11 @@
          break;
       case 1:
          if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
-                                          && ! (sk() instanceof NumericSketch )) {
-	    console.log("SIMPLE SKETCH");
-	 }
-	 else {
-	    console.log("NOT SIMPLE SKETCH");
+                                          && ! (sk() instanceof NumericSketch ))
+            sk().isGlyphable = ! sk().isGlyphable;
+	 else if (sk().glyph !== undefined) {
+	    sk().fadeAway = 1;
+	    sk().glyph.toSimpleSketch(sk().cx(), sk().cy(), sk().size / 200 * sk().size / (sk().size - 2 * sketchPadding));
 	 }
 	 break;
       case 2:

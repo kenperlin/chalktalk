@@ -419,7 +419,7 @@ var sketchToDelete = null;
          this.isPressed = false;
 
 	 if (this.isDraggingGlyph) {
-	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY);
+	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
 	    this.isDraggingGlyph = false;
 	    return;
 	 }

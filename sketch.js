@@ -826,6 +826,7 @@
       this.parsedStrokes = null;
       this.parsedTransition = 0;
       this.glyphName = "simple sketch";
+      this.isGlyphable = true;
 
       this.isParsed = function() {
          return this.parsedStrokes != null;
@@ -1003,7 +1004,8 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    this.convertToGlyphSketch();
+	    if (this.isGlyphable)
+	       this.convertToGlyphSketch();
             return;
          }
 
