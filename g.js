@@ -1394,6 +1394,9 @@
       }
    }
 
+   function directionsToPage(n1, n2) { return 8 * n1 + n2; }
+   function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
+
    // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
 
    function bgGesture(n1, n2, s) {
@@ -1405,7 +1408,7 @@
 	 }
       }
       else if (s === undefined)
-         setPage(8 * n1 + n2);
+         setPage(directionsToPage(n1, n2));
       else
          console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
@@ -1562,6 +1565,7 @@
    }
 
    var tick = function(g) {
+      var w = width(), h = height();
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
@@ -1587,7 +1591,6 @@
             : isBottomHover                     ? '-webkit-grab'
 	    :                                     'crosshair'
             ;
-         var w = width(), h = height();
 
          onScreenKeyboard.x = w / 2;
          onScreenKeyboard.y = h * 3 / 4;
@@ -1915,6 +1918,7 @@
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
 
          if (isRightHover && ! isBottomGesture) {
+            annotateStart();
             _g.save();
             _g.globalAlpha = 1.0;
             lineWidth(1);
@@ -1960,7 +1964,21 @@
                _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
             }
 
+	    if (! isExpertMode) {
+	       var d = h / 10;
+	       color(defaultPenColor);
+	       fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+	       var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+	       var x1 = w/2 - d * cos(n1 * TAU / 8);
+	       var y1 = h/2 + d * sin(n1 * TAU / 8);
+	       var x2 = x1  - d * cos(n2 * TAU / 8);
+	       var y2 = y1  + d * sin(n2 * TAU / 8);
+	       lineWidth(d/10);
+	       arrow(x1, y1, x2, y2, d/8);
+	    }
+
             _g.restore();
+            annotateEnd();
          }
 
          if (visible_sp != null) {
