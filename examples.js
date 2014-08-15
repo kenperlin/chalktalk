@@ -1,12 +1,12 @@
-   registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
-   registerGlyph("cube()",    [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
-   registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
-   registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
+   registerGlyph("axes3DSketch()",   [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
+   registerGlyph("cubeSketch()",     [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
+   registerGlyph("cylinderSketch()", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
+   registerGlyph("sphereSketch()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
-   function cube()     { geometrySketch(root.addCube()); }
-   function cylinder() { geometrySketch(root.addCylinder()); }
-   function globe()    { geometrySketch(root.addGlobe()); }
-   function axes3D() {
+   function sphereSketch()   { geometrySketch(root.addGlobe()); }
+   function cubeSketch()     { geometrySketch(root.addCube()); }
+   function cylinderSketch() { geometrySketch(root.addCylinder()); }
+   function axes3DSketch() {
       var a = root.addNode();
       a.addCube().getMatrix().translate( .5, .0, .0).scale(.50,.03,.03);
       a.addCube().getMatrix().translate( .0, .5, .0).scale(.03,.50,.03);
@@ -353,9 +353,6 @@
       }
    }
    Control.prototype = new Sketch;
-
-   registerGlyph(sketchTypeToCode('Control', 'slideX'), [ [[-.5,0],[.5,0]], [[0,-.2],[0,.2]] ]);
-   //registerGlyph(sketchTypeToCode('Control', 'slideY'), [ [[0,-.5],[0,.5]], [[-.2,0],[.2,0]] ]);
 
    function Diagram() {
       this.labels =

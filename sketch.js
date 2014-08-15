@@ -1004,8 +1004,10 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    if (this.isGlyphable)
+	    if (this.isGlyphable) {
 	       this.convertToGlyphSketch();
+	       console.log(sk().glyph.name);
+            }
             return;
          }
 
@@ -1025,8 +1027,7 @@
       }
 
       this.convertToGlyphSketch = function() {
-         strokes = this.getStrokes();
-         var glyph = interpretStrokes();
+         var glyph = findGlyph(this.getStrokes(), glyphs);
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();

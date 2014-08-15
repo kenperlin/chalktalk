@@ -185,7 +185,7 @@ var sketchToDelete = null;
                needToStartSketchDragAction = true;
             else {
                isBgActionEnabled = true;
-               startBgAction(x, y);
+               bgActionDown(x, y);
             }
             return;
          }
@@ -321,7 +321,7 @@ var sketchToDelete = null;
          }
 
          if (isBgActionEnabled) {
-            doBgAction(x, y);
+            bgActionDrag(x, y);
             return;
          }
 
@@ -430,8 +430,13 @@ var sketchToDelete = null;
          }
 
          if (isBgActionEnabled) {
-            endBgAction(x, y);
-            isBgActionEnabled = false;
+	    if (this.travel > clickSize)
+               bgActionUp(x, y);
+            else {
+               bgActionEnd(x, y);
+	       bgClickCount = 0;
+            }
+            return;
          }
 
          if (paletteColorId >= 0) {
@@ -528,7 +533,8 @@ var sketchToDelete = null;
                toggleTextMode();
 
             else if (! isShorthandMode) {
-               var glyph = interpretStrokes();
+               var glyph = findGlyph(strokes, glyphs);
+	       strokes = [];
                if (glyph != null && ! isCreatingGlyphData)
                   this.handleDrawnTextChar(glyph.name);
             }
@@ -1258,6 +1264,9 @@ var sketchToDelete = null;
          case 'x':
             isExpertMode = ! isExpertMode;
             break;
+         case 'y':
+            isShowingScribbleGlyphs = ! isShowingScribbleGlyphs;
+            break;
          case 'z':
             break;
          case '-':
@@ -1620,10 +1629,12 @@ var sketchToDelete = null;
          }
       }
 
+      var glyphsPerCol = 10;
+
       this.glyphBounds = function(i) {
-         var ht = height() / 10;
-         var x = ht / 20 + ht * floor(i / 10) - _g.panX;
-         var y = ((i % 10) * height()) / 10 + ht / 10;
+         var ht = height() / glyphsPerCol;
+         var x = ht / glyphsPerCol / 2 + ht * floor(i / glyphsPerCol) - _g.panX;
+         var y = ((i % glyphsPerCol) * height()) / glyphsPerCol + ht * .1;
          return [ x, y, x + ht * .7, y + ht * .8 ];
       }
 
@@ -1644,7 +1655,7 @@ var sketchToDelete = null;
 
          this.glyphT = this.isDraggingGlyph
 	             ? this.iDragged + 0.99
-	             : 10 * (floor((this.mx + _g.panX) / (height()/10)) +
+	             : glyphsPerCol * (floor((this.mx + _g.panX) / (height()/glyphsPerCol)) +
                              max(0, min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
@@ -1664,7 +1675,7 @@ var sketchToDelete = null;
 	    gX += cx - (b[0] + b[2]) / 2;
 	    gY += cy - (b[1] + b[3]) / 2;
          }
-	 var x = gX + (height()/10) * .1;
+	 var x = gX + (height()/glyphsPerCol) * .1;
 	 var y = gY;
 	 var t = this.glyphT;
 
@@ -1699,7 +1710,7 @@ var sketchToDelete = null;
          var tw = textWidth(txt);
          _g.fillText(txt, gX + 2, y + 10.5);
 
-         y += height() / 45;
+         y += height() / 45 * 10 / glyphsPerCol;
 
          var selected = t >= i && t < i+1;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
@@ -1708,7 +1719,7 @@ var sketchToDelete = null;
 
          var nn = glyph.data.length;
 
-         var sc = height() / 2000;
+         var sc = height() / 2000 * 10 / glyphsPerCol;
          for (var n = 0 ; n < nn ; n++) {
 
             var d = glyph.data[n];

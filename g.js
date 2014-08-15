@@ -149,11 +149,11 @@
                      s[i].under(sk());
                }
 
-	       // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
+               // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
 
-	       if (s.length > 0) {
-	          console.log(sk().glyphName + " -> " + s[0].glyphName);
-	          deleteSketch(sk());
+               if (s.length > 0) {
+                  console.log(sk().glyphName + " -> " + s[0].glyphName);
+                  deleteSketch(sk());
                }
 
                break;
@@ -393,7 +393,7 @@
 
       if (! isLine) {
          var sx = snx(sk(), cx, cy);
-	 var sy = sny(sk(), cx, cy);
+         var sy = sny(sk(), cx, cy);
          _g.moveTo(sx, sy);
       }
 
@@ -401,12 +401,12 @@
          for (var i = 20 ; i < d ; i += 20) {
             var xx = lerp(i/d, xPrev, cx);
             var yy = lerp(i/d, yPrev, cy);
-	    var sx = snx(sk(), xx, yy);
-	    var sy = sny(sk(), xx, yy);
+            var sx = snx(sk(), xx, yy);
+            var sy = sny(sk(), xx, yy);
             _g.lineTo(sx, sy);
          }
          var sx = snx(sk(), cx, cy);
-	 var sy = sny(sk(), cx, cy);
+         var sy = sny(sk(), cx, cy);
          _g.lineTo(sx, sy);
       }
 
@@ -486,13 +486,13 @@
          var x = 0, y = 0, z = 0, w = 0;
          for (var n = 0 ; n < B.length ; n++) {
             var xyz = bestFit(B[n], A[n]);
-	    var t = computeCurveLength(A[n]);
-	    x += t * xyz[0];
-	    y += t * xyz[1];
-	    z += t * xyz[2];
-	    w += t;
+            var t = computeCurveLength(A[n]);
+            x += t * xyz[0];
+            y += t * xyz[1];
+            z += t * xyz[2];
+            w += t;
          }
-	 sk().xyz = [x / w, y / w, z / w];
+         sk().xyz = [x / w, y / w, z / w];
       }
 
       var s = sCurve(t);
@@ -537,8 +537,10 @@
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowingPresenterView = false;
+   var isShowingScribbleGlyphs = false;
    var isTextMode = false;
    var margin = 50;
+   var scribbleColor = 'cyan';
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
@@ -658,6 +660,17 @@
 
       pixelsPerUnit = 5.8 * height() / cameraFOV;
 
+      // LOAD ALL THE SCRIBBLE GLYPHS.
+
+      for (var n = 0 ; n < glyphs.length ; n++) {
+         var name = glyphs[n].indexName;
+         scribbleGlyphs.push(new Glyph(name, [new Scribble(name)]));
+      }
+
+      for (var n = 0 ; n < scribbles.length ; n++)
+         if (! containsGlyph(scribbleGlyphs, scribbles[n]))
+            scribbleGlyphs.push(new Glyph(scribbles[n], [new Scribble(scribbles[n])]));
+
       tick(g);
    }
 
@@ -721,6 +734,7 @@
       ['t'  , "translating"],
       ['w'  , "toggle whiteboard"],
       ['x'  , "toggle expert mode"],
+      ['y'  , "toggle scribble glyphs"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
@@ -862,7 +876,7 @@
       for (var i = 0 ; i < dataValues.length ; i++) {
          var x = xy[0] + 2 * i;
          var y = xy[1] - 2 * 30 * dataValues[i];
-	 if (i == 0)
+         if (i == 0)
             _g.moveTo(x, y);
          else
             _g.lineTo(x, y);
@@ -1111,14 +1125,11 @@
    var strokesStartTime = 0;
    var strokesGlyph = null;
 
-   function interpretStrokes() {
-      if (strokes.length == 0 || strokes[0].length < 2) {
-         strokes = [];
+   function findGlyph(strokes, glyphs) {
+      if (strokes.length == 0 || strokes[0].length < 2)
          return null;
-      }
 
       strokesGlyph = new Glyph("", strokes);
-      strokes = [];
 
       if (isCreatingGlyphData)
          console.log(strokesGlyph.toString());
@@ -1132,7 +1143,6 @@
             bestMatch = i;
          }
       }
-
       return glyphs[bestMatch];
    }
 
@@ -1173,6 +1183,11 @@
    function registerGlyph(name, strokes, indexName) {
        if (indexName === undefined) {
           indexName = name;
+
+          var j = indexName.indexOf('Sketch');
+          if (j > 0)
+             indexName = indexName.substring(0, j);
+
           var j = indexName.indexOf('(');
           if (j > 0)
              indexName = indexName.substring(0, j);
@@ -1230,14 +1245,14 @@
             for (var i = 0 ; i < this.data[n].length ; i++) {
                var x1 = sc * this.data[n][i][0] - 50;
                var y1 = sc * this.data[n][i][1] - 50;
-	       var x = x1 + 2*sc * noise2(x1 / 30, y1 / 30);
-	       var y = y1 + 2*sc * noise2(x1 / 30, y1 / 30 + 100);
+               var x = x1 + 2*sc * noise2(x1 / 30, y1 / 30);
+               var y = y1 + 2*sc * noise2(x1 / 30, y1 / 30 + 100);
                s.sp0.push([x,y]);
                s.sp.push([x,y,i>0]);
             }
          sketchPage.add(s);
          finishSketch();
-	 s.setColorId(sketchPage.colorId);
+         s.setColorId(sketchPage.colorId);
          s.tX = tx;
          s.tY = ty;
       }
@@ -1267,10 +1282,10 @@
             setTextMode(true);
          }
 
-	 // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
+         // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
 
-	 sk().glyph = this;
-	 sk().glyphName = this.indexName;
+         sk().glyph = this;
+         sk().glyphName = this.indexName;
       }
 
       this.name = name;
@@ -1326,8 +1341,11 @@
                break;
             }
             var u = (t - f[i-1]) / (f[i] - f[i-1]);
-            this.data[n].push([lerp(u, stroke[i-1][0], stroke[i][0]),
-                               lerp(u, stroke[i-1][1], stroke[i][1])]);
+            if (i == 0)
+               this.data[n].push([stroke[i][0], stroke[i][1]]);
+            else
+               this.data[n].push([lerp(u, stroke[i-1][0], stroke[i][0]),
+                                  lerp(u, stroke[i-1][1], stroke[i][1])]);
          }
       }
    }
@@ -1352,45 +1370,147 @@
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
-   function startBgAction(x, y) {
+   function Scribble(str) {
+      var charIndex = "abcdefghijklmnopqrstuvwxyz";
+      var charDir   = "55566667777001111222223333";
+      var charShape = "|)>(|)>(|)>()(|)><(|)><()>";
+      var s = [[0,0]];
+      for (var i = 0 ; i < str.length ; i++) {
+         var ch = str.substring(i, i+1);
+         var n = charIndex.indexOf(ch);
+         var dir = -charDir.substring(n, n+1);
+         var shape = charShape.substring(n, n+1);
+         var C = cos(TAU * dir / 8);
+         var S = sin(TAU * dir / 8);
+         function xf(pts, xy) {
+            for (var k = 0 ; k < pts.length ; k++) {
+               var x = pts[k][0], y = pts[k][1];
+               pts[k][0] = xy[0] + C * x - S * y;
+               pts[k][1] = xy[1] + S * x + C * y;
+            }
+            return pts;
+         }
+         function arced(c) {
+            var p = [];
+            for (var k = 1 ; k <= 10 ; k++) {
+               var t = k / 10;
+               p.push([t, c * t * (1 - t)]);
+            }
+            return p;
+         }
+         function curly(c) {
+            var p = [];
+            for (var k = 1 ; k <= 10 ; k++) {
+               var t = k / 10;
+               var x = t + sin(TAU * t) / 3;
+               var y = c * (1 - cos(TAU * t)) / 4;
+               p.push([x, y]);
+            }
+            return p;
+         }
+         var ep = s[s.length - 1];
+         switch (shape) {
+         case "<": s = s.concat(xf(curly( 1), ep)); break;
+         case "(": s = s.concat(xf(arced( 1), ep)); break;
+         case "|": s = s.concat(xf(arced( 0), ep)); break;
+         case ")": s = s.concat(xf(arced(-1), ep)); break;
+         case ">": s = s.concat(xf(curly(-1), ep)); break;
+         }
+      }
+      return s;
    }
 
-   function doBgAction(x, y) {
+   function containsGlyph(glyphs, name, strokes) {
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (glyphs[i].name == name)
+	    return true;
+      return false;
    }
 
-   function endBgAction(x, y) {
+   var scribbles = "now is the time for all good men to come aid of their party".split(' ');
+   var scribbleGlyphs = [];
+
+   function BgScribble(x, y) {
+      this.size = margin;
+      this.path = [[x,y]];
+      this.x0 = x;
+      this.y0 = y;
+      this.x = x;
+      this.y = y;
+      this.index = 0;
+      this.seq = [];
+      this.draw = function() {
+         color(scribbleColor);
+
+         lineWidth(1);
+         var r = this.size / 5;
+         drawOval(this.x - r, this.y - r, 2 * r, 2 * r);
+
+         lineWidth(0.5);
+         drawCurve(this.path);
+      }
+      this.drag = function(x, y) {
+         this.path.push([x, y]);
+      }
+      this.interpret = function() {
+         var glyph = findGlyph([this.path], scribbleGlyphs);
+         return glyph == null ? "" : glyph.name;
+      }
+   }
+   var bgs;
+   var bgsText = "";
+
+   function bgActionDown(x, y) {
+      if (len(x - bgClickX, y - bgClickY) < clickSize) {
+         bgs = new BgScribble(x, y);
+         bgsText = "";
+      }
+   }
+
+   function bgActionDrag(x, y) {
+      if (bgs !== undefined)
+         bgs.drag(x, y);
+   }
+
+   function bgActionEnd(x, y) {
+      console.log(bgsText);
+      bgs = undefined;
+   }
+
+   function bgActionUp(x, y) {
+      if (bgs !== undefined) {
+         bgsText += bgs.interpret() + " ";
+         bgs = new BgScribble(x, y);
+         return;
+      }
+
       var x0 = bgClickX;
       var y0 = bgClickY;
       var x1 = sketchPage.xDown;
       var y1 = sketchPage.yDown;
-      if (len(x1 - x0, y1 - y0) < clickSize) {
-         var n = pieMenuIndex(x - x1, y - y1, 8);
-         console.log("BG DOUBLE CLICK");
+
+      var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
+
+      // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
+
+      if (len(x - x1, y - y1) < clickSize) {
+         bgGesture(n1);
+         return;
       }
+
+      var sketches = sketchPage.sketchesAt(x, y);
+      if (sketches.length == 0)
+
+         // POSITION OF START OF SWIPE WRT END OF SWIPE.
+
+         bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
+
       else {
-         var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
 
-         // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
+         // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
 
-         if (len(x - x1, y - y1) < clickSize) {
-	    bgGesture(n1);
-	    return;
-         }
-
-	 var sketches = sketchPage.sketchesAt(x, y);
-	 if (sketches.length == 0)
-
-            // POSITION OF START OF SWIPE WRT END OF SWIPE.
-
-            bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
-
-         else {
-
-            // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
-
-            var s = sketches[0];
-            bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
-         }
+         var s = sketches[0];
+         bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
       }
    }
 
@@ -1403,9 +1523,9 @@
       if (n2 === undefined) {
          console.log(n1);
          switch (n1) {
-	 case 2: setPage(pageIndex - 1); break;
-	 case 6: setPage(pageIndex + 1); break;
-	 }
+         case 2: setPage(pageIndex - 1); break;
+         case 6: setPage(pageIndex + 1); break;
+         }
       }
       else if (s === undefined)
          setPage(directionsToPage(n1, n2));
@@ -1423,7 +1543,7 @@
       case 3:
          sketchDragActionXY = [x,y];
          sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
-	 break;
+         break;
       }
    }
 
@@ -1450,7 +1570,7 @@
       switch (sketchDragMode) {
       case 2:
          delete sketchPage.definingMotion;
-	 break;
+         break;
       }
    }
 
@@ -1471,11 +1591,11 @@
          if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
                                           && ! (sk() instanceof NumericSketch ))
             sk().isGlyphable = ! sk().isGlyphable;
-	 else if (sk().glyph !== undefined) {
-	    sk().fadeAway = 1;
-	    sk().glyph.toSimpleSketch(sk().cx(), sk().cy(), sk().size / 200 * sk().size / (sk().size - 2 * sketchPadding));
-	 }
-	 break;
+         else if (sk().glyph !== undefined) {
+            sk().fadeAway = 1;
+            sk().glyph.toSimpleSketch(sk().cx(), sk().cy(), sk().size / 200 * sk().size / (sk().size - 2 * sketchPadding));
+         }
+         break;
       case 2:
          sketchAction = "translating";  // N -- TRANSLATE
          break;
@@ -1494,7 +1614,7 @@
          break;
       case 7:
          sketchAction = "undrawing";    // SE -- "UNDRAW" A SIMPLE SKETCH
-	 sketchPage.tUndraw = 0;
+         sketchPage.tUndraw = 0;
          break;
       }
 
@@ -1582,14 +1702,14 @@
          // SET THE CURSOR STYLE.
 
          document.body.style.cursor =
-	    (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
-	    isExpertMode && (pieMenuIsActive || isSketchInProgress())
-	                                        ? 'none'
+            (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
+            isExpertMode && (pieMenuIsActive || isSketchInProgress())
+                                                ? 'none'
             : bgClickCount == 1                 ? 'cell'
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
-	    :                                     'crosshair'
+            :                                     'crosshair'
             ;
 
          onScreenKeyboard.x = w / 2;
@@ -1604,7 +1724,7 @@
          _g = g;
 
          if (! isDef(_g.panX))
-	    _g.panX = 0;
+            _g.panX = 0;
 
          // CLEAR THE CANVAS
 
@@ -1785,6 +1905,9 @@
                drawCrosshair(cursorX, cursorY);
          }
 
+         if (bgs !== undefined)
+            bgs.draw();
+
          if (isAudiencePopup()) {
 
             // MAKE SURE AUDIENCE VIEW HAS THE RIGHT BACKGROUND COLOR.
@@ -1820,23 +1943,23 @@
             // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
 
             if (S.isNullText()) {
-	       if (S instanceof SimpleSketch) {
+               if (S instanceof SimpleSketch) {
                   if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
-	       }
-	       else {
+               }
+               else {
                  for (var i = 0 ; i < S.in.length ; i++)
                     S.outValue[i] = S.inValue[i];
-	       }
-	    }
+               }
+            }
 
             // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
 
-	    else {
+            else {
                S.evalResult = S.evalCode(S.text);
                if (S.evalResult != null && isDef(S.out[0]))
                   S.outValue[0] = S.evalResult;
-	    }
+            }
 
             // VALUES PROPAGATE ALONG LINKS.
 
@@ -1851,50 +1974,50 @@
                }
          }
 
-	 // IF SHOWING LIVE DATA
+         // IF SHOWING LIVE DATA
 
          if (showingLiveData > 0) {
 
-	    if (showingLiveData >= 1) {
+            if (showingLiveData >= 1) {
 
-	       // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
+               // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
 
-	       if (outSketch != outSketchPrev || outPort != outPortPrev)
-	          portDataValues = [];
-	       outSketchPrev = outSketch;
-	       outPortPrev = outPort;
+               if (outSketch != outSketchPrev || outPort != outPortPrev)
+                  portDataValues = [];
+               outSketchPrev = outSketch;
+               outPortPrev = outPort;
 
-	       if (outSketch != null && outPort >= 0 && ! (outSketch instanceof NumericSketch)) {
-	          var val = outSketch.outValue[outPort];
-	          portDataValues.push(val == false ? 0 : val == true ? 1 : val);
+               if (outSketch != null && outPort >= 0 && ! (outSketch instanceof NumericSketch)) {
+                  var val = outSketch.outValue[outPort];
+                  portDataValues.push(val == false ? 0 : val == true ? 1 : val);
                   color(liveDataColor);
-	          drawPortData(outSketch, outPort, portDataValues);
+                  drawPortData(outSketch, outPort, portDataValues);
                }
             }
 
-	    if (showingLiveData >= 2)
-	       for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
-	          var s = sketchPage.sketches[I];
-	          for (var i = 0 ; i < s.portName.length ; i++)
-	             if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
-		        var xy = s.portXY(i);
-		        var str = roundedString(s.outValue[i]);
+            if (showingLiveData >= 2)
+               for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
+                  var s = sketchPage.sketches[I];
+                  for (var i = 0 ; i < s.portName.length ; i++)
+                     if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
+                        var xy = s.portXY(i);
+                        var str = roundedString(s.outValue[i]);
 
                         textHeight(20);
-			color(backgroundColor);
-			var _sw = textWidth(str);
-			var _sh = textHeight();
-			_g.beginPath();
-			_g.moveTo(xy[0] - _sw/2, xy[1] - _sh/2);
-			_g.lineTo(xy[0] + _sw/2, xy[1] - _sh/2);
-			_g.lineTo(xy[0] + _sw/2, xy[1] + _sh/2);
-			_g.lineTo(xy[0] - _sw/2, xy[1] + _sh/2);
-			_g.fill();
+                        color(backgroundColor);
+                        var _sw = textWidth(str);
+                        var _sh = textHeight();
+                        _g.beginPath();
+                        _g.moveTo(xy[0] - _sw/2, xy[1] - _sh/2);
+                        _g.lineTo(xy[0] + _sw/2, xy[1] - _sh/2);
+                        _g.lineTo(xy[0] + _sw/2, xy[1] + _sh/2);
+                        _g.lineTo(xy[0] - _sw/2, xy[1] + _sh/2);
+                        _g.fill();
 
-			color(liveDataColor);
-		        text(str, xy[0], xy[1], .5, .5);
-		     }
-	       }
+                        color(liveDataColor);
+                        text(str, xy[0], xy[1], .5, .5);
+                     }
+               }
          }
 
          sketchPage.computePortBounds();
@@ -1959,23 +2082,40 @@
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
                // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
                var centerRatio = pn < 10 ? 0.57 : 0.65;
                var numberX = w - _g.panX - margin * centerRatio;
                _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
             }
 
-	    if (! isExpertMode) {
-	       var d = h / 10;
-	       color(defaultPenColor);
-	       fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
-	       var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
-	       var x1 = w/2 - d * cos(n1 * TAU / 8);
-	       var y1 = h/2 + d * sin(n1 * TAU / 8);
-	       var x2 = x1  - d * cos(n2 * TAU / 8);
-	       var y2 = y1  + d * sin(n2 * TAU / 8);
-	       lineWidth(d/10);
-	       arrow(x1, y1, x2, y2, d/8);
-	    }
+            if (! isExpertMode) {
+               var d = h / 10;
+               var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+               var x1 = w/2 - d * cos(n1 * TAU / 8);
+               var y1 = h/2 + d * sin(n1 * TAU / 8);
+               var x2 = x1  - d * cos(n2 * TAU / 8);
+               var y2 = y1  + d * sin(n2 * TAU / 8);
+
+               // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+               lineWidth(d/12);
+               color(defaultPenColor);
+               fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+               lineWidth(d/15);
+               color(backgroundColor);
+               fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+               // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+               lineWidth(d/12);
+               color(defaultPenColor);
+               arrow(x1, y1, x2, y2, d/8);
+
+               lineWidth(d/20);
+               color(backgroundColor);
+               arrow(x1, y1, x2, y2, d/8);
+            }
 
             _g.restore();
             annotateEnd();
@@ -2000,19 +2140,19 @@
 
          if (this.mouseY >= h - margin || isBottomGesture) {
             color(scrimColor(0.06));
-	    fillRect(-_g.panX, h - margin, w, margin - 2);
+            fillRect(-_g.panX, h - margin, w, margin - 2);
 
             color(scrimColor(0.03));
-	    var dx = margin / 2;
+            var dx = margin / 2;
             for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
-	       fillRect(x, h - margin, dx/2, margin - 2);
+               fillRect(x, h - margin, dx/2, margin - 2);
          }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
          lineWidth(0.25);
-	 color(defaultPenColor);
-	 drawRect(-_g.panX, 0, w-1, h-1);
+         color(defaultPenColor);
+         drawRect(-_g.panX, 0, w-1, h-1);
 
          _g.restore();
 
@@ -2036,6 +2176,43 @@
             }
          }
 */
+      }
+
+      if (isShowingScribbleGlyphs) {
+         for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
+            function xfx(x) { return x0 + x / 2; }
+            function xfy(y) { return y0 + y / 2; }
+            var col = ns % 20;
+            var row = floor(ns / 20);
+            var x0 = (col + 0.3) * w / 20;
+            var y0 = (row + 0.4) * w / 15;
+            var s = scribbleGlyphs[ns].data;
+            color(scribbleColor);
+            lineWidth(2);
+
+            var x = xfx(s[0][0][0]), y = xfy(s[0][0][1]);
+            _g.beginPath();
+            _g.moveTo(x - 3, y - 3);
+            _g.lineTo(x + 3, y - 3);
+            _g.lineTo(x + 3, y + 3);
+            _g.lineTo(x - 3, y + 3);
+            _g.fill();
+
+	    _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
+
+            for (var n = 0 ; n < s.length ; n++) {
+               _g.beginPath();
+               for (var i = 0 ; i < s[n].length ; i++) {
+                  var x = xfx(s[n][i][0]);
+                  var y = xfy(s[n][i][1]);
+                  if (i == 0)
+                     _g.moveTo(x, y);
+                  else
+                     _g.lineTo(x, y);
+               }
+               _g.stroke();
+            }
+         }
       }
 
       // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
@@ -2103,7 +2280,7 @@
 
          //--------- DELETE OUT LINKS TO THIS SKETCH WITHIN OTHER SKETCHES:
 
-	 // FOR EACH ACTIVE IN-PORT OF sketch:
+         // FOR EACH ACTIVE IN-PORT OF sketch:
 
          for (var inPort = 0 ; inPort < sketch.in.length ; inPort++)
             if (isDef(sketch.in[inPort])) {
@@ -2120,7 +2297,7 @@
 
                         // WHERE s LINKS TO sketch, REMOVE THAT OUT-LINK.
 
-		        if (s.out[outPort][k][0] == sketch)
+                        if (s.out[outPort][k][0] == sketch)
                            deleteOutLink(s, outPort, k);
             }
 
@@ -2170,34 +2347,34 @@
 
       else if (s instanceof GeometrySketch) {
 
-	 var sketch = new GeometrySketch();
+         var sketch = new GeometrySketch();
 
-	 var x = This().mouseX, y = This().mouseY;
-	 var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
-	 var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
-	 sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
-	 sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
+         var x = This().mouseX, y = This().mouseY;
+         var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
+         var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
+         sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
+         sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
 
          var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
-	 root.add(mesh);
+         root.add(mesh);
          mesh.sketch = sketch;
-	 mesh.update = s.mesh.update;
+         mesh.update = s.mesh.update;
 
-	 sketch.fragmentShader = s.fragmentShader;
-	 sketch.glyphName = s.glyphName;
-	 sketch.mesh = mesh;
-	 sketch.onClick = s.onClick;
-	 sketch.onSwipe = s.onSwipe;
-	 sketch.rX = s.rX;
-	 sketch.rY = s.rY;
-	 sketch.shaderCount = 0;
+         sketch.fragmentShader = s.fragmentShader;
+         sketch.glyphName = s.glyphName;
+         sketch.mesh = mesh;
+         sketch.onClick = s.onClick;
+         sketch.onSwipe = s.onSwipe;
+         sketch.rX = s.rX;
+         sketch.rY = s.rY;
+         sketch.shaderCount = 0;
          sketch.sketchProgress = 1;
          sketch.sketchState = 'finished';
-	 sketch.sx = s.sx;
-	 sketch.sy = s.sy;
-	 sketch.update = s.update;
+         sketch.sx = s.sx;
+         sketch.sy = s.sy;
+         sketch.update = s.update;
 
-	 addSketch(sketch);
+         addSketch(sketch);
          finishDrawingUnfinishedSketch();
          return;
       }
