@@ -540,7 +540,7 @@
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
    var margin = 50;
-   var scribbleColor = 'cyan';
+   var scribbleColor = 'rgb(128, 224, 255)';
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
