@@ -245,7 +245,7 @@
 
    function Control() {
 
-      this.labels = "slideX slideY".split(' ');
+      this.labels = "slidex slidey".split(' ');
 
       this.flip = 1;
 

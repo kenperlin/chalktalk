@@ -662,14 +662,22 @@
 
       // LOAD ALL THE SCRIBBLE GLYPHS.
 
+      for (var n = 0 ; n < 26 ; n++) {
+         // NEED TO ADD INDIVIDUAL CHARACTERS
+      }
+
       for (var n = 0 ; n < glyphs.length ; n++) {
          var name = glyphs[n].indexName;
          scribbleGlyphs.push(new Glyph(name, [new Scribble(name)]));
       }
 
-      for (var n = 0 ; n < scribbles.length ; n++)
-         if (! containsGlyph(scribbleGlyphs, scribbles[n]))
-            scribbleGlyphs.push(new Glyph(scribbles[n], [new Scribble(scribbles[n])]));
+      for (var n = 0 ; n < scribbleNames.length ; n++) {
+         var name = scribbleNames[n];
+         if (glyphIndex(scribbleGlyphs, name) == -1) {
+            var scribble = [new Scribble(name)];
+            addGlyph(scribbleGlyphs, new Glyph(name, scribble));
+         }
+      }
 
       tick(g);
    }
@@ -1370,10 +1378,15 @@
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
+/////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
+
+   var scribbleNames = "now is the time for all good men to come aid of their party C D N P".split(' ');
+   var scribbleGlyphs = [];
+
    function Scribble(str) {
-      var charIndex = "abcdefghijklmnopqrstuvwxyz";
-      var charDir   = "55566667777001111222223333";
-      var charShape = "|)>(|)>(|)>()(|)><(|)><()>";
+      var charIndex = "zCaPbcdefNghijklmnopq0r9876s5432t1uvwDxy";
+      var charDir   = "5555566666777770000011111222223333344444";
+      var charShape = "<(|)><(|)><(|)><(|)><(|)><(|)><(|)><(|)>";
       var s = [[0,0]];
       for (var i = 0 ; i < str.length ; i++) {
          var ch = str.substring(i, i+1);
@@ -1402,7 +1415,7 @@
             var p = [];
             for (var k = 1 ; k <= 10 ; k++) {
                var t = k / 10;
-               var x = t + sin(TAU * t) / 3;
+               var x = t + sin(TAU * t) / 2.5;
                var y = c * (1 - cos(TAU * t)) / 4;
                p.push([x, y]);
             }
@@ -1420,31 +1433,31 @@
       return s;
    }
 
-   function containsGlyph(glyphs, name, strokes) {
+   function glyphIndex(glyphs, name) {
       for (var i = 0 ; i < glyphs.length ; i++)
          if (glyphs[i].name == name)
-	    return true;
-      return false;
+	    return i;
+      return -1;
    }
 
-   var scribbles = "now is the time for all good men to come aid of their party".split(' ');
-   var scribbleGlyphs = [];
+   function addGlyph(glyphs, glyph) {
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (glyph.name < glyphs[i].name) {
+            glyphs.splice(i, 0, glyph);
+            return;
+         }
+      glyphs.push(glyph);
+   }
 
    function BgScribble(x, y) {
-      this.size = margin;
       this.path = [[x,y]];
-      this.x0 = x;
-      this.y0 = y;
-      this.x = x;
-      this.y = y;
       this.index = 0;
-      this.seq = [];
       this.draw = function() {
          color(scribbleColor);
 
          lineWidth(1);
-         var r = this.size / 5;
-         drawOval(this.x - r, this.y - r, 2 * r, 2 * r);
+         var r = margin / 5;
+         drawOval(this.path[0][0] - r, this.path[0][1] - r, 2 * r, 2 * r);
 
          lineWidth(0.5);
          drawCurve(this.path);
@@ -1457,29 +1470,62 @@
          return glyph == null ? "" : glyph.name;
       }
    }
-   var bgs;
-   var bgsText = "";
+   var bgs, bgsText = "";
+   var isBgsDelete = false, isBgsShift = false, isBgsNumeric = false;
 
    function bgActionDown(x, y) {
-      if (len(x - bgClickX, y - bgClickY) < clickSize) {
+
+      // IF ALREADY IN SCRIBBLE-TEXT MODE, START NEXT WORD.
+
+      if (bgs !== undefined)
+         bgs.path[0] = [x, y];
+
+      // ELSE IF LINE STARTS AT CLICK, ENTER SCRIBBLE-TEXT MODE.
+
+      else if (len(x - bgClickX, y - bgClickY) < clickSize) {
          bgs = new BgScribble(x, y);
          bgsText = "";
       }
    }
 
    function bgActionDrag(x, y) {
+
+      // ADD NEXT POINT TO SCRIBBLE-TEXT STROKE.
+
       if (bgs !== undefined)
          bgs.drag(x, y);
    }
 
-   function bgActionEnd(x, y) {
-      console.log(bgsText);
-      bgs = undefined;
-   }
-
    function bgActionUp(x, y) {
+
+      // HANDLE A SCRIBBLE-TEXT STROKE.
+
       if (bgs !== undefined) {
-         bgsText += bgs.interpret() + " ";
+         var str = bgs.interpret();
+	 console.log("str = " + str);
+	 switch (str) {
+	 case "C":
+	    isBgsShift = true;
+	    break;
+	 case "D":
+	    if (bgsText.length > 0) {
+	       var i = bgsText.length - 2;
+	       for ( ; i > 0 ; i--)
+	          if (bgsText.substring(i, i+1) == " ")
+		     break;
+	       bgsText = i == 0 ? "" : bgsText.substring(0, i+1);
+            }
+	    break;
+	 default:
+	    if (bgsText.length > 0 && str.length == 1)
+	       bgsText = bgsText.substring(0, bgsText.length - 1);
+            if (isBgsShift) {
+	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+	       isBgsShift = false;
+	    }
+            bgsText += str + " ";
+	    break;
+         }
          bgs = new BgScribble(x, y);
          return;
       }
@@ -1513,6 +1559,22 @@
          bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
       }
    }
+
+   function bgActionEnd(x, y) {
+
+      // ACT ON SCRIBBLE-TEXT, THEN EXIT SCRIBBLE-TEXT MODE.
+
+      bgsText = bgsText.trim();
+      var index = glyphIndex(glyphs, bgsText);
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (bgsText == glyphs[i].indexName) {
+            console.log("need to add glyph " + bgsText);
+            break;
+         }
+      bgs = undefined;
+   }
+
+/////////////////////////////////////////////////////////////////////////////
 
    function directionsToPage(n1, n2) { return 8 * n1 + n2; }
    function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
@@ -1905,7 +1967,7 @@
                drawCrosshair(cursorX, cursorY);
          }
 
-         if (bgs !== undefined)
+         if (bgs !== undefined && bgs != null)
             bgs.draw();
 
          if (isAudiencePopup()) {
@@ -2179,16 +2241,21 @@
       }
 
       if (isShowingScribbleGlyphs) {
+         color(scribbleColor);
+         lineWidth(2);
+
+         _g.font = "28px Arial";
+	 _g.fillText(bgsText, 7, 28);
+         _g.font = "13px Arial";
+
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
             function xfx(x) { return x0 + x / 2; }
             function xfy(y) { return y0 + y / 2; }
             var col = ns % 20;
             var row = floor(ns / 20);
-            var x0 = (col + 0.3) * w / 20;
-            var y0 = (row + 0.4) * w / 15;
+            var x0 = (col + 0.3) * w / 20 * 0.9;
+            var y0 = (row + 0.6) * w / 15;
             var s = scribbleGlyphs[ns].data;
-            color(scribbleColor);
-            lineWidth(2);
 
             var x = xfx(s[0][0][0]), y = xfy(s[0][0][1]);
             _g.beginPath();

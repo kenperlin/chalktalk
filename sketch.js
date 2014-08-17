@@ -1004,10 +1004,8 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    if (this.isGlyphable) {
+	    if (this.isGlyphable)
 	       this.convertToGlyphSketch();
-	       console.log(sk().glyph.name);
-            }
             return;
          }
 

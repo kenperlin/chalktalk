@@ -430,12 +430,12 @@ var sketchToDelete = null;
          }
 
          if (isBgActionEnabled) {
-	    if (this.travel > clickSize)
-               bgActionUp(x, y);
-            else {
+	    if (this.travel <= clickSize) {
                bgActionEnd(x, y);
 	       bgClickCount = 0;
             }
+	    else
+               bgActionUp(x, y);
             return;
          }
 
