@@ -1380,11 +1380,11 @@
 
 /////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
 
-   var scribbleNames = "now is the time for all good men to come aid of their party C D N P".split(' ');
+   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
    var scribbleGlyphs = [];
 
    function Scribble(str) {
-      var charIndex = "zCaPbcdefNghijklmnopq0r9876s5432t1uvwDxy";
+      var charIndex = "NPab1cdefg0hijklmnopq9r876stu543C2vwxDyz";
       var charDir   = "5555566666777770000011111222223333344444";
       var charShape = "<(|)><(|)><(|)><(|)><(|)><(|)><(|)><(|)>";
       var s = [[0,0]];
@@ -2241,28 +2241,34 @@
       }
 
       if (isShowingScribbleGlyphs) {
-         color(scribbleColor);
-         lineWidth(2);
+         var ncols = 30;
+	 var cw = w / ncols;
 
-         _g.font = "28px Arial";
+         color(scribbleColor);
+         lineWidth(cw / 70);
+
+         var fs = floor(0.25 * w / ncols);
+         _g.font = (2*fs) + "px Arial";
 	 _g.fillText(bgsText, 7, 28);
-         _g.font = "13px Arial";
+         _g.font = fs + "px Arial";
 
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
             function xfx(x) { return x0 + x / 2; }
             function xfy(y) { return y0 + y / 2; }
-            var col = ns % 20;
-            var row = floor(ns / 20);
-            var x0 = (col + 0.3) * w / 20 * 0.9;
-            var y0 = (row + 0.6) * w / 15;
+            var col = ns % ncols;
+            var row = floor(ns / ncols);
+            var x0 = (col + 0.3) * cw;
+            var y0 = (row + 0.8) * cw * 1.5;
             var s = scribbleGlyphs[ns].data;
 
-            var x = xfx(s[0][0][0]), y = xfy(s[0][0][1]);
+            var x = xfx(s[0][0][0] * cw / 70);
+	    var y = xfy(s[0][0][1] * cw / 70);
+	    var dr = 3 * cw / 70;
             _g.beginPath();
-            _g.moveTo(x - 3, y - 3);
-            _g.lineTo(x + 3, y - 3);
-            _g.lineTo(x + 3, y + 3);
-            _g.lineTo(x - 3, y + 3);
+            _g.moveTo(x - dr, y - dr);
+            _g.lineTo(x + dr, y - dr);
+            _g.lineTo(x + dr, y + dr);
+            _g.lineTo(x - dr, y + dr);
             _g.fill();
 
 	    _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
@@ -2270,8 +2276,8 @@
             for (var n = 0 ; n < s.length ; n++) {
                _g.beginPath();
                for (var i = 0 ; i < s[n].length ; i++) {
-                  var x = xfx(s[n][i][0]);
-                  var y = xfy(s[n][i][1]);
+                  var x = xfx(s[n][i][0] * cw / 70);
+                  var y = xfy(s[n][i][1] * cw / 70);
                   if (i == 0)
                      _g.moveTo(x, y);
                   else
