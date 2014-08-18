@@ -798,11 +798,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
-      codeElement.x1 = ylo > h + h/2
-                       ? x
-                       : (xlo + xhi) / 2 < width() / 2
-                         ? xhi + w/2
-                         : xlo - w/2;
+      codeElement.x1 = (ylo > h + h/2
+                        ? x
+                        : (xlo + xhi) / 2 < width() / 2
+                          ? xhi + w/2
+                          : xlo - w/2) - _g.panX;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
