@@ -668,7 +668,10 @@
 
       for (var n = 0 ; n < glyphs.length ; n++) {
          var name = glyphs[n].indexName;
-         scribbleGlyphs.push(new Glyph(name, [new Scribble(name)]));
+         var scribble = new Scribble(name);
+         var glyph = new Glyph(name, [scribble]);
+	 glyph.curveLength = computeCurveLength(scribble);
+         scribbleGlyphs.push(glyph);
       }
 
       for (var n = 0 ; n < scribbleNames.length ; n++) {
@@ -1470,7 +1473,7 @@
          return glyph == null ? "" : glyph.name;
       }
    }
-   var bgs, bgsText = "";
+   var bgs, bgsText = "", bgsTextUndo = [];
    var isBgsDelete = false, isBgsShift = false, isBgsNumeric = false;
 
    function bgActionDown(x, y) {
@@ -1485,6 +1488,7 @@
       else if (len(x - bgClickX, y - bgClickY) < clickSize) {
          bgs = new BgScribble(x, y);
          bgsText = "";
+         bgsTextUndo = [];
       }
    }
 
@@ -1502,21 +1506,16 @@
 
       if (bgs !== undefined) {
          var str = bgs.interpret();
-	 console.log("str = " + str);
 	 switch (str) {
 	 case "C":
 	    isBgsShift = true;
 	    break;
 	 case "D":
-	    if (bgsText.length > 0) {
-	       var i = bgsText.length - 2;
-	       for ( ; i > 0 ; i--)
-	          if (bgsText.substring(i, i+1) == " ")
-		     break;
-	       bgsText = i == 0 ? "" : bgsText.substring(0, i+1);
-            }
+            if (bgsTextUndo.length > 0)
+	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
 	    break;
 	 default:
+	    bgsTextUndo.push(bgsText);
 	    if (bgsText.length > 0 && str.length == 1)
 	       bgsText = bgsText.substring(0, bgsText.length - 1);
             if (isBgsShift) {
@@ -1572,6 +1571,8 @@
             break;
          }
       bgs = undefined;
+      bgsText = "";
+      bgsTextUndo = [];
    }
 
 /////////////////////////////////////////////////////////////////////////////
