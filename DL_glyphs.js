@@ -135,7 +135,9 @@ THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var points = [];
   for (var i = 0 ; i < p.length ; i++)
      points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
-  var geometry = tubeGeometry( points, nSegments );
+  var geometry = tubeGeometry( points, nSegments);
+  // THREE.TubeGeometry = function( path, segments, radius, radialSegments, closed ) {
+
   var mesh = new THREE.Mesh(geometry, blackMaterial);
   this.add(mesh);
   return mesh;
@@ -143,7 +145,13 @@ THREE.Object3D.prototype.addTube = function(p, nSegments) {
 
 function tubeGeometry(points, n) { 
   var curve = new THREE.SplineCurve3(points);
-  return new THREE.TubeGeometry(curve, n,.1); 
+   var closed = false;
+  var dist = curve.points[0].distanceTo(curve.points[curve.points.length-1]);
+  if(curve.points[0].distanceTo(curve.points[curve.points.length-1])<1)
+    closed=true;
+  console.log(dist);
+ 
+  return new THREE.TubeGeometry(curve, n,.1,8,closed); 
 }
 
 
