@@ -4,6 +4,7 @@
 var clickSize = 30;
 var codeSketch = null;
 var isAudioSignal = false;
+var isBgDragActionEnabled = false;
 var isBottomHover = false;
 var isCommandPressed = false;
 var isControlPressed = false;
@@ -17,10 +18,13 @@ var isShiftPressed = false;
 var isShorthandMode = false;
 var isShorthandTimeout = false;
 var isShowingGlyphs = false;
+var isSketchDragActionEnabled = false;
 var isSpacePressed = false;
 var isTogglingMenuType = false;
 var menuType = 0;
-var paletteColorIndex = 0;
+var needToStartSketchDragAction = false;
+var paletteColorId = 0;
+var showingLiveData = false;
 var sketchToDelete = null;
 
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
@@ -28,7 +32,7 @@ var sketchToDelete = null;
    function paletteX(i) { return 30 - _g.panX; }
    function paletteY(i) { return 30 + i * 30; }
    function paletteR(i) {
-      var index = paletteColorIndex >= 0 ? paletteColorIndex : sketchPage.colorIndex;
+      var index = paletteColorId >= 0 ? paletteColorId : sketchPage.colorId;
       return i == index ? 12 : 8;
    }
 
@@ -70,7 +74,7 @@ var sketchToDelete = null;
 
       this.doFadeAway = function(elapsed) {
          this.fadeAway = max(0.0, this.fadeAway - elapsed / 0.25);
-         _g.globalAlpha = this.fadeAway * this.fadeAway;
+         _g.globalAlpha = this.fadeAway;
          if (this.fadeAway == 0.0) {
             this.clearAfterFadeAway();
             _g.sketchProgress = 1;
@@ -92,6 +96,7 @@ var sketchToDelete = null;
          this.keyUp(27);
          return sk();
       }
+
       this.createLink = function() {
 
          // AVOID CREATING DUPLICATE LINKS.
@@ -114,7 +119,7 @@ var sketchToDelete = null;
          if (isCodeWidget)
             toggleCodeWidget();
 
-         this.colorIndex = 0;
+         this.colorId = 0;
          this.index = -1;
          while (this.sketches.length > 0)
             deleteSketch(this.sketches[0]);
@@ -127,6 +132,7 @@ var sketchToDelete = null;
                   root.remove(i);
          }
       }
+
       this.clear();
 
       this.findIndex = function(sketch) {
@@ -176,10 +182,10 @@ var sketchToDelete = null;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
             if (isSketchDragActionEnabled = isHover())
-               startSketchDragAction(x, y);
+               needToStartSketchDragAction = true;
             else {
                isBgActionEnabled = true;
-               startBgAction(x, y);
+               bgActionDown(x, y);
             }
             return;
          }
@@ -195,7 +201,7 @@ var sketchToDelete = null;
 	    }
 	 }
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
             this.paletteColorDragXY = null;
             return;
          }
@@ -258,6 +264,8 @@ var sketchToDelete = null;
 
          this.isFocusOnSketch = false;
          if (isk() && sk().isMouseOver) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
                this.isFocusOnSketch = ! (sk() instanceof SimpleSketch) || sk().isGroup();
                sk().isPressed = true;
@@ -279,6 +287,8 @@ var sketchToDelete = null;
             addSketch(new SimpleSketch());
             sk().sketchProgress = 1;
             sk().sketchState = 'finished';
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             sk().mouseDown(x, y);
          }
       }
@@ -301,23 +311,27 @@ var sketchToDelete = null;
             return;
          }
 
-         if (isSketchDragActionEnabled) {
+         if (isSketchDragActionEnabled && this.travel > clickSize) {
+	    if (needToStartSketchDragAction) {
+	       startSketchDragAction(this.xDown, this.yDown);
+	       needToStartSketchDragAction = false;
+	    }
             doSketchDragAction(x, y);
             return;
          }
 
          if (isBgActionEnabled) {
-            doBgAction(x, y);
+            bgActionDrag(x, y);
             return;
          }
 
          if (bgClickCount == 1)
             return;
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
             var index = findPaletteColorIndex(x, y);
             if (index >= 0)
-               paletteColorIndex = index;
+               paletteColorId = index;
             else
                this.paletteColorDragXY = [x,y];
             return;
@@ -330,7 +344,7 @@ var sketchToDelete = null;
          }
 
          if (isBottomGesture) {
-            _g.panX += x - this.xDown;
+            _g.panX = min(0, _g.panX + x - this.xDown);
             return;
          }
 
@@ -383,6 +397,8 @@ var sketchToDelete = null;
             return;
 
          if (isk()) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
                if (sk().travel > clickSize)
@@ -403,7 +419,7 @@ var sketchToDelete = null;
          this.isPressed = false;
 
 	 if (this.isDraggingGlyph) {
-	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY);
+	    glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
 	    this.isDraggingGlyph = false;
 	    return;
 	 }
@@ -414,24 +430,29 @@ var sketchToDelete = null;
          }
 
          if (isBgActionEnabled) {
-            endBgAction(x, y);
-            isBgActionEnabled = false;
+	    if (this.travel <= clickSize) {
+               bgActionEnd(x, y);
+	       bgClickCount = 0;
+            }
+	    else
+               bgActionUp(x, y);
+            return;
          }
 
-         if (paletteColorIndex >= 0) {
+         if (paletteColorId >= 0) {
 
             // MOUSE-UP OVER PALETTE TO SET THE DRAWING COLOR.
 
             if (this.paletteColorDragXY == null)
-               this.colorIndex = paletteColorIndex;
+               this.colorId = paletteColorId;
 
             // DRAG A COLOR SWATCH FROM THE PALETTE TO CHANGE COLOR OF A SKETCH.
 
             else {
                if (isk() && sk().isMouseOver) {
-                  sk().color = sketchPalette[paletteColorIndex];
+                  sk().setColorId(paletteColorId);
                   if (sk() instanceof GeometrySketch)
-                     setMeshMaterialToColor(sk().mesh, sk().color);
+                     setMeshMaterialToRGB(sk().mesh, paletteRGB[sk().colorId]);
                }
                this.paletteColorDragXY = null;
             }
@@ -450,6 +471,10 @@ var sketchToDelete = null;
          if (isBottomGesture) {
             if (y < height() - 100)
                this.clear();
+/*
+            else if (this.travel <= clickSize)
+	       _g.panX = min(0, -(x - margin/2) * height() / margin);
+*/
             isBottomGesture = false;
             return;
          }
@@ -493,7 +518,7 @@ var sketchToDelete = null;
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 
                if (isHover())
-                  sk().setTextCursor(x, y);
+                  sk().setTextCursor(sk().unadjustX(x), sk().unadjustY(y));
 
                // CLICK NOT ON STROKE TURNS OFF TEXT MODE.
 
@@ -508,7 +533,8 @@ var sketchToDelete = null;
                toggleTextMode();
 
             else if (! isShorthandMode) {
-               var glyph = interpretStrokes();
+               var glyph = findGlyph(strokes, glyphs);
+	       strokes = [];
                if (glyph != null && ! isCreatingGlyphData)
                   this.handleDrawnTextChar(glyph.name);
             }
@@ -594,8 +620,11 @@ var sketchToDelete = null;
 
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else if (doSketchClickAction(x, y))
-               return;
+            else {
+	       if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) {
+                  return;
+               }
+            }
          }
 
 	 // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
@@ -608,6 +637,8 @@ var sketchToDelete = null;
          // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
 
          if (isk()) {
+	    x = sk().unadjustX(x);
+	    y = sk().unadjustY(y);
 
             if (sk().sketchProgress == 1)
                sk().isPressed = false;
@@ -684,6 +715,31 @@ var sketchToDelete = null;
 
       this.doTranslate = function(x, y) {
          if (isk()) {
+	    if (sk().hasMotionPath()) {
+	       var X = sk().motionPath[0];
+	       var Y = sk().motionPath[1];
+	       var x0 = X[0];
+	       var y0 = Y[0];
+
+	       var curve = [], totalLength = 0;
+	       for (var i = 0 ; i < X.length ; i++) {
+	          curve.push([X[i] - x0,Y[i] - y0]);
+		  if (i > 0)
+		     totalLength += len(X[i]-X[i-1],Y[i],Y[i-1]);
+               }
+
+               bendCurve(curve, [x - sk().tX, y - sk().tY], totalLength);
+
+               X = [];
+               Y = [];
+	       for (var i = 0 ; i < curve.length ; i++) {
+	          X.push(curve[i][0] + x0);
+	          Y.push(curve[i][1] + y0);
+               }
+	       sk().motionPath = [X, Y];
+
+	       return;
+	    }
             sk().translate(x - this.mx, y - this.my);
             if (isSketchInProgress()) {
                cursorX += x - this.mx;
@@ -772,8 +828,8 @@ var sketchToDelete = null;
 
       this.mouseMove = function(x, y) {
 
-         this.moveX = x;
-         this.moveY = y;
+         this.x = x;
+         this.y = y;
 
          if (y >= height() - margin && ! isShowingGlyphs) {
             isBottomHover = true;
@@ -893,7 +949,7 @@ var sketchToDelete = null;
 
          // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
-         paletteColorIndex = findPaletteColorIndex(x, y);
+         paletteColorId = findPaletteColorIndex(x, y);
       }
 
       var altCmdState = 0;
@@ -1155,6 +1211,9 @@ var sketchToDelete = null;
             if (isk())
                sk().isCard = ! sk().isCard;
             break;
+         case 'd':
+	    showingLiveData = (showingLiveData + 1) % 3;
+            break;
          case 'e':
             toggleCodeWidget();
             break;
@@ -1205,6 +1264,9 @@ var sketchToDelete = null;
          case 'x':
             isExpertMode = ! isExpertMode;
             break;
+         case 'y':
+            isShowingScribbleGlyphs = ! isShowingScribbleGlyphs;
+            break;
          case 'z':
             break;
          case '-':
@@ -1221,14 +1283,14 @@ var sketchToDelete = null;
 
             background.color = backgroundColor;
             background.style.backgroundColor = backgroundColor;
-            sketchPalette[0] = defaultPenColor;
+            palette[0] = defaultPenColor;
             for (var i = 0 ; i < this.sketches.length ; i++)
-               if (this.sketches[i].color == backgroundColor)
-                  this.sketches[i].color = defaultPenColor;
+               if (this.sketches[i].colorId == 0)
+                  this.sketches[i].setColorId(0);
 
-            if (codeText != null) {
-               codeText.style.backgroundColor = codeTextBgColor();
-               codeText.style.color = codeTextFgColor();
+            if (codeTextArea != null) {
+               codeTextArea.style.backgroundColor = codeTextBgColor();
+               codeTextArea.style.color = codeTextFgColor();
             }
 
             if (codeSelector != null) {
@@ -1283,8 +1345,6 @@ var sketchToDelete = null;
 
       this.animate = function(elapsed) {
 
-         this.scaleSelectedSketch();
-
          var w = width();
          var h = height();
 
@@ -1305,8 +1365,21 @@ var sketchToDelete = null;
 	 // WE CAN LOOK AT sketchPage.trueIndex TO FIND OUT WHAT THE REAL CURRENT SKETCH IS.
 
          this.trueIndex = this.index;
+	 var skTrue = sk();
+
+	 function xOnPanStrip(x) { return x * margin / h - _g.panX; }
+         function yOnPanStrip(y) { return y * margin / h + h - margin; }
+
+	 var isOnPanStrip = isBottomGesture || this.y >= h - margin;
+	 var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
 
          for (var I = 0 ; I < nsk() ; I++) {
+
+            // DO NOT RENDER ANY GEOMETRY SKETCH THAT IS PANNED OFF THE SCREEN.
+
+            if ( sk(I) instanceof GeometrySketch &&
+	         sk(I).xlo !== undefined && (sk(I).xhi + _g.panX < 0 || sk(I).xlo + _g.panX > w) )
+               continue;
 
             if (sk() == null)
                break;
@@ -1339,10 +1412,10 @@ var sketchToDelete = null;
                   I--;
                   continue;
                }
-               _g.globalAlpha = sk().fadeAway;
+               _g.globalAlpha = sk().fade();
             }
 
-            if (sk().glyphTrace != null && sk().sketchState != 'finished') {
+            if (sk().sketchTrace != null && sk().sketchState != 'finished') {
                sk().trace = [];
             }
 
@@ -1362,26 +1435,104 @@ var sketchToDelete = null;
                m.restore();
             }
 
-            if (sk().glyphTrace != null && sk().sketchState != 'finished') {
-               morphGlyphToSketch();
+            if (sk().sketchTrace != null && sk().sketchState != 'finished') {
+               morphSketchToGlyphSketch();
 
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);
 
                if (sk().glyphTransition == 1) {
                   finishDrawingUnfinishedSketch();
-                  sk().glyphTrace = null;
+                  sk().sketchTrace = null;
                }
             }
 
             _g.restore();
 
-            this.index = PUSHED_sketchPage_index;
-
             _g_sketchEnd();
+
+	    if (sk().hasMotionPath() && skTrue.hasMotionPath() && sk().colorId == skTrue.colorId) {
+	       var X = sk().motionPath[0];
+	       var Y = sk().motionPath[1];
+	       _g.strokeStyle = 'rgba(' + paletteRGB[sk().colorId][0] + ',' +
+	                                  paletteRGB[sk().colorId][1] + ',' +
+	                                  paletteRGB[sk().colorId][2] + ', 0.5)';
+
+               // DRAW MOTION PATH
+
+	       _g.lineWidth = 5;
+               _g.beginPath();
+	       _g.moveTo(X[0], Y[0]);
+	       for (var i = 1 ; i < X.length ; i++)
+	          _g.lineTo(X[i], Y[i]);
+
+               // DRAW ARROWHEAD AT END OF MOTION PATH
+
+	       var n = X.length;
+               for (var i = n - 1 ; i >= 0 ; i--) {
+	          var dx = X[n-1] - X[i];
+	          var dy = Y[n-1] - Y[i];
+	          var d = len(dx, dy);
+	          if (d > clickSize) {
+	             d *= 50 / width();
+		     _g.moveTo(X[n-1] - (dx+dy) / d, Y[n-1] - (dy-dx) / d);
+		     _g.lineTo(X[n-1], Y[n-1]);
+		     _g.lineTo(X[n-1] - (dx-dy) / d, Y[n-1] - (dy+dx) / d);
+		     break;
+	          }
+	       }
+
+               _g.stroke();
+	    }
+
+	    // ADD SKETCH TO THE PANORAMA STRIP.
+
+            if (isNearPanStrip) {
+	       if (sk() instanceof GeometrySketch) {
+	          var x0 = xOnPanStrip(min(sk().sp[0][0], sk().sp[1][0]));
+	          var y0 = yOnPanStrip(min(sk().sp[0][1], sk().sp[1][1]));
+	          var x1 = xOnPanStrip(max(sk().sp[0][0], sk().sp[1][0]));
+	          var y1 = yOnPanStrip(max(sk().sp[0][1], sk().sp[1][1]));
+		  color(scrimColor(.2));
+	          _g.beginPath();
+	          _g.moveTo(x0, y0);
+	          _g.lineTo(x1, y0);
+	          _g.lineTo(x1, y1);
+	          _g.lineTo(x0, y1);
+	          _g.fill();
+	       }
+	       else {
+	          lineWidth(_g.lineWidth * margin / h);
+	          _g.beginPath();
+	          for (var i = 0 ; i < sk().sp.length ; i++) {
+	             var x = xOnPanStrip(sk().sp[i][0]);
+	             var y = yOnPanStrip(sk().sp[i][1]);
+	             if (sk().sp[i][2] == 0)
+	                _g.moveTo(x, y);
+	             else
+	                _g.lineTo(x, y);
+                  }
+                  _g.stroke();
+               }
+            }
+
+            this.index = PUSHED_sketchPage_index;
          }
 
          noisy = 0;
+
+	 // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA STRIP.
+
+         if (isNearPanStrip) {
+	    var x0 = xOnPanStrip(  - _g.panX), y0 = yOnPanStrip(0);
+	    var x1 = xOnPanStrip(w - _g.panX), y1 = yOnPanStrip(h) - 2;
+	    color(scrimColor(isOnPanStrip ? .06 : .12));
+	    fillRect(x0, y0, x1 - x0, y1 - y0);
+	    if (isOnPanStrip) {
+	       color(scrimColor(1));
+	       drawRect(x0, y0, x1 - x0, y1 - y0);
+            }
+         }
 
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
@@ -1420,7 +1571,7 @@ var sketchToDelete = null;
             onScreenKeyboard.render();
 
          if (this.paletteColorDragXY != null) {
-            color(sketchPalette[paletteColorIndex]);
+            color(palette[paletteColorId]);
             fillRect(this.paletteColorDragXY[0] - 12,
                      this.paletteColorDragXY[1] - 12, 24, 24);
          }
@@ -1478,10 +1629,13 @@ var sketchToDelete = null;
          }
       }
 
+      var glyphsPerCol = 10;
+
       this.glyphBounds = function(i) {
-         var x = glyphW() / 20 + glyphW() * floor(i / 10) - _g.panX;
-         var y = ((i % 10) * height()) / 10 + glyphW() / 10;
-         return [ x, y, x + glyphW() * .7, y + glyphW() * .8 ];
+         var ht = height() / glyphsPerCol;
+         var x = ht / glyphsPerCol / 2 + ht * floor(i / glyphsPerCol) - _g.panX;
+         var y = ((i % glyphsPerCol) * height()) / glyphsPerCol + ht * .1;
+         return [ x, y, x + ht * .7, y + ht * .8 ];
       }
 
       this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
@@ -1497,22 +1651,18 @@ var sketchToDelete = null;
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200, height());
 
-         _g.strokeStyle = scrimColor(.6);
          _g.font = '8pt Trebuchet MS';
-         _g.lineWidth = 1;
-         line(0, height()-1, width(), height()-1);
 
          this.glyphT = this.isDraggingGlyph
 	             ? this.iDragged + 0.99
-	             : 10 * (floor((this.mx + _g.panX) / glyphW()) +
-                                    max(0, min(.99, this.my / height())));
+	             : glyphsPerCol * (floor((this.mx + _g.panX) / (height()/glyphsPerCol)) +
+                             max(0, min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
 	    this.showGlyph(i);
 
-         if (this.isDraggingGlyph) {
+         if (this.isDraggingGlyph)
 	    this.showGlyph(this.iDragged, This().mouseX, This().mouseY);
-         }
 
          _g.restore();
       }
@@ -1525,7 +1675,7 @@ var sketchToDelete = null;
 	    gX += cx - (b[0] + b[2]) / 2;
 	    gY += cy - (b[1] + b[3]) / 2;
          }
-	 var x = gX + glyphW() * .1;
+	 var x = gX + (height()/glyphsPerCol) * .1;
 	 var y = gY;
 	 var t = this.glyphT;
 
@@ -1560,7 +1710,7 @@ var sketchToDelete = null;
          var tw = textWidth(txt);
          _g.fillText(txt, gX + 2, y + 10.5);
 
-         y += 20;
+         y += height() / 45 * 10 / glyphsPerCol;
 
          var selected = t >= i && t < i+1;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
@@ -1569,7 +1719,7 @@ var sketchToDelete = null;
 
          var nn = glyph.data.length;
 
-         var sc = 0.4;
+         var sc = height() / 2000 * 10 / glyphsPerCol;
          for (var n = 0 ; n < nn ; n++) {
 
             var d = glyph.data[n];
@@ -1599,10 +1749,8 @@ var sketchToDelete = null;
 
          // SHOW THE GLYPH DICTIONARY
 
-         if (isShowingGlyphs) {
+         if (isShowingGlyphs)
             this.showGlyphs();
-            return;
-         }
 
          // SHOW THE TIMELINE
 
@@ -1626,7 +1774,8 @@ var sketchToDelete = null;
 
          // DRAW THE COLOR PALETTE
 
-         drawPalette();
+         if (! isShowingGlyphs)
+            drawPalette();
 
          color(overlayColor);
 
@@ -1727,11 +1876,11 @@ var sketchToDelete = null;
 
          // IF NOT IN TEXT INSERTION MODE, SHOW THE AVAILABLE KEYBOARD SHORTCUTS.
 
-         if (! isTextMode) {
+         if (! isShowingGlyphs && ! isTextMode) {
             color(overlayColor);
             lineWidth(1);
             textHeight(12);
-            var y0 = paletteY(sketchPalette.length);
+            var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 20;
                text(hotKeyMenu[j][0],  8, y, 0, 0);
@@ -1931,7 +2080,6 @@ var sketchToDelete = null;
             if (isDef(ts) && ts.length > 0) {
                _g.lineWidth = isShowingShorthand ? 2 : 4;
                _g.beginPath();
-               //_g.strokeStyle = 'red';
                var i0 = isShowingShorthand ? iOut : 0;
                if (ts.length > i0) {
                   _g.moveTo(ts[i0][0], ts[i0][1]);
@@ -1954,8 +2102,6 @@ var sketchToDelete = null;
 	 return sketches;
       }
    }
-
-   var glyphW = function() { return height() / 10; }
 
    var sketchPage = sketchBook.setPage(0);
 

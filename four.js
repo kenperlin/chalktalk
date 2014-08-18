@@ -261,7 +261,7 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
       vertexShader: vertexShader,
    });
 
-   var u = "alpha mx my selectedIndex time x y z".split(' ');
+   var u = "alpha mx my pixelSize selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" ? 1 : 0) };
 
@@ -281,7 +281,7 @@ var defaultVertexShader = ["\
    void main() {\
       dx = 2. * uv.x - 1.;\
       dy = 2. * uv.y - 1.;\
-      vNormal = (modelViewMatrix * vec4(normal, 0.)).xyz;\
+      vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);\
       vPosition = position*.03;\
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
    }\
@@ -346,8 +346,9 @@ var fragmentShaderHeader = ["\
    varying float dy;\
    uniform float mx;\
    uniform float my;\
-   uniform float time;\
+   uniform float pixelSize;\
    uniform float selectedIndex;\
+   uniform float time;\
    varying vec3 vNormal;\
    varying vec3 vPosition;\
    uniform float x;\

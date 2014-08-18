@@ -37,7 +37,7 @@ function lathe() {
     }
     var x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
-    var scale = 2 / (yHi - yLo + 2 * sketchPadding);
+    var scale = 1.5 / (yHi - yLo + 2 * sketchPadding);
 
     for(var i = 0 ; i < profile.length ; i++){
        profile[i][0] = scale * (profile[i][0] - x);
@@ -103,7 +103,7 @@ function hose() {
     }
     var x = (xLo + xHi) / 2;
     var y = (yLo + yHi) / 2;
-    var scale = 2 / (yHi - yLo + 2 * sketchPadding);
+    var scale = 1.5 / (yHi - yLo + 2 * sketchPadding);
 
     for(var i = 0 ; i < profile.length ; i++){
        profile[i][0] = scale * (profile[i][0] - x);
@@ -555,6 +555,8 @@ PVase.prototype = new Sketch;
 // "].join("\n");
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
+
+var count = 0;
 
 barleyField = {
     
@@ -1264,14 +1266,13 @@ THREE.Object3D.prototype.addNoiseBall = function() {
 }
 
 function explode() {
-	var a = root.addNoiseBall();
-	geometrySketch(a);
-	a.update = function() {
-
-		this.shaderMaterial.uniforms['time'].value = time*.1;
-                this.shaderMaterial.uniforms['alpha'].value = this.sketch.fadeAway == 0 ? 1 : this.sketch.fadeAway;
-
-	}
+   var a = root.addNoiseBall();
+   geometrySketch(a);
+   a.update = function() {
+      this.shaderMaterial.uniforms['time'].value = time*.1;
+      this.shaderMaterial.uniforms['alpha'].value = this.sketch.fade();
+      a.getMatrix().scale(0.6);
+   }
 }
 
 explodeBall = {

@@ -151,6 +151,30 @@
       }
    }
 
+   function Motion() {
+      this.labels = "motion".split(' ');
+      this.dragValue = 1;
+      var d = 0.3;
+
+      this.mouseDrag = function(x, y) {
+         var x0 = this.xlo + sketchPadding;
+         var x1 = this.xhi - sketchPadding;
+         this.dragValue = (x - x0) / (x1 - x0);
+      }
+
+      this.render = function(elapsed) {
+         motion[this.colorId] = max(0, min(1, isDef(this.in[0]) ? this.inValue[0] : this.dragValue));
+         m.save();
+            m.scale(this.size / 360);
+            mLine([-1,0],[1,0]);
+            mCurve([[1-d,d],[1,0],[1-d,-d]]);
+            m.translate(2 * motion[this.colorId] - 1, 0, 0);
+            mLine([0,d],[0,-d]);
+         m.restore();
+      }
+   }
+   Motion.prototype = new Sketch;
+
    function Noises() {
       this.labels = "noise1D absns1D".split(' ');
 
@@ -243,25 +267,23 @@
                 - add texture (show code).
 */
 
-var planetFragmentShader = ["\
-   void main(void) {\n\
-      float dz = sqrt(1.-dx*dx-dy*dy);\n\
-      float cRot = cos(.2*time), sRot = sin(.2*time);\n\
-      float cVar = cos(.1*time), sVar = sin(.1*time);\n\
-      vec3 pt = vec3(cRot*dx+sRot*dz+cVar,dy,-sRot*dx+cRot*dz+sVar);\n\
-      float g = turbulence(pt);                         /* CLOUDS */\n\
-      vec2 v = .6 * vec2(dx,dy);                        /* SHAPE  */\n\
-      float d = 1. - 4.1 * dot(v,v);\n\
-      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */\n\
-      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : d>-.1 ? d+.1 : 0.;\n\
-      float f = -.2 + sin(4. * pt.x + 8. * g + 4.);     /* FIRE   */\n\
-      f = f > 0. ? 1. : 1. - f * f * f;\n\
-      if (d <= 0.1)\n\
-         f *= (g + 5.) / 3.;\n\
-      vec3 color = vec3(d*f*f*.85, d*f, d*.7);          /* COLOR  */\n\
-      gl_FragColor = vec4(color,alpha*min(1.,10.*d));\n\
-   }\
-"].join("\n");
+var planetFragmentShader = [
+,'   void main(void) {'
+,'      float dz = sqrt(1.-dx*dx-dy*dy);                  /* DEPTH  */'
+,'      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */'
+,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
+,'      float cV = cos(.1*time), sV = sin(.1*time);'
+,'      vec3 P = vec3(cR*dx+sR*dz+cV,dy,-sR*dx+cR*dz+sV);'
+,'      float g = turbulence(P);                          /* CLOUDS */'
+,'      float d = 1. - 1.2 * (dx*dx + dy*dy);             /* EDGE   */'
+,'      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : max(0.,d+.1);'
+,'      float f = -.2 + sin(4. * P.x + 8. * g + 4.);      /* FIRE   */'
+,'      f = f > 0. ? 1. : 1. - f * f * f;'
+,'      f *= d > .1 ? 1. : (g + 5.) / 3.;'
+,'      vec3 color = vec3(d*f*f*.85, d*f, d*.7);          /* COLOR  */'
+,'      gl_FragColor = vec4(color,alpha*min(1.,10.*d));'
+,'   }'
+].join("\n");
 
 registerGlyph("planet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
@@ -279,7 +301,7 @@ var marbleFragmentShader = ["\
       float t = selectedIndex == 3. ? .7 * noise(vec3(dx,dy,0.)) :\n\
                 selectedIndex == 4. ? .5 * fractal(vec3(dx,dy,5.)) :\n\
                 selectedIndex == 5. ? .4 * (turbulence(vec3(dx*1.5,dy*1.5,10.))+1.8)\n\
-		                    : .0 ;\n\
+                                    : .0 ;\n\
       float s = .5 + .5*cos(7.*dx+6.*t);\n\
       if (selectedIndex == 2.) \n\
          s = .5 + noise(vec3(3.*dx,3.*dy,10.));\n\
@@ -352,6 +374,7 @@ function corona() {
       ["turbulence", "grad(r + turbulence(P))"],
       ["animate", "grad(r + turbulence(P(time)))"],
    ];
+   sketch.selectedIndex = 3;
 }
 
 
@@ -393,10 +416,10 @@ var slicedFragmentShader = ["\
          float t = selectedIndex == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\n\
                    selectedIndex == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\n\
                    selectedIndex == 6. ? 0.8 * (turbulence(vec3(X,Y,Z+20.))+1.8) :\n\
-   		                 0.0 ;\n\
+                                    0.0 ;\n\
          float c = .5 + .5*cos(7.*X+6.*t);\n\
-	 if (selectedIndex == 1.)\n\
-	    c = .2 + .8 * c;\n\
+         if (selectedIndex == 1.)\n\
+            c = .2 + .8 * c;\n\
          else if (selectedIndex == 0.)\n\
             c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\n\
          else if (selectedIndex == 4.)\n\
@@ -458,8 +481,28 @@ function Lattice() {
    this.is3D = true;
    this.showLattice = false;
    this.showCube = false;
+   this.showNoise = false;
+   this.pts = [];
    this.onClick = function() {
-      if (this.showLattice)
+      if (this.showNoise)
+         ;
+      else if (this.showCube) {
+         this.showNoise = true;
+	 var d = 1/16;
+	 for (var dz = 0 ; dz < .99 ; dz += d)
+	 for (var dy = 0 ; dy < .99 ; dy += d)
+	 for (var dx = 0 ; dx < .99 ; dx += d) {
+             var x = -2 + dx;
+             var y =  1 + dy;
+             var z =  1 + dz;
+	     var c = floor(255 * pow(.5 + .5 * noise(x,y,z+4), 2));
+	     this.pts.push([
+		'rgba(' + floor((255-c)/4) + ',' + c + ',' + c + ',.2)' ,
+	        [ [x,y,z], [x+d,y,z], [x+d,y+d,z], [x,y+d,z] ]
+	     ]);
+         }
+      }
+      else if (this.showLattice)
          this.showCube = true;
       else
          this.showLattice = true;
@@ -469,59 +512,70 @@ function Lattice() {
          m.scale(this.size / 400);
          m.rotateY(-.2);
          m.rotateX( .2);
-	 if (this.showLattice)
-	    lineWidth(1);
+         if (this.showLattice)
+            lineWidth(1);
          mCurve([[-1, 0, 0], [ 1, 0, 0]]);
          mCurve([[ 0,-1, 0], [ 0, 1, 0]]);
          mCurve([[ 0, 0,-1], [ 0, 0, 1]]);
-	 if (this.showLattice) {
-	    m.scale(.5);
-	    for (var x = -2 ; x <= 2 ; x++)
-	    for (var y = -2 ; y <= 2 ; y++)
-	    for (var z = -2 ; z <= 2 ; z++) {
-	       mCurve([[x-.03,y,z],[x+.03,y,z]]);
-	       mCurve([[x,y-.03,z],[x,y+.03,z]]);
-	    }
-	    if (this.showCube) {
-	       color('pink');
-	       mLine([-2, 2, 2],[-1, 2, 2]);
-	       mLine([-2, 2, 2],[-2, 1, 2]);
-	       mLine([-2, 2, 2],[-2, 2, 1]);
+         if (this.showLattice) {
+            m.scale(.5);
+            for (var x = -2 ; x <= 2 ; x++)
+            for (var y = -2 ; y <= 2 ; y++)
+            for (var z = -2 ; z <= 2 ; z++) {
+               mCurve([[x-.03,y,z],[x+.03,y,z]]);
+               mCurve([[x,y-.03,z],[x,y+.03,z]]);
+            }
+            if (this.showCube) {
+               color('pink');
+               mLine([-2, 2, 2],[-1, 2, 2]);
+               mLine([-2, 2, 2],[-2, 1, 2]);
+               mLine([-2, 2, 2],[-2, 2, 1]);
 
-          mLine([-1, 2, 2],[-1, 2, 1]);
-          mLine([-2, 2, 1],[-1, 2, 1]);
-          mLine([-1, 2, 2],[-1, 1, 2]);
+               mLine([-1, 2, 2],[-1, 2, 1]);
+               mLine([-2, 2, 1],[-1, 2, 1]);
+               mLine([-1, 2, 2],[-1, 1, 2]);
 
-          mLine([-1, 2, 1],[-1, 1, 1]);
-          mLine([-1, 1, 2],[-1, 1, 1]);
+               mLine([-1, 2, 1],[-1, 1, 1]);
+               mLine([-1, 1, 2],[-1, 1, 1]);
 
-          mLine([-2, 1, 2],[-1, 1, 2]);
-          mLine([-2, 1, 1],[-1, 1, 1]);
+               mLine([-2, 1, 2],[-1, 1, 2]);
+               mLine([-2, 1, 1],[-1, 1, 1]);
 
-          mLine([-2, 1, 2],[-2, 1, 1]);
-          mLine([-2, 1, 1],[-2, 2, 1]);
-	    }
-	 }
+               mLine([-2, 1, 2],[-2, 1, 1]);
+               mLine([-2, 1, 1],[-2, 2, 1]);
+
+               if (this.showNoise) {
+                  for (var n = 0 ; n < this.pts.length ; n++) {
+                     color(this.pts[n][0]);
+		     var P = [];
+		     for (var i = 0 ; i < this.pts[n][1].length ; i++)
+		        P.push(m.transform(this.pts[n][1][i]));
+                     fillPolygon(P);
+                  }
+               }
+            }
+         }
       m.restore();
    }
 }
 Lattice.prototype = new Sketch;
 
+/*
 function SplineTest() {
    this.labels = "spline".split(' ');
    this.shape = createSpline([
-      [-.3,1.1],
-      [-.3, .9],
-      [-.3, .5],
-      [-.7,-.1],
-      [-.7,-.7],
-      [-.3,-1 ],
-      [ .3,-1 ],
-      [ .7,-.7],
-      [ .7,-.1],
-      [ .3, .5],
-      [ .3, .9],
       [ .3,1.1],
+      [ .3, .9],
+      [ .3, .5],
+      [ .7,-.1],
+      [ .7,-.7],
+      [ .3,-1 ],
+      [-.3,-1 ],
+      [-.7,-.7],
+      [-.7,-.1],
+      [-.3, .5],
+      [-.3, .9],
+      [-.3,1.1],
    ]);
    this.render = function(elapsed) {
       m.save();
@@ -530,6 +584,7 @@ function SplineTest() {
    }
 }
 SplineTest.prototype = new Sketch;
+*/
 
 function Grid() {
    this.labels = "grid".split(' ');
@@ -553,7 +608,7 @@ function Grid() {
          }
          this.afterSketch(function() {
 
-	    function n2(x, y) { return noise2(x, y + 10); }
+            function n2(x, y) { return noise2(x, y + 10); }
 
             var uColor = 'rgb(255,64,64)';
             var vColor = 'rgb(64,255,64)';
@@ -626,17 +681,17 @@ function MothAndCandle() {
       case "moth":
          switch (pieMenuIndex(dx, dy)) {
          case 1:
-	    this.isAnimating = true;
-	    break;
+            this.isAnimating = true;
+            break;
          case 3:
-	    for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
-	       var s = sketchPage.sketches[i];
-	       if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
+            for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
+               var s = sketchPage.sketches[i];
+               if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
                   s.isAnimating = true;
             }
-	    break;
+            break;
          }
-	 break;
+         break;
       }
    }
 
@@ -655,24 +710,24 @@ function MothAndCandle() {
 
          if (this.isAnimating) {
 
-	    if (this.animationThrottle === undefined)
-	       this.animationThrottle = 0;
-	    this.animationThrottle = min(1, this.animationThrottle + elapsed / 0.5);
-	    var animationSpeed = sCurve(this.animationThrottle);
+            if (this.animationThrottle === undefined)
+               this.animationThrottle = 0;
+            this.animationThrottle = min(1, this.animationThrottle + elapsed / 0.5);
+            var animationSpeed = sCurve(this.animationThrottle);
 
-	    // ALWAYS MOVE FORWARD.
+            // ALWAYS MOVE FORWARD.
 
-	    this.mm.translate(0, 15 * elapsed * animationSpeed, 0);
+            this.mm.translate(0, 15 * elapsed * animationSpeed, 0);
 
-	    // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
+            // IF THERE IS A CANDLE, HOVER AROUND THE CANDLE.
 
             if (isCandle) {
-	       this.mm._m()[12] *= 1 - elapsed/2;
-	       this.mm._m()[13] *= 1 - elapsed/2;
-	       this.mm._m()[14] *= 1 - elapsed/2;
+               this.mm._m()[12] *= 1 - elapsed/2;
+               this.mm._m()[13] *= 1 - elapsed/2;
+               this.mm._m()[14] *= 1 - elapsed/2;
 
                this.transitionToCandle = min(1, this.transitionToCandle + elapsed / 2.0);
-	       var t = sCurve(this.transitionToCandle);
+               var t = sCurve(this.transitionToCandle);
 
                var x = (this.xlo + this.xhi) / 2;
                var y = (this.ylo + this.yhi) / 2;
@@ -681,61 +736,62 @@ function MothAndCandle() {
                this.moveMothY -= elapsed * max(-10, min(10, candleY - y)) * min(1, 200 / this.size);
             }
 
-	    m.translate(this.moveMothX, this.moveMothY, 0);
+            m.translate(this.moveMothX, this.moveMothY, 0);
 
-	    // CONTINUALLY CHANGE DIRECTION.
+            // CONTINUALLY CHANGE DIRECTION.
 
             var turnRate = 25 * elapsed * animationSpeed;
-	    this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 200.5 + 10 * this.id)));
-	    this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5 + 10 * this.id)));
+            this.mm.rotateX(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 200.5 + 10 * this.id)));
+            this.mm.rotateZ(turnRate * sharpen(2 * noise2(8 * (time - this.startTime), 300.5 + 10 * this.id)));
 
-	    // TRY TO STAY ORIENTED UPRIGHT.
+            // TRY TO STAY ORIENTED UPRIGHT.
 
             if (animationSpeed == 1)
-	       this.mm.aimZ(this.up);
-	 }
+               this.mm.aimZ(this.up);
+         }
 
-	 // DRAW TORSO
+         // DRAW TORSO
 
          lineWidth(lerp(transition, 2, 0.5));
 
-         m.scale(this.size / 300);
-	 m._xf(this.mm._m());
-	 m.save();
-	    // ALWAYS TURN TORSO TO FACE VIEW.
-	    m.rotateY(atan2(m._m()[2], m._m()[0]));
+         m.scale(this.size / 250);
+         m.translate(0,-.1,0);
+         m._xf(this.mm._m());
+         m.save();
+            // ALWAYS TURN TORSO TO FACE VIEW.
+            m.rotateY(atan2(m._m()[2], m._m()[0]));
             mCurve(createCurve([-0.01,-0.6],[ 0.01,-0.6], 45.0));
-	 m.restore();
+         m.restore();
 
-	 // DRAW LEFT WING
+         // DRAW LEFT WING
 
-	 var flap = sin(6 * TAU * time);
+         var flap = sin(6 * TAU * time);
          lineWidth(2);
 
-	 m.save();
-	    m.translate(-0.06,0,0);
-	    if (this.isAnimating)
-	       m.rotateY(flap);
-	    mCurve(createCurve([-0.03, 0.1],[-0.34,-0.2],-0.8).
-	    concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
-	 m.restore();
+         m.save();
+            m.translate(-0.06,0,0);
+            if (this.isAnimating)
+               m.rotateY(flap);
+            mCurve(createCurve([-0.03, 0.1],[-0.34,-0.2],-0.8).
+            concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
+         m.restore();
 
-	 // DRAW RIGHT WING
+         // DRAW RIGHT WING
 
-	 m.save();
-	    m.translate(0.06,0,0);
-	    if (this.isAnimating)
-	       m.rotateY(-flap);
-	    mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
-	    concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
-	 m.restore();
+         m.save();
+            m.translate(0.06,0,0);
+            if (this.isAnimating)
+               m.rotateY(-flap);
+            mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
+            concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
+         m.restore();
 
-	 // DRAW LEFT AND RIGHT ANTENNAE
+         // DRAW LEFT AND RIGHT ANTENNAE
 
          lineWidth(lerp(transition, 2, 0.5));
 
-	 mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
-	 mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+         mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
+         mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
 
          break;
 
@@ -745,35 +801,35 @@ function MothAndCandle() {
          // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
 
          if (this.glyphTransition >= 0.5 && isNumber(this.xlo)) {
-	    candleX = (this.xlo + this.xhi) / 2;
-	    candleY = this.ylo;
+            candleX = (this.xlo + this.xhi) / 2;
+            candleY = this.ylo;
             isCandle = true;
          }
 
-	 // THEY WANDER OFF WHEN THE CANDLE DISAPPEARS.
+         // THEY WANDER OFF WHEN THE CANDLE DISAPPEARS.
 
          if (this.fadeAway > 0 && this.fadeAway < 1)
             isCandle = false;
 
          m.scale(this.size / 350);
 
-	 // CANDLE
+         // CANDLE
 
          mCurve([[-.2,-1.1],[-.2,.3]]
-	        .concat(createCurve([-.2,.3],[.2,.2],-.1))
-		.concat([[.2,.2],[.2,-1.1]]));
+                .concat(createCurve([-.2,.3],[.2,.2],-.1))
+                .concat([[.2,.2],[.2,-1.1]]));
 
-	 // WICK
+         // WICK
 
          mCurve(createCurve([ .01, .21],[ .01, .4], .05));
 
-	 // FLAME
+         // FLAME
 
          mCurve(createCurve([ 0.00 ,0.90],[-0.10 ,0.60], 0.08).
-	 concat(createCurve([-0.10 ,0.60],[ 0.00 ,0.30],-0.31)));
+         concat(createCurve([-0.10 ,0.60],[ 0.00 ,0.30],-0.31)));
 
          mCurve(createCurve([ 0.00 ,0.90],[ 0.195,0.63], 0.03).
-	 concat(createCurve([ 0.195,0.63],[ 0.00 ,0.30], 0.30)));
+         concat(createCurve([ 0.195,0.63],[ 0.00 ,0.30], 0.30)));
 
          break;
       }

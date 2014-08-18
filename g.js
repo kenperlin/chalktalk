@@ -3,6 +3,8 @@
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
    function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+   //function height() { return 720; }
+   //function height() { return 800; }
 
    function scrimColor(alpha) {
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
@@ -147,11 +149,11 @@
                      s[i].under(sk());
                }
 
-	       // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
+               // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
 
-	       if (s.length > 0) {
-	          console.log(sk().glyphName + " -> " + s[0].glyphName);
-	          deleteSketch(sk());
+               if (s.length > 0) {
+                  console.log(sk().glyphName + " -> " + s[0].glyphName);
+                  deleteSketch(sk());
                }
 
                break;
@@ -194,7 +196,6 @@
          if (handle.mousePressed) {
             globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
             // console.log(globalStrokes.strokes);
-
          }
          else{
             globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
@@ -243,7 +244,7 @@
          // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
 
          if (isPanning)
-            _g.panX += event.clientX - _g.lastX;
+            _g.panX = min(0, _g.panX + event.clientX - _g.lastX);
          _g.lastX = event.clientX;
       }
    }
@@ -344,7 +345,10 @@
          return;
       }
 
-      if (sk().glyphTrace != null) {
+      x = sk().adjustX(x);
+      y = sk().adjustY(y);
+
+      if (sk().sketchTrace != null) {
          if (sk().sketchState != 'finished' && sk().glyphTransition < 0.5)
             buildTrace(sk().trace, x, y, isLine);
          else {
@@ -387,17 +391,25 @@
          }
       }
 
-      if (! isLine)
-         _g.moveTo(snx(sk(),cx,cy), sny(sk(),cx,cy));
+      if (! isLine) {
+         var sx = snx(sk(), cx, cy);
+         var sy = sny(sk(), cx, cy);
+         _g.moveTo(sx, sy);
+      }
 
       else if (d > 0) {
          for (var i = 20 ; i < d ; i += 20) {
             var xx = lerp(i/d, xPrev, cx);
             var yy = lerp(i/d, yPrev, cy);
-            _g.lineTo(snx(sk(),xx,yy), sny(sk(),xx,yy));
+            var sx = snx(sk(), xx, yy);
+            var sy = sny(sk(), xx, yy);
+            _g.lineTo(sx, sy);
          }
-         _g.lineTo(snx(sk(),cx,cy), sny(sk(),cx,cy));
+         var sx = snx(sk(), cx, cy);
+         var sy = sny(sk(), cx, cy);
+         _g.lineTo(sx, sy);
       }
+
       xPrev = x;
       yPrev = y;
 
@@ -437,7 +449,7 @@
       return dst;
    }
 
-   function morphGlyphToSketch(suppressTransition) {
+   function morphSketchToGlyphSketch(suppressTransition) {
       function drawTrace(tr) {
          _g.beginPath();
          for (var n = 0 ; n < tr.length ; n++)
@@ -458,18 +470,30 @@
          t = 0;
 
       if (t == 0) {
-         drawTrace(sk().glyphTrace);
+         drawTrace(sk().sketchTrace);
          return;
       }
 
-      else if (t == 1) {
-         _g.lineWidth = sketchLineWidth * .6;
-         drawTrace(sk().trace);
+      if (t == 1)
          return;
-      }
 
-      var A = sk().glyphTrace;
+      var A = sk().sketchTrace;
       var B = resampleTrace(sk().trace);
+
+      // ADJUST FINAL SKETCH TO CREATE BEST FIT.
+
+      if (sk().xyz.length == 0) {
+         var x = 0, y = 0, z = 0, w = 0;
+         for (var n = 0 ; n < B.length ; n++) {
+            var xyz = bestFit(B[n], A[n]);
+            var t = computeCurveLength(A[n]);
+            x += t * xyz[0];
+            y += t * xyz[1];
+            z += t * xyz[2];
+            w += t;
+         }
+         sk().xyz = [x / w, y / w, z / w];
+      }
 
       var s = sCurve(t);
       var C = [];
@@ -513,8 +537,10 @@
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowingPresenterView = false;
+   var isShowingScribbleGlyphs = false;
    var isTextMode = false;
    var margin = 50;
+   var scribbleColor = 'rgb(128, 224, 255)';
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
@@ -634,6 +660,28 @@
 
       pixelsPerUnit = 5.8 * height() / cameraFOV;
 
+      // LOAD ALL THE SCRIBBLE GLYPHS.
+
+      for (var n = 0 ; n < 26 ; n++) {
+         // NEED TO ADD INDIVIDUAL CHARACTERS
+      }
+
+      for (var n = 0 ; n < glyphs.length ; n++) {
+         var name = glyphs[n].indexName;
+         var scribble = new Scribble(name);
+         var glyph = new Glyph(name, [scribble]);
+	 glyph.curveLength = computeCurveLength(scribble);
+         scribbleGlyphs.push(glyph);
+      }
+
+      for (var n = 0 ; n < scribbleNames.length ; n++) {
+         var name = scribbleNames[n];
+         if (glyphIndex(scribbleGlyphs, name) == -1) {
+            var scribble = [new Scribble(name)];
+            addGlyph(scribbleGlyphs, new Glyph(name, scribble));
+         }
+      }
+
       tick(g);
    }
 
@@ -659,7 +707,7 @@
       if (context == undefined)
          context = _g;
 
-      var w = width(), h = height(), nc = sketchPalette.length;
+      var w = width(), h = height(), nc = palette.length;
 
       annotateStart(context);
       for (var n = 0 ; n < nc ; n++) {
@@ -667,7 +715,7 @@
          var y = paletteY(n);
          var r = paletteR(n);
 
-         context.fillStyle = sketchPalette[n];
+         context.fillStyle = palette[n];
          context.beginPath();
          context.moveTo(x - r, y - r);
          context.lineTo(x + r, y - r);
@@ -682,7 +730,7 @@
       ['a'  , "toggle audience"],
       ['b'  , "bend line"],
       ['c'  , "toggle card"],
-      ['d'  , "start drawing"],
+      ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['g'  , "group/ungroup"],
       ['h'  , "home"],
@@ -697,6 +745,7 @@
       ['t'  , "translating"],
       ['w'  , "toggle whiteboard"],
       ['x'  , "toggle expert mode"],
+      ['y'  , "toggle scribble glyphs"],
       ['z'  , "zoom"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
@@ -717,6 +766,7 @@
    var groupPath = [];
    var linkDeleteColor = 'rgba(255,0,0,.1)';
    var linkHighlightColor = 'rgba(0,192,96,.2)';
+   var liveDataColor = 'rgb(128,192,255)'
    var overlayColor = 'rgb(0,64,255)';
    var overlayScrim = 'rgba(0,64,255,.25)';
    var portColor = 'rgb(0,192,96)';
@@ -779,7 +829,7 @@
       sk().width = bounds[2] - bounds[0];
       sk().height = bounds[3] - bounds[1];
       sk().setSelection(selection);
-      sk().glyphTrace = resampleTrace(sketchToTrace(glyphSketch));
+      sk().sketchTrace = resampleTrace(sketchToTrace(glyphSketch));
       sk().glyphTransition = 0;
       sk().trace = [];
 
@@ -817,6 +867,32 @@
       var j = link[3][1];
       link[3][2] = computeCurvature(a.portXY(i), C, b.portXY(j));
       link[3][3] = undefined;
+   }
+
+   var portDataValues = [], outSketchPrev = null, outPortPrev = -1;
+
+   function drawPortData(sketch, port, dataValues) {
+      var lo = 100000, hi = -100000;
+      for (var i = 0 ; i < dataValues.length ; i++) {
+         lo = min(lo, dataValues[i]);
+         hi = max(hi, dataValues[i]);
+      }
+      if (hi - lo < 0.1)
+         return;
+
+      var xy = sketch.portXY(port);
+
+      lineWidth(1);
+      _g.beginPath();
+      for (var i = 0 ; i < dataValues.length ; i++) {
+         var x = xy[0] + 2 * i;
+         var y = xy[1] - 2 * 30 * dataValues[i];
+         if (i == 0)
+            _g.moveTo(x, y);
+         else
+            _g.lineTo(x, y);
+      }
+      _g.stroke();
    }
 
    function drawLink(a, i, linkData, isVisible) {
@@ -1060,14 +1136,11 @@
    var strokesStartTime = 0;
    var strokesGlyph = null;
 
-   function interpretStrokes() {
-      if (strokes.length == 0 || strokes[0].length < 2) {
-         strokes = [];
+   function findGlyph(strokes, glyphs) {
+      if (strokes.length == 0 || strokes[0].length < 2)
          return null;
-      }
 
       strokesGlyph = new Glyph("", strokes);
-      strokes = [];
 
       if (isCreatingGlyphData)
          console.log(strokesGlyph.toString());
@@ -1081,7 +1154,6 @@
             bestMatch = i;
          }
       }
-
       return glyphs[bestMatch];
    }
 
@@ -1122,6 +1194,11 @@
    function registerGlyph(name, strokes, indexName) {
        if (indexName === undefined) {
           indexName = name;
+
+          var j = indexName.indexOf('Sketch');
+          if (j > 0)
+             indexName = indexName.substring(0, j);
+
           var j = indexName.indexOf('(');
           if (j > 0)
              indexName = indexName.substring(0, j);
@@ -1173,20 +1250,20 @@
          return score;
       }
 
-      this.toSimpleSketch = function(tx, ty) {
+      this.toSimpleSketch = function(tx, ty, sc) {
          var s = new SimpleSketch();
          for (var n = 0 ; n < this.data.length ; n++)
             for (var i = 0 ; i < this.data[n].length ; i++) {
-               var x1 = this.data[n][i][0] - 50;
-               var y1 = this.data[n][i][1] - 50;
-	       var x = x1 + 3 * noise2(x1 / 30, y1 / 30);
-	       var y = y1 + 3 * noise2(x1 / 30, y1 / 30 + 100);
+               var x1 = sc * this.data[n][i][0] - 50;
+               var y1 = sc * this.data[n][i][1] - 50;
+               var x = x1 + 2*sc * noise2(x1 / 30, y1 / 30);
+               var y = y1 + 2*sc * noise2(x1 / 30, y1 / 30 + 100);
                s.sp0.push([x,y]);
                s.sp.push([x,y,i>0]);
             }
          sketchPage.add(s);
          finishSketch();
-	 s.color = sketchColor();
+         s.setColorId(sketchPage.colorId);
          s.tX = tx;
          s.tY = ty;
       }
@@ -1216,9 +1293,10 @@
             setTextMode(true);
          }
 
-	 // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
+         // USE THE TYPE OF THIS GLYPH TO DEFINE A GLYPH NAME FOR THE SKETCH.
 
-	 sk().glyphName = this.indexName;
+         sk().glyph = this;
+         sk().glyphName = this.indexName;
       }
 
       this.name = name;
@@ -1274,8 +1352,11 @@
                break;
             }
             var u = (t - f[i-1]) / (f[i] - f[i-1]);
-            this.data[n].push([lerp(u, stroke[i-1][0], stroke[i][0]),
-                               lerp(u, stroke[i-1][1], stroke[i][1])]);
+            if (i == 0)
+               this.data[n].push([stroke[i][0], stroke[i][1]]);
+            else
+               this.data[n].push([lerp(u, stroke[i-1][0], stroke[i][0]),
+                                  lerp(u, stroke[i-1][1], stroke[i][1])]);
          }
       }
    }
@@ -1300,37 +1381,244 @@
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
-   function startBgAction(x, y) {
+/////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
+
+   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
+   var scribbleGlyphs = [];
+
+   function Scribble(str) {
+      var charIndex = "NPab1cdefg0hijklmnopq9r876stu543C2vwxDyz";
+      var charDir   = "5555566666777770000011111222223333344444";
+      var charShape = "<(|)><(|)><(|)><(|)><(|)><(|)><(|)><(|)>";
+      var s = [[0,0]];
+      for (var i = 0 ; i < str.length ; i++) {
+         var ch = str.substring(i, i+1);
+         var n = charIndex.indexOf(ch);
+         var dir = -charDir.substring(n, n+1);
+         var shape = charShape.substring(n, n+1);
+         var C = cos(TAU * dir / 8);
+         var S = sin(TAU * dir / 8);
+         function xf(pts, xy) {
+            for (var k = 0 ; k < pts.length ; k++) {
+               var x = pts[k][0], y = pts[k][1];
+               pts[k][0] = xy[0] + C * x - S * y;
+               pts[k][1] = xy[1] + S * x + C * y;
+            }
+            return pts;
+         }
+         function arced(c) {
+            var p = [];
+            for (var k = 1 ; k <= 10 ; k++) {
+               var t = k / 10;
+               p.push([t, c * t * (1 - t)]);
+            }
+            return p;
+         }
+         function curly(c) {
+            var p = [];
+            for (var k = 1 ; k <= 10 ; k++) {
+               var t = k / 10;
+               var x = t + sin(TAU * t) / 2.5;
+               var y = c * (1 - cos(TAU * t)) / 4;
+               p.push([x, y]);
+            }
+            return p;
+         }
+         var ep = s[s.length - 1];
+         switch (shape) {
+         case "<": s = s.concat(xf(curly( 1), ep)); break;
+         case "(": s = s.concat(xf(arced( 1), ep)); break;
+         case "|": s = s.concat(xf(arced( 0), ep)); break;
+         case ")": s = s.concat(xf(arced(-1), ep)); break;
+         case ">": s = s.concat(xf(curly(-1), ep)); break;
+         }
+      }
+      return s;
    }
 
-   function doBgAction(x, y) {
+   function glyphIndex(glyphs, name) {
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (glyphs[i].name == name)
+	    return i;
+      return -1;
    }
 
-   function endBgAction(x, y) {
+   function addGlyph(glyphs, glyph) {
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (glyph.name < glyphs[i].name) {
+            glyphs.splice(i, 0, glyph);
+            return;
+         }
+      glyphs.push(glyph);
+   }
+
+   function BgScribble(x, y) {
+      this.path = [[x,y]];
+      this.index = 0;
+      this.draw = function() {
+         color(scribbleColor);
+
+         lineWidth(1);
+         var r = margin / 5;
+         drawOval(this.path[0][0] - r, this.path[0][1] - r, 2 * r, 2 * r);
+
+         lineWidth(0.5);
+         drawCurve(this.path);
+      }
+      this.drag = function(x, y) {
+         this.path.push([x, y]);
+      }
+      this.interpret = function() {
+         var glyph = findGlyph([this.path], scribbleGlyphs);
+         return glyph == null ? "" : glyph.name;
+      }
+   }
+   var bgs, bgsText = "", bgsTextUndo = [];
+   var isBgsDelete = false, isBgsShift = false, isBgsNumeric = false;
+
+   function bgActionDown(x, y) {
+
+      // IF ALREADY IN SCRIBBLE-TEXT MODE, START NEXT WORD.
+
+      if (bgs !== undefined)
+         bgs.path[0] = [x, y];
+
+      // ELSE IF LINE STARTS AT CLICK, ENTER SCRIBBLE-TEXT MODE.
+
+      else if (len(x - bgClickX, y - bgClickY) < clickSize) {
+         bgs = new BgScribble(x, y);
+         bgsText = "";
+         bgsTextUndo = [];
+      }
+   }
+
+   function bgActionDrag(x, y) {
+
+      // ADD NEXT POINT TO SCRIBBLE-TEXT STROKE.
+
+      if (bgs !== undefined)
+         bgs.drag(x, y);
+   }
+
+   function bgActionUp(x, y) {
+
+      // HANDLE A SCRIBBLE-TEXT STROKE.
+
+      if (bgs !== undefined) {
+         var str = bgs.interpret();
+	 switch (str) {
+	 case "C":
+	    isBgsShift = true;
+	    break;
+	 case "D":
+            if (bgsTextUndo.length > 0)
+	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
+	    break;
+	 default:
+	    bgsTextUndo.push(bgsText);
+	    if (bgsText.length > 0 && str.length == 1)
+	       bgsText = bgsText.substring(0, bgsText.length - 1);
+            if (isBgsShift) {
+	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+	       isBgsShift = false;
+	    }
+            bgsText += str + " ";
+	    break;
+         }
+         bgs = new BgScribble(x, y);
+         return;
+      }
+
       var x0 = bgClickX;
       var y0 = bgClickY;
       var x1 = sketchPage.xDown;
       var y1 = sketchPage.yDown;
-      var n2 = pieMenuIndex(x - x1, y - y1, 8);
-      if (len(x1 - x0, y1 - y0) < clickSize)
-         console.log("BG ACTION " + n2);
-      else {
-         var n1 = pieMenuIndex(x1 - x0, y1 - y0, 8);
-         console.log("BG ACTION " + n1 + " -> " + n2);
+
+      var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
+
+      // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
+
+      if (len(x - x1, y - y1) < clickSize) {
+         bgGesture(n1);
+         return;
       }
+
+      var sketches = sketchPage.sketchesAt(x, y);
+      if (sketches.length == 0)
+
+         // POSITION OF START OF SWIPE WRT END OF SWIPE.
+
+         bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
+
+      else {
+
+         // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
+
+         var s = sketches[0];
+         bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
+      }
+   }
+
+   function bgActionEnd(x, y) {
+
+      // ACT ON SCRIBBLE-TEXT, THEN EXIT SCRIBBLE-TEXT MODE.
+
+      bgsText = bgsText.trim();
+      var index = glyphIndex(glyphs, bgsText);
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (bgsText == glyphs[i].indexName) {
+            console.log("need to add glyph " + bgsText);
+            break;
+         }
+      bgs = undefined;
+      bgsText = "";
+      bgsTextUndo = [];
+   }
+
+/////////////////////////////////////////////////////////////////////////////
+
+   function directionsToPage(n1, n2) { return 8 * n1 + n2; }
+   function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
+
+   // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+
+   function bgGesture(n1, n2, s) {
+      if (n2 === undefined) {
+         console.log(n1);
+         switch (n1) {
+         case 2: setPage(pageIndex - 1); break;
+         case 6: setPage(pageIndex + 1); break;
+         }
+      }
+      else if (s === undefined)
+         setPage(directionsToPage(n1, n2));
+      else
+         console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
 
    function startSketchDragAction(x, y) {
       sketchDragMode = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-      sketchDragActionXY = [x,y];
-      sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
+      switch (sketchDragMode) {
+      case 2:
+         sk().motionPath = [[x],[y]];
+         sketchPage.definingMotion = sk().colorId;
+         break;
+      case 3:
+         sketchDragActionXY = [x,y];
+         sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
+         break;
+      }
    }
 
    function doSketchDragAction(x, y) {
-      var dx = x - sketchDragActionXY[0];
-      var dy = y - sketchDragActionXY[1];
       switch (sketchDragMode) {
+      case 2:
+         sk().motionPath[0].push(x);
+         sk().motionPath[1].push(y);
+         break;
       case 3:
+         var dx = x - sketchDragActionXY[0];
+         var dy = y - sketchDragActionXY[1];
          if ( abs(dx) > sketchDragActionSize[0] ||
               abs(dy) > sketchDragActionSize[1] ) {
             copySketch(sk());
@@ -1342,6 +1630,11 @@
    }
 
    function endSketchDragAction(x, y) {
+      switch (sketchDragMode) {
+      case 2:
+         delete sketchPage.definingMotion;
+         break;
+      }
    }
 
    function doSketchClickAction(x, y) {
@@ -1356,6 +1649,15 @@
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
+         break;
+      case 1:
+         if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
+                                          && ! (sk() instanceof NumericSketch ))
+            sk().isGlyphable = ! sk().isGlyphable;
+         else if (sk().glyph !== undefined) {
+            sk().fadeAway = 1;
+            sk().glyph.toSimpleSketch(sk().cx(), sk().cy(), sk().size / 200 * sk().size / (sk().size - 2 * sketchPadding));
+         }
          break;
       case 2:
          sketchAction = "translating";  // N -- TRANSLATE
@@ -1375,7 +1677,7 @@
          break;
       case 7:
          sketchAction = "undrawing";    // SE -- "UNDRAW" A SIMPLE SKETCH
-	 sketchPage.tUndraw = 0;
+         sketchPage.tUndraw = 0;
          break;
       }
 
@@ -1383,7 +1685,7 @@
    }
 
    function findPaletteColorIndex(x, y) {
-      for (var n = 0 ; n < sketchPalette.length ; n++) {
+      for (var n = 0 ; n < palette.length ; n++) {
          var dx = x - paletteX(n);
          var dy = y - paletteY(n);
             if (dx * dx + dy * dy < 20 * 20)
@@ -1429,7 +1731,28 @@
 
    var visible_sp = null;
 
+   var ttForce = newZeroArray(1024);
+
+   function ttTick() {
+      if (tt !== undefined && tt.myState === undefined)
+         tt.waitForDomReady(document, function() {
+            tt.load(function(error) {
+               tt.myState = new tt.State();
+            });
+         });
+      if (tt.myState !== undefined) {
+         tt.pollState(tt.myState);
+         for (var i = 0 ; i < 1024 ; i++)
+            ttForce[i] = tt.myState.hmd.forces[i] / 4096;
+      }
+   }
+
    var tick = function(g) {
+      var w = width(), h = height();
+
+      // HANDLE THE TACTONIC SENSOR, IF ANY.
+
+      //ttTick();
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 
@@ -1442,16 +1765,15 @@
          // SET THE CURSOR STYLE.
 
          document.body.style.cursor =
-	    (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
-	    isExpertMode && (pieMenuIsActive || isSketchInProgress())
-	                                        ? 'none'
+            (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
+            isExpertMode && (pieMenuIsActive || isSketchInProgress())
+                                                ? 'none'
             : bgClickCount == 1                 ? 'cell'
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
-	    :                                     'crosshair'
+            :                                     'crosshair'
             ;
-         var w = width(), h = height();
 
          onScreenKeyboard.x = w / 2;
          onScreenKeyboard.y = h * 3 / 4;
@@ -1465,7 +1787,7 @@
          _g = g;
 
          if (! isDef(_g.panX))
-	    _g.panX = 0;
+            _g.panX = 0;
 
          // CLEAR THE CANVAS
 
@@ -1479,7 +1801,8 @@
 
          // PAN 3D OBJECTS TOO
 
-         root.position.x = _g.panX / 305.5;
+         //root.position.x = _g.panX / 305.5;
+         root.position.x = _g.panX / (0.382 * height());
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
@@ -1645,6 +1968,9 @@
                drawCrosshair(cursorX, cursorY);
          }
 
+         if (bgs !== undefined && bgs != null)
+            bgs.draw();
+
          if (isAudiencePopup()) {
 
             // MAKE SURE AUDIENCE VIEW HAS THE RIGHT BACKGROUND COLOR.
@@ -1677,30 +2003,26 @@
          for (var I = 0 ; I < nsk() ; I++) {
             var S = sk(I);
 
-            // SIMPLE SKETCH:
+            // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
 
-            if (S instanceof SimpleSketch) {
-
-               // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
-
-               if (S.isNullText()) {
+            if (S.isNullText()) {
+               if (S instanceof SimpleSketch) {
                   if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
                }
-
-               // IF TEXT: EVALUATE, THEN PROPAGATE IF THERE IS AN OUTPUT.
-
                else {
-                  S.evalResult = S.evalCode(S.text);
-                  if (S.evalResult != null && isDef(S.out[0]))
-                     S.outValue[0] = S.evalResult;
+                 for (var i = 0 ; i < S.in.length ; i++)
+                    S.outValue[i] = S.inValue[i];
                }
             }
 
-            // NON-SIMPLE SKETCH: EACH PORT'S VALUES PROPAGATE FROM ITS INPUT TO ITS OWN OUTPUT.
+            // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
 
-            else for (var i = 0 ; i < S.in.length ; i++)
-               S.outValue[i] = S.inValue[i];
+            else {
+               S.evalResult = S.evalCode(S.text);
+               if (S.evalResult != null && isDef(S.out[0]))
+                  S.outValue[0] = S.evalResult;
+            }
 
             // VALUES PROPAGATE ALONG LINKS.
 
@@ -1712,6 +2034,52 @@
                      var j = S.out[i][k][1];
                      b.inValue[j] = outValue;
                   }
+               }
+         }
+
+         // IF SHOWING LIVE DATA
+
+         if (showingLiveData > 0) {
+
+            if (showingLiveData >= 1) {
+
+               // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
+
+               if (outSketch != outSketchPrev || outPort != outPortPrev)
+                  portDataValues = [];
+               outSketchPrev = outSketch;
+               outPortPrev = outPort;
+
+               if (outSketch != null && outPort >= 0 && ! (outSketch instanceof NumericSketch)) {
+                  var val = outSketch.outValue[outPort];
+                  portDataValues.push(val == false ? 0 : val == true ? 1 : val);
+                  color(liveDataColor);
+                  drawPortData(outSketch, outPort, portDataValues);
+               }
+            }
+
+            if (showingLiveData >= 2)
+               for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
+                  var s = sketchPage.sketches[I];
+                  for (var i = 0 ; i < s.portName.length ; i++)
+                     if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
+                        var xy = s.portXY(i);
+                        var str = roundedString(s.outValue[i]);
+
+                        textHeight(20);
+                        color(backgroundColor);
+                        var _sw = textWidth(str);
+                        var _sh = textHeight();
+                        _g.beginPath();
+                        _g.moveTo(xy[0] - _sw/2, xy[1] - _sh/2);
+                        _g.lineTo(xy[0] + _sw/2, xy[1] - _sh/2);
+                        _g.lineTo(xy[0] + _sw/2, xy[1] + _sh/2);
+                        _g.lineTo(xy[0] - _sw/2, xy[1] + _sh/2);
+                        _g.fill();
+
+                        color(liveDataColor);
+                        text(str, xy[0], xy[1], .5, .5);
+                     }
                }
          }
 
@@ -1736,6 +2104,7 @@
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
 
          if (isRightHover && ! isBottomGesture) {
+            annotateStart();
             _g.save();
             _g.globalAlpha = 1.0;
             lineWidth(1);
@@ -1776,12 +2145,43 @@
                _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
 
                // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
                var centerRatio = pn < 10 ? 0.57 : 0.65;
                var numberX = w - _g.panX - margin * centerRatio;
                _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
             }
 
+            if (! isExpertMode) {
+               var d = h / 10;
+               var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+               var x1 = w/2 - d * cos(n1 * TAU / 8);
+               var y1 = h/2 + d * sin(n1 * TAU / 8);
+               var x2 = x1  - d * cos(n2 * TAU / 8);
+               var y2 = y1  + d * sin(n2 * TAU / 8);
+
+               // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+               lineWidth(d/12);
+               color(defaultPenColor);
+               fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+               lineWidth(d/15);
+               color(backgroundColor);
+               fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+               // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+               lineWidth(d/12);
+               color(defaultPenColor);
+               arrow(x1, y1, x2, y2, d/8);
+
+               lineWidth(d/20);
+               color(backgroundColor);
+               arrow(x1, y1, x2, y2, d/8);
+            }
+
             _g.restore();
+            annotateEnd();
          }
 
          if (visible_sp != null) {
@@ -1802,19 +2202,20 @@
          _g.globalAlpha = 1.0;
 
          if (this.mouseY >= h - margin || isBottomGesture) {
-            color(scrimColor(0.1));
-	    fillRect(_g.panx, h - margin, w, margin - 2);
+            color(scrimColor(0.06));
+            fillRect(-_g.panX, h - margin, w, margin - 2);
 
-            var offset = _g.panX % margin;
-            for (var x = offset - _g.panX ; x < w - _g.panX ; x += margin)
-	       fillRect(x, h - margin, margin/2, margin - 2);
+            color(scrimColor(0.03));
+            var dx = margin / 2;
+            for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
+               fillRect(x, h - margin, dx/2, margin - 2);
          }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
          lineWidth(0.25);
-	 color(defaultPenColor);
-	 drawRect(-_g.panX, 0, w-1, h-1);
+         color(defaultPenColor);
+         drawRect(-_g.panX, 0, w-1, h-1);
 
          _g.restore();
 
@@ -1838,6 +2239,54 @@
             }
          }
 */
+      }
+
+      if (isShowingScribbleGlyphs) {
+         var ncols = 30;
+	 var cw = w / ncols;
+
+         color(scribbleColor);
+         lineWidth(cw / 70);
+
+         var fs = floor(0.25 * w / ncols);
+         _g.font = (2*fs) + "px Arial";
+	 _g.fillText(bgsText, 7, 28);
+         _g.font = fs + "px Arial";
+
+         for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
+            function xfx(x) { return x0 + x / 2; }
+            function xfy(y) { return y0 + y / 2; }
+            var col = ns % ncols;
+            var row = floor(ns / ncols);
+            var x0 = (col + 0.3) * cw;
+            var y0 = (row + 0.8) * cw * 1.5;
+            var s = scribbleGlyphs[ns].data;
+
+            var x = xfx(s[0][0][0] * cw / 70);
+	    var y = xfy(s[0][0][1] * cw / 70);
+	    var dr = 3 * cw / 70;
+            _g.beginPath();
+            _g.moveTo(x - dr, y - dr);
+            _g.lineTo(x + dr, y - dr);
+            _g.lineTo(x + dr, y + dr);
+            _g.lineTo(x - dr, y + dr);
+            _g.fill();
+
+	    _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
+
+            for (var n = 0 ; n < s.length ; n++) {
+               _g.beginPath();
+               for (var i = 0 ; i < s[n].length ; i++) {
+                  var x = xfx(s[n][i][0] * cw / 70);
+                  var y = xfy(s[n][i][1] * cw / 70);
+                  if (i == 0)
+                     _g.moveTo(x, y);
+                  else
+                     _g.lineTo(x, y);
+               }
+               _g.stroke();
+            }
+         }
       }
 
       // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
@@ -1905,7 +2354,7 @@
 
          //--------- DELETE OUT LINKS TO THIS SKETCH WITHIN OTHER SKETCHES:
 
-	 // FOR EACH ACTIVE IN-PORT OF sketch:
+         // FOR EACH ACTIVE IN-PORT OF sketch:
 
          for (var inPort = 0 ; inPort < sketch.in.length ; inPort++)
             if (isDef(sketch.in[inPort])) {
@@ -1922,7 +2371,7 @@
 
                         // WHERE s LINKS TO sketch, REMOVE THAT OUT-LINK.
 
-		        if (s.out[outPort][k][0] == sketch)
+                        if (s.out[outPort][k][0] == sketch)
                            deleteOutLink(s, outPort, k);
             }
 
@@ -1972,34 +2421,34 @@
 
       else if (s instanceof GeometrySketch) {
 
-	 var sketch = new GeometrySketch();
+         var sketch = new GeometrySketch();
 
-	 var x = This().mouseX, y = This().mouseY;
-	 var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
-	 var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
-	 sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
-	 sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
+         var x = This().mouseX, y = This().mouseY;
+         var xr = (s.xhi - s.xlo) / 2 - sketchPadding;
+         var yr = (s.yhi - s.ylo) / 2 - sketchPadding;
+         sketch.sp0 = [[0,0],[x-xr,y-yr],[x+xr,y-yr],[x+xr,y+yr]];
+         sketch.sp = [[0,0,0],[x-xr,y-yr,0],[x+xr,y-yr,1],[x+xr,y+yr,1]];
 
          var mesh = new THREE.Mesh(s.mesh.geometry.clone(), s.mesh.material.clone());
-	 root.add(mesh);
+         root.add(mesh);
          mesh.sketch = sketch;
-	 mesh.update = s.mesh.update;
+         mesh.update = s.mesh.update;
 
-	 sketch.fragmentShader = s.fragmentShader;
-	 sketch.glyphName = s.glyphName;
-	 sketch.mesh = mesh;
-	 sketch.onClick = s.onClick;
-	 sketch.onSwipe = s.onSwipe;
-	 sketch.rX = s.rX;
-	 sketch.rY = s.rY;
-	 sketch.shaderCount = 0;
+         sketch.fragmentShader = s.fragmentShader;
+         sketch.glyphName = s.glyphName;
+         sketch.mesh = mesh;
+         sketch.onClick = s.onClick;
+         sketch.onSwipe = s.onSwipe;
+         sketch.rX = s.rX;
+         sketch.rY = s.rY;
+         sketch.shaderCount = 0;
          sketch.sketchProgress = 1;
          sketch.sketchState = 'finished';
-	 sketch.sx = s.sx;
-	 sketch.sy = s.sy;
-	 sketch.update = s.update;
+         sketch.sx = s.sx;
+         sketch.sy = s.sy;
+         sketch.update = s.update;
 
-	 addSketch(sketch);
+         addSketch(sketch);
          finishDrawingUnfinishedSketch();
          return;
       }
@@ -2045,7 +2494,7 @@
    function addSketch(sketch) {
       sketchPage.add(sketch);
       sk().id = globalSketchId++;
-      sk().color = sketchColor();
+      sk().setColorId(sketchPage.colorId);
       sk().sketchState = 'start';
       sk().children = [];
       sk().in = [];
@@ -2195,8 +2644,12 @@
    }
    GeometrySketch.prototype = new SimpleSketch;
 
-   function addPlaneShaderSketch(vertexShader, fragmentShader) {
-      return addGeometryShaderSketch(new THREE.PlaneGeometry(2.5,2.5), vertexShader, fragmentShader);
+   function addPlaneShaderSketch(vertexShader, fragmentShader, n) {
+      return addGeometryShaderSketch(new THREE.PlaneGeometry(2,2,n,n), vertexShader, fragmentShader);
+   }
+
+   function addSphereShaderSketch(vertexShader, fragmentShader) {
+       return addGeometryShaderSketch(new THREE.SphereGeometry(1.0, 21.0, 21.0), vertexShader, fragmentShader);
    }
 
    function createMesh(geometry, vertexShader, fragmentShader) {
@@ -2243,11 +2696,11 @@
 
       // FORCE THE BOUNDING RECTANGLE TO BE A SQUARE.
 
-      var r = (b[2] - b[0] + b[3] - b[1]) / 4;
-      b[0] = x - r;
-      b[1] = y - r;
-      b[2] = x + r;
-      b[3] = y + r;
+      var r = (b[2] - b[0] + b[3] - b[1]) / 3.0;
+      b[0] = x - r + sketchPadding;
+      b[1] = y - r + sketchPadding;
+      b[2] = x + r - sketchPadding;
+      b[3] = y + r - sketchPadding;
 
       sketch.sp0 = [ [0,0  ] , [b[0]-x,b[1]-y  ] , [b[2]-x,b[3]-y  ] ];
       sketch.sp  = [ [0,0,0] , [b[0]  ,b[1]  ,1] , [b[2]  ,b[3]  ,1] ];
@@ -2259,7 +2712,7 @@
       setMeshUpdateFunction(mesh);
 
       if (mesh.material == blackMaterial)
-         setMeshMaterialToColor(mesh, sketchColor());
+         setMeshMaterialToRGB(mesh, paletteRGB[sketchPage.colorId]);
 
       addSketch(sketch);
 
@@ -2289,7 +2742,7 @@
 
          if (! S.isClick) {
             S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
-            S.setUniform('my', (S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
+            S.setUniform('my',-(S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
          }
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
@@ -2299,13 +2752,19 @@
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 
          S.setUniform('selectedIndex', isDef(S.selectedIndex) ? S.selectedIndex : 0);
+
+         // TELL THE MATERIAL THE SIZE OF ONE PIXEL, IN TEXTURE SPACE.
+
+         S.setUniform('pixelSize', 3 / (S.xhi - S.xlo));
       }
    }
 
-   function setMeshMaterialToColor(mesh, color) {
-      var C = colorToRGB(color);
-      mesh.setMaterial(new phongMaterial().setAmbient(.3*C[0],.3*C[1],.3*C[2])
-                                          .setDiffuse(.5*C[0],.5*C[1],.5*C[2])
+   function setMeshMaterialToRGB(mesh, rgb) {
+      var r = rgb[0] / 255;
+      var g = rgb[1] / 255;
+      var b = rgb[2] / 255;
+      mesh.setMaterial(new phongMaterial().setAmbient(.3*r,.3*g,.3*b)
+                                          .setDiffuse(.5*r,.5*g,.5*b)
                                           .setSpecular(0,0,0,1));
    }
 
@@ -2313,6 +2772,10 @@
 ////////////////////////////////////////////////////////////
 
    var _g, time = 0, _startTime = (new Date()).getTime();
+
+   var motion = [];
+   for (var i = 0 ; i < palette.length ; i++)
+      motion.push(1);
 
    var glyphCountBeforePage = 0;
 

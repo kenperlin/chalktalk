@@ -1,12 +1,12 @@
-   registerGlyph("axes3D()",  [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
-   registerGlyph("cube()",    [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
-   registerGlyph("cylinder()",[ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
-   registerGlyph("globe()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
+   registerGlyph("axes3DSketch()",   [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
+   registerGlyph("cubeSketch()",     [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
+   registerGlyph("cylinderSketch()", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
+   registerGlyph("sphereSketch()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
-   function cube()     { geometrySketch(root.addCube()); }
-   function cylinder() { geometrySketch(root.addCylinder()); }
-   function globe()    { geometrySketch(root.addGlobe()); }
-   function axes3D() {
+   function sphereSketch()   { geometrySketch(root.addGlobe()); }
+   function cubeSketch()     { geometrySketch(root.addCube()); }
+   function cylinderSketch() { geometrySketch(root.addCylinder()); }
+   function axes3DSketch() {
       var a = root.addNode();
       a.addCube().getMatrix().translate( .5, .0, .0).scale(.50,.03,.03);
       a.addCube().getMatrix().translate( .0, .5, .0).scale(.03,.50,.03);
@@ -24,7 +24,7 @@
    }
 
    function alan() { image('alan_kay_smiling.jpg', 1.8); }
-   function diner() { image('red_fox_diner.jpg', 0.8); }
+   function diner() { image('red_fox_diner.jpg', 0.75); }
    function face() { image('smiling_cat.jpg', 0.35); }
    function kwa() { image('kwalado.jpg'); }
 
@@ -42,25 +42,31 @@
 
    function Bird() {
       this.T = 0;
-      this.walkT = 0;
       this.labels = "bird".split(' ');
+      this.isGaze = false;
       this.isTall = false;
+      this.gaze = 0.0;
       this.tall = 0.0;
+      this.walkT = 0;
 
       this.choice = new Choice();
 
       this.onSwipe = function(dx, dy) {
-         switch (pieMenuIndex(dx, dy)) {
+         switch (pieMenuIndex(dx, dy, 8)) {
 	 case 0:
-	    this.choice.set(2);
+	    this.choice.state(2);
+	    this.isGaze = false;
 	    break;
 	 case 1:
-	    this.isTall = true;
+	    this.isGaze = ! this.isGaze;
 	    break;
 	 case 2:
-	    this.choice.set(1);
+	    this.isTall = true;
 	    break;
-	 case 3:
+	 case 4:
+	    this.choice.state(1);
+	    break;
+	 case 6:
 	    this.isTall = false;
 	    break;
 	 }
@@ -70,14 +76,17 @@
          this.choice.update(elapsed);
 
          this.tall = this.isTall ? min(1, this.tall + 2 * elapsed)
-                                 : max(0, this.tall - 2 * elapsed);
+                                 : max(0, this.tall - elapsed);
 
-         var idle = this.choice.get(1);
-         var walk = this.choice.get(2);
+         this.gaze = this.isGaze ? min(1, this.gaze + 2 * elapsed)
+                                 : max(0, this.gaze - elapsed);
+
+         var idle = this.choice.value(1);
+         var walk = this.choice.value(2);
 
          // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
 
-         if (this.xlo > width()) {
+         if (this.xlo > width() - _g.panX) {
             sketchToDelete = this;
             return;
          }
@@ -93,7 +102,7 @@
 
          // T CONTROLS WALK, IS ZERO UNTIL SKETCH IS FINISHED.
 
-         var state = this.choice.value;
+         var state = this.choice.state();
 
          this.afterSketch(function() {
             switch (state) {
@@ -159,7 +168,10 @@
 
             m.save();
                m.translate(neckX,neckY,0);
-               m.rotateZ(lookUp);
+	       var rotz = lookUp;
+	       if (sketchPage.x !== undefined && isNumber(this.cx()))
+	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
+               m.rotateZ(rotz);
                m.rotateY(lookSide);
                mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
             m.restore();
@@ -232,12 +244,13 @@
    David.prototype = new Sketch;
 
    function Control() {
-      this.labels = "slideX slideY".split(' ');
+
+      this.labels = "slidex slidey".split(' ');
 
       this.flip = 1;
 
       this.computeStatistics = function() {
-         var c = this.glyphTrace[1-this.selection];
+         var c = this.sketchTrace[1-this.selection];
          var y0 = c[0][1];
          var y1 = c[c.length - 1][1];
 	 this.flip = y0 > y1 ? 1 : -1;
@@ -286,7 +299,8 @@
          this.lo = this.isInValue("lo") ? this.getInFloat("lo") : this.getDefaultValue("lo");
          this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
 
-         this.setOutValue("t", lerp(t, this.lo, this.hi));
+         var value = lerp(t, this.lo, this.hi);
+         this.setOutValue("t", value);
 
          m.save();
          m.scale(sc);
@@ -302,17 +316,16 @@
             mLine([-.15,x],[.15,x]);
             break;
          }
-
          this.afterSketch(function() {
             textHeight(16);
             switch (this.selection) {
             case 0:
-               mText(roundedString(this.lo), [-.6,0], 1, .5);
-               mText(roundedString(this.hi), [ .6,0], 0, .5);
+               this.drawValue(this.lo, m.transform([-.6, 0]), 1, .5);
+               this.drawValue(this.hi, m.transform([ .6, 0]), 0, .5);
                break;
             case 1:
-               mText(roundedString(this.lo), [0,-.6], .5, 0);
-               mText(roundedString(this.hi), [0, .6], .5, 1);
+               this.drawValue(this.lo, m.transform([0, -.6]), .5, 0);
+               this.drawValue(this.hi, m.transform([0,  .6]), .5, 1);
                break;
             }
 
@@ -341,13 +354,10 @@
    }
    Control.prototype = new Sketch;
 
-   registerGlyph(sketchTypeToCode('Control', 'slideX'), [ [[-.5,0],[.5,0]], [[0,-.2],[0,.2]] ]);
-   //registerGlyph(sketchTypeToCode('Control', 'slideY'), [ [[0,-.5],[0,.5]], [[-.2,0],[.2,0]] ]);
-
    function Diagram() {
       this.labels =
-         "refract scan rgb circles ".concat(
-         "square circle triangle flap").split(' ');
+         //"refract scan rgb circles square circle triangle flap".split(' ');
+         "square circle triangle flap".split(' ');
 
       this.isWandering = false;
 
@@ -633,10 +643,10 @@
                var ty = yHi + w/32;
                color(defaultPenColor);
                textHeight(w/48);
-               text("400", -w/2, ty);
-               text("500", -w/2 + w/3 - w/20/3, ty);
-               text("600", -w/2 + w*2/3 - w/20*2/3, ty);
-               text("700", w/2 - w/20, ty);
+               this.drawLabel("400", [-w/2, ty]);
+               this.drawLabel("500", [-w/2 + w/3 - w/20/3, ty]);
+               this.drawLabel("600", [-w/2 + w*2/3 - w/20*2/3, ty]);
+               this.drawLabel("700", [w/2 - w/20, ty]);
 
                textHeight(w/30);
 
@@ -644,14 +654,14 @@
                var yr = evalCurve(redCurve, x / w);
                fillOval(x - 5, h * (4/5 - yr+.4) - 5 - 3*h/4, 10, 10);
 
-               text("R:", w/60 - w/2, yLo + w/20);
+               this.drawLabel("R:", [w/60 - w/2, yLo + w/20]);
                fillRect(w/16 - w/2, yLo + w/20*0.3, h * yr / 3, w/30);
 
                color('#00e000');
                var yg = evalCurve(greenCurve, x / w);
                fillOval(x - 5, h * (4/5 - yg+.4) - 5 - 3*h/4, 10, 10);
 
-               text("G:", w/60 - w/2, yLo + w/20 * 2);
+               this.drawLabel("G:", [w/60 - w/2, yLo + w/20 * 2]);
                fillRect(w/16 - w/2, yLo + w/20*1.3, h * yg / 3, w/30);
 
 
@@ -659,7 +669,7 @@
                var yb = evalCurve(blueCurve, x / w);
                fillOval(x - 5, h * (4/5 - yb+.4) - 5 - 3*h/4, 10, 10);
 
-               text("B:", w/60 - w/2, yLo + w/20 * 3);
+               this.drawLabel("B:", [w/60 - w/2, yLo + w/20 * 3]);
                fillRect(w/16 - w/2, yLo + w/20*2.3, h * yb / 3, w/30);
 
                color(defaultPenColor);
@@ -773,10 +783,18 @@
 
             var x2 = x1 + (dx2 * cb + dy2 * sb);
             var y2 = y1 + (dy2 * cb - dx2 * sb);
-
+/*
             drawCurve([ [ox-x2, oy+y2],
                         [ox-x1, oy+y1],
                         [ox+x0, oy+y0],
+                        [ox+x1, oy+y1],
+                        [ox+x2, oy+y2] ]);
+*/
+            drawCurve([ [ox-x0, oy+y0],
+                        [ox-x1, oy+y1],
+                        [ox-x2, oy+y2] ]);
+
+            drawCurve([ [ox+x0, oy+y0],
                         [ox+x1, oy+y1],
                         [ox+x2, oy+y2] ]);
 
@@ -817,7 +835,7 @@
          sinceLastMeasurement = 1000;
          values = [];
 
-         switch (that.choice.value) {
+         switch (that.choice.state()) {
          case 0:       // AUTO RANGE
             minval = null;
             maxval = null;
@@ -843,7 +861,7 @@
 
             values.push(v);
 
-            if (that.choice.value == 0) {        // AUTO RANGE
+            if (that.choice.state() == 0) {        // AUTO RANGE
                // update min/max
                if (values.length == 1 || minval === null || maxval === null) {
                   minval = v;
@@ -870,9 +888,9 @@
 
          mLine([-1,1],[-1,-1]);
 
-         if (this.s != this.choice.value)
+         if (this.s != this.choice.state())
              resetValues();
-         this.s = this.choice.value;
+         this.s = this.choice.state();
 
          // Record measurement
 
@@ -897,7 +915,7 @@
 
          // zero line (if one is in range)
 
-         if (this.choice.value == 2) {
+         if (this.choice.state() == 2) {
 
             // LOGIC RANGE, draw the baseline below 0
 
@@ -960,6 +978,7 @@
          ["sqr", "x * x"],
          ["floor", "floor(x-.5)"],
          ["blur", "blur(x,1.0)"],
+         ["saw", "x-floor(x)"],
       ];
 
       this.labels = [];
@@ -968,7 +987,7 @@
 
       function makeCurve(f) {
          var curve = [];
-         for (var t = -1 ; t <= 1 ; t += .1)
+         for (var t = -1 ; t <= 1 ; t += .03)
 	    curve.push([t, f(t)]);
 	 return curve;
       }
@@ -980,6 +999,7 @@
          makeCurve(function(x) { return x * x; }),
          makeCurve(function(x) { return (floor(x)+.5); }),
          makeCurve(function(x) { return x<0?1:1-x; }),
+         makeCurve(function(x) { return x - floor(x); }),
       ];
 
       this.render = function(elapsed) {
@@ -1002,7 +1022,7 @@
          m.save();
          m.scale(sc);
 
-         var x = this.getInFloat("x");
+         var x = this.isInValue("x") ? this.getInFloat("x") : time;
          var y = this.getInFloat("y1") + this.getInFloat("y2");
          var result = null;
          try {
@@ -1075,14 +1095,14 @@
             this.clearPorts();
             if (s % 4 == 0) {
                this.addPort("i", -.5 * sc, 0);
-               this.addPort("d",   0, 0);
+               this.addPort("d",        0, 0);
             }
             else {
                var x = s % 4 < 3 ? -.5 : -.65;
                this.addPort("i", x * sc,  .2 * sc);
                this.addPort("j", x * sc, -.2 * sc);
             }
-            this.addPort("o", s < 4 ? .5 * sc : .6 * sc, 0);
+            this.addPort("o", sc * (s < 4 ? .5 : .6), 0);
          }
 
          function xor(a, b) { return a == b ? 0 : 1; }
@@ -1140,7 +1160,7 @@
       this.labels = "swing".split(' ');
 
       this.computeStatistics = function() {
-         var b = traceComputeBounds(this.glyphTrace);
+         var b = traceComputeBounds(this.sketchTrace);
          this.hubWidth = 10 * (b[0][2] - b[0][0]) / this.size;
          this.radius = 5 * (b[2][2] - b[2][0] + b[2][3] - b[2][1]) / 2 / this.size;
          this.ht = 8.5 * ((b[2][1]+b[2][3])/2 - b[1][1]) / this.size;
