@@ -760,7 +760,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
 
-   function drawCodeWidget(text, xlo, ylo, xhi, yhi, changed) {
+   function drawCodeWidget(text, xlo, ylo, xhi, yhi, isChanged) {
 
       var x = (xlo + xhi) / 2;
       var y = 10;
@@ -798,15 +798,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
-      codeElement.x1 = (ylo > h + h/2
-                        ? x
-                        : (xlo + xhi) / 2 < width() / 2
-                          ? xhi + w/2
-                          : xlo - w/2) - _g.panX;
+      var x1 = (ylo > h
+                ? ( (xlo + xhi)/2 + width()/2 ) / 2
+                  : (xlo + xhi) / 2 < width() / 2
+                    ? xhi + (xhi - xlo) / 2 + w/2
+                    : xlo - (xhi - xlo) / 2 - w/2) - _g.panX;
+
+      x1 = max(x1, w/2);
+      x1 = min(x1, width() - w/2);
+
+      codeElement.x1 = x1;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
-                          : changed
+                          : isChanged
                             ? codeElement.x1
                             : lerp(0.1, codeElement.x, codeElement.x1);
 
@@ -819,17 +824,43 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var c = createRoundRect(x - w/2, y, w, h, 16);
 
-      // IF THERE'S ENOUGH ROOM, ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
+      // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
-      if (ylo > c[c.length-1][1]) {
+      c = resampleCurve(c, 1000);
 
-         var L = c[c.length-1];
-         c.splice(c.length-1, c.length);
-         var R = c[c.length-1];
+      var ddMin = Number.MAX_VALUE, ax=0, ay=0, bx=0, by=0;
+      for (var i = 0 ; i < c.length ; i++) {
+         var x0 = c[i][0];
+	 var y0 = c[i][1];
+         var x1 = (xlo + xhi) / 2;
+	 var y1 = (ylo + yhi) / 2;
 
-         c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-         c.push([(xlo + xhi)/2, ylo]);
-         c.push(L);
+	 var tx0 = x0 > xlo ? 0 : (xlo - x0) / (x1 - x0);
+	 var ty0 = y0 > ylo ? 0 : (ylo - y0) / (y1 - y0);
+	 var tx1 = x0 < xhi ? 0 : (xhi - x0) / (x1 - x0);
+	 var ty1 = y0 < yhi ? 0 : (yhi - y0) / (y1 - y0);
+	 var t = max(tx0, max(ty0, max(tx1, ty1)));
+	 x1 = lerp(t, x0, x1);
+	 y1 = lerp(t, y0, y1);
+
+	 var dd = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+	 if (dd < ddMin) {
+	    ddMin = dd;
+	    ax = x0;
+	    ay = y0;
+	    bx = x1;
+	    by = y1;
+	 }
+      }
+
+      if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h) * .8 + .1, y    , y+h  );
+      else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w) * .8 + .1, x-w/2, x+w/2);
+
+      for (var i = c.length - 1 ; i >= 0 ; i--) {
+         if (len(c[i][0] - ax, c[i][1] - ay) < width() / 70) {
+	    c[i][0] = bx;
+	    c[i][1] = by;
+	 }
       }
 
       // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.

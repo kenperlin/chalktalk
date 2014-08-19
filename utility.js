@@ -859,6 +859,13 @@
          dst.push([lerp(f, src[i-1][0], src[i][0]),
                    lerp(f, src[i-1][1], src[i][1])]);
       }
+
+      // ACCOUNT FOR THE SOURCE CURVE BEING A CLOSED LOOP.
+
+      if ( src[0][0] == src[src.length-1][0] &&
+           src[0][1] == src[src.length-1][1] )
+         dst.push([ src[0][0], src[0][1] ]);
+
       return dst;
    }
 
