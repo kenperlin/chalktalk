@@ -822,7 +822,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
-      var c = createRoundRect(x - w/2, y, w, h, 16);
+      var cr = width() / 70;
+
+      var c = createRoundRect(x - w/2, y, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
@@ -853,11 +855,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 }
       }
 
-      if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h) * .8 + .1, y    , y+h  );
-      else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w) * .8 + .1, x-w/2, x+w/2);
+      if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h), y     + cr, y+h   - cr);
+      else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w), x-w/2 + cr, x+w/2 - cr);
 
       for (var i = c.length - 1 ; i >= 0 ; i--) {
-         if (len(c[i][0] - ax, c[i][1] - ay) < width() / 70) {
+         if (len(c[i][0] - ax, c[i][1] - ay) < cr) {
 	    c[i][0] = bx;
 	    c[i][1] = by;
 	 }

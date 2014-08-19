@@ -541,6 +541,7 @@
    var isTextMode = false;
    var margin = 50;
    var scribbleColor = 'rgb(128, 224, 255)';
+   var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
@@ -666,20 +667,22 @@
          // NEED TO ADD INDIVIDUAL CHARACTERS
       }
 
+      function nameToGlyph(name) {
+         var scribble = new Scribble(name);
+	 var glyph = new Glyph(name, [scribble]);
+	 glyph.scribbleLength = computeCurveLength(scribble);
+	 return glyph;
+      }
+
       for (var n = 0 ; n < glyphs.length ; n++) {
          var name = glyphs[n].indexName;
-         var scribble = new Scribble(name);
-         var glyph = new Glyph(name, [scribble]);
-	 glyph.curveLength = computeCurveLength(scribble);
-         scribbleGlyphs.push(glyph);
+         scribbleGlyphs.push(nameToGlyph(name));
       }
 
       for (var n = 0 ; n < scribbleNames.length ; n++) {
          var name = scribbleNames[n];
-         if (glyphIndex(scribbleGlyphs, name) == -1) {
-            var scribble = [new Scribble(name)];
-            addGlyph(scribbleGlyphs, new Glyph(name, scribble));
-         }
+         if (glyphIndex(scribbleGlyphs, name) == -1)
+            addGlyph(scribbleGlyphs, nameToGlyph(name));
       }
 
       tick(g);
@@ -1148,6 +1151,10 @@
       var bestMatch = 0;
       var bestScore = 10000000;
       for (var i = 0 ; i < glyphs.length ; i++) {
+
+         if (glyphs[i].scribbleLength !== undefined && strokesGlyph.scribbleLength === undefined)
+	    strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
+
          var score = strokesGlyph.compare(glyphs[i]);
          if (score < bestScore) {
             bestScore = score;
@@ -1241,12 +1248,21 @@
          if (this.data.length != other.data.length)
             return 1000000;
          var score = 0;
-         for (var n = 0 ; n < this.data.length ; n++)
+         for (var n = 0 ; n < this.data.length ; n++) {
             for (var i = 0 ; i < this.data[n].length ; i++) {
                var dx = this.data[n][i][0] - other.data[n][i][0];
                var dy = this.data[n][i][1] - other.data[n][i][1];
                score += dx * dx + dy * dy;
             }
+
+	    // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
+
+	    if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
+	         other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
+	       var ratio = other.scribbleLength / this.scribbleLength;
+	       score *= max(ratio, 1 / ratio);
+	    }
+         }
          return score;
       }
 
@@ -1470,6 +1486,7 @@
       }
       this.interpret = function() {
          var glyph = findGlyph([this.path], scribbleGlyphs);
+	 scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
          return glyph == null ? "" : glyph.name;
       }
    }
