@@ -1399,7 +1399,8 @@
 
 /////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
 
-   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
+   //var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
+   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z C D N P".split(' ');
    var scribbleGlyphs = [];
 
    function Scribble(str) {
@@ -1426,7 +1427,7 @@
             var p = [];
             for (var k = 1 ; k <= 10 ; k++) {
                var t = k / 10;
-               p.push([t, c * t * (1 - t)]);
+               p.push([t, c * t * (1 - t) * 1.3]);
             }
             return p;
          }
@@ -2259,17 +2260,17 @@
       }
 
       if (isShowingScribbleGlyphs) {
-         var ncols = 30;
+         var ncols = 25;
 	 var cw = w / ncols;
 
          color(scribbleColor);
          lineWidth(cw / 70);
 
-         var fs = floor(0.25 * w / ncols);
+         var fs = floor(0.2 * w / ncols);
          _g.font = (2*fs) + "px Arial";
 	 _g.fillText(bgsText, 7, 28);
-         _g.font = fs + "px Arial";
 
+         _g.font = fs + "px Arial";
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
             function xfx(x) { return x0 + x / 2; }
             function xfy(y) { return y0 + y / 2; }
