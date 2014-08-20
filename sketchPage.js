@@ -24,7 +24,7 @@ var isTogglingMenuType = false;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;
-var showingLiveData = false;
+var showingLiveDataMode = 0;
 var sketchToDelete = null;
 
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
@@ -1212,7 +1212,7 @@ var sketchToDelete = null;
                sk().isCard = ! sk().isCard;
             break;
          case 'd':
-	    showingLiveData = (showingLiveData + 1) % 3;
+	    showingLiveDataMode = (showingLiveDataMode + 1) % 3;
             break;
          case 'e':
             toggleCodeWidget();
@@ -1313,6 +1313,13 @@ var sketchToDelete = null;
 
          else if (outSketch != null && inSketch != outSketch && inPort >= 0)
             this.createLink();
+
+         // DOUBLE CLICK ON AN OUT-PORT TOGGLES WHETHER TO SHOW LIVE DATA FOR THIS SKETCH.
+
+         else if (outSketch != null && isHover() && sk() == outSketch && findPortAtCursor(sk()) == outPort) {
+	    sk().isShowingLiveData = ! sk().isShowingLiveData;
+	    return;
+         }
 
          // END ON BACKGROUND: CREATE A NEW LINK TO A NEW OUTPUT VALUE SKETCH.
 

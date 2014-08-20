@@ -874,14 +874,16 @@
 
    var portDataValues = [], outSketchPrev = null, outPortPrev = -1;
 
-   function drawPortData(sketch, port, dataValues) {
-      var lo = 100000, hi = -100000;
-      for (var i = 0 ; i < dataValues.length ; i++) {
-         lo = min(lo, dataValues[i]);
-         hi = max(hi, dataValues[i]);
+   function drawPortData(sketch, port, dataValues, isAlwaysDrawing) {
+      if (isAlwaysDrawing === undefined || ! isAlwaysDrawing) {
+         var lo = 100000, hi = -100000;
+         for (var i = 0 ; i < dataValues.length ; i++) {
+            lo = min(lo, dataValues[i]);
+            hi = max(hi, dataValues[i]);
+         }
+         if (hi - lo < 0.1)
+            return;
       }
-      if (hi - lo < 0.1)
-         return;
 
       var xy = sketch.portXY(port);
 
@@ -2057,9 +2059,13 @@
 
          // IF SHOWING LIVE DATA
 
-         if (showingLiveData > 0) {
+	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
 
-            if (showingLiveData >= 1) {
+         if (showingLiveDataMode > 0 || isShowingLiveDataAtPort) {
+
+	    console.log("AHA");
+
+            if (showingLiveDataMode >= 1 || isShowingLiveDataAtPort) {
 
                // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
 
@@ -2072,11 +2078,11 @@
                   var val = outSketch.outValue[outPort];
                   portDataValues.push(val == false ? 0 : val == true ? 1 : val);
                   color(liveDataColor);
-                  drawPortData(outSketch, outPort, portDataValues);
+                  drawPortData(outSketch, outPort, portDataValues, isShowingLiveDataAtPort);
                }
             }
 
-            if (showingLiveData >= 2)
+            if (showingLiveDataMode >= 2)
                for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
                   var s = sketchPage.sketches[I];
                   for (var i = 0 ; i < s.portName.length ; i++)
