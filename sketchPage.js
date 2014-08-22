@@ -517,12 +517,11 @@ var sketchToDelete = null;
          // SPECIAL HANDLING FOR TEXT MODE.
 
          if (isTextMode) {
-            var stroke = strokes[0];
-            var n = stroke.length;
 
-            if (! isShorthandTimeout &&
-                len(stroke[n-1][0] - stroke[0][0],
-                    stroke[n-1][1] - stroke[0][1]) < shRadius) {
+            var stroke = strokes[0];
+            if (! isShorthandTimeout && (stroke === undefined ||
+                len(stroke[stroke.length-1][0] - stroke[0][0],
+                    stroke[stroke.length-1][1] - stroke[0][1]) < shRadius)) {
 
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 

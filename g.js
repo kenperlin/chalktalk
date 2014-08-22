@@ -810,7 +810,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-         names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
+	 names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
