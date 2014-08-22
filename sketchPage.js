@@ -84,16 +84,25 @@ var sketchToDelete = null;
          }
       }
 
-      this.createTextSketch = function(text) {
+      this.beginTextSketch = function() {
          this.keyDown(64 + 9);            // enter text insertion mode
          this.keyUp(64 + 9);
+         return sk();
+      }
+
+      this.addTextToTextSketch = function(text) {
          for (var i = 0 ; i < text.length ; i++) {
             var charCode = text.charCodeAt(i);
             this.keyDown(charCode);
             this.keyUp(charCode);
          }
-         this.keyDown(27);                // exit text insertion mode
-         this.keyUp(27);
+         return sk();
+      }
+
+      this.createTextSketch = function(text) {
+         this.beginTextSketch();
+         this.addTextToTextSketch(text);
+	 setTextMode(false);
          return sk();
       }
 

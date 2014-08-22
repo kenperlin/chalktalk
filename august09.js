@@ -14,7 +14,6 @@
       }
       this.render = function(elapsed) {
          if (this.swipeTime != 0 && time > this.swipeTime) {
-	    console.log("AHA");
             this.velocity += 0.4 * elapsed;
             this.altitude += this.velocity;
          }

@@ -1405,10 +1405,18 @@
    var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z C D N P".split(' ');
    var scribbleGlyphs = [];
 
+//        3stu4
+//   5vCw6     1_r_2
+//
+// 7xDy8         mnopq
+//
+//   9zab0     jhilk
+//        cdefg
+
    function Scribble(str) {
-      var charIndex = "NPab1cdefg0hijklmnopq9r876stu543C2vwxDyz";
-      var charDir   = "5555566666777770000011111222223333344444";
-      var charShape = "<(|)><(|)><(|)><(|)><(|)><(|)><(|)><(|)>";
+      var charIndex = "9zab0 cdefg jhilk mnopq 1ArB2 3stu4 5vCw6 7xDy8";
+      var charDir   = "55555 66666 77777 00000 11111 22222 33333 44444";
+      var charShape = "<(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)>";
       var s = [[0,0]];
       for (var i = 0 ; i < str.length ; i++) {
          var ch = str.substring(i, i+1);
@@ -1509,6 +1517,7 @@
          bgs = new BgScribble(x, y);
          bgsText = "";
          bgsTextUndo = [];
+	 sketchPage.beginTextSketch();
       }
    }
 
@@ -1531,18 +1540,23 @@
 	    isBgsShift = true;
 	    break;
 	 case "D":
-            if (bgsTextUndo.length > 0)
+            if (bgsTextUndo.length > 0) {
 	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
+               sk().setText(bgsText);
+               sk().textCursor = bgsText.length;
+            }
 	    break;
 	 default:
 	    bgsTextUndo.push(bgsText);
-	    if (bgsText.length > 0 && str.length == 1)
-	       bgsText = bgsText.substring(0, bgsText.length - 1);
+	    if (bgsText.length > 0 && str.length > 1)
+	       bgsText += " ";
             if (isBgsShift) {
 	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
 	       isBgsShift = false;
 	    }
-            bgsText += str + " ";
+            bgsText += str;
+            sk().setText(bgsText);
+            sk().textCursor = bgsText.length;
 	    break;
          }
          bgs = new BgScribble(x, y);
@@ -1593,6 +1607,7 @@
       bgs = undefined;
       bgsText = "";
       bgsTextUndo = [];
+      setTextMode(false);
    }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2062,8 +2077,6 @@
 	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
 
          if (showingLiveDataMode > 0 || isShowingLiveDataAtPort) {
-
-	    console.log("AHA");
 
             if (showingLiveDataMode >= 1 || isShowingLiveDataAtPort) {
 
