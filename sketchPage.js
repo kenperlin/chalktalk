@@ -24,7 +24,7 @@ var isTogglingMenuType = false;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;
-var showingLiveData = false;
+var showingLiveDataMode = 0;
 var sketchToDelete = null;
 
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
@@ -84,16 +84,25 @@ var sketchToDelete = null;
          }
       }
 
-      this.createTextSketch = function(text) {
+      this.beginTextSketch = function() {
          this.keyDown(64 + 9);            // enter text insertion mode
          this.keyUp(64 + 9);
+         return sk();
+      }
+
+      this.addTextToTextSketch = function(text) {
          for (var i = 0 ; i < text.length ; i++) {
             var charCode = text.charCodeAt(i);
             this.keyDown(charCode);
             this.keyUp(charCode);
          }
-         this.keyDown(27);                // exit text insertion mode
-         this.keyUp(27);
+         return sk();
+      }
+
+      this.createTextSketch = function(text) {
+         this.beginTextSketch();
+         this.addTextToTextSketch(text);
+	 setTextMode(false);
          return sk();
       }
 
@@ -226,6 +235,7 @@ var sketchToDelete = null;
          }
 
          if (isTextMode) {
+
             strokes = [[[x,y]]];
             strokesStartTime = time;
 /*
@@ -508,12 +518,11 @@ var sketchToDelete = null;
          // SPECIAL HANDLING FOR TEXT MODE.
 
          if (isTextMode) {
-            var stroke = strokes[0];
-            var n = stroke.length;
 
+            var stroke = strokes[0];
             if (! isShorthandTimeout &&
-                len(stroke[n-1][0] - stroke[0][0],
-                    stroke[n-1][1] - stroke[0][1]) < shRadius) {
+                len(stroke[stroke.length-1][0] - stroke[0][0],
+                    stroke[stroke.length-1][1] - stroke[0][1]) < shRadius) {
 
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 
@@ -529,6 +538,41 @@ var sketchToDelete = null;
                return;
             }
 
+	    // CLICKING ON THE INDEX NAME OF A GLYPH INSTANTIATES A GLYPH SKETCH OF THAT TYPE+LABEL.
+
+	    if (isHover()) {
+	       var indexName = sk().text.trim();
+	       for (var n = 0 ; n < glyphs.length ; n++) {
+	          var glyph = glyphs[n];
+	          if (indexName == glyph.indexName) {
+		     deleteSketch(sk());
+		     var name = glyph.name;
+		     console.log(name);
+		     if (name.indexOf("(") < 0)
+		        break;
+		     var a = name.indexOf("'");
+		     if (a >= 0) {
+		        var b = name.indexOf("'", a+1);
+		        var c = name.indexOf("'", b+1);
+		        var d = name.indexOf("'", c+1);
+		        var type = name.substring(a+1, b);
+		        var label = name.substring(c+1, d);
+		        eval("addSketch(new " + type + "())");
+                     }
+		     else
+		        eval(name);
+		     sk().setSelection(label);
+		     finishSketch();
+		     sk().tX = x - width()/2;
+		     sk().tY = y - height()/2;
+		     if (bgs !== undefined)
+		        bgActionEnd();
+                     bgClickCount = 0;
+		     break;
+	          }
+	       }
+	       return;
+	    }
             if (this.isClick)
                toggleTextMode();
 
@@ -1212,7 +1256,7 @@ var sketchToDelete = null;
                sk().isCard = ! sk().isCard;
             break;
          case 'd':
-	    showingLiveData = (showingLiveData + 1) % 3;
+	    showingLiveDataMode = (showingLiveDataMode + 1) % 3;
             break;
          case 'e':
             toggleCodeWidget();
@@ -1313,6 +1357,13 @@ var sketchToDelete = null;
 
          else if (outSketch != null && inSketch != outSketch && inPort >= 0)
             this.createLink();
+
+         // DOUBLE CLICK ON AN OUT-PORT TOGGLES WHETHER TO SHOW LIVE DATA FOR THIS SKETCH.
+
+         else if (outSketch != null && isHover() && sk() == outSketch && findPortAtCursor(sk()) == outPort) {
+	    sk().isShowingLiveData = ! sk().isShowingLiveData;
+	    return;
+         }
 
          // END ON BACKGROUND: CREATE A NEW LINK TO A NEW OUTPUT VALUE SKETCH.
 

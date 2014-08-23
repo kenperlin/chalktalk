@@ -410,6 +410,7 @@
       this.isNegated = false;
       this.isNullText = function() { return this.text.replace(/ /g, '').length == 0; }
       this.isParsed = function() { return false; }
+      this.isShowingLiveData = false;
       this.isSimple = function() { return this instanceof SimpleSketch; }
       this.keyDown = function(key) {}
       this.keyUp = function(key) {}

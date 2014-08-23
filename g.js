@@ -810,7 +810,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-         names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
+	 names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
@@ -874,14 +874,16 @@
 
    var portDataValues = [], outSketchPrev = null, outPortPrev = -1;
 
-   function drawPortData(sketch, port, dataValues) {
-      var lo = 100000, hi = -100000;
-      for (var i = 0 ; i < dataValues.length ; i++) {
-         lo = min(lo, dataValues[i]);
-         hi = max(hi, dataValues[i]);
+   function drawPortData(sketch, port, dataValues, isAlwaysDrawing) {
+      if (isAlwaysDrawing === undefined || ! isAlwaysDrawing) {
+         var lo = 100000, hi = -100000;
+         for (var i = 0 ; i < dataValues.length ; i++) {
+            lo = min(lo, dataValues[i]);
+            hi = max(hi, dataValues[i]);
+         }
+         if (hi - lo < 0.1)
+            return;
       }
-      if (hi - lo < 0.1)
-         return;
 
       var xy = sketch.portXY(port);
 
@@ -1399,13 +1401,22 @@
 
 /////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
 
-   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
+   //var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
+   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z C D N P".split(' ');
    var scribbleGlyphs = [];
 
+//        3stu4
+//   5vCw6     1_r_2
+//
+// 7xDy8         mnopq
+//
+//   9zab0     jhilk
+//        cdefg
+
    function Scribble(str) {
-      var charIndex = "NPab1cdefg0hijklmnopq9r876stu543C2vwxDyz";
-      var charDir   = "5555566666777770000011111222223333344444";
-      var charShape = "<(|)><(|)><(|)><(|)><(|)><(|)><(|)><(|)>";
+      var charIndex = "9zab0 cdefg jhilk mnopq 1ArB2 3stu4 5vCw6 7xDy8";
+      var charDir   = "55555 66666 77777 00000 11111 22222 33333 44444";
+      var charShape = "<(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)>";
       var s = [[0,0]];
       for (var i = 0 ; i < str.length ; i++) {
          var ch = str.substring(i, i+1);
@@ -1426,7 +1437,7 @@
             var p = [];
             for (var k = 1 ; k <= 10 ; k++) {
                var t = k / 10;
-               p.push([t, c * t * (1 - t)]);
+               p.push([t, c * t * (1 - t) * 1.3]);
             }
             return p;
          }
@@ -1506,6 +1517,7 @@
          bgs = new BgScribble(x, y);
          bgsText = "";
          bgsTextUndo = [];
+	 sketchPage.beginTextSketch();
       }
    }
 
@@ -1528,18 +1540,23 @@
 	    isBgsShift = true;
 	    break;
 	 case "D":
-            if (bgsTextUndo.length > 0)
+            if (bgsTextUndo.length > 0) {
 	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
+               sk().setText(bgsText);
+               sk().textCursor = bgsText.length;
+            }
 	    break;
 	 default:
 	    bgsTextUndo.push(bgsText);
-	    if (bgsText.length > 0 && str.length == 1)
-	       bgsText = bgsText.substring(0, bgsText.length - 1);
+	    if (bgsText.length > 0 && str.length > 1)
+	       bgsText += " ";
             if (isBgsShift) {
 	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
 	       isBgsShift = false;
 	    }
-            bgsText += str + " ";
+            bgsText += str;
+            sk().setText(bgsText);
+            sk().textCursor = bgsText.length;
 	    break;
          }
          bgs = new BgScribble(x, y);
@@ -1590,6 +1607,7 @@
       bgs = undefined;
       bgsText = "";
       bgsTextUndo = [];
+      setTextMode(false);
    }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2056,9 +2074,11 @@
 
          // IF SHOWING LIVE DATA
 
-         if (showingLiveData > 0) {
+	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
 
-            if (showingLiveData >= 1) {
+         if (showingLiveDataMode > 0 || isShowingLiveDataAtPort) {
+
+            if (showingLiveDataMode >= 1 || isShowingLiveDataAtPort) {
 
                // DRAW ANY TIME-VARYING LIVE DATA FROM THE OUT-PORT AT THE CURSOR.
 
@@ -2071,11 +2091,11 @@
                   var val = outSketch.outValue[outPort];
                   portDataValues.push(val == false ? 0 : val == true ? 1 : val);
                   color(liveDataColor);
-                  drawPortData(outSketch, outPort, portDataValues);
+                  drawPortData(outSketch, outPort, portDataValues, isShowingLiveDataAtPort);
                }
             }
 
-            if (showingLiveData >= 2)
+            if (showingLiveDataMode >= 2)
                for (var I = 0 ; I < sketchPage.sketches.length ; I++) {
                   var s = sketchPage.sketches[I];
                   for (var i = 0 ; i < s.portName.length ; i++)
@@ -2259,17 +2279,17 @@
       }
 
       if (isShowingScribbleGlyphs) {
-         var ncols = 30;
+         var ncols = 25;
 	 var cw = w / ncols;
 
          color(scribbleColor);
          lineWidth(cw / 70);
 
-         var fs = floor(0.25 * w / ncols);
+         var fs = floor(0.2 * w / ncols);
          _g.font = (2*fs) + "px Arial";
 	 _g.fillText(bgsText, 7, 28);
-         _g.font = fs + "px Arial";
 
+         _g.font = fs + "px Arial";
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
             function xfx(x) { return x0 + x / 2; }
             function xfy(y) { return y0 + y / 2; }
