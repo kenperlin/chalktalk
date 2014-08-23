@@ -235,17 +235,6 @@ var sketchToDelete = null;
          }
 
          if (isTextMode) {
-	    if (isHover()) {
-	       var name = sk().text.trim();
-	       for (var n = 0 ; n < glyphs.length ; n++) {
-	          var glyph = glyphs[n];
-	          if (name == glyph.indexName) {
-		     glyph.toSimpleSketch();
-		     break;
-	          }
-	       }
-	       return;
-	    }
 
             strokes = [[[x,y]]];
             strokesStartTime = time;
@@ -531,9 +520,9 @@ var sketchToDelete = null;
          if (isTextMode) {
 
             var stroke = strokes[0];
-            if (! isShorthandTimeout && (stroke === undefined ||
+            if (! isShorthandTimeout &&
                 len(stroke[stroke.length-1][0] - stroke[0][0],
-                    stroke[stroke.length-1][1] - stroke[0][1]) < shRadius)) {
+                    stroke[stroke.length-1][1] - stroke[0][1]) < shRadius) {
 
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 
@@ -549,6 +538,41 @@ var sketchToDelete = null;
                return;
             }
 
+	    // CLICKING ON THE INDEX NAME OF A GLYPH INSTANTIATES A GLYPH SKETCH OF THAT TYPE+LABEL.
+
+	    if (isHover()) {
+	       var indexName = sk().text.trim();
+	       for (var n = 0 ; n < glyphs.length ; n++) {
+	          var glyph = glyphs[n];
+	          if (indexName == glyph.indexName) {
+		     deleteSketch(sk());
+		     var name = glyph.name;
+		     console.log(name);
+		     if (name.indexOf("(") < 0)
+		        break;
+		     var a = name.indexOf("'");
+		     if (a >= 0) {
+		        var b = name.indexOf("'", a+1);
+		        var c = name.indexOf("'", b+1);
+		        var d = name.indexOf("'", c+1);
+		        var type = name.substring(a+1, b);
+		        var label = name.substring(c+1, d);
+		        eval("addSketch(new " + type + "())");
+                     }
+		     else
+		        eval(name);
+		     sk().setSelection(label);
+		     finishSketch();
+		     sk().tX = x - width()/2;
+		     sk().tY = y - height()/2;
+		     if (bgs !== undefined)
+		        bgActionEnd();
+                     bgClickCount = 0;
+		     break;
+	          }
+	       }
+	       return;
+	    }
             if (this.isClick)
                toggleTextMode();
 
