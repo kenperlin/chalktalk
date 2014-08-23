@@ -235,6 +235,18 @@ var sketchToDelete = null;
          }
 
          if (isTextMode) {
+	    if (isHover()) {
+	       var name = sk().text.trim();
+	       for (var n = 0 ; n < glyphs.length ; n++) {
+	          var glyph = glyphs[n];
+	          if (name == glyph.indexName) {
+		     glyph.toSimpleSketch();
+		     break;
+	          }
+	       }
+	       return;
+	    }
+
             strokes = [[[x,y]]];
             strokesStartTime = time;
 /*
