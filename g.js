@@ -1221,6 +1221,10 @@
           if (indexName == glyphs[i].indexName)
              return;
 
+if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
+   // NEED TO FLIP STROKES UPSIDE DOWN.
+}
+
        var glyph = new Glyph(name, strokes);
        glyph.indexName = indexName;
 
