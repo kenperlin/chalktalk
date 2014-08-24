@@ -1,6 +1,6 @@
    registerGlyph("axes3DSketch()",   [ [[0,0],[0,1]], [[0,0],[1,-.1]], [[0,0],[-.2,-.2]] ]);
-   registerGlyph("cubeSketch()",     [ [[-1,-1],[-1,1],[1,1],[1,-1],[-1,-1]] ]);
-   registerGlyph("cylinderSketch()", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
+   registerGlyph("cubeSketch()",     [ [[-1,-1],[-1, 1],[ 1, 1],[ 1,-1],[-1,-1]] ]);
+   registerGlyph("cylinderSketch()", [ [[ 1,-1],[ 1, 1],[-1, 1],[-1,-1],[ 1,-1]] ]);
    registerGlyph("sphereSketch()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
    function sphereSketch()   { geometrySketch(root.addGlobe()); }

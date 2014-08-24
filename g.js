@@ -536,6 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
+   var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
@@ -2686,6 +2687,23 @@ if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
+         }
+
+         if (isShowingMeshEdges) {
+            this.visibleEdges = this.mesh.geometry.visibleEdges(this.mesh.matrix);
+
+	    var s = this.size * 0.765;
+	    _g.beginPath();
+	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {
+	       var edge = this.visibleEdges[n];
+	       var a = this.mesh.geometry.vertices[edge[0]];
+	       var b = this.mesh.geometry.vertices[edge[1]];
+	       var A = this.mesh.getMatrix().transform([a.x,a.y,a.z]);
+	       var B = this.mesh.getMatrix().transform([b.x,b.y,b.z]);
+	       _g.moveTo(width()/2 + s * A[0], height()/2 - s * A[1]);
+	       _g.lineTo(width()/2 + s * B[0], height()/2 - s * B[1]);
+	    }
+	    _g.stroke();
          }
       }
       this.setUniform = function(name, value) {

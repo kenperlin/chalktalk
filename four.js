@@ -64,14 +64,10 @@
 
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
-      var thing = new node();
       var geometry = cylinderGeometry(n);
       var mesh = new THREE.Mesh(geometry, blackMaterial);
-      mesh.rotation.x = PI / 2;
-      thing.add(mesh);
-      thing.material = blackMaterial;
-      this.add(thing);
-      return thing;
+      this.add(mesh);
+      return mesh;
    }
 
    THREE.Object3D.prototype.addCube = function() {
@@ -94,6 +90,41 @@
       var mesh = new THREE.Mesh();
       this.add(mesh);
       return mesh;
+   }
+
+   THREE.Geometry.prototype.computeEdges = function() {
+      function testEdge(edges, a, b) {
+         var h = Math.min(a, b) + "," + Math.max(a, b);
+	 if (hash[h] === undefined)
+	    hash[h] = n;
+         else
+	    edges.push([hash[h], n, [a, b]]);
+      }
+      this.edges = [];
+      var hash = {};
+      for (var n = 0 ; n < this.faces.length ; n++) {
+         var face = this.faces[n];
+	 testEdge(this.edges, face.a, face.b);
+	 testEdge(this.edges, face.b, face.c);
+	 testEdge(this.edges, face.c, face.a);
+      }
+   }
+
+   THREE.Geometry.prototype.visibleEdges = function(matrix) {
+      var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
+      if (this.edges === undefined)
+         this.computeEdges();
+      var edges = [];
+      var N = [new THREE.Vector3(), new THREE.Vector3()];
+      for (var n = 0 ; n < this.edges.length ; n++) {
+         for (var k = 0 ; k < 2 ; k++)
+	    N[k].copy(this.faces[this.edges[n][k]].normal)
+	        .applyMatrix3(normalMatrix).normalize();
+	 if ( (N[0].z > 0 || N[1].z > 0) &&
+	      (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
+	    edges.push(this.edges[n][2]);
+      }
+      return edges;
    }
 
    var PI = Math.PI;
