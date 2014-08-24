@@ -7,8 +7,8 @@
 
       // TEMPLATE TO MATCH FOR THE FREEHAND SKETCH OF THE COFFEE CUP.
 
-      [ [ -1,-1 ], [ -1,1 ], [ 1,1 ], [1,-1 ] ],    // SIDES AND BOTTOM.
-      [ [ 1,-1], [-1,-1], [1,-1] ],                 // TOP.
+      [ [ -1,1 ], [ -1,-1 ], [ 1,-1 ], [1,1 ] ],    // SIDES AND BOTTOM.
+      [ [ 1,1], [-1,1], [1,1] ],                 // TOP.
       makeOval(-1.6,-.6, 1.2, 1.2, 20, PI/2, 3*PI/2),      // OUTER HANDLE.
       makeOval(-1.4,-.4, 0.8, 0.8, 20, PI/2, 3*PI/2),      // INNER HANDLE.
    ]);
@@ -287,7 +287,7 @@ var planetFragmentShader = [
 
 registerGlyph("planet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
+   [ [0,1], [-1/2,1/3], [1/2,-1/3], [0,-1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
 function planet() {
@@ -313,9 +313,9 @@ var marbleFragmentShader = ["\
 "].join("\n");
 
 registerGlyph("marble()",[
-   [ [-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
-   [ [-1/3,-1], [-1/3,1] ],
-   [ [ 1/3,-1], [ 1/3,1] ],
+   [ [-1,1],[1,1],[1,-1],[-1,-1],[-1,1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
+   [ [-1/3,1], [-1/3,-1] ],
+   [ [ 1/3,1], [ 1/3,-1] ],
 ]);
 
 function marble() {
@@ -393,6 +393,7 @@ void main(void) {\n\
 
 
 var slicedFragmentShader = ["\
+   uniform float frequency;\n\
    uniform float spinAngle;\n\
    void main(void) {\n\
       float rr = dx*dx + dy*dy;\n\
@@ -420,8 +421,10 @@ var slicedFragmentShader = ["\
          float c = .5 + .5*cos(7.*X+6.*t);\n\
          if (selectedIndex == 1.)\n\
             c = .2 + .8 * c;\n\
-         else if (selectedIndex == 0.)\n\
-            c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\n\
+         else if (selectedIndex == 0.) {\n\
+	    float f = 3. * frequency;\n\
+            c = .5 + .4 * noise(vec3(f*X,f*Y,f*Z));\n\
+         }\n\
          else if (selectedIndex == 4.)\n\
             c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\n\
          else\n\
@@ -442,7 +445,7 @@ var slicedFragmentShader = ["\
 
 registerGlyph("sliced()",[
    makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
-   makeOval( 0, -1, 1, 1, 32,  PI*0.5, PI*2.0),
+   makeOval( 0,  0, 1, 1, 32,  PI*0.5, PI*2.0),
 ]);
 
 function sliced() {
@@ -472,6 +475,7 @@ function sliced() {
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+      this.setUniform('frequency', this.in.length > 0 ? this.inValue[0] : 1);
    }
 }
 

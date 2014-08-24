@@ -71,13 +71,17 @@ var xeyeballFragmentShader = [
 
 registerGlyph("xeyeball()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [-1, -1], [1, 1]], 
+   [ [-1, 1], [1, -1]], 
 ]);
 
 function xeyeball() {
    var sketch = addSphereShaderSketch(defaultVertexShader, xeyeballFragmentShader);
    sketch.code = [["yplanet", xeyeballFragmentShader],["flame", flameFragmentShader]];
    sketch.enableFragmentShaderEditing();
+   sketch.update = function() {
+      this.rX = this.in.length > 0 ? this.inValue[0] : 0;
+      this.rY = this.in.length > 1 ? this.inValue[1] : 0;
+   }
 }
 
 
@@ -151,7 +155,7 @@ var xplanetFragmentShader = [
 
 registerGlyph("xplanet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [-1, 1], [1,-1]], 
+   [ [-1, -1], [1, 1]], 
 ]);
 
 function xplanet() {
@@ -228,5 +232,5 @@ function tworays() {
 
 registerGlyph("tworays()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   makeOval(-1,  0, 1, 1, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
+   makeOval(-1, -1, 1, 1, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
 ]);

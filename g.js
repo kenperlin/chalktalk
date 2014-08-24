@@ -536,6 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
+   var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
@@ -823,7 +824,7 @@
    // CREATE AN INSTANCE OF A REGISTERED SKETCH TYPE.
 
    function sg(type, selection) {
-      var bounds = computeCurveBounds(glyphSketch.sp, 1);
+      var bounds = computeGlyphSketchBounds();
       This().mouseX = (bounds[0] + bounds[2]) / 2;
       This().mouseY = (bounds[1] + bounds[3]) / 2;
 
@@ -832,9 +833,13 @@
       sk().width = bounds[2] - bounds[0];
       sk().height = bounds[3] - bounds[1];
       sk().setSelection(selection);
-      sk().sketchTrace = resampleTrace(sketchToTrace(glyphSketch));
-      sk().glyphTransition = 0;
-      sk().trace = [];
+      if (glyphSketch != null) {
+         sk().sketchTrace = resampleTrace(sketchToTrace(glyphSketch));
+         sk().glyphTransition = 0;
+         sk().trace = [];
+      }
+      else
+         sk().glyphTransition = 1;
 
       sk().size = 2 * max(sk().width, sk().height);
 
@@ -1217,6 +1222,13 @@
           if (indexName == glyphs[i].indexName)
              return;
 
+if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
+   console.log(name);
+   for (var n = 0 ; n < strokes.length ; n++)
+      for (var i = 0 ; i < strokes[n].length ; i++)
+         strokes[n][i][1] *= -1;
+}
+
        var glyph = new Glyph(name, strokes);
        glyph.indexName = indexName;
 
@@ -1554,6 +1566,16 @@
 	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
 	       isBgsShift = false;
 	    }
+
+            if (bgsText.length == 0)
+	       for (var n = 0 ; n < glyphs.length ; n++)
+	          if (str == glyphs[n].indexName) {
+                     sk().setText(str);
+		     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
+		     bgActionEnd();
+		     return;
+	          }
+
             bgsText += str;
             sk().setText(bgsText);
             sk().textCursor = bgsText.length;
@@ -1598,12 +1620,6 @@
       // ACT ON SCRIBBLE-TEXT, THEN EXIT SCRIBBLE-TEXT MODE.
 
       bgsText = bgsText.trim();
-      var index = glyphIndex(glyphs, bgsText);
-      for (var i = 0 ; i < glyphs.length ; i++)
-         if (bgsText == glyphs[i].indexName) {
-            console.log("need to add glyph " + bgsText);
-            break;
-         }
       bgs = undefined;
       bgsText = "";
       bgsTextUndo = [];
@@ -2003,7 +2019,7 @@
                drawCrosshair(cursorX, cursorY);
          }
 
-         if (bgs !== undefined && bgs != null)
+         if (isShowingScribbleGlyphs && bgs !== undefined && bgs != null)
             bgs.draw();
 
          if (isAudiencePopup()) {
@@ -2672,6 +2688,23 @@
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
+
+         if (isShowingMeshEdges) {
+            this.visibleEdges = this.mesh.geometry.visibleEdges(this.mesh.matrix);
+
+	    var s = this.size * 0.765;
+	    _g.beginPath();
+	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {
+	       var edge = this.visibleEdges[n];
+	       var a = this.mesh.geometry.vertices[edge[0]];
+	       var b = this.mesh.geometry.vertices[edge[1]];
+	       var A = this.mesh.getMatrix().transform([a.x,a.y,a.z]);
+	       var B = this.mesh.getMatrix().transform([b.x,b.y,b.z]);
+	       _g.moveTo(width()/2 + s * A[0], height()/2 - s * A[1]);
+	       _g.lineTo(width()/2 + s * B[0], height()/2 - s * B[1]);
+	    }
+	    _g.stroke();
+         }
       }
       this.setUniform = function(name, value) {
          if (isDef(this.mesh.material.uniforms[name]))
@@ -2703,15 +2736,24 @@
       return mesh.sketch;
    }
 
+   function computeGlyphSketchBounds() {
+      if (glyphSketch != null)
+         return computeCurveBounds(glyphSketch.sp, 1);
+      else
+         return [sketchPage.x-50, sketchPage.y-50, sketchPage.x+50, sketchPage.y+50];
+   }
+
    function geometrySketch(mesh, xf) {
 
       var sketch = new GeometrySketch();
 
-      var b = computeCurveBounds(glyphSketch.sp, 1);
+      var b = computeGlyphSketchBounds();
 
-      sketchPage.add(glyphSketch);
-      glyphSketch.fadeAway = 1.0;
-      sketch.glyphSketch = glyphSketch;
+      if (glyphSketch != null) {
+         sketchPage.add(glyphSketch);
+         glyphSketch.fadeAway = 1.0;
+         sketch.glyphSketch = glyphSketch;
+      }
 
       if (isDef(xf)) {
          var w = b[2] - b[0];

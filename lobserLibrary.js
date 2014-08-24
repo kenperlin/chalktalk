@@ -170,7 +170,7 @@ uniform float spinAngle;\
 
 registerGlyph("bSliced()",[
    makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
-   makeOval( 0, -1, 1, 1, 32,  PI*2.0, PI*0.5),
+   makeOval( 0,  0, 1, 1, 32,  PI*2.0, PI*0.5),
 ]);
 
 function bSliced() {
