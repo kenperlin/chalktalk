@@ -2018,7 +2018,7 @@ if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
                drawCrosshair(cursorX, cursorY);
          }
 
-         if (bgs !== undefined && bgs != null)
+         if (isShowingScribbleGlyphs && bgs !== undefined && bgs != null)
             bgs.draw();
 
          if (isAudiencePopup()) {
