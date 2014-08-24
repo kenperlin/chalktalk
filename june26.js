@@ -34,7 +34,7 @@
       handle.getMatrix().translate(-1,0,0).rotateX(PI/2).scale(.5);
 
       var coffee = node.addCylinder();
-      coffee.getMatrix().translate(0,0,.9).scale(.95,.95,.01);
+      coffee.getMatrix().translate(0,0,.9).rotateX(PI/2).scale(.95,.01,.95);
 
       node.setMaterial(whiteMaterial);
       coffee.setMaterial(new phongMaterial().setAmbient(.07,0,0));
