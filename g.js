@@ -1222,7 +1222,10 @@
              return;
 
 if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
-   // NEED TO FLIP STROKES UPSIDE DOWN.
+   console.log(name);
+   for (var n = 0 ; n < strokes.length ; n++)
+      for (var i = 0 ; i < strokes[n].length ; i++)
+         strokes[n][i][1] *= -1;
 }
 
        var glyph = new Glyph(name, strokes);

@@ -1,5 +1,5 @@
-   registerGlyph("axes3DSketch()",   [ [[0,0],[0,-1]], [[0,0],[1,.1]], [[0,0],[-.2,.2]] ]);
-   registerGlyph("cubeSketch()",     [ [[-1,1],[-1,-1],[1,-1],[1,1],[-1,1]] ]);
+   registerGlyph("axes3DSketch()",   [ [[0,0],[0,1]], [[0,0],[1,-.1]], [[0,0],[-.2,-.2]] ]);
+   registerGlyph("cubeSketch()",     [ [[-1,-1],[-1,1],[1,1],[1,-1],[-1,-1]] ]);
    registerGlyph("cylinderSketch()", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ]);
    registerGlyph("sphereSketch()",   [ makeOval(-1,-1,2,2,20,3*PI/2,-PI/2) ]);
 
@@ -681,8 +681,8 @@
          case "circles":
             var d = w/8;
             if (this.region === undefined)
-               this.region = makeOval(-d-w/4,-w/4,w/2,w/2,10,TAU*5/6,TAU*7/6).concat(
-                             makeOval( d-w/4,-w/4,w/2,w/2,10,TAU*2/6,TAU*4/6));
+               this.region = makeOval(-d-w/4,-w/4,w/2,w/2,10,-TAU*5/6,-TAU*7/6).concat(
+                             makeOval( d-w/4,-w/4,w/2,w/2,10,-TAU*2/6,-TAU*4/6));
 
             drawOval(-d-w/4, -w/4, w/2, w/2, 40, TAU*1/6, TAU*7/6);
             drawOval( d-w/4, -w/4, w/2, w/2, 40, TAU*2/6, TAU*8/6);

@@ -145,7 +145,7 @@
       for (var i = 0 ; i < n ; i++) {
          var theta = angle0 + (angle1 - angle0) * i / (n-1);
          xy.push([x + w/2 + w/2 * Math.cos(theta),
-                  y + h/2 - h/2 * Math.sin(theta)]);
+                  y + h/2 + h/2 * Math.sin(theta)]);
       }
       return xy;
    }

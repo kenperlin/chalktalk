@@ -7,8 +7,8 @@
 
       // TEMPLATE TO MATCH FOR THE FREEHAND SKETCH OF THE COFFEE CUP.
 
-      [ [ -1,-1 ], [ -1,1 ], [ 1,1 ], [1,-1 ] ],    // SIDES AND BOTTOM.
-      [ [ 1,-1], [-1,-1], [1,-1] ],                 // TOP.
+      [ [ -1,1 ], [ -1,-1 ], [ 1,-1 ], [1,1 ] ],    // SIDES AND BOTTOM.
+      [ [ 1,1], [-1,1], [1,1] ],                 // TOP.
       makeOval(-1.6,-.6, 1.2, 1.2, 20, PI/2, 3*PI/2),      // OUTER HANDLE.
       makeOval(-1.4,-.4, 0.8, 0.8, 20, PI/2, 3*PI/2),      // INNER HANDLE.
    ]);
@@ -287,7 +287,7 @@ var planetFragmentShader = [
 
 registerGlyph("planet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [0,-1], [-1/2,-1/3], [1/2,1/3], [0,1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
+   [ [0,1], [-1/2,1/3], [1/2,-1/3], [0,-1] ], // ZIGZAG DOWN CENTER, FIRST LEFT THEN RIGHT.
 ]);
 
 function planet() {
@@ -313,9 +313,9 @@ var marbleFragmentShader = ["\
 "].join("\n");
 
 registerGlyph("marble()",[
-   [ [-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
-   [ [-1/3,-1], [-1/3,1] ],
-   [ [ 1/3,-1], [ 1/3,1] ],
+   [ [-1,1],[1,1],[1,-1],[-1,-1],[-1,1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
+   [ [-1/3,1], [-1/3,-1] ],
+   [ [ 1/3,1], [ 1/3,-1] ],
 ]);
 
 function marble() {
@@ -442,7 +442,7 @@ var slicedFragmentShader = ["\
 
 registerGlyph("sliced()",[
    makeOval(-1, -1, 2, 2, 32,  PI*0.5, PI*2.5),
-   makeOval( 0, -1, 1, 1, 32,  PI*0.5, PI*2.0),
+   makeOval( 0,  0, 1, 1, 32,  PI*0.5, PI*2.0),
 ]);
 
 function sliced() {

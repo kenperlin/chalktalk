@@ -73,7 +73,7 @@ var xeyeballFragmentShader = [
 
 registerGlyph("xeyeball()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [-1, -1], [1, 1]], 
+   [ [-1, 1], [1, -1]], 
 ]);
 
 function xeyeball() {
@@ -153,7 +153,7 @@ var xplanetFragmentShader = [
 
 registerGlyph("xplanet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [-1, 1], [1,-1]], 
+   [ [-1, -1], [1, 1]], 
 ]);
 
 function xplanet() {
@@ -230,5 +230,5 @@ function tworays() {
 
 registerGlyph("tworays()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   makeOval(-1,  0, 1, 1, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
+   makeOval(-1, -1, 1, 1, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
 ]);
