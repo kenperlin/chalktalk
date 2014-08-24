@@ -393,6 +393,7 @@ void main(void) {\n\
 
 
 var slicedFragmentShader = ["\
+   uniform float frequency;\n\
    uniform float spinAngle;\n\
    void main(void) {\n\
       float rr = dx*dx + dy*dy;\n\
@@ -420,8 +421,10 @@ var slicedFragmentShader = ["\
          float c = .5 + .5*cos(7.*X+6.*t);\n\
          if (selectedIndex == 1.)\n\
             c = .2 + .8 * c;\n\
-         else if (selectedIndex == 0.)\n\
-            c = .5 + .4 * noise(vec3(3.*X,3.*Y,3.*Z));\n\
+         else if (selectedIndex == 0.) {\n\
+	    float f = 3. * frequency;\n\
+            c = .5 + .4 * noise(vec3(f*X,f*Y,f*Z));\n\
+         }\n\
          else if (selectedIndex == 4.)\n\
             c = .5 + .4 * fractal(vec3(3.*X,3.*Y,3.*Z));\n\
          else\n\
@@ -472,6 +475,7 @@ function sliced() {
    }
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
+      this.setUniform('frequency', this.in.length > 0 ? this.inValue[0] : 1);
    }
 }
 
