@@ -29,7 +29,7 @@ var xeyeballFragmentShader = [
 ,'      float iris_ring = 0.35;'
 ,'      float iris_ring_size = 0.45;'
 ,'      float sclera_size = 1.0 - iris_size;'
-,'      vec3 eyept = vec3(0.0, 0.0, 1.0);'
+,'      vec3 eyept = vec3(0.0, 0.0, -100.0);'
 ,'      vec3 moonpt = vec3(50.0, 50.0, 100.0);'
 ,'      //'
 ,'      float mtime = time * 0.1;'
@@ -57,13 +57,17 @@ var xeyeballFragmentShader = [
 ,'      if (incl <= pupil_size) color = pupil_clr;'
 ,'      if (incl >= pupil_size && incl <= iris_size) {'
 ,'         color = mix(iris_clr, iris_clr_2, t1*t1);'
-,'         if (incl >= iris_ring) color = mix(color, iris_ring_clr, 0.5+((incl-iris_ring)*10.));'
+,'         if (incl >= iris_ring) color = mix(color, iris_ring_clr, 0.25+((incl-iris_ring)*10.));'
 ,'      }'
 ,'      if (incl > iris_size) color = sclera_clr;'
 ,'      if (incl > iris_size && (lat_amp+long_amp) > 0.0) color = mix(color, blood_clr, t2 * 0.5);'
 ,'      // if (incl > iris_size && incl < 2.0 && azi >= 0.65 && azi <= 0.7) color = mix(color, blood_clr, t1);'
 ,'      // color = color + (lat_amp*line_clr ) + (long_amp*line_clr);'
-,'      color = color * dfamp;'
+,'      vec3 viewdir = normalize(eyept - vPosition);'
+,'      vec3 lightdir = normalize(moonpt - vPosition);'
+,'      vec3 refldir = normalize(reflect(lightdir, vNormal));'
+,'      float specamp = pow(max(0., dot(viewdir, refldir)),5.0);'
+,'      color = (color * dfamp) + (vec3(0.5,0.5,0.5) * specamp);'
 ,'      color = clamp(color, 0.0, 1.0);'
 ,'      gl_FragColor = vec4(color, alpha);'
 ,'   }'			       
@@ -79,8 +83,8 @@ function xeyeball() {
    sketch.code = [["yplanet", xeyeballFragmentShader],["flame", flameFragmentShader]];
    sketch.enableFragmentShaderEditing();
    sketch.update = function() {
-      this.rX = this.in.length > 0 ? this.inValue[0] : 0;
-      this.rY = this.in.length > 1 ? this.inValue[1] : 0;
+     this.rX = this.in.length > 0 ? this.inValue[0] : 0;
+     this.rY = this.in.length > 1 ? this.inValue[1] : 0;
    }
 }
 
