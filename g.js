@@ -536,7 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
-   var isShowingMeshEdges = false;
+   var isShowingMeshEdges = true;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
@@ -2690,22 +2690,39 @@ if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
          }
 
          if (isShowingMeshEdges) {
-            this.visibleEdges = this.mesh.geometry.visibleEdges(this.mesh.matrix);
+	    var geometry = this.mesh.geometry;
+	    var matrix = this.mesh.getMatrix();
 
+            this.visibleEdges = geometry.visibleEdges(this.mesh.matrix);
+
+	    if (this.visibleEdgesMesh === undefined) {
+	       var veg = new THREE.Geometry();
+	       var vem = new THREE.LineBasicMaterial( { color: '#ff0000' } );
+	       for (var n = 0 ; n < this.visibleEdges.length ; n++) {
+	          var edge = this.visibleEdges[n];
+		  veg.vertices.push(geometry.vertices[edge[0]]);
+		  veg.vertices.push(geometry.vertices[edge[1]]);
+               }
+	       this.visibleEdgesMesh = new THREE.Mesh(veg, vem);
+	       this.mesh.add(this.visibleEdgesMesh);
+	    }
+/*
 	    var s = this.size * 0.765;
 	    _g.beginPath();
 	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {
 	       var edge = this.visibleEdges[n];
-	       var a = this.mesh.geometry.vertices[edge[0]];
-	       var b = this.mesh.geometry.vertices[edge[1]];
-	       var A = this.mesh.getMatrix().transform([a.x,a.y,a.z]);
-	       var B = this.mesh.getMatrix().transform([b.x,b.y,b.z]);
+	       var a = geometry.vertices[edge[0]];
+	       var b = geometry.vertices[edge[1]];
+	       var A = matrix.transform([a.x,a.y,a.z]);
+	       var B = matrix.transform([b.x,b.y,b.z]);
 	       _g.moveTo(width()/2 + s * A[0], height()/2 - s * A[1]);
 	       _g.lineTo(width()/2 + s * B[0], height()/2 - s * B[1]);
 	    }
 	    _g.stroke();
+*/
          }
       }
+
       this.setUniform = function(name, value) {
          if (isDef(this.mesh.material.uniforms[name]))
             this.mesh.material.uniforms[name].value = value;
