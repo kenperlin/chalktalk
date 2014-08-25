@@ -83,8 +83,8 @@ function xeyeball() {
    sketch.code = [["yplanet", xeyeballFragmentShader],["flame", flameFragmentShader]];
    sketch.enableFragmentShaderEditing();
    sketch.update = function() {
-     this.rX = this.in.length > 0 ? this.inValue[0] : 0;
-     this.rY = this.in.length > 1 ? this.inValue[1] : 0;
+     if (this.in.length > 0) this.rX = this.inValue[0];
+     if (this.in.length > 1) this.rY = this.inValue[1];
    }
 }
 

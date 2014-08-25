@@ -40,6 +40,7 @@
    }
 
    function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
+   function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
    function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
@@ -65,6 +66,14 @@
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
       var geometry = cylinderGeometry(n);
+      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      this.add(mesh);
+      return mesh;
+   }
+
+   THREE.Object3D.prototype.addOpenCylinder = function(n) {
+      if (n === undefined) n = 24;
+      var geometry = openCylinderGeometry(n);
       var mesh = new THREE.Mesh(geometry, blackMaterial);
       this.add(mesh);
       return mesh;
