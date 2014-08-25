@@ -1200,46 +1200,44 @@
    }
 
    function unregisterGlyph(indexName) {
-       for (var i = 0 ; i < glyphs.length ; i++)
-          if (indexName == glyphs[i].indexName)
-             glyphs.splice(i--, 0);
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (indexName == glyphs[i].indexName)
+            glyphs.splice(i--, 0);
    }
 
    function registerGlyph(name, strokes, indexName) {
-       if (indexName === undefined) {
-          indexName = name;
+      if (indexName === undefined) {
+         indexName = name;
 
-          var j = indexName.indexOf('Sketch');
-          if (j > 0)
-             indexName = indexName.substring(0, j);
+         var j = indexName.indexOf('Sketch');
+         if (j > 0)
+            indexName = indexName.substring(0, j);
 
-          var j = indexName.indexOf('(');
-          if (j > 0)
-             indexName = indexName.substring(0, j);
-       }
+         var j = indexName.indexOf('(');
+         if (j > 0)
+            indexName = indexName.substring(0, j);
+      }
 
-       for (var i = 0 ; i < glyphs.length ; i++)
-          if (indexName == glyphs[i].indexName)
-             return;
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (indexName == glyphs[i].indexName)
+            return;
 
-if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string') {
-   console.log(name);
-   for (var n = 0 ; n < strokes.length ; n++)
-      for (var i = 0 ; i < strokes[n].length ; i++)
-         strokes[n][i][1] *= -1;
-}
+      if (name.indexOf("sg(") < 0 && typeof(strokes[0]) != 'string')
+         for (var n = 0 ; n < strokes.length ; n++)
+            for (var i = 0 ; i < strokes[n].length ; i++)
+               strokes[n][i][1] *= -1;
 
-       var glyph = new Glyph(name, strokes);
-       glyph.indexName = indexName;
+      var glyph = new Glyph(name, strokes);
+      glyph.indexName = indexName;
 
-       for (var i = 0 ; i < glyphs.length ; i++)
-          if (indexName < glyphs[i].indexName) {
-             glyphs.splice(i, 0, glyph);
-             return glyph.indexName;
-          }
+      for (var i = 0 ; i < glyphs.length ; i++)
+         if (indexName < glyphs[i].indexName) {
+            glyphs.splice(i, 0, glyph);
+            return glyph.indexName;
+         }
 
-       glyphs.push(glyph);
-       return glyph.indexName;
+      glyphs.push(glyph);
+      return glyph.indexName;
    }
 
    function Glyph(name, src) {
