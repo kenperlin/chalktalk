@@ -1,5 +1,5 @@
 var imports = [
-   "sketches/bird.js",
+   "sketches/io.js",
 ];
 
 var sketchTypes =

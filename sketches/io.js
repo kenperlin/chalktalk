@@ -77,3 +77,5 @@ function IO() {
    }
 }
 IO.prototype = new Sketch;
+
+registerSketch("IO");
