@@ -536,7 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
-   var isShowingMeshEdges = true;
+   var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
@@ -739,7 +739,7 @@
       ['g'  , "group/ungroup"],
       ['h'  , "home"],
       ['i'  , "insert text"],
-      ['k'  , "toggle 3d box"],
+      ['l'  , "toggle edge render"],
       ['m'  , "toggle menu type"],
       ['n'  , "negate card color"],
       ['o'  , "output glyphs"],
@@ -2625,6 +2625,8 @@
       this.downy = 0;
       this.cleanup = function() {
          root.remove(this.mesh);
+	 if (this.visibleEdgesMesh !== undefined)
+	    root.remove(this.visibleEdgesMesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2677,34 +2679,52 @@
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
                                || this.glyphSketch != null) {
-            var alpha = this.fadeAway > 0 ? this.fadeAway :
-                        this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
-                        sketchPage.fadeAway;
-            this.mesh.material.opacity = sCurve(alpha);
+            this.alpha = this.fadeAway > 0 ? this.fadeAway :
+                         this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+                         sketchPage.fadeAway;
+            this.mesh.material.opacity = sCurve(this.alpha);
             this.mesh.material.transparent = true;
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
 
+         var wasVisibleEdgesMesh = this.visibleEdgesMesh !== undefined;
+	 if (wasVisibleEdgesMesh)
+	    root.remove(this.visibleEdgesMesh);
+
          if (isShowingMeshEdges) {
+            this.visibleEdges = this.mesh.findVisibleEdges();
+
+	    var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
+	    this.visibleEdgesMesh = mesh;
+
+	    if (wasVisibleEdgesMesh) {
+               var a = new THREE.Vector3();
+               var b = new THREE.Vector3();
+	       for (var k = 0 ; k < this.visibleEdges.length ; k++) {
+	          var ve = this.visibleEdges[k];
+	          var vem = ve[0];
+	          var veg = ve[1];
+	          var vee = ve[2];
+	          for (var n = 0 ; n < vee.length ; n++) {
+	             var edge = vee[n];
+	             a.copy(veg.vertices[edge[0]]).applyMatrix4(vem);
+	             b.copy(veg.vertices[edge[1]]).applyMatrix4(vem);
+	             mesh.geometry.addLine(.015, a, b);
+                  }
+               }
+            }
+
+	    if (this.alpha !== undefined) {
+               mesh.material.opacity = sCurve(this.alpha);
+               mesh.material.transparent = true;
+	    }
+
+	    root.add(mesh);
+/*
 	    var geometry = this.mesh.geometry;
 	    var matrix = this.mesh.getMatrix();
-
-            this.visibleEdges = geometry.visibleEdges(this.mesh.matrix);
-
-	    if (this.visibleEdgesMesh === undefined) {
-	       var veg = new THREE.Geometry();
-	       var vem = new THREE.LineBasicMaterial( { color: '#ff0000' } );
-	       for (var n = 0 ; n < this.visibleEdges.length ; n++) {
-	          var edge = this.visibleEdges[n];
-		  veg.vertices.push(geometry.vertices[edge[0]]);
-		  veg.vertices.push(geometry.vertices[edge[1]]);
-               }
-	       this.visibleEdgesMesh = new THREE.Mesh(veg, vem);
-	       this.mesh.add(this.visibleEdgesMesh);
-	    }
-/*
 	    var s = this.size * 0.765;
 	    _g.beginPath();
 	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {

@@ -31,10 +31,10 @@
          this.matrix.compose( this.position, this.quaternion, this.scale );
       else {
          var v = this.mat._m();
-	 this.matrix.set(v[0],v[4],v[ 8],v[12],
-	                 v[1],v[5],v[ 9],v[13],
-	                 v[2],v[6],v[10],v[14],
-	                 v[3],v[7],v[11],v[15]);
+         this.matrix.set(v[0],v[4],v[ 8],v[12],
+                         v[1],v[5],v[ 9],v[13],
+                         v[2],v[6],v[10],v[14],
+                         v[3],v[7],v[11],v[15]);
       }
       this.matrixWorldNeedsUpdate = true;
    }
@@ -104,36 +104,69 @@
    THREE.Geometry.prototype.computeEdges = function() {
       function testEdge(edges, a, b) {
          var h = Math.min(a, b) + "," + Math.max(a, b);
-	 if (hash[h] === undefined)
-	    hash[h] = n;
+         if (hash[h] === undefined)
+            hash[h] = n;
          else
-	    edges.push([hash[h], n, [a, b]]);
+            edges.push([hash[h], n, [a, b]]);
       }
       this.edges = [];
       var hash = {};
       for (var n = 0 ; n < this.faces.length ; n++) {
          var face = this.faces[n];
-	 testEdge(this.edges, face.a, face.b);
-	 testEdge(this.edges, face.b, face.c);
-	 testEdge(this.edges, face.c, face.a);
+         testEdge(this.edges, face.a, face.b);
+         testEdge(this.edges, face.b, face.c);
+         testEdge(this.edges, face.c, face.a);
       }
    }
 
-   THREE.Geometry.prototype.visibleEdges = function(matrix) {
-      var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
+   THREE.Object3D.prototype.findVisibleEdges = function(matrix, ve) {
+      if (matrix === undefined)
+         matrix = new THREE.Matrix4();
+
+      if (ve === undefined)
+         ve = [];
+
+      matrix = matrix.multiply(this.matrix);
+
+      ve.push([ matrix, this.geometry, this.geometry.findVisibleEdges(matrix) ]);
+
+      for (var k = 0 ; k < this.children.length ; k++) {
+         var childMatrix = new THREE.Matrix4();
+	 childMatrix.copy(matrix);
+         this.children[k].findVisibleEdges(childMatrix, ve);
+      }
+
+      return ve;
+   }
+
+   THREE.Geometry.prototype.findVisibleEdges = function(matrix) {
+      var visibleEdges = [];
       if (this.edges === undefined)
          this.computeEdges();
-      var edges = [];
+      var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
       var N = [new THREE.Vector3(), new THREE.Vector3()];
       for (var n = 0 ; n < this.edges.length ; n++) {
          for (var k = 0 ; k < 2 ; k++)
-	    N[k].copy(this.faces[this.edges[n][k]].normal)
-	        .applyMatrix3(normalMatrix).normalize();
+            N[k].copy(this.faces[this.edges[n][k]].normal)
+                .applyMatrix3(normalMatrix).normalize();
 	 if ( (N[0].z > 0 || N[1].z > 0) &&
-	      (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
-	    edges.push(this.edges[n][2]);
+              (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
+            visibleEdges.push(this.edges[n][2]);
       }
-      return edges;
+      return visibleEdges;
+   }
+
+   THREE.Geometry.prototype.addLine = function(t, a, b) {
+      var dx = b.x - a.x, dy = b.y - a.y, d = sqrt(dx * dx + dy * dy);
+      dx *= t/2 / d;
+      dy *= t/2 / d;
+      this.vertices.push(new THREE.Vector3(a.x + dy, a.y - dx, a.z + t));
+      this.vertices.push(new THREE.Vector3(b.x + dy, b.y - dx, b.z + t));
+      this.vertices.push(new THREE.Vector3(b.x - dy, b.y + dx, b.z + t));
+      this.vertices.push(new THREE.Vector3(a.x - dy, a.y + dx, a.z + t));
+      var nf = this.vertices.length;
+      this.faces.push(new THREE.Face3(nf-4, nf-3, nf-2));
+      this.faces.push(new THREE.Face3(nf-2, nf-1, nf-4));
    }
 
    var PI = Math.PI;
@@ -395,4 +428,5 @@ var fragmentShaderHeader = ["\
    uniform float y;\
    uniform float z;\
 "].join("\n");
+
 

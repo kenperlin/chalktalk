@@ -1244,6 +1244,9 @@ var sketchToDelete = null;
          case 'i':
             toggleTextMode();
             break;
+         case 'l':
+	    isShowingMeshEdges = ! isShowingMeshEdges;
+	    break;
          case 'm':
             menuType = (menuType + 1) % 2;
             break;
