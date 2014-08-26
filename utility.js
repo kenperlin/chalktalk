@@ -92,27 +92,34 @@
 // CHOICE SELECTION WITH CONTINUOUS TRANSITION WEIGHTS.
 
    function Choice() {
-      this.weights = [];
-      this.set = function(n) {
-         this.value = n;
-         this.update();
+      this.flip = function() {
+         this.set(1 - this.stateValue);
       }
-      this.get = function(i) {
+      this.value = function(i) {
+         if (i === undefined) i = 0;
          return sCurve(this.weights[i]);
+      }
+      this.state = function(n) {
+         if (n !== undefined) {
+            this.stateValue = n;
+            this.update();
+         }
+         return this.stateValue;
       }
       this.update = function(delta) {
          if (delta === undefined)
             delta = 0;
 
-         while (this.weights.length <= this.value)
+         while (this.weights.length <= this.stateValue)
             this.weights.push(0);
 
          for (var i = 0 ; i < this.weights.length ; i++)
             this.weights[i] =
-               i == this.value ? min(1, this.weights[i] + 2 * delta)
-                               : max(0, this.weights[i] - delta);
+               i == this.stateValue ? min(1, this.weights[i] + 2 * delta)
+                                    : max(0, this.weights[i] - delta);
       }
-      this.set(0);
+      this.weights = [];
+      this.state(0);
    }
 
 // ENCODE A FRACTIONAL AMOUNT AS A PRINTABLE CHARACTER (HAS ABOUT 2 SIG. DIGITS PRECISION).
@@ -179,6 +186,39 @@
    function cotan(t) { return Math.cotan(t); }
    function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+   function solve(A) { /* From http://martin-thoma.com */
+      // Solve a system of linear equations given as an n x n+1 matrix.
+      var n = A.length;
+      for (var i=0; i<n; i++) {
+         // Search for maximum in this column.
+         var maxRow = i, maxEl = Math.abs(A[i][i]);
+         for (var k=i+1; k<n; k++)
+            if (Math.abs(A[k][i]) > maxEl) {
+               maxEl = Math.abs(A[k][i]);
+               maxRow = k;
+            }
+         // Swap maximum row with current row (column by column).
+         for (var k=i; k<n+1; k++) {
+            var tmp = A[maxRow][k];
+            A[maxRow][k] = A[i][k];
+            A[i][k] = tmp;
+         }
+         // Make all rows below this one 0 in current column.
+         for (k=i+1; k<n; k++) {
+            var c = -A[k][i] / A[i][i];
+            for(var j=i; j<n+1; j++)
+               A[k][j] = i==j ? 0 : A[k][j] + c * A[i][j];
+         }
+      }
+      // Solve equation Ax=b for an upper triangular matrix A.
+      var x = new Array(n);
+      for (var i=n-1; i>-1; i--) {
+         x[i] = A[i][n] / A[i][i];
+         for (var k=i-1; k>-1; k--)
+            A[k][n] -= A[k][i] * x[i];
+      }
+      return x; // Return n x 1 result vector.
+   }
    function isEqualArray(a, b) {
       if (a === undefined || b === undefined ||
           a == null || b == null || a.length != b.length)
@@ -381,25 +421,25 @@
 
             // NO MATCH IF name IS PRECEDED BY . or _ or 0-9 or a-z or A-Z.
 
-	    if (i > 0) {
-	       var n = str.charCodeAt(i-1);
-	       if (n == cp || n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
-	          continue;
-	    }
+            if (i > 0) {
+               var n = str.charCodeAt(i-1);
+               if (n == cp || n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+                  continue;
+            }
 
             // NO MATCH IF name IS FOLLOWED BY _ or 0-9 or a-z or A-Z.
 
-	    if (i + name.length < str.length) {
-	       var n = str.charCodeAt(i-1);
-	       if (n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
-	          continue;
-	    }
+            if (i + name.length < str.length) {
+               var n = str.charCodeAt(i-1);
+               if (n == c_ || n >= c0 && n <= c9 || n >= ca && n <= cz || n >= cA && n <= cZ)
+                  continue;
+            }
 
             // OTHERWISE, DO THE SUBSTITUTION, AND ADJUST i ACCORDINGLY.
 
-	    str = str.substring(0, i) + value + str.substring(i + name.length, str.length);
-	    i += value.length - name.length;
-	 }
+            str = str.substring(0, i) + value + str.substring(i + name.length, str.length);
+            i += value.length - name.length;
+         }
       }
 
       return str;
@@ -441,10 +481,161 @@
       return i;
    }
 
+   function sample(arr, t) {
+      t = max(0, min(0.999, t));
+      var n = arr.length;
+      if (n == 1)
+         return arr[0];
+      var i = floor((n-1) * t);
+      var f = (n-1) * t - i;
+      return lerp(f, arr[i], arr[i+1]);
+   }
+
+   function newZeroArray(size) {
+      var dst = [];
+      for (var i = 0 ; i < size ; i++)
+         dst.push(0);
+      return dst;
+   }
+
+// IMAGE PROCESSING.
+
+   function imageEnlarge(src, dst) {
+      if (this.tmp === undefined)
+         this.tmp = newZeroArray(dst.length);
+
+      function index(i,j,w) { return max(0,min(w-1,i)) + w * max(0,min(w-1,j)); }
+
+      var w = floor(sqrt(src.length));
+
+      for (var row = 0 ; row < w ; row++)
+      for (var col = 0 ; col < w ; col++) {
+         var i0 = index(row  , col  , w);
+         var i1 = index(row+1, col  , w);
+         var i2 = index(row  , col+1, w);
+         var i3 = index(row+1, col+1, w);
+         var j = index(2*row, 2*col, 2*w);
+         this.tmp[j      ] =  src[i0];
+         this.tmp[j+1    ] = (src[i0] + src[i1]) / 2;
+         this.tmp[j  +2*w] = (src[i0] + src[i2]) / 2;
+         this.tmp[j+1+2*w] = (src[i0] + src[i1] + src[i2] + src[i3]) / 4;
+      }
+
+      var wt = [1/6,1/3,1/3,1/6];
+
+      for (var row = 0 ; row < 2*w ; row++)
+      for (var col = 0 ; col < 2*w ; col++) {
+         var sum = 0;
+         for (var u = -1 ; u <= 2 ; u++)
+         for (var v = -1 ; v <= 2 ; v++)
+            sum += this.tmp[index(col+u, row+v, 2*w)] * wt[u+1] * wt[v+1];
+         dst[index(col, row, 2*w)] =  sum;
+      }
+   }
+
 // 2D GEOMETRY UTILITIES.
 
-   function isInRect(x,y, R) {
-      return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
+   // Change the length of a curve.
+
+   function adjustCurveLength(curve, targetLength, i0) {
+      var n = curve.length;
+
+      var ratio = targetLength / computeCurveLength(curve, i0);
+
+      var x0 = (curve[1][0] + curve[n-1][0]) / 2;
+      var y0 = (curve[1][1] + curve[n-1][1]) / 2;
+
+      var p = [];
+      for (var i = 0 ; i < n ; i++)
+         p.push([curve[i][0], curve[i][1]]);
+
+      for (var i = 2 ; i <= n-2 ; i++) {
+         var t = 1 - 4*(i-n/2)*(i-n/2)/n/n;
+         var dr = t * (ratio - 1) + 1;
+         p[i][0] = lerp(dr, x0, p[i][0]);
+         p[i][1] = lerp(dr, y0, p[i][1]);
+      }
+
+      for (var i = 2 ; i <= n-2 ; i++) {
+         curve[i][0] = p[i][0];
+         curve[i][1] = p[i][1];
+      }
+   }
+
+   // Bend a curve toward a point, ending up at a target length.
+
+   function bendCurve(curve, pt, totalLength, i0) {
+      if (i0 === undefined) i0 = 0;
+
+      var n = curve.length;
+
+      // FIND NEAREST POINT ON CURVE.
+
+      var ddMin = Number.MAX_VALUE, im = 0;
+      for (var i = 0 ; i < n ; i++) {
+         var dx = curve[i][0] - pt[0];
+         var dy = curve[i][1] - pt[1];
+         var dd = dx * dx + dy * dy;
+         if (dd < ddMin) {
+            ddMin = dd;
+            im = i;
+         }
+      }
+
+      // IF NOT AT THE ENDS, THEN WARP MIDDLE OF CURVE.
+
+      if (im > n/8 && im < n*7/8) {
+         var dx = pt[0] - curve[im][0];
+         var dy = pt[1] - curve[im][1];
+         for (var i = i0+1 ; i < n-1 ; i++) {
+            var t = i < im ? sCurve((i-i0 ) / (im-i0 ))
+                           : sCurve((n-1-i) / (n-1-im));
+            curve[i][0] += t * dx;
+            curve[i][1] += t * dy;
+         }
+         return;
+      }
+
+      //return;
+
+      // IF AT THE ENDS, THEN MOVE ONE ENDPOINT AND PRESERVE LENGTH.
+
+      var ax = curve[i0 ][0], ay = curve[i0 ][1];
+      var bx = curve[n-1][0], by = curve[n-1][1];
+
+      var dxa = pt[0] - ax, dya = pt[1] - ay;
+      var dxb = pt[0] - bx, dyb = pt[1] - by;
+
+      if (dxa * dxa + dya * dya < dxb * dxb + dyb * dyb) {
+         for (var i = n-2 ; i >= i0 ; i--) {
+            var t = (n-1-i) / (n-2);
+            curve[i][0] += t * dxa;
+            curve[i][1] += t * dya;
+         }
+      }
+      else 
+         for (var i = i0 + 1 ; i <= n-1 ; i++) {
+            var t = (i-1) / (n-2);
+            curve[i][0] += t * dxb;
+            curve[i][1] += t * dyb;
+         }
+      //adjustCurveLength(curve, totalLength, i0);
+   }
+
+   // FIND x,y,scale FOR CURVE P TO BEST FIT CURVE Q.
+
+   function bestFit(P, Q) {
+      var n = min(P.length, Q.length), a=0, b=0, c=0, d=0, e=0, f=0;
+      for (var i = 0 ; i < n ; i++) {
+         var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];
+         a += px;
+         b += py;
+         c += qx;
+         d += qy;
+         e += px * px + py * py;
+         f += px * qx + py * qy;
+      }
+      return solve([ [n,0,a,c], [0,n,b,d], [a,b,e,f] ]);
    }
 
    function clipLineToRect(ax,ay, bx,by, R) {
@@ -478,57 +669,6 @@
       c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
       c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
       return c;
-   }
-
-   // Change the length of a curve.
-
-   function adjustCurveLength(curve, targetLength, i0) {
-      var n = curve.length;
-
-      var ratio = targetLength / computeCurveLength(curve, i0);
-
-      var x0 = (curve[1][0] + curve[n-1][0]) / 2;
-      var y0 = (curve[1][1] + curve[n-1][1]) / 2;
-
-      var p = [];
-      for (var i = 0 ; i < n ; i++)
-         p.push([curve[i][0], curve[i][1]]);
-
-      for (var i = 2 ; i <= n-2 ; i++) {
-         var t = 1 - 4*(i-n/2)*(i-n/2)/n/n;
-         var dr = t * (ratio - 1) + 1;
-         p[i][0] = lerp(dr, x0, p[i][0]);
-         p[i][1] = lerp(dr, y0, p[i][1]);
-      }
-
-      for (var i = 2 ; i <= n-2 ; i++) {
-         curve[i][0] = p[i][0];
-         curve[i][1] = p[i][1];
-      }
-   }
-
-   // Bend a curve toward a point, ending up at a target length.
-
-   function bendCurve(curve, pt, len, i0) {
-      if (i0 === undefined) i0 = 0;
-      var n = curve.length;
-      var dx0 = pt[0] - curve[1][0];
-      var dy0 = pt[1] - curve[1][1];
-      var dx1 = pt[0] - curve[n-1][0];
-      var dy1 = pt[1] - curve[n-1][1];
-      if (dx0 * dx0 + dy0 * dy0 < dx1 * dx1 + dy1 * dy1)
-         for (var i = n-2 ; i >= i0 ; i--) {
-            var t = (n-1-i) / (n-2);
-            curve[i][0] += t * dx0;
-            curve[i][1] += t * dy0;
-         }
-      else
-         for (var i = i0 + 1 ; i <= n-1 ; i++) {
-            var t = (i-1) / (n-2);
-            curve[i][0] += t * dx1;
-            curve[i][1] += t * dy1;
-         }
-      adjustCurveLength(curve, len, i0);
    }
 
    // Compute the bounding rectangle for a curve.
@@ -602,9 +742,9 @@
       function l(k) { return L[k]; }
       function hermite(a, da, b, db) {
          return  a * ( 2 * ttt - 3 * tt     + 1)
-	      + da * (     ttt - 2 * tt + t    )
-	      +  b * (-2 * ttt + 3 * tt        )
-	      + db * (     ttt -     tt        );
+              + da * (     ttt - 2 * tt + t    )
+              +  b * (-2 * ttt + 3 * tt        )
+              + db * (     ttt -     tt        );
       }
       if (N === undefined)
          N = (keys.length - 1) * 4;
@@ -618,23 +758,33 @@
       for (var n = 0 ; n < nk-1 ; n++) {
 
          var dx0 = n > 0 ? (l(n) * (x(n) - x(n-1)) + l(n-1) * (x(n+1) - x(n))) / (l(n-1) + l(n))
-	                 : 3*x(n + 1) - 2*x(n) - x(n + 2);
+                         : 3*x(n + 1) - 2*x(n) - x(n + 2);
          var dy0 = n > 0 ? (l(n) * (y(n) - y(n-1)) + l(n-1) * (y(n+1) - y(n))) / (l(n-1) + l(n))
-	                 : 3*y(n + 1) - 2*y(n) - y(n + 2);
+                         : 3*y(n + 1) - 2*y(n) - y(n + 2);
 
          var dx1 = n < nk-2 ? (l(n+1) * (x(n+1) - x(n)) + l(n) * (x(n+2) - x(n+1))) / (l(n) + l(n+1))
-	                    : 2*x(n + 1) - 3*x(n) + x(n - 1);
+                            : 2*x(n + 1) - 3*x(n) + x(n - 1);
          var dy1 = n < nk-2 ? (l(n+1) * (y(n+1) - y(n)) + l(n) * (y(n+2) - y(n+1))) / (l(n) + l(n+1))
-	                    : 2*y(n + 1) - 3*y(n) + y(n - 1);
+                            : 2*y(n + 1) - 3*y(n) + y(n - 1);
 
-	 for (var i = 0 ; i < N ; i++) {
-	    var t = i / N, tt = t * t, ttt = t * tt;
-	    spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
-	                  hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
-	 }
+         for (var i = 0 ; i < N ; i++) {
+            var t = i / N, tt = t * t, ttt = t * tt;
+            spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
+                          hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
+         }
       }
       spline.push([ x(nk-1), y(nk-1) ]);
       return spline;
+   }
+
+   // Compute the curvature of a curved line from A to B which passes through M.
+
+   function computeCurvature(A, M, B) {
+      var dx = B[0] - A[0];
+      var dy = B[1] - A[1];
+      var ex = M[0] - (A[0] + B[0]) / 2;
+      var ey = M[1] - (A[1] + B[1]) / 2;
+      return (dx * ey - dy * ex) / (dx * dx + dy * dy);
    }
 
    // Compute the total geometric length of a curve.
@@ -647,16 +797,6 @@
          len += sqrt(dx * dx + dy * dy);
       }
       return len;
-   }
-
-   // Compute the curvature of a curved line from A to B which passes through M.
-
-   function computeCurvature(A, M, B) {
-      var dx = B[0] - A[0];
-      var dy = B[1] - A[1];
-      var ex = M[0] - (A[0] + B[0]) / 2;
-      var ey = M[1] - (A[1] + B[1]) / 2;
-      return (dx * ey - dy * ex) / (dx * dx + dy * dy);
    }
 
    // Return distance squared from point [x,y] to curve c.
@@ -694,6 +834,10 @@
                lerp(f, curve[i][1], curve[i+1][1]) ];
    }
 
+   function isInRect(x,y, R) {
+      return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
+   }
+
    // Resample a curve to equal geometric spacing.
 
    function resampleCurve(src, count) {
@@ -715,6 +859,13 @@
          dst.push([lerp(f, src[i-1][0], src[i][0]),
                    lerp(f, src[i-1][1], src[i][1])]);
       }
+
+      // ACCOUNT FOR THE SOURCE CURVE BEING A CLOSED LOOP.
+
+      if ( src[0][0] == src[src.length-1][0] &&
+           src[0][1] == src[src.length-1][1] )
+         dst.push([ src[0][0], src[0][1] ]);
+
       return dst;
    }
 

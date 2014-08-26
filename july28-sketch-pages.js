@@ -1,7 +1,3 @@
-var imports = [
-   "sketches/io.js",
-];
-
 var sketchTypes =
 "Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle SplineTest".split(' ');
 
@@ -295,7 +291,7 @@ var page16 = {
    innerHTML: "\
       <table width=1280>\
       <tr>\
-         <td><center><font color=white size=8>movement</font></center></td>\
+         <td><center><font color=white size=8>&nbsp;<br>movement</font></center></td>\
          </tr>\
       </table>\
    "
@@ -358,6 +354,48 @@ var page101 = {
    "
 };
 
+var page102a = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1914</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/gertie.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page102b = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1955</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/harold.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page102c = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1963</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/whoopee.png width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page102 = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -389,12 +427,26 @@ var page103 = {
    "
 };
 
+var page104 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2011</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/arcade.png width=670></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page104a = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2012</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2012</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/sony_glasses.jpg width=600></th>\
@@ -408,7 +460,7 @@ var page104b = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2013</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/david_smith_ar_device.png width=500></th>\
@@ -422,7 +474,7 @@ var page104c = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2014</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/valve_vr_room.jpg width=600></th>\
@@ -436,7 +488,7 @@ var page104d = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2019</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2019-2021</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/glasses2.jpg width=600></th>\
@@ -450,10 +502,23 @@ var page104e = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2025-2030</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2025-2030</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/contact_lens.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104f = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/rainbows_end.jpg width=350></th>\
          </tr>\
       </table>\
    "
@@ -538,14 +603,20 @@ var sketchPages = [
    page19,
    page100,
    page101,
-   page102,
+   page102a,
+   blankPage(),
+   page102b,
+   blankPage(),
+   page102c,
    blankPage(),
    page103,
+   page104,
    page104a,
    page104b,
    page104c,
    page104d,
    page104e,
+   page104f,
    page105,
    blankPage(),
    page106,

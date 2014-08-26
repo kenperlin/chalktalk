@@ -1,9 +1,5 @@
-var imports = [
-   "sketches/io.js",
-];
-
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle SplineTest".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket".split(' ');
 
 function blankPage() {
    return {
@@ -24,11 +20,11 @@ var title_page = {
          <td>\
             <center>\
             <font color=white size=10>\
-            Early experiences and\
+            <b>Thinking procedurally</b>\
+            <p>\
+            <small>from textures\
             <br>\
-            current influences\
-            <br>\
-            in computer graphics\
+            to magic blackboards</small>\
             <br>&nbsp;<p>\
             <i><small>Ken Perlin</small></i>\
             </font>\
@@ -295,7 +291,7 @@ var page16 = {
    innerHTML: "\
       <table width=1280>\
       <tr>\
-         <td><center><font color=white size=8>movement</font></center></td>\
+         <td><center><font color=white size=8>&nbsp;<br>movement</font></center></td>\
          </tr>\
       </table>\
    "
@@ -358,6 +354,48 @@ var page101 = {
    "
 };
 
+var page102a = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1914</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/gertie.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page102b = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1955</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/harold.jpg width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page102c = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>1963</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/whoopee.png width=600></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page102 = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -379,11 +417,25 @@ var page103 = {
    innerHTML: "\
       <table width=1280>\
       <tr height=50></tr>\
-      <tr><th><font size=10 color=white>This is the dawn of</font></th></tr>\
-      <tr><th><font size=10 color=white>the age of computer graphics</font></th></tr>\
+      <tr><th><font size=10 color=black>This is the dawn of</font></th></tr>\
+      <tr><th><font size=10 color=black>the age of computer graphics</font></th></tr>\
       <tr height=50></tr>\
       <tr>\
          <th><img src=imgs/gumball_machine.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2011</font></th></tr>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/arcade.png width=670></th>\
          </tr>\
       </table>\
    "
@@ -394,7 +446,7 @@ var page104a = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2012</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2012</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/sony_glasses.jpg width=600></th>\
@@ -408,7 +460,7 @@ var page104b = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2013</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/david_smith_ar_device.png width=500></th>\
@@ -422,7 +474,7 @@ var page104c = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2014</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/valve_vr_room.jpg width=600></th>\
@@ -436,7 +488,7 @@ var page104d = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2019</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2019-2021</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/glasses2.jpg width=600></th>\
@@ -450,10 +502,23 @@ var page104e = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>2025-2030</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>2025-2030</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/contact_lens.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104f = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/rainbows_end.jpg width=350></th>\
          </tr>\
       </table>\
    "
@@ -485,6 +550,37 @@ var page106 = {
    "
 };
 
+var page106a = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=50></tr>\
+      <tr><th><font size=10 color=white><small>In the future:<p>\
+                                        <small>&bull; Any wall can be a display<p>\
+                                        &bull; High quality touch everywhere</small>\
+					</small></font></th></tr>\
+      </table>\
+   "
+};
+
+var page106b = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=50></tr>\
+      <tr><th><font size=10 color=white><small>In the future:<p>\
+                                        <small>Language will extend to<br>\
+                                        the very walls around us.</small><p>\
+					&nbsp;</small></font></th></tr>\
+      <tr>\
+         <th><img src=imgs/whoopee_fire.png width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page107 = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -497,12 +593,14 @@ var page107 = {
            <font color=white size=10>\
    	<br>&nbsp;<p>\
    	<small><small>\
-   	<small><i>special thanks to</i></small>\
+   	<small><i>Special thanks to</i></small>\
    	<p>\
-	<big>Centre for Digital Media\
-   	<p>\
+	<big>NYU Media Research Lab\
+	<br>\
+	The Centre for Digital Media\
+   	<br>\
    	David Lobser\
-   	<p>\
+   	<br>\
    	Evan Moore</big>\
    	</small></small>\
            </font>\
@@ -516,7 +614,6 @@ var page107 = {
 var sketchPages = [
    blankPage(),
    title_page,
-   page0,
    page1,
    page2,
    page3,
@@ -538,16 +635,14 @@ var sketchPages = [
    page19,
    page100,
    page101,
-   page102,
+   page102a,
    blankPage(),
+   page102b,
+   blankPage(),
+   page102c,
    page103,
-   page104a,
-   page104b,
-   page104c,
-   page104d,
-   page104e,
-   page105,
    blankPage(),
-   page106,
+   page106a,
+   page106b,
    page107,
 ];

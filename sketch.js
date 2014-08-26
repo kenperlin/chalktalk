@@ -1,5 +1,20 @@
 
-   var sketchPalette = [
+   var paletteRGB = [
+      [255,255,255],
+      [128, 50, 25],
+      [255,  0,  0],
+      [255,255,  0],
+      [  0,255,  0],
+      [  0,  0,255],
+      [255,  0,255],
+   ];
+
+   var palette = [];
+   for (var i = 0 ; i < paletteRGB.length ; i++)
+      palette.push('rgb(' + paletteRGB[i][0] + ',' +
+                            paletteRGB[i][1] + ',' +
+                            paletteRGB[i][2] + ')' );
+/*
       'white',
       'rgb(128,50,25)',
       'red',
@@ -8,10 +23,27 @@
       'blue',
       'magenta',
    ];
+*/
 
-   function sketchColor() { return sketchPalette[sketchPage.colorIndex]; }
+   function sketchColor() { return palette[sketchPage.colorId]; }
 
    function Sketch() {
+      this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
+      this.adjustY = function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; }
+      this.adjustXY = function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; }
+
+      this.unadjustX = function(x) { return this.xyz.length == 0 ? x : (x - this.xyz[0]) / this.xyz[2]; }
+      this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
+      this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
+
+
+      this.fade = function() {
+         return this.fadeAway == 0 ? 1 : this.fadeAway;
+      }
+      this.setColorId = function(i) {
+         this.colorId = i;
+	 this.color = palette[i];
+      }
       this.transformX2D = function(x, y) {
          var angle = 2 * this.rX;
          return this.x2D + this.scale() * (cos(angle)*x + sin(angle)*y);
@@ -36,12 +68,11 @@
          }
       }
       this.afterSketch = function(callbackFunction) {
-         var isg = this.glyphTrace != null && this.glyphTransition >= 0.5;
+         var isg = this.sketchTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
-            var fade = this.fadeAway == 0 ? 1 : this.fadeAway;
             _g.save();
             _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
-                                  : this.styleTransition) * fade;
+                                  : this.styleTransition) * this.fade();
             if (isg)
                _g.lineWidth = sketchLineWidth * .6;
             this.afterSketchCallbackFunction = callbackFunction;
@@ -85,7 +116,7 @@
          return dst;
       }
       this.code = null;
-      this.color = sketchColor();
+      this.setColorId(sketchPage.colorindex);
       this.colorIndex = [];
       this.computeGroupBounds = function() {
          this.xlo = this.ylo =  10000;
@@ -175,6 +206,14 @@
          context.restore();
       }
       this.drawFirstLine = false;
+      this.drawLabel = function(label, xy, ax, ay) {
+         var P = this.adjustXY(xy);
+         text(label, P[0], P[1], ax, ay);
+      }
+      this.drawValue = function(value, xy, ax, ay) {
+         var P = this.adjustXY(xy);
+         text(roundedString(value), P[0], P[1], ax, ay);
+      }
       this.drawText = function(context) {
          var fontSize = floor(24 * this.scale());
 
@@ -214,8 +253,7 @@
          context.font = fontHeight + 'pt ' + (this.isParsed() ? 'Consolas'
                                                               : 'Comic Sans MS');
 
-         var isCursor = isTextMode && context == _g
-                                   && this == sk(sketchPage.textInputIndex);
+         var isCursor = isTextMode && context == _g && this == sk(sketchPage.trueIndex);
          if (! isCursor && this.text.length == 0)
             return;
 
@@ -234,8 +272,7 @@
             var x = x1;
             var y = y1 + 1.3 * fontHeight * (n - 0.5 * (this.textStrs.length-1));
             var tx = x - .5 * tw;
-            if (this.fadeAway > 0)
-               context.globalAlpha = this.fadeAway;
+            context.globalAlpha = this.fade();
             context.fillText(str, tx, y + .35 * fontHeight);
 
             // IF A TEXT CURSOR X,Y HAS BEEN SPECIFIED, RESET THE TEXT CURSOR.
@@ -321,11 +358,14 @@
          return ! isDef(value) || value == null ? "0" : value;
       }
       this.getPortIndex = function(name) { return getIndex(this.portName, name); }
-      this.glyphTrace = null;
+      this.sketchTrace = null;
       this.trace = [];
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
+      this.hasMotionPath = function() {
+         return this.motionPath.length > 0 && this.motionPath[0].length > 1;
+      }
       this.id;
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
@@ -370,6 +410,7 @@
       this.isNegated = false;
       this.isNullText = function() { return this.text.replace(/ /g, '').length == 0; }
       this.isParsed = function() { return false; }
+      this.isShowingLiveData = false;
       this.isSimple = function() { return this instanceof SimpleSketch; }
       this.keyDown = function(key) {}
       this.keyUp = function(key) {}
@@ -377,6 +418,7 @@
       this.m2s = function(p) { return [ this.m2x(p[0]), this.m2y(p[1]) ]; }
       this.m2x = function(x) { return (x - this.tx()) / this.scale(); }
       this.m2y = function(y) { return (y - this.ty()) / this.scale(); }
+      this.motionPath = [];
       this.mouseDown = function(x, y) {}
       this.mouseDrag = function(x, y) {}
       this.mouseMove = function(x, y) {}
@@ -448,17 +490,19 @@
          if (isDef(this.portLocation[i])) {
             if (this instanceof Sketch2D) {
                var p = this.portLocation[i];
-               return [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
+               p = [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
+	       return this.adjustXY(p);
             }
             else {
                m.save();
                this.standardView();
-               var xy = m.transform(this.portLocation[i]);
+               var p = this.portLocation[i];
+               var xy = m.transform(p);
                m.restore();
-               return xy;
+	       return this.adjustXY(xy);
             }
          }
-         return [this.cx(),this.cy()];
+         return this.adjustXY([this.cx(),this.cy()]);
       }
       this.rX = 0;
       this.rY = 0;
@@ -594,7 +638,7 @@
       this.sketchState = 'finished';
       this.styleTransition = 0;
       this.sp = [];
-      this.standardView = function(p) {
+      this.standardView = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
             .5 + this.tx() / width(),
@@ -602,7 +646,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            .25 * this.scale());
+            this.scale() / 14);
       }
       this.standardViewInverse = function() {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
@@ -612,7 +656,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            .25 * this.scale());
+            this.scale() / 14);
       }
       this.tX = 0;
       this.tY = 0;
@@ -655,6 +699,8 @@
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
+	 if (this.hasMotionPath())
+	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
       }
       this.ty = function() {
@@ -667,6 +713,8 @@
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
+	 if (this.hasMotionPath())
+	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
       }
 
@@ -699,6 +747,7 @@
 
       this.value = null;
       this.x = 0;
+      this.xyz = [];
       this.xStart = 0;
       this.xf = [0,0,1,0,1];
       this.y = 0;
@@ -760,11 +809,12 @@
             if (this.imageObj === undefined)
                return;
             var s = this.scale();
-            if (this.fadeAway > 0)
-               _g.globalAlpha = this.fadeAway;
+            var saveAlpha = _g.globalAlpha;
+            _g.globalAlpha = this.fade() * this.styleTransition;
             _g.drawImage(this.imageObj, this.x2D - this.width * s / 2,
                                         this.y2D - this.height * s / 2,
                                         this.width * s, this.height * s);
+            _g.globalAlpha = saveAlpha;
          });
       }
    }
@@ -776,6 +826,8 @@
       this.drewFirstLine = false;
       this.parsedStrokes = null;
       this.parsedTransition = 0;
+      this.glyphName = "simple sketch";
+      this.isGlyphable = true;
 
       this.isParsed = function() {
          return this.parsedStrokes != null;
@@ -881,7 +933,8 @@
 
             // JOIN: APPEND STROKE TO sk(I), INVERT sk(I) XFORM FOR EACH PT OF STROKE.
 
-            if (action == "joining" && isk() && isDef(sk(I))) {
+            if (action == "joining" && isk() && isDef(sk(I))
+	                            && ! (sk(I) instanceof GeometrySketch)) {
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
@@ -952,7 +1005,8 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    this.convertToGlyphSketch();
+	    if (this.isGlyphable)
+	       this.convertToGlyphSketch();
             return;
          }
 
@@ -972,12 +1026,14 @@
       }
 
       this.convertToGlyphSketch = function() {
-         strokes = this.getStrokes();
-         var glyph = interpretStrokes();
+         var glyph = findGlyph(this.getStrokes(), glyphs);
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();
-         deleteSketch(glyphSketch);
+         if (sk() instanceof Picture)
+	    glyphSketch.fadeAway = 1;
+         else
+            deleteSketch(glyphSketch);
       }
 
       this.getStrokes = function() {
@@ -1055,13 +1111,15 @@
 
             // LOOP THROUGH THE sp ARRAY.
 
+            var startedAnyStrokes = false;
             for (var i = 1 ; i < n ; i++) {
 
                // START DRAWING A STROKE.
 
                if (sp[i][2] == 0) {
-                  if (i > 1)
+                  if (startedAnyStrokes)
                      _g.stroke();
+                  startedAnyStrokes = true;
 
                   if (isUndrawing)
                      fillOval(sp[i][0] - 4, sp[i][1] - 4, 8, 8);
@@ -1071,7 +1129,7 @@
 
                   strokeIndex++;
                   if (strokeIndex < this.colorIndex.length)
-                     _g.strokeStyle = sketchPalette[this.colorIndex[strokeIndex]];
+                     _g.strokeStyle = palette[this.colorIndex[strokeIndex]];
                }
 
                // CONTINUE DRAWING A STROKE.
@@ -1095,12 +1153,12 @@
                   }
                }
             }
-            _g.stroke();
+	    if (startedAnyStrokes)
+               _g.stroke();
 
 	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
 
 	    if (isUndrawing && n >= 4) {
-	       console.log(sp.length + " " + n);
 	       var ax = sp[n-3][0], ay = sp[n-3][1];
 	       var bx = sp[n-1][0], by = sp[n-1][1];
 	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);

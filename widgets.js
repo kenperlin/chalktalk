@@ -1,4 +1,24 @@
 
+//////////////// DATA USED BY BOTH PIE MENUS AND PULL DOWN MENUS ///////////////
+
+   var pageActionLabels = "text clone group whiteboard clear".split(' ');
+   var sketchTypeLabels = [];
+
+/////////////////////////////////// HELP MENU //////////////////////////////////
+
+   function helpMenuDraw() {
+      if (isk()) {
+         var msg = "del,unparse,translate,copy,scale,text,rotate,undraw".split(",");
+	 var rx = 50 + (sk().xhi - sk().xlo) / 2;
+	 var ry = 50 + (sk().yhi - sk().ylo) / 2;
+	 for (var i = 0 ; i < 8 ; i++) {
+	    var x = sk().cx() + rx * cos(TAU * i / 8);
+	    var y = sk().cy() - ry * sin(TAU * i / 8);
+            text(msg[i], x, y, .5, .5, 'Comic Sans MS');
+	 }
+      }
+   }
+
 //////////////////////////////////// PIE MENU //////////////////////////////////
 
    // EXTERNAL VARS
@@ -152,11 +172,14 @@
 
 ///////////////////////////////// PULL DOWN MENU //////////////////////////////////
 
+   var pagePullDownLabels = pageActionLabels; // sketchTypes for the current page will be appended
    var pullDownIsActive = false;
    var pullDownLabels = [];
    var pullDownSelection = -1;
    var pullDownX = 0;
    var pullDownY = 0;
+   var sketchActionLabels = "linking translating rotating scaling parsing deleting".split(' ');
+   var sketchLabelSelection = -1;
 
    function pullDownStart(x, y) {
       if (pullDownLabels.length > 0) {
@@ -353,6 +376,8 @@
 
 ///////////////////////////////// SHORTHAND TEXT //////////////////////////////////
 
+   var iOut = 0;
+   var isNumericShorthandMode = false;
    var shRadius = 16; // radius of shorthand inner region
 
    function interpretShorthand() {
@@ -419,7 +444,7 @@
       case R_ARROW: return " ";
       case L_ARROW: return "del";
       case U_ARROW: isShiftPressed = ! isShiftPressed; return null;
-      case 'N': isNumeric = ! isNumeric; return null;
+      case 'N': isNumericShorthandMode = ! isNumericShorthandMode; return null;
       case D_ARROW: return "ret";
       }
 
@@ -427,6 +452,16 @@
    }
 
 ///////////////////////////// ON SCREEN KEYBOARD //////////////////////////////////
+
+   var isOnScreenKeyboardMode = false;
+
+   function kbd() {
+      isOnScreenKeyboardMode = ! isOnScreenKeyboardMode;
+   }
+
+   function isOnScreenKeyboard() {
+      return isOnScreenKeyboardMode && isTextMode;
+   }
 
    function OnScreenKeyboard() {
       this.mx = 0;
@@ -633,6 +668,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    var codeElement,
        codeSelector,
        codeTextArea,
+       isCodeWidget = false,
        setCodeAreaText = function() {
           codeTextArea.value = codeSelector.value;
           updateF();
@@ -648,11 +684,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function code() {
       return codeSketch == null ? null : codeSketch.code;
    }
-
-   function codeSelectorBgColor() { return backgroundColor === 'white' ? 'rgba(0,0,0,0)' : 'rgba(128,192,255,0.3)'; }
-   function codeSelectorFgColor() { return backgroundColor === 'white' ? 'black' : '#c0e0ff'; }
-   function codeTextBgColor() { return 'rgba(0,0,0,0)'; }
-   function codeTextFgColor() { return backgroundColor === 'white' ? '#0080ff' : '#80c0ff'; }
+   function codeSelectorBgColor() {
+      return backgroundColor === 'white' ? 'rgba(0,0,0,0)'
+                                         : 'rgba(128,192,255,' + (0.3 * codeSketch.fade()) + ')';
+   }
+   function codeSelectorFgColor() {
+      return backgroundColor === 'white' ? bgScrimColor(codeSketch.fade())
+                                         : 'rgba(192,224,255,' + codeSketch.fade() + ')';
+   }
+   function codeTextBgColor() {
+      return 'rgba(0,0,0,0)';
+   }
+   function codeTextFgColor() {
+      return (backgroundColor == 'white' ? 'rgba(0,128,255,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
+   }
 
    function toggleCodeWidget() {
       if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
@@ -715,7 +760,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
    }
 
-   function drawCodeWidget(text, xlo, ylo, xhi, yhi, changed) {
+   function drawCodeWidget(text, xlo, ylo, xhi, yhi, isChanged) {
 
       var x = (xlo + xhi) / 2;
       var y = 10;
@@ -736,6 +781,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeTextArea.rows = rows;
       codeTextArea.cols = cols;
 
+      codeTextArea.style.color = codeTextFgColor();
+
+      codeSelector.style.backgroundColor = codeSelectorBgColor();
+      codeSelector.style.borderColor = codeTextFgColor();
+      codeSelector.style.color = codeSelectorFgColor();
+
       var w = 12 * cols + 10;
 
       if (rows > 3)
@@ -747,15 +798,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
-      codeElement.x1 = ylo > h + h/2
-                       ? x
-                       : (xlo + xhi) / 2 < width() / 2
-                         ? xhi + w/2
-                         : xlo - w/2;
+      var x1 = (ylo > h
+                ? ( (xlo + xhi)/2 + width()/2 ) / 2
+                  : (xlo + xhi) / 2 < width() / 2
+                    ? xhi + (xhi - xlo) / 2 + w/2
+                    : xlo - (xhi - xlo) / 2 - w/2) - _g.panX;
+
+      x1 = max(x1, w/2);
+      x1 = min(x1, width() - w/2);
+
+      codeElement.x1 = x1;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
-                          : changed
+                          : isChanged
                             ? codeElement.x1
                             : lerp(0.1, codeElement.x, codeElement.x1);
 
@@ -764,26 +820,56 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeElement.style.left = x + _g.panX - w/2 + 10;
       codeElement.style.top = y + 5;
 
-      // CREATED THE ROUNDED SPEECH BUBBLE SHAPE.
+      // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
-      var c = createRoundRect(x - w/2, y, w, h, 16);
+      var cr = width() / 70;
+
+      var c = createRoundRect(x - w/2, y, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
-      if (ylo > c[c.length-1][1]) {
+      c = resampleCurve(c, 1000);
 
-         var L = c[c.length-1];
-         c.splice(c.length-1, c.length);
-         var R = c[c.length-1];
+      var ddMin = Number.MAX_VALUE, ax=0, ay=0, bx=0, by=0;
+      for (var i = 0 ; i < c.length ; i++) {
+         var x0 = c[i][0];
+	 var y0 = c[i][1];
+         var x1 = (xlo + xhi) / 2;
+	 var y1 = (ylo + yhi) / 2;
 
-         c.push([lerp(32 / (R[0] - L[0]), L[0], R[0]), L[1]]);
-         c.push([(xlo + xhi)/2, ylo]);
-         c.push(L);
+	 var tx0 = x0 > xlo ? 0 : (xlo - x0) / (x1 - x0);
+	 var ty0 = y0 > ylo ? 0 : (ylo - y0) / (y1 - y0);
+	 var tx1 = x0 < xhi ? 0 : (xhi - x0) / (x1 - x0);
+	 var ty1 = y0 < yhi ? 0 : (yhi - y0) / (y1 - y0);
+	 var t = max(tx0, max(ty0, max(tx1, ty1)));
+	 x1 = lerp(t, x0, x1);
+	 y1 = lerp(t, y0, y1);
+
+	 var dd = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+	 if (dd < ddMin) {
+	    ddMin = dd;
+	    ax = x0;
+	    ay = y0;
+	    bx = x1;
+	    by = y1;
+	 }
       }
 
-      // DRAW SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+      if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h), y     + cr, y+h   - cr);
+      else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w), x-w/2 + cr, x+w/2 - cr);
 
-      color('rgba(0,0,255,0.2)');
+      for (var i = c.length - 1 ; i >= 0 ; i--) {
+         if (len(c[i][0] - ax, c[i][1] - ay) < cr) {
+	    c[i][0] = bx;
+	    c[i][1] = by;
+	 }
+      }
+
+      // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
+
+      var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
+
+      color('rgba(0,0,255,' + (0.2 * fade) + ')');
       fillCurve(c);
 
       lineWidth(2);
@@ -832,4 +918,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       audiencePopup.close();
       audiencePopup = null;
    }
+
+
 
