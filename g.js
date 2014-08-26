@@ -2700,18 +2700,16 @@
 	    this.visibleEdgesMesh = mesh;
 
 	    if (wasVisibleEdgesMesh) {
-               var a = new THREE.Vector3();
-               var b = new THREE.Vector3();
+	       var V = [ new THREE.Vector3(), new THREE.Vector3() ];
 	       for (var k = 0 ; k < this.visibleEdges.length ; k++) {
 	          var ve = this.visibleEdges[k];
-	          var vem = ve[0];
-	          var veg = ve[1];
-	          var vee = ve[2];
-	          for (var n = 0 ; n < vee.length ; n++) {
-	             var edge = vee[n];
-	             a.copy(veg.vertices[edge[0]]).applyMatrix4(vem);
-	             b.copy(veg.vertices[edge[1]]).applyMatrix4(vem);
-	             mesh.geometry.addLine(.015, a, b);
+	          var mat   = ve[0];
+	          var geom  = ve[1];
+	          var edges = ve[2];
+	          for (var n = 0 ; n < edges.length ; n++) {
+		     for (var j = 0 ; j < 2 ; j++)
+	                V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(mat);
+	             mesh.geometry.addLine(.015, V[0], V[1]);
                   }
                }
             }
