@@ -67,6 +67,7 @@ var sketchToDelete = null;
 
    function SketchPage() {
       this.fadeAway = 0;
+      this.isGlyphable = true;
       this.paletteColorDragXY = null;
       this.sketches = [];
       this.scaleRate = 0;
