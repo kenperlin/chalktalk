@@ -739,6 +739,7 @@
       ['g'  , "group/ungroup"],
       ['h'  , "home"],
       ['i'  , "insert text"],
+      ['k'  , "toggle char glyphs"],
       ['l'  , "toggle edge render"],
       ['m'  , "toggle menu type"],
       ['n'  , "negate card color"],

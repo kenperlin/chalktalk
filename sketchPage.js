@@ -6,6 +6,7 @@ var codeSketch = null;
 var isAudioSignal = false;
 var isBgDragActionEnabled = false;
 var isBottomHover = false;
+var isCharacterGlyphDataLoaded = false;
 var isCommandPressed = false;
 var isControlPressed = false;
 var isDrawingSketch2D = false;
@@ -1022,12 +1023,6 @@ var sketchToDelete = null;
          case 'h':
             this.doHome();
             break;
-         case 'l':
-            loadGlyphArray(characterGlyphData);
-            break;
-         case 'u':
-            unloadGlyphArray(characterGlyphData);
-            break;
          case 'p':
             isPanning = true;
             break;
@@ -1243,6 +1238,13 @@ var sketchToDelete = null;
             break;
          case 'i':
             toggleTextMode();
+            break;
+         case 'k':
+	    if (! isCharacterGlyphDataLoaded)
+               loadGlyphArray(characterGlyphData);
+            else
+               unloadGlyphArray(characterGlyphData);
+	    isCharacterGlyphDataLoaded = ! isCharacterGlyphDataLoaded;
             break;
          case 'l':
 	    isShowingMeshEdges = ! isShowingMeshEdges;
