@@ -341,7 +341,7 @@
       if (isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
-         buildTrace(glyphInfo, x, y, isLine);
+         buildTrace(glyphTrace, x, y, isLine);
          return;
       }
 
@@ -528,7 +528,7 @@
    var bgClickX = 0;
    var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
-   var glyphInfo = [];
+   var glyphTrace = [];
    var glyphSketch = null;
    var isAltKeyCopySketchEnabled = true;
    var isAltPressed = false;
@@ -536,7 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
-   var isShowing2DMeshEdges = false;
+   var isShowing2DMeshEdges = true;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -738,7 +738,7 @@
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['g'  , "group/ungroup"],
-      ['h'  , "home"],
+      ['h'  , "draw hint lines"],
       ['i'  , "insert text"],
       ['k'  , "toggle char glyphs"],
       ['l'  , "toggle edge render"],
@@ -805,7 +805,7 @@
 
          // CREATE GLYPH SHAPE INFO.
 
-         glyphInfo = [];
+         glyphTrace = [];
          isMakingGlyph = true;
          sk().render(0.02);
          isMakingGlyph = false;
@@ -813,7 +813,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-	 names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
+	 names.push(registerGlyph(code, glyphTrace, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
@@ -2101,6 +2101,24 @@
                }
          }
 
+	 // DRAW THE HINT TRACE IF THERE IS ONE.
+
+	 if (sketchPage.hintTrace !== undefined) {
+	    _g.save();
+	    _g.strokeStyle = 'green';
+	    _g.globalAlpha = 0.5;
+	    _g.lineWidth = 6;
+	    _g.beginPath();
+	    for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
+	       var stroke = sketchPage.hintTrace[n];
+	       _g.moveTo(stroke[0][0], stroke[0][1]);
+	       for (var i = 1 ; i < stroke.length ; i++)
+	          _g.lineTo(stroke[i][0], stroke[i][1]);
+            }
+	    _g.stroke();
+	    _g.restore();
+	 }
+
          // IF SHOWING LIVE DATA
 
 	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
@@ -2675,6 +2693,7 @@
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
@@ -2714,7 +2733,6 @@
 	    var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
 	    this.visibleEdgesMesh = mesh;
 
-	    var s = this.size * 0.86;
             if (isShowing2DMeshEdges) {
 	       color('red');
 	       lineWidth(1);
@@ -2734,8 +2752,8 @@
 	             mesh.geometry.addLine(.015, V[0], V[1]);
 
                      if (isShowing2DMeshEdges) {
-		        _g.moveTo(width() / 2 + s * V[0].x, height() / 2 - s * V[0].y);
-			_g.lineTo(width() / 2 + s * V[1].x, height() / 2 - s * V[1].y);
+		        _g.moveTo(width() / 2 + 344 * V[0].x, height() / 2 - 344 * V[0].y);
+			_g.lineTo(width() / 2 + 344 * V[1].x, height() / 2 - 344 * V[1].y);
                      }
                   }
                }
@@ -2752,6 +2770,23 @@
 
 	    root.add(mesh);
          }
+/*
+	    if (this.meshTrace !== undefined) {
+	       _g.save();
+	       _g.globalAlpha = 0.5;
+	       color('green');
+	       lineWidth(6);
+	       _g.beginPath();
+	       for (var n = 0 ; n < this.meshTrace.length ; n++) {
+	          var stroke = this.meshTrace[n];
+		  _g.moveTo(stroke[0][0], stroke[0][1]);
+		  for (var i = 1 ; i < stroke.length ; i++)
+		     _g.lineTo(stroke[i][0], stroke[i][1]);
+	       }
+	       _g.stroke();
+	       _g.restore();
+	    }
+*/
       }
 
       this.setUniform = function(name, value) {

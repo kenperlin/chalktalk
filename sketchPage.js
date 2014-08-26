@@ -189,6 +189,11 @@ var sketchToDelete = null;
             return;
          }
 
+	 if (this.hintTrace !== undefined) {
+	    this.hintTrace.push([[x,y]]);
+	    return;
+	 }
+
          isSketchDragActionEnabled = false;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
@@ -323,6 +328,11 @@ var sketchToDelete = null;
             return;
          }
 
+	 if (this.hintTrace !== undefined) {
+	    this.hintTrace[this.hintTrace.length-1].push([x,y]);
+	    return;
+	 }
+
          if (isSketchDragActionEnabled && this.travel > clickSize) {
             if (needToStartSketchDragAction) {
                startSketchDragAction(this.xDown, this.yDown);
@@ -429,6 +439,10 @@ var sketchToDelete = null;
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+	 if (this.hintTrace !== undefined) {
+	    return;
+	 }
 
          if (this.isDraggingGlyph) {
             glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
@@ -780,25 +794,12 @@ var sketchToDelete = null;
          }
       }
 
-      this.panX = 0;
-      this.panY = 0;
       this.zoom = 1;
-
-      this.doPan = function(x, y) {
-         this.panX = this.panX + (x - this.mx);
-         this.panY = this.panY + (y - this.my);
-      }
 
       // ZOOM THE SKETCH PAGE
 
       this.doZoom = function(x, y) {
          this.zoom *= 1 - (y - this.my) / height();
-      }
-
-      this.doHome = function() {
-         this.panX = 0;
-         this.panY = 0;
-         this.zoom = 1;
       }
 
       // RESPONSE TO MOUSE MOVE WHILE IN CREATING GROUP PATH MODE.
@@ -924,9 +925,6 @@ var sketchToDelete = null;
          case 'g':
             this.groupMouseMove(x, y);
             break;
-         case 'p':
-            //this.doPan(x, y);
-            break;
          case 'r':
             this.doRotate(x, y);
             break;
@@ -1021,9 +1019,6 @@ var sketchToDelete = null;
          case 'spc':
             isSpacePressed = true;
             return;
-         case 'h':
-            this.doHome();
-            break;
          case 'p':
             isPanning = true;
             break;
@@ -1237,6 +1232,12 @@ var sketchToDelete = null;
          case 'g':
             this.toggleGroup();
             break;
+         case 'h':
+	    if (this.hintTrace === undefined)
+	       this.hintTrace = [];
+            else
+	       delete this.hintTrace;
+	    break;
          case 'i':
             toggleTextMode();
             break;
