@@ -2649,6 +2649,9 @@
 /////// SKETCHES THAT MAKE USE OF WEBGL AND SHADERS ////////
 ////////////////////////////////////////////////////////////
 
+   function projectX(x) { return width () / 2 + 304 * x; }
+   function projectY(y) { return height() / 2 - 304 * y; }
+
    function GeometrySketch() {
       this.sx = 1;
       this.sy = 1;
@@ -2752,8 +2755,8 @@
 	             mesh.geometry.addLine(.015, V[0], V[1]);
 
                      if (isShowing2DMeshEdges) {
-		        _g.moveTo(width() / 2 + 344 * V[0].x, height() / 2 - 344 * V[0].y);
-			_g.lineTo(width() / 2 + 344 * V[1].x, height() / 2 - 344 * V[1].y);
+		        _g.moveTo(projectX(V[0].x), projectY(V[0].y));
+		        _g.lineTo(projectX(V[1].x), projectY(V[1].y));
                      }
                   }
                }
