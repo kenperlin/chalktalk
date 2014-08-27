@@ -146,12 +146,24 @@
       var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
       var N = [new THREE.Vector3(), new THREE.Vector3()];
       for (var n = 0 ; n < this.edges.length ; n++) {
-         for (var k = 0 ; k < 2 ; k++)
-            N[k].copy(this.faces[this.edges[n][k]].normal)
-                .applyMatrix3(normalMatrix).normalize();
+         var edge = this.edges[n];
+/*
+         var a = edge[2][0];
+         var b = edge[2][1];
+*/
+         for (var k = 0 ; k < 2 ; k++) {
+	    var face = this.faces[edge[k]];
+/*
+	    var j = face.a != a && face.a != b ? 0 :
+	            face.b != a && face.b != b ? 1 : 2;
+            var normal = face.vertexNormals[j];
+            N[k].copy(normal).applyMatrix3(normalMatrix).normalize();
+*/
+            N[k].copy(face.normal).applyMatrix3(normalMatrix).normalize();
+         }
 	 if ( (N[0].z > 0 || N[1].z > 0) &&
               (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
-            visibleEdges.push(this.edges[n][2]);
+            visibleEdges.push(edge[2]);
       }
       return visibleEdges;
    }

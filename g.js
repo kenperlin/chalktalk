@@ -2105,9 +2105,9 @@
 
 	 if (sketchPage.hintTrace !== undefined) {
 	    _g.save();
-	    _g.strokeStyle = 'green';
-	    _g.globalAlpha = 0.5;
-	    _g.lineWidth = 6;
+	    _g.strokeStyle = 'cyan';
+	    _g.globalAlpha = 0.25;
+	    _g.lineWidth = 20;
 	    _g.beginPath();
 	    for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
 	       var stroke = sketchPage.hintTrace[n];
@@ -2697,8 +2697,8 @@
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
-             .rotateX(-PI*this.rY)
              .rotateY( PI*this.rX)
+             .rotateX(-PI*this.rY)
              .scale(s * this.sx, s * this.sy, s);
 
          if (this.inValue[0] !== undefined) this.setUniform("x", this.inValue[0]);
