@@ -341,7 +341,7 @@
       if (isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
-         buildTrace(glyphInfo, x, y, isLine);
+         buildTrace(glyphTrace, x, y, isLine);
          return;
       }
 
@@ -528,7 +528,7 @@
    var bgClickX = 0;
    var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
-   var glyphInfo = [];
+   var glyphTrace = [];
    var glyphSketch = null;
    var isAltKeyCopySketchEnabled = true;
    var isAltPressed = false;
@@ -536,6 +536,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
+   var isShowing2DMeshEdges = true;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -737,8 +738,9 @@
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['g'  , "group/ungroup"],
-      ['h'  , "home"],
+      ['h'  , "draw hint lines"],
       ['i'  , "insert text"],
+      ['k'  , "toggle char glyphs"],
       ['l'  , "toggle edge render"],
       ['m'  , "toggle menu type"],
       ['n'  , "negate card color"],
@@ -803,7 +805,7 @@
 
          // CREATE GLYPH SHAPE INFO.
 
-         glyphInfo = [];
+         glyphTrace = [];
          isMakingGlyph = true;
          sk().render(0.02);
          isMakingGlyph = false;
@@ -811,7 +813,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-	 names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
+	 names.push(registerGlyph(code, glyphTrace, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
@@ -1077,8 +1079,12 @@
    function deleteInLink(s, j) {
       s.in[j] = undefined;
       s.inValue[j] = undefined;
-      if (s instanceof SimpleSketch && s.isNullText() && s.sp0.length <= 1)
+      if (isSimpleSketch(s) && s.isNullText() && s.sp0.length <= 1)
          deleteSketch(s);
+   }
+
+   function isSimpleSketch(s) {
+      return s instanceof SimpleSketch && ! (s instanceof GeometrySketch);
    }
 
 /////////////////////////////////////////////////////////////////////
@@ -1529,6 +1535,16 @@
          bgsTextUndo = [];
 	 sketchPage.beginTextSketch();
       }
+
+      else {
+         var bgCommand = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
+	 switch(bgCommand) {
+	 case 1:
+	    sketchPage.isGlyphable = ! sketchPage.isGlyphable;
+	    console.log(sketchPage.isGlyphable);
+	    break;
+	 }
+      }
    }
 
    function bgActionDrag(x, y) {
@@ -1700,8 +1716,7 @@
          sk().fadeAway = 1;             // E -- FADE TO DELETE
          break;
       case 1:
-         if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
-                                          && ! (sk() instanceof NumericSketch ))
+         if (isSimpleSketch(sk()) && ! (sk() instanceof NumericSketch ))
             sk().isGlyphable = ! sk().isGlyphable;
          else if (sk().glyph !== undefined) {
             sk().fadeAway = 1;
@@ -2085,6 +2100,24 @@
                   }
                }
          }
+
+	 // DRAW THE HINT TRACE IF THERE IS ONE.
+
+	 if (sketchPage.hintTrace !== undefined) {
+	    _g.save();
+	    _g.strokeStyle = 'cyan';
+	    _g.globalAlpha = 0.25;
+	    _g.lineWidth = 20;
+	    _g.beginPath();
+	    for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
+	       var stroke = sketchPage.hintTrace[n];
+	       _g.moveTo(stroke[0][0], stroke[0][1]);
+	       for (var i = 1 ; i < stroke.length ; i++)
+	          _g.lineTo(stroke[i][0], stroke[i][1]);
+            }
+	    _g.stroke();
+	    _g.restore();
+	 }
 
          // IF SHOWING LIVE DATA
 
@@ -2660,11 +2693,12 @@
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
-             .rotateX(-PI*this.rY)
              .rotateY( PI*this.rX)
+             .rotateX(-PI*this.rY)
              .scale(s * this.sx, s * this.sy, s);
 
          if (this.inValue[0] !== undefined) this.setUniform("x", this.inValue[0]);
@@ -2699,22 +2733,35 @@
 	    var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
 	    this.visibleEdgesMesh = mesh;
 
+            if (isShowing2DMeshEdges) {
+	       color('red');
+	       lineWidth(1);
+	       _g.beginPath();
+            }
+
 	    if (wasVisibleEdgesMesh) {
-               var a = new THREE.Vector3();
-               var b = new THREE.Vector3();
+	       var V = [ new THREE.Vector3(), new THREE.Vector3() ];
 	       for (var k = 0 ; k < this.visibleEdges.length ; k++) {
 	          var ve = this.visibleEdges[k];
-	          var vem = ve[0];
-	          var veg = ve[1];
-	          var vee = ve[2];
-	          for (var n = 0 ; n < vee.length ; n++) {
-	             var edge = vee[n];
-	             a.copy(veg.vertices[edge[0]]).applyMatrix4(vem);
-	             b.copy(veg.vertices[edge[1]]).applyMatrix4(vem);
-	             mesh.geometry.addLine(.015, a, b);
+	          var mat   = ve[0];
+	          var geom  = ve[1];
+	          var edges = ve[2];
+	          for (var n = 0 ; n < edges.length ; n++) {
+		     for (var j = 0 ; j < 2 ; j++)
+	                V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(mat);
+	             mesh.geometry.addLine(.015, V[0], V[1]);
+
+                     if (isShowing2DMeshEdges) {
+		        _g.moveTo(width() / 2 + 344 * V[0].x, height() / 2 - 344 * V[0].y);
+			_g.lineTo(width() / 2 + 344 * V[1].x, height() / 2 - 344 * V[1].y);
+                     }
                   }
                }
             }
+
+            if (isShowing2DMeshEdges) {
+	       _g.stroke();
+	    }
 
 	    if (this.alpha !== undefined) {
                mesh.material.opacity = sCurve(this.alpha);
@@ -2722,23 +2769,24 @@
 	    }
 
 	    root.add(mesh);
-/*
-	    var geometry = this.mesh.geometry;
-	    var matrix = this.mesh.getMatrix();
-	    var s = this.size * 0.765;
-	    _g.beginPath();
-	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {
-	       var edge = this.visibleEdges[n];
-	       var a = geometry.vertices[edge[0]];
-	       var b = geometry.vertices[edge[1]];
-	       var A = matrix.transform([a.x,a.y,a.z]);
-	       var B = matrix.transform([b.x,b.y,b.z]);
-	       _g.moveTo(width()/2 + s * A[0], height()/2 - s * A[1]);
-	       _g.lineTo(width()/2 + s * B[0], height()/2 - s * B[1]);
-	    }
-	    _g.stroke();
-*/
          }
+/*
+	    if (this.meshTrace !== undefined) {
+	       _g.save();
+	       _g.globalAlpha = 0.5;
+	       color('green');
+	       lineWidth(6);
+	       _g.beginPath();
+	       for (var n = 0 ; n < this.meshTrace.length ; n++) {
+	          var stroke = this.meshTrace[n];
+		  _g.moveTo(stroke[0][0], stroke[0][1]);
+		  for (var i = 1 ; i < stroke.length ; i++)
+		     _g.lineTo(stroke[i][0], stroke[i][1]);
+	       }
+	       _g.stroke();
+	       _g.restore();
+	    }
+*/
       }
 
       this.setUniform = function(name, value) {

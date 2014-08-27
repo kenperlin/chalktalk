@@ -403,7 +403,9 @@
          return j >= 0 ? isDef(this.DefaultValue[j]) : false;
       }
       this.isInValue = function(name) {
-         var j = getIndex(this.portName, name);
+         return this.isInValueAt(getIndex(this.portName, name));
+      }
+      this.isInValueAt = function(j) {
          return j >= 0 ? isDef(this.inValue[j]) : false;
       }
       this.isMouseOver = false;
@@ -1005,7 +1007,7 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    if (this.isGlyphable)
+	    if (sketchPage.isGlyphable && this.isGlyphable)
 	       this.convertToGlyphSketch();
             return;
          }

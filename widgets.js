@@ -817,14 +817,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       //////////////////////////////////////////////////////////////////////////////////////
 
-      codeElement.style.left = x + _g.panX - w/2 + 10;
+      codeElement.style.left = x - w/2 + 10;
       codeElement.style.top = y + 5;
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
       var cr = width() / 70;
 
-      var c = createRoundRect(x - w/2, y, w, h, cr);
+      var c = createRoundRect(x - _g.panX - w/2, y, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
