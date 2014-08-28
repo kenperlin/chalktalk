@@ -671,9 +671,9 @@
 
       function nameToGlyph(name) {
          var scribble = new Scribble(name);
-	 var glyph = new Glyph(name, [scribble]);
-	 glyph.scribbleLength = computeCurveLength(scribble);
-	 return glyph;
+         var glyph = new Glyph(name, [scribble]);
+         glyph.scribbleLength = computeCurveLength(scribble);
+         return glyph;
       }
 
       for (var n = 0 ; n < glyphs.length ; n++) {
@@ -813,7 +813,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-	 names.push(registerGlyph(code, glyphTrace, sk().labels[n]));
+         names.push(registerGlyph(code, glyphTrace, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
@@ -1166,7 +1166,7 @@
       for (var i = 0 ; i < glyphs.length ; i++) {
 
          if (glyphs[i].scribbleLength !== undefined && strokesGlyph.scribbleLength === undefined)
-	    strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
+            strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
 
          var score = strokesGlyph.compare(glyphs[i]);
          if (score < bestScore) {
@@ -1273,13 +1273,13 @@
                score += dx * dx + dy * dy;
             }
 
-	    // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
+            // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
 
-	    if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
-	         other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
-	       var ratio = other.scribbleLength / this.scribbleLength;
-	       score *= max(ratio, 1 / ratio);
-	    }
+            if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
+                 other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
+               var ratio = other.scribbleLength / this.scribbleLength;
+               score *= max(ratio, 1 / ratio);
+            }
          }
          return score;
       }
@@ -1482,7 +1482,7 @@
    function glyphIndex(glyphs, name) {
       for (var i = 0 ; i < glyphs.length ; i++)
          if (glyphs[i].name == name)
-	    return i;
+            return i;
       return -1;
    }
 
@@ -1513,7 +1513,7 @@
       }
       this.interpret = function() {
          var glyph = findGlyph([this.path], scribbleGlyphs);
-	 scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
+         scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
          return glyph == null ? "" : glyph.name;
       }
    }
@@ -1533,17 +1533,17 @@
          bgs = new BgScribble(x, y);
          bgsText = "";
          bgsTextUndo = [];
-	 sketchPage.beginTextSketch();
+         sketchPage.beginTextSketch();
       }
 
       else {
          var bgCommand = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-	 switch(bgCommand) {
-	 case 1:
-	    sketchPage.isGlyphable = ! sketchPage.isGlyphable;
-	    console.log(sketchPage.isGlyphable);
-	    break;
-	 }
+         switch(bgCommand) {
+         case 1:
+            sketchPage.isGlyphable = ! sketchPage.isGlyphable;
+            console.log(sketchPage.isGlyphable);
+            break;
+         }
       }
    }
 
@@ -1561,39 +1561,39 @@
 
       if (bgs !== undefined) {
          var str = bgs.interpret();
-	 switch (str) {
-	 case "C":
-	    isBgsShift = true;
-	    break;
-	 case "D":
+         switch (str) {
+         case "C":
+            isBgsShift = true;
+            break;
+         case "D":
             if (bgsTextUndo.length > 0) {
-	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
+               bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
                sk().setText(bgsText);
                sk().textCursor = bgsText.length;
             }
-	    break;
-	 default:
-	    bgsTextUndo.push(bgsText);
-	    if (bgsText.length > 0 && str.length > 1)
-	       bgsText += " ";
+            break;
+         default:
+            bgsTextUndo.push(bgsText);
+            if (bgsText.length > 0 && str.length > 1)
+               bgsText += " ";
             if (isBgsShift) {
-	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
-	       isBgsShift = false;
-	    }
+               str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+               isBgsShift = false;
+            }
 
             if (bgsText.length == 0)
-	       for (var n = 0 ; n < glyphs.length ; n++)
-	          if (str == glyphs[n].indexName) {
+               for (var n = 0 ; n < glyphs.length ; n++)
+                  if (str == glyphs[n].indexName) {
                      sk().setText(str);
-		     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
-		     bgActionEnd();
-		     return;
-	          }
+                     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
+                     bgActionEnd();
+                     return;
+                  }
 
             bgsText += str;
             sk().setText(bgsText);
             sk().textCursor = bgsText.length;
-	    break;
+            break;
          }
          bgs = new BgScribble(x, y);
          return;
@@ -1813,6 +1813,13 @@
 
    var tick = function(g) {
       var w = width(), h = height();
+
+      // SET CONSTANTS FOR projectX() and projectY().
+
+      pxM =  344 * w / 1440;
+      pxB =  w / 2;
+      pyM = -344 * w / 1440;
+      pyB =  h / 2;
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
@@ -2101,27 +2108,27 @@
                }
          }
 
-	 // DRAW THE HINT TRACE IF THERE IS ONE.
+         // DRAW THE HINT TRACE IF THERE IS ONE.
 
-	 if (sketchPage.hintTrace !== undefined) {
-	    _g.save();
-	    _g.strokeStyle = 'cyan';
-	    _g.globalAlpha = 0.25;
-	    _g.lineWidth = 20;
-	    _g.beginPath();
-	    for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
-	       var stroke = sketchPage.hintTrace[n];
-	       _g.moveTo(stroke[0][0], stroke[0][1]);
-	       for (var i = 1 ; i < stroke.length ; i++)
-	          _g.lineTo(stroke[i][0], stroke[i][1]);
+         if (sketchPage.hintTrace !== undefined) {
+            _g.save();
+            _g.strokeStyle = 'cyan';
+            _g.globalAlpha = 0.25;
+            _g.lineWidth = 20;
+            _g.beginPath();
+            for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
+               var stroke = sketchPage.hintTrace[n];
+               _g.moveTo(stroke[0][0], stroke[0][1]);
+               for (var i = 1 ; i < stroke.length ; i++)
+                  _g.lineTo(stroke[i][0], stroke[i][1]);
             }
-	    _g.stroke();
-	    _g.restore();
-	 }
+            _g.stroke();
+            _g.restore();
+         }
 
          // IF SHOWING LIVE DATA
 
-	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
+         var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
 
          if (showingLiveDataMode > 0 || isShowingLiveDataAtPort) {
 
@@ -2327,14 +2334,14 @@
 
       if (isShowingScribbleGlyphs) {
          var ncols = 25;
-	 var cw = w / ncols;
+         var cw = w / ncols;
 
          color(scribbleColor);
          lineWidth(cw / 70);
 
          var fs = floor(0.2 * w / ncols);
          _g.font = (2*fs) + "px Arial";
-	 _g.fillText(bgsText, 7, 28);
+         _g.fillText(bgsText, 7, 28);
 
          _g.font = fs + "px Arial";
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
@@ -2347,8 +2354,8 @@
             var s = scribbleGlyphs[ns].data;
 
             var x = xfx(s[0][0][0] * cw / 70);
-	    var y = xfy(s[0][0][1] * cw / 70);
-	    var dr = 3 * cw / 70;
+            var y = xfy(s[0][0][1] * cw / 70);
+            var dr = 3 * cw / 70;
             _g.beginPath();
             _g.moveTo(x - dr, y - dr);
             _g.lineTo(x + dr, y - dr);
@@ -2356,7 +2363,7 @@
             _g.lineTo(x - dr, y + dr);
             _g.fill();
 
-	    _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
+            _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
 
             for (var n = 0 ; n < s.length ; n++) {
                _g.beginPath();
@@ -2649,8 +2656,10 @@
 /////// SKETCHES THAT MAKE USE OF WEBGL AND SHADERS ////////
 ////////////////////////////////////////////////////////////
 
-   function projectX(x) { return width () / 2 + 304 * x; }
-   function projectY(y) { return height() / 2 - 304 * y; }
+   var pxM, pxB, pyM, pyB;
+
+   function projectX(x) { return pxM * x + pxB; }
+   function projectY(y) { return pyM * y + pyB; }
 
    function GeometrySketch() {
       this.sx = 1;
@@ -2661,8 +2670,8 @@
       this.downy = 0;
       this.cleanup = function() {
          root.remove(this.mesh);
-	 if (this.visibleEdgesMesh !== undefined)
-	    root.remove(this.visibleEdgesMesh);
+         if (this.visibleEdgesMesh !== undefined)
+            root.remove(this.visibleEdgesMesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2727,68 +2736,105 @@
          }
 
          var wasVisibleEdgesMesh = this.visibleEdgesMesh !== undefined;
-	 if (wasVisibleEdgesMesh)
-	    root.remove(this.visibleEdgesMesh);
+         if (wasVisibleEdgesMesh)
+            root.remove(this.visibleEdgesMesh);
 
          if (isShowingMeshEdges) {
-            this.visibleEdges = this.mesh.findVisibleEdges();
+            var veds = this.mesh.findVisibleEdges();
 
-	    var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
-	    this.visibleEdgesMesh = mesh;
+            var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
+            this.visibleEdgesMesh = mesh;
 
             if (isShowing2DMeshEdges) {
-	       color('red');
-	       lineWidth(1);
-	       _g.beginPath();
+               color('red');
+               lineWidth(1);
+               _g.beginPath();
+
+               for (var k = 0 ; k < veds.length ; k++) {
+                  var geom = veds[k][0];
+                  if (geom.verticesWorld === undefined) {
+                     geom.verticesWorld = [];
+                     for (var n = 0 ; n < geom.vertices.length ; n++)
+                        geom.verticesWorld.push(new THREE.Vector3());
+                  }
+                  for (var n = 0 ; n < geom.vertices.length ; n++)
+                     geom.verticesWorld[n].copy(geom.vertices[n]).applyMatrix4(geom.matrixWorld);
+               }
             }
 
-	    if (wasVisibleEdgesMesh) {
-	       var V = [ new THREE.Vector3(), new THREE.Vector3() ];
-	       for (var k = 0 ; k < this.visibleEdges.length ; k++) {
-	          var ve = this.visibleEdges[k];
-	          var mat   = ve[0];
-	          var geom  = ve[1];
-	          var edges = ve[2];
-	          for (var n = 0 ; n < edges.length ; n++) {
-		     for (var j = 0 ; j < 2 ; j++)
-	                V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(mat);
-	             mesh.geometry.addLine(.015, V[0], V[1]);
+            if (wasVisibleEdgesMesh) {
+               function isHidden(p) {
+                  for (var k = 0 ; k < veds.length ; k++) {
+                     var geom = veds[k][0];
+                     var vws = geom.verticesWorld;
+                     for (var n = 0 ; n < geom.faces.length ; n++) {
+                        var face = geom.faces[n];
+                        if (isPointHiddenByTriangle(p, vws[face.a], vws[face.b], vws[face.c]))
+                           return true;
+                     }
+                  }
+                  return false;
+               }
 
+               var V = [ new THREE.Vector3(), new THREE.Vector3() ];
+               var E = new THREE.Vector3();
+
+               for (var k = 0 ; k < veds.length ; k++) {
+                  var geom  = veds[k][0];
+                  var edges = veds[k][1];
+
+                  for (var n = 0 ; n < edges.length ; n++) {
+                     for (var j = 0 ; j < 2 ; j++)
+                        V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(geom.matrixWorld);
+                     mesh.geometry.addLine(.015, V[0], V[1]);
                      if (isShowing2DMeshEdges) {
-		        _g.moveTo(projectX(V[0].x), projectY(V[0].y));
-		        _g.lineTo(projectX(V[1].x), projectY(V[1].y));
+		        if (! isHidden(V[0]) && ! isHidden(V[1])) {
+                           _g.moveTo(projectX(V[0].x), projectY(V[0].y));
+                           _g.lineTo(projectX(V[1].x), projectY(V[1].y));
+                        }
+/*
+		        var d = V[0].distanceTo(V[1]);
+			var nSteps = max(2, floor(d / 0.03));
+			for (var step = 0 ; step < nSteps ; step++) {
+			   E.copy(V[0]).lerp(V[1], step / nSteps);
+                           if (step == 0 || isHidden(E))
+                              _g.moveTo(projectX(E.x), projectY(E.y));
+                           else
+                              _g.lineTo(projectX(E.x), projectY(E.y));
+                        }
+*/
                      }
                   }
                }
             }
 
             if (isShowing2DMeshEdges) {
-	       _g.stroke();
-	    }
+               _g.stroke();
+            }
 
-	    if (this.alpha !== undefined) {
+            if (this.alpha !== undefined) {
                mesh.material.opacity = sCurve(this.alpha);
                mesh.material.transparent = true;
-	    }
+            }
 
-	    root.add(mesh);
+            root.add(mesh);
          }
 /*
-	    if (this.meshTrace !== undefined) {
-	       _g.save();
-	       _g.globalAlpha = 0.5;
-	       color('green');
-	       lineWidth(6);
-	       _g.beginPath();
-	       for (var n = 0 ; n < this.meshTrace.length ; n++) {
-	          var stroke = this.meshTrace[n];
-		  _g.moveTo(stroke[0][0], stroke[0][1]);
-		  for (var i = 1 ; i < stroke.length ; i++)
-		     _g.lineTo(stroke[i][0], stroke[i][1]);
-	       }
-	       _g.stroke();
-	       _g.restore();
-	    }
+            if (this.meshTrace !== undefined) {
+               _g.save();
+               _g.globalAlpha = 0.5;
+               color('green');
+               lineWidth(6);
+               _g.beginPath();
+               for (var n = 0 ; n < this.meshTrace.length ; n++) {
+                  var stroke = this.meshTrace[n];
+                  _g.moveTo(stroke[0][0], stroke[0][1]);
+                  for (var i = 1 ; i < stroke.length ; i++)
+                     _g.lineTo(stroke[i][0], stroke[i][1]);
+               }
+               _g.stroke();
+               _g.restore();
+            }
 */
       }
 

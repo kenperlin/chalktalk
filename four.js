@@ -119,52 +119,43 @@
       }
    }
 
-   THREE.Object3D.prototype.findVisibleEdges = function(matrix, ve) {
-      if (matrix === undefined)
-         matrix = new THREE.Matrix4();
-
+   THREE.Object3D.prototype.findVisibleEdges = function(ve) {
       if (ve === undefined)
          ve = [];
-
-      matrix = matrix.multiply(this.matrix);
-
-      ve.push([ matrix, this.geometry, this.geometry.findVisibleEdges(matrix) ]);
-
-      for (var k = 0 ; k < this.children.length ; k++) {
-         var childMatrix = new THREE.Matrix4();
-	 childMatrix.copy(matrix);
-         this.children[k].findVisibleEdges(childMatrix, ve);
-      }
-
+      this.geometry.matrixWorld = this.matrixWorld;
+      ve.push([ this.geometry, this.geometry.findVisibleEdges() ]);
+      for (var k = 0 ; k < this.children.length ; k++)
+         this.children[k].findVisibleEdges(ve);
       return ve;
    }
 
-   THREE.Geometry.prototype.findVisibleEdges = function(matrix) {
+   THREE.Geometry.prototype.findVisibleEdges = function() {
       var visibleEdges = [];
+
       if (this.edges === undefined)
          this.computeEdges();
-      var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
-      var N = [new THREE.Vector3(), new THREE.Vector3()];
+      var normalMatrix = new THREE.Matrix3().getNormalMatrix(this.matrixWorld);
+
+      // COMPUTE VIEW DEPENDENT NORMAL FOR EVERY FACE.
+
+      for (var n = 0 ; n < this.faces.length ; n++) {
+	 var face = this.faces[n];
+	 if (face.viewNormal === undefined)
+	    face.viewNormal = new THREE.Vector3();
+         face.viewNormal.copy(face.normal).applyMatrix3(normalMatrix).normalize();
+      }
+
+      // FIND EDGES THAT ARE EITHER LOCALLY SILHOUETTE OR DIHEDRAL.
+
       for (var n = 0 ; n < this.edges.length ; n++) {
          var edge = this.edges[n];
-/*
-         var a = edge[2][0];
-         var b = edge[2][1];
-*/
-         for (var k = 0 ; k < 2 ; k++) {
-	    var face = this.faces[edge[k]];
-/*
-	    var j = face.a != a && face.a != b ? 0 :
-	            face.b != a && face.b != b ? 1 : 2;
-            var normal = face.vertexNormals[j];
-            N[k].copy(normal).applyMatrix3(normalMatrix).normalize();
-*/
-            N[k].copy(face.normal).applyMatrix3(normalMatrix).normalize();
-         }
-	 if ( (N[0].z > 0 || N[1].z > 0) &&
-              (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
+	 var n0 = this.faces[edge[0]].viewNormal;
+	 var n1 = this.faces[edge[1]].viewNormal;
+	 if ( (n0.z >= 0 || n1.z >= 0) &&
+              (n0.z <= 0 || n1.z <= 0 || n0.dot(n1) < 0.5) )
             visibleEdges.push(edge[2]);
       }
+
       return visibleEdges;
    }
 
@@ -179,6 +170,25 @@
       var nf = this.vertices.length;
       this.faces.push(new THREE.Face3(nf-4, nf-3, nf-2));
       this.faces.push(new THREE.Face3(nf-2, nf-1, nf-4));
+   }
+
+   // Compute one barycentric coordinate of a point in a triangle.
+
+   function barycentric(p, a, b, c) {
+      var A = c.y - b.y;
+      var B = b.x - c.x;
+      var C = -A * b.x - B * b.y;
+      return (A * p.x + B * p.y + C) / (A * a.x + B * a.y + C);
+   }
+
+   // Find out whether point p is hidden by triangle a,b,c.
+
+   var isPointHiddenByTriangle = function(p, a, b, c) {
+      var U = barycentric(p, a, b, c); if (U < 0) return false;
+      var V = barycentric(p, b, c, a); if (V < 0) return false;
+      var W = barycentric(p, c, a, b); if (W < 0) return false;
+      var tz = U * a.z + V * b.z + W * c.z;
+      return tz > p.z + 0.001;
    }
 
    var PI = Math.PI;
@@ -440,5 +450,4 @@ var fragmentShaderHeader = ["\
    uniform float y;\
    uniform float z;\
 "].join("\n");
-
 
