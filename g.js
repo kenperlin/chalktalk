@@ -2763,7 +2763,7 @@
             }
 
             if (wasVisibleEdgesMesh) {
-               function isHidden(p) {
+               function isHiddenPoint(p) {
                   for (var k = 0 ; k < veds.length ; k++) {
                      var geom = veds[k][0];
                      var vws = geom.verticesWorld;
@@ -2777,7 +2777,8 @@
                }
 
                var V = [ new THREE.Vector3(), new THREE.Vector3() ];
-               var E = new THREE.Vector3();
+               var E0 = new THREE.Vector3();
+               var E1 = new THREE.Vector3();
 
                for (var k = 0 ; k < veds.length ; k++) {
                   var geom  = veds[k][0];
@@ -2788,21 +2789,23 @@
                         V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(geom.matrixWorld);
                      mesh.geometry.addLine(.015, V[0], V[1]);
                      if (isShowing2DMeshEdges) {
-		        if (! isHidden(V[0]) && ! isHidden(V[1])) {
-                           _g.moveTo(projectX(V[0].x), projectY(V[0].y));
-                           _g.lineTo(projectX(V[1].x), projectY(V[1].y));
-                        }
-/*
+			_g.moveTo(projectX(V[0].x), projectY(V[0].y));
 		        var d = V[0].distanceTo(V[1]);
-			var nSteps = max(2, floor(d / 0.03));
-			for (var step = 0 ; step < nSteps ; step++) {
-			   E.copy(V[0]).lerp(V[1], step / nSteps);
-                           if (step == 0 || isHidden(E))
-                              _g.moveTo(projectX(E.x), projectY(E.y));
-                           else
-                              _g.lineTo(projectX(E.x), projectY(E.y));
+			var nSteps = max(1, floor(d / 0.03));
+			var wasHidden = isHiddenPoint(V[0]);
+			E1.copy(V[0]);
+			for (var step = 1 ; step <= nSteps ; step++) {
+			   E0.copy(E1);
+			   E1.copy(V[0]).lerp(V[1], step / nSteps);
+			   var isHidden = isHiddenPoint(E1);
+                           if (! wasHidden && isHidden)
+                              _g.lineTo(projectX(E0.x), projectY(E0.y));
+			   if (wasHidden && ! isHidden)
+                              _g.moveTo(projectX(E1.x), projectY(E1.y));
+                           wasHidden = isHidden;
                         }
-*/
+                        if (! wasHidden)
+                           _g.lineTo(projectX(E1.x), projectY(E1.y));
                      }
                   }
                }

@@ -357,7 +357,7 @@
    function Diagram() {
       this.labels =
          //"refract scan rgb circles square circle triangle flap".split(' ');
-         "square circle triangle flap".split(' ');
+         "scan square circle triangle flap".split(' ');
 
       this.isWandering = false;
 
@@ -575,10 +575,10 @@
                   drawRect((n + 1) * w / (nrc+2) - w/2, Y + H + w/(nrc-nr), w/(nrc+2), w/(nrc+2));
                }
 
-               text("col:", w/40 - w/2, Y + w/20);
-               text("row:", w/40 - w/2, Y + w/20 + w/10);
-               text(this.col, w/40 + w/7 - w/2, Y + w/20);
-               text(this.row, w/40 + w/7 - w/2, Y + w/20 + w/10);
+               text("col:", w/40 - w/1.5, Y + w/20);
+               text("row:", w/40 - w/1.5, Y + w/20 + w/10);
+               text(this.col, w/40 + w/7 - w/1.5, Y + w/20);
+               text(this.row, w/40 + w/7 - w/1.5, Y + w/20 + w/10);
 
                _g.textHeight = saveTextHeight;
             });
