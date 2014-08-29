@@ -647,6 +647,61 @@
       return [lerp(t, ax, bx), lerp(t, ay, by)];
    }
 
+   /*
+      Return the area of a 2D counterclockwise polygon.
+   */
+
+   function computeArea(P) {
+      var sum = 0;
+      for (var i = 0 ; i < P.length ; i++) {
+         var j = (i + 1) % P.length;
+	 sum += (P[j][0] - P[i][0]) * (P[i][1] + P[j][1]);
+      }
+      return sum / 2;
+   }
+
+   /*
+      Find out whether a 3D point is hidden by a 3D triangle.
+   */
+
+   var isPointBehindTriangle = function(p, tri) {
+      var L = [0,0,0];
+      var W = [0,0,0];
+      var dist = function(p, L) { return p[0] * L[0] + p[1] * L[1] + L[2]; }
+
+      return function(p, tri) {
+
+         // Loop through the three vertices of the triangle.
+
+         for (var j = 0 ; j < 3 ; j++) {
+
+            // Look at edge formed by the two vertices a and b opposite this vertex.
+
+	    var a = tri[(j+1)%3];
+	    var b = tri[(j+2)%3];
+
+            // From x,y coords of a and b, compute equation of 2d line through them.
+
+	    L[0] = b[1] - a[1];
+	    L[1] = a[0] - b[0];
+            L[2] = -(a[0] * L[0] + a[1] * L[1]);
+
+	    // Compute fractional distance of point into triangle away from edge.
+
+            W[j] = dist(p, L) / dist(tri[j], L);
+
+	    // If point is outside this edge, return false.
+
+	    if (W[j] < 0)
+	       return false;
+         }
+
+	 // Compare barycentrically weighted z of triangle vertices to z of the point.
+
+	 return W[0] * tri[0][2] + W[1] * tri[1][2] + W[2] * tri[2][2] > p[2];
+      }
+   }();
+
    // Create an arc of a circle.
 
    function createArc(x, y, r, angle0, angle1, n) {
