@@ -1265,6 +1265,9 @@ var sketchToDelete = null;
             isPanning = false;
             break;
          case 'q':
+	    _g.query = 0;
+	    break;
+/*
             if (! isk() || sk().sp == visible_sp)
                visible_sp = null;
             else if (isk()) {
@@ -1272,6 +1275,7 @@ var sketchToDelete = null;
                for (var i = 0 ; i < visible_sp.length ; i++)
                   console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
             }
+*/
             break;
          case 'b':
          case 'r':

@@ -448,8 +448,10 @@
 // ARRAY UTILITIES.
 
    function arrayToString(a, level) {
+      if (a.length == 0)
+        return "[]";
       if (level === undefined)
-         level = 0;
+        level = 0;
       var spacer = level == 0 ? " " : "";
       var str = "[" + spacer;
       for (var i = 0 ; i < a.length ; i++)

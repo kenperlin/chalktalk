@@ -2746,10 +2746,6 @@
             this.visibleEdgesMesh = mesh;
 
             if (isShowing2DMeshEdges) {
-               color('red');
-               lineWidth(1);
-               _g.beginPath();
-
                for (var k = 0 ; k < veds.length ; k++) {
                   var geom = veds[k][0];
                   if (geom.verticesWorld === undefined) {
@@ -2761,6 +2757,20 @@
                      geom.verticesWorld[n].copy(geom.vertices[n]).applyMatrix4(geom.matrixWorld);
                }
             }
+
+	    var e2 = [];
+
+	    function eq2d(a, b) { return a[0] == b[0] && a[1] == b[1]; } // Are two 2D points the same point?
+	    function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
+	    function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
+	    function e2lineTo(p) {
+	       var e = e2[e2.length-1];
+	       var xy = p2xy(p);
+	       if (eq2d(e[0], xy))
+	          e2.splice(e2.length-1, 1);
+	       else
+	          e.push(xy);
+	    }
 
             if (wasVisibleEdgesMesh) {
                function isHiddenPoint(p) {
@@ -2776,7 +2786,8 @@
                   return false;
                }
 
-               var V = [ new THREE.Vector3(), new THREE.Vector3() ];
+               var V0 = new THREE.Vector3();
+               var V1 = new THREE.Vector3();
                var E0 = new THREE.Vector3();
                var E1 = new THREE.Vector3();
 
@@ -2785,34 +2796,188 @@
                   var edges = veds[k][1];
 
                   for (var n = 0 ; n < edges.length ; n++) {
-                     for (var j = 0 ; j < 2 ; j++)
-                        V[j].copy(geom.vertices[edges[n][j]]).applyMatrix4(geom.matrixWorld);
-                     mesh.geometry.addLine(.015, V[0], V[1]);
+                     V0.copy(geom.vertices[edges[n][0]]).applyMatrix4(geom.matrixWorld);
+                     V1.copy(geom.vertices[edges[n][1]]).applyMatrix4(geom.matrixWorld);
+                     mesh.geometry.addLine(.015, V0, V1);
                      if (isShowing2DMeshEdges) {
-			_g.moveTo(projectX(V[0].x), projectY(V[0].y));
-		        var d = V[0].distanceTo(V[1]);
+
+
+		        var d = V0.distanceTo(V1);
 			var nSteps = max(1, floor(d / 0.03));
-			var wasHidden = isHiddenPoint(V[0]);
-			E1.copy(V[0]);
+			var wasHidden = isHiddenPoint(V0);
+			E1.copy(V0);
+			if (! wasHidden)
+			   e2moveTo(E1);
 			for (var step = 1 ; step <= nSteps ; step++) {
 			   E0.copy(E1);
-			   E1.copy(V[0]).lerp(V[1], step / nSteps);
+			   E1.copy(V0).lerp(V1, step / nSteps);
 			   var isHidden = isHiddenPoint(E1);
                            if (! wasHidden && isHidden)
-                              _g.lineTo(projectX(E0.x), projectY(E0.y));
+			      e2lineTo(E0);
 			   if (wasHidden && ! isHidden)
-                              _g.moveTo(projectX(E1.x), projectY(E1.y));
+			      e2moveTo(E1);
                            wasHidden = isHidden;
                         }
                         if (! wasHidden)
-                           _g.lineTo(projectX(E1.x), projectY(E1.y));
+			   e2lineTo(E1);
                      }
                   }
                }
             }
 
+	    function isQuery() { return _g.query !== undefined && _g.query < 10; }
+
             if (isShowing2DMeshEdges) {
+
+	       if (_g.query !== undefined)
+                  _g.query++;
+
+	       // Given one side of a connection, return the xy of the corresponding edge point.
+
+	       function c2xy(m, s) {
+		  var n = C[m][s][0];
+		  var j = C[m][s][1];
+		  return e2[n][j];
+	       }
+
+
+               ////////////////////////////////////////
+               // Reorder segments into longest chains.
+               ////////////////////////////////////////
+
+               var hash = {}, C = [];
+
+               // Hash all the edges to find pairwise connections of matching vertices between them.
+
+	       for (var n = 0 ; n < e2.length ; n++)
+
+                  // Look at both points of the edge.
+
+	          for (var j = 0 ; j < 2 ; j++) {
+
+	             // Create a unique hash string for the point.
+
+                     var p = e2[n][j];
+	             var h = p[0] + "," + p[1];
+
+		     // If this is the first time we are seeing this point, make a new hash entry.
+
+		     if (hash[h] === undefined)
+		        hash[h] = [n,j];
+
+	             // Otherwise, it's a match!  Add both sides of the connection to connections array.
+
+	             else
+		        C.push([ hash[h], [n,j] ]);
+	          }
+
+               // Build long chains, using these pairwise connections between edges.
+
+               for (var m1 = 0 ; m1 < C.length - 1 ; m1++)
+
+                  // Try all remaining connections to see whether this chain can be added to.
+
+	          for (var m2 = m1 + 1 ; m2 < C.length ; m2++) {
+
+	             // Try prepending each side of the connection to the chain.
+
+	             for (var s = 0 ; s < 2 ; s++) {
+		        var i = 0;
+
+			// The chain must not already have the same side of the same connection.
+
+                        var hasIt = false;
+			for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
+		           hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
+
+		        if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
+			   var c = C.splice(m2, 1)[0];
+			   C[m1] = [c[1-s], c[s]].concat(C[m1]);
+			   m2 = m1;
+			   break;
+			}
+                     }
+
+                     if (m2 == m1)
+		        continue;
+
+		     // If that didn't work, try postpending each side of the connection to the chain.
+
+	             for (var s = 0 ; s < 2 ; s++) {
+		        var i = C[m1].length - 1;
+
+			// The chain must not already have the same side of the same connection.
+
+                        var hasIt = false;
+			for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
+		           hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
+
+		        if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
+			   var c = C.splice(m2, 1)[0];
+			   C[m1] = C[m1].concat([c[s], c[1-s]]);
+			   m2 = m1;
+			   break;
+			}
+	             }
+	          }
+
+               // Add in any edges which have been left out.
+
+	       for (var n = 0 ; n < e2.length ; n++) {
+	          var count = 0;
+		  for (var m = 0 ; m < C.length ; m++)
+		     for (k = 0 ; k < C[m].length ; k++)
+		        if (C[m][k][0] == n)
+			   count++;
+
+                  if (count < 2)
+		     C.push( [ [n, 0], [n, 1] ] );
+	       }
+
+	       // Draw the 2d connected components in different colors.
+
+               lineWidth(20);
+	       function pickColor(m) {
+	          switch (m % 7) {
+	          case  0: return 'rgba(255,255,255, 0.5)';
+	          case  1: return 'rgba(255,255,  0, 0.5)';
+	          case  2: return 'rgba(255,  0,255, 0.5)';
+	          case  3: return 'rgba(255,  0,  0, 0.5)';
+	          case  4: return 'rgba(  0,255,255, 0.5)';
+	          case  5: return 'rgba(  0,255,  0, 0.5)';
+	          case  6: return 'rgba(  0,  0,255, 0.5)';
+	          }
+	       }
+               for (var m = 0 ; m < C.length ; m++) {
+	          color(pickColor(m));
+	          _g.beginPath();
+	          for (var k = 0 ; k < C[m].length ; k++) {
+		     var xy = c2xy(m, k);
+		     if (k == 0)
+		        _g.moveTo(xy[0], xy[1]);
+		     else
+		        _g.lineTo(xy[0], xy[1]);
+		  }
+		  if (C[m][0][0] == C[m][C[m].length-1][0]) {
+		     var xy = c2xy(m, 0);
+		     _g.lineTo(xy[0], xy[1]);
+		  }
+	          _g.stroke();
+	       }
+
+	       // Draw the original 2d edges.
+
+               color('rgba(255,0,0,0.5)');
+               lineWidth(10);
+	       _g.beginPath();
+	       for (var n = 0 ; n < e2.length ; n++) {
+	          if (e2[n].length == 2) {
+	             _g.moveTo(e2[n][0][0], e2[n][0][1]);
+	             _g.lineTo(e2[n][1][0], e2[n][1][1]);
+	          }
+	       }
                _g.stroke();
+
             }
 
             if (this.alpha !== undefined) {
