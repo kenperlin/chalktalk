@@ -787,7 +787,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var w = 12 * cols + 10;
+      var w = min(12 * cols + 10, width() * 0.75);
 
       if (rows > 3)
          rows += 0.3;
