@@ -2740,6 +2740,9 @@
             root.remove(this.visibleEdgesMesh);
 
          if (isShowingMeshEdges) {
+
+            // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
+
             var veds = this.mesh.findVisibleEdges();
 
             var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
@@ -2757,6 +2760,8 @@
                      geom.verticesWorld[n].copy(geom.vertices[n]).applyMatrix4(geom.matrixWorld);
                }
             }
+
+	    // CREATE A CORRESPONDING ARRAY OF 2D PROJECTED EDGES.
 
 	    var e2 = [];
 
@@ -2801,7 +2806,6 @@
                      mesh.geometry.addLine(.015, V0, V1);
                      if (isShowing2DMeshEdges) {
 
-
 		        var d = V0.distanceTo(V1);
 			var nSteps = max(1, floor(d / 0.03));
 			var wasHidden = isHiddenPoint(V0);
@@ -2825,125 +2829,8 @@
                }
             }
 
-            ////////////////////////////////////////////////////////////////////
-            // Reorder segments into long chains, suitable for defining a glyph.
-            ////////////////////////////////////////////////////////////////////
-
-	    function isQuery() { return _g.query !== undefined && _g.query < 10; }
-
             if (isShowing2DMeshEdges) {
-
-	       if (_g.query !== undefined)
-                  _g.query++;
-
-	       // Given one side of a connection, return the xy of the corresponding edge point.
-
-	       function c2xy(m, s) {
-		  var n = C[m][s][0];
-		  var j = C[m][s][1];
-		  return e2[n][j];
-	       }
-
-
-               var hash = {}, C = [];
-
-               // Hash all the edges to find pairwise connections of matching vertices between them.
-
-	       for (var n = 0 ; n < e2.length ; n++)
-
-                  // Look at both points of the edge.
-
-	          for (var j = 0 ; j < 2 ; j++) {
-
-	             // Create a unique hash string for the point.
-
-                     var p = e2[n][j];
-	             var h = p[0] + "," + p[1];
-
-		     // If this is the first time we are seeing this point, make a new hash entry.
-
-		     if (hash[h] === undefined)
-		        hash[h] = [n,j];
-
-	             // Otherwise, it's a match!  Add both sides of the connection to connections array.
-
-	             else
-		        C.push([ hash[h], [n,j] ]);
-	          }
-
-               // Build long chains, using these pairwise connections between edges.
-
-               for (var m1 = 0 ; m1 < C.length - 1 ; m1++)
-
-                  // Try all remaining connections to see whether this chain can be added to.
-
-	          for (var m2 = m1 + 1 ; m2 < C.length ; m2++) {
-
-	             // Try prepending each side of the connection to the chain.
-
-	             for (var s = 0 ; s < 2 ; s++) {
-		        var i = 0;
-
-			// The chain must not already have the same side of the same connection.
-
-                        var hasIt = false;
-			for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
-		           hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
-
-		        if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
-			   var c = C.splice(m2, 1)[0];
-			   C[m1] = [c[1-s], c[s]].concat(C[m1]);
-			   m2 = m1;
-			   break;
-			}
-                     }
-
-                     if (m2 == m1)
-		        continue;
-
-		     // If that didn't work, try postpending each side of the connection to the chain.
-
-	             for (var s = 0 ; s < 2 ; s++) {
-		        var i = C[m1].length - 1;
-
-			// The chain must not already have the same side of the same connection.
-
-                        var hasIt = false;
-			for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
-		           hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
-
-		        if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
-			   var c = C.splice(m2, 1)[0];
-			   C[m1] = C[m1].concat([c[s], c[1-s]]);
-			   m2 = m1;
-			   break;
-			}
-	             }
-	          }
-
-               // Add in any edges which have been left out.
-
-	       for (var n = 0 ; n < e2.length ; n++) {
-	          var count = 0;
-		  for (var m = 0 ; m < C.length ; m++)
-		     for (k = 0 ; k < C[m].length ; k++)
-		        if (C[m][k][0] == n)
-			   count++;
-
-                  if (count < 2)
-		     C.push( [ [n, 0], [n, 1] ] );
-	       }
-
-	       // Finally, package as a set of strokes that can be used to define a glyph.
-
-	       var c2 = [];
-               for (var m = 0 ; m < C.length ; m++) {
-	          c2.push( [ c2xy(m, 0) ] );
-	          for (var k = 1 ; k < C[m].length ; k++)
-		     c2[m].push( c2xy(m, k) );
-                  if (C[m][0][0] == C[m][C[m].length-1][0])
-		     c2[m].push( c2xy(m, 0) );
-	       }
+	       var c2 = edgesToStrokes(e2);
 
 	       // Draw the 2d connected components in different colors.
 
