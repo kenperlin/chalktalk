@@ -2825,6 +2825,10 @@
                }
             }
 
+            ////////////////////////////////////////////////////////////////////
+            // Reorder segments into long chains, suitable for defining a glyph.
+            ////////////////////////////////////////////////////////////////////
+
 	    function isQuery() { return _g.query !== undefined && _g.query < 10; }
 
             if (isShowing2DMeshEdges) {
@@ -2840,10 +2844,6 @@
 		  return e2[n][j];
 	       }
 
-
-               ////////////////////////////////////////
-               // Reorder segments into longest chains.
-               ////////////////////////////////////////
 
                var hash = {}, C = [];
 
@@ -2934,34 +2934,31 @@
 		     C.push( [ [n, 0], [n, 1] ] );
 	       }
 
+	       // Finally, package as a set of strokes that can be used to define a glyph.
+
+	       var c2 = [];
+               for (var m = 0 ; m < C.length ; m++) {
+	          c2.push( [ c2xy(m, 0) ] );
+	          for (var k = 1 ; k < C[m].length ; k++)
+		     c2[m].push( c2xy(m, k) );
+                  if (C[m][0][0] == C[m][C[m].length-1][0])
+		     c2[m].push( c2xy(m, 0) );
+	       }
+
 	       // Draw the 2d connected components in different colors.
 
-               lineWidth(20);
 	       function pickColor(m) {
-	          switch (m % 7) {
-	          case  0: return 'rgba(255,255,255, 0.5)';
-	          case  1: return 'rgba(255,255,  0, 0.5)';
-	          case  2: return 'rgba(255,  0,255, 0.5)';
-	          case  3: return 'rgba(255,  0,  0, 0.5)';
-	          case  4: return 'rgba(  0,255,255, 0.5)';
-	          case  5: return 'rgba(  0,255,  0, 0.5)';
-	          case  6: return 'rgba(  0,  0,255, 0.5)';
-	          }
+	          function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
+		  return 'rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)';
 	       }
-               for (var m = 0 ; m < C.length ; m++) {
+
+               lineWidth(20);
+               for (var m = 0 ; m < c2.length ; m++) {
 	          color(pickColor(m));
 	          _g.beginPath();
-	          for (var k = 0 ; k < C[m].length ; k++) {
-		     var xy = c2xy(m, k);
-		     if (k == 0)
-		        _g.moveTo(xy[0], xy[1]);
-		     else
-		        _g.lineTo(xy[0], xy[1]);
-		  }
-		  if (C[m][0][0] == C[m][C[m].length-1][0]) {
-		     var xy = c2xy(m, 0);
-		     _g.lineTo(xy[0], xy[1]);
-		  }
+		  _g.moveTo(c2[m][0][0], c2[m][0][1]);
+	          for (var k = 1 ; k < c2[m].length ; k++)
+		     _g.lineTo(c2[m][k][0], c2[m][k][1]);
 	          _g.stroke();
 	       }
 
