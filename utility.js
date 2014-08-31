@@ -742,6 +742,12 @@
       return [xlo,ylo,xhi,yhi];
    }
 
+   // The union of two bounding rectangles.
+
+   function computeUnionOfBounds(a, b) {
+      return [ min(a[0],b[0]), min(a[1], b[1]), max(a[2],b[2]), max(a[3],b[3]) ];
+   }
+
    // Create a curved line.
 
    function createCurve(A, B, curvature, N) {

@@ -1128,6 +1128,10 @@
 
    function setTextMode(state) {
       isTextMode = state;
+      if (isTextMode)
+         loadGlyphArray(characterGlyphData);
+      else
+         unloadGlyphArray(characterGlyphData);
       return isTextMode;
    }
 
@@ -2831,6 +2835,31 @@
 
             if (isShowing2DMeshEdges) {
 	       var c2 = edgesToStrokes(e2);
+
+/////////////////////////////
+	       // Convert to standard position and size for a glyph.
+
+	       var b = [width(),height(),0,0];
+	       for (var m = 0 ; m < c2.length ; m++)
+	          b = computeUnionOfBounds(b, computeCurveBounds(c2[m]));
+               var bradius = max(b[2] - b[0], b[3] - b[1]) / 2;
+               var bx_mean = (b[0] + b[2]) / 2;
+               var by_mean = (b[1] + b[3]) / 2;
+
+	       // console.log(this.mesh.getMatrix().toString());
+
+               var s2 = [];
+	       for (var m = 0 ; m < c2.length ; m++) {
+	          s2.push([]);
+		  for (var k = 0 ; k < c2[m].length ; k++) {
+		     var x = c2[m][k][0];
+		     var y = c2[m][k][1];
+		     s2[m].push( [ (x - bx_mean) / bradius , (y - by_mean) / bradius ] );
+		  }
+	       }
+
+	       // console.log(arrayToString(s2));
+/////////////////////////////
 
 	       // Draw the 2d connected components in different colors.
 

@@ -215,6 +215,7 @@
          text(roundedString(value), P[0], P[1], ax, ay);
       }
       this.drawText = function(context) {
+
          var fontSize = floor(24 * this.scale());
 
          if (this instanceof SimpleSketch && this.isNullText()) {
@@ -257,13 +258,13 @@
          if (! isCursor && this.text.length == 0)
             return;
 
-         if (this.text.length == 0) {
-            this.drawCursor(this.tx(), this.ty(), fontHeight, context);
-            return;
-         }
-
          var x1 = this instanceof Sketch2D ? this.x2D : lerp(this.scale(), this.tx(), this.textX);
          var y1 = this instanceof Sketch2D ? this.y2D : lerp(this.scale(), this.ty(), this.textY);
+
+	 if (this.text.length == 0) {
+	    this.drawCursor(x1, y1, fontHeight, context);
+	    return;
+	 }
 
          var j = 0;
          for (var n = 0 ; n < this.textStrs.length ; n++) {

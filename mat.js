@@ -97,6 +97,12 @@
          v[8] = Z[0]; v[9] = Z[1]; v[10] = Z[2];
 	 return this;
       }
+      this.toString = function() {
+         var str = "";
+	 for (var i = 0 ; i < 16 ; i++)
+	    str += (i==0 ? "[" : ",") + roundedString(this._m()[i]);
+         return str + "]";
+      }
       this.translate = function(x,y,z) {
          this._xf(this._tr(x,y,z));
 	 return this;
