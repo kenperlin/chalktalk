@@ -242,7 +242,6 @@ var sketchToDelete = null;
          }
 
          if (isTextMode) {
-
             strokes = [[[x,y]]];
             strokesStartTime = time;
 /*
@@ -556,7 +555,7 @@ var sketchToDelete = null;
 
             // CLICKING ON THE INDEX NAME OF A GLYPH INSTANTIATES A GLYPH SKETCH OF THAT TYPE+LABEL.
 
-            if (isHover()) {
+            if (this.isClick && isHover()) {
                convertTextSketchToGlyphSketch(sk(), x, y);
                return;
             }
