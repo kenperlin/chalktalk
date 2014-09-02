@@ -651,11 +651,8 @@ var sketchToDelete = null;
 
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else {
-               if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) {
-                  return;
-               }
-            }
+            else if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) 
+               return;
          }
 
          // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
@@ -1177,6 +1174,7 @@ var sketchToDelete = null;
                   sk().removeLastStroke();
                else {
                   sk().fadeAway = 1.0;
+		  fadeArrowsIntoSketch(sk());
                   setTextMode(false);
                }
                else

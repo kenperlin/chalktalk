@@ -139,9 +139,9 @@
       // COMPUTE VIEW DEPENDENT NORMAL FOR EVERY FACE.
 
       for (var n = 0 ; n < this.faces.length ; n++) {
-	 var face = this.faces[n];
-	 if (face.viewNormal === undefined)
-	    face.viewNormal = new THREE.Vector3();
+         var face = this.faces[n];
+         if (face.viewNormal === undefined)
+            face.viewNormal = new THREE.Vector3();
          face.viewNormal.copy(face.normal).applyMatrix3(normalMatrix).normalize();
       }
 
@@ -149,9 +149,9 @@
 
       for (var n = 0 ; n < this.edges.length ; n++) {
          var edge = this.edges[n];
-	 var n0 = this.faces[edge[0]].viewNormal;
-	 var n1 = this.faces[edge[1]].viewNormal;
-	 if ( (n0.z >= 0 || n1.z >= 0) &&
+         var n0 = this.faces[edge[0]].viewNormal;
+         var n1 = this.faces[edge[1]].viewNormal;
+         if ( (n0.z >= 0 || n1.z >= 0) &&
               (n0.z <= 0 || n1.z <= 0 || n0.dot(n1) < 0.5) )
             visibleEdges.push(edge[2]);
       }
@@ -450,4 +450,72 @@ var fragmentShaderHeader = ["\
    uniform float y;\
    uniform float z;\
 "].join("\n");
+
+
+   function projectVisibleEdges(mesh, veds) {
+      var e2 = [];
+
+      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
+      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
+      function e2lineTo(p) {
+         var e = e2[e2.length-1];
+         var xy = p2xy(p);
+         if (e[0][0] == xy[0] && e[0][1] == xy[1])
+            e2.splice(e2.length-1, 1);
+         else
+            e.push(xy);
+      }
+
+      function isHiddenPoint(p) {
+         for (var k = 0 ; k < veds.length ; k++) {
+            var geom = veds[k][0];
+            var vws = geom.verticesWorld;
+            for (var n = 0 ; n < geom.faces.length ; n++) {
+               var face = geom.faces[n];
+               if (isPointHiddenByTriangle(p, vws[face.a], vws[face.b], vws[face.c]))
+                  return true;
+            }
+         }
+         return false;
+      }
+
+      var V0 = new THREE.Vector3();
+      var V1 = new THREE.Vector3();
+      var E0 = new THREE.Vector3();
+      var E1 = new THREE.Vector3();
+
+      for (var k = 0 ; k < veds.length ; k++) {
+         var geom  = veds[k][0];
+         var edges = veds[k][1];
+
+         for (var n = 0 ; n < edges.length ; n++) {
+            V0.copy(geom.vertices[edges[n][0]]).applyMatrix4(geom.matrixWorld);
+            V1.copy(geom.vertices[edges[n][1]]).applyMatrix4(geom.matrixWorld);
+            mesh.geometry.addLine(.015, V0, V1);
+            if (isShowing2DMeshEdges) {
+
+               var d = V0.distanceTo(V1);
+               var nSteps = max(1, floor(d / 0.03));
+               var wasHidden = isHiddenPoint(V0);
+               E1.copy(V0);
+               if (! wasHidden)
+                  e2moveTo(E1);
+               for (var step = 1 ; step <= nSteps ; step++) {
+                  E0.copy(E1);
+                  E1.copy(V0).lerp(V1, step / nSteps);
+                  var isHidden = isHiddenPoint(E1);
+                  if (! wasHidden && isHidden)
+                     e2lineTo(E0);
+                  if (wasHidden && ! isHidden)
+                     e2moveTo(E1);
+                  wasHidden = isHidden;
+               }
+               if (! wasHidden)
+                  e2lineTo(E1);
+            }
+         }
+      }
+
+      return e2;
+   }
 

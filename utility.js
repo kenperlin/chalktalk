@@ -564,6 +564,33 @@
       }
    }
 
+   // Clip a curve to that part which is entirely outside of a rectangle.
+
+   function clipCurveAgainstRect(src, R) {
+      if (src[0] == undefined) return [];
+      var dst = [];
+      var x1 = src[0][0];
+      var y1 = src[0][1];
+      if (! isInRect(x1,y1, R))
+         dst.push([x1,y1]);
+      for (var n = 1 ; n < src.length ; n++) {
+         var x0 = x1, y0 = y1;
+         x1 = src[n][0];
+         y1 = src[n][1];
+         var draw0 = ! isInRect(x0,y0, R);
+         var draw1 = ! isInRect(x1,y1, R);
+         if (draw0 || draw1) {
+            if (! draw0)
+               dst.push(clipLineToRect(x0,y0, x1,y1, R));
+            if (! draw1)
+               dst.push(clipLineToRect(x1,y1, x0,y0, R));
+            else
+               dst.push([x1,y1]);
+         }
+      }
+      return dst;
+   }
+
    // Bend a curve toward a point, ending up at a target length.
 
    function bendCurve(curve, pt, totalLength, i0) {

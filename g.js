@@ -926,31 +926,6 @@
 
          linkData[4] = createCurve(A, B, s);
 
-         function clipCurveAgainstRect(src, R) {
-            if (src[0] == undefined) return [];
-            var dst = [];
-            var x1 = src[0][0];
-            var y1 = src[0][1];
-            if (! isInRect(x1,y1, R))
-               dst.push([x1,y1]);
-            for (var n = 1 ; n < src.length ; n++) {
-               var x0 = x1, y0 = y1;
-               x1 = src[n][0];
-               y1 = src[n][1];
-               var draw0 = ! isInRect(x0,y0, R);
-               var draw1 = ! isInRect(x1,y1, R);
-               if (draw0 || draw1) {
-                  if (! draw0)
-                     dst.push(clipLineToRect(x0,y0, x1,y1, R));
-                  if (! draw1)
-                     dst.push(clipLineToRect(x1,y1, x0,y0, R));
-                  else
-                     dst.push([x1,y1]);
-               }
-            }
-            return dst;
-         }
-
          linkData[4] = clipCurveAgainstRect(linkData[4], aR);
          linkData[4] = clipCurveAgainstRect(linkData[4], bR);
       }
@@ -1676,6 +1651,9 @@
          sketchDragActionXY = [x,y];
          sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
          break;
+      case 6:
+         sk().arrowBegin(x, y);
+         break;
       }
    }
 
@@ -1694,6 +1672,8 @@
             sketchDragActionXY[0] = x;
             sketchDragActionXY[1] = y;
          }
+      case 6:
+         sk().arrowDrag(x, y);
          break;
       }
    }
@@ -1702,6 +1682,9 @@
       switch (sketchDragMode) {
       case 2:
          delete sketchPage.definingMotion;
+         break;
+      case 6:
+         sk().arrowEnd(x, y);
          break;
       }
    }
@@ -1718,6 +1701,7 @@
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
+	 fadeArrowsIntoSketch(sk());
          break;
       case 1:
          if (isSimpleSketch(sk()) && ! (sk() instanceof NumericSketch ))
@@ -2000,6 +1984,58 @@
 
          if (isTextMode && time - strokesStartTime >= 0.5)
             isShorthandTimeout = true;
+
+         // DRAW ARROWS.
+
+	 annotateStart();
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I).parent == null) {
+	       var a = sk(I);
+	       for (var n = 0 ; n < a.arrows.length ; n++) {
+	          var c = a.arrows[n][0];
+	          var b = a.arrows[n][1];
+
+		  var alpha = 1;
+	          var fade = a.arrows[n][2];
+		  if (fade !== undefined) {
+		     alpha = fade;
+		     alpha = max(0, a.arrows[n][2] - 3 * This().elapsed);
+		     if (alpha == 0) {
+		        a.arrowRemove(b);
+			continue;
+		     }
+		     a.arrows[n][2] = alpha;
+		  }
+
+		  if (b == null)
+		     continue;
+		  var C = createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
+		  C = clipCurveAgainstRect(C, [a.xlo,a.ylo,a.xhi,a.yhi]);
+		  C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+		  if (C[0] === undefined)
+		     continue;
+		  var nc = C.length;
+		  _g.strokeStyle = defaultPenColor;
+		  _g.lineWidth = width() / 300;
+		  _g.globalAlpha = sCurve(alpha);
+		  _g.beginPath();
+		  _g.moveTo(C[0][0], C[0][1]);
+		  for (var k = 0 ; k < nc ; k++)
+		     _g.lineTo(C[k][0], C[k][1]);
+		  if (nc > 4) {
+		     var dx = C[nc-1][0] - C[nc-4][0];
+		     var dy = C[nc-1][1] - C[nc-4][1];
+		     var d = len(dx, dy);
+		     dx *= _g.lineWidth * 5 / d;
+		     dy *= _g.lineWidth * 5 / d;
+		     _g.lineTo(C[nc-1][0] - dx - dy, C[nc-1][1] - dy + dx);
+		     _g.moveTo(C[nc-1][0], C[nc-1][1]);
+		     _g.lineTo(C[nc-1][0] - dx + dy, C[nc-1][1] - dy - dx);
+		  }
+		  _g.stroke();
+	       }
+	    }
+	 annotateEnd();
 
          // DRAW LINKS.
 
@@ -2436,6 +2472,12 @@
       deleteSketchOnly(sketch);
    }
 
+   function fadeArrowsIntoSketch(sketch) {
+      for (var I = 0 ; I < nsk() ; I++)
+         if (sk(I) != sketch)
+            sk(I).arrowFade(sketch);
+   }
+
    function deleteSketchOnly(sketch) {
 
       var i = sketchPage.findIndex(sketch);
@@ -2588,6 +2630,7 @@
 
    function addSketch(sketch) {
       sketchPage.add(sketch);
+      sk().arrows = [];
       sk().id = globalSketchId++;
       sk().setColorId(sketchPage.colorId);
       sk().sketchState = 'start';
@@ -2595,6 +2638,7 @@
       sk().in = [];
       sk().out = [];
       sk().inValue = [];
+      sk().motionPath = [];
       sk().outValue = [];
       sk().defaultValue = [];
       sk().portBounds = [];
@@ -2755,113 +2799,33 @@
             if (isShowing2DMeshEdges) {
                for (var k = 0 ; k < veds.length ; k++) {
                   var geom = veds[k][0];
+
+		  // If this geometry doesn't yet have a world-coord vertices array, create it.
+
                   if (geom.verticesWorld === undefined) {
                      geom.verticesWorld = [];
                      for (var n = 0 ; n < geom.vertices.length ; n++)
                         geom.verticesWorld.push(new THREE.Vector3());
                   }
+
+		  // Compute world vertex coordinates for this geometry.
+
                   for (var n = 0 ; n < geom.vertices.length ; n++)
                      geom.verticesWorld[n].copy(geom.vertices[n]).applyMatrix4(geom.matrixWorld);
                }
             }
 
-	    // CREATE A CORRESPONDING ARRAY OF 2D PROJECTED EDGES.
+	    // Create a corresponding array of 2d projected edges.
+	    // Connect them into long 2d strokes.
+	    // Visualize the results.
 
-	    var e2 = [];
+            if (wasVisibleEdgesMesh && isShowing2DMeshEdges) {
 
-	    function eq2d(a, b) { return a[0] == b[0] && a[1] == b[1]; } // Are two 2D points the same point?
-	    function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
-	    function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
-	    function e2lineTo(p) {
-	       var e = e2[e2.length-1];
-	       var xy = p2xy(p);
-	       if (eq2d(e[0], xy))
-	          e2.splice(e2.length-1, 1);
-	       else
-	          e.push(xy);
-	    }
+	       var e2 = projectVisibleEdges(mesh, veds);
 
-            if (wasVisibleEdgesMesh) {
-               function isHiddenPoint(p) {
-                  for (var k = 0 ; k < veds.length ; k++) {
-                     var geom = veds[k][0];
-                     var vws = geom.verticesWorld;
-                     for (var n = 0 ; n < geom.faces.length ; n++) {
-                        var face = geom.faces[n];
-                        if (isPointHiddenByTriangle(p, vws[face.a], vws[face.b], vws[face.c]))
-                           return true;
-                     }
-                  }
-                  return false;
-               }
-
-               var V0 = new THREE.Vector3();
-               var V1 = new THREE.Vector3();
-               var E0 = new THREE.Vector3();
-               var E1 = new THREE.Vector3();
-
-               for (var k = 0 ; k < veds.length ; k++) {
-                  var geom  = veds[k][0];
-                  var edges = veds[k][1];
-
-                  for (var n = 0 ; n < edges.length ; n++) {
-                     V0.copy(geom.vertices[edges[n][0]]).applyMatrix4(geom.matrixWorld);
-                     V1.copy(geom.vertices[edges[n][1]]).applyMatrix4(geom.matrixWorld);
-                     mesh.geometry.addLine(.015, V0, V1);
-                     if (isShowing2DMeshEdges) {
-
-		        var d = V0.distanceTo(V1);
-			var nSteps = max(1, floor(d / 0.03));
-			var wasHidden = isHiddenPoint(V0);
-			E1.copy(V0);
-			if (! wasHidden)
-			   e2moveTo(E1);
-			for (var step = 1 ; step <= nSteps ; step++) {
-			   E0.copy(E1);
-			   E1.copy(V0).lerp(V1, step / nSteps);
-			   var isHidden = isHiddenPoint(E1);
-                           if (! wasHidden && isHidden)
-			      e2lineTo(E0);
-			   if (wasHidden && ! isHidden)
-			      e2moveTo(E1);
-                           wasHidden = isHidden;
-                        }
-                        if (! wasHidden)
-			   e2lineTo(E1);
-                     }
-                  }
-               }
-            }
-
-            if (isShowing2DMeshEdges) {
 	       var c2 = edgesToStrokes(e2);
 
-/////////////////////////////
-	       // Convert to standard position and size for a glyph.
-
-	       var b = [width(),height(),0,0];
-	       for (var m = 0 ; m < c2.length ; m++)
-	          b = computeUnionOfBounds(b, computeCurveBounds(c2[m]));
-               var bradius = max(b[2] - b[0], b[3] - b[1]) / 2;
-               var bx_mean = (b[0] + b[2]) / 2;
-               var by_mean = (b[1] + b[3]) / 2;
-
-	       // console.log(this.mesh.getMatrix().toString());
-
-               var s2 = [];
-	       for (var m = 0 ; m < c2.length ; m++) {
-	          s2.push([]);
-		  for (var k = 0 ; k < c2[m].length ; k++) {
-		     var x = c2[m][k][0];
-		     var y = c2[m][k][1];
-		     s2[m].push( [ (x - bx_mean) / bradius , (y - by_mean) / bradius ] );
-		  }
-	       }
-
-	       // console.log(arrayToString(s2));
-/////////////////////////////
-
-	       // Draw the 2d connected components in different colors.
+	       // Draw the long connected 2d strokes in different colors.
 
 	       function pickColor(m) {
 	          function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
@@ -2878,7 +2842,7 @@
 	          _g.stroke();
 	       }
 
-	       // Draw the original 2d edges.
+	       // Draw the projected 2d edges.
 
                color('rgba(255,0,0,0.5)');
                lineWidth(10);
@@ -3253,6 +3217,6 @@
    }
 
 var glyphs = [];
-loadGlyphArray(glyphData);
+loadGlyphArray(numericGlyphData);
 
 
