@@ -2,7 +2,7 @@
 
 
 
-var xeyeballFragmentShader = [
+var xEyeballFragmentShader = [
 ,'   float car2radius(vec3 P) {'
 ,'      float rad = sqrt(P.x*P.x + P.y*P.y + P.z*P.z);'
 ,'      return rad;'
@@ -126,14 +126,14 @@ var xeyeballFragmentShader = [
 ,'   }'			       
 ].join("\n");
 
-registerGlyph("xeyeball()",[
+registerGlyph("xEyeball()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
    [ [-1, 1], [1, -1]], 
 ]);
 
-function xeyeball() {
-   var sketch = addSphereShaderSketch(defaultVertexShader, xeyeballFragmentShader);
-   sketch.code = [["yplanet", xeyeballFragmentShader],["flame", flameFragmentShader]];
+function xEyeball() {
+   var sketch = addSphereShaderSketch(defaultVertexShader, xEyeballFragmentShader);
+   sketch.code = [["yplanet", xEyeballFragmentShader],["flame", flameFragmentShader]];
    sketch.enableFragmentShaderEditing();
    sketch.update = function() {
      if (this.isInValueAt(0)) this.rX = this.inValue[0];
@@ -143,7 +143,7 @@ function xeyeball() {
 
 
 
-var xplanetFragmentShader = [
+var xRedPlanetFragmentShader = [
 ,'   float car2radius(vec3 P) {'
 ,'      float rad = sqrt(P.x*P.x + P.y*P.y + P.z*P.z);'
 ,'      return rad;'
@@ -199,7 +199,7 @@ var xplanetFragmentShader = [
 ,'      vec3  refl_dir[numLights];'
 ,'      light_color[0] = vec3(1., 1., 1.);'
 ,'      light_color[1] = vec3(1., 0.2, 0.2);'
-,'      light_pt[0] = vec3(100.0, 40.0, 25.0);'
+,'      light_pt[0] = vec3(300.0, 100.0, 250.0);'
 ,'      light_pt[1] = vec3(-50.0, -50.0, -50.0);'
 ,'      light_amp[0] = vec3(0.05, 0.3, 0.0);'
 ,'      light_amp[1] = vec3(0.0, 0.1, 0.0);'
@@ -214,12 +214,14 @@ var xplanetFragmentShader = [
 ,'      float azi = car2azi(vPosition); //  + sin(mod(time,2.*3.14156));'
 ,'      float t1 = turbulence(vec3(azi*8.+51.0, incl*8.0+75.2, 251.444));'
 ,'      float t2 = turbulence(vec3(azi*3.0+101.33, incl*3.0-7777.22, 6251.444));'
+,'      float t3 = pow(turbulence(vPosition * 5.0), 5.0);'
+,'      float t4 = pow(turbulence((vNormal + vec3(200.01, -500.444, 20444.3)) * .5), 3.0);'
 ,'      float lat_amp = latamp(azi + t2);'
 ,'      float long_amp = longamp(incl + t2);'
 ,'      //'
 ,'      vec3 ice_clr = vec3(0.8,0.8,1.);'
 ,'      vec3 cloud_clr = vec3(1.0, 1.0, 1.0);'
-,'      vec3 ocean_clr = vec3(0., 0.0, 0.4);'
+,'      vec3 ocean_clr = vec3(0.0, 0.0, 0.0);'
 ,'      vec3 ocean_clr_2 = vec3(0.2, 0.5, 0.2);'
 ,'      vec3 citylight_clr = vec3(0.5, 0.3, 0.2);'
 ,'      vec3 road_clr = vec3(0., 0., 0.);'
@@ -233,13 +235,14 @@ var xplanetFragmentShader = [
 ,'      //'
 ,'      vec3 color = vec3(0.0,0.0,0.0);'
 ,'      float sum_amps = 0.0;'
-,'      float cloud_amp = clamp(t2*t2 * 1.0, 0.0, 1.0);'
+,'      float cloud_amp = clamp(t3, 0.0, 1.0);'
 ,'      float fire_amp = clamp((lat_amp + long_amp) * t1 * 0.5, 0.0, 1.0);'
 ,'      if (incl <= 0.3 || incl >= (2.0*3.14159-0.3)) fire_amp = 0.0;'
 ,'      float ocean_amp = max(0.0, 1.0 - cloud_amp - fire_amp);'
 ,'      // color += line_clr * fire_amp;'
-,'      color += ocean_clr * max(0.0, ocean_amp - cloud_amp);'
-,'      color += cloud_clr * cloud_amp ;'
+,'      color += ocean_clr * max(0.0, 1.0 - t3);'
+,'      // color += cloud_clr * cloud_amp ;'
+,'      // color += citylight_clr * max(0.0, fire_amp - cloud_amp);'
 ,'      // if (incl + (t1*0.1) < n_pole) color += ice_clr * clamp(t1 * 1.0, 0.0, 1.0);'
 ,'      vec3 new_vPosition = vPosition + (vNormal * cloud_amp * 0.1); '
 ,'      //'
@@ -249,7 +252,9 @@ var xplanetFragmentShader = [
 ,'      vec3   viewdir = normalize(eyept - new_vPosition);'
 ,'      float  horizon_amp = 1.0 - max(0.0, -dot(viewdir, normalize(vNormal)));' 
 ,'      horizon_amp = pow(horizon_amp, 7.0);'
-,'      if (horizon_amp > 0.0) color += atmos_clr * horizon_amp;'
+,'      if (horizon_amp > 0.0) {'
+,'         color += atmos_clr * horizon_amp;'
+,'      }'
 ,'      for (int i = 0; i < numLights; i++) {'
 ,'         diff_amp[i] = max(0.0, dot(vNormal, normalize((light_pt[i]-vPosition))));'
 ,'         // viewdir = normalize(eyept - vPosition);'
@@ -266,18 +271,20 @@ var xplanetFragmentShader = [
 ,'      // if (incl > iris_size) color = sclera_clr;'
 ,'      // if (incl > iris_size && (lat_amp+long_amp) > 0.0) color = mix(color, blood_clr, t2 * 0.5);'
 ,'      for (int i = 0; i < numLights; i++) {'
-,'         spec_amp[i] *= (1.0 - fire_amp);'
-,'         spec_amp[i] *= (1.0 - cloud_amp);'
+,'         // spec_amp[i] *= (1.0 - fire_amp);'
+,'         // spec_amp[i] *= (1.0 - cloud_amp);'
+,'         spec_amp[i] *= (1.0 - t3);'
 ,'         spec_color = proc_env_map(1.0, refl_dir[i], specC1, sun_clr, 1.0, 1.0);' 
 ,'         out_color += (color * light_color[i] * light_amp[i].x) +'
 ,'            (color * light_color[i] * diff_amp[i] * light_amp[i].y) + (spec_color * light_color[i] * spec_amp[i] * light_amp[i].z);'
 ,'      }'
-,'      if (fire_amp > 0.0 && cloud_amp <= 0.2) out_color += citylight_clr * (max(0.0, fire_amp-cloud_amp));'
+,'      // if (fire_amp > 0.0 && cloud_amp <= 0.2) out_color += citylight_clr * (max(0.0, fire_amp-cloud_amp));'
 ,'      if (horizon_amp > 0.0) {'
 ,'         // out_color += atmos_clr * horizon_amp;'
 ,'         // out_alpha *= (1.0 - horizon_amp);'
 ,'      }'
-,'      // out_color = vec3(horizon_amp, 0.0, 0.0);'
+,'      out_color += vec3(t3, 0.0, 0.0);'
+,'      out_color += citylight_clr * max(0.0, fire_amp * (t3 + 0.0) * 2.5);'
 ,'      // out_alpha = 1.0;'
 ,'      if (out_color == vec3(0.0, 0.0, 0.0)) out_color = vec3(0.0, 1.0, 0.0);'
 ,'      out_color = gamma_encode(clamp(out_color, 0.0, 1.0), 0.6);'
@@ -354,14 +361,14 @@ var OLDxplanetFragmentShader = [
 ,'   }'
 ].join("\n");
 
-registerGlyph("xplanet()",[
+registerGlyph("xRedPlanet()",[
    makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTLINE PLANET CCW FROM TOP.
-   [ [-1, -1], [1, 1]], 
+   [ [1, 1], [-1, -1]], 
 ]);
 
-function xplanet() {
-   var sketch = addSphereShaderSketch(defaultVertexShader, xplanetFragmentShader);
-   sketch.code = [["xplanet", xplanetFragmentShader],["flame", flameFragmentShader]];
+function xRedPlanet() {
+   var sketch = addSphereShaderSketch(defaultVertexShader, xRedPlanetFragmentShader);
+   sketch.code = [["xRedPlanet", xRedPlanetFragmentShader]];
    sketch.enableFragmentShaderEditing();
 };
 
