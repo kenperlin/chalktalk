@@ -1,5 +1,5 @@
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Mat4 Cyl1".split(' ');
 
 function blankPage() {
    return {
