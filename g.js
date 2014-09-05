@@ -2786,13 +2786,19 @@
          if (this.visibleEdgesMesh !== undefined)
             root.remove(this.visibleEdgesMesh);
 
+/*
+   function meshToStrokes(mesh) {
+      return edgesToStrokes(mesh.projectVisibleEdges(mesh.findVisibleEdges()));
+   }
+*/
+
          if (isShowingMeshEdges) {
 
             // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
 
-            var veds = this.mesh.findVisibleEdges();
+            var visibleEdges = this.mesh.findVisibleEdges();
 
-            this.visibleEdgesMesh = createVisibleEdgesMesh(veds);
+            this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
             root.add(this.visibleEdgesMesh);
 
@@ -2804,7 +2810,7 @@
 	    // Project the visible edges, and connect them into long 2d strokes.
 
             if (isShowing2DMeshEdges) {
-	       var e2 = projectVisibleEdges(veds);
+	       var e2 = this.mesh.projectVisibleEdges(visibleEdges);
 	       var c2 = edgesToStrokes(e2);
 
 

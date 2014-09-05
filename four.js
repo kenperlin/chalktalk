@@ -120,14 +120,73 @@
    }
 
    THREE.Object3D.prototype.findVisibleEdges = function(ve) {
-      if (ve === undefined)
+      if (ve === undefined) {
+         this.updateMatrixWorld();
          ve = [];
-      this.updateMatrixWorld();
+      }
       this.geometry.matrixWorld = this.matrixWorld;
       ve.push([ this.geometry, this.geometry.findVisibleEdges() ]);
       for (var k = 0 ; k < this.children.length ; k++)
          this.children[k].findVisibleEdges(ve);
       return ve;
+   }
+
+   THREE.Object3D.prototype.projectVisibleEdges = function(veds) {
+      var e2 = [];
+
+      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
+      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
+      function e2lineTo(p) {
+         var e = e2[e2.length-1];
+         var xy = p2xy(p);
+         if (e[0][0] == xy[0] && e[0][1] == xy[1])
+            e2.splice(e2.length-1, 1);
+         else
+            e.push(xy);
+      }
+
+      var E0 = new THREE.Vector3();
+      var E1 = new THREE.Vector3();
+
+      for (var k = 0 ; k < veds.length ; k++) {
+         var geom  = veds[k][0];
+         var edges = veds[k][1];
+
+         for (var n = 0 ; n < edges.length ; n++) {
+            var V0 = geom.vertexWorld(edges[n][0]);
+            var V1 = geom.vertexWorld(edges[n][1]);
+
+            var d = V0.distanceTo(V1);
+            var nSteps = max(1, floor(d / 0.03));
+            E1.copy(V0);
+            var wasHidden = this.isHiddenPoint(E1);
+            if (! wasHidden)
+               e2moveTo(E1);
+            for (var step = 1 ; step <= nSteps ; step++) {
+               E0.copy(E1);
+               E1.copy(V0).lerp(V1, step / nSteps);
+               var isHidden = this.isHiddenPoint(E1);
+               if (! wasHidden && isHidden)
+                  e2lineTo(E0);
+               if (wasHidden && ! isHidden)
+                  e2moveTo(E1);
+               wasHidden = isHidden;
+            }
+            if (! wasHidden)
+               e2lineTo(E1);
+         }
+      }
+
+      return e2;
+   }
+
+   THREE.Object3D.prototype.isHiddenPoint = function(p) {
+      if (this.geometry.isHiddenPoint(p))
+         return true;
+      for (var k = 0 ; k < this.children.length ; k++)
+         if (this.children[k].isHiddenPoint(p))
+            return true;
+      return false;
    }
 
    THREE.Geometry.prototype.findVisibleEdges = function() {
@@ -169,6 +228,7 @@
 
       return this.verticesWorld[i].copy(this.vertices[i]).applyMatrix4(this.matrixWorld);
    }
+
 
    THREE.Geometry.prototype.addLine = function(t, a, b) {
       var dx = b.x - a.x, dy = b.y - a.y, d = sqrt(dx * dx + dy * dy);
@@ -489,54 +549,5 @@ var fragmentShaderHeader = ["\
       }
 
       return mesh;
-   }
-
-   function projectVisibleEdges(veds) {
-      var e2 = [];
-
-      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
-      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
-      function e2lineTo(p) {
-         var e = e2[e2.length-1];
-         var xy = p2xy(p);
-         if (e[0][0] == xy[0] && e[0][1] == xy[1])
-            e2.splice(e2.length-1, 1);
-         else
-            e.push(xy);
-      }
-
-      var E0 = new THREE.Vector3();
-      var E1 = new THREE.Vector3();
-
-      for (var k = 0 ; k < veds.length ; k++) {
-         var geom  = veds[k][0];
-         var edges = veds[k][1];
-
-         for (var n = 0 ; n < edges.length ; n++) {
-            var V0 = geom.vertexWorld(edges[n][0]);
-            var V1 = geom.vertexWorld(edges[n][1]);
-
-            var d = V0.distanceTo(V1);
-            var nSteps = max(1, floor(d / 0.03));
-            var wasHidden = geom.isHiddenPoint(V0);
-            E1.copy(V0);
-            if (! wasHidden)
-               e2moveTo(E1);
-            for (var step = 1 ; step <= nSteps ; step++) {
-               E0.copy(E1);
-               E1.copy(V0).lerp(V1, step / nSteps);
-               var isHidden = geom.isHiddenPoint(E1);
-               if (! wasHidden && isHidden)
-                  e2lineTo(E0);
-               if (wasHidden && ! isHidden)
-                  e2moveTo(E1);
-               wasHidden = isHidden;
-            }
-            if (! wasHidden)
-               e2lineTo(E1);
-         }
-      }
-
-      return e2;
    }
 
