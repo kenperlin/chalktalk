@@ -2783,103 +2783,74 @@
                this.glyphSketch = null;
          }
 
-         var wasVisibleEdgesMesh = this.visibleEdgesMesh !== undefined;
-         if (wasVisibleEdgesMesh)
+         if (this.visibleEdgesMesh !== undefined)
             root.remove(this.visibleEdgesMesh);
+
+/*
+   function meshToStrokes(mesh) {
+      return edgesToStrokes(mesh.projectVisibleEdges(mesh.findVisibleEdges()));
+   }
+*/
 
          if (isShowingMeshEdges) {
 
             // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
 
-            var veds = this.mesh.findVisibleEdges();
+            var visibleEdges = this.mesh.findVisibleEdges();
 
-            var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
-            this.visibleEdgesMesh = mesh;
+            this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
-            if (isShowing2DMeshEdges) {
-               for (var k = 0 ; k < veds.length ; k++) {
-                  var geom = veds[k][0];
+            root.add(this.visibleEdgesMesh);
 
-		  // If this geometry doesn't yet have a world-coord vertices array, create it.
-
-                  if (geom.verticesWorld === undefined) {
-                     geom.verticesWorld = [];
-                     for (var n = 0 ; n < geom.vertices.length ; n++)
-                        geom.verticesWorld.push(new THREE.Vector3());
-                  }
-
-		  // Compute world vertex coordinates for this geometry.
-
-                  for (var n = 0 ; n < geom.vertices.length ; n++)
-                     geom.verticesWorld[n].copy(geom.vertices[n]).applyMatrix4(geom.matrixWorld);
-               }
+            if (this.alpha !== undefined) {
+               this.visibleEdgesMesh.material.opacity = sCurve(this.alpha);
+               this.visibleEdgesMesh.material.transparent = true;
             }
 
-	    // Create a corresponding array of 2d projected edges.
-	    // Connect them into long 2d strokes.
-	    // Visualize the results.
+	    // Project the visible edges, and connect them into long 2d strokes.
 
-            if (wasVisibleEdgesMesh && isShowing2DMeshEdges) {
-
-	       var e2 = projectVisibleEdges(mesh, veds);
-
+            if (isShowing2DMeshEdges) {
+	       var e2 = this.mesh.projectVisibleEdges(visibleEdges);
 	       var c2 = edgesToStrokes(e2);
+
+
+	       annotateStart();
 
 	       // Draw the long connected 2d strokes in different colors.
 
-	       function pickColor(m) {
-	          function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
-		  return 'rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)';
-	       }
-
                lineWidth(20);
+	       function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
                for (var m = 0 ; m < c2.length ; m++) {
-	          color(pickColor(m));
-	          _g.beginPath();
-		  _g.moveTo(c2[m][0][0], c2[m][0][1]);
-	          for (var k = 1 ; k < c2[m].length ; k++)
-		     _g.lineTo(c2[m][k][0], c2[m][k][1]);
-	          _g.stroke();
+	          color('rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)');
+		  drawCurve(c2[m]);
 	       }
 
 	       // Draw the projected 2d edges.
 
-               color('rgba(255,0,0,0.5)');
                lineWidth(10);
-	       _g.beginPath();
-	       for (var n = 0 ; n < e2.length ; n++) {
-	          if (e2[n].length == 2) {
-	             _g.moveTo(e2[n][0][0], e2[n][0][1]);
-	             _g.lineTo(e2[n][1][0], e2[n][1][1]);
-	          }
-	       }
-               _g.stroke();
+               color('rgba(255,0,0,0.5)');
+	       for (var n = 0 ; n < e2.length ; n++)
+		  drawCurve(e2[n]);
 
+	       annotateEnd();
             }
-
-            if (this.alpha !== undefined) {
-               mesh.material.opacity = sCurve(this.alpha);
-               mesh.material.transparent = true;
-            }
-
-            root.add(mesh);
          }
 /*
-            if (this.meshTrace !== undefined) {
-               _g.save();
-               _g.globalAlpha = 0.5;
-               color('green');
-               lineWidth(6);
-               _g.beginPath();
-               for (var n = 0 ; n < this.meshTrace.length ; n++) {
-                  var stroke = this.meshTrace[n];
-                  _g.moveTo(stroke[0][0], stroke[0][1]);
-                  for (var i = 1 ; i < stroke.length ; i++)
-                     _g.lineTo(stroke[i][0], stroke[i][1]);
-               }
-               _g.stroke();
-               _g.restore();
+         if (this.meshTrace !== undefined) {
+            _g.save();
+            _g.globalAlpha = 0.5;
+            color('green');
+            lineWidth(6);
+            _g.beginPath();
+            for (var n = 0 ; n < this.meshTrace.length ; n++) {
+               var stroke = this.meshTrace[n];
+               _g.moveTo(stroke[0][0], stroke[0][1]);
+               for (var i = 1 ; i < stroke.length ; i++)
+                  _g.lineTo(stroke[i][0], stroke[i][1]);
             }
+            _g.stroke();
+            _g.restore();
+         }
 */
       }
 

@@ -120,13 +120,73 @@
    }
 
    THREE.Object3D.prototype.findVisibleEdges = function(ve) {
-      if (ve === undefined)
+      if (ve === undefined) {
+         this.updateMatrixWorld();
          ve = [];
+      }
       this.geometry.matrixWorld = this.matrixWorld;
       ve.push([ this.geometry, this.geometry.findVisibleEdges() ]);
       for (var k = 0 ; k < this.children.length ; k++)
          this.children[k].findVisibleEdges(ve);
       return ve;
+   }
+
+   THREE.Object3D.prototype.projectVisibleEdges = function(veds) {
+      var e2 = [];
+
+      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
+      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
+      function e2lineTo(p) {
+         var e = e2[e2.length-1];
+         var xy = p2xy(p);
+         if (e[0][0] == xy[0] && e[0][1] == xy[1])
+            e2.splice(e2.length-1, 1);
+         else
+            e.push(xy);
+      }
+
+      var E0 = new THREE.Vector3();
+      var E1 = new THREE.Vector3();
+
+      for (var k = 0 ; k < veds.length ; k++) {
+         var geom  = veds[k][0];
+         var edges = veds[k][1];
+
+         for (var n = 0 ; n < edges.length ; n++) {
+            var V0 = geom.vertexWorld(edges[n][0]);
+            var V1 = geom.vertexWorld(edges[n][1]);
+
+            var d = V0.distanceTo(V1);
+            var nSteps = max(1, floor(d / 0.03));
+            E1.copy(V0);
+            var wasHidden = this.isHiddenPoint(E1);
+            if (! wasHidden)
+               e2moveTo(E1);
+            for (var step = 1 ; step <= nSteps ; step++) {
+               E0.copy(E1);
+               E1.copy(V0).lerp(V1, step / nSteps);
+               var isHidden = this.isHiddenPoint(E1);
+               if (! wasHidden && isHidden)
+                  e2lineTo(E0);
+               if (wasHidden && ! isHidden)
+                  e2moveTo(E1);
+               wasHidden = isHidden;
+            }
+            if (! wasHidden)
+               e2lineTo(E1);
+         }
+      }
+
+      return e2;
+   }
+
+   THREE.Object3D.prototype.isHiddenPoint = function(p) {
+      if (this.geometry.isHiddenPoint(p))
+         return true;
+      for (var k = 0 ; k < this.children.length ; k++)
+         if (this.children[k].isHiddenPoint(p))
+            return true;
+      return false;
    }
 
    THREE.Geometry.prototype.findVisibleEdges = function() {
@@ -159,6 +219,17 @@
       return visibleEdges;
    }
 
+   THREE.Geometry.prototype.vertexWorld = function(i) {
+      if (this.verticesWorld === undefined)
+         this.verticesWorld = [];
+
+      if (this.verticesWorld[i] === undefined)
+         this.verticesWorld[i] = new THREE.Vector3();
+
+      return this.verticesWorld[i].copy(this.vertices[i]).applyMatrix4(this.matrixWorld);
+   }
+
+
    THREE.Geometry.prototype.addLine = function(t, a, b) {
       var dx = b.x - a.x, dy = b.y - a.y, d = sqrt(dx * dx + dy * dy);
       dx *= t/2 / d;
@@ -172,13 +243,18 @@
       this.faces.push(new THREE.Face3(nf-2, nf-1, nf-4));
    }
 
-   // Compute one barycentric coordinate of a point in a triangle.
+   THREE.Geometry.prototype.isHiddenPoint = function(p) {
+      for (var n = 0 ; n < this.faces.length ; n++)
+         if (this.isPointHiddenByFace(p, n))
+            return true;
+      return false;
+   }
 
-   function barycentric(p, a, b, c) {
-      var A = c.y - b.y;
-      var B = b.x - c.x;
-      var C = -A * b.x - B * b.y;
-      return (A * p.x + B * p.y + C) / (A * a.x + B * a.y + C);
+   THREE.Geometry.prototype.isPointHiddenByFace = function(p, n) {
+      var face = this.faces[n];
+      return isPointHiddenByTriangle(p, this.vertexWorld(face.a),
+	                                this.vertexWorld(face.b),
+	                                this.vertexWorld(face.c));
    }
 
    // Find out whether point p is hidden by triangle a,b,c.
@@ -189,6 +265,15 @@
       var W = barycentric(p, c, a, b); if (W < 0) return false;
       var tz = U * a.z + V * b.z + W * c.z;
       return tz > p.z + 0.001;
+   }
+
+   // Compute one barycentric coordinate of a point in a triangle.
+
+   function barycentric(p, a, b, c) {
+      var A = c.y - b.y;
+      var B = b.x - c.x;
+      var C = -A * b.x - B * b.y;
+      return (A * p.x + B * p.y + C) / (A * a.x + B * a.y + C);
    }
 
    var PI = Math.PI;
@@ -451,71 +536,18 @@ var fragmentShaderHeader = ["\
    uniform float z;\
 "].join("\n");
 
-
-   function projectVisibleEdges(mesh, veds) {
-      var e2 = [];
-
-      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
-      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
-      function e2lineTo(p) {
-         var e = e2[e2.length-1];
-         var xy = p2xy(p);
-         if (e[0][0] == xy[0] && e[0][1] == xy[1])
-            e2.splice(e2.length-1, 1);
-         else
-            e.push(xy);
-      }
-
-      function isHiddenPoint(p) {
-         for (var k = 0 ; k < veds.length ; k++) {
-            var geom = veds[k][0];
-            var vws = geom.verticesWorld;
-            for (var n = 0 ; n < geom.faces.length ; n++) {
-               var face = geom.faces[n];
-               if (isPointHiddenByTriangle(p, vws[face.a], vws[face.b], vws[face.c]))
-                  return true;
-            }
-         }
-         return false;
-      }
-
-      var V0 = new THREE.Vector3();
-      var V1 = new THREE.Vector3();
-      var E0 = new THREE.Vector3();
-      var E1 = new THREE.Vector3();
+   function createVisibleEdgesMesh(veds) {
+      var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
 
       for (var k = 0 ; k < veds.length ; k++) {
          var geom  = veds[k][0];
          var edges = veds[k][1];
 
-         for (var n = 0 ; n < edges.length ; n++) {
-            V0.copy(geom.vertices[edges[n][0]]).applyMatrix4(geom.matrixWorld);
-            V1.copy(geom.vertices[edges[n][1]]).applyMatrix4(geom.matrixWorld);
-            mesh.geometry.addLine(.015, V0, V1);
-            if (isShowing2DMeshEdges) {
-
-               var d = V0.distanceTo(V1);
-               var nSteps = max(1, floor(d / 0.03));
-               var wasHidden = isHiddenPoint(V0);
-               E1.copy(V0);
-               if (! wasHidden)
-                  e2moveTo(E1);
-               for (var step = 1 ; step <= nSteps ; step++) {
-                  E0.copy(E1);
-                  E1.copy(V0).lerp(V1, step / nSteps);
-                  var isHidden = isHiddenPoint(E1);
-                  if (! wasHidden && isHidden)
-                     e2lineTo(E0);
-                  if (wasHidden && ! isHidden)
-                     e2moveTo(E1);
-                  wasHidden = isHidden;
-               }
-               if (! wasHidden)
-                  e2lineTo(E1);
-            }
-         }
+         for (var n = 0 ; n < edges.length ; n++)
+            mesh.geometry.addLine(.015, geom.vertexWorld(edges[n][0]),
+	                                geom.vertexWorld(edges[n][1]));
       }
 
-      return e2;
+      return mesh;
    }
 
