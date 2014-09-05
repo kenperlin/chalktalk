@@ -323,7 +323,7 @@
    function mArrow(a,b){
       var A = m.transform(a);
       var B = m.transform(b);
-      arrow(A[0],A[1],B[0],B[1]);
+      arrow(A[0],A[1],B[0],B[1],len(A[0]-B[0],A[1]-B[1])/10);
    };
    function mText(str,p,ax,ay){
       var P = m.transform(p);
