@@ -547,18 +547,28 @@
    var sketchAction = null;
 
    function importSketch(filename) {
-      var client = new XMLHttpRequest();
-      client.open("GET", filename);
-      client.onloadend = function() {
-         window.eval(client.responseText);
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         window.eval(sketchRequest.responseText);
       }
-      client.send();
+      sketchRequest.send();
    }
 
    function gStart() {
-      // LOAD SKETCHES FROM IMPORT ARRAY
-      for (var i = 0; i < imports.length; i++)
-         importSketch(imports[i]);
+      // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+      var lsRequest = new XMLHttpRequest();
+      lsRequest.open("GET", "ls_sketches");
+
+      lsRequest.onloadend = function () {
+         if (lsRequest.responseText != "") {
+            var ls = lsRequest.responseText.trim().split("\n");
+            for (var i = 0; i < ls.length; i++)
+               importSketch(ls[i]);
+         }
+      }
+
+      lsRequest.send();
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 

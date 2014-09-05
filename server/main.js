@@ -33,6 +33,23 @@ app.route("/upload").post(function(req, res, next) {
    });
 });
 
+// handle request for list of available sketches
+app.route("/ls_sketches").get(function(req, res) {
+   fs.readdir("./sketches/", function(err, files) {
+      if (err) {
+         res.writeHead(500, { "Content-Type": "text/plain" });
+         res.write(err);
+         console.log("error listing the sketch directory" + err);
+      } else {
+         res.writeHead(200, { "Content-Type": "text/plain" });
+         for (var i = 0; i < files.length; i++) {
+            res.write(files[i] + "\n");
+         }
+      } 
+      res.end();
+   });
+});
+
 var server = app.listen(parseInt(port, 10), function() {
    console.log("Listening on port %d", server.address().port);
 });
