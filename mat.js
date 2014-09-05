@@ -97,6 +97,12 @@
          v[8] = Z[0]; v[9] = Z[1]; v[10] = Z[2];
 	 return this;
       }
+      this.toString = function() {
+         var str = "";
+	 for (var i = 0 ; i < 16 ; i++)
+	    str += (i==0 ? "[" : ",") + roundedString(this._m()[i]);
+         return str + "]";
+      }
       this.translate = function(x,y,z) {
          this._xf(this._tr(x,y,z));
 	 return this;
@@ -317,7 +323,7 @@
    function mArrow(a,b){
       var A = m.transform(a);
       var B = m.transform(b);
-      arrow(A[0],A[1],B[0],B[1]);
+      arrow(A[0],A[1],B[0],B[1],len(A[0]-B[0],A[1]-B[1])/10);
    };
    function mText(str,p,ax,ay){
       var P = m.transform(p);

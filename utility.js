@@ -448,8 +448,10 @@
 // ARRAY UTILITIES.
 
    function arrayToString(a, level) {
+      if (a.length == 0)
+        return "[]";
       if (level === undefined)
-         level = 0;
+        level = 0;
       var spacer = level == 0 ? " " : "";
       var str = "[" + spacer;
       for (var i = 0 ; i < a.length ; i++)
@@ -562,6 +564,33 @@
       }
    }
 
+   // Clip a curve to that part which is entirely outside of a rectangle.
+
+   function clipCurveAgainstRect(src, R) {
+      if (src[0] == undefined) return [];
+      var dst = [];
+      var x1 = src[0][0];
+      var y1 = src[0][1];
+      if (! isInRect(x1,y1, R))
+         dst.push([x1,y1]);
+      for (var n = 1 ; n < src.length ; n++) {
+         var x0 = x1, y0 = y1;
+         x1 = src[n][0];
+         y1 = src[n][1];
+         var draw0 = ! isInRect(x0,y0, R);
+         var draw1 = ! isInRect(x1,y1, R);
+         if (draw0 || draw1) {
+            if (! draw0)
+               dst.push(clipLineToRect(x0,y0, x1,y1, R));
+            if (! draw1)
+               dst.push(clipLineToRect(x1,y1, x0,y0, R));
+            else
+               dst.push([x1,y1]);
+         }
+      }
+      return dst;
+   }
+
    // Bend a curve toward a point, ending up at a target length.
 
    function bendCurve(curve, pt, totalLength, i0) {
@@ -647,6 +676,61 @@
       return [lerp(t, ax, bx), lerp(t, ay, by)];
    }
 
+   /*
+      Return the area of a 2D counterclockwise polygon.
+   */
+
+   function computeArea(P) {
+      var sum = 0;
+      for (var i = 0 ; i < P.length ; i++) {
+         var j = (i + 1) % P.length;
+         sum += (P[j][0] - P[i][0]) * (P[i][1] + P[j][1]);
+      }
+      return sum / 2;
+   }
+
+   /*
+      Find out whether a 3D point is hidden by a 3D triangle.
+   */
+
+   var isPointBehindTriangle = function(p, tri) {
+      var L = [0,0,0];
+      var W = [0,0,0];
+      var dist = function(p, L) { return p[0] * L[0] + p[1] * L[1] + L[2]; }
+
+      return function(p, tri) {
+
+         // Loop through the three vertices of the triangle.
+
+         for (var j = 0 ; j < 3 ; j++) {
+
+            // Look at edge formed by the two vertices a and b opposite this vertex.
+
+            var a = tri[(j+1)%3];
+            var b = tri[(j+2)%3];
+
+            // From x,y coords of a and b, compute equation of 2d line through them.
+
+            L[0] = b[1] - a[1];
+            L[1] = a[0] - b[0];
+            L[2] = -(a[0] * L[0] + a[1] * L[1]);
+
+            // Compute fractional distance of point into triangle away from edge.
+
+            W[j] = dist(p, L) / dist(tri[j], L);
+
+            // If point is outside this edge, return false.
+
+            if (W[j] < 0)
+               return false;
+         }
+
+         // Compare barycentrically weighted z of triangle vertices to z of the point.
+
+         return W[0] * tri[0][2] + W[1] * tri[1][2] + W[2] * tri[2][2] > p[2];
+      }
+   }();
+
    // Create an arc of a circle.
 
    function createArc(x, y, r, angle0, angle1, n) {
@@ -683,6 +767,12 @@
          yhi = max(yhi, src[n][1]);
       }
       return [xlo,ylo,xhi,yhi];
+   }
+
+   // The union of two bounding rectangles.
+
+   function computeUnionOfBounds(a, b) {
+      return [ min(a[0],b[0]), min(a[1], b[1]), max(a[2],b[2]), max(a[3],b[3]) ];
    }
 
    // Create a curved line.
@@ -919,6 +1009,123 @@
       // RETURN ARRAY OF CURVES.
 
       return dst;
+   }
+
+   ///////////////////////////////////////////////////////////////////
+   // Rearrange edges into long chains, suitable for defining a glyph.
+   ///////////////////////////////////////////////////////////////////
+
+   function edgesToStrokes(e2) {
+
+      // Given side s of connection m, return the xy of the corresponding edge point.
+
+      function c2xy(m, s) {
+         var n = C[m][s][0];
+         var j = C[m][s][1];
+         return e2[n][j];
+      }
+
+      var hash = {}, C = [];
+
+      // Hash all the edges to find pairwise connections of matching vertices between them.
+
+      for (var n = 0 ; n < e2.length ; n++)
+
+         // Look at both points of the edge.
+
+         for (var j = 0 ; j < 2 ; j++) {
+
+            // Create a unique hash string for the point.
+
+            var p = e2[n][j];
+            var h = p[0] + "," + p[1];
+
+            // If this is the first time we are seeing this point, make a new hash entry.
+
+            if (hash[h] === undefined)
+               hash[h] = [n,j];
+
+            // Otherwise, it's a match!  Add both sides of the connection to connections array.
+
+            else
+               C.push([ hash[h], [n,j] ]);
+         }
+
+      // Build long chains, using these pairwise connections between edges.
+
+      for (var m1 = 0 ; m1 < C.length - 1 ; m1++)
+
+         // Try all remaining connections to see whether this chain can be added to.
+
+         for (var m2 = m1 + 1 ; m2 < C.length ; m2++) {
+
+            // Try prepending each side of the connection to the chain.
+
+            for (var s = 0 ; s < 2 ; s++) {
+               var i = 0;
+
+               // The chain must not already have the same side of the same connection.
+
+               var hasIt = false;
+               for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
+                  hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
+
+               if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
+                  var c = C.splice(m2, 1)[0];
+                  C[m1] = [c[1-s], c[s]].concat(C[m1]);
+                  m2 = m1;
+                  break;
+               }
+            }
+
+            if (m2 == m1)
+               continue;
+
+            // If that didn't work, try postpending each side of the connection to the chain.
+
+            for (var s = 0 ; s < 2 ; s++) {
+               var i = C[m1].length - 1;
+
+               // The chain must not already have the same side of the same connection.
+
+               var hasIt = false;
+               for (var k = 0 ; k < C[m1].length && ! hasIt ; k++)
+                  hasIt = C[m1][k][0] == C[m2][s][0] && C[m1][k][1] == C[m2][s][1];
+
+               if (! hasIt && C[m1][i][0] == C[m2][s][0] && C[m1][i][1] != C[m2][s][1]) {
+                  var c = C.splice(m2, 1)[0];
+                  C[m1] = C[m1].concat([c[s], c[1-s]]);
+                  m2 = m1;
+                  break;
+               }
+            }
+         }
+
+      // Add in any edges which have been left out.
+
+      for (var n = 0 ; n < e2.length ; n++) {
+         var count = 0;
+         for (var m = 0 ; m < C.length ; m++)
+            for (k = 0 ; k < C[m].length ; k++)
+               if (C[m][k][0] == n)
+                  count++;
+
+         if (count < 2)
+            C.push( [ [n, 0], [n, 1] ] );
+      }
+
+      // Finally, package as a set of strokes that can be used to define a glyph.
+
+      var c2 = [];
+      for (var m = 0 ; m < C.length ; m++) {
+         c2.push( [ c2xy(m, 0) ] );
+         for (var k = 1 ; k < C[m].length ; k++)
+            c2[m].push( c2xy(m, k) );
+         if (C[m][0][0] == C[m][C[m].length-1][0])
+            c2[m].push( c2xy(m, 0) );
+      }
+
+      return c2;
    }
 
 // VARIOUS MANIPULATIONS OF HTML ELEMENTS.

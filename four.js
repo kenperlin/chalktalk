@@ -31,10 +31,10 @@
          this.matrix.compose( this.position, this.quaternion, this.scale );
       else {
          var v = this.mat._m();
-	 this.matrix.set(v[0],v[4],v[ 8],v[12],
-	                 v[1],v[5],v[ 9],v[13],
-	                 v[2],v[6],v[10],v[14],
-	                 v[3],v[7],v[11],v[15]);
+         this.matrix.set(v[0],v[4],v[ 8],v[12],
+                         v[1],v[5],v[ 9],v[13],
+                         v[2],v[6],v[10],v[14],
+                         v[3],v[7],v[11],v[15]);
       }
       this.matrixWorldNeedsUpdate = true;
    }
@@ -104,36 +104,176 @@
    THREE.Geometry.prototype.computeEdges = function() {
       function testEdge(edges, a, b) {
          var h = Math.min(a, b) + "," + Math.max(a, b);
-	 if (hash[h] === undefined)
-	    hash[h] = n;
+         if (hash[h] === undefined)
+            hash[h] = n;
          else
-	    edges.push([hash[h], n, [a, b]]);
+            edges.push([hash[h], n, [a, b]]);
       }
       this.edges = [];
       var hash = {};
       for (var n = 0 ; n < this.faces.length ; n++) {
          var face = this.faces[n];
-	 testEdge(this.edges, face.a, face.b);
-	 testEdge(this.edges, face.b, face.c);
-	 testEdge(this.edges, face.c, face.a);
+         testEdge(this.edges, face.a, face.b);
+         testEdge(this.edges, face.b, face.c);
+         testEdge(this.edges, face.c, face.a);
       }
    }
 
-   THREE.Geometry.prototype.visibleEdges = function(matrix) {
-      var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
+   THREE.Object3D.prototype.findVisibleEdges = function(ve) {
+      if (ve === undefined) {
+         this.updateMatrixWorld();
+         ve = [];
+      }
+      this.geometry.matrixWorld = this.matrixWorld;
+      ve.push([ this.geometry, this.geometry.findVisibleEdges() ]);
+      for (var k = 0 ; k < this.children.length ; k++)
+         this.children[k].findVisibleEdges(ve);
+      return ve;
+   }
+
+   THREE.Object3D.prototype.projectVisibleEdges = function(veds) {
+      var e2 = [];
+
+      function p2xy(p) { return [ projectX(p.x), projectY(p.y) ]; }
+      function e2moveTo(p) { e2.push( [ p2xy(p) ] ); }
+      function e2lineTo(p) {
+         var e = e2[e2.length-1];
+         var xy = p2xy(p);
+         if (e[0][0] == xy[0] && e[0][1] == xy[1])
+            e2.splice(e2.length-1, 1);
+         else
+            e.push(xy);
+      }
+
+      var E0 = new THREE.Vector3();
+      var E1 = new THREE.Vector3();
+
+      for (var k = 0 ; k < veds.length ; k++) {
+         var geom  = veds[k][0];
+         var edges = veds[k][1];
+
+         for (var n = 0 ; n < edges.length ; n++) {
+            var V0 = geom.vertexWorld(edges[n][0]);
+            var V1 = geom.vertexWorld(edges[n][1]);
+
+            var d = V0.distanceTo(V1);
+            var nSteps = max(1, floor(d / 0.03));
+            E1.copy(V0);
+            var wasHidden = this.isHiddenPoint(E1);
+            if (! wasHidden)
+               e2moveTo(E1);
+            for (var step = 1 ; step <= nSteps ; step++) {
+               E0.copy(E1);
+               E1.copy(V0).lerp(V1, step / nSteps);
+               var isHidden = this.isHiddenPoint(E1);
+               if (! wasHidden && isHidden)
+                  e2lineTo(E0);
+               if (wasHidden && ! isHidden)
+                  e2moveTo(E1);
+               wasHidden = isHidden;
+            }
+            if (! wasHidden)
+               e2lineTo(E1);
+         }
+      }
+
+      return e2;
+   }
+
+   THREE.Object3D.prototype.isHiddenPoint = function(p) {
+      if (this.geometry.isHiddenPoint(p))
+         return true;
+      for (var k = 0 ; k < this.children.length ; k++)
+         if (this.children[k].isHiddenPoint(p))
+            return true;
+      return false;
+   }
+
+   THREE.Geometry.prototype.findVisibleEdges = function() {
+      var visibleEdges = [];
+
       if (this.edges === undefined)
          this.computeEdges();
-      var edges = [];
-      var N = [new THREE.Vector3(), new THREE.Vector3()];
-      for (var n = 0 ; n < this.edges.length ; n++) {
-         for (var k = 0 ; k < 2 ; k++)
-	    N[k].copy(this.faces[this.edges[n][k]].normal)
-	        .applyMatrix3(normalMatrix).normalize();
-	 if ( (N[0].z > 0 || N[1].z > 0) &&
-	      (N[0].z < 0 || N[1].z < 0 || N[0].dot(N[1]) < 0.5))
-	    edges.push(this.edges[n][2]);
+      var normalMatrix = new THREE.Matrix3().getNormalMatrix(this.matrixWorld);
+
+      // COMPUTE VIEW DEPENDENT NORMAL FOR EVERY FACE.
+
+      for (var n = 0 ; n < this.faces.length ; n++) {
+         var face = this.faces[n];
+         if (face.viewNormal === undefined)
+            face.viewNormal = new THREE.Vector3();
+         face.viewNormal.copy(face.normal).applyMatrix3(normalMatrix).normalize();
       }
-      return edges;
+
+      // FIND EDGES THAT ARE EITHER LOCALLY SILHOUETTE OR DIHEDRAL.
+
+      for (var n = 0 ; n < this.edges.length ; n++) {
+         var edge = this.edges[n];
+         var n0 = this.faces[edge[0]].viewNormal;
+         var n1 = this.faces[edge[1]].viewNormal;
+         if ( (n0.z >= 0 || n1.z >= 0) &&
+              (n0.z <= 0 || n1.z <= 0 || n0.dot(n1) < 0.5) )
+            visibleEdges.push(edge[2]);
+      }
+
+      return visibleEdges;
+   }
+
+   THREE.Geometry.prototype.vertexWorld = function(i) {
+      if (this.verticesWorld === undefined)
+         this.verticesWorld = [];
+
+      if (this.verticesWorld[i] === undefined)
+         this.verticesWorld[i] = new THREE.Vector3();
+
+      return this.verticesWorld[i].copy(this.vertices[i]).applyMatrix4(this.matrixWorld);
+   }
+
+
+   THREE.Geometry.prototype.addLine = function(t, a, b) {
+      var dx = b.x - a.x, dy = b.y - a.y, d = sqrt(dx * dx + dy * dy);
+      dx *= t/2 / d;
+      dy *= t/2 / d;
+      this.vertices.push(new THREE.Vector3(a.x + dy, a.y - dx, a.z + t));
+      this.vertices.push(new THREE.Vector3(b.x + dy, b.y - dx, b.z + t));
+      this.vertices.push(new THREE.Vector3(b.x - dy, b.y + dx, b.z + t));
+      this.vertices.push(new THREE.Vector3(a.x - dy, a.y + dx, a.z + t));
+      var nf = this.vertices.length;
+      this.faces.push(new THREE.Face3(nf-4, nf-3, nf-2));
+      this.faces.push(new THREE.Face3(nf-2, nf-1, nf-4));
+   }
+
+   THREE.Geometry.prototype.isHiddenPoint = function(p) {
+      for (var n = 0 ; n < this.faces.length ; n++)
+         if (this.isPointHiddenByFace(p, n))
+            return true;
+      return false;
+   }
+
+   THREE.Geometry.prototype.isPointHiddenByFace = function(p, n) {
+      var face = this.faces[n];
+      return isPointHiddenByTriangle(p, this.vertexWorld(face.a),
+	                                this.vertexWorld(face.b),
+	                                this.vertexWorld(face.c));
+   }
+
+   // Find out whether point p is hidden by triangle a,b,c.
+
+   var isPointHiddenByTriangle = function(p, a, b, c) {
+      var U = barycentric(p, a, b, c); if (U < 0) return false;
+      var V = barycentric(p, b, c, a); if (V < 0) return false;
+      var W = barycentric(p, c, a, b); if (W < 0) return false;
+      var tz = U * a.z + V * b.z + W * c.z;
+      return tz > p.z + 0.001;
+   }
+
+   // Compute one barycentric coordinate of a point in a triangle.
+
+   function barycentric(p, a, b, c) {
+      var A = c.y - b.y;
+      var B = b.x - c.x;
+      var C = -A * b.x - B * b.y;
+      return (A * p.x + B * p.y + C) / (A * a.x + B * a.y + C);
    }
 
    var PI = Math.PI;
@@ -395,4 +535,19 @@ var fragmentShaderHeader = ["\
    uniform float y;\
    uniform float z;\
 "].join("\n");
+
+   function createVisibleEdgesMesh(veds) {
+      var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
+
+      for (var k = 0 ; k < veds.length ; k++) {
+         var geom  = veds[k][0];
+         var edges = veds[k][1];
+
+         for (var n = 0 ; n < edges.length ; n++)
+            mesh.geometry.addLine(.015, geom.vertexWorld(edges[n][0]),
+	                                geom.vertexWorld(edges[n][1]));
+      }
+
+      return mesh;
+   }
 

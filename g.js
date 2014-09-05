@@ -340,7 +340,7 @@
       if (isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
-         buildTrace(glyphInfo, x, y, isLine);
+         buildTrace(glyphTrace, x, y, isLine);
          return;
       }
 
@@ -527,7 +527,7 @@
    var bgClickX = 0;
    var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
-   var glyphInfo = [];
+   var glyphTrace = [];
    var glyphSketch = null;
    var isAltKeyCopySketchEnabled = true;
    var isAltPressed = false;
@@ -535,7 +535,8 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
-   var isShowingMeshEdges = true;
+   var isShowing2DMeshEdges = true;
+   var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
@@ -691,9 +692,9 @@
 
       function nameToGlyph(name) {
          var scribble = new Scribble(name);
-	 var glyph = new Glyph(name, [scribble]);
-	 glyph.scribbleLength = computeCurveLength(scribble);
-	 return glyph;
+         var glyph = new Glyph(name, [scribble]);
+         glyph.scribbleLength = computeCurveLength(scribble);
+         return glyph;
       }
 
       for (var n = 0 ; n < glyphs.length ; n++) {
@@ -758,9 +759,10 @@
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['g'  , "group/ungroup"],
-      ['h'  , "home"],
+      ['h'  , "draw hint lines"],
       ['i'  , "insert text"],
-      ['k'  , "toggle 3d box"],
+      ['k'  , "toggle char glyphs"],
+      ['l'  , "toggle edge render"],
       ['m'  , "toggle menu type"],
       ['n'  , "negate card color"],
       ['o'  , "output glyphs"],
@@ -824,7 +826,7 @@
 
          // CREATE GLYPH SHAPE INFO.
 
-         glyphInfo = [];
+         glyphTrace = [];
          isMakingGlyph = true;
          sk().render(0.02);
          isMakingGlyph = false;
@@ -832,7 +834,7 @@
          // REGISTER THE GLYPH.
 
          var code = sketchTypeToCode(type, sk().labels[n]);
-	 names.push(registerGlyph(code, glyphInfo, sk().labels[n]));
+         names.push(registerGlyph(code, glyphTrace, sk().labels[n]));
       }
 
       // FINALLY, DELETE THE SKETCH.
@@ -944,31 +946,6 @@
          linkData[3] = status;
 
          linkData[4] = createCurve(A, B, s);
-
-         function clipCurveAgainstRect(src, R) {
-            if (src[0] == undefined) return [];
-            var dst = [];
-            var x1 = src[0][0];
-            var y1 = src[0][1];
-            if (! isInRect(x1,y1, R))
-               dst.push([x1,y1]);
-            for (var n = 1 ; n < src.length ; n++) {
-               var x0 = x1, y0 = y1;
-               x1 = src[n][0];
-               y1 = src[n][1];
-               var draw0 = ! isInRect(x0,y0, R);
-               var draw1 = ! isInRect(x1,y1, R);
-               if (draw0 || draw1) {
-                  if (! draw0)
-                     dst.push(clipLineToRect(x0,y0, x1,y1, R));
-                  if (! draw1)
-                     dst.push(clipLineToRect(x1,y1, x0,y0, R));
-                  else
-                     dst.push([x1,y1]);
-               }
-            }
-            return dst;
-         }
 
          linkData[4] = clipCurveAgainstRect(linkData[4], aR);
          linkData[4] = clipCurveAgainstRect(linkData[4], bR);
@@ -1098,8 +1075,12 @@
    function deleteInLink(s, j) {
       s.in[j] = undefined;
       s.inValue[j] = undefined;
-      if (s instanceof SimpleSketch && s.isNullText() && s.sp0.length <= 1)
+      if (isSimpleSketch(s) && s.isNullText() && s.sp0.length <= 1)
          deleteSketch(s);
+   }
+
+   function isSimpleSketch(s) {
+      return s instanceof SimpleSketch && ! (s instanceof GeometrySketch);
    }
 
 /////////////////////////////////////////////////////////////////////
@@ -1143,6 +1124,10 @@
 
    function setTextMode(state) {
       isTextMode = state;
+      if (isTextMode)
+         loadGlyphArray(characterGlyphData);
+      else
+         unloadGlyphArray(characterGlyphData);
       return isTextMode;
    }
 
@@ -1181,7 +1166,7 @@
       for (var i = 0 ; i < glyphs.length ; i++) {
 
          if (glyphs[i].scribbleLength !== undefined && strokesGlyph.scribbleLength === undefined)
-	    strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
+            strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
 
          var score = strokesGlyph.compare(glyphs[i]);
          if (score < bestScore) {
@@ -1288,13 +1273,13 @@
                score += dx * dx + dy * dy;
             }
 
-	    // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
+            // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
 
-	    if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
-	         other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
-	       var ratio = other.scribbleLength / this.scribbleLength;
-	       score *= max(ratio, 1 / ratio);
-	    }
+            if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
+                 other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
+               var ratio = other.scribbleLength / this.scribbleLength;
+               score *= max(ratio, 1 / ratio);
+            }
          }
          return score;
       }
@@ -1497,7 +1482,7 @@
    function glyphIndex(glyphs, name) {
       for (var i = 0 ; i < glyphs.length ; i++)
          if (glyphs[i].name == name)
-	    return i;
+            return i;
       return -1;
    }
 
@@ -1528,7 +1513,7 @@
       }
       this.interpret = function() {
          var glyph = findGlyph([this.path], scribbleGlyphs);
-	 scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
+         scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
          return glyph == null ? "" : glyph.name;
       }
    }
@@ -1548,7 +1533,17 @@
          bgs = new BgScribble(x, y);
          bgsText = "";
          bgsTextUndo = [];
-	 sketchPage.beginTextSketch();
+         sketchPage.beginTextSketch();
+      }
+
+      else {
+         var bgCommand = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
+         switch(bgCommand) {
+         case 1:
+            sketchPage.isGlyphable = ! sketchPage.isGlyphable;
+            console.log(sketchPage.isGlyphable);
+            break;
+         }
       }
    }
 
@@ -1566,39 +1561,39 @@
 
       if (bgs !== undefined) {
          var str = bgs.interpret();
-	 switch (str) {
-	 case "C":
-	    isBgsShift = true;
-	    break;
-	 case "D":
+         switch (str) {
+         case "C":
+            isBgsShift = true;
+            break;
+         case "D":
             if (bgsTextUndo.length > 0) {
-	       bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
+               bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
                sk().setText(bgsText);
                sk().textCursor = bgsText.length;
             }
-	    break;
-	 default:
-	    bgsTextUndo.push(bgsText);
-	    if (bgsText.length > 0 && str.length > 1)
-	       bgsText += " ";
+            break;
+         default:
+            bgsTextUndo.push(bgsText);
+            if (bgsText.length > 0 && str.length > 1)
+               bgsText += " ";
             if (isBgsShift) {
-	       str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
-	       isBgsShift = false;
-	    }
+               str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+               isBgsShift = false;
+            }
 
             if (bgsText.length == 0)
-	       for (var n = 0 ; n < glyphs.length ; n++)
-	          if (str == glyphs[n].indexName) {
+               for (var n = 0 ; n < glyphs.length ; n++)
+                  if (str == glyphs[n].indexName) {
                      sk().setText(str);
-		     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
-		     bgActionEnd();
-		     return;
-	          }
+                     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
+                     bgActionEnd();
+                     return;
+                  }
 
             bgsText += str;
             sk().setText(bgsText);
             sk().textCursor = bgsText.length;
-	    break;
+            break;
          }
          bgs = new BgScribble(x, y);
          return;
@@ -1677,6 +1672,9 @@
          sketchDragActionXY = [x,y];
          sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
          break;
+      case 6:
+         sk().arrowBegin(x, y);
+         break;
       }
    }
 
@@ -1695,6 +1693,8 @@
             sketchDragActionXY[0] = x;
             sketchDragActionXY[1] = y;
          }
+      case 6:
+         sk().arrowDrag(x, y);
          break;
       }
    }
@@ -1703,6 +1703,9 @@
       switch (sketchDragMode) {
       case 2:
          delete sketchPage.definingMotion;
+         break;
+      case 6:
+         sk().arrowEnd(x, y);
          break;
       }
    }
@@ -1719,10 +1722,10 @@
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
+	 fadeArrowsIntoSketch(sk());
          break;
       case 1:
-         if (sk() instanceof SimpleSketch && ! (sk() instanceof GeometrySketch)
-                                          && ! (sk() instanceof NumericSketch ))
+         if (isSimpleSketch(sk()) && ! (sk() instanceof NumericSketch ))
             sk().isGlyphable = ! sk().isGlyphable;
          else if (sk().glyph !== undefined) {
             sk().fadeAway = 1;
@@ -1819,6 +1822,13 @@
 
    var tick = function(g) {
       var w = width(), h = height();
+
+      // SET CONSTANTS FOR projectX() and projectY().
+
+      pxM =  344 * w / 1440;
+      pxB =  w / 2;
+      pyM = -344 * w / 1440;
+      pyB =  h / 2;
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
@@ -1996,6 +2006,58 @@
          if (isTextMode && time - strokesStartTime >= 0.5)
             isShorthandTimeout = true;
 
+         // DRAW ARROWS.
+
+	 annotateStart();
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I).parent == null) {
+	       var a = sk(I);
+	       for (var n = 0 ; n < a.arrows.length ; n++) {
+	          var c = a.arrows[n][0];
+	          var b = a.arrows[n][1];
+
+		  var alpha = 1;
+	          var fade = a.arrows[n][2];
+		  if (fade !== undefined) {
+		     alpha = fade;
+		     alpha = max(0, a.arrows[n][2] - 3 * This().elapsed);
+		     if (alpha == 0) {
+		        a.arrowRemove(b);
+			continue;
+		     }
+		     a.arrows[n][2] = alpha;
+		  }
+
+		  if (b == null)
+		     continue;
+		  var C = createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
+		  C = clipCurveAgainstRect(C, [a.xlo,a.ylo,a.xhi,a.yhi]);
+		  C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+		  if (C[0] === undefined)
+		     continue;
+		  var nc = C.length;
+		  _g.strokeStyle = defaultPenColor;
+		  _g.lineWidth = width() / 300;
+		  _g.globalAlpha = sCurve(alpha);
+		  _g.beginPath();
+		  _g.moveTo(C[0][0], C[0][1]);
+		  for (var k = 0 ; k < nc ; k++)
+		     _g.lineTo(C[k][0], C[k][1]);
+		  if (nc > 4) {
+		     var dx = C[nc-1][0] - C[nc-4][0];
+		     var dy = C[nc-1][1] - C[nc-4][1];
+		     var d = len(dx, dy);
+		     dx *= _g.lineWidth * 5 / d;
+		     dy *= _g.lineWidth * 5 / d;
+		     _g.lineTo(C[nc-1][0] - dx - dy, C[nc-1][1] - dy + dx);
+		     _g.moveTo(C[nc-1][0], C[nc-1][1]);
+		     _g.lineTo(C[nc-1][0] - dx + dy, C[nc-1][1] - dy - dx);
+		  }
+		  _g.stroke();
+	       }
+	    }
+	 annotateEnd();
+
          // DRAW LINKS.
 
          if (isAudiencePopup() || ! isShowingOverlay()) {
@@ -2107,9 +2169,27 @@
                }
          }
 
+         // DRAW THE HINT TRACE IF THERE IS ONE.
+
+         if (sketchPage.hintTrace !== undefined) {
+            _g.save();
+            _g.strokeStyle = 'cyan';
+            _g.globalAlpha = 0.25;
+            _g.lineWidth = 20;
+            _g.beginPath();
+            for (var n = 0 ; n < sketchPage.hintTrace.length ; n++) {
+               var stroke = sketchPage.hintTrace[n];
+               _g.moveTo(stroke[0][0], stroke[0][1]);
+               for (var i = 1 ; i < stroke.length ; i++)
+                  _g.lineTo(stroke[i][0], stroke[i][1]);
+            }
+            _g.stroke();
+            _g.restore();
+         }
+
          // IF SHOWING LIVE DATA
 
-	 var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
+         var isShowingLiveDataAtPort = outSketch != null && outSketch.isShowingLiveData;
 
          if (showingLiveDataMode > 0 || isShowingLiveDataAtPort) {
 
@@ -2315,14 +2395,14 @@
 
       if (isShowingScribbleGlyphs) {
          var ncols = 25;
-	 var cw = w / ncols;
+         var cw = w / ncols;
 
          color(scribbleColor);
          lineWidth(cw / 70);
 
          var fs = floor(0.2 * w / ncols);
          _g.font = (2*fs) + "px Arial";
-	 _g.fillText(bgsText, 7, 28);
+         _g.fillText(bgsText, 7, 28);
 
          _g.font = fs + "px Arial";
          for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
@@ -2335,8 +2415,8 @@
             var s = scribbleGlyphs[ns].data;
 
             var x = xfx(s[0][0][0] * cw / 70);
-	    var y = xfy(s[0][0][1] * cw / 70);
-	    var dr = 3 * cw / 70;
+            var y = xfy(s[0][0][1] * cw / 70);
+            var dr = 3 * cw / 70;
             _g.beginPath();
             _g.moveTo(x - dr, y - dr);
             _g.lineTo(x + dr, y - dr);
@@ -2344,7 +2424,7 @@
             _g.lineTo(x - dr, y + dr);
             _g.fill();
 
-	    _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
+            _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
 
             for (var n = 0 ; n < s.length ; n++) {
                _g.beginPath();
@@ -2411,6 +2491,12 @@
          sketchPage.sketches.splice(k, 1);
       }
       deleteSketchOnly(sketch);
+   }
+
+   function fadeArrowsIntoSketch(sketch) {
+      for (var I = 0 ; I < nsk() ; I++)
+         if (sk(I) != sketch)
+            sk(I).arrowFade(sketch);
    }
 
    function deleteSketchOnly(sketch) {
@@ -2565,6 +2651,7 @@
 
    function addSketch(sketch) {
       sketchPage.add(sketch);
+      sk().arrows = [];
       sk().id = globalSketchId++;
       sk().setColorId(sketchPage.colorId);
       sk().sketchState = 'start';
@@ -2572,6 +2659,7 @@
       sk().in = [];
       sk().out = [];
       sk().inValue = [];
+      sk().motionPath = [];
       sk().outValue = [];
       sk().defaultValue = [];
       sk().portBounds = [];
@@ -2637,6 +2725,11 @@
 /////// SKETCHES THAT MAKE USE OF WEBGL AND SHADERS ////////
 ////////////////////////////////////////////////////////////
 
+   var pxM, pxB, pyM, pyB;
+
+   function projectX(x) { return pxM * x + pxB; }
+   function projectY(y) { return pyM * y + pyB; }
+
    function GeometrySketch() {
       this.sx = 1;
       this.sy = 1;
@@ -2646,6 +2739,8 @@
       this.downy = 0;
       this.cleanup = function() {
          root.remove(this.mesh);
+         if (this.visibleEdgesMesh !== undefined)
+            root.remove(this.visibleEdgesMesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2679,11 +2774,12 @@
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
-             .rotateX(-PI*this.rY)
              .rotateY( PI*this.rX)
+             .rotateX(-PI*this.rY)
              .scale(s * this.sx, s * this.sy, s);
 
          if (this.inValue[0] !== undefined) this.setUniform("x", this.inValue[0]);
@@ -2698,48 +2794,85 @@
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
                                || this.glyphSketch != null) {
-            var alpha = this.fadeAway > 0 ? this.fadeAway :
-                        this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
-                        sketchPage.fadeAway;
-            this.mesh.material.opacity = sCurve(alpha);
+            this.alpha = this.fadeAway > 0 ? this.fadeAway :
+                         this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+                         sketchPage.fadeAway;
+            this.mesh.material.opacity = sCurve(this.alpha);
             this.mesh.material.transparent = true;
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
 
-         if (isShowingMeshEdges) {
-	    var geometry = this.mesh.geometry;
-	    var matrix = this.mesh.getMatrix();
+         if (this.visibleEdgesMesh !== undefined)
+            root.remove(this.visibleEdgesMesh);
 
-            this.visibleEdges = geometry.visibleEdges(this.mesh.matrix);
-
-	    if (this.visibleEdgesMesh === undefined) {
-	       var veg = new THREE.Geometry();
-	       var vem = new THREE.LineBasicMaterial( { color: '#ff0000' } );
-	       for (var n = 0 ; n < this.visibleEdges.length ; n++) {
-	          var edge = this.visibleEdges[n];
-		  veg.vertices.push(geometry.vertices[edge[0]]);
-		  veg.vertices.push(geometry.vertices[edge[1]]);
-               }
-	       this.visibleEdgesMesh = new THREE.Mesh(veg, vem);
-	       this.mesh.add(this.visibleEdgesMesh);
-	    }
 /*
-	    var s = this.size * 0.765;
-	    _g.beginPath();
-	    for (var n = 0 ; n < this.visibleEdges.length ; n++) {
-	       var edge = this.visibleEdges[n];
-	       var a = geometry.vertices[edge[0]];
-	       var b = geometry.vertices[edge[1]];
-	       var A = matrix.transform([a.x,a.y,a.z]);
-	       var B = matrix.transform([b.x,b.y,b.z]);
-	       _g.moveTo(width()/2 + s * A[0], height()/2 - s * A[1]);
-	       _g.lineTo(width()/2 + s * B[0], height()/2 - s * B[1]);
-	    }
-	    _g.stroke();
+   function meshToStrokes(mesh) {
+      return edgesToStrokes(mesh.projectVisibleEdges(mesh.findVisibleEdges()));
+   }
 */
+
+         if (isShowingMeshEdges) {
+
+            // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
+
+            var visibleEdges = this.mesh.findVisibleEdges();
+
+            this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
+
+            root.add(this.visibleEdgesMesh);
+
+            if (this.alpha !== undefined) {
+               this.visibleEdgesMesh.material.opacity = sCurve(this.alpha);
+               this.visibleEdgesMesh.material.transparent = true;
+            }
+
+	    // Project the visible edges, and connect them into long 2d strokes.
+
+            if (isShowing2DMeshEdges) {
+	       var e2 = this.mesh.projectVisibleEdges(visibleEdges);
+	       var c2 = edgesToStrokes(e2);
+
+
+	       annotateStart();
+
+	       // Draw the long connected 2d strokes in different colors.
+
+               lineWidth(20);
+	       function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
+               for (var m = 0 ; m < c2.length ; m++) {
+	          color('rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)');
+		  drawCurve(c2[m]);
+	       }
+
+	       // Draw the projected 2d edges.
+
+               lineWidth(10);
+               color('rgba(255,0,0,0.5)');
+	       for (var n = 0 ; n < e2.length ; n++)
+		  drawCurve(e2[n]);
+
+	       annotateEnd();
+            }
          }
+/*
+         if (this.meshTrace !== undefined) {
+            _g.save();
+            _g.globalAlpha = 0.5;
+            color('green');
+            lineWidth(6);
+            _g.beginPath();
+            for (var n = 0 ; n < this.meshTrace.length ; n++) {
+               var stroke = this.meshTrace[n];
+               _g.moveTo(stroke[0][0], stroke[0][1]);
+               for (var i = 1 ; i < stroke.length ; i++)
+                  _g.lineTo(stroke[i][0], stroke[i][1]);
+            }
+            _g.stroke();
+            _g.restore();
+         }
+*/
       }
 
       this.setUniform = function(name, value) {
@@ -3073,6 +3206,6 @@
    }
 
 var glyphs = [];
-loadGlyphArray(glyphData);
+loadGlyphArray(numericGlyphData);
 
 

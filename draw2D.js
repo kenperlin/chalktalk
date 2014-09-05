@@ -207,6 +207,8 @@
          y = sk().transformY2D(xx, yy);
          th *= sk().scale();
       }
+      x = sk().adjustX(x);
+      y = sk().adjustY(y);
 
       if (! isDef(alignX))
          alignX = 0;

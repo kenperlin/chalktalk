@@ -804,7 +804,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var w = 12 * cols + 10;
+      var w = min(12 * cols + 10, width() * 0.75);
 
       if (rows > 3)
          rows += 0.3;
@@ -834,14 +834,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       //////////////////////////////////////////////////////////////////////////////////////
 
-      codeElement.style.left = x + _g.panX - w/2 + 10;
+      codeElement.style.left = x - w/2 + 10;
       codeElement.style.top = y + 5;
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
       var cr = width() / 70;
 
-      var c = createRoundRect(x - w/2, y, w, h, cr);
+      var c = createRoundRect(x - _g.panX - w/2, y, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 

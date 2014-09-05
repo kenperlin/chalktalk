@@ -6,6 +6,7 @@ var codeSketch = null;
 var isAudioSignal = false;
 var isBgDragActionEnabled = false;
 var isBottomHover = false;
+var isCharacterGlyphDataLoaded = false;
 var isCommandPressed = false;
 var isControlPressed = false;
 var isDrawingSketch2D = false;
@@ -66,6 +67,7 @@ var sketchToDelete = null;
 
    function SketchPage() {
       this.fadeAway = 0;
+      this.isGlyphable = true;
       this.paletteColorDragXY = null;
       this.sketches = [];
       this.scaleRate = 0;
@@ -187,6 +189,11 @@ var sketchToDelete = null;
             return;
          }
 
+	 if (this.hintTrace !== undefined) {
+	    this.hintTrace.push([[x,y]]);
+	    return;
+	 }
+
          isSketchDragActionEnabled = false;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
@@ -235,7 +242,6 @@ var sketchToDelete = null;
          }
 
          if (isTextMode) {
-
             strokes = [[[x,y]]];
             strokesStartTime = time;
 /*
@@ -320,6 +326,11 @@ var sketchToDelete = null;
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
          }
+
+	 if (this.hintTrace !== undefined) {
+	    this.hintTrace[this.hintTrace.length-1].push([x,y]);
+	    return;
+	 }
 
          if (isSketchDragActionEnabled && this.travel > clickSize) {
             if (needToStartSketchDragAction) {
@@ -427,6 +438,10 @@ var sketchToDelete = null;
       this.mouseUp = function(x, y) {
 
          this.isPressed = false;
+
+	 if (this.hintTrace !== undefined) {
+	    return;
+	 }
 
          if (this.isDraggingGlyph) {
             glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
@@ -540,7 +555,7 @@ var sketchToDelete = null;
 
             // CLICKING ON THE INDEX NAME OF A GLYPH INSTANTIATES A GLYPH SKETCH OF THAT TYPE+LABEL.
 
-            if (isHover()) {
+            if (this.isClick && isHover()) {
                convertTextSketchToGlyphSketch(sk(), x, y);
                return;
             }
@@ -636,11 +651,8 @@ var sketchToDelete = null;
 
             // CLICK ON A SKETCH AFTER CLICKING ON BACKGROUND TO DO A SKETCH ACTION.
 
-            else {
-               if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) {
-                  return;
-               }
-            }
+            else if (doSketchClickAction(sk().unadjustX(x), sk().unadjustY(y))) 
+               return;
          }
 
          // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
@@ -778,25 +790,12 @@ var sketchToDelete = null;
          }
       }
 
-      this.panX = 0;
-      this.panY = 0;
       this.zoom = 1;
-
-      this.doPan = function(x, y) {
-         this.panX = this.panX + (x - this.mx);
-         this.panY = this.panY + (y - this.my);
-      }
 
       // ZOOM THE SKETCH PAGE
 
       this.doZoom = function(x, y) {
          this.zoom *= 1 - (y - this.my) / height();
-      }
-
-      this.doHome = function() {
-         this.panX = 0;
-         this.panY = 0;
-         this.zoom = 1;
       }
 
       // RESPONSE TO MOUSE MOVE WHILE IN CREATING GROUP PATH MODE.
@@ -922,9 +921,6 @@ var sketchToDelete = null;
          case 'g':
             this.groupMouseMove(x, y);
             break;
-         case 'p':
-            //this.doPan(x, y);
-            break;
          case 'r':
             this.doRotate(x, y);
             break;
@@ -1019,15 +1015,6 @@ var sketchToDelete = null;
          case 'spc':
             isSpacePressed = true;
             return;
-         case 'h':
-            this.doHome();
-            break;
-         case 'l':
-            loadGlyphArray(characterGlyphData);
-            break;
-         case 'u':
-            unloadGlyphArray(characterGlyphData);
-            break;
          case 'p':
             isPanning = true;
             break;
@@ -1187,6 +1174,7 @@ var sketchToDelete = null;
                   sk().removeLastStroke();
                else {
                   sk().fadeAway = 1.0;
+		  fadeArrowsIntoSketch(sk());
                   setTextMode(false);
                }
                else
@@ -1241,9 +1229,25 @@ var sketchToDelete = null;
          case 'g':
             this.toggleGroup();
             break;
+         case 'h':
+	    if (this.hintTrace === undefined)
+	       this.hintTrace = [];
+            else
+	       delete this.hintTrace;
+	    break;
          case 'i':
             toggleTextMode();
             break;
+         case 'k':
+	    if (! isCharacterGlyphDataLoaded)
+               loadGlyphArray(characterGlyphData);
+            else
+               unloadGlyphArray(characterGlyphData);
+	    isCharacterGlyphDataLoaded = ! isCharacterGlyphDataLoaded;
+            break;
+         case 'l':
+	    isShowingMeshEdges = ! isShowingMeshEdges;
+	    break;
          case 'm':
             menuType = (menuType + 1) % 2;
             break;
@@ -1258,6 +1262,9 @@ var sketchToDelete = null;
             isPanning = false;
             break;
          case 'q':
+	    _g.query = 0;
+	    break;
+/*
             if (! isk() || sk().sp == visible_sp)
                visible_sp = null;
             else if (isk()) {
@@ -1265,6 +1272,7 @@ var sketchToDelete = null;
                for (var i = 0 ; i < visible_sp.length ; i++)
                   console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
             }
+*/
             break;
          case 'b':
          case 'r':

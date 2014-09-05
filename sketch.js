@@ -36,6 +36,52 @@
       this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
       this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
 
+      this.arrowBegin = function(x, y) {
+         this.arrows.push( [ [[x,y]], null ] );
+      }
+
+      this.arrowDrag = function(x, y) {
+         var n = this.arrows.length - 1;
+         this.arrows[n][0].push([x,y]);
+      }
+
+      this.arrowEnd = function(x, y) {
+         var n = this.arrows.length - 1;
+	 var sketches = sketchPage.sketchesAt(x, y);
+	 if (sketches.length == 0 || sketches[0] == this) {
+
+	    // If this is an arrow to nowhere, just delete it.
+
+	    this.arrows.splice(n, 1);
+         }
+         else {
+	    // Compute curvature.
+
+	    var s = this.arrows[n][0];
+	    var ns = s.length;
+	    var dx = s[ns-1][0] - s[0][0];
+	    var dy = s[ns-1][1] - s[0][1];
+	    var sum = 0;
+	    for (var k = 1 ; k < ns - 1 ; k++)
+	       sum += dx * (s[k][1] - s[0][1]) - dy * (s[k][0] - s[0][0]);
+            this.arrows[n][0] = 2 * sum / ns / (dx * dx + dy * dy);
+	    this.arrows[n][1] = sketches[0];
+         }
+      }
+
+      this.arrowFade = function(sketch) {
+         for (var n = 0 ; n < this.arrows.length ; n++)
+	    if (this.arrows[n][1] == sketch)
+	       this.arrows[n][2] = 1;
+      }
+
+      this.arrowRemove = function(sketch) {
+         for (var n = 0 ; n < this.arrows.length ; n++)
+	    if (this.arrows[n][1] == sketch)
+	       this.arrows.splice(n--, 1);
+      }
+
+      this.arrows = [];
 
       this.fade = function() {
          return this.fadeAway == 0 ? 1 : this.fadeAway;
@@ -215,6 +261,7 @@
          text(roundedString(value), P[0], P[1], ax, ay);
       }
       this.drawText = function(context) {
+
          var fontSize = floor(24 * this.scale());
 
          if (this instanceof SimpleSketch && this.isNullText()) {
@@ -257,13 +304,13 @@
          if (! isCursor && this.text.length == 0)
             return;
 
-         if (this.text.length == 0) {
-            this.drawCursor(this.tx(), this.ty(), fontHeight, context);
-            return;
-         }
-
          var x1 = this instanceof Sketch2D ? this.x2D : lerp(this.scale(), this.tx(), this.textX);
          var y1 = this instanceof Sketch2D ? this.y2D : lerp(this.scale(), this.ty(), this.textY);
+
+	 if (this.text.length == 0) {
+	    this.drawCursor(x1, y1, fontHeight, context);
+	    return;
+	 }
 
          var j = 0;
          for (var n = 0 ; n < this.textStrs.length ; n++) {
@@ -403,7 +450,9 @@
          return j >= 0 ? isDef(this.DefaultValue[j]) : false;
       }
       this.isInValue = function(name) {
-         var j = getIndex(this.portName, name);
+         return this.isInValueAt(getIndex(this.portName, name));
+      }
+      this.isInValueAt = function(j) {
          return j >= 0 ? isDef(this.inValue[j]) : false;
       }
       this.isMouseOver = false;
@@ -1005,7 +1054,7 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    if (this.isGlyphable)
+	    if (sketchPage.isGlyphable && this.isGlyphable)
 	       this.convertToGlyphSketch();
             return;
          }
