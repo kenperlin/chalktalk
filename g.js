@@ -949,7 +949,7 @@
             fillOval(cx - 13, cy - 13, 26, 26);
             color(dataColor);
             textHeight(16);
-            text(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
+            utext(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
             lineWidth(1);
             drawOval(cx - 13, cy - 13, 26, 26);
          }
@@ -2215,7 +2215,7 @@
                         _g.fill();
 
                         color(liveDataColor);
-                        text(str, xy[0], xy[1], .5, .5);
+                        utext(str, xy[0], xy[1], .75, .5);
                      }
                }
          }

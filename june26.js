@@ -268,7 +268,7 @@
 */
 
 var planetFragmentShader = [
-,'   void main(void) {'
+ '   void main(void) {'
 ,'      float dz = sqrt(1.-dx*dx-dy*dy);                  /* DEPTH  */'
 ,'      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */'
 ,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
@@ -292,7 +292,7 @@ registerGlyph("planet()",[
 
 function planet() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, planetFragmentShader);
-   sketch.code = [["planet", planetFragmentShader],["flame", flameFragmentShader]];
+   sketch.code = [["planet", planetFragmentShader] /*,["flame", flameFragmentShader] */];
    sketch.enableFragmentShaderEditing();
 }
 
