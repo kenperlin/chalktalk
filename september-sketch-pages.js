@@ -524,6 +524,32 @@ var page104f = {
    "
 };
 
+var page104g = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/ken-perlin-at-the-cdm.jpg width=700></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104h = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/vihartDragon.png width=700></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page105 = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -730,6 +756,8 @@ var sketchPages = [
    page104d,
    page104e,
    page104f,
+   page104g,
+   page104h,
    page106b,
    page106,
 ];
