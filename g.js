@@ -2013,11 +2013,13 @@
 		     a.arrows[n][2] = alpha;
 		  }
 
-		  if (b == null)
-		     continue;
-		  var C = createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
+                  var C = b == null ? c : createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
+
 		  C = clipCurveAgainstRect(C, [a.xlo,a.ylo,a.xhi,a.yhi]);
-		  C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+
+		  if (b != null)
+		     C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+
 		  if (C[0] === undefined)
 		     continue;
 		  var nc = C.length;
