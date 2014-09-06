@@ -6,7 +6,6 @@ var codeSketch = null;
 var isAudioSignal = false;
 var isBgDragActionEnabled = false;
 var isBottomHover = false;
-var isCharacterGlyphDataLoaded = false;
 var isCommandPressed = false;
 var isControlPressed = false;
 var isDrawingSketch2D = false;
@@ -1239,11 +1238,14 @@ var sketchToDelete = null;
             toggleTextMode();
             break;
          case 'k':
-	    if (! isCharacterGlyphDataLoaded)
-               loadGlyphArray(characterGlyphData);
-            else
-               unloadGlyphArray(characterGlyphData);
-	    isCharacterGlyphDataLoaded = ! isCharacterGlyphDataLoaded;
+	    if (isk() && sk() instanceof GeometrySketch) {
+	       var type = sk().glyphIndexName;
+	       var name = type + "_s";
+	       var strokes = sk().mesh.toStrokes();
+	       registerGlyph("sg('StrokesSketch','" + name + "')", strokes, name);
+	       var index = glyphIndex(glyphs, name);
+	       glyphs[index].info = { type: type, width: sk().xhi - sk().xlo, rX: sk().rX, rY: sk().rY };
+	    }
             break;
          case 'l':
 	    isShowingMeshEdges = ! isShowingMeshEdges;

@@ -355,9 +355,7 @@
    Control.prototype = new Sketch;
 
    function Diagram() {
-      this.labels =
-         //"refract scan rgb circles square circle triangle flap".split(' ');
-         "scan square circle triangle flap".split(' ');
+      this.labels = "refract scan square circle triangle flap".split(' ');
 
       this.isWandering = false;
 
@@ -575,10 +573,10 @@
                   drawRect((n + 1) * w / (nrc+2) - w/2, Y + H + w/(nrc-nr), w/(nrc+2), w/(nrc+2));
                }
 
-               text("col:", w/40 - w/1.5, Y + w/20);
-               text("row:", w/40 - w/1.5, Y + w/20 + w/10);
-               text(this.col, w/40 + w/7 - w/1.5, Y + w/20);
-               text(this.row, w/40 + w/7 - w/1.5, Y + w/20 + w/10);
+               text("col:", w/40 - w/2, Y + w/20);
+               text("row:", w/40 - w/2, Y + w/20 + w/10);
+               text(this.col, w/40 + w/7 - w/2, Y + w/20);
+               text(this.row, w/40 + w/7 - w/2, Y + w/20 + w/10);
 
                _g.textHeight = saveTextHeight;
             });
@@ -643,10 +641,10 @@
                var ty = yHi + w/32;
                color(defaultPenColor);
                textHeight(w/48);
-               this.drawLabel("400", [-w/2, ty]);
-               this.drawLabel("500", [-w/2 + w/3 - w/20/3, ty]);
-               this.drawLabel("600", [-w/2 + w*2/3 - w/20*2/3, ty]);
-               this.drawLabel("700", [w/2 - w/20, ty]);
+               text("400", -w/2, ty);
+               text("500", -w/2 + w/3 - w/20/3, ty);
+               text("600", -w/2 + w*2/3 - w/20*2/3, ty);
+               text("700", w/2 - w/20, ty);
 
                textHeight(w/30);
 
@@ -654,14 +652,14 @@
                var yr = evalCurve(redCurve, x / w);
                fillOval(x - 5, h * (4/5 - yr+.4) - 5 - 3*h/4, 10, 10);
 
-               this.drawLabel("R:", [w/60 - w/2, yLo + w/20]);
+               text("R:", w/60 - w/2, yLo + w/20);
                fillRect(w/16 - w/2, yLo + w/20*0.3, h * yr / 3, w/30);
 
                color('#00e000');
                var yg = evalCurve(greenCurve, x / w);
                fillOval(x - 5, h * (4/5 - yg+.4) - 5 - 3*h/4, 10, 10);
 
-               this.drawLabel("G:", [w/60 - w/2, yLo + w/20 * 2]);
+               text("G:", w/60 - w/2, yLo + w/20 * 2);
                fillRect(w/16 - w/2, yLo + w/20*1.3, h * yg / 3, w/30);
 
 
@@ -669,7 +667,7 @@
                var yb = evalCurve(blueCurve, x / w);
                fillOval(x - 5, h * (4/5 - yb+.4) - 5 - 3*h/4, 10, 10);
 
-               this.drawLabel("B:", [w/60 - w/2, yLo + w/20 * 3]);
+               text("B:", w/60 - w/2, yLo + w/20 * 3);
                fillRect(w/16 - w/2, yLo + w/20*2.3, h * yb / 3, w/30);
 
                color(defaultPenColor);

@@ -450,6 +450,7 @@
    }
 
    function morphSketchToGlyphSketch(suppressTransition) {
+
       function drawTrace(tr) {
          _g.beginPath();
          for (var n = 0 ; n < tr.length ; n++)
@@ -826,6 +827,7 @@
    // CREATE AN INSTANCE OF A REGISTERED SKETCH TYPE.
 
    function sg(type, selection) {
+
       var bounds = computeGlyphSketchBounds();
       This().mouseX = (bounds[0] + bounds[2]) / 2;
       This().mouseY = (bounds[1] + bounds[3]) / 2;
@@ -1073,11 +1075,13 @@
       }
    }
 
-   function finishSketch() {
-      sk().sketchProgress = 1;
-      sk().cursorTransition = 1;
-      sk().styleTransition = 1;
-      sk().sketchState = 'finished';
+   function finishSketch(sketch) {
+      if (sketch === undefined)
+         sketch = sk();
+      sketch.sketchProgress = 1;
+      sketch.cursorTransition = 1;
+      sketch.styleTransition = 1;
+      sketch.sketchState = 'finished';
    }
 
    function isFinishedDrawing() {
@@ -1226,6 +1230,8 @@
    }
 
    function Glyph(name, src) {
+
+      this.src = src;
 
       this.toString = function() {
          var str = '"' + this.name + '",\n';
@@ -1460,7 +1466,7 @@
 
    function glyphIndex(glyphs, name) {
       for (var i = 0 ; i < glyphs.length ; i++)
-         if (glyphs[i].name == name)
+         if (glyphs[i].indexName == name)
             return i;
       return -1;
    }
@@ -2785,12 +2791,6 @@
 
          if (this.visibleEdgesMesh !== undefined)
             root.remove(this.visibleEdgesMesh);
-
-/*
-   function meshToStrokes(mesh) {
-      return edgesToStrokes(mesh.projectVisibleEdges(mesh.findVisibleEdges()));
-   }
-*/
 
          if (isShowingMeshEdges) {
 

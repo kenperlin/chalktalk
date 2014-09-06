@@ -656,7 +656,7 @@ var page106b = {
       <tr height=50></tr>\
       <tr><th><font size=10 color=white><small>In the future:<p>\
                                         <small>Language will extend to<br>\
-                                        the very walls around us.</small><p>\
+                                        the very air between us.</small><p>\
 					&nbsp;</small></font></th></tr>\
       <tr>\
          <th><img src=imgs/whoopee_fire.png width=500></th>\
@@ -725,16 +725,15 @@ var sketchPages = [
    blankPage(),
    page102c,
    page103,
+   page104,
+   page104a,
+   page104b,
+   page104c,
+   page104d,
+   page104e,
+   page104f,
    blankPage(),
-   page106a,
    page106b,
    page107,
    blankPage(),
-   pagemarg1,
-   pagemarg2,
-   pagemarg3,
-   pagemarg4,
-   pagemarg5,
-   pagemarg6,
-   pagemarg7,
 ];

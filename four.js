@@ -119,6 +119,10 @@
       }
    }
 
+   THREE.Object3D.prototype.toStrokes = function() {
+      return edgesToStrokes(this.projectVisibleEdges(this.findVisibleEdges()));
+   }
+
    THREE.Object3D.prototype.findVisibleEdges = function(ve) {
       if (ve === undefined) {
          this.updateMatrixWorld();

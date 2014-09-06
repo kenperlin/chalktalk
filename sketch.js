@@ -625,8 +625,10 @@
             this.outValue[j] = value;
       }
       this.setSelection = function(s) {
-         if (typeof(s) == 'string')
+         if (typeof(s) == 'string') {
+            this.selectionName = s;
             s = getIndex(this.labels, s);
+         }
          this.selection = s;
          this.updateSelectionWeights(0);
       }
@@ -1074,11 +1076,32 @@
          this.len = computeCurveLength(this.sp0, 1);
       }
 
+      this.useStrokes = function(strokes) {
+         var xx = 0, yy = 0, kk = 0;
+         for (var n = 0 ; n < strokes.length ; n++)
+	    for (var i = 0 ; i < strokes[n].length ; i++) {
+	       xx += strokes[n][i][0];
+	       yy += strokes[n][i][1];
+	       kk++;
+	    }
+         this.tX = xx / kk;
+         this.tY = yy / kk;
+
+         for (var n = 0 ; n < strokes.length ; n++)
+	    for (var i = 0 ; i < strokes[n].length ; i++) {
+	       var x = strokes[n][i][0] - this.tX;
+	       var y = strokes[n][i][1] - this.tY;
+	       this.sp0.push([x,y]);
+	       this.sp.push([x,y,i>0]);
+	    }
+      }
+
       this.convertToGlyphSketch = function() {
          var glyph = findGlyph(this.getStrokes(), glyphs);
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();
+         sk().glyphIndexName = glyph.indexName;
          if (sk() instanceof Picture)
 	    glyphSketch.fadeAway = 1;
          else
@@ -1229,6 +1252,45 @@
       }
    }
    SimpleSketch.prototype = new Sketch;
+
+   function StrokesSketch() {
+      this.src = [];
+      this.render = function() {
+         if (this.src.length == 0) {
+	    var name = this.selectionName;
+	    var index = glyphIndex(glyphs, name);
+	    var glyph = glyphs[index];
+	    this.src = glyph.src;
+	    this.info = glyph.info;
+            this.srcBounds = strokesComputeBounds(this.src);
+	 }
+/*
+	 if (this.glyphTransition == 1 && this.info !== undefined) {
+
+	    var info = this.info;
+	    delete this.info;
+
+	    var xlo = 10000, xhi = -10000;
+	    var sp0 = glyphSketch.sp0;
+	    for (var n = 1 ; n < sp0.length ; n++) {
+	       xlo = min(xlo, sp0[n][0]);
+	       xhi = max(xhi, sp0[n][0]);
+            }
+
+	    glyphSketch = null;
+	    eval(info.type + "Sketch()");
+	    sk().sc = this.xyz[2] * (xhi - xlo) / (this.srcBounds[2] - this.srcBounds[0]);
+	    sk().rX = info.rX;
+	    sk().rY = info.rY;
+	    this.fadeAway = 1;
+	    return;
+         }
+*/
+	 for (var n = 0 ; n < this.src.length ; n++)
+	    drawCurve(this.src[n]);
+      }
+   }
+   StrokesSketch.prototype = new SimpleSketch;
 
    function NumericSketch() {
       this.init = function(str, x, y) {
