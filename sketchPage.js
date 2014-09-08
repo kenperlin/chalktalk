@@ -1220,13 +1220,12 @@ var sketchToDelete = null;
          case 'e':
             toggleCodeWidget();
             break;
-/*
          case 'f':
-            isAudioSignal = ! isAudioSignal;
-            setAudioSignal(isAudioSignal ? function(t) { return cos(125 * TAU * t) > 0 ? 1 : -1; }
-                                         : function(t) { return 0; });
+	    if (_g.panX >= 5000)
+	      _g.panX -= 5000;
+            else
+	      _g.panX += 5000;
             break;
-*/
          case 'g':
             this.toggleGroup();
             break;

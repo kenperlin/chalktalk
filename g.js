@@ -1866,8 +1866,7 @@
 
          // PAN 3D OBJECTS TOO
 
-         //root.position.x = _g.panX / 305.5;
-         root.position.x = _g.panX / (0.382 * height());
+         root.position.x = _g.panX / (0.391 * height());
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);

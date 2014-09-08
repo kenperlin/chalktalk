@@ -530,6 +530,21 @@ var page104g = {
    innerHTML: "\
       <table width=1280>\
       <tr height=100></tr>\
+      <tr><th><font size=10 color=white><small>People don't need a GUI<br>\
+                                        to talk with each other</small><p>&nbsp;<p></font></th></tr>\
+      <tr>\
+         <th><img src=imgs/kids-talking.jpg width=550></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104h = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/ken-perlin-at-the-cdm.jpg width=700></th>\
          </tr>\
@@ -537,7 +552,7 @@ var page104g = {
    "
 };
 
-var page104h = {
+var page104i = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -758,6 +773,7 @@ var sketchPages = [
    page104f,
    page104g,
    page104h,
+   page104i,
    page106b,
    page106,
 ];
