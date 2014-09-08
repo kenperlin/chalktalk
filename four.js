@@ -548,7 +548,7 @@ var fragmentShaderHeader = ["\
          var edges = veds[k][1];
 
          for (var n = 0 ; n < edges.length ; n++)
-            mesh.geometry.addLine(.015, geom.vertexWorld(edges[n][0]),
+            mesh.geometry.addLine(.007, geom.vertexWorld(edges[n][0]),
 	                                geom.vertexWorld(edges[n][1]));
       }
 

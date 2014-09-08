@@ -537,7 +537,7 @@
    var isExpertMode = true;
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
-   var isShowing2DMeshEdges = true;
+   var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -2723,6 +2723,7 @@
       this.dragy = 0;
       this.downx = 0;
       this.downy = 0;
+      this.isOutline = false;
       this.cleanup = function() {
          root.remove(this.mesh);
          if (this.visibleEdgesMesh !== undefined)
@@ -2793,7 +2794,7 @@
          if (this.visibleEdgesMesh !== undefined)
             root.remove(this.visibleEdgesMesh);
 
-         if (isShowingMeshEdges) {
+         if (this.isOutline || isShowingMeshEdges) {
 
             // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
 

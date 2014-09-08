@@ -1260,35 +1260,51 @@
 	    var name = this.selectionName;
 	    var index = glyphIndex(glyphs, name);
 	    var glyph = glyphs[index];
-	    this.src = glyph.src;
+	    this.src = cloneArray(glyph.src);
 	    this.info = glyph.info;
-            this.srcBounds = strokesComputeBounds(this.src);
+	    var xy0 = this.info.xy0;
+/*
+	    for (var n = 0 ; n < this.src.length ; n++)
+	       for (var i = 0 ; i < this.src[n].length ; i++) {
+	          this.src[n][i][0] -= xy0[0];
+	          this.src[n][i][1] -= xy0[1];
+	       }
+            this.tX += xy0[0];
+            this.tY += xy0[1];
+*/
 	 }
 
-	 if (this.glyphTransition == 1 && this.info !== undefined) {
+/*
+   To do:  extract an outline from the resulting 3D shape.
+   Compare against the outline we've been drawing, and
+   do an adjustment to tX, tY, sc.
+*/
+
+	 if (this.glyphTransition == 1 && this.info !== undefined && this.xyz.length > 0) {
 
 	    var info = this.info;
 	    delete this.info;
 
-            var tX = glyphSketch.tX;
-            var tY = glyphSketch.tY;
-            var rX = info.rX;
-            var rY = info.rY;
-            var xyz = glyphSketch.xyz;
+	    var type = info.type;
+            var rX   = info.rX;
+            var rY   = info.rY;
+
 	    glyphSketch = null;
-	    eval(info.type + "Sketch()");
-	    sk().tX = tX;
-	    sk().tY = tY;
+	    eval(type + "Sketch()");
+	    sk().isOutline = true;
+	    sk().mesh.setMaterial(blackMaterial);
 	    sk().rX = rX;
 	    sk().rY = rY;
-	    if (xyz.length > 0)
-	       sk().xyz = [xyz[0],xyz[1],xyz[2]];
 	    this.fadeAway = 1;
 	    return;
          }
 
-	 for (var n = 0 ; n < this.src.length ; n++)
-	    drawCurve(this.src[n]);
+	 for (var n = 0 ; n < this.src.length ; n++) {
+	    var C = [];
+	    for (var i = 0 ; i < this.src[n].length ; i++)
+	       C.push(this.xform(this.src[n][i]));
+	    drawCurve(C);
+         }
       }
    }
    StrokesSketch.prototype = new SimpleSketch;

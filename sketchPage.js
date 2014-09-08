@@ -1240,10 +1240,13 @@ var sketchToDelete = null;
 	    if (isk() && sk() instanceof GeometrySketch) {
 	       var type = sk().glyphIndexName;
 	       var name = type + "_s";
+	       var m = sk().mesh.matrixWorld.elements;
+	       var x0 = width () / 2 + pixelsPerUnit * m[12];
+	       var y0 = height() / 2 - pixelsPerUnit * m[13];
 	       var strokes = sk().mesh.toStrokes();
 	       registerGlyph("sg('StrokesSketch','" + name + "')", strokes, name);
 	       var index = glyphIndex(glyphs, name);
-	       glyphs[index].info = { type: type, tX: sk().tX, tY: sk().tY, rX: sk().rX, rY: sk().rY };
+	       glyphs[index].info = { type: type, xy0: [x0,y0], rX: sk().rX, rY: sk().rY };
 	    }
             break;
          case 'l':
