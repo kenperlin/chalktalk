@@ -1264,28 +1264,29 @@
 	    this.info = glyph.info;
             this.srcBounds = strokesComputeBounds(this.src);
 	 }
-/*
+
 	 if (this.glyphTransition == 1 && this.info !== undefined) {
 
 	    var info = this.info;
 	    delete this.info;
 
-	    var xlo = 10000, xhi = -10000;
-	    var sp0 = glyphSketch.sp0;
-	    for (var n = 1 ; n < sp0.length ; n++) {
-	       xlo = min(xlo, sp0[n][0]);
-	       xhi = max(xhi, sp0[n][0]);
-            }
-
+            var tX = glyphSketch.tX;
+            var tY = glyphSketch.tY;
+            var rX = info.rX;
+            var rY = info.rY;
+            var xyz = glyphSketch.xyz;
 	    glyphSketch = null;
 	    eval(info.type + "Sketch()");
-	    sk().sc = this.xyz[2] * (xhi - xlo) / (this.srcBounds[2] - this.srcBounds[0]);
-	    sk().rX = info.rX;
-	    sk().rY = info.rY;
+	    sk().tX = tX;
+	    sk().tY = tY;
+	    sk().rX = rX;
+	    sk().rY = rY;
+	    if (xyz.length > 0)
+	       sk().xyz = [xyz[0],xyz[1],xyz[2]];
 	    this.fadeAway = 1;
 	    return;
          }
-*/
+
 	 for (var n = 0 ; n < this.src.length ; n++)
 	    drawCurve(this.src[n]);
       }

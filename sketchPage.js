@@ -1221,10 +1221,8 @@ var sketchToDelete = null;
             toggleCodeWidget();
             break;
          case 'f':
-	    if (_g.panX >= 5000)
-	      _g.panX -= 5000;
-            else
-	      _g.panX += 5000;
+	    if (isk())
+	       console.log(sk().tX + " " + sk().tY + " " + sk().sc + " " + arrayToString(sk().xyz));
             break;
          case 'g':
             this.toggleGroup();
@@ -1245,7 +1243,7 @@ var sketchToDelete = null;
 	       var strokes = sk().mesh.toStrokes();
 	       registerGlyph("sg('StrokesSketch','" + name + "')", strokes, name);
 	       var index = glyphIndex(glyphs, name);
-	       glyphs[index].info = { type: type, width: sk().xhi - sk().xlo, rX: sk().rX, rY: sk().rY };
+	       glyphs[index].info = { type: type, tX: sk().tX, tY: sk().tY, rX: sk().rX, rY: sk().rY };
 	    }
             break;
          case 'l':
