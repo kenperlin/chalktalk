@@ -1563,6 +1563,25 @@ var sketchToDelete = null;
             this.index = PUSHED_sketchPage_index;
          }
 
+	 // IF THERE IS A STROKES SKETCH, CREATE ITS CORRESPONDING SHAPE.
+
+         var shapeInfo = null;
+	 for (var I = 0 ; I < nsk() ; I++)
+	    if (sk(I) instanceof StrokesSketch && sk(I).shapeInfo !== undefined) {
+	       shapeInfo = sk(I).shapeInfo;
+	       delete sk(I).shapeInfo;
+	       break;
+	    }
+         if (shapeInfo != null) {
+            glyphSketch = null;
+            eval(shapeInfo.type + "Sketch()");
+            sk().isOutline = true;
+            sk().mesh.setMaterial(blackMaterial);
+            sk().rX = shapeInfo.rX;
+            sk().rY = shapeInfo.rY;
+            sk().adjustBounds = shapeInfo.bounds;
+	 }
+
          noisy = 0;
 
          // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA STRIP.
@@ -2183,4 +2202,5 @@ var sketchToDelete = null;
    }
 
    var sketchPage = sketchBook.setPage(0);
+
 

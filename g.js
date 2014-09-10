@@ -2833,7 +2833,7 @@
 
 
 	       annotateStart();
-
+/*
 	       // Draw the long connected 2d strokes in different colors.
 
                lineWidth(20);
@@ -2842,7 +2842,7 @@
 	          color('rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)');
 		  drawCurve(c2[m]);
 	       }
-
+*/
 	       // Draw the projected 2d edges.
 
                lineWidth(10);

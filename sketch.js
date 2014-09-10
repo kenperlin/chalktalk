@@ -1282,22 +1282,12 @@
 	 // THIS LOGIC NEEDS TO GO AFTER RENDER, NOT IN IT.
 
 	 if (this.glyphTransition == 1 && this.info !== undefined) {
-
-	    glyphSketch = null;
-
-	    eval(this.info.type + "Sketch()");
-
-	    sk().isOutline = true;
-	    sk().mesh.setMaterial(blackMaterial);
-	    sk().rX = this.info.rX;
-	    sk().rY = this.info.rY;
-
-	    sk().adjustBounds = computeCurveBounds(this.sp, 1);
-
+	    this.shapeInfo = { type  : this.info.type,
+	                       rX    : this.info.rX,
+			       rY    : this.info.rY,
+	                       bounds: computeCurveBounds(this.sp, 1) };
 	    this.fadeAway = 1;
-
 	    delete this.info;
-	    return;
          }
       }
    }
