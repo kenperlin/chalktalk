@@ -1262,48 +1262,42 @@
 	    var glyph = glyphs[index];
 	    this.src = cloneArray(glyph.src);
 	    this.info = glyph.info;
-	    var xy0 = this.info.xy0;
-/*
+
 	    for (var n = 0 ; n < this.src.length ; n++)
 	       for (var i = 0 ; i < this.src[n].length ; i++) {
-	          this.src[n][i][0] -= xy0[0];
-	          this.src[n][i][1] -= xy0[1];
+	          this.src[n][i][0] -= this.info.x0;
+	          this.src[n][i][1] -= this.info.y0;
 	       }
-            this.tX += xy0[0];
-            this.tY += xy0[1];
-*/
+            this.tX += this.info.x0;
+            this.tY += this.info.y0;
 	 }
-
-/*
-   To do:  extract an outline from the resulting 3D shape.
-   Compare against the outline we've been drawing, and
-   do an adjustment to tX, tY, sc.
-*/
-
-	 if (this.glyphTransition == 1 && this.info !== undefined && this.xyz.length > 0) {
-
-	    var info = this.info;
-	    delete this.info;
-
-	    var type = info.type;
-            var rX   = info.rX;
-            var rY   = info.rY;
-
-	    glyphSketch = null;
-	    eval(type + "Sketch()");
-	    sk().isOutline = true;
-	    sk().mesh.setMaterial(blackMaterial);
-	    sk().rX = rX;
-	    sk().rY = rY;
-	    this.fadeAway = 1;
-	    return;
-         }
 
 	 for (var n = 0 ; n < this.src.length ; n++) {
 	    var C = [];
 	    for (var i = 0 ; i < this.src[n].length ; i++)
 	       C.push(this.xform(this.src[n][i]));
 	    drawCurve(C);
+         }
+
+	 // THIS LOGIC NEEDS TO GO AFTER RENDER, NOT IN IT.
+
+	 if (this.glyphTransition == 1 && this.info !== undefined) {
+
+	    glyphSketch = null;
+
+	    eval(this.info.type + "Sketch()");
+
+	    sk().isOutline = true;
+	    sk().mesh.setMaterial(blackMaterial);
+	    sk().rX = this.info.rX;
+	    sk().rY = this.info.rY;
+
+	    sk().adjustBounds = computeCurveBounds(this.sp, 1);
+
+	    this.fadeAway = 1;
+
+	    delete this.info;
+	    return;
          }
       }
    }

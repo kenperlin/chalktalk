@@ -2750,6 +2750,19 @@
          this.makeXform();
          this.rX = save_rX;
 
+	 if (this.adjustBounds && ! isNaN(this.xlo)) {
+	    this._dx = (this.adjustBounds[0] + this.adjustBounds[2]) / 2 - (this.xlo + this.xhi) / 2;
+	    this._dy = (this.adjustBounds[1] + this.adjustBounds[3]) / 2 - (this.ylo + this.yhi) / 2;
+	    this._ds = (this.adjustBounds[2] - this.adjustBounds[0]) / (this.xhi - this.xlo);
+	    delete this.adjustBounds;
+	 }
+
+	 if (this._dx !== undefined) {
+	    this.xf[0] += this._dx;
+	    this.xf[1] += this._dy;
+	    this.xf[4] *= this._ds;
+         }
+
          for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
             var xy = this.xform(this.sp0[i]);
             this.sp[i][0] = xy[0];
@@ -2795,6 +2808,9 @@
             root.remove(this.visibleEdgesMesh);
 
          if (this.isOutline || isShowingMeshEdges) {
+
+	    if (this.adjustBounds)
+	       return;
 
             // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
 
