@@ -1272,6 +1272,9 @@
             this.tY += this.info.y0;
 	 }
 
+	 this.sp = [[0,0]];
+	 this.sp0 = [[0,0,0]];
+
 	 for (var n = 0 ; n < this.src.length ; n++) {
 	    var C = [];
 	    for (var i = 0 ; i < this.src[n].length ; i++)

@@ -1579,7 +1579,7 @@ var sketchToDelete = null;
             sk().mesh.setMaterial(blackMaterial);
             sk().rX = shapeInfo.rX;
             sk().rY = shapeInfo.rY;
-            sk().adjustBounds = shapeInfo.bounds;
+            sk().bounds = shapeInfo.bounds;
 	 }
 
          noisy = 0;
