@@ -1,4 +1,93 @@
 
+
+registerGlyph("Rocket3D()", ["PARBUCWCZB]A_?`<`:a7a5`2_0^.[,Z)X(V&T$R!P!M K H!F#D%B&@(?*>,</;1;4:6:9:;:>;@;C=E>G@IBKDLFNHNKNNNPOSOUOXPZQ]R_TaVbXcZd^e`eceeehekemdpcrbt`v_x[zY{W|U}R~P~M~J~H}F|C{Ay@w?u>r=p=m=k>h>f@dAaC`E_H_J`LbNcOfOh"]
+);
+
+THREE.Object3D.prototype.add3DRocket = function() {
+
+   // var geometry = cubeGeometry();
+   //  var mesh = new THREE.Mesh(geometry, blackMaterial);
+   //  this.add(mesh);
+   //  return mesh;
+
+  // var object;
+
+  // var loader = new THREE.OBJLoader();
+
+  // console.log(loader);
+
+  // function bob(tEvent){
+  //   console.log("hi bob");
+  //   object = tEvent.content;
+  //   console.log(tEvent);
+  // }
+        
+  // loader.addEventListener( 'load', bob( tEvent ) 
+
+  //   // object = event.content;
+
+  //   // object.traverse( function ( child ) {
+  //   //   if ( child instanceof THREE.Mesh ) {
+  //   //     child.material.side = THREE.DoubleSide;
+  //   //   }
+  //   // });
+
+  // );
+
+  // loader.load( 'assets/models/iceCreamCone.obj' );
+
+  return objLoad();
+}
+
+function objLoad(){
+
+  var returner = new THREE.Object3D();
+
+  var loader = new THREE.OBJLoader();
+
+  console.log(loader);
+
+  console.log(loader.addEventListener);
+
+  loader.addEventListener( 'load', function ( event ) {
+
+    var object = event.content;
+
+    object.traverse( function ( child ) {
+
+      if ( child instanceof THREE.Mesh ) {
+
+        child.material.side = THREE.DoubleSide;
+        child.material.map = texture2;
+
+      }
+
+    } );
+
+    returner.add(object);
+    
+
+  });
+
+  loader.load( 'assets/models/iceCreamCone.obj' );
+
+  return returner;
+}
+
+function Rocket3D(){
+
+
+  var a = root.add3DRocket();//new THREE.Mesh(new THREE.SphereGeometry(),new THREE.MeshLambertMaterial(0xffffff));//root.add3DRocket();
+  var sketch = geometrySketch(a);
+  console.log(sketch);
+  // a.update = function() {
+
+  //  this.getMatrix().translate(0,-2,0).scale(0.08);
+  //  this.shaderMaterial.uniforms['time'].value = time*.1;
+
+  // }
+}
+
 ["] ]!]#]$]%]&]'](](])]*]+],]-].^/^0^1^2^3^4^4^5^6^7^8^9^:^;_<_=_>^?^@^A^A^B^C^D^E^F^G^H^I^J^K^L^M^N^O^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^]^]^^^_^`^a^b^c^d^e^f]g]h]i]j]j]k]l]m]n]o]p]q]r]s]t]u]v[w[w[x[y[z[{[|[}[~","]&[%Y&X&W&U&T&S%R%P%O%N%M%K%J%I%G%F%E&D&B&A&A&A'A)A*A+A-A.A/A0A2A3A4A5A7B8B9B;B<B=B>B@BABBBCBEBFBGBIBJBKBLBNBOBPBQBSCTCUCVCXCYCZC]C^C_C`CbCcCdCeCgChCiCkClCmCnCoEoFoGoHnJnKnLnNnOnPnQnSnTnUnVnXnYnZo[o^o"]
 
 
