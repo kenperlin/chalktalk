@@ -1123,6 +1123,12 @@ var sketchToDelete = null;
          case '!':
             this.clear();
             break;
+         case '#':
+	    if (this.isGraphPaper === undefined)
+	       this.isGraphPaper = true;
+            else
+	       delete this.isGraphPaper;
+            break;
          case PAGE_UP:
             break;
          case PAGE_DN:
@@ -1416,6 +1422,20 @@ var sketchToDelete = null;
 
          var isOnPanStrip = isBottomGesture || this.y >= h - margin;
          var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
+
+	 if (this.isGraphPaper !== undefined) {
+	    annotateStart();
+	    var r = w / 32;
+            color(defaultPenColor);
+	    lineWidth(0.15);
+	    var x0 = r * floor(-_g.panX / r);
+	    var x1 = x0 + w + r;
+	    for (var x = x0 ; x < x1 ; x += r)
+	       line(x, 0, x, h - margin);
+	    for (var y = r ; y < h - margin ; y += r)
+	       line(x0, y, x1, y);
+	    annotateEnd();
+	 }
 
          for (var I = 0 ; I < nsk() ; I++) {
 

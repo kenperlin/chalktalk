@@ -543,7 +543,6 @@
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
    var margin = 50;
-   var scribbleColor = 'rgb(128, 224, 255)';
    var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
@@ -1480,11 +1479,16 @@
       glyphs.push(glyph);
    }
 
+   function scribbleColor() {
+      return backgroundColor == 'white' ? 'rgb(  0, 112, 128)'
+                                        : 'rgb(128, 224, 255)';
+   }
+
    function BgScribble(x, y) {
       this.path = [[x,y]];
       this.index = 0;
       this.draw = function() {
-         color(scribbleColor);
+         color(scribbleColor());
 
          lineWidth(1);
          var r = margin / 5;
@@ -2383,7 +2387,7 @@
          var ncols = 25;
          var cw = w / ncols;
 
-         color(scribbleColor);
+         color(scribbleColor());
          lineWidth(cw / 70);
 
          var fs = floor(0.2 * w / ncols);
