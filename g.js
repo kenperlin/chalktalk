@@ -543,7 +543,6 @@
    var isShowingScribbleGlyphs = false;
    var isTextMode = false;
    var margin = 50;
-   var scribbleColor = 'rgb(128, 224, 255)';
    var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
@@ -754,6 +753,7 @@
       ['x'  , "toggle expert mode"],
       ['y'  , "toggle scribble glyphs"],
       ['z'  , "zoom"],
+      ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
       ['spc', "quick help menu"],
@@ -774,8 +774,9 @@
    var linkDeleteColor = 'rgba(255,0,0,.1)';
    var linkHighlightColor = 'rgba(0,192,96,.2)';
    var liveDataColor = 'rgb(128,192,255)'
-   var overlayColor = 'rgb(0,64,255)';
-   var overlayScrim = 'rgba(0,64,255,.25)';
+   var overlayColor = 'rgb(0,96,255)';
+   var overlayClearColor = 'rgba(0,96,255,.5)';
+   var overlayScrim = 'rgba(0,96,255,.25)';
    var portColor = 'rgb(0,192,96)';
    var portBgColor = backgroundColor;
    var portHeight = 24;
@@ -1480,11 +1481,16 @@
       glyphs.push(glyph);
    }
 
+   function scribbleColor() {
+      return backgroundColor == 'white' ? 'rgb(  0, 112, 128)'
+                                        : 'rgb(128, 224, 255)';
+   }
+
    function BgScribble(x, y) {
       this.path = [[x,y]];
       this.index = 0;
       this.draw = function() {
-         color(scribbleColor);
+         color(scribbleColor());
 
          lineWidth(1);
          var r = margin / 5;
@@ -2383,7 +2389,7 @@
          var ncols = 25;
          var cw = w / ncols;
 
-         color(scribbleColor);
+         color(scribbleColor());
          lineWidth(cw / 70);
 
          var fs = floor(0.2 * w / ncols);

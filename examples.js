@@ -782,13 +782,10 @@
             var x2 = x1 + (dx2 * cb + dy2 * sb);
             var y2 = y1 + (dy2 * cb - dx2 * sb);
 
-            drawCurve([ [ox-x0, oy+y0],
-                        [ox-x1, oy+y1],
-                        [ox-x2, oy+y2] ]);
-
-            drawCurve([ [ox+x0, oy+y0],
-                        [ox+x1, oy+y1],
-                        [ox+x2, oy+y2] ]);
+            drawCurve([ [ox-x0, oy+y0], [ox-x1, oy+y1] ]);
+            drawCurve([ [ox-x1, oy+y1], [ox-x2, oy+y2] ]);
+            drawCurve([ [ox+x0, oy+y0], [ox+x1, oy+y1] ]);
+            drawCurve([ [ox+x1, oy+y1], [ox+x2, oy+y2] ]);
 
             this.afterSketch(function() {
                var r = w/40;

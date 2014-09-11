@@ -1123,6 +1123,12 @@ var sketchToDelete = null;
          case '!':
             this.clear();
             break;
+         case '#':
+	    if (this.isGraphPaper === undefined)
+	       this.isGraphPaper = true;
+            else
+	       delete this.isGraphPaper;
+            break;
          case PAGE_UP:
             break;
          case PAGE_DN:
@@ -1416,6 +1422,21 @@ var sketchToDelete = null;
 
          var isOnPanStrip = isBottomGesture || this.y >= h - margin;
          var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
+
+	 if (this.isGraphPaper !== undefined) {
+	    annotateStart();
+	    var r = w / 32;
+            color(defaultPenColor);
+	    lineWidth(backgroundColor == 'white' ? 0.1 : 0.15);
+	    var x0 = r * floor(-_g.panX / r);
+	    var x1 = x0 + w + r;
+	    var y1 = this.y >= h - margin ? h - margin : h;
+	    for (var x = x0 ; x < x1 ; x += r)
+	       line(x, 0, x, y1);
+	    for (var y = r ; y < y1 ; y += r)
+	       line(x0, y, x1, y);
+	    annotateEnd();
+	 }
 
          for (var I = 0 ; I < nsk() ; I++) {
 
@@ -1801,6 +1822,7 @@ var sketchToDelete = null;
 
       this.overlay = function() {
          var w = width(), h = height();
+	 var dx = -_g.panX;
 
          isShowingTimeline = isDraggingTimeline ||
                              ! isExpertMode
@@ -1816,7 +1838,7 @@ var sketchToDelete = null;
             this.showGlyphs();
 
          // SHOW THE TIMELINE
-
+/*
          if (isShowingTimeline) {
             annotateStart();
             color('blue');
@@ -1825,15 +1847,15 @@ var sketchToDelete = null;
             annotateEnd();
             return;
          }
-
+*/
          annotateStart();
 
          // SHOW THE OPTION OF WHETHER TO USE PULLDOWN OR PIE MENU
 
-         color('blue');
+         color(overlayClearColor);
          textHeight(12);
-         text("Using", w - 40, h - 30, .5, 1);
-         text((menuType==0 ? "PullDown" : "Pie Menu"), w - 40, h - 10, .5, 1);
+         text("Using", dx + w - 40, h - 30, .5, 1);
+         text((menuType==0 ? "PullDown" : "Pie Menu"), dx + w - 40, h - 10, .5, 1);
 
          // DRAW THE COLOR PALETTE
 
@@ -1842,8 +1864,8 @@ var sketchToDelete = null;
 
          color(overlayColor);
 
-         line(w,0,w,h);
-         line(0,h,w,h);
+         line(dx+w,0, dx+w,h);
+         line(dx+0,h, dx+w,h);
 
          // LIGHTLY OUTLINE ALL SKETCHES
 
@@ -1854,9 +1876,9 @@ var sketchToDelete = null;
          _g.restore();
 
          _g.save();
-         _g.font = '30pt Calibri';
+         _g.font = '30pt Helvetica';
          _g.fillStyle = overlayScrim;
-         _g.fillText("PAGE " + sketchBook.page, 60, 40);
+         _g.fillText("PAGE " + sketchBook.page, dx + 60, 40);
          _g.restore();
 
          if (this.isWhiteboard)
@@ -1940,20 +1962,20 @@ var sketchToDelete = null;
          // IF NOT IN TEXT INSERTION MODE, SHOW THE AVAILABLE KEYBOARD SHORTCUTS.
 
          if (! isShowingGlyphs && ! isTextMode) {
-            color(overlayColor);
+            color(overlayClearColor);
             lineWidth(1);
-            textHeight(12);
+            textHeight(11);
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
-               var y = y0 + j * 20;
-               text(hotKeyMenu[j][0],  8, y, 0, 0);
-               text(hotKeyMenu[j][1], 38, y, 0, 0);
+               var y = y0 + j * 18;
+               text(hotKeyMenu[j][0], dx + 8, y, 0, 0);
+               text(hotKeyMenu[j][1], dx +38, y, 0, 0);
                if (hotKeyMenu[j][0] == letterPressed)
-                  drawRect(3, y - 3, 30, 20);
+                  drawRect(dx + 3, y - 3, 30, 20);
             }
 
             if (letterPressed != '\0')
-               text(letterPressed + " key pressed", 5, 60, 0, 1);
+               text(letterPressed + " key pressed", dx + 5, 60, 0, 1);
          }
 
          // SHOW LINKS BETWEEN SKETCHES.
