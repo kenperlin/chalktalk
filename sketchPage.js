@@ -1427,12 +1427,13 @@ var sketchToDelete = null;
 	    annotateStart();
 	    var r = w / 32;
             color(defaultPenColor);
-	    lineWidth(0.15);
+	    lineWidth(backgroundColor == 'white' ? 0.1 : 0.15);
 	    var x0 = r * floor(-_g.panX / r);
 	    var x1 = x0 + w + r;
+	    var y1 = this.y >= h - margin ? h - margin : h;
 	    for (var x = x0 ; x < x1 ; x += r)
-	       line(x, 0, x, h - margin);
-	    for (var y = r ; y < h - margin ; y += r)
+	       line(x, 0, x, y1);
+	    for (var y = r ; y < y1 ; y += r)
 	       line(x0, y, x1, y);
 	    annotateEnd();
 	 }
