@@ -6,83 +6,73 @@ registerGlyph("Rocket3D()", ["PARBUCWCZB]A_?`<`:a7a5`2_0^.[,Z)X(V&T$R!P!M K H!F#
 THREE.Object3D.prototype.add3DRocket = function() {
 
    // var geometry = cubeGeometry();
-   //  var mesh = new THREE.Mesh(geometry, blackMaterial);
-   //  this.add(mesh);
-   //  return mesh;
+   // var geometry = objLoad();
+   // console.log(geometry.children[0]);
+   
 
-  // var object;
+  var returner = new THREE.Object3D();
 
-  // var loader = new THREE.OBJLoader();
+  var manager = new THREE.LoadingManager();
+  var loader = new THREE.OBJLoader( manager );
 
-  // console.log(loader);
+  var that = this;
 
-  // function bob(tEvent){
-  //   console.log("hi bob");
-  //   object = tEvent.content;
-  //   console.log(tEvent);
-  // }
-        
-  // loader.addEventListener( 'load', bob( tEvent ) 
+  loader.load( 'assets/models/iceCreamCone.obj', function ( object ) {
 
-  //   // object = event.content;
+      console.log(object.children[0]);
+      var mesh = new THREE.Mesh(object.children[0].geometry, whiteMaterial);
+      // this.add(mesh);
+      // return mesh;
+      var a = mesh;
+      that.add(object);
+      var sketch = geometrySketch(object.children[0]);
 
-  //   // object.traverse( function ( child ) {
-  //   //   if ( child instanceof THREE.Mesh ) {
-  //   //     child.material.side = THREE.DoubleSide;
-  //   //   }
-  //   // });
-
-  // );
-
-  // loader.load( 'assets/models/iceCreamCone.obj' );
-
-  return objLoad();
+    });
 }
 
 function objLoad(){
 
   var returner = new THREE.Object3D();
 
-  var loader = new THREE.OBJLoader();
+  var manager = new THREE.LoadingManager();
+  var loader = new THREE.OBJLoader( manager );
 
-  console.log(loader);
 
-  console.log(loader.addEventListener);
+  loader.load( 'assets/models/iceCreamCone.obj', function ( object ) {
+    console.log(object.children[0].geometry);
+    // object.traverse( function ( child ) {
 
-  loader.addEventListener( 'load', function ( event ) {
+    //   if ( child instanceof THREE.Mesh ) {
 
-    var object = event.content;
+    //     child.material.map = texture;
 
-    object.traverse( function ( child ) {
+    //   }
 
-      if ( child instanceof THREE.Mesh ) {
+    // } );
 
-        child.material.side = THREE.DoubleSide;
-        child.material.map = texture2;
+    // object.position.y = - 80;
+    returner.add(object) ;
+    return object.children[0].geometry;
+  } );
 
-      }
 
-    } );
-
-    returner.add(object);
+    // returner.add(object);
     
+    console.log(returner);
 
-  });
-
-  loader.load( 'assets/models/iceCreamCone.obj' );
-
-  return returner;
+  // loader.load( 'assets/models/iceCreamCone.obj' );  
 }
 
 function Rocket3D(){
 
-
-  var a = root.add3DRocket();//new THREE.Mesh(new THREE.SphereGeometry(),new THREE.MeshLambertMaterial(0xffffff));//root.add3DRocket();
-  var sketch = geometrySketch(a);
-  console.log(sketch);
+    root.add3DRocket()
+  // var a = root.add3DRocket();//new THREE.Mesh(new THREE.SphereGeometry(),new THREE.MeshLambertMaterial(0xffffff));//root.add3DRocket();
+  // console.log(a);
+  // var sketch = geometrySketch(a);
+  // console.log(a);
   // a.update = function() {
 
-  //  this.getMatrix().translate(0,-2,0).scale(0.08);
+  //  this.getMatrix().translate(0,0,0).scale(1);
   //  this.shaderMaterial.uniforms['time'].value = time*.1;
 
   // }
