@@ -753,6 +753,7 @@
       ['x'  , "toggle expert mode"],
       ['y'  , "toggle scribble glyphs"],
       ['z'  , "zoom"],
+      ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
       ['spc', "quick help menu"],
@@ -773,8 +774,9 @@
    var linkDeleteColor = 'rgba(255,0,0,.1)';
    var linkHighlightColor = 'rgba(0,192,96,.2)';
    var liveDataColor = 'rgb(128,192,255)'
-   var overlayColor = 'rgb(0,64,255)';
-   var overlayScrim = 'rgba(0,64,255,.25)';
+   var overlayColor = 'rgb(0,96,255)';
+   var overlayClearColor = 'rgba(0,96,255,.5)';
+   var overlayScrim = 'rgba(0,96,255,.25)';
    var portColor = 'rgb(0,192,96)';
    var portBgColor = backgroundColor;
    var portHeight = 24;
