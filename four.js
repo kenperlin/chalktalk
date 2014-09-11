@@ -367,6 +367,7 @@
    }
 
    var blackMaterial = new phongMaterial(0x000000,0x000000,0x000000,20);
+   var whiteMaterial = new phongMaterial(0xffffff,0xffffff,0xffffff,20);
 
    function node() {
       return new THREE.Mesh();

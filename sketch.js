@@ -252,13 +252,18 @@
          context.restore();
       }
       this.drawFirstLine = false;
-      this.drawLabel = function(label, xy, ax, ay) {
+      this.drawLabel = function(label, xy, ax, ay, scale) {
          var P = this.adjustXY(xy);
          utext(label, P[0], P[1], ax, ay);
       }
-      this.drawValue = function(value, xy, ax, ay) {
+      this.drawValue = function(value, xy, ax, ay, scale) {
+	 //var textHeight = _g.textHeight;
+	 //_g.textHeight = textHeight * this.sc;
+
          var P = this.adjustXY(xy);
          utext(roundedString(value), P[0], P[1], ax, ay);
+
+	 //_g.textHeight = textHeight;
       }
       this.drawText = function(context) {
 
