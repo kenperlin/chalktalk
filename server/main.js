@@ -21,7 +21,13 @@ app.route("/upload").post(function(req, res, next) {
       res.writeHead(200, {"content-type": "text/plain"});
       res.write('received upload:\n\n');
 
-      fs.writeFile(form.uploadDir + "/" + fields.sketchName + ".js", fields.sketchContent, function(err) {
+      var filename = fields.sketchName;
+      var suffix = ".js";
+      if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
+         filename += suffix; 
+
+      fs.writeFile(form.uploadDir + "/"
+            + filename, fields.sketchContent, function(err) {
          if (err) {
             console.log(err);
          } else {
