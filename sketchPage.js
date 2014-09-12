@@ -379,9 +379,13 @@ var sketchToDelete = null;
          if (isTogglingMenuType)
             return;
 
-         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
-            outSketch.defaultValue[outPort] -= floor(y/10) - floor((y-dy)/10);
-            this.isClick = false;
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]) && ! this.click) {
+	    if (this.portValueDragMode === undefined)
+	       this.portValueDragMode = abs(x - this.xDown) > abs(y - this.yDown) ? "portValueDragX" : "portValueDragY";
+            if (this.portValueDragMode == "portValueDragY") {
+               var incr = floor((y-dy)/10) - floor(y/10);
+               outSketch.defaultValue[outPort] += incr;
+            }
          }
 
          if (pieMenuIsActive) {
@@ -441,6 +445,13 @@ var sketchToDelete = null;
 	 if (this.hintTrace !== undefined) {
 	    return;
 	 }
+
+         if (this.portValueDragMode !== undefined) {
+	    if (this.portValueDragMode == "portValueDragX")
+               outSketch.defaultValue[outPort] *= x > this.xDown ? 0.1 : 10;
+            delete this.portValueDragMode;
+	    return;
+         }
 
          if (this.isDraggingGlyph) {
             glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
@@ -988,6 +999,10 @@ var sketchToDelete = null;
 
          var letter = charCodeToString(key);
          letterPressed = letter;
+
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
+	    console.log("NEED TO TURN ON TEXT MODE WHEN TYPING INTO A PORT DEFAULT VALUE");
+	 }
 
          if (isTextMode) {
             switch (letter) {

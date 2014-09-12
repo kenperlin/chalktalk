@@ -1196,16 +1196,26 @@
    }
 
    function registerGlyph(name, strokes, indexName) {
+
+// console.log("Z: " + name);
+
       if (indexName === undefined) {
          indexName = name;
+
+// console.log("A: " + name);
+// console.log("B: " + indexName);
 
          var j = indexName.indexOf('Sketch');
          if (j > 0)
             indexName = indexName.substring(0, j);
 
+// console.log("C: " + indexName);
+
          var j = indexName.indexOf('(');
          if (j > 0)
             indexName = indexName.substring(0, j);
+
+// console.log("D: " + indexName);
       }
 
       for (var i = 0 ; i < glyphs.length ; i++)
