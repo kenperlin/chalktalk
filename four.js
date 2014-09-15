@@ -123,6 +123,18 @@
       return edgesToStrokes(this.projectVisibleEdges(this.findVisibleEdges()));
    }
 
+   THREE.Object3D.prototype.findBoundsWorld = function(bb) {
+      if (bb === undefined) {
+         this.updateMatrixWorld();
+	 bb = [10000,10000,10000,-10000,-10000,-10000];
+      }
+      this.geometry.matrixWorld = this.matrixWorld;
+      this.geometry.expandBoundsWorld(bb);
+      for (var k = 0 ; k < this.children.length ; k++)
+         this.children[k].findBoundsWorld(bb);
+      return bb;
+   }
+
    THREE.Object3D.prototype.findVisibleEdges = function(ve) {
       if (ve === undefined) {
          this.updateMatrixWorld();
@@ -191,6 +203,20 @@
          if (this.children[k].isHiddenPoint(p))
             return true;
       return false;
+   }
+
+   THREE.Geometry.prototype.expandBoundsWorld = function(bb) {
+      for (var n = 0 ; n < this.vertices.length ; n++) {
+         var v = this.vertexWorld(n);
+
+         bb[0] = min(bb[0], v.x);
+         bb[1] = min(bb[1], v.y);
+         bb[2] = min(bb[2], v.z);
+
+         bb[3] = max(bb[3], v.x);
+         bb[4] = max(bb[4], v.y);
+         bb[5] = max(bb[5], v.z);
+      }
    }
 
    THREE.Geometry.prototype.findVisibleEdges = function() {

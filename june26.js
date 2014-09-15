@@ -804,7 +804,7 @@ function MothAndCandle() {
 
          // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
 
-         if (this.glyphTransition >= 0.5 && isNumber(this.xlo)) {
+         if (this.glyphTransition >= 0.5 && isNumeric(this.xlo)) {
             candleX = (this.xlo + this.xhi) / 2;
             candleY = this.ylo;
             isCandle = true;

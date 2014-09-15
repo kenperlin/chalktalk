@@ -261,7 +261,7 @@
 	 //_g.textHeight = textHeight * this.sc;
 
          var P = this.adjustXY(xy);
-         utext(roundedString(value), P[0], P[1], ax, ay);
+         utext(isNumeric(value) ? roundedString(value) : value, P[0], P[1], ax, ay);
 
 	 //_g.textHeight = textHeight;
       }
@@ -1261,7 +1261,11 @@
    function StrokesSketch() {
       this.src = [];
       this.render = function() {
+
+         // FIRST TIME ONLY: GET THE TARGET SHAPE FROM THE GLYPH.
+
          if (this.src.length == 0) {
+
 	    var name = this.selectionName;
 	    var index = glyphIndex(glyphs, name);
 	    var glyph = glyphs[index];
@@ -1277,6 +1281,8 @@
             this.tY += this.info.y0;
 	 }
 
+	 // REBUILD THE STROKES EVERY FRAME.
+
 	 this.sp = [[0,0]];
 	 this.sp0 = [[0,0,0]];
 
@@ -1287,7 +1293,7 @@
 	    drawCurve(C);
          }
 
-	 // THIS LOGIC NEEDS TO GO AFTER RENDER, NOT IN IT.
+	 // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
 
 	 if (this.glyphTransition == 1 && this.info !== undefined) {
 	    this.shapeInfo = { type  : this.info.type,

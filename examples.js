@@ -169,7 +169,7 @@
             m.save();
                m.translate(neckX,neckY,0);
 	       var rotz = lookUp;
-	       if (sketchPage.x !== undefined && isNumber(this.cx()))
+	       if (sketchPage.x !== undefined && isNumeric(this.cx()))
 	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
                m.rotateZ(rotz);
                m.rotateY(lookSide);
@@ -843,7 +843,7 @@
       resetValues();
 
       var recordValue = function (v) {
-         if (isDef(v) && v !== null && isNumber(v)) {
+         if (isDef(v) && v !== null && isNumeric(v)) {
             v = Math.round(v*1000)/1000;
             if (values.length == 1 && v == values[0])
                return; // don't start recording until the value is changing
