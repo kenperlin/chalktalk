@@ -1106,7 +1106,7 @@
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();
-         sk().glyphIndexName = glyph.indexName;
+         sk().glyph = glyph;
          if (sk() instanceof Picture)
 	    glyphSketch.fadeAway = 1;
          else
@@ -1265,12 +1265,8 @@
          // FIRST TIME ONLY: GET THE TARGET SHAPE FROM THE GLYPH.
 
          if (this.src.length == 0) {
-
-	    var name = this.selectionName;
-	    var index = glyphIndex(glyphs, name);
-	    var glyph = glyphs[index];
-	    this.src = cloneArray(glyph.src);
-	    this.info = glyph.info;
+	    this.src = cloneArray(this.glyph.src);
+	    this.info = this.glyph.info;
 
 	    for (var n = 0 ; n < this.src.length ; n++)
 	       for (var i = 0 ; i < this.src[n].length ; i++) {
@@ -1279,6 +1275,14 @@
 	       }
             this.tX += this.info.x0;
             this.tY += this.info.y0;
+/*
+	    eval(this.info.type + "Sketch()");
+	    sk().isOutline = true;
+	    sk().mesh.setMaterial(blackMaterial);
+	    sk().rX = this.info.rX;
+	    sk().rY = this.info.rY;
+	    this.geoSketch = sk();
+*/
 	 }
 
 	 // REBUILD THE STROKES EVERY FRAME.
@@ -1292,7 +1296,32 @@
 	       C.push(this.xform(this.src[n][i]));
 	    drawCurve(C);
          }
+/*
+	 if (this.geoSketch !== undefined && this.geoSketch.xlo !== undefined) {
+	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
+	    var e2 = this.geoSketch.mesh.projectVisibleEdges(visibleEdges);
 
+	    var b1 = [10000,10000,-10000,-10000];
+            for (var n = 0 ; n < e2.length ; n++)
+            for (var i = 0 ; i < e2[n].length ; i++) {
+               b1[0] = min(b1[0], e2[n][i][0]);
+               b1[1] = min(b1[1], e2[n][i][1]);
+               b1[2] = max(b1[2], e2[n][i][0]);
+               b1[3] = max(b1[3], e2[n][i][1]);
+            }
+
+	    var b2 = computeCurveBounds(this.sp, 1);
+
+console.log("b1: " + arrayToString(b1));
+console.log("b2: " + arrayToString(b2));
+
+            this.geoSketch._dx = (b2[0] + b2[2]) / 2 - (b1[0] + b1[2]) / 2;
+            this.geoSketch._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
+            this.geoSketch._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]);
+
+	    delete this.geoSketch;
+	 }
+*/
 	 // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
 
 	 if (this.glyphTransition == 1 && this.info !== undefined) {

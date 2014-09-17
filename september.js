@@ -145,14 +145,14 @@
    Cyl1.prototype = new Sketch;
 
    function F1D() {
-      this.code = [["", "x*x/2 - 1/8"]];
+      this.code = [["", "t*t/2 - 1/8"]];
       this.labels = "f1d".split(' ');
 
-      this.f = function(x) {
-         var result = this._f(x);
+      this.f = function(t) {
+         var result = this._f(t);
          return result == null ? 0 : result;
       }
-      this._f = function(x) {
+      this._f = function(t) {
          var result = null;
 	 try {
 	    eval("result = (" + this.code[0][1] + ")");
@@ -161,7 +161,7 @@
       }
       this.render = function(elapsed) {
          if (this.nPorts == 0) {
-            this.addPort("x", -1, 0);
+            this.addPort("t", -1, 0);
             this.addPort("f",  1, 0);
          }
          m.save();
@@ -172,20 +172,20 @@
 
 	 var e = 1/30;
 	 var C = [];
-	 for (var x = -1 ; x <= 1 ; x += e)
-	    C.push([x, this.f(x)]);
+	 for (var t = -1 ; t <= 1 ; t += e)
+	    C.push([t, this.f(t)]);
 	 lineWidth(2);
 	 mCurve(C);
 
          this.afterSketch(function() {
-            var x = this.isInValue("x") ? this.getInFloat("x") : 0;
-	    var y = this._f(x);
+            var t = this.isInValue("t") ? this.getInFloat("t") : 0;
+	    var y = this._f(t);
 	    if (y != null) {
 	       this.setOutValue("f", y);
 	       color(scrimColor(0.5));
-	       var xx = max(-1, min(1, x));
+	       var tt = max(-1, min(1, t));
 	       var yy = max(-1, min(1, y));
-	       mFillCurve([ [0,0], [xx,0], [xx,yy], [0,yy] ]);
+	       mFillCurve([ [0,0], [tt,0], [tt,yy], [0,yy] ]);
             }
          });
 
@@ -195,7 +195,7 @@
    F1D.prototype = new Sketch;
 
    function F2D() {
-      this.code = [["function", "x*x/2 + y*y/2 - 1/8"]];
+      this.code = [["function", "(x*x + y*y)/2 - 1/8"]];
       this.labels = "f2d".split(' ');
       this.is3D = true;
       this.f = function(x,y) {
@@ -225,8 +225,14 @@
 	 });
 
          this.afterSketch(function() {
+
+	    if (this.aa === undefined)
+	       this.aa = 0;
+            if (this.styleTransition > .5)
+               this.aa += 3 * elapsed;
+
 	    var e = 1/30;
-	    lineWidth(.5);
+	    _g.globalAlpha = min(this.aa, 1);
 
 	    for (var x = -1 ; x <= 1.001 ; x += e)
 	    for (var y = -1 ; y <  0.999 ; y += e) {

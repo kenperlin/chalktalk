@@ -1132,7 +1132,7 @@ var sketchToDelete = null;
                if (letter == 'del') {
 	          if (val.length > 0) {
 	             val = val.substring(0, val.length-1);
-	             if (isNumeric(val))
+		     if (isNumeric(val))
 		        val = parseFloat(val);
                   }
                }
@@ -1279,7 +1279,7 @@ var sketchToDelete = null;
             break;
          case 'k':
 	    if (isk() && sk() instanceof GeometrySketch) {
-	       var type = sk().glyphIndexName;
+	       var type = sk().glyph.indexName;
 	       var name = type + "_s";
 
 	       // CREATE AN OUTLINE DRAWING FOR THIS 3D OBJECT.

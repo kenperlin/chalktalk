@@ -2482,6 +2482,9 @@
 
    function deleteSketchOnly(sketch) {
 
+      if (this.visibleEdgesMesh !== undefined)
+         sketchPage.scene.remove(this.visibleEdgesMesh);
+
       var i = sketchPage.findIndex(sketch);
       if (i >= 0) {
          if (sketch.cleanup != null)
@@ -2722,7 +2725,7 @@
       this.cleanup = function() {
          root.remove(this.mesh);
          if (this.visibleEdgesMesh !== undefined)
-            root.remove(this.visibleEdgesMesh);
+            sketchPage.scene.remove(this.visibleEdgesMesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2804,7 +2807,7 @@
          }
 
          if (this.visibleEdgesMesh !== undefined)
-            root.remove(this.visibleEdgesMesh);
+            sketchPage.scene.remove(this.visibleEdgesMesh);
 
          if (this.hasMatrix === undefined)
             this.alpha = 0;
@@ -2818,7 +2821,7 @@
 
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
-            root.add(this.visibleEdgesMesh);
+            sketchPage.scene.add(this.visibleEdgesMesh);
 
             if (this.alpha !== undefined) {
                this.visibleEdgesMesh.material.opacity = sCurve(this.alpha);
@@ -2827,7 +2830,6 @@
 
             // Project the visible edges, and connect them into long 2d strokes.
 	     
-
             var e2;
             if (this.bounds !== undefined || isShowing2DMeshEdges)
                e2 = this.mesh.projectVisibleEdges(visibleEdges);

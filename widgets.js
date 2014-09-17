@@ -802,7 +802,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                 ? ( (xlo + xhi)/2 + width()/2 ) / 2
                   : (xlo + xhi) / 2 < width() / 2
                     ? xhi + (xhi - xlo) / 2 + w/2
-                    : xlo - (xhi - xlo) / 2 - w/2) - _g.panX;
+                    : xlo - (xhi - xlo) / 2 - w/2) + _g.panX;
 
       x1 = max(x1, w/2);
       x1 = min(x1, width() - w/2);
