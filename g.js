@@ -483,18 +483,8 @@
 
       // ADJUST FINAL SKETCH TO CREATE BEST FIT.
 
-      if (sk().xyz.length == 0) {
-         var x = 0, y = 0, z = 0, w = 0;
-         for (var n = 0 ; n < B.length ; n++) {
-            var xyz = bestFit(B[n], A[n]);
-            var t = computeCurveLength(A[n]);
-            x += t * xyz[0];
-            y += t * xyz[1];
-            z += t * xyz[2];
-            w += t;
-         }
-         sk().xyz = [x / w, y / w, z / w];
-      }
+      if (sk().xyz.length == 0)
+         sk().xyz = bestCurvesFit(B, A);
 
       var s = sCurve(t);
       var C = [];
@@ -1112,6 +1102,7 @@
          loadGlyphArray(characterGlyphData);
       else
          unloadGlyphArray(characterGlyphData);
+      delete sketchPage.isPortValueTextMode;
       return isTextMode;
    }
 
@@ -1198,11 +1189,9 @@
    function registerGlyph(name, strokes, indexName) {
       if (indexName === undefined) {
          indexName = name;
-
          var j = indexName.indexOf('Sketch');
          if (j > 0)
             indexName = indexName.substring(0, j);
-
          var j = indexName.indexOf('(');
          if (j > 0)
             indexName = indexName.substring(0, j);
@@ -1298,7 +1287,7 @@
 
          // IF GLYPH IS A DIGIT, CREATE A NUMBER OBJECT.
 
-         else if (isNumber(parseInt(this.name))) {
+         else if (isNumeric(parseInt(this.name))) {
             var s = new NumericSketch();
             addSketch(s);
             s.init(this.name, sketchPage.x, sketchPage.y);
@@ -1713,7 +1702,7 @@
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
-	 fadeArrowsIntoSketch(sk());
+         fadeArrowsIntoSketch(sk());
          break;
       case 1:
          if (isSimpleSketch(sk()) && ! (sk() instanceof NumericSketch ))
@@ -1998,57 +1987,57 @@
 
          // DRAW ARROWS.
 
-	 annotateStart();
+         annotateStart();
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I).parent == null) {
-	       var a = sk(I);
-	       for (var n = 0 ; n < a.arrows.length ; n++) {
-	          var c = a.arrows[n][0];
-	          var b = a.arrows[n][1];
+               var a = sk(I);
+               for (var n = 0 ; n < a.arrows.length ; n++) {
+                  var c = a.arrows[n][0];
+                  var b = a.arrows[n][1];
 
-		  var alpha = 1;
-	          var fade = a.arrows[n][2];
-		  if (fade !== undefined) {
-		     alpha = fade;
-		     alpha = max(0, a.arrows[n][2] - 3 * This().elapsed);
-		     if (alpha == 0) {
-		        a.arrowRemove(b);
-			continue;
-		     }
-		     a.arrows[n][2] = alpha;
-		  }
+                  var alpha = 1;
+                  var fade = a.arrows[n][2];
+                  if (fade !== undefined) {
+                     alpha = fade;
+                     alpha = max(0, a.arrows[n][2] - 3 * This().elapsed);
+                     if (alpha == 0) {
+                        a.arrowRemove(b);
+                        continue;
+                     }
+                     a.arrows[n][2] = alpha;
+                  }
 
                   var C = b == null ? c : createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
 
-		  C = clipCurveAgainstRect(C, [a.xlo,a.ylo,a.xhi,a.yhi]);
+                  C = clipCurveAgainstRect(C, [a.xlo,a.ylo,a.xhi,a.yhi]);
 
-		  if (b != null)
-		     C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+                  if (b != null)
+                     C = clipCurveAgainstRect(C, [b.xlo,b.ylo,b.xhi,b.yhi]);
 
-		  if (C[0] === undefined)
-		     continue;
-		  var nc = C.length;
-		  _g.strokeStyle = defaultPenColor;
-		  _g.lineWidth = width() / 300;
-		  _g.globalAlpha = sCurve(alpha);
-		  _g.beginPath();
-		  _g.moveTo(C[0][0], C[0][1]);
-		  for (var k = 0 ; k < nc ; k++)
-		     _g.lineTo(C[k][0], C[k][1]);
-		  if (nc > 4) {
-		     var dx = C[nc-1][0] - C[nc-4][0];
-		     var dy = C[nc-1][1] - C[nc-4][1];
-		     var d = len(dx, dy);
-		     dx *= _g.lineWidth * 5 / d;
-		     dy *= _g.lineWidth * 5 / d;
-		     _g.lineTo(C[nc-1][0] - dx - dy, C[nc-1][1] - dy + dx);
-		     _g.moveTo(C[nc-1][0], C[nc-1][1]);
-		     _g.lineTo(C[nc-1][0] - dx + dy, C[nc-1][1] - dy - dx);
-		  }
-		  _g.stroke();
-	       }
-	    }
-	 annotateEnd();
+                  if (C[0] === undefined)
+                     continue;
+                  var nc = C.length;
+                  _g.strokeStyle = defaultPenColor;
+                  _g.lineWidth = width() / 300;
+                  _g.globalAlpha = sCurve(alpha);
+                  _g.beginPath();
+                  _g.moveTo(C[0][0], C[0][1]);
+                  for (var k = 0 ; k < nc ; k++)
+                     _g.lineTo(C[k][0], C[k][1]);
+                  if (nc > 4) {
+                     var dx = C[nc-1][0] - C[nc-4][0];
+                     var dy = C[nc-1][1] - C[nc-4][1];
+                     var d = len(dx, dy);
+                     dx *= _g.lineWidth * 5 / d;
+                     dy *= _g.lineWidth * 5 / d;
+                     _g.lineTo(C[nc-1][0] - dx - dy, C[nc-1][1] - dy + dx);
+                     _g.moveTo(C[nc-1][0], C[nc-1][1]);
+                     _g.lineTo(C[nc-1][0] - dx + dy, C[nc-1][1] - dy - dx);
+                  }
+                  _g.stroke();
+               }
+            }
+         annotateEnd();
 
          // DRAW LINKS.
 
@@ -2493,6 +2482,9 @@
 
    function deleteSketchOnly(sketch) {
 
+      if (this.visibleEdgesMesh !== undefined)
+         sketchPage.scene.remove(this.visibleEdgesMesh);
+
       var i = sketchPage.findIndex(sketch);
       if (i >= 0) {
          if (sketch.cleanup != null)
@@ -2733,7 +2725,7 @@
       this.cleanup = function() {
          root.remove(this.mesh);
          if (this.visibleEdgesMesh !== undefined)
-            root.remove(this.visibleEdgesMesh);
+            sketchPage.scene.remove(this.visibleEdgesMesh);
       }
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
@@ -2756,18 +2748,21 @@
          this.makeXform();
          this.rX = save_rX;
 
-	 if (this.bounds && ! isNaN(this.xlo)) {
-	    this._dx = (this.bounds[0] + this.bounds[2]) / 2 - (this.xlo + this.xhi) / 2;
-	    this._dy = (this.bounds[1] + this.bounds[3]) / 2 - (this.ylo + this.yhi) / 2;
-	    this._ds = (this.bounds[2] - this.bounds[0]) / (this.xhi - this.xlo);
-	    delete this.bounds;
-	    this.alpha = 0;
-	 }
+         if (this.bounds !== undefined && this.e2bounds !== undefined) {
+            var b1 = this.e2bounds;
+            var b2 = this.bounds;
 
-	 if (this._dx !== undefined) {
-	    this.xf[0] += this._dx;
-	    this.xf[1] += this._dy;
-	    this.xf[4] *= this._ds;
+            this._dx = (b2[0] + b2[2]) / 2 - (b1[0] + b1[2]) / 2;
+            this._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
+            this._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]);
+
+	    delete this.bounds;
+         }
+
+         if (this._dx !== undefined) {
+            this.xf[0] += this._dx;
+            this.xf[1] += this._dy;
+            this.xf[4] *= this._ds * 1.1;
          }
 
          for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
@@ -2812,10 +2807,11 @@
          }
 
          if (this.visibleEdgesMesh !== undefined)
-            root.remove(this.visibleEdgesMesh);
+            sketchPage.scene.remove(this.visibleEdgesMesh);
 
-         if (this.alpha !== undefined)
-	    this.alpha = min(1, this.alpha + 10 * elapsed);
+         if (this.hasMatrix === undefined)
+            this.alpha = 0;
+         this.hasMatrix = true;
 
          if (this.isOutline || isShowingMeshEdges) {
 
@@ -2825,41 +2821,61 @@
 
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
-            root.add(this.visibleEdgesMesh);
+            sketchPage.scene.add(this.visibleEdgesMesh);
 
             if (this.alpha !== undefined) {
                this.visibleEdgesMesh.material.opacity = sCurve(this.alpha);
                this.visibleEdgesMesh.material.transparent = true;
             }
 
-	    // Project the visible edges, and connect them into long 2d strokes.
+            // Project the visible edges, and connect them into long 2d strokes.
+	     
+            var e2;
+            if (this.bounds !== undefined || isShowing2DMeshEdges)
+               e2 = this.mesh.projectVisibleEdges(visibleEdges);
+
+            if (this.bounds !== undefined) {
+
+               // COMPUTE BOUNDS AND ATTACH TO THEM TO SKETCH.
+
+               var b = [10000,10000,-10000,-10000];
+               for (var n = 0 ; n < e2.length ; n++)
+               for (var i = 0 ; i < e2[n].length ; i++) {
+                  b[0] = min(b[0], e2[n][i][0]);
+                  b[1] = min(b[1], e2[n][i][1]);
+                  b[2] = max(b[2], e2[n][i][0]);
+                  b[3] = max(b[3], e2[n][i][1]);
+               }
+               this.e2bounds = b;
+            }
 
             if (isShowing2DMeshEdges) {
-	       var e2 = this.mesh.projectVisibleEdges(visibleEdges);
-	       var c2 = edgesToStrokes(e2);
+               var c2 = edgesToStrokes(e2);
 
-
-	       annotateStart();
+               annotateStart();
 /*
-	       // Draw the long connected 2d strokes in different colors.
+               // Draw the long connected 2d strokes in different colors.
 
                lineWidth(20);
-	       function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
+               function c(m, p) { return (m % (p+p)) < p ? 255 : 64; }
                for (var m = 0 ; m < c2.length ; m++) {
-	          color('rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)');
-		  drawCurve(c2[m]);
-	       }
+                  color('rgba(' + c(m,1) + ',' + c(m,2) + ',' + c(m,4) + ', 0.5)');
+                  drawCurve(c2[m]);
+               }
 */
-	       // Draw the projected 2d edges.
+               // Draw the projected 2d edges.
 
                lineWidth(10);
                color('rgba(255,0,0,0.5)');
-	       for (var n = 0 ; n < e2.length ; n++)
-		  drawCurve(e2[n]);
+               for (var n = 0 ; n < e2.length ; n++)
+                  drawCurve(e2[n]);
 
-	       annotateEnd();
+               annotateEnd();
             }
          }
+
+         if (this.alpha !== undefined)
+            this.alpha = min(1, this.alpha + 10 * elapsed);
 /*
          if (this.meshTrace !== undefined) {
             _g.save();

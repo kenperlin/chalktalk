@@ -10,7 +10,7 @@
       return hexChar(n >> 4) + hexChar(n & 15);
    }
    function isDef(v) { return ! (v === undefined); }
-   function isNumber(v) { return ! isNaN(v); }
+   function isNumeric(v) { return ! isNaN(v); }
    function roundedString(v) {
       if (typeof(v) == 'string')
          v = parseFloat(v);
@@ -651,9 +651,24 @@
       //adjustCurveLength(curve, totalLength, i0);
    }
 
+   // FIND x,y,scale FOR ARRAY OF CURVES A TO BEST FIT ARRAY OF CURVES B.
+
+   function bestCurvesFit(A, B) {
+      var x = 0, y = 0, z = 0, w = 0;
+      for (var n = 0 ; n < A.length ; n++) {
+         var xyz = bestCurveFit(A[n], B[n]);
+         var t = computeCurveLength(B[n]);
+         x += t * xyz[0];
+         y += t * xyz[1];
+         z += t * xyz[2];
+         w += t;
+      }
+      return [x / w, y / w, z / w];
+   }
+
    // FIND x,y,scale FOR CURVE P TO BEST FIT CURVE Q.
 
-   function bestFit(P, Q) {
+   function bestCurveFit(P, Q) {
       var n = min(P.length, Q.length), a=0, b=0, c=0, d=0, e=0, f=0;
       for (var i = 0 ; i < n ; i++) {
          var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];

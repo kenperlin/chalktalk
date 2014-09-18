@@ -379,9 +379,16 @@ var sketchToDelete = null;
          if (isTogglingMenuType)
             return;
 
-         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
-            outSketch.defaultValue[outPort] -= floor(y/10) - floor((y-dy)/10);
-            this.isClick = false;
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]) && ! this.click) {
+            if (isNumeric(outSketch.defaultValue[outPort])) {
+	       if (this.portValueDragMode === undefined)
+	          this.portValueDragMode = abs(x-this.xDown) > abs(y-this.yDown) ? "portValueDragX" : "portValueDragY";
+               if (this.portValueDragMode == "portValueDragY") {
+                  var incr = floor((y-dy)/10) - floor(y/10);
+                  outSketch.defaultValue[outPort] += incr;
+               }
+            }
+	    return;
          }
 
          if (pieMenuIsActive) {
@@ -441,6 +448,13 @@ var sketchToDelete = null;
 	 if (this.hintTrace !== undefined) {
 	    return;
 	 }
+
+         if (this.portValueDragMode !== undefined) {
+	    if (this.portValueDragMode == "portValueDragX")
+               outSketch.defaultValue[outPort] *= x > this.xDown ? 0.1 : 10;
+            delete this.portValueDragMode;
+	    return;
+         }
 
          if (this.isDraggingGlyph) {
             glyphs[this.iDragged].toSimpleSketch(This().mouseX, This().mouseY, 1.5);
@@ -989,6 +1003,11 @@ var sketchToDelete = null;
          var letter = charCodeToString(key);
          letterPressed = letter;
 
+         if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
+	    isTextMode = true;
+	    this.isPortValueTextMode = true;
+	 }
+
          if (isTextMode) {
             switch (letter) {
             case 'cap':
@@ -1108,7 +1127,23 @@ var sketchToDelete = null;
          // Special handling for when in text mode.
 
          if (isTextMode) {
-            this.handleTextChar(letter);
+	    if (this.isPortValueTextMode !== undefined) {
+	       var val = "" + outSketch.defaultValue[outPort];
+               if (letter == 'del') {
+	          if (val.length > 0) {
+	             val = val.substring(0, val.length-1);
+		     if (isNumeric(val))
+		        val = parseFloat(val);
+                  }
+               }
+	       else if (isNumeric(val) && isNumeric(letter))
+		  val = parseFloat(val) + parseFloat(letter);
+               else
+	          val += letter;
+	       outSketch.defaultValue[outPort] = isNumeric(val) ? val : val.length == 0 ? 0 : val;
+	    }
+	    else
+               this.handleTextChar(letter);
             return;
          }
 
@@ -1183,7 +1218,7 @@ var sketchToDelete = null;
                   setTextMode(false);
                }
                else
-            setTextMode(false);
+                  setTextMode(false);
             break;
          case 'spc':
             isSpacePressed = false;
@@ -1244,14 +1279,29 @@ var sketchToDelete = null;
             break;
          case 'k':
 	    if (isk() && sk() instanceof GeometrySketch) {
-	       var type = sk().glyphIndexName;
+	       var type = sk().glyph.indexName;
 	       var name = type + "_s";
 
+	       // CREATE AN OUTLINE DRAWING FOR THIS 3D OBJECT.
+
 	       var strokes = sk().mesh.toStrokes();
+/*
+console.log("strokes = [");
+for (var n = 0 ; n < strokes.length ; n++) {
+   console.log("   [");
+   for (var i = 0 ; i < strokes[n].length ; i++)
+      console.log("      [" + floor(strokes[n][i][0]) + "," + floor(strokes[n][i][1]) + "],");
+   console.log("   ]");
+}
+console.log("]");
+*/
+	       // COMPUTE PIXEL COORDS OF MATRIX ORIGIN.
 
 	       var m = sk().mesh.matrixWorld.elements;
 	       var x0 = width()/2 + pixelsPerUnit * m[12];
 	       var y0 = height()/2 - pixelsPerUnit * m[13];
+
+	       // COMPUTE THE PIXEL WIDTH.
 
                var xlo = 10000, xhi = -xlo;
 	       for (var i = 1 ; i < sk().sp0.length ; i++) {
