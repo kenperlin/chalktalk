@@ -2277,86 +2277,175 @@
 
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
 
-         if (isRightHover && ! isBottomGesture) {
-            annotateStart();
-            _g.save();
-            _g.globalAlpha = 1.0;
-            lineWidth(1);
+         if (! isVerticalPan) {
+            if (isRightHover && ! isBottomGesture) {
+               annotateStart();
+               _g.save();
+               _g.globalAlpha = 1.0;
+               lineWidth(1);
 
-            // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
+               // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
 
-            var numberSpacing = (h - margin) / sketchPages.length;
-            for (var i = 0; i < h - margin; i += numberSpacing * 2) {
-               _g.beginPath();
-               _g.moveTo(rightX - margin, topY + i);
-               _g.lineTo(rightX - margin, topY + i + numberSpacing);
-               _g.lineTo(rightX, topY + i + numberSpacing);
-               _g.lineTo(rightX, topY + i);
+               var numberSpacing = (h - margin) / sketchPages.length;
                _g.fillStyle = scrimColor(.2);
-               _g.fill();
+               for (var i = 0; i < h - margin; i += numberSpacing * 2) {
+                  _g.beginPath();
+
+                  _g.moveTo(rightX - margin, topY + i);
+                  _g.lineTo(rightX - margin, topY + i + numberSpacing);
+                  _g.lineTo(rightX         , topY + i + numberSpacing);
+                  _g.lineTo(rightX         , topY + i);
+
+                  _g.fill();
+               }
+
+               // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+
+               var currentPageY = pageIndex * numberSpacing;
+               lineWidth(0.75);
+               _g.globalAlpha = 1.0;
+               _g.beginPath();
+               _g.moveTo(rightX - margin, topY + currentPageY);
+               _g.lineTo(rightX - margin, topY + currentPageY + numberSpacing);
+               _g.lineTo(rightX, topY + currentPageY + numberSpacing);
+               _g.lineTo(rightX, topY + currentPageY);
+               _g.lineTo(rightX - margin, topY + currentPageY);
+               _g.strokeStyle = "rgb(255, 255, 255)";
+               _g.stroke();
+
+               // DRAW PAGE NUMBERS IN SLIDE SWITCHER
+
+               _g.font = "14px Arial";
+               var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
+               for (var pn = 0; pn < sketchPages.length; pn++) {
+                  var alpha = pageNumber == pn ? 0.8 : 0.35;
+                  _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+
+                  // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
+                  var centerRatio = pn < 10 ? 0.57 : 0.65;
+                  var numberX = w - _g.panX - margin * centerRatio;
+                  _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
+               }
+
+               if (! isExpertMode) {
+                  var d = h / 10;
+                  var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+                  var x1 = w/2 - d * cos(n1 * TAU / 8);
+                  var y1 = h/2 + d * sin(n1 * TAU / 8);
+                  var x2 = x1  - d * cos(n2 * TAU / 8);
+                  var y2 = y1  + d * sin(n2 * TAU / 8);
+
+                  // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+                  lineWidth(d/15);
+                  color(backgroundColor);
+                  fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+                  // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  arrow(x1, y1, x2, y2, d/8);
+
+                  lineWidth(d/20);
+                  color(backgroundColor);
+                  arrow(x1, y1, x2, y2, d/8);
+               }
+
+               _g.restore();
+               annotateEnd();
             }
-
-            // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
-
-            var currentPageY = pageIndex * numberSpacing;
-            lineWidth(0.75);
-            _g.globalAlpha = 1.0;
-            _g.beginPath();
-            _g.moveTo(rightX - margin, topY + currentPageY);
-            _g.lineTo(rightX - margin, topY + currentPageY + numberSpacing);
-            _g.lineTo(rightX, topY + currentPageY + numberSpacing);
-            _g.lineTo(rightX, topY + currentPageY);
-            _g.lineTo(rightX - margin, topY + currentPageY);
-            _g.strokeStyle = "rgb(255, 255, 255)";
-            _g.stroke();
-
-            // DRAW PAGE NUMBERS IN SLIDE SWITCHER
-
-            _g.font = "14px Arial";
-            var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
-            for (var pn = 0; pn < sketchPages.length; pn++) {
-               var alpha = pageNumber == pn ? 0.8 : 0.35;
-               _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
-
-               // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
-
-               var centerRatio = pn < 10 ? 0.57 : 0.65;
-               var numberX = w - _g.panX - margin * centerRatio;
-               _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
-            }
-
-            if (! isExpertMode) {
-               var d = h / 10;
-               var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
-               var x1 = w/2 - d * cos(n1 * TAU / 8);
-               var y1 = h/2 + d * sin(n1 * TAU / 8);
-               var x2 = x1  - d * cos(n2 * TAU / 8);
-               var y2 = y1  + d * sin(n2 * TAU / 8);
-
-               // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
-
-               lineWidth(d/12);
-               color(defaultPenColor);
-               fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
-
-               lineWidth(d/15);
-               color(backgroundColor);
-               fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
-
-               // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
-
-               lineWidth(d/12);
-               color(defaultPenColor);
-               arrow(x1, y1, x2, y2, d/8);
-
-               lineWidth(d/20);
-               color(backgroundColor);
-               arrow(x1, y1, x2, y2, d/8);
-            }
-
-            _g.restore();
-            annotateEnd();
          }
+	 else {
+            if (isBottomHover && ! isRightGesture) {
+               annotateStart();
+               _g.save();
+               _g.globalAlpha = 1.0;
+               lineWidth(1);
+
+               // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
+
+               var numberSpacing = (w - margin) / sketchPages.length;
+               _g.fillStyle = scrimColor(.2);
+               for (var i = 0; i < w - margin; i += numberSpacing * 2) {
+                  _g.beginPath();
+
+                  _g.moveTo(leftX + i                , bottomY - margin);
+                  _g.lineTo(leftX + i + numberSpacing, bottomY - margin);
+                  _g.lineTo(leftX + i + numberSpacing, bottomY);
+                  _g.lineTo(leftX + i                , bottomY);
+
+                  _g.fill();
+               }
+
+               // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+
+               var currentPageX = pageIndex * numberSpacing;
+               lineWidth(0.75);
+               _g.globalAlpha = 1.0;
+               _g.strokeStyle = "rgb(255, 255, 255)";
+               _g.beginPath();
+
+               _g.moveTo(leftX + currentPageX                , bottomY - margin);
+               _g.lineTo(leftX + currentPageX + numberSpacing, bottomY - margin);
+               _g.lineTo(leftX + currentPageX + numberSpacing, bottomY);
+               _g.lineTo(leftX + currentPageX                , bottomY);
+               _g.lineTo(leftX + currentPageX                , bottomY - margin);
+
+               _g.stroke();
+
+               // DRAW PAGE NUMBERS IN SLIDE SWITCHER
+
+               _g.font = "14px Arial";
+               var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
+               for (var pn = 0; pn < sketchPages.length; pn++) {
+                  var alpha = pageNumber == pn ? 0.8 : 0.35;
+                  _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+
+                  // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
+                  var centerRatio = pn < 10 ? 0.57 : 0.75;
+                  _g.fillText(pn, (pn - centerRatio) * numberSpacing, h - _g.panY - margin * 0.5);
+               }
+
+               if (! isExpertMode) {
+                  var d = h / 10;
+                  var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+                  var x1 = w/2 - d * cos(n1 * TAU / 8);
+                  var y1 = h/2 + d * sin(n1 * TAU / 8);
+                  var x2 = x1  - d * cos(n2 * TAU / 8);
+                  var y2 = y1  + d * sin(n2 * TAU / 8);
+
+                  // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+                  lineWidth(d/15);
+                  color(backgroundColor);
+                  fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+                  // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  arrow(x1, y1, x2, y2, d/8);
+
+                  lineWidth(d/20);
+                  color(backgroundColor);
+                  arrow(x1, y1, x2, y2, d/8);
+               }
+
+               _g.restore();
+               annotateEnd();
+	    }
+	 }
 
          if (visible_sp != null) {
             annotateStart();
@@ -2370,20 +2459,33 @@
          if (isShowingNLParse)
             showNLParse();
 
-         // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
+         // DRAW PAN STRIP.
 
          _g.save();
          _g.globalAlpha = 1.0;
 
-         if (this.mouseY >= h - margin || isBottomGesture) {
-            color(scrimColor(0.06));
-            fillRect(-_g.panX, h - margin - _g.panY, w, margin - 2);
+         if (! isVerticalPan) {
+            if (this.mouseY >= h - margin || isBottomGesture) {
+               color(scrimColor(0.06));
+               fillRect(-_g.panX, h - margin - _g.panY, w, margin - 2);
 
-            color(scrimColor(0.03));
-            var dx = margin / 2;
-            for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
-               fillRect(x, h - margin - _g.panY, dx/2, margin - 2);
+               color(scrimColor(0.03));
+               var dx = margin / 2;
+               for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
+                  fillRect(x, h - margin - _g.panY, dx/2, margin - 2);
+            }
          }
+	 else {
+            if (this.mouseX >= w - margin || isRightGesture) {
+               color(scrimColor(0.06));
+               fillRect(w - margin - _g.panX, -_g.panY, margin - 2, h);
+
+               color(scrimColor(0.03));
+               var dy = margin / 2;
+               for (var y = _g.panY % dy - _g.panY ; y < h - _g.panY ; y += dy)
+                  fillRect(w - margin - _g.panX, y, margin - 2, dy/2);
+            }
+	 }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 

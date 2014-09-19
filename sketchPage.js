@@ -225,7 +225,13 @@ var sketchToDelete = null;
             return;
          }
 
-         if (y >= height() - margin) {
+         if (isRightHover || x >= width() - margin) {
+            isRightGesture = true;
+            this.yDown = y;
+            return;
+         }
+
+         if (isBottomHover || y >= height() - margin) {
             isBottomGesture = true;
             this.xDown = x;
             return;
@@ -235,9 +241,6 @@ var sketchToDelete = null;
             isTogglingMenuType = true;
             return;
          }
-
-         if (isRightHover)
-            isRightGesture = true;
 
          if (pieMenuIsActive) {
             pieMenuStroke = [[x,y]];
@@ -554,8 +557,6 @@ var sketchToDelete = null;
                   setPage(pageNumber);
                return;
             }
-
-            isRightGesture = false;
          }
 	 else {
             if (isRightGesture) {
@@ -575,8 +576,10 @@ var sketchToDelete = null;
                return;
             }
 
-            isBottomGesture = false;
 	 }
+
+         isRightGesture = false;
+         isBottomGesture = false;
 
          if (isTogglingMenuType) {
             isTogglingMenuType = false;
@@ -913,7 +916,7 @@ var sketchToDelete = null;
          this.x = x;
          this.y = y;
 
-         if (y >= height() - margin && ! isShowingGlyphs) {
+         if (y >= height() - margin - _g.panY && x < width() - margin && ! isShowingGlyphs) {
             isBottomHover = true;
          } else {
             isBottomHover = false;
@@ -1525,8 +1528,8 @@ console.log("]");
          this.trueIndex = this.index;
          var skTrue = sk();
 
-         function xOnPanStrip(x) { return x * margin / h - _g.panX; }
-         function yOnPanStrip(y) { return y * margin / h + h - margin - _g.panY; }
+         function xOnPanStrip(x) { return x * margin / (isVerticalPan ? w : h) + (isVerticalPan ? w - margin : 0) - _g.panX; }
+         function yOnPanStrip(y) { return y * margin / (isVerticalPan ? w : h) + (isVerticalPan ? 0 : h - margin) - _g.panY; }
 
          var isOnPanStrip = false, isNearPanStrip = false;
 	 if (! isVerticalPan) {
@@ -1747,11 +1750,13 @@ console.log("]");
 
          noisy = 0;
 
-         // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PANORAMA STRIP.
+         // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PAN STRIP.
 
          if (isNearPanStrip) {
-            var x0 = xOnPanStrip(  - _g.panX), y0 = yOnPanStrip(0);
-            var x1 = xOnPanStrip(w - _g.panX), y1 = yOnPanStrip(h) - 2;
+	    var dx = isVerticalPan ? 0 : -_g.panX;
+	    var dy = isVerticalPan ? -_g.panY : 0;
+            var x0 = xOnPanStrip(dx    ), y0 = yOnPanStrip(dy    );
+            var x1 = xOnPanStrip(dx + w), y1 = yOnPanStrip(dy + h) - 2;
             color(scrimColor(isOnPanStrip ? .06 : .12));
             fillRect(x0, y0, x1 - x0, y1 - y0);
             if (isOnPanStrip) {
