@@ -1485,8 +1485,8 @@ console.log("]");
          function xOnPanStrip(x) { return x * margin / h - _g.panX; }
          function yOnPanStrip(y) { return y * margin / h + h - margin - _g.panY; }
 
-         var isOnPanStrip = isBottomGesture || this.y >= h - margin;
-         var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
+         var isOnPanStrip = isBottomGesture || this.y + _g.panY >= h - margin;
+         var isNearPanStrip = isBottomGesture || this.y + _g.panY >= h - 2 * margin;
 
 	 if (this.isLinedPaper !== undefined) {
 	    annotateStart();
@@ -1513,7 +1513,7 @@ console.log("]");
 	    var x0 = 0;
 	    var x1 = x0 + w + r;
 	    var y0 = 0;
-	    var y1 = (this.y >= h - margin ? h - margin : h) - _g.panY;
+	    var y1 = (this.y + _g.panY >= h - margin ? h - margin : h) - _g.panY;
 	    for (var y = y0 ; y < y1 ; y += r)
 	       line(x0, y, x1, y);
 
