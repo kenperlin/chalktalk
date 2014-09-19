@@ -258,8 +258,8 @@
          // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
 
          if (isPanning) {
-            //_g.panX = min(0, _g.panX + event.clientX - _g.lastX);
-            _g.panY = min(0, _g.panY + event.clientY - _g.lastY);
+            if (! isVerticalPan) _g.panX = min(0, _g.panX + event.clientX - _g.lastX);
+            if (  isVerticalPan) _g.panY = min(0, _g.panY + event.clientY - _g.lastY);
          }
          _g.lastX = event.clientX;
          _g.lastY = event.clientY;
@@ -780,6 +780,7 @@
       ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
+      ['/'  , "pan up/down or L/R"],
       ['spc', "quick help menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],
@@ -799,7 +800,7 @@
    var linkHighlightColor = 'rgba(0,192,96,.2)';
    var liveDataColor = 'rgb(128,192,255)'
    var overlayColor = 'rgb(0,96,255)';
-   var overlayClearColor = 'rgba(0,96,255,.5)';
+   var overlayClearColor = function() { return backgroundColor != 'white' ? 'rgba(192,224,255,.5)' : 'rgba(0,96,255,.5)'; }
    var overlayScrim = 'rgba(0,96,255,.25)';
    var portColor = 'rgb(0,192,96)';
    var portBgColor = backgroundColor;

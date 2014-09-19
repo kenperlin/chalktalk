@@ -21,6 +21,7 @@ var isShowingGlyphs = false;
 var isSketchDragActionEnabled = false;
 var isSpacePressed = false;
 var isTogglingMenuType = false;
+var isVerticalPan = false;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;
@@ -370,18 +371,35 @@ var sketchToDelete = null;
             isRightHover = false;
          }
 
-         if (isBottomGesture) {
-            _g.panX = min(0, _g.panX + x - this.xDown);
-            return;
+         if (! isVerticalPan) {
+            if (isBottomGesture) {
+               _g.panX = min(0, _g.panX + x - this.xDown);
+               return;
+            }
+
+            if (isRightHover && isRightGesture && ! isBottomGesture) {
+               // DRAGGING TO QUICK SWITCH PAGES
+               pageNumber = floor((y / (height() - margin)) * sketchPages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+               return;
+            }
          }
 
-         if (isRightHover && isRightGesture && ! isBottomGesture) {
-            // DRAGGING TO QUICK SWITCH PAGES
-            pageNumber = floor((y / (height() - margin)) * sketchPages.length);
-            if (pageNumber != pageIndex)
-               setPage(pageNumber);
-            return;
-         }
+	 else {
+	    if (isVerticalPan && isRightGesture) {
+               _g.panY = min(0, _g.panY + y - this.yDown);
+               return;
+	    }
+
+            if (isBottomHover && isBottomGesture && ! isRightGesture) {
+               // DRAGGING TO QUICK SWITCH PAGES
+               pageNumber = floor((x / (width() - margin)) * sketchPages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+               return;
+            }
+	 }
 
          if (isTogglingMenuType)
             return;
@@ -519,24 +537,46 @@ var sketchToDelete = null;
             }
          }
 
-         if (isBottomGesture) {
-            if (y < height() - 100)
-               this.clear();
+         if (! isVerticalPan) {
+            if (isBottomGesture) {
+               if (y < height() - 100)
+                  this.clear();
+               isBottomGesture = false;
+               return;
+            }
+
+            if (isRightHover && isRightGesture && ! isBottomGesture) {
+
+               // CLICK TO SWITCH PAGES QUICKLY.
+
+               pageNumber = floor((y / (height() - margin)) * sketchPages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+               return;
+            }
+
+            isRightGesture = false;
+         }
+	 else {
+            if (isRightGesture) {
+               if (x < width() - 100)
+                  this.clear();
+               isRightGesture = false;
+               return;
+            }
+
+            if (isBottomHover && isBottomGesture && ! isRightGesture) {
+
+               // CLICK TO SWITCH PAGES QUICKLY.
+
+               pageNumber = floor((x / (width() - margin)) * sketchPages.length);
+               if (pageNumber != pageIndex)
+                  setPage(pageNumber);
+               return;
+            }
+
             isBottomGesture = false;
-            return;
-         }
-
-         if (isRightHover && isRightGesture && ! isBottomGesture) {
-
-            // CLICK TO SWITCH PAGES QUICKLY.
-
-            pageNumber = floor((y / (height() - margin)) * sketchPages.length);
-            if (pageNumber != pageIndex)
-               setPage(pageNumber);
-            return;
-         }
-
-         isRightGesture = false;
+	 }
 
          if (isTogglingMenuType) {
             isTogglingMenuType = false;
@@ -1377,6 +1417,9 @@ console.log("]");
             break;
          case 'z':
             break;
+         case '/':
+	    isVerticalPan = ! isVerticalPan;
+	    break;
          case '-':
             if (backgroundColor === 'white') {
                backgroundColor = 'black';
@@ -1485,8 +1528,15 @@ console.log("]");
          function xOnPanStrip(x) { return x * margin / h - _g.panX; }
          function yOnPanStrip(y) { return y * margin / h + h - margin - _g.panY; }
 
-         var isOnPanStrip = isBottomGesture || this.y + _g.panY >= h - margin;
-         var isNearPanStrip = isBottomGesture || this.y + _g.panY >= h - 2 * margin;
+         var isOnPanStrip = false, isNearPanStrip = false;
+	 if (! isVerticalPan) {
+            isOnPanStrip   = isBottomGesture || this.y + _g.panY >= h - margin;
+            isNearPanStrip = isBottomGesture || this.y + _g.panY >= h - 2 * margin;
+         }
+	 else {
+            isOnPanStrip   = isRightGesture || this.x + _g.panX >= w - margin;
+            isNearPanStrip = isRightGesture || this.x + _g.panX >= w - 2 * margin;
+	 }
 
 	 if (this.isLinedPaper !== undefined) {
 	    annotateStart();
@@ -1944,7 +1994,7 @@ console.log("]");
 
          // SHOW THE OPTION OF WHETHER TO USE PULLDOWN OR PIE MENU
 
-         color(overlayClearColor);
+         color(overlayClearColor());
          textHeight(12);
          text("Using", dx + w - 40, h - 30, .5, 1);
          text((menuType==0 ? "PullDown" : "Pie Menu"), dx + w - 40, h - 10, .5, 1);
@@ -2054,7 +2104,7 @@ console.log("]");
          // IF NOT IN TEXT INSERTION MODE, SHOW THE AVAILABLE KEYBOARD SHORTCUTS.
 
          if (! isShowingGlyphs && ! isTextMode) {
-            color(overlayClearColor);
+            color(overlayClearColor());
             lineWidth(1);
             textHeight(11);
             var y0 = paletteY(palette.length);
