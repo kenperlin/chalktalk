@@ -262,3 +262,66 @@
       }
    }
    F2D.prototype = new Sketch;
+
+   function S2C() {
+      this.labels = "s2c".split(' ');
+      this.render = function(elapsed) {
+         m.save();
+	    mCurve([ [-1,-1], [1,-1], [1,1], [-1,1], [-1,-1] ]);
+         m.restore();
+	 this.afterSketch(function() {
+	    if (this.shapeSketch === undefined) {
+	       glyphSketch = null;
+	       this.shapeSketch = geometrySketch(root.addCube());
+	       this.shapeSketch.tX = this.tX + width() / 2;
+	       this.shapeSketch.tY = this.tY + height() / 2;
+	       this.shapeSketch.mesh.sc = 1.8 * this.xyz[2];
+	       this.shapeSketch.fadeAway = 0.3;
+	       this.shapeSketch.update = function(elapsed) {
+	          this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
+		  if (this.fadeAway == 1) {
+		     this.fadeAway = 0;
+		     delete this.update;
+		  }
+               }	
+	       this.shapeSketch.mesh.update = function(elapsed) {
+	          this.getMatrix().scale(this.sc);
+	       }
+	       this.fadeAway = 1;
+            }
+	 });
+      }
+   }
+   S2C.prototype = new Sketch;
+
+   function C2S() {
+      this.labels = "c2s".split(' ');
+      this.render = function(elapsed) {
+         m.save();
+	    mCurve(makeOval(-1,-1,2,2,20,-PI/2,3*PI/2));
+         m.restore();
+	 this.afterSketch(function() {
+	    if (this.shapeSketch === undefined) {
+	       glyphSketch = null;
+	       this.shapeSketch = geometrySketch(root.addGlobe());
+	       this.shapeSketch.tX = this.tX + width() / 2;
+	       this.shapeSketch.tY = this.tY + height() / 2;
+	       this.shapeSketch.mesh.sc = 1.8 * this.xyz[2];
+	       this.shapeSketch.fadeAway = 0.3;
+	       this.shapeSketch.update = function(elapsed) {
+	          this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
+		  if (this.fadeAway == 1) {
+		     this.fadeAway = 0;
+		     delete this.update;
+		  }
+               }	
+	       this.shapeSketch.mesh.update = function(elapsed) {
+	          this.getMatrix().scale(this.sc);
+	       }
+	       this.fadeAway = 1;
+            }
+	 });
+      }
+   }
+   C2S.prototype = new Sketch;
+

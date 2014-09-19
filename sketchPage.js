@@ -30,7 +30,7 @@ var sketchToDelete = null;
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
 
    function paletteX(i) { return 30 - _g.panX; }
-   function paletteY(i) { return 30 + i * 30; }
+   function paletteY(i) { return 30 + i * 30 - _g.panY; }
    function paletteR(i) {
       var index = paletteColorId >= 0 ? paletteColorId : sketchPage.colorId;
       return i == index ? 12 : 8;
@@ -175,6 +175,9 @@ var sketchToDelete = null;
 
       this.mouseDown = function(x, y) {
 
+         if (this.setPageInfo !== undefined)
+	    return;
+
          this.isPressed = true;
          this.isClick = true;
          this.isPossibleClickOverBackground = ! isHover();
@@ -278,6 +281,7 @@ var sketchToDelete = null;
          // SEND MOUSE DOWN/DRAG COMMANDS TO AN EXISTING SKETCH.
 
          this.isFocusOnSketch = false;
+
          if (isk() && sk().isMouseOver) {
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
@@ -311,6 +315,9 @@ var sketchToDelete = null;
       // HANDLE MOUSE DRAG FOR THE SKETCH PAGE.
 
       this.mouseDrag = function(x, y) {
+
+         if (this.setPageInfo !== undefined)
+	    return;
 
          var dx = x - this.x;
          var dy = y - this.y;
@@ -443,6 +450,12 @@ var sketchToDelete = null;
 
       this.mouseUp = function(x, y) {
 
+         if (this.setPageInfo !== undefined) {
+	    setPage(this.setPageInfo.page);
+	    delete this.setPageInfo;
+	    return;
+         }
+
          this.isPressed = false;
 
 	 if (this.hintTrace !== undefined) {
@@ -509,10 +522,6 @@ var sketchToDelete = null;
          if (isBottomGesture) {
             if (y < height() - 100)
                this.clear();
-/*
-            else if (this.travel <= clickSize)
-               _g.panX = min(0, -(x - margin/2) * height() / margin);
-*/
             isBottomGesture = false;
             return;
          }
@@ -856,6 +865,11 @@ var sketchToDelete = null;
 
       this.mouseMove = function(x, y) {
 
+         if (this.setPageInfo !== undefined) {
+	    if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize)
+	       delete this.setPageInfo;
+         }
+
          this.x = x;
          this.y = y;
 
@@ -1159,10 +1173,10 @@ var sketchToDelete = null;
             this.clear();
             break;
          case '#':
-	    if (this.isGraphPaper === undefined)
-	       this.isGraphPaper = true;
+	    if (this.isLinedPaper === undefined)
+	       this.isLinedPaper = true;
             else
-	       delete this.isGraphPaper;
+	       delete this.isLinedPaper;
             break;
          case PAGE_UP:
             break;
@@ -1213,6 +1227,7 @@ var sketchToDelete = null;
                if (isShiftPressed)
                   sk().removeLastStroke();
                else {
+                  sketchAction = null;
                   sk().fadeAway = 1.0;
 		  fadeArrowsIntoSketch(sk());
                   setTextMode(false);
@@ -1468,13 +1483,16 @@ console.log("]");
          var skTrue = sk();
 
          function xOnPanStrip(x) { return x * margin / h - _g.panX; }
-         function yOnPanStrip(y) { return y * margin / h + h - margin; }
+         function yOnPanStrip(y) { return y * margin / h + h - margin - _g.panY; }
 
          var isOnPanStrip = isBottomGesture || this.y >= h - margin;
          var isNearPanStrip = isBottomGesture || this.y >= h - 2 * margin;
 
-	 if (this.isGraphPaper !== undefined) {
+	 if (this.isLinedPaper !== undefined) {
 	    annotateStart();
+/*
+// GRAPH PAPER
+
 	    var r = w / 32;
             color(defaultPenColor);
 	    lineWidth(backgroundColor == 'white' ? 0.1 : 0.15);
@@ -1485,6 +1503,25 @@ console.log("]");
 	       line(x, 0, x, y1);
 	    for (var y = r ; y < y1 ; y += r)
 	       line(x0, y, x1, y);
+*/
+// LINED PAPER
+
+	    var r = 45;
+            color('rgb(128,192,255)');
+	    lineWidth(2);
+	    //var x0 = r * floor(-_g.panX / r);
+	    var x0 = 0;
+	    var x1 = x0 + w + r;
+	    var y0 = 0;
+	    var y1 = (this.y >= h - margin ? h - margin : h) - _g.panY;
+	    for (var y = y0 ; y < y1 ; y += r)
+	       line(x0, y, x1, y);
+
+            color('rgb(255,128,192)');
+	    lineWidth(1);
+	    line(x0 + 3 * r, 0, x0 + 3 * r, y1);
+	    line(x0 + 3 * r + 5, 0, x0 + 3 * r + 5, y1);
+
 	    annotateEnd();
 	 }
 
@@ -1493,7 +1530,8 @@ console.log("]");
             // DO NOT RENDER ANY GEOMETRY SKETCH THAT IS PANNED OFF THE SCREEN.
 
             if ( sk(I) instanceof GeometrySketch &&
-                 sk(I).xlo !== undefined && (sk(I).xhi + _g.panX < 0 || sk(I).xlo + _g.panX > w) )
+                 sk(I).xlo !== undefined && (sk(I).xhi + _g.panX < 0 || sk(I).xlo + _g.panX > w)
+                                         && (sk(I).yhi + _g.panY < 0 || sk(I).ylo + _g.panY > h) )
                continue;
 
             if (sk() == null)
@@ -1644,13 +1682,17 @@ console.log("]");
 	       break;
 	    }
          if (shapeInfo != null) {
+
             glyphSketch = null;
             eval(shapeInfo.type + "Sketch()");
+
             sk().isOutline = true;
-            sk().mesh.setMaterial(blackMaterial);
+            sk().mesh.setMaterial(bgMaterial());
+            sk().mesh.setMaterial(backgroundColor == 'white' ? new THREE.LineBasicMaterial() : blackMaterial);
             sk().rX = shapeInfo.rX;
             sk().rY = shapeInfo.rY;
             sk().bounds = shapeInfo.bounds;
+            sk().sw = shapeInfo.sw;
 	 }
 
          noisy = 0;
@@ -1768,7 +1810,7 @@ console.log("]");
       this.glyphBounds = function(i) {
          var ht = height() / glyphsPerCol;
          var x = ht / glyphsPerCol / 2 + ht * floor(i / glyphsPerCol) - _g.panX;
-         var y = ((i % glyphsPerCol) * height()) / glyphsPerCol + ht * .1;
+         var y = ((i % glyphsPerCol) * height()) / glyphsPerCol + ht * .1 - _g.panY;
          return [ x, y, x + ht * .7, y + ht * .8 ];
       }
 
@@ -1783,14 +1825,14 @@ console.log("]");
          _g.globalAlpha = 1.0;
 
          color(bgScrimColor(.5));
-         fillRect(-_g.panX - 100, 0, width() + 200, height());
+         fillRect(-_g.panX - 100, 0, width() + 200 - _g.panY, height());
 
          _g.font = '8pt Trebuchet MS';
 
          this.glyphT = this.isDraggingGlyph
                      ? this.iDragged + 0.99
                      : glyphsPerCol * (floor((this.mx + _g.panX) / (height()/glyphsPerCol)) +
-                             max(0, min(.99, this.my / height())));
+                             max(0, _g.panY + min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
             this.showGlyph(i);

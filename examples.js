@@ -14,13 +14,8 @@
       a.addCube().getMatrix().translate(-.5, .0, .0).scale(.50,.01,.01);
       a.addCube().getMatrix().translate( .0,-.5, .0).scale(.01,.50,.01);
       a.addCube().getMatrix().translate( .0, .0,-.5).scale(.01,.01,.50);
-      a.setMaterial(blackMaterial);
-
+      a.setMaterial(bgMaterial());
       geometrySketch(a, [-.25,.3,-.1,-.1,2]);
-
-      a.update = function() {
-         //this.getMatrix().rotateY(time);
-      }
    }
 
    function alan() { image('alan_kay_smiling.jpg', 1.8); }

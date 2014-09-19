@@ -1,5 +1,5 @@
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S".split(' ');
 
 function blankPage() {
    return {
@@ -22,9 +22,9 @@ var title_page = {
             <font color=white size=10>\
             <b>Thinking procedurally</b>\
             <p>\
-            <small>from textures\
+            <small>from magic blackboards\
             <br>\
-            to magic blackboards</small>\
+            to the future</small>\
             <br>&nbsp;<p>\
             <i><small>Ken Perlin</small></i>\
             </font>\
@@ -530,7 +530,8 @@ var page104g = {
    innerHTML: "\
       <table width=1280>\
       <tr height=100></tr>\
-      <tr><th><font size=10 color=white><small>People don't need a GUI<br>\
+      <tr><th><font size=10 color=white><small>People don't need<br>\
+                                        buttons, menus and sliders<br>\
                                         to talk with each other</small><p>&nbsp;<p></font></th></tr>\
       <tr>\
          <th><img src=imgs/kids-talking.jpg width=550></th>\
@@ -742,6 +743,7 @@ var sketchPages = [
    page1,
    page2,
    page3,
+   blankPage(),
    page4,
    page5,
    page6,
@@ -772,8 +774,8 @@ var sketchPages = [
    page104e,
    page104f,
    page104g,
-   page104h,
-   page104i,
+   /*page104h,
+   page104i,*/
    page106b,
    page106,
 ];

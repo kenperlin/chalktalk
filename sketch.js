@@ -1278,7 +1278,7 @@
 /*
 	    eval(this.info.type + "Sketch()");
 	    sk().isOutline = true;
-	    sk().mesh.setMaterial(blackMaterial);
+	    sk().mesh.setMaterial(bgMaterial());
 	    sk().rX = this.info.rX;
 	    sk().rY = this.info.rY;
 	    this.geoSketch = sk();
@@ -1290,14 +1290,26 @@
 	 this.sp = [[0,0]];
 	 this.sp0 = [[0,0,0]];
 
+         var b = [10000,10000,-10000,-10000];
+
 	 for (var n = 0 ; n < this.src.length ; n++) {
 	    var C = [];
-	    for (var i = 0 ; i < this.src[n].length ; i++)
+	    for (var i = 0 ; i < this.src[n].length ; i++) {
 	       C.push(this.xform(this.src[n][i]));
+
+	       var p = C[C.length-1];
+	       var x = this.adjustX(p[0]);
+	       var y = this.adjustY(p[1]);
+	       b[0] = min(b[0], x);
+	       b[1] = min(b[1], y);
+	       b[2] = max(b[2], x);
+	       b[3] = max(b[3], y);
+            }
 	    drawCurve(C);
          }
+	 console.log("b : " + arrayToString(b));
 /*
-	 if (this.geoSketch !== undefined && this.geoSketch.xlo !== undefined) {
+	 if (this.geoSketch !== undefined && b[0] > 0) {
 	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
 	    var e2 = this.geoSketch.mesh.projectVisibleEdges(visibleEdges);
 
@@ -1315,20 +1327,22 @@
 console.log("b1: " + arrayToString(b1));
 console.log("b2: " + arrayToString(b2));
 
-            this.geoSketch._dx = (b2[0] + b2[2]) / 2 - (b1[0] + b1[2]) / 2;
-            this.geoSketch._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
-            this.geoSketch._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]);
+            this.geoSketch._dx = (b[0] + b[2]) / 2 - (b1[0] + b1[2]) / 2;
+            this.geoSketch._dy = (b[1] + b[3]) / 2 - (b1[1] + b1[3]) / 2;
+            this.geoSketch._ds = (b[2] - b[0]) / (b1[2] - b1[0]);
 
 	    delete this.geoSketch;
 	 }
 */
+
 	 // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
 
 	 if (this.glyphTransition == 1 && this.info !== undefined) {
 	    this.shapeInfo = { type  : this.info.type,
 	                       rX    : this.info.rX,
 			       rY    : this.info.rY,
-	                       bounds: computeCurveBounds(this.sp, 1) };
+			       sw    : this.info.sw,
+	                       bounds: b };
 	    this.fadeAway = 1;
 	    delete this.info;
          }

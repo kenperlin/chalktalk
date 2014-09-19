@@ -171,7 +171,7 @@ THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var geometry = tubeGeometry( points, nSegments);
   // THREE.TubeGeometry = function( path, segments, radius, radialSegments, closed ) {
 
-  var mesh = new THREE.Mesh(geometry, blackMaterial);
+  var mesh = new THREE.Mesh(geometry, bgMaterial());
   this.add(mesh);
   return mesh;
 }

@@ -48,7 +48,7 @@
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
-      var mesh = new THREE.Mesh( geometry, blackMaterial );
+      var mesh = new THREE.Mesh( geometry, bgMaterial() );
       this.add(mesh);
       return mesh;
    }
@@ -58,7 +58,7 @@
       for (var i = 0 ; i < p.length ; i++)
          points.push( new THREE.Vector3( p[i][0],p[i][1],p[i][2] ) );
       var geometry = latheGeometry( points, nSegments );
-      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
    }
@@ -66,7 +66,7 @@
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
       var geometry = cylinderGeometry(n);
-      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
    }
@@ -74,14 +74,14 @@
    THREE.Object3D.prototype.addOpenCylinder = function(n) {
       if (n === undefined) n = 24;
       var geometry = openCylinderGeometry(n);
-      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
    }
 
    THREE.Object3D.prototype.addCube = function() {
       var geometry = cubeGeometry();
-      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
    }
@@ -90,7 +90,7 @@
       if (m === undefined) m = 32;
       if (n === undefined) n = floor(m / 2);
       var geometry = globeGeometry(m, n);
-      var mesh = new THREE.Mesh(geometry, blackMaterial);
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
    }
@@ -411,8 +411,8 @@
    var renderer, cameraFOV = 15, mouseX = 0, mouseY = 0;
 
    function fourStart() {
-      renderer = new THREE.WebGLRenderer( { alpha: true} );
-      renderer.setClearColor(0, 0);
+      renderer = new THREE.WebGLRenderer( { alpha: true } );
+      renderer.setClearColor(0x000000, 0);
       renderer.setSize(width(), height());
 
       document.addEventListener('mousemove', function(event) {
@@ -568,7 +568,10 @@ var fragmentShaderHeader = ["\
 "].join("\n");
 
    function createVisibleEdgesMesh(veds) {
-      var mesh = new THREE.Mesh(new THREE.Geometry(), new THREE.LineBasicMaterial());
+      var material = new THREE.LineBasicMaterial();
+      if (backgroundColor == 'white')
+         material.color = new THREE.Color( 0 );
+      var mesh = new THREE.Mesh(new THREE.Geometry(), material);
 
       for (var k = 0 ; k < veds.length ; k++) {
          var geom  = veds[k][0];

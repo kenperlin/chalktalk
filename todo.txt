@@ -1,4 +1,11 @@
 
+Look for way to create transparent 3D canvas bg, and put 3D canvas in front.
+
+Best way to match 3d shape:
+   When I first create StrokeSketch, build the GeometrySketch behind the scenes, set its matrix properly, render it with alpha=0, and then use its 2D projected strokes as the target for morphing (ie: as the data structure to drive the procedural drawing of the StrokeSketch itself).
+
+Why does code editor bubble sometimes go black?
+
 Optional faint grid for background (graph paper).
 
 xyzw homogeneous vectors.
