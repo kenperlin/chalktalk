@@ -25,7 +25,7 @@
 <div id="editor">Edit your sketch here</div>
 
 <button id="submit">Submit sketch</button>
-<div id="submit_result"></div>
+<button id="commit">Commit sketch</button>
     
 <script src="jslint.js" type="text/javascript" charset="utf-8"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -34,7 +34,6 @@
 
    var submit = document.getElementById("submit");
    submit.onclick = function() {
-      var inputContent = document.getElementById("name").value;
       var sketchName = document.getElementById("name").value;
 
       var uploadForm = new FormData();
@@ -46,6 +45,18 @@
       var request = new XMLHttpRequest();
       request.open("POST", "http://evanmoore.no-ip.org:8888/upload");
       request.send(uploadForm);
+   }
+
+   var commit = document.getElementById("commit");
+   commit.onclick = function() {
+      var sketchName = document.getElementById("name").value;
+
+      var commitForm = new FormData();
+      commitForm.append("sketchName", sketchName);
+
+      var request = new XMLHttpRequest();
+      request.open("POST", "http://evanmoore.no-ip.org:8888/commit");
+      request.send(commitForm);
    }
 
    // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 

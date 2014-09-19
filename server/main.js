@@ -2,7 +2,14 @@ var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
 var fs = require("fs");
+var git = require("nodegit");
 var path = require("path");
+var readline = require("readline-sync");
+
+var gitUser = readline.question("github username: ");
+var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
+console.log(gitUser);
+console.log(gitPass);
 
 var app = express();
 var port = process.argv[2] || 8888;
@@ -36,6 +43,65 @@ app.route("/upload").post(function(req, res, next) {
       });
 
       res.end();
+   });
+});
+
+// open git repo
+var repository;
+git.Repo.open(".git", function(err, repo) {
+   if (err) throw err;
+   repository = repo;
+});
+
+
+// handle commit requests
+app.route("/commit").post(function(req, res, next) {
+   var form = formidable.IncomingForm();
+
+   form.parse(req, function(err, fields, files) {
+      res.writeHead(200, {"content-type": "text/plain"});
+      res.write("received commit request");
+
+      var filename = fields.sketchName;
+      var suffix = ".js";
+      if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
+         filename += suffix; 
+
+      repository.openIndex(function(err, index) {
+         if (err) throw err;
+
+         index.read(function(err) {
+            if (err) throw err;   
+
+            index.addByPath("sketches/" + filename, function(err) {
+               if (err) throw err;
+
+               index.write(function(err) {
+                  if (err) throw err;
+
+                  index.writeTree(function(err, oid) {
+                     if (err) throw err;
+
+                     git.Reference.oidForName(repository, 'HEAD', function(err, head) {
+                        if (err) throw err; 
+
+                        repository.getCommit(head, function(err, parent) {
+                           if (err) throw err;
+                           
+                           var author = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
+                           var committer = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
+
+                           repository.createCommit('HEAD', author, committer, 'new sketch from web editor', oid, [parent], function(err, commitId) {
+                              console.log("New commit: " + commitId.sha());
+                           });
+                        });
+                     });
+                  });
+               });
+            });
+         });
+
+      });
    });
 });
 

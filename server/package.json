@@ -4,6 +4,8 @@
    "dependencies": {
       "body-parser": "1.5.x",
       "express": "4.7.x",
-      "formidable": "1.0.x"
+      "formidable": "1.0.x",
+      "nodegit": "0.1.x",
+      "readline-sync": "0.4.x"
    }
 }
