@@ -555,7 +555,7 @@
    var sketchTypes = [];
    var sketchAction = null;
 
-   var isShowingRenderer = false;
+   var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
    function gStart() {
 

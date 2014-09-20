@@ -225,6 +225,12 @@ var sketchToDelete = null;
             return;
          }
 
+         this.isPanViewGesture = false;
+         if (this.isOnPanStrip) {
+            var b = this.panViewBounds;
+            this.isPanViewGesture = x >= b[0] && y >= b[1] && x < b[2] && y < b[3];
+         }
+
          if (isRightHover || x >= width() - margin) {
             isRightGesture = true;
             this.yDown = y;
@@ -320,6 +326,9 @@ var sketchToDelete = null;
 
       this.mouseDrag = function(x, y) {
 
+         var w = width();
+         var h = height();
+
          if (this.setPageInfo !== undefined)
 	    return;
 
@@ -390,8 +399,13 @@ var sketchToDelete = null;
          }
 
 	 else {
+	    if (this.isPanViewGesture) {
+	       return;
+	    }
+
 	    if (isRightGesture) {
                _g.panY = min(0, _g.panY + y - this.yDown);
+	       console.log(_g.panY);
                return;
 	    }
 
@@ -538,6 +552,11 @@ var sketchToDelete = null;
                 this.handleTextChar(onScreenKeyboard.key);
                 return;
             }
+         }
+
+	 if (this.isPanViewGesture) {
+	    this.isPanViewGesture = false;
+	    return;
          }
 
          if (! isVerticalPan) {
@@ -1504,6 +1523,8 @@ console.log("]");
          }
       }
 
+      this.isOnPanStrip = false;
+
       this.animate = function(elapsed) {
 
          var w = width();
@@ -1531,15 +1552,8 @@ console.log("]");
          function xOnPanStrip(x) { return x * margin / (isVerticalPan ? w : h) + (isVerticalPan ? w - margin : 0) - _g.panX; }
          function yOnPanStrip(y) { return y * margin / (isVerticalPan ? w : h) + (isVerticalPan ? 0 : h - margin) - _g.panY; }
 
-         var isOnPanStrip = false, isNearPanStrip = false;
-	 if (! isVerticalPan) {
-            isOnPanStrip   = isBottomGesture || this.y + _g.panY >= h - margin;
-            isNearPanStrip = isBottomGesture || this.y + _g.panY >= h - 2 * margin;
-         }
-	 else {
-            isOnPanStrip   = isRightGesture || this.x + _g.panX >= w - margin;
-            isNearPanStrip = isRightGesture || this.x + _g.panX >= w - 2 * margin;
-	 }
+         this.isOnPanStrip = isVerticalPan ? isRightGesture  || this.x + _g.panX >= w - margin
+                                           : isBottomGesture || this.y + _g.panY >= h - margin;
 
 	 if (this.isLinedPaper !== undefined) {
 	    annotateStart();
@@ -1693,7 +1707,7 @@ console.log("]");
 
             // ADD SKETCH TO THE PAN STRIP.
 
-            if (isOnPanStrip) {
+            if (this.isOnPanStrip) {
                lineWidth(_g.lineWidth * margin / (isVerticalPan ? w : h));
                if (sk() instanceof GeometrySketch) {
                   var x0 = xOnPanStrip(min(sk().sp[0][0], sk().sp[1][0]));
@@ -1752,18 +1766,18 @@ console.log("]");
 
          // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PAN STRIP.
 
-         if (isOnPanStrip) {
+         if (this.isOnPanStrip) {
 	    var dx = isVerticalPan ? 0 : -_g.panX;
 	    var dy = isVerticalPan ? -_g.panY : 0;
             var x0 = xOnPanStrip(dx    ), y0 = yOnPanStrip(dy    );
             var x1 = xOnPanStrip(dx + w), y1 = yOnPanStrip(dy + h) - 2;
-            color(scrimColor(isOnPanStrip ? .06 : .12));
+	    this.panViewBounds = [x0, y0, x1, y1];
+
+            color(scrimColor(0.06));
             fillRect(x0, y0, x1 - x0, y1 - y0);
-            if (isOnPanStrip) {
-               color(scrimColor(1));
-	       lineWidth(0.5);
-               drawRect(x0, y0, x1 - x0, y1 - y0);
-            }
+            color(scrimColor(1));
+	    lineWidth(0.5);
+            drawRect(x0, y0, x1 - x0, y1 - y0);
          }
 
          if (isExpertMode) {
