@@ -598,6 +598,9 @@
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " <!!/div>"
       )
+      + " <canvas id='video_canvas' tabindex=1"
+      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+      + " </canvas>"
       + " <canvas id='events_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
@@ -652,6 +655,15 @@
       for (var i = 0 ; i < c.length ; i++)
           if (c[i].getAttribute("data-render") != "gl")
              startCanvas(c[i].id);
+
+
+      // GET VIDEO CANVAS
+      video_canvas = document.getElementById('video_canvas');
+      video_canvas.width = width();
+      video_canvas.height = height();
+      // INIT VIDEO LAYER
+      videoLayer = new ChromaKeyedVideo();
+      videoLayer.init(video_canvas);
    }
 
    function e2s() {
@@ -674,6 +686,10 @@
       var _canvas = document.getElementById(name);
       if (name == 'events_canvas') {
          initEventHandlers(_canvas);
+         return;
+      }
+      else if (name == 'video_canvas') {
+         console.log("ignoring video_canvas");
          return;
       }
 
@@ -1847,6 +1863,12 @@
 
    var tick = function(g) {
       var w = width(), h = height();
+
+
+      // RENDER CONTENTS OF VIDEO LAYER
+      if (videoLayer != undefined) {
+         videoLayer.render();
+      }
 
       // SET CONSTANTS FOR projectX() and projectY().
 
