@@ -2481,8 +2481,8 @@
                fillRect(w - margin - _g.panX, -_g.panY, margin - 2, h);
 
                color(scrimColor(0.03));
-               var dy = margin / 2;
-               for (var y = _g.panY % dy - _g.panY ; y < h - _g.panY ; y += dy)
+               var dy = 45;
+               for (var y = _g.panY % dy - _g.panY - dy/4 ; y < h - _g.panY ; y += dy)
                   fillRect(w - margin - _g.panX, y, margin - 2, dy/2);
             }
 	 }

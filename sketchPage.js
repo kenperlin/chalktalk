@@ -1564,7 +1564,7 @@ console.log("]");
 	    lineWidth(2);
 	    //var x0 = r * floor(-_g.panX / r);
 	    var x0 = 0;
-	    var x1 = x0 + w - (isRightHover ? margin + 1 : 0);
+	    var x1 = x0 + w - (this.x >= w - margin || isRightGesture ? margin + 1 : 0);
 	    var y0 = 0;
 	    var y1 = (this.y + _g.panY >= h - margin ? h - margin : h) - _g.panY;
 	    for (var y = y0 ; y < y1 ; y += r)
@@ -1691,9 +1691,9 @@ console.log("]");
                _g.stroke();
             }
 
-            // ADD SKETCH TO THE PANORAMA STRIP.
+            // ADD SKETCH TO THE PAN STRIP.
 
-            if (isNearPanStrip) {
+            if (isOnPanStrip) {
                lineWidth(_g.lineWidth * margin / (isVerticalPan ? w : h));
                if (sk() instanceof GeometrySketch) {
                   var x0 = xOnPanStrip(min(sk().sp[0][0], sk().sp[1][0]));
@@ -1752,7 +1752,7 @@ console.log("]");
 
          // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PAN STRIP.
 
-         if (isNearPanStrip) {
+         if (isOnPanStrip) {
 	    var dx = isVerticalPan ? 0 : -_g.panX;
 	    var dy = isVerticalPan ? -_g.panY : 0;
             var x0 = xOnPanStrip(dx    ), y0 = yOnPanStrip(dy    );
@@ -1761,6 +1761,7 @@ console.log("]");
             fillRect(x0, y0, x1 - x0, y1 - y0);
             if (isOnPanStrip) {
                color(scrimColor(1));
+	       lineWidth(0.5);
                drawRect(x0, y0, x1 - x0, y1 - y0);
             }
          }
