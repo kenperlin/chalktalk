@@ -1464,6 +1464,10 @@ console.log("]");
             }
 
             break;
+
+         case 'v':
+            videoLayer.toggle();
+            break;
          }
       }
 

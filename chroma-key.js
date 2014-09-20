@@ -76,7 +76,7 @@ function ChromaKeyedVideo()
     console.log("chroma-key: init");
     this.bRender = false;
     this.canvas = canvas;
-  
+
     this.gl = this.getWebGLContext(this.canvas);
 
     // get live video
@@ -135,8 +135,6 @@ function ChromaKeyedVideo()
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // return;
-    // return;
     // bind the texture
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -167,6 +165,17 @@ function ChromaKeyedVideo()
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
+  this.toggle = function()
+  {
+    this.bRender = !this.bRender;
+
+    if (!this.bRender) {
+      // clear layer
+      var gl = this.gl;
+      gl.clearColor(0.0, 0.0, 0.0, 0.0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+  }
 
   this.getWebGLContext = function(canvas)
   {

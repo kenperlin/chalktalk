@@ -799,6 +799,7 @@
       ['r'  , "rotating"],
       ['s'  , "scaling"],
       ['t'  , "translating"],
+      ['v'  , "toggle video layer"],
       ['w'  , "toggle whiteboard"],
       ['x'  , "toggle expert mode"],
       ['y'  , "toggle scribble glyphs"],
