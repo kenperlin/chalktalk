@@ -689,7 +689,7 @@
          return;
       }
       else if (name == 'video_canvas') {
-         console.log("ignoring video_canvas");
+         // ignore video_canvas
          return;
       }
 

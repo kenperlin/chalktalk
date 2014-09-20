@@ -22,7 +22,7 @@ function ChromaKeyedVideo()
 
   var shaderProgram, shaderVertexPosAttr, shaderProjectionMatUni, shaderModelViewMatUni;
 
-  var bIsReady;
+  var bRender;
 
   this.chromaShaderVertSRC =
     "precision highp float;\n" +
@@ -73,51 +73,40 @@ function ChromaKeyedVideo()
 
   this.init = function(canvas)
   {
-    console.log("init called");
-    this.bIsReady = false;
+    console.log("chroma-key: init");
+    this.bRender = false;
     this.canvas = canvas;
   
     this.gl = this.getWebGLContext(this.canvas);
 
-    // get line video
+    // get live video
 	  navigator.getUserMedia({audio: false, video: true}, function(stream) {videoLayer.startVideo(stream);}, function() {videoLayer.noVideo();});
-    // loadImage();
   }
 
   this.startVideo = function(stream)
   {
-    console.log("start video called");
-    // console.log(this);
-
-    this.videoStream = stream;
       // init video object
+    this.videoStream = stream;
     this.video = document.createElement("video");
-    // video = document.getElementById("video");
-    // this.video.play();
     this.video.autoplay = true;
     this.video.src = webkitURL.createObjectURL(stream);
 
+    // call initGL when the video is ready to play
     this.video.addEventListener("canplaythrough", function() { videoLayer.initGL();} );
-    // this.initGL();
   }
 
   this.noVideo = function()
   {
-    console.log("user cancelled line video");
+    console.log("chroma-key: user cancelled line video");
   }
-
-
-
 
 
   this.initGL = function()
   {
-    console.log("initGL called");
-    console.log(this);
-    this.initMatrices(this.canvas);
-    console.log("canvas size: " + this.canvas.width + "x" + this.canvas.height);
-    console.log("video size: " + this.video.videoWidth + "x" + this.video.videoHeight);
+    console.log("chroma-key: canvas size: " + this.canvas.width + "x" + this.canvas.height);
+    console.log("chroma-key: video size: " + this.video.videoWidth + "x" + this.video.videoHeight);
 
+    this.initMatrices(this.canvas);
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
     // some blending settings
@@ -131,15 +120,15 @@ function ChromaKeyedVideo()
     this.vertexBuffer = this.createVertexBuffer(this.gl);
     this.texCoordsBuffer = this.createTexCoords(this.gl);
     // loop();
-    this.bIsReady = true;
+    this.bRender = true;
   }
 
   this.render = function()
   {
-    if (!this.bIsReady) {
+    if (!this.bRender) {
       return;
     }
-    
+
     var gl = this.gl;
     var shaderProgram = this.shaderProgram;
 
@@ -207,12 +196,21 @@ function ChromaKeyedVideo()
   {
     var buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    // var verts = [
+    //   1.0, 1.0, 0.0,
+    //   -1.0, 1.0, 0.0,
+    //   1.0, -1.0, 0.0,
+    //   -1.0, -1.0, 0.0
+    // ];
+    var hRatio = this.video.videoWidth / this.canvas.width;
+    var vRatio = this.video.videoHeight / this.canvas.height;
+
     var verts = [
-      1.0, 1.0, 0.0,
-      -1.0, 1.0, 0.0,
-      1.0, -1.0, 0.0,
-      -1.0, -1.0, 0.0
-    ];
+        vRatio, hRatio, 0.0,
+        -vRatio, hRatio, 0.0,
+        vRatio, -hRatio, 0.0,
+        -vRatio, -hRatio, 0.0
+        ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
     buffer.vertSize = 3;
@@ -249,7 +247,7 @@ function ChromaKeyedVideo()
   {
     // create model view matrix
     this.modelViewMatrix = mat4.create();
-    mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0, 0, -1.1]);
+    mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0, 0, -0.8]);
       // var eye = [2.0, 1.0, 3.0];
       // var center = [0.0, 0.0, 0.0];
       // var up = [0.0, 0.0, -1.0];
@@ -261,7 +259,7 @@ function ChromaKeyedVideo()
     // create a projection matrix with 45 degree field of view
     this.projectionMatrix = mat4.create();
     mat4.perspective(this.projectionMatrix, Math.PI / 4,
-                      canvas.width / canvas.height, 1, 10000);
+                      canvas.width / canvas.height, 0.5, 10000);
   }
 
   this.createShader = function(gl, str, type)
@@ -292,13 +290,8 @@ function ChromaKeyedVideo()
 
   this.linkShader = function(gl, vertSRC, fragSRC)
   {
-    console.log("linking shader");
-    console.log(gl);
-
     var vertexShader = this.createShader(gl, vertSRC, "vertex");
     var fragmentShader = this.createShader(gl, fragSRC, "fragment");
-
-    console.log("after creating shader");
 
     // link them together into a new program
     var shaderProgram = gl.createProgram();
@@ -309,8 +302,6 @@ function ChromaKeyedVideo()
     // get pointers to the shader params
     shaderProgram.vertexPosAttr = gl.getAttribLocation(shaderProgram, "vertexPos");
     shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    console.log("vertexPosAttr = " + shaderProgram.vertexPosAttr);
-    console.log("aTextureCoord = " + shaderProgram.aTextureCoord);
 
     gl.enableVertexAttribArray(shaderProgram.vertexPosAttr);
     gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
