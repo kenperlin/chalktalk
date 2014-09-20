@@ -555,6 +555,8 @@
    var sketchTypes = [];
    var sketchAction = null;
 
+   var isShowingRenderer = false;
+
    function gStart() {
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
@@ -585,9 +587,17 @@
       + " <canvas id='sketch_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
-      + " <div id='scene_div' tabindex=1"
-      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
-      + " </div>"
+      +
+      (isShowingRenderer
+       ?
+	   " <div id='scene_div' tabindex=1"
+         + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+         + " </div>"
+       :       
+           " <!!div id='scene_div' tabindex=1"
+         + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+         + " <!!/div>"
+      )
       + " <canvas id='events_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
@@ -599,17 +609,13 @@
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
 
-      // events_canvas = sketch_canvas;
-
       // SET ALL THE SCREEN-FILLING ELEMENTS TO THE SIZE OF THE SCREEN.
 
       slide.width = width();
-      scene_div.width = width();
       sketch_canvas.width = width();
       events_canvas.width = width();
 
       slide.height = height();
-      scene_div.height = height();
       sketch_canvas.height = height();
       events_canvas.height = height();
 
@@ -633,8 +639,12 @@
 
       fourStart();
 
-      var sceneElement = document.getElementById('scene_div');
-      sceneElement.appendChild(renderer.domElement);
+      if (window['scene_div'] !== undefined) {
+         scene_div.width = width();
+         scene_div.height = height();
+         var sceneElement = document.getElementById('scene_div');
+         sceneElement.appendChild(renderer.domElement);
+      }
 
       // START ALL CANVASES RUNNING
 
