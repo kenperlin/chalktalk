@@ -231,19 +231,19 @@ var sketchToDelete = null;
             this.isPanViewGesture = x >= b[0] && y >= b[1] && x < b[2] && y < b[3];
          }
 
-         if (isRightHover || x >= width() - margin) {
+         if (isRightHover || x >= width() - margin - _g.panX) {
             isRightGesture = true;
             this.yDown = y;
             return;
          }
 
-         if (isBottomHover || y >= height() - margin) {
+         if (isBottomHover || y >= height() - margin - _g.panY) {
             isBottomGesture = true;
             this.xDown = x;
             return;
          }
 
-         if (x >= width() - margin && y >= height() - margin) {
+         if (x >= width() - margin && y >= height() - margin - _g.panY) {
             isTogglingMenuType = true;
             return;
          }
@@ -383,6 +383,9 @@ var sketchToDelete = null;
             isRightHover = false;
          }
 
+	 if (this.isPanViewGesture)
+	    return;
+
          if (! isVerticalPan) {
             if (isBottomGesture) {
                _g.panX = min(0, _g.panX + x - this.xDown);
@@ -397,12 +400,7 @@ var sketchToDelete = null;
                return;
             }
          }
-
 	 else {
-	    if (this.isPanViewGesture) {
-	       return;
-	    }
-
 	    if (isRightGesture) {
                _g.panY = min(0, _g.panY + y - this.yDown);
 	       console.log(_g.panY);
@@ -554,11 +552,6 @@ var sketchToDelete = null;
             }
          }
 
-	 if (this.isPanViewGesture) {
-	    this.isPanViewGesture = false;
-	    return;
-         }
-
          if (! isVerticalPan) {
             if (isBottomGesture) {
                if (y < height() - 100)
@@ -594,7 +587,6 @@ var sketchToDelete = null;
                   setPage(pageNumber);
                return;
             }
-
 	 }
 
          isRightGesture = false;
