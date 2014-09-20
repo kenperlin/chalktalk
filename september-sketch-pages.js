@@ -264,6 +264,7 @@ var page13 = {
       <table width=1280>\
       <tr height=100></tr>\
       <tr>\
+         <th width= 50></th>\
          <th width=600><img src=imgs/weird_science2.jpg width=100%></th>\
          <th width= 50></th>\
          </tr>\

@@ -1564,7 +1564,7 @@ console.log("]");
 	    lineWidth(2);
 	    //var x0 = r * floor(-_g.panX / r);
 	    var x0 = 0;
-	    var x1 = x0 + w + r;
+	    var x1 = x0 + w - (isRightHover ? margin + 1 : 0);
 	    var y0 = 0;
 	    var y1 = (this.y + _g.panY >= h - margin ? h - margin : h) - _g.panY;
 	    for (var y = y0 ; y < y1 ; y += r)
