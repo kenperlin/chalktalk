@@ -567,7 +567,7 @@ Lattice.prototype = new Sketch;
 /*
 function SplineTest() {
    this.labels = "spline".split(' ');
-   this.shape = createSpline([
+   this.shape = makeSpline([
       [ .3,1.1],
       [ .3, .9],
       [ .3, .5],

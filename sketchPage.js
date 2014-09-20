@@ -390,7 +390,7 @@ var sketchToDelete = null;
          }
 
 	 else {
-	    if (isVerticalPan && isRightGesture) {
+	    if (isRightGesture) {
                _g.panY = min(0, _g.panY + y - this.yDown);
                return;
 	    }
@@ -916,7 +916,7 @@ var sketchToDelete = null;
          this.x = x;
          this.y = y;
 
-         if (y >= height() - margin - _g.panY && x < width() - margin && ! isShowingGlyphs) {
+         if (y >= height() - margin - _g.panY && x < width() - margin) {
             isBottomHover = true;
          } else {
             isBottomHover = false;
@@ -1607,7 +1607,6 @@ console.log("]");
 
             // FADE AWAY THIS SKETCH BEFORE DELETING IT.
 
-            var globalAlpha = _g.globalAlpha;
             if (sk().fadeAway > 0) {
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
@@ -1654,6 +1653,7 @@ console.log("]");
             }
 
             _g.restore();
+            _g.globalAlpha = 1;
 
             _g_sketchEnd();
 
@@ -1694,6 +1694,7 @@ console.log("]");
             // ADD SKETCH TO THE PANORAMA STRIP.
 
             if (isNearPanStrip) {
+               lineWidth(_g.lineWidth * margin / (isVerticalPan ? w : h));
                if (sk() instanceof GeometrySketch) {
                   var x0 = xOnPanStrip(min(sk().sp[0][0], sk().sp[1][0]));
                   var y0 = yOnPanStrip(min(sk().sp[0][1], sk().sp[1][1]));
@@ -1708,7 +1709,6 @@ console.log("]");
                   _g.fill();
                }
                else {
-                  lineWidth(_g.lineWidth * margin / h);
                   _g.beginPath();
                   for (var i = 0 ; i < sk().sp.length ; i++) {
                      var x = xOnPanStrip(sk().sp[i][0]);
