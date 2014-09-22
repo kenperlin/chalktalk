@@ -275,7 +275,7 @@
 	       this.shapeSketch = geometrySketch(root.addCube());
 	       this.shapeSketch.tX = this.tX + width() / 2;
 	       this.shapeSketch.tY = this.tY + height() / 2;
-	       this.shapeSketch.mesh.sc = 1.8 * this.xyz[2];
+	       this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
 	       this.shapeSketch.fadeAway = 0.3;
 	       this.shapeSketch.update = function(elapsed) {
 	          this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
@@ -306,7 +306,7 @@
 	       this.shapeSketch = geometrySketch(root.addGlobe());
 	       this.shapeSketch.tX = this.tX + width() / 2;
 	       this.shapeSketch.tY = this.tY + height() / 2;
-	       this.shapeSketch.mesh.sc = 1.8 * this.xyz[2];
+	       this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
 	       this.shapeSketch.fadeAway = 0.3;
 	       this.shapeSketch.update = function(elapsed) {
 	          this.fadeAway = min(1, this.fadeAway + 5 * elapsed);

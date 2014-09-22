@@ -554,7 +554,7 @@ var sketchToDelete = null;
 
          if (! isVerticalPan) {
             if (isBottomGesture) {
-               if (y < height() - 100)
+               if (this.travel <= clickSize && y < height() - 100)
                   this.clear();
                isBottomGesture = false;
                return;
@@ -572,7 +572,7 @@ var sketchToDelete = null;
          }
 	 else {
             if (isRightGesture) {
-               if (x < width() - 100)
+               if (this.travel <= clickSize && x < width() - 100)
                   this.clear();
                isRightGesture = false;
                return;
