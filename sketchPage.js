@@ -187,6 +187,8 @@ var sketchToDelete = null;
          this.yDown = y;
          this.x = x;
          this.y = y;
+         this.panXDown = _g.panX;
+         this.panYDown = _g.panY;
 
          if (isOnScreenKeyboard() && onScreenKeyboard.mouseDown(x,y)) {
             return;
@@ -554,8 +556,10 @@ var sketchToDelete = null;
 
          if (! isVerticalPan) {
             if (isBottomGesture) {
-               if (this.travel <= clickSize && y < height() - 100)
+               if (abs(_g.panX - this.panXDown) <= clickSize && y < height() - 100) {
+	          console.log("doing page clear");
                   this.clear();
+               }
                isBottomGesture = false;
                return;
             }
@@ -572,7 +576,7 @@ var sketchToDelete = null;
          }
 	 else {
             if (isRightGesture) {
-               if (this.travel <= clickSize && x < width() - 100)
+               if (abs(_g.panY - this.panYDown) <= clickSize && x < width() - 100)
                   this.clear();
                isRightGesture = false;
                return;
