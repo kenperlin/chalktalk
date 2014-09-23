@@ -556,6 +556,11 @@
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
+
+/////////////////////////////////////////////////////////////////////
+///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
+///////////////////////// GOING TO BE MOVED /////////////////////////
+
    function importSketch(filename) {
       var sketchRequest = new XMLHttpRequest();
       sketchRequest.open("GET", "sketches/" + filename);
@@ -564,6 +569,29 @@
       }
       sketchRequest.send();
    }
+
+   var ServerUtils = {};
+
+   ServerUtils.set = function(key, value) {
+      var setForm = new FormData();
+      setForm.append("key", key);
+      setForm.append("value", JSON.stringify(value));
+   
+      var request = new XMLHttpRequest();
+      request.open("POST", "http://evanmoore.no-ip.org:8888/set");
+      request.send(setForm);
+   }
+
+   ServerUtils.get = function(key, fn) {
+      var getRequest = new XMLHttpRequest();
+      getRequest.open("GET", "state/" + key + ".json");
+      getRequest.onloadend = function() {
+         fn(getRequest.responseText);
+      }
+      getRequest.send();
+   }
+
+/////////////////////////////////////////////////////////////////////
 
    function gStart() {
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 

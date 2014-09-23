@@ -8,8 +8,6 @@ var readline = require("readline-sync");
 
 var gitUser = readline.question("github username: ");
 var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
-console.log(gitUser);
-console.log(gitPass);
 
 var app = express();
 var port = process.argv[2] || 8888;
@@ -46,6 +44,29 @@ app.route("/upload").post(function(req, res, next) {
    });
 });
 
+app.route("/set").post(function(req, res, next) {
+   var form = formidable.IncomingForm();
+   form.parse(req, function(err, fields, files) {
+      res.writeHead(200, {"content-type": "text/plain"});
+      res.write('received upload:\n\n');
+   
+      var key = fields.key;
+      var suffix = ".json";
+      if (key.indexOf(suffix, key.length - suffix.length) == -1)
+         key += suffix; 
+
+      fs.writeFile("state/" + key, fields.value, function(err) {
+         if (err) {
+            console.log(err);
+         } else {
+            console.log("file written");
+         }
+      });
+
+      res.end();
+   });
+});
+
 // open git repo
 var repository;
 git.Repo.open(".git", function(err, repo) {
@@ -67,27 +88,21 @@ app.route("/commit").post(function(req, res, next) {
       if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
          filename += suffix; 
 
+      // I know this is confusing but I'll fix it 
       repository.openIndex(function(err, index) {
          if (err) throw err;
-
          index.read(function(err) {
             if (err) throw err;   
-
             index.addByPath("sketches/" + filename, function(err) {
                if (err) throw err;
-
                index.write(function(err) {
                   if (err) throw err;
-
                   index.writeTree(function(err, oid) {
                      if (err) throw err;
-
                      git.Reference.oidForName(repository, 'HEAD', function(err, head) {
                         if (err) throw err; 
-
                         repository.getCommit(head, function(err, parent) {
                            if (err) throw err;
-                           
                            var author = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
                            var committer = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
 
