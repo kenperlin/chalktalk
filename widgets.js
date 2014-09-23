@@ -696,7 +696,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return 'rgba(0,0,0,0)';
    }
    function codeTextFgColor() {
-      return (backgroundColor == 'white' ? 'rgba(0,128,255,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
+      return (backgroundColor == 'white' ? 'rgba(0,112,224,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
    }
 
    function toggleCodeWidget() {
@@ -819,7 +819,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                 ? ( (xlo + xhi)/2 + width()/2 ) / 2
                   : (xlo + xhi) / 2 < width() / 2
                     ? xhi + (xhi - xlo) / 2 + w/2
-                    : xlo - (xhi - xlo) / 2 - w/2) - _g.panX;
+                    : xlo - (xhi - xlo) / 2 - w/2) + _g.panX;
 
       x1 = max(x1, w/2);
       x1 = min(x1, width() - w/2);
@@ -841,7 +841,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var cr = width() / 70;
 
-      var c = createRoundRect(x - _g.panX - w/2, y, w, h, cr);
+      var c = createRoundRect(x - _g.panX - w/2, y - _g.panY, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
@@ -886,7 +886,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
 
-      color('rgba(0,0,255,' + (0.2 * fade) + ')');
+      color(backgroundColor == 'white' ? 'rgba(224,224,255,' + (0.5 * fade) + ')'
+                                       : 'rgba(  0,  0,255,' + (0.2 * fade) + ')');
       fillCurve(c);
 
       lineWidth(2);

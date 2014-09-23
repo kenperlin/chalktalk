@@ -1,5 +1,42 @@
+[[-0.3705463965,0.1681142573],[-0.4401231997,0.2015217632],[-0.3831176681,0.3420273783],[-0.486678622,0.5292325585],[-0.42458884,0.7514859123],[-0.3054437766,0.9082298975],[-0.1004551006,0.9962111157],[0.1013220835,0.9999104678],[0.3051325426,0.9073956369],[0.4233779844,0.7519698322],[0.5162729479,0.5388859442],[0.4133142948,0.3451573407],[0.4282487591,0.163480801],[0.1898266722,0.1054116066],[0.01981768996,0.01535104439],[-0.1924553856,0.09529044749],],[[-0.3705463966,0.1681142574],[-0.3399492358,0.08943494051],[0,-1.034526944],[0.3612222715,0.1013154445],],
 
-["] ]!]#]$]%]&]'](](])]*]+],]-].^/^0^1^2^3^4^4^5^6^7^8^9^:^;_<_=_>^?^@^A^A^B^C^D^E^F^G^H^I^J^K^L^M^N^O^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^]^]^^^_^`^a^b^c^d^e^f]g]h]i]j]j]k]l]m]n]o]p]q]r]s]t]u]v[w[w[x[y[z[{[|[}[~","]&[%Y&X&W&U&T&S%R%P%O%N%M%K%J%I%G%F%E&D&B&A&A&A'A)A*A+A-A.A/A0A2A3A4A5A7B8B9B;B<B=B>B@BABBBCBEBFBGBIBJBKBLBNBOBPBQBSCTCUCVCXCYCZC]C^C_C`CbCcCdCeCgChCiCkClCmCnCoEoFoGoHnJnKnLnNnOnPnQnSnTnUnVnXnYnZo[o^o"]
+// registerGlyph("iceCreamCone()", ["PARBUCWCZB]A_?`<`:a7a5`2_0^.[,Z)X(V&T$R!P!M K H!F#D%B&@(?*>,</;1;4:6:9:;:>;@;C=E>G@IBKDLFNHNKNNNPOSOUOXPZQ]R_TaVbXcZd^e`eceeehekemdpcrbt`v_x[zY{W|U}R~P~M~J~H}F|C{Ay@w?u>r=p=m=k>h>f@dAaC`E_H_J`LbNcOfOh"]
+// );
+
+
+registerGlyph("iceCreamCone()", [[[-0.3705463965,0.1681142573],[-0.4401231997,0.2015217632],[-0.3831176681,0.3420273783],[-0.486678622,0.5292325585],[-0.42458884,0.7514859123],[-0.3054437766,0.9082298975],[-0.1004551006,0.9962111157],[0.1013220835,0.9999104678],[0.3051325426,0.9073956369],[0.4233779844,0.7519698322],[0.5162729479,0.5388859442],[0.4133142948,0.3451573407],[0.4282487591,0.163480801],[0.1898266722,0.1054116066],[0.01981768996,0.01535104439],[-0.1924553856,0.09529044749],],[[-0.3705463966,0.1681142574],[-0.3399492358,0.08943494051],[0,-1.034526944],[0.3612222715,0.1013154445],],]
+);
+
+THREE.Object3D.prototype.addIceCreamCone = function() {
+
+  var manager = new THREE.LoadingManager();
+  var loader = new THREE.OBJLoader( manager );
+
+  var that = this;
+
+  loader.load( 'assets/models/iceCreamCone.obj', function ( object ) {
+
+      that.add(object);
+      // object.children[0].geometry.computeCentroids();
+      // object.children[0].geometry.computeFaceNormals();
+      object.children[0].geometry.computeVertexNormals();
+      var sketch = geometrySketch(object.children[0]);
+
+    });
+}
+
+function iceCreamCone(){
+
+    root.addIceCreamCone()
+  // var a = root.add3DRocket();//new THREE.Mesh(new THREE.SphereGeometry(),new THREE.MeshLambertMaterial(0xffffff));//root.add3DRocket();
+  // var sketch = geometrySketch(a);
+  // a.update = function() {
+
+  //  this.getMatrix().translate(0,0,0).scale(1);
+  //  this.shaderMaterial.uniforms['time'].value = time*.1;
+
+  // }
+}
 
 
 registerGlyph("lathe()", [
@@ -138,7 +175,7 @@ THREE.Object3D.prototype.addTube = function(p, nSegments) {
   var geometry = tubeGeometry( points, nSegments);
   // THREE.TubeGeometry = function( path, segments, radius, radialSegments, closed ) {
 
-  var mesh = new THREE.Mesh(geometry, blackMaterial);
+  var mesh = new THREE.Mesh(geometry, bgMaterial());
   this.add(mesh);
   return mesh;
 }

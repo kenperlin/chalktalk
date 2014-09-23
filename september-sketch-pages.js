@@ -1,5 +1,5 @@
 var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Mat4 Cyl1".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S Flower".split(' ');
 
 function blankPage() {
    return {
@@ -22,9 +22,9 @@ var title_page = {
             <font color=white size=10>\
             <b>Thinking procedurally</b>\
             <p>\
-            <small>from textures\
+            <small>from magic blackboards\
             <br>\
-            to magic blackboards</small>\
+            to the future</small>\
             <br>&nbsp;<p>\
             <i><small>Ken Perlin</small></i>\
             </font>\
@@ -264,6 +264,7 @@ var page13 = {
       <table width=1280>\
       <tr height=100></tr>\
       <tr>\
+         <th width= 50></th>\
          <th width=600><img src=imgs/weird_science2.jpg width=100%></th>\
          <th width= 50></th>\
          </tr>\
@@ -524,6 +525,48 @@ var page104f = {
    "
 };
 
+var page104g = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr><th><font size=10 color=white><small>People don't need<br>\
+                                        buttons, menus and sliders<br>\
+                                        to talk with each other</small><p>&nbsp;<p></font></th></tr>\
+      <tr>\
+         <th><img src=imgs/kids-talking.jpg width=550></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104h = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/ken-perlin-at-the-cdm.jpg width=700></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var page104i = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/vihartDragon.png width=700></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page105 = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -656,7 +699,7 @@ var page106b = {
       <tr height=50></tr>\
       <tr><th><font size=10 color=white><small>In the future:<p>\
                                         <small>Language will extend to<br>\
-                                        the very walls around us.</small><p>\
+                                        the very air between us.</small><p>\
 					&nbsp;</small></font></th></tr>\
       <tr>\
          <th><img src=imgs/whoopee_fire.png width=500></th>\
@@ -701,6 +744,7 @@ var sketchPages = [
    page1,
    page2,
    page3,
+   blankPage(),
    page4,
    page5,
    page6,
@@ -720,21 +764,19 @@ var sketchPages = [
    page100,
    page101,
    page102a,
-   blankPage(),
    page102b,
-   blankPage(),
    page102c,
    page103,
-   blankPage(),
-   page106a,
+   page104,
+   page104a,
+   page104b,
+   page104c,
+   page104d,
+   page104e,
+   page104f,
+   page104g,
+   /*page104h,
+   page104i,*/
    page106b,
-   page107,
-   blankPage(),
-   pagemarg1,
-   pagemarg2,
-   pagemarg3,
-   pagemarg4,
-   pagemarg5,
-   pagemarg6,
-   pagemarg7,
+   page106,
 ];

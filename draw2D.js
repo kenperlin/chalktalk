@@ -199,6 +199,12 @@
       return _g.textHeight;
    }
 
+   function utext(message, x, y, alignX, alignY, font) {
+      _g.noAdjust = true;
+      text(message, x, y, alignX, alignY, font);
+      delete _g.noAdjust;
+   }
+
    function text(message, x, y, alignX, alignY, font) {
       var th = _g.textHeight;
       if (isDrawingSketch2D) {
@@ -207,14 +213,17 @@
          y = sk().transformY2D(xx, yy);
          th *= sk().scale();
       }
-      x = sk().adjustX(x);
-      y = sk().adjustY(y);
+      if (isk() && _g.noAdjust === undefined) {
+         x = sk().adjustX(x);
+         y = sk().adjustY(y);
+      }
 
       if (! isDef(alignX))
          alignX = 0;
       if (! isDef(alignY))
          alignY = 1;
-      _g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
+      //_g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
+      _g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Helvetica');
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 

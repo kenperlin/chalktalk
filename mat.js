@@ -320,6 +320,12 @@
          cc.push(m.transform(c[n]));
       drawCurve(cc);
    };
+   function mFillCurve(c) {
+      var cc = [];
+      for (var n = 0 ; n < c.length ; n++)
+         cc.push(m.transform(c[n]));
+      fillCurve(cc);
+   };
    function mArrow(a,b){
       var A = m.transform(a);
       var B = m.transform(b);

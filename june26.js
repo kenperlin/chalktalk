@@ -268,7 +268,7 @@
 */
 
 var planetFragmentShader = [
-,'   void main(void) {'
+ '   void main(void) {'
 ,'      float dz = sqrt(1.-dx*dx-dy*dy);                  /* DEPTH  */'
 ,'      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */'
 ,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
@@ -292,7 +292,7 @@ registerGlyph("planet()",[
 
 function planet() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, planetFragmentShader);
-   sketch.code = [["planet", planetFragmentShader],["flame", flameFragmentShader]];
+   sketch.code = [["planet", planetFragmentShader] /*,["flame", flameFragmentShader] */];
    sketch.enableFragmentShaderEditing();
 }
 
@@ -567,7 +567,7 @@ Lattice.prototype = new Sketch;
 /*
 function SplineTest() {
    this.labels = "spline".split(' ');
-   this.shape = createSpline([
+   this.shape = makeSpline([
       [ .3,1.1],
       [ .3, .9],
       [ .3, .5],
@@ -804,7 +804,7 @@ function MothAndCandle() {
 
          // MOTHS GO TO THE FLAME WHEN THE CANDLE APPEARS.
 
-         if (this.glyphTransition >= 0.5 && isNumber(this.xlo)) {
+         if (this.glyphTransition >= 0.5 && isNumeric(this.xlo)) {
             candleX = (this.xlo + this.xhi) / 2;
             candleY = this.ylo;
             isCandle = true;

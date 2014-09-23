@@ -252,13 +252,18 @@
          context.restore();
       }
       this.drawFirstLine = false;
-      this.drawLabel = function(label, xy, ax, ay) {
+      this.drawLabel = function(label, xy, ax, ay, scale) {
          var P = this.adjustXY(xy);
-         text(label, P[0], P[1], ax, ay);
+         utext(label, P[0], P[1], ax, ay);
       }
-      this.drawValue = function(value, xy, ax, ay) {
+      this.drawValue = function(value, xy, ax, ay, scale) {
+	 //var textHeight = _g.textHeight;
+	 //_g.textHeight = textHeight * this.sc;
+
          var P = this.adjustXY(xy);
-         text(roundedString(value), P[0], P[1], ax, ay);
+         utext(isNumeric(value) ? roundedString(value) : value, P[0], P[1], ax, ay);
+
+	 //_g.textHeight = textHeight;
       }
       this.drawText = function(context) {
 
@@ -625,8 +630,10 @@
             this.outValue[j] = value;
       }
       this.setSelection = function(s) {
-         if (typeof(s) == 'string')
+         if (typeof(s) == 'string') {
+            this.selectionName = s;
             s = getIndex(this.labels, s);
+         }
          this.selection = s;
          this.updateSelectionWeights(0);
       }
@@ -1074,11 +1081,32 @@
          this.len = computeCurveLength(this.sp0, 1);
       }
 
+      this.useStrokes = function(strokes) {
+         var xx = 0, yy = 0, kk = 0;
+         for (var n = 0 ; n < strokes.length ; n++)
+	    for (var i = 0 ; i < strokes[n].length ; i++) {
+	       xx += strokes[n][i][0];
+	       yy += strokes[n][i][1];
+	       kk++;
+	    }
+         this.tX = xx / kk;
+         this.tY = yy / kk;
+
+         for (var n = 0 ; n < strokes.length ; n++)
+	    for (var i = 0 ; i < strokes[n].length ; i++) {
+	       var x = strokes[n][i][0] - this.tX;
+	       var y = strokes[n][i][1] - this.tY;
+	       this.sp0.push([x,y]);
+	       this.sp.push([x,y,i>0]);
+	    }
+      }
+
       this.convertToGlyphSketch = function() {
          var glyph = findGlyph(this.getStrokes(), glyphs);
          glyphSketch = this;
          if (glyph != null)
             glyph.toSketch();
+         sk().glyph = glyph;
          if (sk() instanceof Picture)
 	    glyphSketch.fadeAway = 1;
          else
@@ -1229,6 +1257,98 @@
       }
    }
    SimpleSketch.prototype = new Sketch;
+
+   function StrokesSketch() {
+      this.src = [];
+      this.render = function() {
+
+         // FIRST TIME ONLY: GET THE TARGET SHAPE FROM THE GLYPH.
+
+         if (this.src.length == 0) {
+	    this.src = cloneArray(this.glyph.src);
+	    this.info = this.glyph.info;
+
+	    for (var n = 0 ; n < this.src.length ; n++)
+	       for (var i = 0 ; i < this.src[n].length ; i++) {
+	          this.src[n][i][0] -= this.info.x0;
+	          this.src[n][i][1] -= this.info.y0;
+	       }
+            this.tX += this.info.x0;
+            this.tY += this.info.y0;
+/*
+	    eval(this.info.type + "Sketch()");
+	    sk().isOutline = true;
+	    sk().mesh.setMaterial(bgMaterial());
+	    sk().rX = this.info.rX;
+	    sk().rY = this.info.rY;
+	    this.geoSketch = sk();
+*/
+	 }
+
+	 // REBUILD THE STROKES EVERY FRAME.
+
+	 this.sp = [[0,0]];
+	 this.sp0 = [[0,0,0]];
+
+         var b = [10000,10000,-10000,-10000];
+
+	 for (var n = 0 ; n < this.src.length ; n++) {
+	    var C = [];
+	    for (var i = 0 ; i < this.src[n].length ; i++) {
+	       C.push(this.xform(this.src[n][i]));
+
+	       var p = C[C.length-1];
+	       var x = this.adjustX(p[0]);
+	       var y = this.adjustY(p[1]);
+	       b[0] = min(b[0], x);
+	       b[1] = min(b[1], y);
+	       b[2] = max(b[2], x);
+	       b[3] = max(b[3], y);
+            }
+	    drawCurve(C);
+         }
+	 console.log("b : " + arrayToString(b));
+/*
+	 if (this.geoSketch !== undefined && b[0] > 0) {
+	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
+	    var e2 = this.geoSketch.mesh.projectVisibleEdges(visibleEdges);
+
+	    var b1 = [10000,10000,-10000,-10000];
+            for (var n = 0 ; n < e2.length ; n++)
+            for (var i = 0 ; i < e2[n].length ; i++) {
+               b1[0] = min(b1[0], e2[n][i][0]);
+               b1[1] = min(b1[1], e2[n][i][1]);
+               b1[2] = max(b1[2], e2[n][i][0]);
+               b1[3] = max(b1[3], e2[n][i][1]);
+            }
+
+	    var b2 = computeCurveBounds(this.sp, 1);
+
+console.log("b1: " + arrayToString(b1));
+console.log("b2: " + arrayToString(b2));
+
+            this.geoSketch._dx = (b[0] + b[2]) / 2 - (b1[0] + b1[2]) / 2;
+            this.geoSketch._dy = (b[1] + b[3]) / 2 - (b1[1] + b1[3]) / 2;
+            this.geoSketch._ds = (b[2] - b[0]) / (b1[2] - b1[0]);
+
+	    delete this.geoSketch;
+	 }
+*/
+
+	 // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
+
+	 if (this.glyphTransition == 1 && this.info !== undefined) {
+	    this.shapeInfo = { type  : this.info.type,
+	                       rX    : this.info.rX,
+			       rY    : this.info.rY,
+			       sw    : this.info.sw,
+	                       bounds: b };
+	    this.fadeAway = 1;
+	    delete this.info;
+         }
+      }
+   }
+   StrokesSketch.prototype = new SimpleSketch;
 
    function NumericSketch() {
       this.init = function(str, x, y) {
