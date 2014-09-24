@@ -578,7 +578,7 @@
       setForm.append("value", JSON.stringify(value));
    
       var request = new XMLHttpRequest();
-      request.open("POST", "http://evanmoore.no-ip.org:8888/set");
+      request.open("POST", "set");
       request.send(setForm);
    }
 

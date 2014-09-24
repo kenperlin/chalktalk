@@ -6,8 +6,8 @@ var git = require("nodegit");
 var path = require("path");
 var readline = require("readline-sync");
 
-var gitUser = readline.question("github username: ");
-var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
+//var gitUser = readline.question("github username: ");
+//var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
 
 var app = express();
 var port = process.argv[2] || 8888;
