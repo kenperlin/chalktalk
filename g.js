@@ -1,3 +1,6 @@
+
+var isLoadingSketches = false;
+
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
@@ -594,19 +597,22 @@
 /////////////////////////////////////////////////////////////////////
 
    function gStart() {
+
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
-      var lsRequest = new XMLHttpRequest();
-      lsRequest.open("GET", "ls_sketches");
 
-      lsRequest.onloadend = function () {
-         if (lsRequest.responseText != "") {
-            var ls = lsRequest.responseText.trim().split("\n");
-            for (var i = 0; i < ls.length; i++)
-               importSketch(ls[i]);
+      if (isLoadingSketches) {
+         var lsRequest = new XMLHttpRequest();
+         lsRequest.open("GET", "ls_sketches");
+
+         lsRequest.onloadend = function () {
+            if (lsRequest.responseText != "") {
+               var ls = lsRequest.responseText.trim().split("\n");
+               for (var i = 0; i < ls.length; i++)
+                  importSketch(ls[i]);
+            }
          }
+         lsRequest.send();
       }
-
-      lsRequest.send();
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
