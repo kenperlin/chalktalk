@@ -717,7 +717,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      + "</option>";
 
          codeElement.innerHTML =
-            "<select id=code_selector onchange='setCodeAreaText()'>"
+            "<button id=upload_button>upload</upload>"
+          + "<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -725,6 +726,22 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
+
+         uploadButton = document.getElementById("upload_button");
+         uploadButton.onclick = function() {
+            var uploadForm = new FormData();
+            var sketchName = sk().glyphName;
+            uploadForm.append("sketchName", sketchName);
+
+            var shader = "var " + sketchName + "FragmentShader = \"" + document.getElementById("code_text").value + "\";";
+            var sketchContent = eval(sketchName);
+            var register = "registerGlyph(" + sk().glyph.toString() + ");";
+            uploadForm.append("sketchContent", [shader, sketchContent, register].join("\n"));
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "http://localhost:8888/upload");
+            request.send(uploadForm);
+         }
 
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.backgroundColor = codeSelectorBgColor();

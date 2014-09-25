@@ -1,4 +1,3 @@
-
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
@@ -557,7 +556,57 @@
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
+
+/////////////////////////////////////////////////////////////////////
+///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
+///////////////////////// GOING TO BE MOVED /////////////////////////
+
+   function importSketch(filename) {
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         window.eval(sketchRequest.responseText);
+      }
+      sketchRequest.send();
+   }
+
+   var ServerUtils = {};
+
+   ServerUtils.set = function(key, value) {
+      var setForm = new FormData();
+      setForm.append("key", key);
+      setForm.append("value", JSON.stringify(value));
+   
+      var request = new XMLHttpRequest();
+      request.open("POST", "set");
+      request.send(setForm);
+   }
+
+   ServerUtils.get = function(key, fn) {
+      var getRequest = new XMLHttpRequest();
+      getRequest.open("GET", "state/" + key + ".json");
+      getRequest.onloadend = function() {
+         fn(getRequest.responseText);
+      }
+      getRequest.send();
+   }
+
+/////////////////////////////////////////////////////////////////////
+
    function gStart() {
+      // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+      var lsRequest = new XMLHttpRequest();
+      lsRequest.open("GET", "ls_sketches");
+
+      lsRequest.onloadend = function () {
+         if (lsRequest.responseText != "") {
+            var ls = lsRequest.responseText.trim().split("\n");
+            for (var i = 0; i < ls.length; i++)
+               importSketch(ls[i]);
+         }
+      }
+
+      lsRequest.send();
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
@@ -3263,9 +3312,6 @@
       pullDownLabels = pagePullDownLabels;
 
       sketchTypeLabels = [];
-
-      for (var n = 0 ; n < sketchTypes.length ; n++)
-         registerSketch(sketchTypes[n]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
