@@ -804,16 +804,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                     ? xhi + (xhi - xlo) / 2 + w/2
                     : xlo - (xhi - xlo) / 2 - w/2) + _g.panX;
 
-      x1 = max(x1, w/2);
-      x1 = min(x1, width() - w/2);
+      x1 = max(x1, w/2 + _g.panX);
+      x1 = min(x1, width() - w/2 + _g.panX);
 
       codeElement.x1 = x1;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
                           : isChanged
-                            ? codeElement.x1
-                            : lerp(0.1, codeElement.x, codeElement.x1);
+                            ? codeElement.x1 - _g.panX
+                            : lerp(0.1, codeElement.x, codeElement.x1 - _g.panX);
 
       //////////////////////////////////////////////////////////////////////////////////////
 
