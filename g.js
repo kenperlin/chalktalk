@@ -1,6 +1,4 @@
 
-var isLoadingSketches = false;
-
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
@@ -600,7 +598,7 @@ var isLoadingSketches = false;
 
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
 
-      if (isLoadingSketches) {
+      try {
          var lsRequest = new XMLHttpRequest();
          lsRequest.open("GET", "ls_sketches");
 
@@ -612,7 +610,7 @@ var isLoadingSketches = false;
             }
          }
          lsRequest.send();
-      }
+      } catch (e) { }
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
