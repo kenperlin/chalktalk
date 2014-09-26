@@ -546,6 +546,7 @@
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
+   var isRegisteringSketches = true;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -598,7 +599,7 @@
    function gStart() {
 
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
-/*
+
       try {
          var lsRequest = new XMLHttpRequest();
          lsRequest.open("GET", "ls_sketches");
@@ -611,8 +612,9 @@
             }
          }
          lsRequest.send();
+	 isRegisteringSketches = false;
       } catch (e) { }
-*/
+
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
       var noSelectHTML = ""
@@ -3347,8 +3349,9 @@
 
       sketchTypeLabels = [];
 
-      for (var n = 0 ; n < sketchTypes.length ; n++)
-         registerSketch(sketchTypes[n]);
+      if (isRegisteringSketches)
+         for (var n = 0 ; n < sketchTypes.length ; n++)
+            registerSketch(sketchTypes[n]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
