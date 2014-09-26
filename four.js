@@ -254,7 +254,7 @@
 	 }
       }
 
-      console.log("fve: hidden point count = " + ___hiddenpoint_count.toFixed(0));
+      // console.log("fve: hidden point count = " + ___hiddenpoint_count.toFixed(0));
       ___hiddenpoint_count = 0;
 
       return visibleEdges;
