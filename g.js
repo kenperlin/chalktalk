@@ -205,6 +205,7 @@
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = clientY(event) - r.top;
 
+
          //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
          if (handle.mousePressed) {
@@ -597,7 +598,7 @@
    function gStart() {
 
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
-
+/*
       try {
          var lsRequest = new XMLHttpRequest();
          lsRequest.open("GET", "ls_sketches");
@@ -611,7 +612,7 @@
          }
          lsRequest.send();
       } catch (e) { }
-
+*/
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
       var noSelectHTML = ""
@@ -3345,6 +3346,9 @@
       pullDownLabels = pagePullDownLabels;
 
       sketchTypeLabels = [];
+
+      for (var n = 0 ; n < sketchTypes.length ; n++)
+         registerSketch(sketchTypes[n]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
