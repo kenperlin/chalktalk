@@ -3025,6 +3025,30 @@
 
             var visibleEdges = this.mesh.findVisibleEdges();
 
+	    // MW VISIBLE EDGE FIX
+	    // to restore previous algorithm, comment out the next two lines (and follow instructions below)
+
+	    var moreVisibleEdges = this.mesh.findMoreVisibleEdges();
+	    var newVisibleEdges = visibleEdges[0][1].concat(moreVisibleEdges[0][1]);
+
+	    // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
+	    // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
+	    // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
+
+	    // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
+	    visibleEdges[0][1] = newVisibleEdges;
+
+	    // console.log("length of first element of ve = " + visibleEdges[0].length);
+	    // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
+	    // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
+	    // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
+	    // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
+	    // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
+	    // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
+	    // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
+
+	    // FROM HERE FORWARD EVERYTHING IS THE SAME
+
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
             sketchPage.scene.add(this.visibleEdgesMesh);
@@ -3115,6 +3139,11 @@
 
    function addSphereShaderSketch(vertexShader, fragmentShader) {
        return addGeometryShaderSketch(new THREE.SphereGeometry(1.0, 21.0, 21.0), vertexShader, fragmentShader);
+   }
+
+   // MW TORUS GEOMETRY
+   function addTorusShaderSketch(vertexShader, fragmentShader) {
+       return addGeometryShaderSketch(new THREE.TorusGeometry(1.0, 0.5, 11.0, 9.0), vertexShader, fragmentShader);
    }
 
    function createMesh(geometry, vertexShader, fragmentShader) {

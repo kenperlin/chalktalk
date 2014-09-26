@@ -241,10 +241,21 @@
          var edge = this.edges[n];
          var n0 = this.faces[edge[0]].viewNormal;
          var n1 = this.faces[edge[1]].viewNormal;
-         if ( (n0.z >= 0 || n1.z >= 0) &&
-              (n0.z <= 0 || n1.z <= 0 || n0.dot(n1) < 0.5) )
-            visibleEdges.push(edge[2]);
+
+	 if ((n0.z >= -0.0001 && n1.z <= 0.0001) ||
+	     (n0.z <= 0.0001 && n1.z >= -0.0001) || 
+	     (n0.dot(n1) < 0.5)) 
+	 {
+	     // console.log("v  dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
+	     visibleEdges.push(edge[2]);
+	 }
+	 else {
+	     // console.log("nv dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
+	 }
       }
+
+      console.log("fve: hidden point count = " + ___hiddenpoint_count.toFixed(0));
+      ___hiddenpoint_count = 0;
 
       return visibleEdges;
    }
@@ -275,8 +286,11 @@
 
    THREE.Geometry.prototype.isHiddenPoint = function(p) {
       for (var n = 0 ; n < this.faces.length ; n++)
-         if (this.isPointHiddenByFace(p, n))
-            return true;
+	  if (this.isPointHiddenByFace(p, n)) {
+	      ___hiddenpoint_count++;
+	      return true;
+	  }
+
       return false;
    }
 
@@ -294,6 +308,8 @@
       var V = barycentric(p, b, c, a); if (V < 0) return false;
       var W = barycentric(p, c, a, b); if (W < 0) return false;
       var tz = U * a.z + V * b.z + W * c.z;
+      // varous values have been tried for .001 and it does make some difference but
+      // does not solve the problem of the missing silhouette edges
       return tz > p.z + 0.001;
    }
 
