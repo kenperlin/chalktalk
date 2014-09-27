@@ -3227,7 +3227,7 @@
    }
 
    function SketchTo3D() {
-      this.initSto3D = function(label, curves, initMesh) {
+      this.initSketchTo3D = function(label, curves, initMesh) {
          this.labels = [ label ];
          this.initMesh = initMesh;
          this.curves = curves;

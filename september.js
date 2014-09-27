@@ -264,12 +264,12 @@
    F2D.prototype = new Sketch;
 
    function S2C() {
-      this.initSto3D("s2c", [ [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ] ], function() { return root.addCube(); });
+      this.initSketchTo3D("s2c", [ [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ] ], function() { return root.addCube(); });
    }
    S2C.prototype = new SketchTo3D;
 
    function C2S() {
-      this.initSto3D("c2s", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ], function() { return root.addGlobe(); });
+      this.initSketchTo3D("c2s", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ], function() { return root.addGlobe(); });
    }
    C2S.prototype = new SketchTo3D;
 
