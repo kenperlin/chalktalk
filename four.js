@@ -44,7 +44,7 @@
    function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
-   function globeGeometry(m, n) { return new THREE.SphereGeometry(1, m, n); }
+   function globeGeometry(m,n, p0,p1, t0,t1) { return new THREE.SphereGeometry(1, m,n, p0,p1, t0,t1); }
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
@@ -86,10 +86,10 @@
       return mesh;
    }
 
-   THREE.Object3D.prototype.addGlobe = function(m, n) {
+   THREE.Object3D.prototype.addGlobe = function(m,n, p0,p1, t0,t1) {
       if (m === undefined) m = 32;
       if (n === undefined) n = floor(m / 2);
-      var geometry = globeGeometry(m, n);
+      var geometry = globeGeometry(m,n, p0,p1, t0,t1);
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
