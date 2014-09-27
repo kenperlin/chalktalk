@@ -3226,6 +3226,42 @@
       return sketch;
    }
 
+   function SketchTo3D() {
+      this.initSto3D = function(label, curves, initMesh) {
+         this.labels = [ label ];
+         this.initMesh = initMesh;
+         this.curves = curves;
+      }
+      this.render = function(elapsed) {
+         m.save();
+         for (var n = 0 ; n < this.curves.length ; n++)
+            mCurve(this.curves[n]);
+         m.restore();
+         this.afterSketch(function() {
+            if (this.shapeSketch === undefined) {
+               glyphSketch = null;
+               this.shapeSketch = geometrySketch(this.initMesh());
+               this.shapeSketch.tX = this.tX + width() / 2;
+               this.shapeSketch.tY = this.tY + height() / 2;
+               this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
+               this.shapeSketch.fadeAway = 0.3;
+               this.shapeSketch.update = function(elapsed) {
+                  this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
+                  if (this.fadeAway == 1) {
+                     this.fadeAway = 0;
+                     delete this.update;
+                  }
+               }        
+               this.shapeSketch.mesh.update = function(elapsed) {
+                  this.getMatrix().scale(this.sc);
+               }
+               this.fadeAway = 1;
+            }
+         });
+      }
+   }
+   SketchTo3D.prototype = new Sketch;
+
    function setMeshUpdateFunction(mesh) {
       mesh.update = function() {
          if (this.material.uniforms === undefined)
@@ -3471,5 +3507,4 @@
 
 var glyphs = [];
 loadGlyphArray(numericGlyphData);
-
 
