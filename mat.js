@@ -179,7 +179,14 @@
          return [x / w, y / w, z / w];
       };
       this.transform = function(v) {
-         return this._mv(this._m(),v);
+         if (v[0] instanceof Array) {
+	    var dst = [];
+	    for (var n = 0 ; n < v.length ; n++)
+	       dst.push(this.transform(v[n]));
+            return dst;
+	 }
+	 else
+            return this._mv(this._m(),v);
       }
    };
    function cross(a,b,c) {
