@@ -70,9 +70,9 @@ function ChromaKeyedVideo()
        "gl_FragColor = vec4(textureColor.rgb, textureColor.a * blendValue);\n"+
    "}\n";
 
-  this.chromaKeyR = 0.0;
+  this.chromaKeyR = 0.1;
   this.chromaKeyG = 0.76;
-  this.chromaKeyB = 0.23;
+  this.chromaKeyB = 0.85;
 
   this.modelViewZ = -2;
 
@@ -84,10 +84,22 @@ function ChromaKeyedVideo()
   this.isCalibrated;
   this.calibMatrix;
 
-  this.videoCoords = {'x1':-5.0, 'y1':-3.0,  'z1':0.0,
-                      'x2': 4.1, 'y2':-2.0,  'z2':0.0,
-                      'x3':-5.0, 'y3': 2.3,  'z3':0.0,
-                      'x4': 3.9, 'y4': 2.4,  'z4':0.0};
+  // this.videoCoords = {'x1':-5.0, 'y1':-3.0,  'z1':0.0,
+  //                     'x2': 4.1, 'y2':-2.0,  'z2':0.0,
+  //                     'x3':-5.0, 'y3': 2.3,  'z3':0.0,
+  //                     'x4': 3.9, 'y4': 2.4,  'z4':0.0};
+
+  this.videoCoords = {'x1':-1.0, 'y1':-1.0,  'z1':0.0,
+                      'x2': 1.0, 'y2':-1.0,  'z2':0.0,
+                      'x3':-1.0, 'y3': 1.0,  'z3':0.0,
+                      'x4': 1.0, 'y4': 1.0,  'z4':0.0};
+
+  this.modelViewTranslateX = 0;
+  this.modelViewTranslateY = 0;
+  this.modelViewTranslateZ = -3;
+  this.modelViewScaleX = 1;
+  this.modelViewScaleY = 1;
+  this.modelViewScaleZ = 1;
 
   this.addGui = function()
   {
@@ -96,28 +108,27 @@ function ChromaKeyedVideo()
     gui.add(this, 'chromaKeyG', 0, 1);
     gui.add(this, 'chromaKeyB', 0, 1);
 
-    // gui.videoCoords = new Array();
-    // this.videoCoords = new Array();
-    // this.videoCoods[0] = -1;
+    gui.add(this, 'modelViewTranslateX', -1, 1);
+    gui.add(this, 'modelViewTranslateY', -1, 1);
+    gui.add(this, 'modelViewTranslateZ', -4, 0);
+    gui.add(this, 'modelViewScaleX', 1, 4);
+    gui.add(this, 'modelViewScaleY', 1, 4);
+    gui.add(this, 'modelViewScaleZ', 1, 4);
+    // gui.add(this.videoCoords, 'x1', -7.0, -4.0);
+    // gui.add(this.videoCoords, 'y1', -5.0, 0.0);
+    // // gui.add(this.videoCoords, 'z1', -1.0, 1.0);
 
-    window.A = new Array();
-    window.A[0] = false;
+    // gui.add(this.videoCoords, 'x2', 0.0, 5.0);
+    // gui.add(this.videoCoords, 'y2', -5.0, 0.0);
+    // // gui.add(this.videoCoords, 'z2', -1.0, 1.0);
 
-    gui.add(this.videoCoords, 'x1', -7.0, -4.0);
-    gui.add(this.videoCoords, 'y1', -5.0, 0.0);
-    // gui.add(this.videoCoords, 'z1', -1.0, 1.0);
+    // gui.add(this.videoCoords, 'x3', -7.0, -4.0);
+    // gui.add(this.videoCoords, 'y3', 0.0, 5.0);
+    // // gui.add(this.videoCoords, 'z3', -1.0, 1.0);
 
-    gui.add(this.videoCoords, 'x2', 0.0, 5.0);
-    gui.add(this.videoCoords, 'y2', -5.0, 0.0);
-    // gui.add(this.videoCoords, 'z2', -1.0, 1.0);
-
-    gui.add(this.videoCoords, 'x3', -7.0, -4.0);
-    gui.add(this.videoCoords, 'y3', 0.0, 5.0);
-    // gui.add(this.videoCoords, 'z3', -1.0, 1.0);
-
-    gui.add(this.videoCoords, 'x4', 0.0, 5.0);
-    gui.add(this.videoCoords, 'y4', 0.0, 5.0);
-    // gui.add(this.videoCoords, 'z4', -1.0, 1.0);
+    // gui.add(this.videoCoords, 'x4', 0.0, 5.0);
+    // gui.add(this.videoCoords, 'y4', 0.0, 5.0);
+    // // gui.add(this.videoCoords, 'z4', -1.0, 1.0);
 
   }
 
@@ -255,8 +266,6 @@ function ChromaKeyedVideo()
     var gl = this.gl;
     var shaderProgram = this.shaderProgram;
 
-    this.modelViewMatrix.z = this.modelViewZ;
-
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -268,9 +277,11 @@ function ChromaKeyedVideo()
 
     gl.useProgram(shaderProgram);
 
-    // bind the object buffer
+    // recalc geometry stuff
     this.vertexBuffer = this.createVertexBuffer(gl);
+    this.initMatrices(this.canvas);
 
+    // bind the object buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPosAttr, this.vertexBuffer.vertSize, gl.FLOAT, false, 0, 0);
     // bind the texture coords buffer
@@ -304,6 +315,11 @@ function ChromaKeyedVideo()
     }
   }
 
+  this.isShowing = function()
+  {
+    return this.bRender;
+  }
+
   this.getWebGLContext = function(canvas)
   {
     var webGLContext;
@@ -332,14 +348,13 @@ function ChromaKeyedVideo()
   {
     var buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    var verts = [];
 
+
+    var verts = [];
     for (var i=0; i<4; i++) {
       verts[i*3] = eval('this.videoCoords.x' + (i+1));
       verts[i*3+1] = eval('this.videoCoords.y' + (i+1));
       verts[i*3+2] = eval('this.videoCoords.z' + (i+1));
-
-      // console.log(eval('this.videoCoords.x' + (i+1)));
     }
     // var verts = [
     //   1.0, 1.0, 0.0,
@@ -402,7 +417,8 @@ function ChromaKeyedVideo()
     {
       // create model view matrix
       this.modelViewMatrix = mat4.create();
-      mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0, 0, -4]);
+      mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [this.modelViewTranslateX, this.modelViewTranslateY, this.modelViewTranslateZ]);
+      mat4.scale(this.modelViewMatrix, this.modelViewMatrix, [this.modelViewScaleX, this.modelViewScaleY, this.modelViewScaleZ]);
 
       // create a projection matrix with 45 degree field of view
       this.projectionMatrix = mat4.create();
@@ -487,8 +503,8 @@ function ChromaKeyedVideo()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     // unbind
     gl.bindTexture(gl.TEXTURE_2D, null);

@@ -1973,6 +1973,7 @@
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
+            : (videoLayer != undefined) && videoLayer.isShowing()            ? 'none'
             :                                     'crosshair'
             ;
 
