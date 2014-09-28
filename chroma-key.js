@@ -84,11 +84,6 @@ function ChromaKeyedVideo()
   this.isCalibrated;
   this.calibMatrix;
 
-  // this.videoCoords = {'x1':-5.0, 'y1':-3.0,  'z1':0.0,
-  //                     'x2': 4.1, 'y2':-2.0,  'z2':0.0,
-  //                     'x3':-5.0, 'y3': 2.3,  'z3':0.0,
-  //                     'x4': 3.9, 'y4': 2.4,  'z4':0.0};
-
   this.videoCoords = {'x1':-1.0, 'y1':-1.0,  'z1':0.0,
                       'x2': 1.0, 'y2':-1.0,  'z2':0.0,
                       'x3':-1.0, 'y3': 1.0,  'z3':0.0,
@@ -114,89 +109,6 @@ function ChromaKeyedVideo()
     gui.add(this, 'modelViewScaleX', 1, 4);
     gui.add(this, 'modelViewScaleY', 1, 4);
     gui.add(this, 'modelViewScaleZ', 1, 4);
-    // gui.add(this.videoCoords, 'x1', -7.0, -4.0);
-    // gui.add(this.videoCoords, 'y1', -5.0, 0.0);
-    // // gui.add(this.videoCoords, 'z1', -1.0, 1.0);
-
-    // gui.add(this.videoCoords, 'x2', 0.0, 5.0);
-    // gui.add(this.videoCoords, 'y2', -5.0, 0.0);
-    // // gui.add(this.videoCoords, 'z2', -1.0, 1.0);
-
-    // gui.add(this.videoCoords, 'x3', -7.0, -4.0);
-    // gui.add(this.videoCoords, 'y3', 0.0, 5.0);
-    // // gui.add(this.videoCoords, 'z3', -1.0, 1.0);
-
-    // gui.add(this.videoCoords, 'x4', 0.0, 5.0);
-    // gui.add(this.videoCoords, 'y4', 0.0, 5.0);
-    // // gui.add(this.videoCoords, 'z4', -1.0, 1.0);
-
-  }
-
-  this.printHello = function()
-  {
-    console.log("print hello");
-  }
-
-  this.addCalibrationPoint = function(x, y)
-  {
-    this.tabletPoints[this.calibIndex] = [x, y];
-    // var a = vec3.unproject([x, y, 0], this.modelViewMatrix, this.projectionMatrix, [0, 0, this.canvas.width, this.canvas.height]);
-    // a[0] = (a[0]*-800) + 400;
-    // a[1] = (a[1]*-480) + 240;
-    // console.log(a);
-    // this.videoPoints[this.calibIndex] = [a[0], a[1]];
-    // console.log("unproject = " + this.videoPoints[this.calibIndex][0] + "x" + this.videoPoints[this.calibIndex][1]);
-    this.calibIndex++;
-    console.log("calibIndex = " + this.calibIndex);
-    if (this.calibIndex == 4) {
-      // use: TL, TR, BL, BR
-      console.log("Source Points:");
-      console.log(this.tabletPoints);
-      var t = general2DProjection(
-                                  this.tabletPoints[0][0], this.tabletPoints[0][1],
-                                  0, 0,                    
-                                  this.tabletPoints[1][0], this.tabletPoints[1][1],
-                                  this.canvas.width, 0,
-                                  this.tabletPoints[2][0], this.tabletPoints[2][1],
-                                  0, this.canvas.height,
-                                  this.tabletPoints[3][0], this.tabletPoints[3][1],
-                                  this.canvas.width, this.canvas.height);
-
-      for(i = 0; i != 9; ++i) t[i] = t[i]/t[8];
-
-        t = [t[0], t[3], 0, t[6],
-             t[1], t[4], 0, t[7],
-             0   , 0   , 1, 0   ,
-             t[2], t[5], 0, t[8]];
-
-      // t = mat4.translate(t, t, [this.tabletPoints[0][0], this.tabletPoints[0][1], 0]);
-
-       this.calibMatrix = t;
-       t = "matrix3d(" + t.join(", ") + ")";
-       console.log(t);
-      this.canvas.style.transform = t;
-      this.canvas.style.left = this.tabletPoints[0][0]*4 + "px";
-      this.canvas.style.top = this.tabletPoints[0][1]*4 + "px";
-      console.log(this.calibMatrix);
-      // this.calibMatrix = [0.5, 0.1, 0.1, 0, 0.5, 0, 0, 0, 0.5];
-                                  // 0, 0,
-                                  // 0, 1,
-                                  // 1, 0,
-                                  // 1, 1);
-      // console.log(t);
-      this.isInCalibration = false;
-      this.isCalibrated = true;
-      console.log("isCalibration = true");
-    }
-  }
-
-  this.getVideoCoords = function(x, y) {
-    if (!this.isCalibrated) {
-      return [x, y];
-    }
-
-    return [x, y];
-    // return project(this.calibMatrix, x, y);
   }
 
   this.init = function(canvas)
@@ -306,6 +218,8 @@ function ChromaKeyedVideo()
   this.toggle = function()
   {
     this.bRender = !this.bRender;
+
+    dat.GUI.toggleHide();
 
     if (!this.bRender) {
       // clear layer
