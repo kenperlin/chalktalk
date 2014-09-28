@@ -608,6 +608,7 @@
       + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
+      // + " <div id='dat-gui' style='z-index:10;position:absolute;'></div>"
       ;
       var bodyElement = document.getElementsByTagName('body')[0];
       bodyElement.innerHTML = viewerHTML + bodyElement.innerHTML;
@@ -639,6 +640,78 @@
       events_canvas.mouseDrag = function(x, y) { e2s(); sketchPage.mouseDrag(x, y); }
       events_canvas.mouseMove = function(x, y) { e2s(); sketchPage.mouseMove(x, y); }
       events_canvas.mouseUp   = function(x, y) { e2s(); sketchPage.mouseUp(x, y); }
+
+      if (this.enableCalibration != undefined) {
+         events_canvas.mouseDown = function(x, y) 
+         { 
+            if (videoLayer != undefined) {
+               if (!videoLayer.isCalibrated) {
+                  videoLayer.addCalibrationPoint(x, y);
+                  return;
+               }
+               else {
+                  var newPoint = videoLayer.getVideoCoords(x, y);
+                  x = newPoint[0];
+                  y = newPoint[1];
+               }
+
+               // do the mappings
+            } 
+
+            e2s(); 
+            sketchPage.mouseDown(x, y); 
+         }
+         events_canvas.mouseDrag = function(x, y) 
+         {
+            if (videoLayer != undefined) {
+               if (videoLayer.isCalibrated) {
+                  var newPoint = videoLayer.getVideoCoords(x, y);
+                  x = newPoint[0];
+                  y = newPoint[1];               
+               }
+               // console.log("mouse drag: " + x + "x" + y);
+
+               // do the mappings
+            } 
+
+            e2s(); 
+            sketchPage.mouseDrag(x, y); 
+         }
+
+         events_canvas.mouseMove = function(x, y) 
+         { 
+            if (videoLayer != undefined) {
+               if (videoLayer.isCalibrated) {
+                  var newPoint = videoLayer.getVideoCoords(x, y);
+                  x = newPoint[0];
+                  y = newPoint[1];               
+               }
+               // console.log("mouse move: " + x + "x" + y);
+
+               // do the mappings
+            } 
+
+            e2s(); 
+            sketchPage.mouseMove(x, y); 
+         }
+
+         events_canvas.mouseUp   = function(x, y) 
+         { 
+            if (videoLayer != undefined) {
+               if (videoLayer.isCalibrated) {
+                  var newPoint = videoLayer.getVideoCoords(x, y);
+                  x = newPoint[0];
+                  y = newPoint[1];               
+               }
+               // console.log("mouse up: " + x + "x" + y);
+
+               // do the mappings
+            } 
+
+            e2s(); 
+            sketchPage.mouseUp(x, y); 
+         }
+      }
 
       fourStart();
 

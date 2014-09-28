@@ -70,6 +70,123 @@ function ChromaKeyedVideo()
        "gl_FragColor = vec4(textureColor.rgb, textureColor.a * blendValue);\n"+
    "}\n";
 
+  this.chromaKeyR = 0.0;
+  this.chromaKeyG = 0.76;
+  this.chromaKeyB = 0.23;
+
+  this.modelViewZ = -2;
+
+
+  this.isInCalibration;
+  this.calibIndex;
+  this.tabletPoints = [];
+  this.videoPoints = [];
+  this.isCalibrated;
+  this.calibMatrix;
+
+  this.videoCoords = {'x1':-5.0, 'y1':-3.0,  'z1':0.0,
+                      'x2': 4.1, 'y2':-2.0,  'z2':0.0,
+                      'x3':-5.0, 'y3': 2.3,  'z3':0.0,
+                      'x4': 3.9, 'y4': 2.4,  'z4':0.0};
+
+  this.addGui = function()
+  {
+    var gui = new dat.GUI({'autoPlace':true});
+    gui.add(this, 'chromaKeyR', 0, 1);
+    gui.add(this, 'chromaKeyG', 0, 1);
+    gui.add(this, 'chromaKeyB', 0, 1);
+
+    // gui.videoCoords = new Array();
+    // this.videoCoords = new Array();
+    // this.videoCoods[0] = -1;
+
+    window.A = new Array();
+    window.A[0] = false;
+
+    gui.add(this.videoCoords, 'x1', -7.0, -4.0);
+    gui.add(this.videoCoords, 'y1', -5.0, 0.0);
+    // gui.add(this.videoCoords, 'z1', -1.0, 1.0);
+
+    gui.add(this.videoCoords, 'x2', 0.0, 5.0);
+    gui.add(this.videoCoords, 'y2', -5.0, 0.0);
+    // gui.add(this.videoCoords, 'z2', -1.0, 1.0);
+
+    gui.add(this.videoCoords, 'x3', -7.0, -4.0);
+    gui.add(this.videoCoords, 'y3', 0.0, 5.0);
+    // gui.add(this.videoCoords, 'z3', -1.0, 1.0);
+
+    gui.add(this.videoCoords, 'x4', 0.0, 5.0);
+    gui.add(this.videoCoords, 'y4', 0.0, 5.0);
+    // gui.add(this.videoCoords, 'z4', -1.0, 1.0);
+
+  }
+
+  this.printHello = function()
+  {
+    console.log("print hello");
+  }
+
+  this.addCalibrationPoint = function(x, y)
+  {
+    this.tabletPoints[this.calibIndex] = [x, y];
+    // var a = vec3.unproject([x, y, 0], this.modelViewMatrix, this.projectionMatrix, [0, 0, this.canvas.width, this.canvas.height]);
+    // a[0] = (a[0]*-800) + 400;
+    // a[1] = (a[1]*-480) + 240;
+    // console.log(a);
+    // this.videoPoints[this.calibIndex] = [a[0], a[1]];
+    // console.log("unproject = " + this.videoPoints[this.calibIndex][0] + "x" + this.videoPoints[this.calibIndex][1]);
+    this.calibIndex++;
+    console.log("calibIndex = " + this.calibIndex);
+    if (this.calibIndex == 4) {
+      // use: TL, TR, BL, BR
+      console.log("Source Points:");
+      console.log(this.tabletPoints);
+      var t = general2DProjection(
+                                  this.tabletPoints[0][0], this.tabletPoints[0][1],
+                                  0, 0,                    
+                                  this.tabletPoints[1][0], this.tabletPoints[1][1],
+                                  this.canvas.width, 0,
+                                  this.tabletPoints[2][0], this.tabletPoints[2][1],
+                                  0, this.canvas.height,
+                                  this.tabletPoints[3][0], this.tabletPoints[3][1],
+                                  this.canvas.width, this.canvas.height);
+
+      for(i = 0; i != 9; ++i) t[i] = t[i]/t[8];
+
+        t = [t[0], t[3], 0, t[6],
+             t[1], t[4], 0, t[7],
+             0   , 0   , 1, 0   ,
+             t[2], t[5], 0, t[8]];
+
+      // t = mat4.translate(t, t, [this.tabletPoints[0][0], this.tabletPoints[0][1], 0]);
+
+       this.calibMatrix = t;
+       t = "matrix3d(" + t.join(", ") + ")";
+       console.log(t);
+      this.canvas.style.transform = t;
+      this.canvas.style.left = this.tabletPoints[0][0]*4 + "px";
+      this.canvas.style.top = this.tabletPoints[0][1]*4 + "px";
+      console.log(this.calibMatrix);
+      // this.calibMatrix = [0.5, 0.1, 0.1, 0, 0.5, 0, 0, 0, 0.5];
+                                  // 0, 0,
+                                  // 0, 1,
+                                  // 1, 0,
+                                  // 1, 1);
+      // console.log(t);
+      this.isInCalibration = false;
+      this.isCalibrated = true;
+      console.log("isCalibration = true");
+    }
+  }
+
+  this.getVideoCoords = function(x, y) {
+    if (!this.isCalibrated) {
+      return [x, y];
+    }
+
+    return [x, y];
+    // return project(this.calibMatrix, x, y);
+  }
 
   this.init = function(canvas)
   {
@@ -77,7 +194,13 @@ function ChromaKeyedVideo()
     this.bRender = false;
     this.canvas = canvas;
 
+    this.isInCalibration = true;
+    this.isCalibrated = false;
+    this.calibIndex = 0;
+
+    this.addGui();
     this.gl = this.getWebGLContext(this.canvas);
+
 
     // get live video
 	  navigator.getUserMedia({audio: false, video: true}, function(stream) {videoLayer.startVideo(stream);}, function() {videoLayer.noVideo();});
@@ -132,6 +255,8 @@ function ChromaKeyedVideo()
     var gl = this.gl;
     var shaderProgram = this.shaderProgram;
 
+    this.modelViewMatrix.z = this.modelViewZ;
+
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -144,6 +269,8 @@ function ChromaKeyedVideo()
     gl.useProgram(shaderProgram);
 
     // bind the object buffer
+    this.vertexBuffer = this.createVertexBuffer(gl);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPosAttr, this.vertexBuffer.vertSize, gl.FLOAT, false, 0, 0);
     // bind the texture coords buffer
@@ -157,7 +284,7 @@ function ChromaKeyedVideo()
     gl.uniform1i(shaderProgram.samplerUniform, 0);
     gl.uniform1f(shaderProgram.thresholdSensitivity, 0.1);
     gl.uniform1f(shaderProgram.smoothing, 0.3);
-    gl.uniform3f(shaderProgram.colorToReplace, 0.1, 0.8, 0.1);
+    gl.uniform3f(shaderProgram.colorToReplace, this.chromaKeyR, this.chromaKeyG, this.chromaKeyB);
 
     // draw the object
     gl.drawArrays(this.vertexBuffer.primType, 0, this.vertexBuffer.nVerts);
@@ -205,21 +332,31 @@ function ChromaKeyedVideo()
   {
     var buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    var verts = [];
+
+    for (var i=0; i<4; i++) {
+      verts[i*3] = eval('this.videoCoords.x' + (i+1));
+      verts[i*3+1] = eval('this.videoCoords.y' + (i+1));
+      verts[i*3+2] = eval('this.videoCoords.z' + (i+1));
+
+      // console.log(eval('this.videoCoords.x' + (i+1)));
+    }
     // var verts = [
     //   1.0, 1.0, 0.0,
-    //   -1.0, 1.0, 0.0,
-    //   1.0, -1.0, 0.0,
-    //   -1.0, -1.0, 0.0
+    //   0.0, 1.0, 0.0,
+    //   1.0, 0.0, 0.0,
+    //   0.0, 0.0, 0.0
     // ];
-    var hRatio = this.video.videoWidth / this.canvas.width;
-    var vRatio = this.video.videoHeight / this.canvas.height;
 
-    var verts = [
-        vRatio, hRatio, 0.0,
-        -vRatio, hRatio, 0.0,
-        vRatio, -hRatio, 0.0,
-        -vRatio, -hRatio, 0.0
-        ];
+    // var hRatio = 1;//320;//this.video.videoWidth / this.canvas.width;
+    // var vRatio = 0.75;//240;//this.video.videoHeight / this.canvas.height;
+
+    // var verts = [
+    //     hRatio, vRatio, 0.0,
+    //     -hRatio, vRatio, 0.0,
+    //     hRatio, -vRatio, 0.0,
+    //     -hRatio, -vRatio, 0.0
+    //     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
     buffer.vertSize = 3;
@@ -236,10 +373,15 @@ function ChromaKeyedVideo()
     var texCoordsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordsBuffer);
 
-    var texCoords = [0.0, 1.0,
-                      1.0, 1.0,
+    // var texCoords = [0.0, 1.0,
+    //                   1.0, 1.0,
+    //                   0.0, 0.0,
+    //                   1.0, 0.0
+    //                   ];
+    var texCoords = [1.0, 0.0,
                       0.0, 0.0,
-                      1.0, 0.0
+                      1.0, 1.0,
+                      0.0, 1.0
                       ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
@@ -254,21 +396,23 @@ function ChromaKeyedVideo()
 
   this.initMatrices = function(canvas)
   {
-    // create model view matrix
-    this.modelViewMatrix = mat4.create();
-    mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0, 0, -0.8]);
-      // var eye = [2.0, 1.0, 3.0];
-      // var center = [0.0, 0.0, 0.0];
-      // var up = [0.0, 0.0, -1.0];
-      // modelViewMatrix = mat4.create();
-      // mat4.lookAt(modelViewMatrix, eye, center, up);
+    this.properProjection = true;
 
-      // projectionMatrix = mat4.create();
-      // mat4.perspective(projectionMatrix, 45.0, 0.5, 0.1, 100.0);
-    // create a projection matrix with 45 degree field of view
-    this.projectionMatrix = mat4.create();
-    mat4.perspective(this.projectionMatrix, Math.PI / 4,
-                      canvas.width / canvas.height, 0.5, 10000);
+    if (this.properProjection != undefined)
+    {
+      // create model view matrix
+      this.modelViewMatrix = mat4.create();
+      mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0, 0, -4]);
+
+      // create a projection matrix with 45 degree field of view
+      this.projectionMatrix = mat4.create();
+      mat4.perspective(this.projectionMatrix, Math.PI / 4,
+                        canvas.width / canvas.height, 0.5, 10000);
+    }
+    else {
+      this.modelViewMatrix = mat4.create();
+      this.projectionMatrix = mat4.create();
+    }
   }
 
   this.createShader = function(gl, str, type)
@@ -343,8 +487,8 @@ function ChromaKeyedVideo()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     // unbind
     gl.bindTexture(gl.TEXTURE_2D, null);

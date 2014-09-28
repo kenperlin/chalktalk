@@ -1224,6 +1224,35 @@ vec3.rotateZ = function(out, a, b, c){
   	return out;
 };
 
+
+vec3.unproject = function (vec, view, proj, viewport) {
+     
+    var dest = vec3.create();//output
+    var m = mat4.create();//view * proj
+    var im = mat4.create();//inverse view proj
+    var v = vec4.create();//vector
+    var tv = vec4.create();//transformed vector
+     
+    //apply viewport transform
+    v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
+    v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+    v[2] = vec[2];
+    v[3] = 1.0;
+     
+    //build and invert viewproj matrix
+    mat4.multiply(m,view,proj);
+    if(!mat4.invert(im,m)) { return null; }
+     
+    vec4.transformMat4(tv,v,im);
+    if(v[3] === 0.0) { return null; }
+     
+    dest[0] = tv[0] / tv[3];
+    dest[1] = tv[1] / tv[3];
+    dest[2] = tv[2] / tv[3];
+ 
+    return dest;
+};
+
 /**
  * Perform some operation over an array of vec3s.
  *
