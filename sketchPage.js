@@ -177,7 +177,7 @@ var sketchToDelete = null;
       this.mouseDown = function(x, y) {
 
          if (this.setPageInfo !== undefined)
-	    return;
+            return;
 
          this.isPressed = true;
          this.isClick = true;
@@ -194,10 +194,10 @@ var sketchToDelete = null;
             return;
          }
 
-	 if (this.hintTrace !== undefined) {
-	    this.hintTrace.push([[x,y]]);
-	    return;
-	 }
+         if (this.hintTrace !== undefined) {
+            this.hintTrace.push([[x,y]]);
+            return;
+         }
 
          isSketchDragActionEnabled = false;
          isBgActionEnabled = false;
@@ -332,7 +332,7 @@ var sketchToDelete = null;
          var h = height();
 
          if (this.setPageInfo !== undefined)
-	    return;
+            return;
 
          var dx = x - this.x;
          var dy = y - this.y;
@@ -348,10 +348,10 @@ var sketchToDelete = null;
             return;
          }
 
-	 if (this.hintTrace !== undefined) {
-	    this.hintTrace[this.hintTrace.length-1].push([x,y]);
-	    return;
-	 }
+         if (this.hintTrace !== undefined) {
+            this.hintTrace[this.hintTrace.length-1].push([x,y]);
+            return;
+         }
 
          if (isSketchDragActionEnabled && this.travel > clickSize) {
             if (needToStartSketchDragAction) {
@@ -385,8 +385,8 @@ var sketchToDelete = null;
             isRightHover = false;
          }
 
-	 if (this.isPanViewGesture)
-	    return;
+         if (this.isPanViewGesture)
+            return;
 
          if (! isVerticalPan) {
             if (isBottomGesture) {
@@ -402,12 +402,12 @@ var sketchToDelete = null;
                return;
             }
          }
-	 else {
-	    if (isRightGesture) {
+         else {
+            if (isRightGesture) {
                _g.panY = min(0, _g.panY + y - this.yDown);
-	       console.log(_g.panY);
+               console.log(_g.panY);
                return;
-	    }
+            }
 
             if (isBottomHover && isBottomGesture && ! isRightGesture) {
                // DRAGGING TO QUICK SWITCH PAGES
@@ -416,21 +416,21 @@ var sketchToDelete = null;
                   setPage(pageNumber);
                return;
             }
-	 }
+         }
 
          if (isTogglingMenuType)
             return;
 
          if (outPort >= 0 && isDef(outSketch.defaultValue[outPort]) && ! this.click) {
             if (isNumeric(outSketch.defaultValue[outPort])) {
-	       if (this.portValueDragMode === undefined)
-	          this.portValueDragMode = abs(x-this.xDown) > abs(y-this.yDown) ? "portValueDragX" : "portValueDragY";
+               if (this.portValueDragMode === undefined)
+                  this.portValueDragMode = abs(x-this.xDown) > abs(y-this.yDown) ? "portValueDragX" : "portValueDragY";
                if (this.portValueDragMode == "portValueDragY") {
                   var incr = floor((y-dy)/10) - floor(y/10);
                   outSketch.defaultValue[outPort] += incr;
                }
             }
-	    return;
+            return;
          }
 
          if (pieMenuIsActive) {
@@ -486,22 +486,22 @@ var sketchToDelete = null;
       this.mouseUp = function(x, y) {
 
          if (this.setPageInfo !== undefined) {
-	    setPage(this.setPageInfo.page);
-	    delete this.setPageInfo;
-	    return;
+            setPage(this.setPageInfo.page);
+            delete this.setPageInfo;
+            return;
          }
 
          this.isPressed = false;
 
-	 if (this.hintTrace !== undefined) {
-	    return;
-	 }
+         if (this.hintTrace !== undefined) {
+            return;
+         }
 
          if (this.portValueDragMode !== undefined) {
-	    if (this.portValueDragMode == "portValueDragX")
+            if (this.portValueDragMode == "portValueDragX")
                outSketch.defaultValue[outPort] *= x > this.xDown ? 0.1 : 10;
             delete this.portValueDragMode;
-	    return;
+            return;
          }
 
          if (this.isDraggingGlyph) {
@@ -557,7 +557,7 @@ var sketchToDelete = null;
          if (! isVerticalPan) {
             if (isBottomGesture) {
                if (abs(_g.panX - this.panXDown) <= clickSize && y < height() - 100) {
-	          console.log("doing page clear");
+                  console.log("doing page clear");
                   this.clear();
                }
                isBottomGesture = false;
@@ -574,7 +574,7 @@ var sketchToDelete = null;
                return;
             }
          }
-	 else {
+         else {
             if (isRightGesture) {
                if (abs(_g.panY - this.panYDown) <= clickSize && x < width() - 100)
                   this.clear();
@@ -591,7 +591,7 @@ var sketchToDelete = null;
                   setPage(pageNumber);
                return;
             }
-	 }
+         }
 
          isRightGesture = false;
          isBottomGesture = false;
@@ -924,8 +924,8 @@ var sketchToDelete = null;
       this.mouseMove = function(x, y) {
 
          if (this.setPageInfo !== undefined) {
-	    if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize)
-	       delete this.setPageInfo;
+            if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize)
+               delete this.setPageInfo;
          }
 
          this.x = x;
@@ -1076,9 +1076,9 @@ var sketchToDelete = null;
          letterPressed = letter;
 
          if (outPort >= 0 && isDef(outSketch.defaultValue[outPort])) {
-	    isTextMode = true;
-	    this.isPortValueTextMode = true;
-	 }
+            isTextMode = true;
+            this.isPortValueTextMode = true;
+         }
 
          if (isTextMode) {
             switch (letter) {
@@ -1199,22 +1199,22 @@ var sketchToDelete = null;
          // Special handling for when in text mode.
 
          if (isTextMode) {
-	    if (this.isPortValueTextMode !== undefined) {
-	       var val = "" + outSketch.defaultValue[outPort];
+            if (this.isPortValueTextMode !== undefined) {
+               var val = "" + outSketch.defaultValue[outPort];
                if (letter == 'del') {
-	          if (val.length > 0) {
-	             val = val.substring(0, val.length-1);
-		     if (isNumeric(val))
-		        val = parseFloat(val);
+                  if (val.length > 0) {
+                     val = val.substring(0, val.length-1);
+                     if (isNumeric(val))
+                        val = parseFloat(val);
                   }
                }
-	       else if (isNumeric(val) && isNumeric(letter))
-		  val = parseFloat(val) + parseFloat(letter);
+               else if (isNumeric(val) && isNumeric(letter))
+                  val = parseFloat(val) + parseFloat(letter);
                else
-	          val += letter;
-	       outSketch.defaultValue[outPort] = isNumeric(val) ? val : val.length == 0 ? 0 : val;
-	    }
-	    else
+                  val += letter;
+               outSketch.defaultValue[outPort] = isNumeric(val) ? val : val.length == 0 ? 0 : val;
+            }
+            else
                this.handleTextChar(letter);
             return;
          }
@@ -1231,10 +1231,7 @@ var sketchToDelete = null;
             this.clear();
             break;
          case '#':
-	    if (this.isLinedPaper === undefined)
-	       this.isLinedPaper = true;
-            else
-	       delete this.isLinedPaper;
+	    this.toggleLinedBackground();
             break;
          case PAGE_UP:
             break;
@@ -1287,7 +1284,7 @@ var sketchToDelete = null;
                else {
                   sketchAction = null;
                   sk().fadeAway = 1.0;
-		  fadeArrowsIntoSketch(sk());
+                  fadeArrowsIntoSketch(sk());
                   setTextMode(false);
                }
                else
@@ -1335,29 +1332,29 @@ var sketchToDelete = null;
             toggleCodeWidget();
             break;
          case 'f':
-	    if (isk())
-	       console.log(sk().tX + " " + sk().tY + " " + sk().sc + " " + arrayToString(sk().xyz));
+            if (isk())
+               console.log(sk().tX + " " + sk().tY + " " + sk().sc + " " + arrayToString(sk().xyz));
             break;
          case 'g':
             this.toggleGroup();
             break;
          case 'h':
-	    if (this.hintTrace === undefined)
-	       this.hintTrace = [];
+            if (this.hintTrace === undefined)
+               this.hintTrace = [];
             else
-	       delete this.hintTrace;
-	    break;
+               delete this.hintTrace;
+            break;
          case 'i':
             toggleTextMode();
             break;
          case 'k':
-	    if (isk() && sk() instanceof GeometrySketch) {
-	       var type = sk().glyph.indexName;
-	       var name = type + "_s";
+            if (isk() && sk() instanceof GeometrySketch) {
+               var type = sk().glyph.indexName;
+               var name = type + "_s";
 
-	       // CREATE AN OUTLINE DRAWING FOR THIS 3D OBJECT.
+               // CREATE AN OUTLINE DRAWING FOR THIS 3D OBJECT.
 
-	       var strokes = sk().mesh.toStrokes();
+               var strokes = sk().mesh.toStrokes();
 /*
 console.log("strokes = [");
 for (var n = 0 ; n < strokes.length ; n++) {
@@ -1368,28 +1365,28 @@ for (var n = 0 ; n < strokes.length ; n++) {
 }
 console.log("]");
 */
-	       // COMPUTE PIXEL COORDS OF MATRIX ORIGIN.
+               // COMPUTE PIXEL COORDS OF MATRIX ORIGIN.
 
-	       var m = sk().mesh.matrixWorld.elements;
-	       var x0 = width()/2 + pixelsPerUnit * m[12];
-	       var y0 = height()/2 - pixelsPerUnit * m[13];
+               var m = sk().mesh.matrixWorld.elements;
+               var x0 = width()/2 + pixelsPerUnit * m[12];
+               var y0 = height()/2 - pixelsPerUnit * m[13];
 
-	       // COMPUTE THE PIXEL WIDTH.
+               // COMPUTE THE PIXEL WIDTH.
 
                var xlo = 10000, xhi = -xlo;
-	       for (var i = 1 ; i < sk().sp0.length ; i++) {
-	          xlo = min(xlo, sk().sp0[i][0]);
-	          xhi = max(xhi, sk().sp0[i][0]);
-	       }
+               for (var i = 1 ; i < sk().sp0.length ; i++) {
+                  xlo = min(xlo, sk().sp0[i][0]);
+                  xhi = max(xhi, sk().sp0[i][0]);
+               }
 
-	       registerGlyph("sg('StrokesSketch','" + name + "')", strokes, name);
-	       var index = glyphIndex(glyphs, name);
-	       glyphs[index].info = { type: type, x0: x0, y0: y0, rX: sk().rX, rY: sk().rY, sw: xhi - xlo };
-	    }
+               registerGlyph("sg('StrokesSketch','" + name + "')", strokes, name);
+               var index = glyphIndex(glyphs, name);
+               glyphs[index].info = { type: type, x0: x0, y0: y0, rX: sk().rX, rY: sk().rY, sw: xhi - xlo };
+            }
             break;
          case 'l':
-	    isShowingMeshEdges = ! isShowingMeshEdges;
-	    break;
+            isShowingMeshEdges = ! isShowingMeshEdges;
+            break;
          case 'm':
             menuType = (menuType + 1) % 2;
             break;
@@ -1404,8 +1401,8 @@ console.log("]");
             isPanning = false;
             break;
          case 'q':
-	    _g.query = 0;
-	    break;
+            _g.query = 0;
+            break;
 /*
             if (! isk() || sk().sp == visible_sp)
                visible_sp = null;
@@ -1436,38 +1433,53 @@ console.log("]");
          case 'z':
             break;
          case '/':
-	    isVerticalPan = ! isVerticalPan;
-	    break;
-         case '-':
-            if (backgroundColor === 'white') {
-               backgroundColor = 'black';
-               defaultPenColor = 'white';
-            }
-            else {
-               backgroundColor = 'white';
-               defaultPenColor = 'black';
-            }
-
-            document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
-
-            background.color = backgroundColor;
-            background.style.backgroundColor = backgroundColor;
-            palette[0] = defaultPenColor;
-            for (var i = 0 ; i < this.sketches.length ; i++)
-               if (this.sketches[i].colorId == 0)
-                  this.sketches[i].setColorId(0);
-
-            if (codeTextArea != null) {
-               codeTextArea.style.backgroundColor = codeTextBgColor();
-               codeTextArea.style.color = codeTextFgColor();
-            }
-
-            if (codeSelector != null) {
-               codeSelector.style.backgroundColor = codeSelectorBgColor();
-               codeSelector.style.color = codeSelectorFgColor();
-            }
-
+            isVerticalPan = ! isVerticalPan;
             break;
+         case '-':
+            toggleColorScheme();
+            break;
+         case '\\':
+            isVerticalPan = ! isVerticalPan;
+            this.toggleColorScheme();
+            this.toggleLinedBackground();
+            break;
+         }
+      }
+
+      this.toggleLinedBackground = function() {
+         if (this.isLinedPaper === undefined)
+            this.isLinedPaper = true;
+         else
+            delete this.isLinedPaper;
+      }
+
+      this.toggleColorScheme = function() {
+         if (backgroundColor === 'white') {
+            backgroundColor = 'black';
+            defaultPenColor = 'white';
+         }
+         else {
+            backgroundColor = 'white';
+            defaultPenColor = 'black';
+         }
+
+         document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
+
+         background.color = backgroundColor;
+         background.style.backgroundColor = backgroundColor;
+         palette[0] = defaultPenColor;
+         for (var i = 0 ; i < this.sketches.length ; i++)
+            if (this.sketches[i].colorId == 0)
+               this.sketches[i].setColorId(0);
+
+         if (codeTextArea != null) {
+            codeTextArea.style.backgroundColor = codeTextBgColor();
+            codeTextArea.style.color = codeTextFgColor();
+         }
+
+         if (codeSelector != null) {
+            codeSelector.style.backgroundColor = codeSelectorBgColor();
+            codeSelector.style.color = codeSelectorFgColor();
          }
       }
 
@@ -1551,42 +1563,42 @@ console.log("]");
          this.isOnPanStrip = isVerticalPan ? isRightGesture  || this.x + _g.panX >= w - margin
                                            : isBottomGesture || this.y + _g.panY >= h - margin;
 
-	 if (this.isLinedPaper !== undefined) {
-	    annotateStart();
+         if (this.isLinedPaper !== undefined) {
+            annotateStart();
 /*
 // GRAPH PAPER
 
-	    var r = w / 32;
+            var r = w / 32;
             color(defaultPenColor);
-	    lineWidth(backgroundColor == 'white' ? 0.1 : 0.15);
-	    var x0 = r * floor(-_g.panX / r);
-	    var x1 = x0 + w + r;
-	    var y1 = this.y >= h - margin ? h - margin : h;
-	    for (var x = x0 ; x < x1 ; x += r)
-	       line(x, 0, x, y1);
-	    for (var y = r ; y < y1 ; y += r)
-	       line(x0, y, x1, y);
+            lineWidth(backgroundColor == 'white' ? 0.1 : 0.15);
+            var x0 = r * floor(-_g.panX / r);
+            var x1 = x0 + w + r;
+            var y1 = this.y >= h - margin ? h - margin : h;
+            for (var x = x0 ; x < x1 ; x += r)
+               line(x, 0, x, y1);
+            for (var y = r ; y < y1 ; y += r)
+               line(x0, y, x1, y);
 */
 // LINED PAPER
 
-	    var r = 45;
+            var r = 45;
             color('rgb(128,192,255)');
-	    lineWidth(2);
-	    //var x0 = r * floor(-_g.panX / r);
-	    var x0 = 0;
-	    var x1 = x0 + w - (this.x >= w - margin || isRightGesture ? margin + 1 : 0);
-	    var y0 = 0;
-	    var y1 = (this.y + _g.panY >= h - margin ? h - margin : h) - _g.panY;
-	    for (var y = y0 ; y < y1 ; y += r)
-	       line(x0, y, x1, y);
+            lineWidth(2);
+            //var x0 = r * floor(-_g.panX / r);
+            var x0 = 0;
+            var x1 = x0 + w - (this.x >= w - margin || isRightGesture ? margin + 1 : 0);
+            var y0 = 0;
+            var y1 = (this.y + _g.panY >= h - margin ? h - margin : h) - _g.panY;
+            for (var y = y0 ; y < y1 ; y += r)
+               line(x0, y, x1, y);
 
             color('rgb(255,128,192)');
-	    lineWidth(1);
-	    line(x0 + 3 * r, 0, x0 + 3 * r, y1);
-	    line(x0 + 3 * r + 5, 0, x0 + 3 * r + 5, y1);
+            lineWidth(1);
+            line(x0 + 3 * r, 0, x0 + 3 * r, y1);
+            line(x0 + 3 * r + 5, 0, x0 + 3 * r + 5, y1);
 
-	    annotateEnd();
-	 }
+            annotateEnd();
+         }
 
          for (var I = 0 ; I < nsk() ; I++) {
 
@@ -1735,15 +1747,15 @@ console.log("]");
             this.index = PUSHED_sketchPage_index;
          }
 
-	 // IF THERE IS A STROKES SKETCH, CREATE ITS CORRESPONDING SHAPE.
+         // IF THERE IS A STROKES SKETCH, CREATE ITS CORRESPONDING SHAPE.
 
          var shapeInfo = null;
-	 for (var I = 0 ; I < nsk() ; I++)
-	    if (sk(I) instanceof StrokesSketch && sk(I).shapeInfo !== undefined) {
-	       shapeInfo = sk(I).shapeInfo;
-	       delete sk(I).shapeInfo;
-	       break;
-	    }
+         for (var I = 0 ; I < nsk() ; I++)
+            if (sk(I) instanceof StrokesSketch && sk(I).shapeInfo !== undefined) {
+               shapeInfo = sk(I).shapeInfo;
+               delete sk(I).shapeInfo;
+               break;
+            }
          if (shapeInfo != null) {
 
             glyphSketch = null;
@@ -1756,23 +1768,23 @@ console.log("]");
             sk().rY = shapeInfo.rY;
             sk().bounds = shapeInfo.bounds;
             sk().sw = shapeInfo.sw;
-	 }
+         }
 
          noisy = 0;
 
          // HIGHLIGHT THIS SCREEN RECTANGLE IN THE PAN STRIP.
 
          if (this.isOnPanStrip) {
-	    var dx = isVerticalPan ? 0 : -_g.panX;
-	    var dy = isVerticalPan ? -_g.panY : 0;
+            var dx = isVerticalPan ? 0 : -_g.panX;
+            var dy = isVerticalPan ? -_g.panY : 0;
             var x0 = xOnPanStrip(dx    ), y0 = yOnPanStrip(dy    );
             var x1 = xOnPanStrip(dx + w), y1 = yOnPanStrip(dy + h) - 2;
-	    this.panViewBounds = [x0, y0, x1, y1];
+            this.panViewBounds = [x0, y0, x1, y1];
 
             color(scrimColor(0.06));
             fillRect(x0, y0, x1 - x0, y1 - y0);
             color(scrimColor(1));
-	    lineWidth(0.5);
+            lineWidth(0.5);
             drawRect(x0, y0, x1 - x0, y1 - y0);
          }
 
@@ -1980,7 +1992,7 @@ console.log("]");
 
       this.overlay = function() {
          var w = width(), h = height();
-	 var dx = -_g.panX;
+         var dx = -_g.panX;
 
          isShowingTimeline = isDraggingTimeline ||
                              ! isExpertMode
@@ -2370,8 +2382,8 @@ console.log("]");
             }
             else {
                eval(name);
-	       sk().tX += x - sketchPage.x;
-	       sk().tY += y - sketchPage.y;
+               sk().tX += x - sketchPage.x;
+               sk().tY += y - sketchPage.y;
             }
             if (bgs !== undefined)
                bgActionEnd();

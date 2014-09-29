@@ -133,7 +133,7 @@
       makePath([ [x,y1], [x1,y], [x2,y], [x3,y1], [x3,y2], [x2,y3], [x1,y3], [x,y2] ]);
    }
 
-   function makeOval(x, y, w, h, n, angle0, angle1) {
+   function makeOval(x, y, w, h, n, angle0, angle1, power) {
       if (! isDef(n))
          n = 32;
       if (! isDef(angle0))
@@ -144,8 +144,14 @@
       var xy = [];
       for (var i = 0 ; i < n ; i++) {
          var theta = angle0 + (angle1 - angle0) * i / (n-1);
-         xy.push([x + w/2 + w/2 * Math.cos(theta),
-                  y + h/2 + h/2 * Math.sin(theta)]);
+	 var c = Math.cos(theta);
+	 var s = Math.sin(theta);
+	 if (power !== undefined) {
+	    var t = pow(pow(abs(c), power) + pow(abs(s), power), 1/power);
+	    c /= t;
+	    s /= t;
+	 }
+         xy.push([x + w/2 + w/2 * c, y + h/2 + h/2 * s]);
       }
       return xy;
    }
