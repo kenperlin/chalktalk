@@ -3,7 +3,7 @@
     With more stuff added for July 7 talk.
 */
 
-   registerGlyph("cup()", [
+   registerGlyph("cupSketch()", [
 
       // TEMPLATE TO MATCH FOR THE FREEHAND SKETCH OF THE COFFEE CUP.
 
@@ -13,7 +13,7 @@
       makeOval(-1.4,-.4, 0.8, 0.8, 20, PI/2, 3*PI/2),      // INNER HANDLE.
    ]);
 
-   function cup() {
+   function cupSketch() {
       var node = root.addNode();
 
       // THE BODY OF THE CUP IS A HOLLOW TAPERED CYLINDER.
@@ -567,7 +567,7 @@ Lattice.prototype = new Sketch;
 /*
 function SplineTest() {
    this.labels = "spline".split(' ');
-   this.shape = createSpline([
+   this.shape = makeSpline([
       [ .3,1.1],
       [ .3, .9],
       [ .3, .5],

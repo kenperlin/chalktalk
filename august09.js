@@ -28,8 +28,8 @@
 
 	 // DRAW FUSILAGE
 
-	 mCurve(createSpline([[-.25,-1],[-.4,0],[0,1]]));
-	 mCurve(createSpline([[0,1],[ .4,0],[ .25,-1]]));
+	 mCurve(makeSpline([[-.25,-1],[-.4,0],[0,1]]));
+	 mCurve(makeSpline([[0,1],[ .4,0],[ .25,-1]]));
 
 	 // DRAW WINGS
 

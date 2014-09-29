@@ -696,7 +696,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return 'rgba(0,0,0,0)';
    }
    function codeTextFgColor() {
-      return (backgroundColor == 'white' ? 'rgba(0,128,255,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
+      return (backgroundColor == 'white' ? 'rgba(0,112,224,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
    }
 
    function toggleCodeWidget() {
@@ -717,7 +717,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      + "</option>";
 
          codeElement.innerHTML =
-            "<select id=code_selector onchange='setCodeAreaText()'>"
+            "<button id=upload_button>upload</upload>"
+          + "<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -725,6 +726,22 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
+
+         uploadButton = document.getElementById("upload_button");
+         uploadButton.onclick = function() {
+            var uploadForm = new FormData();
+            var sketchName = sk().glyphName;
+            uploadForm.append("sketchName", sketchName);
+
+            var shader = "var " + sketchName + "FragmentShader = \"" + document.getElementById("code_text").value + "\";";
+            var sketchContent = eval(sketchName);
+            var register = "registerGlyph(" + sk().glyph.toString() + ");";
+            uploadForm.append("sketchContent", [shader, sketchContent, register].join("\n"));
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "http://localhost:8888/upload");
+            request.send(uploadForm);
+         }
 
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.backgroundColor = codeSelectorBgColor();
@@ -804,16 +821,16 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                     ? xhi + (xhi - xlo) / 2 + w/2
                     : xlo - (xhi - xlo) / 2 - w/2) + _g.panX;
 
-      x1 = max(x1, w/2);
-      x1 = min(x1, width() - w/2);
+      x1 = max(x1, w/2 + _g.panX);
+      x1 = min(x1, width() - w/2 + _g.panX);
 
       codeElement.x1 = x1;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
                           : isChanged
-                            ? codeElement.x1
-                            : lerp(0.1, codeElement.x, codeElement.x1);
+                            ? codeElement.x1 - _g.panX
+                            : lerp(0.1, codeElement.x, codeElement.x1 - _g.panX);
 
       //////////////////////////////////////////////////////////////////////////////////////
 
@@ -824,7 +841,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var cr = width() / 70;
 
-      var c = createRoundRect(x - _g.panX - w/2, y, w, h, cr);
+      var c = createRoundRect(x - _g.panX - w/2, y - _g.panY, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
@@ -869,7 +886,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
 
-      color('rgba(0,0,255,' + (0.2 * fade) + ')');
+      color(backgroundColor == 'white' ? 'rgba(224,224,255,' + (0.5 * fade) + ')'
+                                       : 'rgba(  0,  0,255,' + (0.2 * fade) + ')');
       fillCurve(c);
 
       lineWidth(2);

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<head>
+<title>Sketch editor</title>
+<style type="text/css" media="screen">
+   #editor { 
+      width: 500px;
+      height: 500px;
+   }
+</style>
+</head>
+<body>
+
+<div id="nameform">
+
+   <select id="remote_sketches" onchange="fetchRemoteSketch(this)" >
+      <option selected disabled>Choose an existing sketch</option>
+   </select>
+
+   <input id="name" type="text" value="new sketch name"
+         onblur="if (this.value == '') this.value = 'new sketch name'"
+         onfocus="if (this.value == 'new sketch name') this.value = ''" >
+
+</div>
+
+<div id="editor">Edit your sketch here</div>
+
+<button id="submit">Submit sketch</button>
+<button id="commit">Commit sketch</button>
+    
+<script src="jslint.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+   var editor = ace.edit("editor");
+
+   var submit = document.getElementById("submit");
+   submit.onclick = function() {
+      var sketchName = document.getElementById("name").value;
+
+      var uploadForm = new FormData();
+      uploadForm.append("sketchName", sketchName);
+   
+      var sketchContent = editor.getValue();
+      uploadForm.append("sketchContent", sketchContent);
+   
+      var request = new XMLHttpRequest();
+      request.open("POST", "http://evanmoore.no-ip.org:8888/upload");
+      request.send(uploadForm);
+   }
+
+   var commit = document.getElementById("commit");
+   commit.onclick = function() {
+      var sketchName = document.getElementById("name").value;
+
+      var commitForm = new FormData();
+      commitForm.append("sketchName", sketchName);
+
+      var request = new XMLHttpRequest();
+      request.open("POST", "http://evanmoore.no-ip.org:8888/commit");
+      request.send(commitForm);
+   }
+
+   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+   var remoteSketches;
+   var selector = document.getElementById("remote_sketches");
+   var lsRequest = new XMLHttpRequest();
+   lsRequest.open("GET", "../ls_sketches");
+
+   lsRequest.onloadend = function () {
+      if (lsRequest.responseText != "") {
+         remoteSketches = lsRequest.responseText.trim().split("\n");
+         for (var i = 0; i < remoteSketches.length; i++) {
+            var option = document.createElement("option");
+            option.text = remoteSketches[i]; 
+            selector.add(option);
+         }
+      }
+   }
+
+   lsRequest.send();
+
+   function fetchRemoteSketch(select) {
+      var filename = select.value;
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "../sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         editor.setValue(sketchRequest.responseText);
+         document.getElementById("name").value = filename;
+      }
+      sketchRequest.send();
+   } 
+</script>
+</body>
+</html>

@@ -6,6 +6,14 @@
    //function height() { return 720; }
    //function height() { return 800; }
 
+   function bgMaterial() {
+      return backgroundColor == 'white' ? whiteMaterial : blackMaterial;
+   }
+
+   function penMaterial() {
+      return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
+   }
+
    function scrimColor(alpha) {
       return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
    }
@@ -17,6 +25,11 @@
    function clientX(event) {
       if (isDef(_g.panX)) return event.clientX - _g.panX;
       return event.clientX;
+   }
+
+   function clientY(event) {
+      if (isDef(_g.panY)) return event.clientY - _g.panY;
+      return event.clientY;
    }
 
 // INITIALIZE HANDLING OF KEYBOARD AND MOUSE EVENTS ON A CANVAS:
@@ -97,7 +110,7 @@
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
-         handle.mouseY = event.clientY - r.top;
+         handle.mouseY = clientY(event) - r.top;
          handle.mousePressedAtX = handle.mouseX;
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
@@ -108,6 +121,7 @@
             handle.mouseDown(handle.mouseX, handle.mouseY);
 
          _g.lastX = event.clientX;
+         _g.lastY = event.clientY;
       };
 
       // MAKE SURE BROWSER CATCHES RIGHT CLICK.
@@ -189,7 +203,8 @@
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
-         handle.mouseY = event.clientY - r.top;
+         handle.mouseY = clientY(event) - r.top;
+
 
          //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
@@ -243,9 +258,12 @@
 
          // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
 
-         if (isPanning)
-            _g.panX = min(0, _g.panX + event.clientX - _g.lastX);
+         if (isPanning) {
+            if (! isVerticalPan) _g.panX = min(0, _g.panX + event.clientX - _g.lastX);
+            if (  isVerticalPan) _g.panY = min(0, _g.panY + event.clientY - _g.lastY);
+         }
          _g.lastX = event.clientX;
+         _g.lastY = event.clientY;
       }
    }
 
@@ -528,6 +546,7 @@
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
+   var isRegisteringSketches = true;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -538,7 +557,63 @@
    var sketchTypes = [];
    var sketchAction = null;
 
+   var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
+
+
+/////////////////////////////////////////////////////////////////////
+///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
+///////////////////////// GOING TO BE MOVED /////////////////////////
+
+   function importSketch(filename) {
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         window.eval(sketchRequest.responseText);
+      }
+      sketchRequest.send();
+   }
+
+   var ServerUtils = {};
+
+   ServerUtils.set = function(key, value) {
+      var setForm = new FormData();
+      setForm.append("key", key);
+      setForm.append("value", JSON.stringify(value));
+   
+      var request = new XMLHttpRequest();
+      request.open("POST", "set");
+      request.send(setForm);
+   }
+
+   ServerUtils.get = function(key, fn) {
+      var getRequest = new XMLHttpRequest();
+      getRequest.open("GET", "state/" + key + ".json");
+      getRequest.onloadend = function() {
+         fn(getRequest.responseText);
+      }
+      getRequest.send();
+   }
+
+/////////////////////////////////////////////////////////////////////
+
    function gStart() {
+
+      // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+
+      try {
+         var lsRequest = new XMLHttpRequest();
+         lsRequest.open("GET", "ls_sketches");
+
+         lsRequest.onloadend = function () {
+            if (lsRequest.responseText != "") {
+               var ls = lsRequest.responseText.trim().split("\n");
+               for (var i = 0; i < ls.length; i++)
+                  importSketch(ls[i]);
+            }
+         }
+         lsRequest.send();
+	 isRegisteringSketches = false;
+      } catch (e) { }
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
@@ -565,10 +640,21 @@
       + " <div id='slide' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <div id='scene_div' tabindex=1"
-      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
-      + " </div>"
       + " <canvas id='sketch_canvas' tabindex=1"
+      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+      + " </canvas>"
+      +
+      (isShowingRenderer
+       ?
+	   " <div id='scene_div' tabindex=1"
+         + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+         + " </div>"
+       :       
+           " <!!div id='scene_div' tabindex=1"
+         + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+         + " <!!/div>"
+      )
+      + " <canvas id='events_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
       + " <hr id='background' size=1024 color='" + backgroundColor + "'>"
@@ -582,34 +668,39 @@
       // SET ALL THE SCREEN-FILLING ELEMENTS TO THE SIZE OF THE SCREEN.
 
       slide.width = width();
-      scene_div.width = width();
       sketch_canvas.width = width();
+      events_canvas.width = width();
 
       slide.height = height();
-      scene_div.height = height();
       sketch_canvas.height = height();
+      events_canvas.height = height();
 
       background.style.backgroundColor = backgroundColor;
 
       // INITIALIZE THE SKETCH CANVAS
 
       sketch_canvas.animate = function(elapsed) { sketchPage.animate(elapsed); }
-      sketch_canvas.keyDown = function(key) { sketchPage.keyDown(key); }
-      sketch_canvas.keyUp = function(key) { sketchPage.keyUp(key); }
-      sketch_canvas.mouseDown = function(x, y) { sketchPage.mouseDown(x, y); }
-      sketch_canvas.mouseDrag = function(x, y) { sketchPage.mouseDrag(x, y); }
-      sketch_canvas.mouseMove = function(x, y) { sketchPage.mouseMove(x, y); }
-      sketch_canvas.mouseUp = function(x, y) { sketchPage.mouseUp(x, y); }
       sketch_canvas.overlay = function() { sketchPage.overlay(); }
       sketch_canvas.setup = function() {
          window.onbeforeunload = function(e) { sketchBook.onbeforeunload(e); }
          setPage(0);
       }
 
+      events_canvas.keyDown   = function(key)  { e2s(); sketchPage.keyDown(key); }
+      events_canvas.keyUp     = function(key)  { e2s(); sketchPage.keyUp(key); }
+      events_canvas.mouseDown = function(x, y) { e2s(); sketchPage.mouseDown(x, y); }
+      events_canvas.mouseDrag = function(x, y) { e2s(); sketchPage.mouseDrag(x, y); }
+      events_canvas.mouseMove = function(x, y) { e2s(); sketchPage.mouseMove(x, y); }
+      events_canvas.mouseUp   = function(x, y) { e2s(); sketchPage.mouseUp(x, y); }
+
       fourStart();
 
-      var sceneElement = document.getElementById('scene_div');
-      sceneElement.appendChild(renderer.domElement);
+      if (window['scene_div'] !== undefined) {
+         scene_div.width = width();
+         scene_div.height = height();
+         var sceneElement = document.getElementById('scene_div');
+         sceneElement.appendChild(renderer.domElement);
+      }
 
       // START ALL CANVASES RUNNING
 
@@ -617,6 +708,15 @@
       for (var i = 0 ; i < c.length ; i++)
           if (c[i].getAttribute("data-render") != "gl")
              startCanvas(c[i].id);
+   }
+
+   function e2s() {
+      sketch_canvas.mouseX = events_canvas.mouseX;
+      sketch_canvas.mouseY = events_canvas.mouseY;
+      sketch_canvas.mousePressedAtX = events_canvas.mousePressedAtX;
+      sketch_canvas.mousePressedAtY = events_canvas.mousePressedAtY;
+      sketch_canvas.mousePressedAtTime = events_canvas.mousePressedAtTime;
+      sketch_canvas.mousePressed = events_canvas.mousePressed;
    }
 
    var updateScene = 0, pixelsPerUnit = 97;
@@ -627,6 +727,12 @@
       if (name.length == 0)
          return;
 
+      var _canvas = document.getElementById(name);
+      if (name == 'events_canvas') {
+         initEventHandlers(_canvas);
+         return;
+      }
+
       window.requestAnimFrame = (function(callback) {
       return window.requestAnimationFrame ||
              window.webkitRequestAnimationFrame ||
@@ -634,7 +740,7 @@
              window.oRequestAnimationFrame ||
              window.msRequestAnimationFrame ||
              function(callback) { window.setTimeout(callback, 1000 / 60); }; })();
-      var _canvas = document.getElementById(name);
+
       var g = _canvas.getContext('2d');
       g.textHeight = 12;
       g.lineCap = "round";
@@ -643,21 +749,15 @@
       g.name = name;
       sketchPage.clear();
 
-      initEventHandlers(_canvas);
-
-      if (isDef(window[g.name].setup)) {
+      //if (name == 'sketch_canvas') {
          _g = g;
          _g.clearRect(0, 0, _g.canvas.width, _g.canvas.height);
          This().setup();
-      }
+      //}
 
       pixelsPerUnit = 5.8 * height() / cameraFOV;
 
       // LOAD ALL THE SCRIBBLE GLYPHS.
-
-      for (var n = 0 ; n < 26 ; n++) {
-         // NEED TO ADD INDIVIDUAL CHARACTERS
-      }
 
       function nameToGlyph(name) {
          var scribble = new Scribble(name);
@@ -746,6 +846,7 @@
       ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
       ['='  , "show glyphs"],
+      ['/'  , "pan up/down or L/R"],
       ['spc', "quick help menu"],
       ['alt', "clone"],
       ['del', "remove last stroke"],
@@ -765,7 +866,7 @@
    var linkHighlightColor = 'rgba(0,192,96,.2)';
    var liveDataColor = 'rgb(128,192,255)'
    var overlayColor = 'rgb(0,96,255)';
-   var overlayClearColor = 'rgba(0,96,255,.5)';
+   var overlayClearColor = function() { return backgroundColor != 'white' ? 'rgba(192,224,255,.5)' : 'rgba(0,96,255,.5)'; }
    var overlayScrim = 'rgba(0,96,255,.25)';
    var portColor = 'rgb(0,192,96)';
    var portBgColor = backgroundColor;
@@ -1521,7 +1622,6 @@
          switch(bgCommand) {
          case 1:
             sketchPage.isGlyphable = ! sketchPage.isGlyphable;
-            console.log(sketchPage.isGlyphable);
             break;
          }
       }
@@ -1611,9 +1711,8 @@
 
    function bgActionEnd(x, y) {
 
-      // ACT ON SCRIBBLE-TEXT, THEN EXIT SCRIBBLE-TEXT MODE.
+      // EXIT SCRIBBLE-TEXT MODE.
 
-      bgsText = bgsText.trim();
       bgs = undefined;
       bgsText = "";
       bgsTextUndo = [];
@@ -1635,8 +1734,10 @@
          case 6: setPage(pageIndex + 1); break;
          }
       }
-      else if (s === undefined)
-         setPage(directionsToPage(n1, n2));
+      else if (s === undefined) {
+         sketchPage.setPageInfo = { x: sketchPage.x, y: sketchPage.y, page: directionsToPage(n1, n2) };
+	 bgClickCount = 0;
+      }
       else
          console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
@@ -1849,23 +1950,27 @@
          if (! isDef(_g.panX))
             _g.panX = 0;
 
+         if (! isDef(_g.panY))
+            _g.panY = 0;
+
          // CLEAR THE CANVAS
 
-         _g.clearRect(-_g.panX - 100, 0, w + 200, h);
+         _g.clearRect(-_g.panX - 100, -_g.panY, w + 200, h);
          _g.inSketch = false;
 
          // DO ACTUAL CANVAS PANNING
 
          _g.setTransform(1,0,0,1,0,0);
-         _g.translate(_g.panX, 0, 0);
+         _g.translate(_g.panX, _g.panY, 0);
 
          // PAN 3D OBJECTS TOO
 
-         root.position.x = _g.panX / (0.391 * height());
+         root.position.x =  _g.panX / (0.391 * height());
+         root.position.y = -_g.panY / (0.391 * height());
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
-            fillRect(-_g.panX - 100, 0, w + 200, h);
+            fillRect(-_g.panX - 100, -_g.panY, w + 200, h);
          }
 
          // START OFF CURRENT PSEUDO-SKETCH, IF NECESSARY
@@ -2231,91 +2336,182 @@
 
          // ADJUST X POSITIONS ACCORDING TO PAN VALUE
 
-         var leftX = 0 - _g.panX;
-         var rightX = w - _g.panX;
+         var leftX   = 0 - _g.panX;
+         var rightX  = w - _g.panX;
+         var topY    = 0 - _g.panY;
+         var bottomY = h - _g.panY;
 
          // DRAW PAGE NUMBER AND BACKGROUND IF QUICK SWITCHING PAGES
 
-         if (isRightHover && ! isBottomGesture) {
-            annotateStart();
-            _g.save();
-            _g.globalAlpha = 1.0;
-            lineWidth(1);
+         if (! isVerticalPan) {
+            if (isRightHover && ! isBottomGesture) {
+               annotateStart();
+               _g.save();
+               _g.globalAlpha = 1.0;
+               lineWidth(1);
 
-            // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
+               // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
 
-            var numberSpacing = (h - margin) / sketchPages.length;
-            for (var i = 0; i < h - margin; i += numberSpacing * 2) {
-               _g.beginPath();
-               _g.moveTo(rightX - margin, i);
-               _g.lineTo(rightX - margin, i + numberSpacing);
-               _g.lineTo(rightX, i + numberSpacing);
-               _g.lineTo(rightX, i);
+               var numberSpacing = (h - margin) / sketchPages.length;
                _g.fillStyle = scrimColor(.2);
-               _g.fill();
+               for (var i = 0; i < h - margin; i += numberSpacing * 2) {
+                  _g.beginPath();
+
+                  _g.moveTo(rightX - margin, topY + i);
+                  _g.lineTo(rightX - margin, topY + i + numberSpacing);
+                  _g.lineTo(rightX         , topY + i + numberSpacing);
+                  _g.lineTo(rightX         , topY + i);
+
+                  _g.fill();
+               }
+
+               // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+
+               var currentPageY = pageIndex * numberSpacing;
+               lineWidth(0.75);
+               _g.globalAlpha = 1.0;
+               _g.beginPath();
+               _g.moveTo(rightX - margin, topY + currentPageY);
+               _g.lineTo(rightX - margin, topY + currentPageY + numberSpacing);
+               _g.lineTo(rightX, topY + currentPageY + numberSpacing);
+               _g.lineTo(rightX, topY + currentPageY);
+               _g.lineTo(rightX - margin, topY + currentPageY);
+               _g.strokeStyle = "rgb(255, 255, 255)";
+               _g.stroke();
+
+               // DRAW PAGE NUMBERS IN SLIDE SWITCHER
+
+               _g.font = "14px Arial";
+               var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
+               for (var pn = 0; pn < sketchPages.length; pn++) {
+                  var alpha = pageNumber == pn ? 0.8 : 0.35;
+                  _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+
+                  // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
+                  var centerRatio = pn < 10 ? 0.57 : 0.65;
+                  var numberX = w - _g.panX - margin * centerRatio;
+                  _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
+               }
+
+               if (! isExpertMode) {
+                  var d = h / 10;
+                  var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+                  var x1 = w/2 - d * cos(n1 * TAU / 8);
+                  var y1 = h/2 + d * sin(n1 * TAU / 8);
+                  var x2 = x1  - d * cos(n2 * TAU / 8);
+                  var y2 = y1  + d * sin(n2 * TAU / 8);
+
+                  // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+                  lineWidth(d/15);
+                  color(backgroundColor);
+                  fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+                  // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  arrow(x1, y1, x2, y2, d/8);
+
+                  lineWidth(d/20);
+                  color(backgroundColor);
+                  arrow(x1, y1, x2, y2, d/8);
+               }
+
+               _g.restore();
+               annotateEnd();
             }
-
-            // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
-
-            var currentPageY = pageIndex * numberSpacing;
-            lineWidth(0.75);
-            _g.globalAlpha = 1.0;
-            _g.beginPath();
-            _g.moveTo(rightX - margin, currentPageY);
-            _g.lineTo(rightX - margin, currentPageY + numberSpacing);
-            _g.lineTo(rightX, currentPageY + numberSpacing);
-            _g.lineTo(rightX, currentPageY);
-            _g.lineTo(rightX - margin, currentPageY);
-            _g.strokeStyle = "rgb(255, 255, 255)";
-            _g.stroke();
-
-            // DRAW PAGE NUMBERS IN SLIDE SWITCHER
-
-            _g.font = "14px Arial";
-            var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
-            for (var pn = 0; pn < sketchPages.length; pn++) {
-               var alpha = pageNumber == pn ? 0.8 : 0.35;
-               _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
-
-               // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
-
-               var centerRatio = pn < 10 ? 0.57 : 0.65;
-               var numberX = w - _g.panX - margin * centerRatio;
-               _g.fillText(pn, numberX, (pn + 0.75) * numberSpacing);
-            }
-
-            if (! isExpertMode) {
-               var d = h / 10;
-               var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
-               var x1 = w/2 - d * cos(n1 * TAU / 8);
-               var y1 = h/2 + d * sin(n1 * TAU / 8);
-               var x2 = x1  - d * cos(n2 * TAU / 8);
-               var y2 = y1  + d * sin(n2 * TAU / 8);
-
-               // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
-
-               lineWidth(d/12);
-               color(defaultPenColor);
-               fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
-
-               lineWidth(d/15);
-               color(backgroundColor);
-               fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
-
-               // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
-
-               lineWidth(d/12);
-               color(defaultPenColor);
-               arrow(x1, y1, x2, y2, d/8);
-
-               lineWidth(d/20);
-               color(backgroundColor);
-               arrow(x1, y1, x2, y2, d/8);
-            }
-
-            _g.restore();
-            annotateEnd();
          }
+	 else {
+            if (isBottomHover && ! isRightGesture) {
+               annotateStart();
+               _g.save();
+               _g.globalAlpha = 1.0;
+               lineWidth(1);
+
+               // FILL GREY BOXES AS PAGE NUMBER BACKGROUNDS
+
+               var numberSpacing = (w - margin) / sketchPages.length;
+               _g.fillStyle = scrimColor(.2);
+               for (var i = 0; i < w - margin; i += numberSpacing * 2) {
+                  _g.beginPath();
+
+                  _g.moveTo(leftX + i                , bottomY - margin);
+                  _g.lineTo(leftX + i + numberSpacing, bottomY - margin);
+                  _g.lineTo(leftX + i + numberSpacing, bottomY);
+                  _g.lineTo(leftX + i                , bottomY);
+
+                  _g.fill();
+               }
+
+               // DRAW OUTLINE AROUND CURRENT PAGE NUMBER
+
+               var currentPageX = pageIndex * numberSpacing;
+               lineWidth(0.75);
+               _g.globalAlpha = 1.0;
+               _g.strokeStyle = "rgb(255, 255, 255)";
+               _g.beginPath();
+
+               _g.moveTo(leftX + currentPageX                , bottomY - margin);
+               _g.lineTo(leftX + currentPageX + numberSpacing, bottomY - margin);
+               _g.lineTo(leftX + currentPageX + numberSpacing, bottomY);
+               _g.lineTo(leftX + currentPageX                , bottomY);
+               _g.lineTo(leftX + currentPageX                , bottomY - margin);
+
+               _g.stroke();
+
+               // DRAW PAGE NUMBERS IN SLIDE SWITCHER
+
+               _g.font = "14px Arial";
+               var pageNumber = floor((This().mouseY / (h - margin)) * sketchPages.length);
+               for (var pn = 0; pn < sketchPages.length; pn++) {
+                  var alpha = pageNumber == pn ? 0.8 : 0.35;
+                  _g.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+
+                  // MAKE SURE BOTH ONE AND TWO DIGIT NUMBERS ARE CENTERED
+
+                  var centerRatio = pn < 10 ? 0.57 : 0.75;
+                  _g.fillText(pn, (pn - centerRatio) * numberSpacing, h - _g.panY - margin * 0.5);
+               }
+
+               if (! isExpertMode) {
+                  var d = h / 10;
+                  var nn = pageToDirections(pageNumber), n1 = nn[0], n2 = nn[1];
+                  var x1 = w/2 - d * cos(n1 * TAU / 8);
+                  var y1 = h/2 + d * sin(n1 * TAU / 8);
+                  var x2 = x1  - d * cos(n2 * TAU / 8);
+                  var y2 = y1  + d * sin(n2 * TAU / 8);
+
+                  // OUTLINE OF A DOT TO REPRESENT INITIAL CLICK.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  fillOval(w/2 - d/12, h/2 - d/12, d/6, d/6);
+
+                  lineWidth(d/15);
+                  color(backgroundColor);
+                  fillOval(w/2 - d/20, h/2 - d/20, d/10, d/10);
+
+                  // OUTLINE OF AN ARROW TO REPRESENT FOLLOWING DRAG.
+
+                  lineWidth(d/12);
+                  color(defaultPenColor);
+                  arrow(x1, y1, x2, y2, d/8);
+
+                  lineWidth(d/20);
+                  color(backgroundColor);
+                  arrow(x1, y1, x2, y2, d/8);
+               }
+
+               _g.restore();
+               annotateEnd();
+	    }
+	 }
 
          if (visible_sp != null) {
             annotateStart();
@@ -2329,26 +2525,39 @@
          if (isShowingNLParse)
             showNLParse();
 
-         // DRAW STRIP ALONG BOTTOM OF THE SCREEN.
+         // DRAW PAN STRIP.
 
          _g.save();
          _g.globalAlpha = 1.0;
 
-         if (this.mouseY >= h - margin || isBottomGesture) {
-            color(scrimColor(0.06));
-            fillRect(-_g.panX, h - margin, w, margin - 2);
+         if (! isVerticalPan) {
+            if (this.mouseY >= h - margin || isBottomGesture) {
+               color(scrimColor(0.06));
+               fillRect(-_g.panX, h - margin - _g.panY, w, margin - 2);
 
-            color(scrimColor(0.03));
-            var dx = margin / 2;
-            for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
-               fillRect(x, h - margin, dx/2, margin - 2);
+               color(scrimColor(0.03));
+               var dx = margin / 2;
+               for (var x = _g.panX % dx - _g.panX ; x < w - _g.panX ; x += dx)
+                  fillRect(x, h - margin - _g.panY, dx/2, margin - 2);
+            }
          }
+	 else {
+            if (this.mouseX >= w - margin || isRightGesture) {
+               color(scrimColor(0.06));
+               fillRect(w - margin - _g.panX, -_g.panY, margin - 2, h);
+
+               color(scrimColor(0.03));
+               var dy = 45;
+               for (var y = _g.panY % dy - _g.panY - dy/4 ; y < h - _g.panY ; y += dy)
+                  fillRect(w - margin - _g.panX, y, margin - 2, dy/2);
+            }
+	 }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
          lineWidth(0.25);
          color(defaultPenColor);
-         drawRect(-_g.panX, 0, w-1, h-1);
+         drawRect(-_g.panX, -_g.panY, w-1, h-1);
 
          _g.restore();
 
@@ -2754,7 +2963,7 @@
 
             this._dx = (b2[0] + b2[2]) / 2 - (b1[0] + b1[2]) / 2;
             this._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
-            this._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]);
+            this._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]) * pow((b2[2] - b2[0]) / this.sw, 0.2) * 1.03;
 
 	    delete this.bounds;
          }
@@ -2762,7 +2971,7 @@
          if (this._dx !== undefined) {
             this.xf[0] += this._dx;
             this.xf[1] += this._dy;
-            this.xf[4] *= this._ds * 1.1;
+            this.xf[4] *= this._ds;
          }
 
          for (var i = 0 ; i < min(this.sp.length, this.sp0.length) ; i++) {
@@ -2776,6 +2985,9 @@
          var y = ( b[1] + b[3] - height()    ) / 2 / pixelsPerUnit;
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
+
+         if (this.mesh.sc !== undefined)
+	    s *= this.mesh.sc;
 
          this.mesh.getMatrix()
              .identity()
@@ -2818,6 +3030,30 @@
             // FIND VISIBLE EDGES FOR THIS VIEW, THEN BUILD 3D EDGES TO DISPLAY WITH THE 3D MODEL.
 
             var visibleEdges = this.mesh.findVisibleEdges();
+
+	    // MW VISIBLE EDGE FIX
+	    // to restore previous algorithm, comment out the next two lines (and follow instructions below)
+
+	    var moreVisibleEdges = this.mesh.findMoreVisibleEdges();
+	    var newVisibleEdges = visibleEdges[0][1].concat(moreVisibleEdges[0][1]);
+
+	    // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
+	    // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
+	    // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
+
+	    // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
+	    visibleEdges[0][1] = newVisibleEdges;
+
+	    // console.log("length of first element of ve = " + visibleEdges[0].length);
+	    // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
+	    // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
+	    // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
+	    // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
+	    // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
+	    // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
+	    // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
+
+	    // FROM HERE FORWARD EVERYTHING IS THE SAME
 
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
@@ -2911,6 +3147,11 @@
        return addGeometryShaderSketch(new THREE.SphereGeometry(1.0, 21.0, 21.0), vertexShader, fragmentShader);
    }
 
+   // MW TORUS GEOMETRY
+   function addTorusShaderSketch(vertexShader, fragmentShader) {
+       return addGeometryShaderSketch(new THREE.TorusGeometry(1.0, 0.5, 11.0, 9.0), vertexShader, fragmentShader);
+   }
+
    function createMesh(geometry, vertexShader, fragmentShader) {
       return new THREE.Mesh(geometry, shaderMaterial(vertexShader, fragmentShader));
    }
@@ -2979,7 +3220,7 @@
       mesh.sketch = sketch;
       setMeshUpdateFunction(mesh);
 
-      if (mesh.material == blackMaterial)
+      if (mesh.material == bgMaterial())
          setMeshMaterialToRGB(mesh, paletteRGB[sketchPage.colorId]);
 
       addSketch(sketch);
@@ -2987,6 +3228,39 @@
       finishDrawingUnfinishedSketch();
       return sketch;
    }
+
+   function SketchTo3D() {
+      this.initSketchTo3D = function(label, curves, initMesh) {
+         this.labels = [ label ];
+         this.initMesh = initMesh;
+         this.curves = curves;
+      }
+      this.render = function(elapsed) {
+         m.save();
+         for (var n = 0 ; n < this.curves.length ; n++)
+            mCurve(this.curves[n]);
+         m.restore();
+         this.afterSketch(function() {
+            if (this.shapeSketch === undefined) {
+               glyphSketch = null;
+               this.shapeSketch = geometrySketch(this.initMesh());
+               this.shapeSketch.tX = this.tX + width() / 2;
+               this.shapeSketch.tY = this.tY + height() / 2;
+               this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
+               this.shapeSketch.fadeAway = 0.3;
+               this.shapeSketch.update = function(elapsed) {
+                  this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
+                  if (this.fadeAway == 1) {
+                     this.fadeAway = 0;
+                     delete this.update;
+                  }
+               }        
+               this.fadeAway = 1;
+            }
+         });
+      }
+   }
+   SketchTo3D.prototype = new Sketch;
 
    function setMeshUpdateFunction(mesh) {
       mesh.update = function() {
@@ -3053,11 +3327,13 @@
 
       // SAVE PAN VALUE FOR PREVIOUS PAGE
 
-      sketchPages[pageIndex].pan = _g.panX;
+      sketchPages[pageIndex].panX = _g.panX;
+      sketchPages[pageIndex].panY = _g.panY;
 
       // RESTORE PAN VALUE FOR NEXT PAGE
 
-      _g.panX = sketchPages[index].pan;
+      _g.panX = sketchPages[index].panX;
+      _g.panY = sketchPages[index].panY;
 
       // MAKE SURE SKETCH ACTION, BG-CLICK ACTION, CODE WIDGET, ETC ARE TURNED OFF.
 
@@ -3109,8 +3385,9 @@
 
       sketchTypeLabels = [];
 
-      for (var n = 0 ; n < sketchTypes.length ; n++)
-         registerSketch(sketchTypes[n]);
+      if (isRegisteringSketches)
+         for (var n = 0 ; n < sketchTypes.length ; n++)
+            registerSketch(sketchTypes[n]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
@@ -3230,5 +3507,4 @@
 
 var glyphs = [];
 loadGlyphArray(numericGlyphData);
-
 

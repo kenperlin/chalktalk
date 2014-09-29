@@ -841,7 +841,7 @@
 
    // CREATE A SPLINE GUIDED BY A PATH OF KEY POINTS.
 
-   function createSpline(keys, N) {
+   function makeSpline(keys, N) {
       function x(k) { return keys[k][0]; }
       function y(k) { return keys[k][1]; }
       function l(k) { return L[k]; }
