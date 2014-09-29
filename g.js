@@ -2986,6 +2986,9 @@
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
 
+         if (this.mesh.sc !== undefined)
+	    s *= this.mesh.sc;
+
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
@@ -3252,9 +3255,6 @@
                      delete this.update;
                   }
                }        
-               this.shapeSketch.mesh.update = function(elapsed) {
-                  this.getMatrix().scale(this.sc);
-               }
                this.fadeAway = 1;
             }
          });

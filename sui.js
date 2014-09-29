@@ -8,7 +8,7 @@
 	 ],
 	 function() {
             var node = root.addNode();
-            var shape = node.addGlobe(32,8, 0,2*PI, -PI,PI/3);
+            var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
 	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
             var material = new phongMaterial().setAmbient(.125,.15,.2)
 	                                      .setDiffuse(.125,.15,.2)
@@ -59,3 +59,41 @@
    }
    Radio.prototype = new SketchTo3D;
 
+/*
+   Need to add a shadow to the ball.
+*/
+
+   function Ball() {
+      this.initSketchTo3D(
+         "ball",
+	 [
+            makeOval(-1,-1, 2, 2, 20, TAU/2, -TAU/2)
+         ],
+	 function() {
+            var ball = root.addNode();
+            ball.ballMaterial = new phongMaterial().setAmbient(.3,.0,.0)
+	                                           .setDiffuse(.3,.0,.0)
+	                                           .setSpecular(.2,.2,.2,10);
+	    return ball;
+	 }
+      );
+      this.render = function(elapsed) {
+         Ball.prototype.render.call(this, elapsed);
+	 if (this.shapeSketch !== undefined) {
+	    var ball = this.shapeSketch.mesh;
+	    ball.update = function(elapsed) {
+	       if (ball.develop === undefined)
+	          ball.develop = 0;
+	       ball.develop = min(1, ball.develop + elapsed / 20);
+	       ball.theta = PI * sCurve(ball.develop);
+
+	       if (ball.shape !== undefined)
+	          ball.remove(ball.shape);
+	       ball.shape = ball.addGlobe(40, 16, 0, TAU, 0, ball.theta);
+	       ball.shape.getMatrix().rotateX(PI/2).translate(0,-cos(ball.theta),0);
+	       ball.shape.setMaterial(ball.ballMaterial);
+            }
+         }
+      }
+   }
+   Ball.prototype = new SketchTo3D;
