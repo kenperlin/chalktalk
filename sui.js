@@ -10,12 +10,9 @@
             var node = root.addNode();
             var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
 	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
-            var material = new phongMaterial().setAmbient(.125,.15,.2)
-	                                      .setDiffuse(.125,.15,.2)
-					      .setSpecular(.1,.1,.1,40);
+            var material = new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
             material.side = THREE.DoubleSide;
-            material.transparent = true;
-            material.opacity = 0.1;
+
             node.setMaterial(material);
 	    return node;
 	 }
