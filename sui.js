@@ -10,12 +10,9 @@
             var node = root.addNode();
             var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
 	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
-            var material = new phongMaterial().setAmbient(.125,.15,.2)
-	                                      .setDiffuse(.125,.15,.2)
-					      .setSpecular(.1,.1,.1,40);
+            var material = new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
             material.side = THREE.DoubleSide;
-            material.transparent = true;
-            material.opacity = 0.1;
+
             node.setMaterial(material);
 	    return node;
 	 }
@@ -59,10 +56,6 @@
    }
    Radio.prototype = new SketchTo3D;
 
-/*
-   Need to add a shadow to the ball.
-*/
-
    function Ball() {
       this.initSketchTo3D(
          "ball",
@@ -92,8 +85,25 @@
 	       ball.shape = ball.addGlobe(40, 16, 0, TAU, 0, ball.theta);
 	       ball.shape.getMatrix().rotateX(PI/2).translate(0,-cos(ball.theta),0);
 	       ball.shape.setMaterial(ball.ballMaterial);
+
+               if (ball.theta > PI/4) {
+                  var t = sin(min(PI/2, ball.theta));
+                  var r = t * 50 * ball.sc;
+	          var s = max(.5, ball.theta - PI/2) / (PI/2);
+                  var x = ball.sketch.tX - 30 * t * s;
+                  var y = ball.sketch.tY + 30 * t * s;
+	          annotateStart();
+		  var n = 20;
+	          for (var i = 0 ; i < n ; i += 3) {
+                     color('rgba(' + floor(lerp(i/n,0,32)) + ',0,0,' + lerp(i/n, 0.0, 0.1) + ')');
+	             var rr = lerp(t, 0.7, 1.1) * r - i;
+	             fillOval(x - rr, y - rr, 2 * rr, 2 * rr);
+                  }
+	          annotateEnd();
+               }
             }
          }
       }
    }
    Ball.prototype = new SketchTo3D;
+
