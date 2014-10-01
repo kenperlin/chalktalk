@@ -14,6 +14,14 @@
       return this;
    }
 
+   THREE.Object3D.prototype.setOpacity = function(opacity) {
+      this.material.opacity = opacity;
+      this.material.transparent = true;
+      for (var i = 0 ; i < this.children.length ; i++)
+         this.children[i].setOpacity(opacity);
+      return this;
+   }
+
    THREE.Object3D.prototype.getMatrix = function() {
       if (this.mat === undefined)
          this.mat = new M4();
