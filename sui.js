@@ -55,29 +55,41 @@
 	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
 	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
 	       this.digitsIndex = xx < -.4 ? 0 : xx < .4 ? 1 : 2;
+	       this.xx = xx;
 	       this.yy = yy;
 	    }
 	    sketch.mouseDrag = function(x, y) {
-	       var index = this.digitsIndex;
+	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
 	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
-	       var d = yy - this.yy;
-	       value = this.digits[index] - d / 20;
-	       if (value >= 10) {
-	          value -= 10;
-		  if (index > 0)
-		     this.digits[index-1]++;
-	       }
-	       else if (value < 0) {
-	          value += 10;
-		  if (index > 0)
-		     this.digits[index-1]--;
-	       }
+	       var index = this.digitsIndex;
+	       value = this.digits[index] - (yy - this.yy) / 20;
 	       this.digits[index] = max(0, min(9.99, value));
-	       console.log(d + " " + this.digits[index]);
 	    }
-	    sketch.mesh.update = function() {
+	    sketch.mouseUp = function(x, y) {
+	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
+	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
+	       if (abs(xx - this.xx) > abs(yy - this.yy))
+	          this.animateAbacus = this.animateAbacus === undefined ? true : undefined;
+	    }
+	    sketch.mesh.update = function(elapsed) {
 	       var sketch = this.sketch;
 	       var stones = this.stones;
+
+	       if (sketch.animateAbacus !== undefined)
+	          sketch.digits[2] += 16 * elapsed;
+
+               for (var index = 2 ; index >= 0 ; index--)
+	          if (sketch.digits[index] >= 10) {
+	             sketch.digits[index] -= 10;
+		     if (index > 0)
+		        sketch.digits[index-1]++;
+	          }
+	          else if (sketch.digits[index] < 0) {
+	             sketch.digits[index] += 10;
+		     if (sketch.digits[index] > 0)
+		        sketch.digits[index-1]--;
+	          }
+
 	       for (var i = 0 ; i < stones.children.length ; i++) {
 	          var n = i % 5;
 	          var d = sketch.digits[floor(i/5)];
