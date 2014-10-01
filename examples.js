@@ -350,7 +350,8 @@
    Control.prototype = new Sketch;
 
    function Diagram() {
-      this.labels = "refract scan square circle triangle flap".split(' ');
+      //this.labels = "refract scan square circle triangle flap".split(' ');
+      this.labels = "square circle triangle flap".split(' ');
 
       this.isWandering = false;
 
@@ -1028,7 +1029,8 @@
    Func.prototype = new Sketch;
 
    function Logic() {
-      this.labels = "buf and or xor not nand nor xnor".split(' ');
+      //this.labels = "buf and or xor not nand nor xnor".split(' ');
+      this.labels = "not".split(' ');
 
       this.IDENT = [[-.5,.4],[.5,0],[-.5,-.4],[-.5,.4]];
       this.AND   = [[-.5,.4]].concat(createArc(.1, 0, .4, PI/2, -PI/2, 12))

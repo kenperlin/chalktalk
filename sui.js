@@ -10,8 +10,8 @@
             var node = root.addNode();
             var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
 	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
-            var material = new phongMaterial().setAmbient(.1,.1,.2)
-	                                      .setDiffuse(.1,.1,.2)
+            var material = new phongMaterial().setAmbient(.2,.2,.4)
+	                                      .setDiffuse(.2,.2,.4)
 	                                      .setSpecular(.4,.4,.4,10);
             material.side = THREE.DoubleSide;
 
@@ -135,11 +135,7 @@
             abacus.addCylinder(16).getMatrix().translate(-.6,0,0).scale(.03,1,.03);
             abacus.addCylinder(16).getMatrix().translate(  0,0,0).scale(.03,1,.03);
             abacus.addCylinder(16).getMatrix().translate( .6,0,0).scale(.03,1,.03);
-/*
-            abacus.setMaterial(new phongMaterial().setAmbient(.4,.2,.1)
-	                                          .setDiffuse(.4,.2,.1)
-	                                          .setSpecular(.1,.1,.1,10));
-*/
+
             var stones = abacus.addNode();
 	    for (var i = 0 ; i < 3 ; i++) {
 	       var x = -.6 + .6 * i;
