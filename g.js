@@ -3017,6 +3017,11 @@
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
+	 else if (this.mesh.material.alpha !== undefined) {
+            this.mesh.material.transparent = true;
+            this.mesh.material.opacity = this.mesh.material.alpha;
+	    this.mesh.material.alpha = undefined;
+	 }
 
          if (this.visibleEdgesMesh !== undefined)
             sketchPage.scene.remove(this.visibleEdgesMesh);

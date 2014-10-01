@@ -10,7 +10,9 @@
             var node = root.addNode();
             var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
 	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
-            var material = new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
+            var material = new phongMaterial().setAmbient(.1,.1,.2)
+	                                      .setDiffuse(.1,.1,.2)
+	                                      .setSpecular(.4,.4,.4,10);
             material.side = THREE.DoubleSide;
 
             node.setMaterial(material);
@@ -106,4 +108,55 @@
       }
    }
    Ball.prototype = new SketchTo3D;
+
+   function Abacus() {
+      this.initSketchTo3D(
+         "abacus",
+         [
+	    [[-1,1],[1,1],[1,-1],[-1,-1],[-1,1]],
+	    [[ -1,.5],[  1,.5]],
+	    [[-.5, 1],[-.5,-1]],
+	    [[  0, 1],[  0,-1]],
+	    [[ .5, 1],[ .5,-1]],
+         ],
+         function() {
+            var abacus = root.addNode();
+            abacus.addCylinder(16).getMatrix().translate( 0,  1,0).rotateZ(PI/2).scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 0, .5,0).rotateZ(PI/2).scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 0, -1,0).rotateZ(PI/2).scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate(-1, 0,0)               .scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 1, 0,0)               .scale(.05,1 ,.1);
+
+            abacus.addGlobe(16, 8).getMatrix().translate(-1, 1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate( 1, 1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate(-1,-1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate( 1,-1,0)               .scale(.05,.05,.1);
+
+            abacus.addCylinder(16).getMatrix().translate(-.6,0,0).scale(.03,1,.03);
+            abacus.addCylinder(16).getMatrix().translate(  0,0,0).scale(.03,1,.03);
+            abacus.addCylinder(16).getMatrix().translate( .6,0,0).scale(.03,1,.03);
+/*
+            abacus.setMaterial(new phongMaterial().setAmbient(.4,.2,.1)
+	                                          .setDiffuse(.4,.2,.1)
+	                                          .setSpecular(.1,.1,.1,10));
+*/
+            var stones = abacus.addNode();
+	    for (var i = 0 ; i < 3 ; i++) {
+	       var x = -.6 + .6 * i;
+	       for (var j = 0 ; j < 6 ; j++)
+	          if (j != 4) {
+	             var y = -.8 + j * .3;
+	             stones.addGlobe(16,8).getMatrix().translate(x,y,0).scale(.2,.155,.2);
+                  }
+            }
+
+            abacus.setMaterial(new phongMaterial().setAmbient(.2,.1,.05)
+	                                          .setDiffuse(.2,.1,.05)
+	                                          .setSpecular(.2,.2,.2,20));
+
+	    return abacus;
+         }
+      );
+   }
+   Abacus.prototype = new SketchTo3D;
 
