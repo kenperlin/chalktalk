@@ -246,7 +246,7 @@ THREE.Object3D.prototype.addIceCreamCone = function() {
 
   var that = this;
 
-  loader.load( 'assets/models/iceCream.obj', function ( object ) {
+  loader.load( 'assets/models/iceCreamCone.obj', function ( object ) {
 
       that.add(object);
       // object.children[0].geometry.computeCentroids();
@@ -257,7 +257,7 @@ THREE.Object3D.prototype.addIceCreamCone = function() {
     });
 }
 
-function iceCreamCone(){
+function iceCream(){
 
     root.addIceCreamCone()
   
