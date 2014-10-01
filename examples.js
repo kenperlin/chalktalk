@@ -1029,8 +1029,7 @@
    Func.prototype = new Sketch;
 
    function Logic() {
-      //this.labels = "buf and or xor not nand nor xnor".split(' ');
-      this.labels = "not".split(' ');
+      this.labels = "buf and or xor not nand nor xnor".split(' ');
 
       this.IDENT = [[-.5,.4],[.5,0],[-.5,-.4],[-.5,.4]];
       this.AND   = [[-.5,.4]].concat(createArc(.1, 0, .4, PI/2, -PI/2, 12))

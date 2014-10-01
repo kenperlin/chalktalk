@@ -885,7 +885,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
       var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
-
       color(backgroundColor == 'white' ? 'rgba(224,224,255,' + (0.5 * fade) + ')'
                                        : 'rgba(  0,  0,255,' + (0.2 * fade) + ')');
       fillCurve(c);

@@ -75,7 +75,7 @@ var greenScreen = {
       <table width=1280>\
       <tr height=50></tr>\
       <tr>\
-         <th><video class=vid width='60%' height='auto'>\
+         <th><video style='-webkit-transform: scale(-1,-1); transform: scale(-1,-1);' class=vid width='60%' height='auto'>\
             <source src='videos/IMG_1239.MOV'>\
             </video></th>\
          </tr>\
