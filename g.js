@@ -3329,6 +3329,7 @@
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+
       if (index < 0 || index >= sketchPages.length)
          return;
 
