@@ -1,5 +1,4 @@
-var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S Flower Lens Radio Ball Abacus".split(' ');
+"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S Flower Lens Typewriter Tablet Radio Ball Abacus OldCamera Television Scroll".split(' ');
 
 function blankPage() {
    return {

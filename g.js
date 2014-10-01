@@ -565,12 +565,12 @@
 ///////////////////////// GOING TO BE MOVED /////////////////////////
 
    function importSketch(filename) {
-      var sketchRequest = new XMLHttpRequest();
-      sketchRequest.open("GET", "sketches/" + filename);
-      sketchRequest.onloadend = function() {
-         window.eval(sketchRequest.responseText);
-      }
-      sketchRequest.send();
+      // var sketchRequest = new XMLHttpRequest();
+      // sketchRequest.open("GET", "sketches/" + filename);
+      // sketchRequest.onloadend = function() {
+      //    window.eval(sketchRequest.responseText);
+      // }
+      // sketchRequest.send();
    }
 
    var ServerUtils = {};
@@ -598,22 +598,24 @@
 
    function gStart() {
 
+      preLoadObjs();
+
       // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
 
-      try {
-         var lsRequest = new XMLHttpRequest();
-         lsRequest.open("GET", "ls_sketches");
+  //     try {
+  //        var lsRequest = new XMLHttpRequest();
+  //        lsRequest.open("GET", "ls_sketches");
 
-         lsRequest.onloadend = function () {
-            if (lsRequest.responseText != "") {
-               var ls = lsRequest.responseText.trim().split("\n");
-               for (var i = 0; i < ls.length; i++)
-                  importSketch(ls[i]);
-            }
-         }
-         lsRequest.send();
-	 isRegisteringSketches = false;
-      } catch (e) { }
+  //        lsRequest.onloadend = function () {
+  //           if (lsRequest.responseText != "") {
+  //              var ls = lsRequest.responseText.trim().split("\n");
+  //              for (var i = 0; i < ls.length; i++)
+  //                 importSketch(ls[i]);
+  //           }
+  //        }
+  //        lsRequest.send();
+	 // isRegisteringSketches = false;
+  //     } catch (e) { }
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
