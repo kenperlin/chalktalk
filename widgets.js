@@ -681,6 +681,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           }
        };
 
+   var bookPaperColor = 'rgb(255,248,240)';
+
    function codeIsBook() {
       return codeSketch != null && codeSketch.isBook !== undefined;
    }
@@ -688,7 +690,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       return codeSketch == null ? null : codeSketch.code;
    }
    function codeSelectorBgColor() {
-      if (codeIsBook()) return 'white';
+      if (codeIsBook()) return bookPaperColor;
       return backgroundColor === 'white' ? 'rgba(0,0,0,0)'
                                          : 'rgba(128,192,255,' + (0.3 * codeSketch.fade()) + ')';
    }
@@ -698,7 +700,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                                          : 'rgba(192,224,255,' + codeSketch.fade() + ')';
    }
    function codeTextBgColor() {
-      if (codeIsBook()) return 'white';
+      if (codeIsBook()) return bookPaperColor;
       return 'rgba(0,0,0,0)';
    }
    function codeTextFgColor() {
