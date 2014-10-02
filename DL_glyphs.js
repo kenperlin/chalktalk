@@ -178,7 +178,7 @@ function preLoadObjs(){
  function Hammer() {
     this.initSketchTo3D(
        "hammer",
-   [[[0.1854977118,-0.9803303763],[-0.1825130855,-0.9803303763],[-0.1840867912,0.3576970607],[-0.4959237157,0.3576970607],[-0.4959237157,0.988862054],[0.4973346363,0.988862054],[0.4973346363,0.3669045917],[0.1870714176,0.3669045917],[0.1854977118,-0.9803303763],],],
+   [[[-0.9803303763,-0.1854977118],[-0.9803303763,0.1825130855],[0.3576970607,0.1840867912],[0.3576970607,0.4959237157],[0.988862054,0.4959237157],[0.988862054,-0.4973346363],[0.3669045917,-0.4973346363],[0.3669045917,-0.1870714176],[-0.9803303763,-0.1854977118],],],
 
    
       function() {
@@ -187,6 +187,25 @@ function preLoadObjs(){
         return Node;
       }
     );
+
+     this.render = function(elapsed) {
+        Hammer.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+
+        if (this.shapeSketch !== undefined) {
+          var ham = this.shapeSketch.mesh;
+
+            ham.update = function(elapsed) {
+              if(!this.count)
+                this.count=1;
+              else
+              this.count+=elapsed;
+              ham.getMatrix().rotateZ(Math.abs(Math.cos(this.count*3))*.5);
+            }
+        }
+      }
+
  }
  Hammer.prototype = new SketchTo3D;
 
