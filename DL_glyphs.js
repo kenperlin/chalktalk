@@ -30,6 +30,8 @@ function preLoadObjs(){
   loader.load( 'assets/models/hammer.obj',  function ( object ) {preLoaded.objs.hammer = object.children[0] } );
   loader.load( 'assets/models/spike.obj',  function ( object ) {preLoaded.objs.spike = object.children[0] } );
  loader.load( 'assets/models/telegraph.obj',  function ( object ) {preLoaded.objs.telegraph = object.children[0] } );
+ loader.load( 'assets/models/telegraphBase.obj',  function ( object ) {preLoaded.objs.telegraphBase = object.children[0] } );
+ loader.load( 'assets/models/telegraphButton.obj',  function ( object ) {preLoaded.objs.telegraphButton = object.children[0] } );
 
 
   var imgLoader = new THREE.ImageLoader( manager );
@@ -188,22 +190,59 @@ function preLoadObjs(){
   function Telegraph() {
     this.initSketchTo3D(
        "telegraph",
-   [[[-0.9953602138,-0.3121770153],[-0.9953602138,-0.06971190482],[1.010487519,-0.06971190482],[1.010487519,-0.3165854719],[-0.9953602138,-0.3165854719],],[[0.9046845613,0.278556163],[-0.5060215362,0.2697392499],[-0.5148384493,0.2300631409],[-0.8498811475,0.2300631409],[-0.8498811475,0.3446830113],[-0.5148384493,0.3358660982],[-0.5060215362,0.2609223368],],[[0.274275274,-0.06089499171],[0.274275274,0.4284436859],[0.1067539249,0.4284436859],[0.115570838,0.5298381867],[0.4550219927,0.5254297301],[0.4417966231,0.4284436859],[0.2875006437,0.4284436859],],[[0.7856562344,-0.06530344826],[0.7680224081,0.4284436859],[0.6093179722,0.4284436859],[0.6005010591,0.5430635563],[0.9311353007,0.5474720129],[0.9355437572,0.4284436859],[0.7768393213,0.4196267728],],],
-
+[[[-0.9953602138,-0.3121770153],[-0.9953602138,-0.06971190482],[1.010487519,-0.06971190482],[1.010487519,-0.3165854719],[-0.9953602138,-0.3165854719],],[[0.274275274,-0.09900632444],[0.274275274,0.4284436859],[0.1067539249,0.4284436859],[0.115570838,0.5298381867],[0.4550219927,0.5254297301],[0.4417966231,0.4284436859],[0.2875006437,0.4284436859],],[[0.7856562344,-0.06530344826],[0.7680224081,0.4284436859],[0.6093179722,0.4284436859],[0.6005010591,0.5430635563],[0.9311353007,0.5474720129],[0.9355437572,0.4284436859],[0.7768393213,0.4196267728],],[[0.9046845613,0.278556163],[-0.5060215362,0.2697392499],[-0.5148384493,0.2300631409],[-0.8498811475,0.2300631409],[-0.8498811475,0.3446830113],[-0.5148384493,0.3358660982],[-0.5060215362,0.2609223368],],],
    
       function() {
         var Node = root.addNode();
-        Node.add(preLoaded.objs.telegraph);
+        var button = preLoaded.objs.telegraphButton;
+        var base = preLoaded.objs.telegraphBase;
+
+        Node.add(preLoaded.objs.telegraphButton);
+        Node.add(preLoaded.objs.telegraphBase);
+
+        Node.button = preLoaded.objs.telegraphButton;
+        Node.base = preLoaded.objs.telegraphBase;
+
+        Node.button.position.x = .53;
+        Node.base.position.x = .262;
+
+
         return Node;
       }
     );
+
+    this.render = function(elapsed) {
+        Telegraph.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+       
+
+        if (this.shapeSketch !== undefined) {
+          var button = this.shapeSketch.mesh;
+          button.up = this;
+
+
+            button.update = function(elapsed) {
+
+            var pressed = 0;
+
+            if(isTelegraphKeyPressed !== undefined){
+              if(isTelegraphKeyPressed);
+                pressed = 1;
+            }
+
+            button.button.getMatrix().identity();
+            button.button.getMatrix().translate(.63,.161,0).rotateZ(pressed*.1);
+            }
+        }
+      }
  }
  Telegraph.prototype = new SketchTo3D;
 
   function Spike() {
     this.initSketchTo3D(
        "spike",
-   [[[0.0009509675805,-0.9381778461],[-0.162161925,0.6135988612],[-0.3032325347,0.79434558],[-0.2988240782,0.9265992766],[-0.1445280987,0.9706838422],[0.2213737953,0.9574584725],[0.2963175568,0.9177823635],[0.3183598395,0.7899371234],[0.1684723167,0.6180073178],[0.0009509675805,-0.9602201289],],],
+   [[[-0.000952313946,-0.9381778461],[0.1623915114,0.6135988612],[0.3036618467,0.79434558],[0.2992471488,0.9265992766],[0.1447327194,0.9706838422],[-0.221687213,0.9574584725],[-0.2967370787,0.9177823635],[-0.3188105686,0.7899371234],[-0.1687108372,0.6180073178],[-0.000952313946,-0.9602201289],],],
 
    
       function() {
