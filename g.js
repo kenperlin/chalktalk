@@ -3391,6 +3391,7 @@
 
       sketchTypeLabels = [];
 
+
       if (isRegisteringSketches)
          for (var n = 0 ; n < sketchTypes.length ; n++)
             registerSketch(sketchTypes[n]);
