@@ -185,6 +185,7 @@ function preLoadObjs(){
    
       function() {
         var Node = root.addNode();
+        preLoaded.objs.hammer.material.color = new THREE.Color( 0xeeaa77 );
         Node.add(preLoaded.objs.hammer);
         return Node;
       }
@@ -346,6 +347,8 @@ function preLoadObjs(){
    
       function() {
         var Node = root.addNode();
+        preLoaded.objs.spike.material.color = new THREE.Color( 0x887766 );
+
         Node.add(preLoaded.objs.spike);
         return Node;
       }
