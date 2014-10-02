@@ -302,6 +302,9 @@ function preLoadObjs(){
         Node.add(preLoaded.objs.telegraphButton);
         Node.add(preLoaded.objs.telegraphBase);
 
+        preLoaded.objs.telegraphButton.material.color = new THREE.Color(0xeeaa88);
+        preLoaded.objs.telegraphBase.material.color = new THREE.Color(0x665544);
+
         Node.button = preLoaded.objs.telegraphButton;
         Node.base = preLoaded.objs.telegraphBase;
 
