@@ -223,6 +223,65 @@ function preLoadObjs(){
         return Node;
       }
     );
+
+    this.render = function(elapsed) {
+       Book1.prototype.render.call(this, elapsed);
+       var sketch = this.shapeSketch;
+       if (sketch !== undefined) {
+          sketch.isBook = true;
+          sketch.code = [
+["page 1",
+"               \n" +
+"               \n" +
+"               It is a truth universally acknowledged, that a single man in possession of a\n" +
+"               good fortune, must be in want of a wife.\n" +
+"               \n" +
+"               However little known the feelings or views of such a man may be on his\n" +
+"               first entering a neighbourhood, this truth is so well fixed in the minds of\n" +
+"               the surrounding families, that he is considered the rightful property of some\n" +
+"               one or other of their daughters.\n" +
+"               \n" +
+"               'My dear Mr.  Bennet,' said his lady to him one day, 'have you heard that\n" +
+"               Netherfield Park is let at last?'\n" +
+"               \n" +
+"               Mr. Bennet replied that he had not.\n" +
+"               \n" +
+"               'But it is,' returned she; 'for Mrs.  Long has just been here, and she told me\n" +
+"               all about it.'\n" +
+"               \n" +
+"               Mr.  Bennet made no answer.  'Do you not want to know who has taken it?'\n" +
+"               cried his wife impatiently.\n" +
+"               \n" +
+"               'You want to tell me, and I have no objection to hearing it.'\n" +
+"               \n" +
+"               This was invitation enough.\n" +
+"               \n" +
+"               'Why, my dear, you must know, Mrs.  Long says that Netherfield is taken by\n" +
+"               a young man of large fortune from the north of England; that he came down\n" +
+"               on Monday in a chaise and four to see the place, and was so much delighted\n" +
+"               with it, that he agreed with Mr.  Morris immediately; that he is to take\n" +
+"               possession before Michaelmas, and some of his servants are to be in the\n" +
+"               house by the end of next week.'\n" +
+"               \n" +
+"               'What is his name?'\n" +
+"               \n" +
+"               'Bingley.'\n" +
+"               \n" +
+"               \n" +
+"               \n" +
+""],
+["page 2", ""],
+["page 3", ""],
+["page 4", ""],
+["page 5", ""],
+["page 6", ""],
+["page 7", ""],
+["page 8", ""],
+["page 9", ""],
+["page 10", ""],
+           ];
+       }
+    }
  }
  Book1.prototype = new SketchTo3D;
 
@@ -265,10 +324,8 @@ function preLoadObjs(){
 
             var pressed = 0;
 
-            // if(isTelegraphKeyPressed !== undefined){
               if(isTelegraphKeyPressed)
                 pressed = 1;
-            // }
 
             button.button.getMatrix().identity();
             button.button.getMatrix().translate(.63,.161,0).rotateZ(pressed*.1);
@@ -2357,3 +2414,4 @@ flago = {
         
     }
 }
+

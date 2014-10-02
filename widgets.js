@@ -681,21 +681,28 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           }
        };
 
+   function codeIsBook() {
+      return codeSketch != null && codeSketch.isBook !== undefined;
+   }
    function code() {
       return codeSketch == null ? null : codeSketch.code;
    }
    function codeSelectorBgColor() {
+      if (codeIsBook()) return 'white';
       return backgroundColor === 'white' ? 'rgba(0,0,0,0)'
                                          : 'rgba(128,192,255,' + (0.3 * codeSketch.fade()) + ')';
    }
    function codeSelectorFgColor() {
+      if (codeIsBook()) return 'black';
       return backgroundColor === 'white' ? bgScrimColor(codeSketch.fade())
                                          : 'rgba(192,224,255,' + codeSketch.fade() + ')';
    }
    function codeTextBgColor() {
+      if (codeIsBook()) return 'white';
       return 'rgba(0,0,0,0)';
    }
    function codeTextFgColor() {
+      if (codeIsBook()) return 'black';
       return (backgroundColor == 'white' ? 'rgba(0,112,224,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
    }
 
@@ -757,8 +764,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = "18px courier";
+         codeTextArea.style.font = codeIsBook() ? "17px serif" : "18px courier";
          codeTextArea.value = code()[codeSelector.selectedIndex][1];
+	 if (codeIsBook()) {
+            codeTextArea.style.width = '650px';
+	 }
          if (code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
@@ -836,6 +846,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       codeElement.style.left = x - w/2 + 10;
       codeElement.style.top = y + 5;
+
+      if (codeIsBook())
+         return;
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
