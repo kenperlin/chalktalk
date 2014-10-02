@@ -227,7 +227,7 @@ function preLoadObjs(){
             var pressed = 0;
 
             if(isTelegraphKeyPressed !== undefined){
-              if(isTelegraphKeyPressed);
+              if(isTelegraphKeyPressed)
                 pressed = 1;
             }
 

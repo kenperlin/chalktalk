@@ -290,8 +290,7 @@
 "'have you heard that Netherfield Park is let at last?'\n" +
 "\n" +
 "Mr. Bennet replied that he had not.\n" +
-""],
-["page 2",
+"\n" +
 "'But it is,' returned she; 'for Mrs.  Long has just\n" +
 "been here, and she told me all about it.'\n" +
 "\n" +
@@ -311,7 +310,16 @@
 "house by the end of next week.'\n" +
 "'What is his name?'\n" +
 "'Bingley.'\n"
-]
+],
+["page 2", ""],
+["page 3", ""],
+["page 4", ""],
+["page 5", ""],
+["page 6", ""],
+["page 7", ""],
+["page 8", ""],
+["page 9", ""],
+["page 10", ""],
       ];
 
       this.render = function(elapsed) {
