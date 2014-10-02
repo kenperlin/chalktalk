@@ -203,7 +203,8 @@ function preLoadObjs(){
                 this.count=1;
               else
               this.count+=elapsed;
-              ham.getMatrix().rotateZ(Math.abs(Math.cos(this.count*3))*.5);
+              // ham.getMatrix().identity();
+              ham.getMatrix().rotateZ(Math.abs(Math.cos(time*4))*.5);
             }
         }
       }
@@ -362,7 +363,8 @@ function preLoadObjs(){
                 this.count=1;
               else
               this.count+=elapsed;
-              spike.getMatrix().translate(0,Math.abs(Math.sin(this.count*3))*-.5,0);
+              // spike.getMatrix().identity();
+              spike.getMatrix().translate(0,Math.abs(Math.cos(time*4))*-.5,0);
             }
         }
       }
