@@ -302,8 +302,12 @@ function preLoadObjs(){
         Node.add(preLoaded.objs.telegraphButton);
         Node.add(preLoaded.objs.telegraphBase);
 
-        preLoaded.objs.telegraphButton.material.color = new THREE.Color(0xeeaa88);
-        preLoaded.objs.telegraphBase.material.color = new THREE.Color(0x665544);
+        preLoaded.objs.telegraphButton.material = new phongMaterial().setAmbient(.3,.0,.0)
+                                             .setDiffuse(.5,.45,.2)
+                                             .setSpecular(.5,.45,.2,30);
+        preLoaded.objs.telegraphBase.material = new phongMaterial().setAmbient(.2,.1,.0)
+                                             .setDiffuse(.2,.15,.1)
+                                             .setSpecular(.2,.2,.2,5);
 
         Node.button = preLoaded.objs.telegraphButton;
         Node.base = preLoaded.objs.telegraphBase;
