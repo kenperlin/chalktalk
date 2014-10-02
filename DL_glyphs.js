@@ -32,6 +32,7 @@ function preLoadObjs(){
  loader.load( 'assets/models/telegraph.obj',  function ( object ) {preLoaded.objs.telegraph = object.children[0] } );
  loader.load( 'assets/models/telegraphBase.obj',  function ( object ) {preLoaded.objs.telegraphBase = object.children[0] } );
  loader.load( 'assets/models/telegraphButton.obj',  function ( object ) {preLoaded.objs.telegraphButton = object.children[0] } );
+ loader.load( 'assets/models/book.obj',  function ( object ) {preLoaded.objs.book = object.children[0] } );
 
 
   var imgLoader = new THREE.ImageLoader( manager );
@@ -40,6 +41,8 @@ function preLoadObjs(){
   imgLoader.load( 'assets/textures/stone.jpg', function ( image ) {  preLoaded.tex.stone.image = image;  preLoaded.tex.stone.needsUpdate = true;} );
   preLoaded.tex.papyrus = new THREE.Texture();
   imgLoader.load( 'assets/textures/papyrus.jpg', function ( image ) {  preLoaded.tex.papyrus.image = image;  preLoaded.tex.papyrus.needsUpdate = true;} );
+  preLoaded.tex.book = new THREE.Texture();
+   imgLoader.load( 'assets/textures/book.jpg', function ( image ) {  preLoaded.tex.book.image = image;  preLoaded.tex.book.needsUpdate = true;} );
  
   return preLoaded.objs;
 
@@ -187,6 +190,23 @@ function preLoadObjs(){
  }
  Hammer.prototype = new SketchTo3D;
 
+
+ function Book1() {
+    this.initSketchTo3D(
+       "book1",
+   [[[-0.6661593447,-0.02114729705],[-0.6661593447,-1.007312912],[0.6892111311,-1.007312912],[0.6892111311,0.9893081115],[-0.6855911795,0.9893081115],[-0.6855911795,-0.01628933836],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        preLoaded.objs.book.material.map = preLoaded.tex.book;
+        Node.add(preLoaded.objs.book);
+        return Node;
+      }
+    );
+ }
+ Book1.prototype = new SketchTo3D;
+
   function Telegraph() {
     this.initSketchTo3D(
        "telegraph",
@@ -226,10 +246,8 @@ function preLoadObjs(){
 
             var pressed = 0;
 
-            if(isTelegraphKeyPressed !== undefined){
               if(isTelegraphKeyPressed)
                 pressed = 1;
-            }
 
             button.button.getMatrix().identity();
             button.button.getMatrix().translate(.63,.161,0).rotateZ(pressed*.1);
