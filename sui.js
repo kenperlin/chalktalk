@@ -75,6 +75,9 @@
 	       var sketch = this.sketch;
 	       var stones = this.stones;
 
+	       if (sketch.code == null)
+	          sketch.code = [["","000"]];
+
 	       if (sketch.animateAbacus !== undefined)
 	          sketch.digits[2] += 16 * elapsed;
 
@@ -89,6 +92,18 @@
 		     if (sketch.digits[index] > 0)
 		        sketch.digits[index-1]--;
 	          }
+
+               if (isCodeWidget && sketch == codeSketch) {
+	          sketch.oldDigits = sketch.newDigits;
+	          sketch.newDigits = floor(sketch.digits[0]) + "" +
+	                             floor(sketch.digits[1]) + "" +
+				     floor(sketch.digits[2]) ;
+                  if (sketch.newDigits != sketch.oldDigits) {
+		     sketch.code = [["", sketch.newDigits]];
+		     toggleCodeWidget();
+		     toggleCodeWidget();
+		  }
+	       }
 
 	       for (var i = 0 ; i < stones.children.length ; i++) {
 	          var n = i % 5;

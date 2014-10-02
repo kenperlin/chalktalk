@@ -112,8 +112,10 @@ function preLoadObjs(){
       function() {
 
         var Node = root.addNode();
+        var node = Node.addNode();
+	node.getMatrix().translate(0,.05,0);
 
-        Node.add(preLoaded.objs.scroll);
+        node.add(preLoaded.objs.scroll);
         preLoaded.objs.scroll.geometry.computeVertexNormals();
         preLoaded.objs.scroll.material.map = preLoaded.tex.papyrus;
 
