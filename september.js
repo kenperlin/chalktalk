@@ -170,7 +170,7 @@
          mCurve([[-1,0],[1,0]]);
          mCurve([[0,-1],[0,1]]);
 
-         var e = 1/30;
+         var e = 1/100;
          var C = [];
          for (var t = -1 ; t <= 1 ; t += e)
             C.push([t, this.f(t)]);

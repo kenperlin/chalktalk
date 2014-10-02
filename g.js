@@ -757,7 +757,7 @@
          This().setup();
       //}
 
-      pixelsPerUnit = 5.8 * height() / cameraFOV;
+      pixelsPerUnit = 5.8635 * height() / cameraFOV;
 
       // LOAD ALL THE SCRIBBLE GLYPHS.
 
@@ -3013,12 +3013,15 @@
             this.alpha = this.fadeAway > 0 ? this.fadeAway :
                          this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
                          sketchPage.fadeAway;
-            this.mesh.material.opacity = sCurve(this.alpha);
-            this.mesh.material.transparent = true;
+            this.mesh.setOpacity(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
+	 else if (this.mesh.material.alpha !== undefined) {
+            this.mesh.setOpacity(this.mesh.material.alpha);
+	    this.mesh.material.alpha = undefined;
+	 }
 
          if (this.visibleEdgesMesh !== undefined)
             sketchPage.scene.remove(this.visibleEdgesMesh);
@@ -3324,6 +3327,7 @@
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+
       if (index < 0 || index >= sketchPages.length)
          return;
 

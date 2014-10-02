@@ -1,6 +1,4 @@
-var sketchTypes =
-"Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S Flower Spike Telegraph Hammer Lens Typewriter Tablet Radio Ball OldCamera Television Scroll".split(' ');
-
+var sketchTypes = "Bird Control Diagram Graph Logic Func Physics IO Grid Lattice Motion Noises MothAndCandle Rocket Ray1 Vec4 Mat4 Cyl1 F1D F2D S2C C2S Flower Lens Typewriter Tablet Radio Ball Abacus OldCamera Television Scroll Reflect".split(' ');
 
 function blankPage() {
    return {
@@ -68,6 +66,22 @@ var page0 = {
       ["&nbsp;<p><big><b>My Textured Life</b></big>"],
       ["<i><small>Ken Perlin</small></i>"]
    ]
+};
+
+var greenScreen = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=50></tr>\
+      <tr>\
+         <th><video style='-webkit-transform: scale(-1,-1); transform: scale(-1,-1);' class=vid width='60%' height='auto'>\
+            <source src='videos/IMG_1239.MOV'>\
+            </video></th>\
+         </tr>\
+      </table>\
+   ",
+   template: "videos/IMG_1239.MOV"
 };
 
 var page1 = {
@@ -741,6 +755,7 @@ var page107 = {
 
 var sketchPages = [
    blankPage(),
+   greenScreen,
    title_page,
    page1,
    page2,

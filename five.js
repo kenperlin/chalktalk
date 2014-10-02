@@ -141,3 +141,37 @@ var printEdge = function(n, e) {
 };
 
 
+// our own version of something that attaches a mesh to glyph 
+// but this will never work
+
+/*
+function addMeshShadersEtc(mymesh, geometry, vertexShader, fragmentShader) {
+      sk().fadeAway = 1.0;
+      var mesh = createMesh(geometry, vertexShader, fragmentShader);
+      root.add(mesh);
+      mesh.sketch = geometrySketch(mesh);
+      mesh.sketch.fragmentShader = fragmentShader;
+      setMeshUpdateFunction(mesh);
+      return mesh.sketch;
+}
+
+
+var makeTexture = function(imgname) {
+
+    var texture = THREE.ImageUtils.loadTexture( "imgs/sumarian_texture.png" ); 
+    texture.wrapS = THREE.RepeatWrapping; 
+    texture.wrapT = THREE.RepeatWrapping; 
+    texture.repeat.set( 4, 4 );
+
+    return tex;
+}
+
+
+THREE.Object3D.prototype.addTorus = function(r, m, n) {
+      var geometry = torusGeometry(r, m, n);
+      var mesh = new THREE.Mesh( geometry, bgMaterial() );
+      this.add(mesh);
+      return mesh;
+}
+*/
+

@@ -1,60 +1,110 @@
 
-   function Lens() {
+   function Abacus() {
       this.initSketchTo3D(
-         "lens",
-	 [
-            makeOval(-1,-1.1, 2, 2.7, 20, TAU*5/8, TAU*7/8),
-            [[-.7,-.7],[.7,-.7]],
-	 ],
-	 function() {
-            var node = root.addNode();
-            var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
-	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
-            var material = new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
-            material.side = THREE.DoubleSide;
+         "abacus",
+         [
+	    [[-1,1],[1,1],[1,-1],[-1,-1],[-1,1]],
+	    [[ -1,.5],[  1,.5]],
+	    [[-.5, 1],[-.5,-1]],
+	    [[  0, 1],[  0,-1]],
+	    [[ .5, 1],[ .5,-1]],
+         ],
+         function() {
+            var abacus = root.addNode();
+            abacus.addCylinder(16).getMatrix().translate( 0,  1,0).rotateZ(PI/2).scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 0,.45,0).rotateZ(PI/2).scale(.10,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 0, -1,0).rotateZ(PI/2).scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate(-1, 0,0)               .scale(.05,1 ,.1);
+            abacus.addCylinder(16).getMatrix().translate( 1, 0,0)               .scale(.05,1 ,.1);
 
-            node.setMaterial(material);
-	    return node;
-	 }
+            abacus.addGlobe(16, 8).getMatrix().translate(-1, 1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate( 1, 1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate(-1,-1,0)               .scale(.05,.05,.1);
+            abacus.addGlobe(16, 8).getMatrix().translate( 1,-1,0)               .scale(.05,.05,.1);
+
+            abacus.addCylinder(16).getMatrix().translate(-.6,0,0).scale(.03,1,.03);
+            abacus.addCylinder(16).getMatrix().translate(  0,0,0).scale(.03,1,.03);
+            abacus.addCylinder(16).getMatrix().translate( .6,0,0).scale(.03,1,.03);
+
+            abacus.stones = abacus.addNode();
+	    for (var i = 0 ; i < 3 ; i++) {
+	       var x = -.6 + .6 * i;
+	       for (var j = 0 ; j < 6 ; j++)
+	          if (j != 4) {
+	             var y = (j == 5 ? 1.5 : j * .3) - .8;
+	             abacus.stones.addNode().addGlobe(16,8).getMatrix().translate(x,y,0).scale(.2,.155,.2);
+                  }
+            }
+
+            abacus.setMaterial(new phongMaterial().setAmbient(.2,.1,.05)
+	                                          .setDiffuse(.2,.1,.05)
+	                                          .setSpecular(.2,.2,.2,20));
+
+	    return abacus;
+         }
       );
-   }
-   Lens.prototype = new SketchTo3D;
+      this.render = function(elapsed) {
+         Abacus.prototype.render.call(this, elapsed);
+	 var sketch = this.shapeSketch;
+	 if (sketch !== undefined) {
+	    if (sketch.digits === undefined) {
+               sketch.digits = [0,0,0];
+               sketch.digitsIndex = 0;
+            }
+	    sketch.mouseDown = function(x, y) {
+	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
+	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
+	       this.digitsIndex = xx < -.4 ? 0 : xx < .4 ? 1 : 2;
+	       this.xx = xx;
+	       this.yy = yy;
+	    }
+	    sketch.mouseDrag = function(x, y) {
+	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
+	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
+	       var index = this.digitsIndex;
+	       value = this.digits[index] - (yy - this.yy) / 20;
+	       this.digits[index] = max(0, min(9.99, value));
+	    }
+	    sketch.mouseUp = function(x, y) {
+	       var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
+	       var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
+	       if (abs(xx - this.xx) > abs(yy - this.yy))
+	          this.animateAbacus = this.animateAbacus === undefined ? true : undefined;
+	    }
+	    sketch.mesh.update = function(elapsed) {
+	       var sketch = this.sketch;
+	       var stones = this.stones;
 
-   function Radio() {
-      this.initSketchTo3D(
-         "radio",
-	 [
-	    [[-1,-1.4],[-1,0]].concat(makeOval(-1,-1, 2, 2, 20, TAU/2, 0))
-	                      .concat([[1,0],[1,-1.4],[-1,-1.4]]),
-            makeOval(-.7,-.7, 1.4, 1.4, 20, TAU/2, -TAU/2)
-	 ],
-	 function() {
-            var radio = root.addNode();
+	       if (sketch.animateAbacus !== undefined)
+	          sketch.digits[2] += 16 * elapsed;
 
-	    var node = radio.addNode();
-	    node.getMatrix().translate(0,.2,0);
+               for (var index = 2 ; index >= 0 ; index--)
+	          if (sketch.digits[index] >= 10) {
+	             sketch.digits[index] -= 10;
+		     if (index > 0)
+		        sketch.digits[index-1]++;
+	          }
+	          else if (sketch.digits[index] < 0) {
+	             sketch.digits[index] += 10;
+		     if (sketch.digits[index] > 0)
+		        sketch.digits[index-1]--;
+	          }
 
-            var shape1 = node.addCylinder(32);
-	    shape1.getMatrix().rotateX(PI/2).scale(1,.5,1);
-
-            var shape2 = node.addCube();
-	    shape2.getMatrix().translate(0,-.7,0).scale(1,.7,.5);
-
-            var shapeMaterial = new phongMaterial().setAmbient(.1,.1,.1)
-	                                           .setDiffuse(.9,.9,.9);
-            radio.setMaterial(shapeMaterial);
-
-            var dial1 = node.addCylinder(32);
-	    dial1.getMatrix().rotateX(PI/2).translate(0,.2,0).scale(.7,.5,.7);
-            var dialMaterial = new phongMaterial().setAmbient(.1,.1,.1)
-	                                          .setDiffuse(.5,.5,.5);
-            dial1.setMaterial(dialMaterial);
-
-	    return radio;
+	       for (var i = 0 ; i < stones.children.length ; i++) {
+	          var n = i % 5;
+	          var d = sketch.digits[floor(i/5)];
+	          stones.children[i].getMatrix().identity();
+		  if (n==0 ? d % 5 >= 4 :
+		      n==1 ? d % 5 >= 3 :
+		      n==2 ? d % 5 >= 2 :
+		      n==3 ? d % 5 >= 1 : d >= 5)
+	             stones.children[i].getMatrix().translate(0, .1, 0);
+	       }
+	    }
 	 }
-      );
+      }
    }
-   Radio.prototype = new SketchTo3D;
+   Abacus.prototype = new SketchTo3D;
 
    function Ball() {
       this.initSketchTo3D(
@@ -106,4 +156,64 @@
       }
    }
    Ball.prototype = new SketchTo3D;
+
+   function Lens() {
+      this.initSketchTo3D(
+         "lens",
+	 [
+            makeOval(-1,-1.1, 2, 2.7, 20, TAU*5/8, TAU*7/8),
+            [[-.7,-.7],[.7,-.7]],
+	 ],
+	 function() {
+            var node = root.addNode();
+            var shape = node.addGlobe(32,8, 0,TAU, -PI,PI/3);
+	    shape.getMatrix().translate(0,.6,0).scale(.8,.8,-.8);
+            var material = new phongMaterial().setAmbient(.2,.2,.4)
+	                                      .setDiffuse(.2,.2,.4)
+	                                      .setSpecular(.4,.4,.4,10);
+            material.side = THREE.DoubleSide;
+
+            node.setMaterial(material);
+	    return node;
+	 }
+      );
+   }
+   Lens.prototype = new SketchTo3D;
+
+   function Radio() {
+      this.initSketchTo3D(
+         "radio",
+	 [
+	    [[-1,-1.4],[-1,0]].concat(makeOval(-1,-1, 2, 2, 20, TAU/2, 0))
+	                      .concat([[1,0],[1,-1.4],[-1,-1.4]]),
+            makeOval(-.7,-.7, 1.4, 1.4, 20, TAU/2, -TAU/2)
+	 ],
+	 function() {
+            var radio = root.addNode();
+
+	    var node = radio.addNode();
+	    node.getMatrix().translate(0,.2,0);
+
+            var shape1 = node.addCylinder(32);
+	    shape1.getMatrix().rotateX(PI/2).scale(1,.5,1);
+
+            var shape2 = node.addCube();
+	    shape2.getMatrix().translate(0,-.7,0).scale(1,.7,.5);
+
+            var shapeMaterial = new phongMaterial().setAmbient(.1,.1,.1)
+	                                           .setDiffuse(.9,.9,.9);
+            radio.setMaterial(shapeMaterial);
+
+            var dial1 = node.addCylinder(32);
+	    dial1.getMatrix().rotateX(PI/2).translate(0,.2,0).scale(.7,.5,.7);
+            var dialMaterial = new phongMaterial().setAmbient(.1,.1,.1)
+	                                          .setDiffuse(.5,.5,.5);
+            dial1.setMaterial(dialMaterial);
+
+	    return radio;
+	 }
+      );
+   }
+   Radio.prototype = new SketchTo3D;
+
 

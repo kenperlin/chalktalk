@@ -717,8 +717,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      + "</option>";
 
          codeElement.innerHTML =
-            "<button id=upload_button>upload</upload>"
-          + "<select id=code_selector onchange='setCodeAreaText()'>"
+          /*"<button id=upload_button>upload</upload>"
+          +*/"<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -726,7 +726,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
-
+/*
          uploadButton = document.getElementById("upload_button");
          uploadButton.onclick = function() {
             var uploadForm = new FormData();
@@ -742,7 +742,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             request.open("POST", "http://localhost:8888/upload");
             request.send(uploadForm);
          }
-
+*/
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.borderColor = codeTextFgColor();
@@ -885,7 +885,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
       var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
-
       color(backgroundColor == 'white' ? 'rgba(224,224,255,' + (0.5 * fade) + ')'
                                        : 'rgba(  0,  0,255,' + (0.2 * fade) + ')');
       fillCurve(c);

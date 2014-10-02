@@ -350,7 +350,8 @@
    Control.prototype = new Sketch;
 
    function Diagram() {
-      this.labels = "refract scan square circle triangle flap".split(' ');
+      //this.labels = "refract scan square circle triangle flap".split(' ');
+      this.labels = "square circle triangle flap".split(' ');
 
       this.isWandering = false;
 
