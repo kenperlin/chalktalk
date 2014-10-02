@@ -1,5 +1,5 @@
 var sketchTypes = (
-  "Abacus Ball Bird C2S Control Cyl1 Diagram F1D F2D Flower Teleg "
+  "Abacus Ball Bird C2S Control Cyl1 Diagram F1D F2D Flower Teleg PNP "
 + "Func Graph Lens Logic Grid Hammer IO Lattice Mat4 Motion "
 + "Noises MothAndCandle OldCamera Physics Radio Reflect Rocket Ray1 Vec4 S2C "
 + "Scroll Spike Typewriter Tablet Telegraph Television"

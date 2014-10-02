@@ -216,11 +216,18 @@
    }
    Radio.prototype = new SketchTo3D;
 
+   var morse = [
+      ".-",	"-...",	"-.-.",	"-..",	".",
+      "..-.",	"--.",	"....",	"..",	".---",
+      "-.-",	".-..",	"--",	"-.",	"---",
+      ".--.",	"--.-",	".-.",	"...",	"-",
+      "..-",	"...-",	".--",	"-..-",	"-.--",
+      "--..",
+   ];
+
    function Teleg() {
       this.labels = "teleg".split(' ');
-      this.code = [["", "now is the time"]];
-
-      this.msg = "..  .  .. .. ..  . .. ..    . .  . . .     ..  . . . .  .    ..  . .  .. ..  .";
+      this.code = [["", "sos"]];
 
       this.render = function(elapsed) {
          m.save();
@@ -229,12 +236,89 @@
          this.afterSketch(function() {
 	    if (this.nPorts == 0)
 	       this.addPort("f", 1, 1);
-            var n = floor(time / 0.1) % this.msg.length;
-	    var ch = this.msg.charAt(n);
-            this.setOutValue("f", ch != " " ? 300 : 0);
+
+            var pattern = "      ";
+            var msg = this.code[0][1];
+	    for (var n = 0 ; n < msg.length ; n++) {
+	       var cc = msg.charCodeAt(n);
+	       if (cc == 32)
+	          pattern += "   ";
+               else {
+	          var i = cc - 97;
+	          if (i >= 0 && i < morse.length) {
+		     var p = morse[i];
+		     for (var j = 0 ; j < p.length ; j++) {
+		        switch (p.charAt(j)) {
+			case ".":
+			   pattern += ". ";
+			   break;
+			case "-":
+			   pattern += "... ";
+			   break;
+			}
+		     }
+		  }
+               }
+	    }
+
+            var n = floor(time / 0.075) % pattern.length;
+	    isTelegraphKeyPressed = pattern.charAt(n) != " ";
+
+            this.setOutValue("f", isTelegraphKeyPressed ? 300 : 0);
          });
          m.restore();
       }
    }
    Teleg.prototype = new Sketch;
+
+   function PNP() {
+      this.labels = "pnp".split(' ');
+      this.code = [
+["page 1",
+"It is a truth universally acknowledged, that a\n" +
+"single man in possession of a good fortune, must be\n" +
+"in want of a wife.\n" +
+"\n" +
+"However little known the feelings or views of such\n" +
+"a man may be on his first entering a neighbourhood,\n" +
+"this truth is so well fixed in the minds of the\n" +
+"surrounding families, that he is considered the\n" +
+"rightful property of some one or other of their\n" +
+"daughters." +
+"\n" +
+"'My dear Mr.  Bennet,' said his lady to him one day,\n" +
+"'have you heard that Netherfield Park is let at last?'\n" +
+"\n" +
+"Mr. Bennet replied that he had not.\n" +
+""],
+["page 2",
+"'But it is,' returned she; 'for Mrs.  Long has just\n" +
+"been here, and she told me all about it.'\n" +
+"\n" +
+"Mr.  Bennet made no answer.  'Do you not want to know\n" +
+"who has taken it?' cried his wife impatiently.\n" +
+"'_You_ want to tell me, and I have no objection to\n" +
+"hearing it.'\n" +
+"\n" +
+"This was invitation enough.\n" +
+"\n" +
+"'Why, my dear, you must know, Mrs.  Long says that Netherfield\n" +
+"is taken by a young man of large fortune from the north of\n" +
+"England; that he came down on Monday in a chaise and four to\n" +
+"see the place, and was so much delighted with it, that he agreed\n" +
+"with Mr.  Morris immediately; that he is to take possession\n" +
+"before Michaelmas, and some of his servants are to be in the\n" +
+"house by the end of next week.'\n" +
+"'What is his name?'\n" +
+"'Bingley.'\n"
+]
+      ];
+
+      this.render = function(elapsed) {
+         m.save();
+	 mCurve([[-.7,0],[-.7,1],[.7,1],[.7,-1],[-.7,-1],[-.7,0]]);
+         m.restore();
+      }
+   }
+   PNP.prototype = new Sketch;
 

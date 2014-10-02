@@ -550,6 +550,7 @@
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
+   var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var margin = 50;
    var scribbleScale = margin;
