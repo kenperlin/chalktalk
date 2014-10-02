@@ -3,11 +3,14 @@
 // );
 [[[-0.6156199438,0.8056861794],[-0.5351238768,0.7938771798],[-0.4579206793,0.7637829594],[-0.3871995484,0.7170199381],[-0.3262559886,0.6551060873],[-0.2780600551,0.5805349865],[-0.2441753787,0.4970564834],[-0.2259369887,0.408244764],[-0.2247871368,0.3178386003],[-0.2407775538,0.2299052976],[-0.2725601812,0.1481119186],[-0.3188900672,0.07596656714],[-0.3782979774,0.01714122783],[-0.447875367,-0.02602146701],[-0.5243632071,-0.05217163469],[-0.6046113487,-0.05985556685],[-0.6851074155,-0.04804658202],[-0.7623106396,-0.01795236098],[-0.8330317179,0.02881070351],[-0.8939752906,0.09072452863],[-0.9421712373,0.1652956224],[-0.9760559143,0.24877417],[-0.9942943172,0.3375858601],[-0.9954441691,0.4279920238],[-0.9794537391,0.5159253559],[-0.9476711112,0.5977186903],[-0.901341212,0.6698640488],[-0.8419332889,0.7286894138],[-0.7723559518,0.7718520654],[-0.6958680851,0.7980022324],[-0.6156199438,0.8056861794],],[[0.1653455104,0.7856448749],[0.2458415773,0.7738358752],[0.3230447749,0.7437416549],[0.3937659058,0.6969786336],[0.4547094257,0.6350647838],[0.5029053725,0.5604936826],[0.5367900489,0.4770151796],[0.5550284522,0.3882034598],[0.5561783041,0.2977972961],[0.5401878737,0.2098639937],[0.5084052464,0.1280706147],[0.4620753471,0.05592526362],[0.4026674768,-0.002900076706],[0.3330900872,-0.04606277155],[0.256602247,-0.07221293923],[0.1763541055,-0.07989687139],[0.09585802541,-0.06808788622],[0.01865482787,-0.03799366586],[-0.05206629694,0.008769399829],[-0.1130098569,0.07068322461],[-0.1612057898,0.1452543181],[-0.1950904668,0.2287328657],[-0.2133288564,0.3175445554],[-0.2144787083,0.4079507191],[-0.1984882916,0.4958840515],[-0.1667056637,0.577677386],[-0.1203757783,0.6498227448],[-0.06096786797,0.7086481101],[0.008609515598,0.7518107606],[0.08509735573,0.7779609282],[0.1653455104,0.7856448749],],[[0.3702792642,-0.4028015391],[0.3381344406,-0.3758413645],[0.3215435639,-0.3115517172],[0.3173958447,-0.2400035614],[0.3277651427,-0.1808985632],[0.3516145279,-0.1311259331],[0.376500843,-0.1134981266],[0.3951655793,-0.1176458458],[0.4428643498,-0.1238674245],[0.4708614542,-0.1197197053],[0.4957477693,-0.08861181152],[0.5227079439,-0.08964874131],[0.5486311888,-0.106239618],[0.5952930295,-0.111424267],[0.6326225021,-0.1197197053],[0.6523241682,-0.136310582],[0.6885443224,-0.1312199376],[0.7587408342,-0.1035107882],[0.8862029215,-0.07025980896],[0.9065229644,-0.09057985185],[0.908370241,-0.1663181936],[0.9065229644,-0.2993221107],[0.8880501981,-0.4249369213],[0.8714247085,-0.4748133903],[0.8474101123,-0.4840497734],[0.7864499836,-0.456340624],[0.6996279822,-0.4101587083],[0.6257369171,-0.4009223252],[0.6109587041,-0.4230896447],[0.6072641508,-0.4341733045],[0.5536931287,-0.4360205811],[0.5038166597,-0.4323260278],[0.4650238506,-0.4046168784]]]
 
+
+
 function preLoadObjs(){
 
   preLoaded = {};
 
   preLoaded.objs = [];
+  preLoaded.tex = [];
 
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader( manager );
@@ -18,8 +21,24 @@ function preLoadObjs(){
   loader.load( 'assets/models/tv.obj', function ( object ) {      preLoaded.objs.push(object.children[0]);preLoaded.objs.tv = object.children[0];});
   loader.load( 'assets/models/scroll.obj', function ( object ) {  preLoaded.objs.push(object.children[0]);preLoaded.objs.scroll = object.children[0];});
   loader.load( 'assets/models/tablet.obj', function ( object ) {  preLoaded.objs.push(object.children[0]);preLoaded.objs.tablet = object.children[0];});
-  loader.load( 'assets/models/typewriter.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriter = object.children[0];});
-  
+  loader.load( 'assets/models/typewriter3.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriter = object.children[0];});
+  loader.load( 'assets/models/typewriterPaper.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterPaper = object.children[0];});
+  loader.load( 'assets/models/typewriterButtons.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterButtons = object.children[0];});
+  loader.load( 'assets/models/typewriterFrame.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterFrame = object.children[0];});
+
+
+  loader.load( 'assets/models/hammer.obj',  function ( object ) {preLoaded.objs.hammer = object.children[0] } );
+  loader.load( 'assets/models/spike.obj',  function ( object ) {preLoaded.objs.spike = object.children[0] } );
+ loader.load( 'assets/models/telegraph.obj',  function ( object ) {preLoaded.objs.telegraph = object.children[0] } );
+
+
+  var imgLoader = new THREE.ImageLoader( manager );
+
+  preLoaded.tex.stone = new THREE.Texture();
+  imgLoader.load( 'assets/textures/stone.jpg', function ( image ) {  preLoaded.tex.stone.image = image;  preLoaded.tex.stone.needsUpdate = true;} );
+  preLoaded.tex.papyrus = new THREE.Texture();
+  imgLoader.load( 'assets/textures/papyrus.jpg', function ( image ) {  preLoaded.tex.papyrus.image = image;  preLoaded.tex.papyrus.needsUpdate = true;} );
+ 
   return preLoaded.objs;
 
 }
@@ -68,7 +87,7 @@ function preLoadObjs(){
       function() {
 
         var Node = root.addNode();
-
+        preLoaded.objs.tv.geometry.computeVertexNormals();
         Node.add(preLoaded.objs.tv);
 
         return Node;
@@ -90,6 +109,13 @@ function preLoadObjs(){
         var Node = root.addNode();
 
         Node.add(preLoaded.objs.scroll);
+        preLoaded.objs.scroll.geometry.computeVertexNormals();
+        preLoaded.objs.scroll.material.map = preLoaded.tex.papyrus;
+
+        preLoaded.tex.papyrus.wrapS = THREE.RepeatWrapping;
+        preLoaded.tex.papyrus.wrapT = THREE.RepeatWrapping;
+        preLoaded.tex.papyrus.repeat.x=3;
+        preLoaded.tex.papyrus.repeat.y=1.1;
 
         return Node;
       }
@@ -108,7 +134,12 @@ function preLoadObjs(){
       function() {
 
         var Node = root.addNode();
-
+        preLoaded.objs.tablet.geometry.computeVertexNormals();
+        preLoaded.objs.tablet.material.map = preLoaded.tex.stone;
+       preLoaded.tex.stone.wrapS = THREE.RepeatWrapping;
+       preLoaded.tex.stone.wrapT = THREE.RepeatWrapping;
+       preLoaded.tex.stone.repeat.x=5;
+       preLoaded.tex.stone.repeat.y=5;
         Node.add(preLoaded.objs.tablet);
 
         return Node;
@@ -128,13 +159,78 @@ function preLoadObjs(){
 
         var Node = root.addNode();
 
-        Node.add(preLoaded.objs.typewriter);
+        Node.add(preLoaded.objs.typewriterButtons);
+        Node.add(preLoaded.objs.typewriterFrame);
+        Node.add(preLoaded.objs.typewriterPaper);
 
         return Node;
       }
     );
  }
  Typewriter.prototype = new SketchTo3D;
+
+
+ function Hammer() {
+    this.initSketchTo3D(
+       "hammer",
+   [[[0.1854977118,-0.9803303763],[-0.1825130855,-0.9803303763],[-0.1840867912,0.3576970607],[-0.4959237157,0.3576970607],[-0.4959237157,0.988862054],[0.4973346363,0.988862054],[0.4973346363,0.3669045917],[0.1870714176,0.3669045917],[0.1854977118,-0.9803303763],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        Node.add(preLoaded.objs.hammer);
+        return Node;
+      }
+    );
+ }
+ Hammer.prototype = new SketchTo3D;
+
+  function Telegraph() {
+    this.initSketchTo3D(
+       "telegraph",
+   [[[-0.9953602138,-0.3121770153],[-0.9953602138,-0.06971190482],[1.010487519,-0.06971190482],[1.010487519,-0.3165854719],[-0.9953602138,-0.3165854719],],[[0.9046845613,0.278556163],[-0.5060215362,0.2697392499],[-0.5148384493,0.2300631409],[-0.8498811475,0.2300631409],[-0.8498811475,0.3446830113],[-0.5148384493,0.3358660982],[-0.5060215362,0.2609223368],],[[0.274275274,-0.06089499171],[0.274275274,0.4284436859],[0.1067539249,0.4284436859],[0.115570838,0.5298381867],[0.4550219927,0.5254297301],[0.4417966231,0.4284436859],[0.2875006437,0.4284436859],],[[0.7856562344,-0.06530344826],[0.7680224081,0.4284436859],[0.6093179722,0.4284436859],[0.6005010591,0.5430635563],[0.9311353007,0.5474720129],[0.9355437572,0.4284436859],[0.7768393213,0.4196267728],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        Node.add(preLoaded.objs.telegraph);
+        return Node;
+      }
+    );
+ }
+ Telegraph.prototype = new SketchTo3D;
+
+  function Spike() {
+    this.initSketchTo3D(
+       "spike",
+   [[[0.0009509675805,-0.9381778461],[-0.162161925,0.6135988612],[-0.3032325347,0.79434558],[-0.2988240782,0.9265992766],[-0.1445280987,0.9706838422],[0.2213737953,0.9574584725],[0.2963175568,0.9177823635],[0.3183598395,0.7899371234],[0.1684723167,0.6180073178],[0.0009509675805,-0.9602201289],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        Node.add(preLoaded.objs.spike);
+        return Node;
+      }
+    );
+    this.render = function(elapsed) {
+        Spike.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+
+        if (this.shapeSketch !== undefined) {
+          var spike = this.shapeSketch.mesh;
+
+            spike.update = function(elapsed) {
+              if(!this.count)
+                this.count=1;
+              else
+              this.count+=elapsed;
+              spike.getMatrix().translate(0,Math.abs(Math.sin(this.count*3))*-.5,0);
+            }
+        }
+      }
+ }
+ Spike.prototype = new SketchTo3D;
 
 
 
