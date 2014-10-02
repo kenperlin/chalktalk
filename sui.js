@@ -216,4 +216,25 @@
    }
    Radio.prototype = new SketchTo3D;
 
+   function Teleg() {
+      this.labels = "teleg".split(' ');
+      this.code = [["", "now is the time"]];
+
+      this.msg = "..  .  .. .. ..  . .. ..    . .  . . .     ..  . . . .  .    ..  . .  .. ..  .";
+
+      this.render = function(elapsed) {
+         m.save();
+	 mLine([-1,1],[1, 1]);
+	 mLine([ 0,1],[0,-1]);
+         this.afterSketch(function() {
+	    if (this.nPorts == 0)
+	       this.addPort("f", 1, 1);
+            var n = floor(time / 0.1) % this.msg.length;
+	    var ch = this.msg.charAt(n);
+            this.setOutValue("f", ch != " " ? 300 : 0);
+         });
+         m.restore();
+      }
+   }
+   Teleg.prototype = new Sketch;
 
