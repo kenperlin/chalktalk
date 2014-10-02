@@ -302,12 +302,12 @@ function preLoadObjs(){
         Node.add(preLoaded.objs.telegraphButton);
         Node.add(preLoaded.objs.telegraphBase);
 
-        preLoaded.objs.telegraphButton.material = new phongMaterial().setAmbient(.3,.0,.0)
-                                             .setDiffuse(.5,.45,.2)
-                                             .setSpecular(.5,.45,.2,30);
-        preLoaded.objs.telegraphBase.material = new phongMaterial().setAmbient(.2,.1,.0)
-                                             .setDiffuse(.2,.15,.1)
-                                             .setSpecular(.2,.2,.2,5);
+        preLoaded.objs.telegraphButton.material = new phongMaterial().setAmbient (.15,.12,.06)
+                                                                     .setDiffuse (.30,.24,.12)
+                                                                     .setSpecular(.50,.40,.20,30);
+        preLoaded.objs.telegraphBase.material = new phongMaterial().setAmbient (.18,.10,.06)
+                                                                   .setDiffuse (.18,.10,.06)
+                                                                   .setSpecular(.2,.2,.2,5);
 
         Node.button = preLoaded.objs.telegraphButton;
         Node.base = preLoaded.objs.telegraphBase;
