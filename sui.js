@@ -231,7 +231,9 @@
    }
    Radio.prototype = new SketchTo3D;
 
-   var morse = [
+   // Letters A-Z in Morse Code.
+
+   var morseCode = [
       ".-",	"-...",	"-.-.",	"-..",	".",
       "..-.",	"--.",	"....",	"..",	".---",
       "-.-",	".-..",	"--",	"-.",	"---",
@@ -246,30 +248,26 @@
 
       this.render = function(elapsed) {
          m.save();
-	 mLine([-1,1],[1, 1]);
-	 mLine([ 0,1],[0,-1]);
+	 mLine([-1, -1], [1, -1]);
+	 mLine([ 1, -1], [1,  1]);
          this.afterSketch(function() {
 	    if (this.nPorts == 0)
-	       this.addPort("f", 1, 1);
+	       this.addPort("f", 1, 0);
 
             var pattern = "      ";
-            var msg = this.code[0][1];
+            var msg = this.code[0][1].toLowerCase();
 	    for (var n = 0 ; n < msg.length ; n++) {
 	       var cc = msg.charCodeAt(n);
 	       if (cc == 32)
 	          pattern += "   ";
                else {
 	          var i = cc - 97;
-	          if (i >= 0 && i < morse.length) {
-		     var p = morse[i];
+	          if (i >= 0 && i < morseCode.length) {
+		     var p = morseCode[i];
 		     for (var j = 0 ; j < p.length ; j++) {
 		        switch (p.charAt(j)) {
-			case ".":
-			   pattern += ". ";
-			   break;
-			case "-":
-			   pattern += "... ";
-			   break;
+			case ".": pattern += ". "  ; break;
+			case "-": pattern += "... "; break;
 			}
 		     }
 		  }
