@@ -24,11 +24,10 @@ var title_page = {
          <td>\
             <center>\
             <font color=white size=10>\
-            <b>Thinking procedurally</b>\
-            <p>\
-            <small>from magic blackboards\
-            <br>\
-            to the future</small>\
+	    <b>The Coming Age\
+	    <br>of Computer Graphics\
+	    <p>and the Evolution\
+	    <br>of Language</b>\
             <br>&nbsp;<p>\
             <i><small>Ken Perlin</small></i>\
             </font>\
@@ -127,6 +126,18 @@ var page3 = {
       <tr height=70></tr>\
       <tr>\
          <th width=600><img src=imgs/cad.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var cave_wall = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr>\
+         <th width=600 height=800><img src=imgs/cave.jpg width=100% height=100%></th>\
          </tr>\
       </table>\
    "
@@ -292,7 +303,7 @@ var page13 = {
    "
 };
 
-var page14 = {
+var marble_vase = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -318,7 +329,7 @@ var page16 = {
    "
 };
 
-var page17 = {
+var long_nose = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -375,7 +386,7 @@ var page101 = {
    "
 };
 
-var page102a = {
+var gertie = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -432,7 +443,7 @@ var page102 = {
    "
 };
 
-var page103 = {
+var gumball_machine = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -448,7 +459,7 @@ var page103 = {
    "
 };
 
-var page104 = {
+var arcade = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -476,12 +487,12 @@ var page104a = {
    "
 };
 
-var page104b = {
+var smith_ar = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2013</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>AR now</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/david_smith_ar_device.png width=500></th>\
@@ -490,12 +501,12 @@ var page104b = {
    "
 };
 
-var page104c = {
+var valve_vr = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2014</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>VR now</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/valve_vr_room.jpg width=600></th>\
@@ -504,12 +515,12 @@ var page104c = {
    "
 };
 
-var page104d = {
+var eyeglasses = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2019-2021</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>AR in 10 years</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/glasses2.jpg width=600></th>\
@@ -518,12 +529,12 @@ var page104d = {
    "
 };
 
-var page104e = {
+var contact_lens = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>2025-2030</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>AR in 25 years</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/contact_lens.jpg width=500></th>\
@@ -532,7 +543,7 @@ var page104e = {
    "
 };
 
-var page104f = {
+var rainbows_end = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -545,7 +556,7 @@ var page104f = {
    "
 };
 
-var page104g = {
+var kids_talking1 = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -555,7 +566,23 @@ var page104g = {
                                         buttons, menus and sliders<br>\
                                         to talk with each other</small><p>&nbsp;<p></font></th></tr>\
       <tr>\
-         <th><img src=imgs/kids-talking.jpg width=550></th>\
+         <th><img src=imgs/kids_talking1.jpg width=550></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var kids_talking2 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr><th><font size=10 color=white><small>Kids will evolve<br>\
+                                        language using whatever<br>\
+                                        is available.</small><p>&nbsp;<p></font></th></tr>\
+      <tr>\
+         <th><img src=imgs/kids_talking2.jpg width=550></th>\
          </tr>\
       </table>\
    "
@@ -574,7 +601,7 @@ var page104h = {
    "
 };
 
-var page104i = {
+var vi_hart = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -587,7 +614,7 @@ var page104i = {
    "
 };
 
-var page105 = {
+var ann_senghas = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -600,7 +627,7 @@ var page105 = {
    "
 };
 
-var page106 = {
+var child_gesture = {
    availableSketches: sketchTypes,
    pan: 0,
    innerHTML: "\
@@ -608,90 +635,6 @@ var page106 = {
       <tr height=180></tr>\
       <tr>\
          <th><img src=imgs/child_gesture.jpg width=500></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg1 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/1.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg2 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/2.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg3 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/3.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg4 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/4.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg5 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/5.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg6 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/6.jpg width=1200></th>\
-         </tr>\
-      </table>\
-   "
-};
-
-var pagemarg7 = {
-   availableSketches: sketchTypes,
-   pan: 0,
-   innerHTML: "\
-      <table width=1280>\
-      <tr>\
-         <th><img src=imgs/7.jpg width=1200></th>\
          </tr>\
       </table>\
    "
@@ -758,46 +701,53 @@ var page107 = {
    "
 };
 
+var kwalado = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=220></tr>\
+      <tr>\
+         <th width=600><img src=imgs/kwalado.jpg width=500></th>\
+         </tr>\
+      </table>\
+   "
+};
+
+var creolization = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th width=1000><img src=imgs/creolization.png width=1000></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var sketchPages = [
-   blankPage(),
-   greenScreen,
+   blankPage(), // clay_tablet,abacus,scroll,book,telegraph,tv,rocket, ... pendulum,oscillator,somewhere/rainbow
    title_page,
-   page1,
-   page2,
-   page3,
-   blankPage(),
-   page4,
-   page5,
-   page6,
-   page7,
-   page8,
-   blankPage(),
-   page10,
-   page11,
-   blankPage(),
-   page13,
-   page14,
-   blankPage(),
-   page16,
-   page17,
-   blankPage(),
-   page19,
-   page100,
-   page101,
-   page102a,
-   page102b,
-   page102c,
-   page103,
-   page104,
-   page104a,
-   page104b,
-   page104c,
-   page104d,
-   page104e,
-   page104f,
-   page104g,
-   /*page104h,
-   page104i,*/
-   page106b,
-   page106,
+   gertie,
+   cave_wall,
+   blankPage(), // flapping, bird
+   marble_vase,
+   blankPage(), // lathe, planet
+   gumball_machine,
+   kwalado,
+   arcade,
+   smith_ar,
+   valve_vr,
+   eyeglasses,
+   contact_lens,
+   blankPage(), // eyeball, contact lens
+   rainbows_end,
+   kids_talking1,
+   long_nose,
+   ann_senghas,
+   creolization,
+   kids_talking2,
+   child_gesture,
 ];

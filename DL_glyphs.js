@@ -113,6 +113,7 @@ function preLoadObjs(){
 
         var Node = root.addNode();
         var node = Node.addNode();
+	console.log(node.getMatrix());
 	node.getMatrix().translate(0,.05,0);
 
         node.add(preLoaded.objs.scroll);
@@ -319,6 +320,7 @@ function preLoadObjs(){
    
       function() {
         var Node = root.addNode();
+
         var button = preLoaded.objs.telegraphButton;
         var base = preLoaded.objs.telegraphBase;
 
@@ -328,6 +330,7 @@ function preLoadObjs(){
         preLoaded.objs.telegraphButton.material = new phongMaterial().setAmbient (.15,.12,.06)
                                                                      .setDiffuse (.30,.24,.12)
                                                                      .setSpecular(.50,.40,.20,30);
+
         preLoaded.objs.telegraphBase.material = new phongMaterial().setAmbient (.18,.10,.06)
                                                                    .setDiffuse (.18,.10,.06)
                                                                    .setSpecular(.2,.2,.2,5);
@@ -335,9 +338,11 @@ function preLoadObjs(){
         Node.button = preLoaded.objs.telegraphButton;
         Node.base = preLoaded.objs.telegraphBase;
 
-        Node.button.position.x = .53;
-        Node.base.position.x = .262;
+        Node.button.position.x = .53  - 0.1;
+        Node.base.position.x   = .262 - 0.1;
 
+        Node.button.position.y = -0.1;
+        Node.base.position.y   = -0.1;;
 
         return Node;
       }
