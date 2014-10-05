@@ -1436,7 +1436,7 @@ console.log("]");
             isVerticalPan = ! isVerticalPan;
             break;
          case '-':
-            toggleColorScheme();
+            this.toggleColorScheme();
             break;
          case '\\':
             isVerticalPan = ! isVerticalPan;

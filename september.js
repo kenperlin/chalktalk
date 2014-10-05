@@ -297,8 +297,6 @@
          m.save();
          m.translate(0,-1,0);
 
-	 console.log(this.wiggle);
-
          // STEM
 
 	 var s1 = this.wiggle * sin(1.5 * TAU * time);
