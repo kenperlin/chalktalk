@@ -405,7 +405,6 @@ var sketchToDelete = null;
          else {
             if (isRightGesture) {
                _g.panY = min(0, _g.panY + y - this.yDown);
-               console.log(_g.panY);
                return;
             }
 
@@ -556,10 +555,8 @@ var sketchToDelete = null;
 
          if (! isVerticalPan) {
             if (isBottomGesture) {
-               if (abs(_g.panX - this.panXDown) <= clickSize && y < height() - 100) {
-                  console.log("doing page clear");
+               if (abs(_g.panX - this.panXDown) <= clickSize && y < height() - 100)
                   this.clear();
-               }
                isBottomGesture = false;
                return;
             }
@@ -1331,10 +1328,6 @@ var sketchToDelete = null;
          case 'e':
             toggleCodeWidget();
             break;
-         case 'f':
-            if (isk())
-               console.log(sk().tX + " " + sk().tY + " " + sk().sc + " " + arrayToString(sk().xyz));
-            break;
          case 'g':
             this.toggleGroup();
             break;
@@ -1355,16 +1348,7 @@ var sketchToDelete = null;
                // CREATE AN OUTLINE DRAWING FOR THIS 3D OBJECT.
 
                var strokes = sk().mesh.toStrokes();
-/*
-console.log("strokes = [");
-for (var n = 0 ; n < strokes.length ; n++) {
-   console.log("   [");
-   for (var i = 0 ; i < strokes[n].length ; i++)
-      console.log("      [" + floor(strokes[n][i][0]) + "," + floor(strokes[n][i][1]) + "],");
-   console.log("   ]");
-}
-console.log("]");
-*/
+
                // COMPUTE PIXEL COORDS OF MATRIX ORIGIN.
 
                var m = sk().mesh.matrixWorld.elements;
@@ -1402,16 +1386,6 @@ console.log("]");
             break;
          case 'q':
             _g.query = 0;
-            break;
-/*
-            if (! isk() || sk().sp == visible_sp)
-               visible_sp = null;
-            else if (isk()) {
-               visible_sp = sk().sp;
-               for (var i = 0 ; i < visible_sp.length ; i++)
-                  console.log((i==0 ? "DISGARD " : visible_sp[i][0]==0 ? "MOVE_TO" : "LINE_TO ") + visible_sp[i]);
-            }
-*/
             break;
          case 'b':
          case 'r':

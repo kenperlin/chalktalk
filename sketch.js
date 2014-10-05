@@ -42,7 +42,8 @@
 
       this.arrowDrag = function(x, y) {
          var n = this.arrows.length - 1;
-         this.arrows[n][0].push([x,y]);
+	 if (this.arrows[n] !== undefined)
+            this.arrows[n][0].push([x,y]);
       }
 
       this.arrowEnd = function(x, y) {
@@ -1307,7 +1308,6 @@
             }
 	    drawCurve(C);
          }
-	 console.log("b : " + arrayToString(b));
 /*
 	 if (this.geoSketch !== undefined && b[0] > 0) {
 	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
@@ -1323,9 +1323,6 @@
             }
 
 	    var b2 = computeCurveBounds(this.sp, 1);
-
-console.log("b1: " + arrayToString(b1));
-console.log("b2: " + arrayToString(b2));
 
             this.geoSketch._dx = (b[0] + b[2]) / 2 - (b1[0] + b1[2]) / 2;
             this.geoSketch._dy = (b[1] + b[3]) / 2 - (b1[1] + b1[3]) / 2;

@@ -280,7 +280,6 @@
       this.wiggle = 0;
       this.wiggleTarget = 0;
       this.onSwipe = function(dx,dy) {
-         console.log("SWIPING " + pieMenuIndex(dx,dy));
          switch(pieMenuIndex(dx,dy)) {
          case 0: this.wiggleTarget = 0; break;
          case 1: this.tallTarget   = 1; break;

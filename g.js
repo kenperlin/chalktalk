@@ -1727,11 +1727,10 @@
    function directionsToPage(n1, n2) { return 8 * n1 + n2; }
    function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
 
-   // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+   // THIS NEEDS TO BE BUILT OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
 
    function bgGesture(n1, n2, s) {
       if (n2 === undefined) {
-         console.log(n1);
          switch (n1) {
          case 2: setPage(pageIndex - 1); break;
          case 6: setPage(pageIndex + 1); break;

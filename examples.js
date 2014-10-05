@@ -354,6 +354,7 @@
       this.labels = "square circle triangle flap".split(' ');
 
       this.isWandering = false;
+      this.isExiting = false;
 
       this.dragX = 0;
       this.dragY = 0;
@@ -365,15 +366,22 @@
          var dir = pieMenuIndex(dx, dy);
          switch (this.labels[this.selection]) {
          case "flap":
-            if (dir == 2) {
+	    switch (dir) {
+	    case 1:
+               this.exitTime = time;
+               this.isExiting = ! this.isExiting;
+	       break;
+	    case 2:
                this.wanderTime = time;
                this.isWandering = ! this.isWandering;
+	       break;
             }
 	    break;
          }
       }
 
       this.render = function() {
+
          var w = this.width;
          var h = this.height;
 	 if (isMakingGlyph) h = w;
@@ -762,6 +770,21 @@
                ox = w   * noise2(t/2, 10);
                oy = w/2 * noise2(t  , 20);
             }
+            if (this.isExiting) {
+	       if (this.exitDx === undefined)
+	          this.exitDx = [];
+               if (this.exitDx[this.id] == undefined)
+	          this.exitDx[this.id] = 2 * random() - 1;
+
+               var t = time - this.exitTime;
+               ox += w/2 * t * t * this.exitDx[this.id];
+               oy -= w/2 * t;
+            }
+
+	    // WHEN BIRD DISAPPEARS FROM VIEW, GET RID OF IT.
+
+	    if (this.cy() < -w/8)
+	       this.fadeAway = 1;
 
             var dx1 = w/4;
             var dy1 = 0;
@@ -793,6 +816,14 @@
                              [ox+x2, oy+y2],
                              [ox+x1, oy+y1],
                              [ox+x0, oy+y0] ]);
+
+               // INCREASE THE SIZE OF THE BOUNDING BOX
+               // TO MAKE IT EASIER TO DO GESTURES ON THE BIRD.
+
+               color(backgroundColor);
+	       line(ox-10, oy-50, ox+10, oy-50);
+	       line(ox-10, oy+50, ox+10, oy+50);
+
             });
 
             break;
