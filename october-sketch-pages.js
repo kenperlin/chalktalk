@@ -400,6 +400,19 @@ var gertie = {
    "
 };
 
+var compose_perform = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=100></tr>\
+      <tr>\
+         <th><img src=imgs/compose_perform.png width=1000></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var page102b = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -448,7 +461,7 @@ var gumball_machine = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=50></tr>\
+      <tr height=0></tr>\
       <tr><th><font size=10 color=black>This is the dawn of</font></th></tr>\
       <tr><th><font size=10 color=black>the age of computer graphics</font></th></tr>\
       <tr height=50></tr>\
@@ -492,7 +505,7 @@ var smith_ar = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>AR now</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>A.R. today</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/david_smith_ar_device.png width=500></th>\
@@ -506,7 +519,7 @@ var valve_vr = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>VR now</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>V.R. today</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/valve_vr_room.jpg width=600></th>\
@@ -520,7 +533,7 @@ var eyeglasses = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>AR in 10 years</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>A.R. in 10 years</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/glasses2.jpg width=600></th>\
@@ -534,7 +547,7 @@ var contact_lens = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr><th><font size=10 color=white>&nbsp;<br>AR in 25 years</font></th></tr>\
+      <tr><th><font size=10 color=white>&nbsp;<br>A.R. in 25 years</font></th></tr>\
       <tr height=100></tr>\
       <tr>\
          <th><img src=imgs/contact_lens.jpg width=500></th>\
@@ -561,8 +574,8 @@ var kids_talking1 = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=100></tr>\
-      <tr><th><font size=10 color=white><small>People don't need<br>\
+      <tr height=30></tr>\
+      <tr><th><font size=10 color=white><small>People don't use<br>\
                                         buttons, menus and sliders<br>\
                                         to talk with each other</small><p>&nbsp;<p></font></th></tr>\
       <tr>\
@@ -577,7 +590,7 @@ var kids_talking2 = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=100></tr>\
+      <tr height=30></tr>\
       <tr><th><font size=10 color=white><small>Kids will evolve<br>\
                                         language using whatever<br>\
                                         is available.</small><p>&nbsp;<p></font></th></tr>\
@@ -706,7 +719,7 @@ var kwalado = {
    pan: 0,
    innerHTML: "\
       <table width=1280>\
-      <tr height=220></tr>\
+      <tr height=170></tr>\
       <tr>\
          <th width=600><img src=imgs/kwalado.jpg width=500></th>\
          </tr>\
@@ -728,26 +741,27 @@ var creolization = {
 };
 
 var sketchPages = [
-   blankPage(), // clay_tablet,abacus,scroll,book,telegraph,tv,rocket, ... pendulum,oscillator,somewhere/rainbow
-   title_page,
-   gertie,
-   cave_wall,
-   blankPage(), // flapping, bird
-   marble_vase,
-   blankPage(), // lathe, planet
-   gumball_machine,
-   kwalado,
-   arcade,
-   smith_ar,
-   valve_vr,
-   eyeglasses,
-   contact_lens,
-   blankPage(), // eyeball, contact lens
-   rainbows_end,
-   kids_talking1,
-   long_nose,
-   ann_senghas,
-   creolization,
-   kids_talking2,
-   child_gesture,
+   blankPage(), // (4) clay_tablet,abacus,scroll,book,telegraph,tv,rocket, ... (17) pendulum,oscillator,moth/candle,somewhere/rainbow
+   title_page, // (1)
+   gertie, // (2)
+   compose_perform, // (2.5)
+   cave_wall, // (3) flapping, bird ... (5) flapping animates, bird animates
+   marble_vase, // (6)
+   blankPage(), // (7) lathe, planet
+   gumball_machine, // (8)
+   kwalado, // (9)
+   arcade, // (10)
+   smith_ar, // (11)
+   valve_vr, // (12)
+   eyeglasses, // (13)
+   contact_lens, // (14)
+   blankPage(), // (15) eyeball, contact lens
+   rainbows_end, // (16)
+   compose_perform, // (16.5)
+   kids_talking1, // (18)
+   long_nose, // (19)
+   ann_senghas, // (20)
+   creolization, // (21)
+   kids_talking2, // (22)
+   child_gesture, // (23)
 ];
