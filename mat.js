@@ -266,31 +266,37 @@
       mFillFace([[-1,-1],[1,-1],[1,1],[-1,1]]);
       mDrawFace([[-1,-1],[1,-1],[1,1],[-1,1]]);
    }
-   function standardView(x,y,phi,theta,psi,s) {
-      m.identity();
+   function standardView(x,y,phi,theta,psi,s, mat) {
+      if (mat === undefined)
+         mat = m;
 
-      m.translate(width()*x,height()*(1-y),0);
-      m.perspective(0,0,-width()*2);
+      mat.identity();
 
-      m.rotateX(phi);
-      m.rotateY(theta);
-      m.rotateZ(psi);
+      mat.translate(width()*x,height()*(1-y),0);
+      mat.perspective(0,0,-width()*2);
+
+      mat.rotateX(phi);
+      mat.rotateY(theta);
+      mat.rotateZ(psi);
 
       s *= width();
-      m.scale(s,-s,s);
+      mat.scale(s,-s,s);
    };
-   function standardViewInverse(x,y,phi,theta,psi,s) {
-      m.identity();
+   function standardViewInverse(x,y,phi,theta,psi,s, mat) {
+      if (mat === undefined)
+         mat = m;
+
+      mat.identity();
 
       s *= width();
-      m.scale(1/s,-1/s,1/s);
+      mat.scale(1/s,-1/s,1/s);
 
-      m.rotateZ(-psi);
-      m.rotateY(-theta);
-      m.rotateX(-phi);
+      mat.rotateZ(-psi);
+      mat.rotateY(-theta);
+      mat.rotateX(-phi);
 
-      m.perspective(0,0,width()*2);
-      m.translate(-width()*x,-height()*(1-y),0);
+      mat.perspective(0,0,width()*2);
+      mat.translate(-width()*x,-height()*(1-y),0);
    }
    function mLine(a,b) {
       var A = m.transform(a);
@@ -326,6 +332,12 @@
       for (var n = 0 ; n < c.length ; n++)
          cc.push(m.transform(c[n]));
       drawCurve(cc);
+   };
+   function mClosedCurve(c) {
+      var cc = [];
+      for (var n = 0 ; n < c.length ; n++)
+         cc.push(m.transform(c[n]));
+      drawClosedCurve(cc);
    };
    function mFillCurve(c) {
       var cc = [];

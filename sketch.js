@@ -695,7 +695,7 @@
       this.sketchState = 'finished';
       this.styleTransition = 0;
       this.sp = [];
-      this.standardView = function() {
+      this.standardView = function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
             .5 + this.tx() / width(),
@@ -703,9 +703,9 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            this.scale() / 14);
+            this.scale() / 14, matrix);
       }
-      this.standardViewInverse = function() {
+      this.standardViewInverse = function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardViewInverse(
             .5 + this.tx() / width(),
@@ -713,7 +713,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            this.scale() / 14);
+            this.scale() / 14, matrix);
       }
       this.tX = 0;
       this.tY = 0;
