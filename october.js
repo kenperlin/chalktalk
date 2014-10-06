@@ -56,10 +56,26 @@
    Reflect.prototype = new Sketch;
 
    function NGon() {
+      this.isFilled = false;
       this.P = null;
       this.mF = new M4();
       this.mI = new M4();
       this.labels = "triangle diamond pentagon hexagon".split(' ');
+      this.onSwipe = function(dx, dy) {
+         if (this.jP != -1)
+	    return;
+         switch (pieMenuIndex(dx, dy)) {
+	 case 0:
+	    break;
+	 case 1:
+	    break;
+	 case 2:
+	    break;
+	 case 3:
+	    this.isFilled = ! this.isFilled;
+	    break;
+	 }
+      }
       this.mouseDown = function(x, y) {
 	 this.standardView(this.mF);
 	 this.standardViewInverse(this.mI);
@@ -121,7 +137,10 @@
 	    case 'hexagon' : this.P = makeNgon(6); break;
 	    }
 	 }
-	 mClosedCurve(this.P);
+	 if (this.isFilled)
+	    mFillCurve(this.P);
+         else
+	    mClosedCurve(this.P);
       }
    }
    NGon.prototype = new Sketch;
