@@ -112,15 +112,15 @@
 	 }
       }
       this.render = function() {
+         function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 + TAU * (n-1) / n); }
          if (! isNumeric(this.xlo)) {
 	    switch (this.labels[this.selection]) {
-	    case 'triangle': this.P = makeOval(-1,-1,2,2, 4, TAU/4, TAU*5/4); break;
-	    case 'diamond' : this.P = makeOval(-1,-1,2,2, 5, TAU/4, TAU*5/4); break;
-	    case 'pentagon': this.P = makeOval(-1,-1,2,2, 6, TAU/4, TAU*5/4); break;
-	    case 'hexagon' : this.P = makeOval(-1,-1,2,2, 7, TAU/4, TAU*5/4); break;
+	    case 'triangle': this.P = makeNgon(3); break;
+	    case 'diamond' : this.P = makeNgon(4); break;
+	    case 'pentagon': this.P = makeNgon(5); break;
+	    case 'hexagon' : this.P = makeNgon(6); break;
 	    }
 	 }
-
 	 mClosedCurve(this.P);
       }
    }
