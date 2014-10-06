@@ -55,11 +55,11 @@
    }
    Reflect.prototype = new Sketch;
 
-   function Triangle() {
-      this.P = [ [0,1], [-1,-1], [1,-1] ];
+   function NGon() {
+      this.P = null;
       this.mF = new M4();
       this.mI = new M4();
-      this.labels = "triangle".split(' ');
+      this.labels = "triangle diamond pentagon hexagon".split(' ');
       this.mouseDown = function(x, y) {
 	 this.standardView(this.mF);
 	 this.standardViewInverse(this.mI);
@@ -107,13 +107,22 @@
 	    var q = this.mF.transform(this.P[j]);
 	    var r = this.mF.transform(this.P[k]);
 	    var a = [ (p[0] + r[0]) / 2, (p[1] + r[1]) / 2 ];
-            if (len(a[0] - q[0], a[1] - q[1]) <= clickSize)
+            if (len(a[0] - q[0], a[1] - q[1]) <= clickSize / 2)
 	       this.P.splice(j, 1);
 	 }
       }
       this.render = function() {
+         if (! isNumeric(this.xlo)) {
+	    switch (this.labels[this.selection]) {
+	    case 'triangle': this.P = makeOval(-1,-1,2,2, 4, TAU/4, TAU*5/4); break;
+	    case 'diamond' : this.P = makeOval(-1,-1,2,2, 5, TAU/4, TAU*5/4); break;
+	    case 'pentagon': this.P = makeOval(-1,-1,2,2, 6, TAU/4, TAU*5/4); break;
+	    case 'hexagon' : this.P = makeOval(-1,-1,2,2, 7, TAU/4, TAU*5/4); break;
+	    }
+	 }
+
 	 mClosedCurve(this.P);
       }
    }
-   Triangle.prototype = new Sketch;
+   NGon.prototype = new Sketch;
 
