@@ -200,6 +200,9 @@
    function Lightbulb() {
       this.labels = "lightbulb".split(' ');
       this.light = 0;
+      this.mouseDown = function(){};
+      this.mouseDrag = function(){};
+      this.mouseUp   = function(){};
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
 	 case 0:
@@ -217,7 +220,10 @@
 	 }
       }
       this.render = function(elapsed) {
+         if (this.nPorts == 0)
+	    this.addPort("light", 0, 0);
          var light = isDef(this.in[0]) ? this.inValue[0] : this.light;
+	 this.setOutValue("light", light);
          m.save();
 	    var C = [[-.5,-1.6],[-.55,-1],[-.7,-.7],[-.95,0],[-.7,.7],
 	             [0,1],

@@ -2241,10 +2241,10 @@ console.log(lo + " " + hi);
                   if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
                }
-               else {
+               else
                  for (var i = 0 ; i < S.in.length ; i++)
-                    S.outValue[i] = S.inValue[i];
-               }
+		    if (isDef(S.in[i]))
+                       S.outValue[i] = S.inValue[i];
             }
 
             // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.

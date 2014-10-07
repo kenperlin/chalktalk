@@ -1431,10 +1431,18 @@ var sketchToDelete = null;
          if (backgroundColor === 'white') {
             backgroundColor = 'black';
             defaultPenColor = 'white';
+	    paletteRGB[0][0] =
+	    paletteRGB[0][1] =
+	    paletteRGB[0][2] = 255;
+	    palette[0] = 'rgb(255,255,255)';
          }
          else {
             backgroundColor = 'white';
             defaultPenColor = 'black';
+	    paletteRGB[0][0] =
+	    paletteRGB[0][1] =
+	    paletteRGB[0][2] = 0;
+	    palette[0] = 'rgb(0,0,0)';
          }
 
          document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
