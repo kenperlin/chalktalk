@@ -163,7 +163,7 @@
    function Bounce() {
       this.labels = "bounce".split(' ');
       this.isBouncing = false;
-      this.by = 0;
+      this.bouncing = 0;
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
 	 case 1:
@@ -172,8 +172,9 @@
 	 }
       }
       this.render = function(elapsed) {
-	 this.by = this.isBouncing ? min(1, this.by + elapsed)
-	                           : max(0, this.by - elapsed);
+	 this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
+	                                 : max(0, this.bouncing - elapsed);
+         var bouncing = isDef(this.in[0]) ? this.inValue[0] : this.bouncing;
          m.save();
 	    this.afterSketch(function() {
 	       color(scrimColor(.25));
@@ -183,8 +184,8 @@
 	    mLine([-1,0],[1,0]);
 
 	    var s = sin(2 * TAU * time);
-	    var y = sqrt(.5 + .5 * s) * this.by;
-	    var h = 1 + min(0, .4 * s * abs(s)) * this.by;
+	    var y = sqrt(.5 + .5 * s) * bouncing;
+	    var h = 1 + min(0, .4 * s * abs(s)) * bouncing;
 	    var oval = makeOval(-.5,y,1,h, 32, -TAU/4, -TAU*5/4);
 	    this.afterSketch(function() {
 	       color(scrimColor(.25));
