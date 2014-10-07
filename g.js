@@ -2869,7 +2869,7 @@ console.log(lo + " " + hi);
       sk().outValue = [];
       sk().defaultValue = [];
       sk().portBounds = [];
-      sk().portLocation = [];
+      //sk().portLocation = [];
       sk().zoom = sketchPage.zoom;
       sk().isDrawingEnabled = false;
       if (sk() instanceof Sketch2D) {
