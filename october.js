@@ -199,19 +199,31 @@
 
    function Lightbulb() {
       this.labels = "lightbulb".split(' ');
+      this.light = 0;
+      this.onSwipe = function(dx, dy) {
+         switch (pieMenuIndex(dx, dy)) {
+	 case 1:
+	    this.light = 1 - this.light;
+	    break;
+	 }
+      }
       this.render = function(elapsed) {
          m.save();
-	    mCurve(makeSpline([[-.5,-1.6],[-.55,-1],[-.7,-.7],[-.95,0],[-.7,.7],[0,1],
-	                       [.7,.7],[.95,0],[.7,-.7],[.55,-1],[.5,-1.6]]));
+	    var C = [[-.5,-1.6],[-.55,-1],[-.7,-.7],[-.95,0],[-.7,.7],
+	             [0,1],
+	             [.7,.7],[.95,0],[.7,-.7],[.55,-1],[.5,-1.6]];
+	    mCurve(makeSpline(C));
+	    this.afterSketch(function() {
+	       color(scrimColor(this.light == 1 ? 1 : .25));
+	       mFillCurve(makeSpline(C));
+	       color(defaultPenColor);
+	    });
             mLine([-.45,-1.6],[.45,-1.6]);
-            mCurve([[-.45,-1.6],[-.5,-1.65],[-.5,-1.75],
-	            [-.45,-1.8],[-.5,-1.85],[-.5,-1.95],
-		    [-.45,-2.0],[-.5,-2.05],[-.5,-2.15],
-		    [-.45,-2.2],[-.3,-2.2]]);
-            mCurve([[.45,-1.6],[.5,-1.65],[.5,-1.75],
-	            [.45,-1.8],[.5,-1.85],[.5,-1.95],
-		    [.45,-2.0],[.5,-2.05],[.5,-2.15],
-		    [.45,-2.2],[.3,-2.2]]);
+	    for (var s = -1 ; s <= 1 ; s += 2)
+               mCurve([[s*.45,-1.6],[s*.5,-1.65],[s*.5,-1.75],
+	               [s*.45,-1.8],[s*.5,-1.85],[s*.5,-1.95],
+		       [s*.45,-2.0],[s*.5,-2.05],[s*.5,-2.15],
+		       [s*.45,-2.2],[s*.3,-2.2]]);
 	    mCurve(makeOval(-.3,-2.5,.6,.6,10,PI,2*PI));
          m.restore();
       }
