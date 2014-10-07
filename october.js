@@ -202,6 +202,9 @@
       this.light = 0;
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
+	 case 0:
+	    this.setColorId((this.colorId + 1) % palette.length);
+	    break;
 	 case 1:
 	    this.light = 1 - this.light;
 	    break;
@@ -214,11 +217,12 @@
 	             [.7,.7],[.95,0],[.7,-.7],[.55,-1],[.5,-1.6]];
 	    mCurve(makeSpline(C));
 	    this.afterSketch(function() {
-	       color(scrimColor(this.light == 1 ? 1 : .25));
+	       color(scrimColor(this.light == 1 ? 1 : .25, this.colorId));
 	       mFillCurve(makeSpline(C));
-	       color(defaultPenColor);
+	       color(palette[this.colorId]);
 	    });
-            mLine([-.45,-1.6],[.45,-1.6]);
+	    color(defaultPenColor);
+	    lineWidth(1);
 	    for (var s = -1 ; s <= 1 ; s += 2)
                mCurve([[s*.45,-1.6],[s*.5,-1.65],[s*.5,-1.75],
 	               [s*.45,-1.8],[s*.5,-1.85],[s*.5,-1.95],

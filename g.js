@@ -14,8 +14,11 @@
       return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
    }
 
-   function scrimColor(alpha) {
-      return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
+   function scrimColor(alpha, colorId) {
+      if (colorId === undefined)
+         colorId = 0;
+      var p = paletteRGB[colorId];
+      return 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + alpha + ')';
    }
 
    function bgScrimColor(alpha) {
