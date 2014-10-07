@@ -56,7 +56,10 @@
    Reflect.prototype = new Sketch;
 
    function NGon() {
-      this.isFilled = false;
+      var jNext = function(j, P) { return (j + 1) % P.length; }
+      var jPrev = function(j, P) { return (j - 1 + P.length) % P.length; }
+
+      this.fillMode = 0;
       this.P = null;
       this.mF = new M4();
       this.mI = new M4();
@@ -72,11 +75,12 @@
 	 case 2:
 	    break;
 	 case 3:
-	    this.isFilled = ! this.isFilled;
+	    this.fillMode = (this.fillMode + 1) % 3;
 	    break;
 	 }
       }
       this.mouseDown = function(x, y) {
+
 	 this.standardView(this.mF);
 	 this.standardViewInverse(this.mI);
 
@@ -116,8 +120,8 @@
 
          if (this.jP >= 0) {
 	    var j = this.jP;
-	    var i = (j - 1 + this.P.length) % this.P.length;
-	    var k = (j + 1) % this.P.length;
+	    var i = jPrev(j, this.P);
+	    var k = jNext(j, this.P);
 
 	    var p = this.mF.transform(this.P[i]);
 	    var q = this.mF.transform(this.P[j]);
@@ -137,11 +141,59 @@
 	    case 'hexagon' : this.P = makeNgon(6); break;
 	    }
 	 }
-	 if (this.isFilled)
-	    mFillCurve(this.P);
-         else
+	 switch (this.fillMode) {
+	 case 0:
 	    mClosedCurve(this.P);
+	    break;
+	 case 1:
+	    var c = _g.strokeStyle;
+	    color(scrimColor(0.25));
+	    mFillCurve(this.P);
+	    color(c);
+	    mClosedCurve(this.P);
+	    break;
+	 case 2:
+	    mFillCurve(this.P);
+	    break;
+         }
       }
    }
    NGon.prototype = new Sketch;
+
+   function Bounce() {
+      this.labels = "bounce".split(' ');
+      this.isBouncing = false;
+      this.by = 0;
+      this.onSwipe = function(dx, dy) {
+         switch (pieMenuIndex(dx, dy)) {
+	 case 1:
+	    this.isBouncing = ! this.isBouncing;
+	    break;
+	 }
+      }
+      this.render = function(elapsed) {
+	 this.by = this.isBouncing ? min(1, this.by + elapsed)
+	                           : max(0, this.by - elapsed);
+         m.save();
+	    this.afterSketch(function() {
+	       color(scrimColor(.25));
+	       mFillCurve([[-1,0],[1,0],[1,-.1],[-1,-.1]]);
+	       color(defaultPenColor);
+	    });
+	    mLine([-1,0],[1,0]);
+
+	    var s = sin(2 * TAU * time);
+	    var y = sqrt(.5 + .5 * s) * this.by;
+	    var h = 1 + min(0, .4 * s * abs(s)) * this.by;
+	    var oval = makeOval(-.5,y,1,h, 32, -TAU/4, -TAU*5/4);
+	    this.afterSketch(function() {
+	       color(scrimColor(.25));
+	       mFillCurve(oval);
+	       color(defaultPenColor);
+            });
+	    mCurve(oval);
+         m.restore();
+      }
+   }
+   Bounce.prototype = new Sketch;
 

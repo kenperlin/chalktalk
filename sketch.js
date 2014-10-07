@@ -160,6 +160,8 @@
             else
                dst[prop] = this[prop];
          }
+	 if (dst.initCopy !== undefined)
+	    dst.initCopy();
          return dst;
       }
       this.code = null;

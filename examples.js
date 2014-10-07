@@ -383,6 +383,11 @@
 
       this.render = function() {
 
+         this.initCopy = function() {
+            this.firstTime = undefined;
+            this.exitDx = undefined;
+         }
+
          var w = this.width;
          var h = this.height;
 	 if (isMakingGlyph) h = w;
@@ -750,10 +755,8 @@
 
          case "flap":
             var phase = 1;
-            if (this.firstTime === undefined) {
-               this.firstTime = true;
+            if (this.phaseOffset === undefined)
                this.phaseOffset = TAU * random();
-            }
             else
                phase = this.phaseOffset + 8 * time + 1;
             if (isNaN(phase)) phase = 1;
@@ -773,12 +776,10 @@
             }
             if (this.isExiting) {
 	       if (this.exitDx === undefined)
-	          this.exitDx = [];
-               if (this.exitDx[this.id] == undefined)
-	          this.exitDx[this.id] = 2 * random() - 1;
+	          this.exitDx = 2 * random() - 1;
 
                var t = time - this.exitTime;
-               ox += w/2 * t * t * this.exitDx[this.id];
+               ox += w/2 * t * t * this.exitDx;
                oy -= w/2 * t;
             }
 

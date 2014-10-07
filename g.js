@@ -3,7 +3,7 @@
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
    function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
-   function height() { return 720; }
+   //function height() { return 720; }
    //function height() { return 800; }
 
    function bgMaterial() {
@@ -1900,6 +1900,14 @@
          tt.pollState(tt.myState);
          for (var i = 0 ; i < 1024 ; i++)
             ttForce[i] = tt.myState.hmd.forces[i] / 4096;
+
+var hi = -10000, lo = 10000;
+for (var i = 0 ; i < 1024 ; i++) {
+   hi = max(hi, ttForce[i]);
+   lo = min(lo, ttForce[i]);
+}
+console.log(lo + " " + hi);
+
       }
    }
 
