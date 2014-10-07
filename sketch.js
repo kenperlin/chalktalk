@@ -1,7 +1,6 @@
 
    var paletteRGB = [
       [255,255,255],
-      [128, 50, 25],
       [255,  0,  0],
       [255,255,  0],
       [  0,255,  0],
@@ -14,16 +13,6 @@
       palette.push('rgb(' + paletteRGB[i][0] + ',' +
                             paletteRGB[i][1] + ',' +
                             paletteRGB[i][2] + ')' );
-/*
-      'white',
-      'rgb(128,50,25)',
-      'red',
-      'orange',
-      'green',
-      'blue',
-      'magenta',
-   ];
-*/
 
    function sketchColor() { return palette[sketchPage.colorId]; }
 
