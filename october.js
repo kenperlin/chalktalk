@@ -175,10 +175,11 @@
 	 this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
 	                                 : max(0, this.bouncing - elapsed);
          var bouncing = isDef(this.in[0]) ? this.inValue[0] : this.bouncing;
+
          m.save();
 	    this.afterSketch(function() {
 	       color(scrimColor(.25));
-	       mFillCurve([[-1,0],[1,0],[1,-.1],[-1,-.1]]);
+	       mFillCurve([[-1,0],[1,0],[1,-.15],[-1,-.15]]);
 	       color(defaultPenColor);
 	    });
 	    mLine([-1,0],[1,0]);
@@ -194,6 +195,10 @@
             });
 	    mCurve(oval);
          m.restore();
+
+         if (this.nPorts == 0)
+	    this.addPort("y", 0, 0);
+	 this.setOutValue("y", y);
       }
    }
    Bounce.prototype = new Sketch;
