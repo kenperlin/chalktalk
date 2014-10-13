@@ -3,16 +3,13 @@
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
    function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+
+   // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
+
    //function height() { return 720; }
    //function height() { return 800; }
 
-   function bgMaterial() {
-      return backgroundColor == 'white' ? whiteMaterial : blackMaterial;
-   }
-
-   function penMaterial() {
-      return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
-   }
+   // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
    function scrimColor(alpha, colorId) {
       if (colorId === undefined)
@@ -21,9 +18,13 @@
       return 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + alpha + ')';
    }
 
+   // TRANSPARENT INK IN THE BACKGROUND COLOR.
+
    function bgScrimColor(alpha) {
       return (backgroundColor != 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
    }
+
+   // LEFT AND TOP COORDINATES OF THE CURRENTLY VISIBLE CANVAS.
 
    function clientX(event) {
       if (isDef(_g.panX)) return event.clientX - _g.panX;
@@ -35,7 +36,9 @@
       return event.clientY;
    }
 
+////////////////////////////////////////////////////////////////
 // INITIALIZE HANDLING OF KEYBOARD AND MOUSE EVENTS ON A CANVAS:
+////////////////////////////////////////////////////////////////
 
    var mouseMoveEvent = null;
 
@@ -96,8 +99,6 @@
 
       canvas.onmousedown = function(event) {
 
-
-
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
          if ((event.which && event.which !== 1) ||
@@ -118,7 +119,6 @@
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
-
 
          if (isDef(handle.mouseDown))
             handle.mouseDown(handle.mouseX, handle.mouseY);
@@ -280,6 +280,8 @@
    function noiseX(x,y) { return _nA * _noise(_nF*x, _nF*y); }
    function noiseY(x,y) { return _nA * _noise(_nF*x, _nF*(y+128)); }
 
+   // ADD NOISE TO THE X AND Y VALUE OF A POINT ON A LINE BEING DRAWN.
+
    function snx(sketch,x,y) {
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
@@ -309,11 +311,27 @@
       return y + amp * noiseY(x - dx, y - dy + seed);
    }
 
+   // WRAPPER FUNCTIONS AROUND STARTING AND ENDING DRAWING A SKETCH.
+
+   function _g_sketchStart() {
+      _g.xp1 = sk().xStart;
+      _g.yp1 = sk().yStart;
+      _g.inSketch = true;
+   }
+
+   function _g_sketchEnd() {
+      _g.inSketch = false;
+   }
+
+   // SET OR GET CANVAS LINE WIDTH, DEPENDING ON WHETHER AN ARGUMENT IS SPECIFIED.
+
    function lineWidth(w) {
       if (isDef(w))
          _g.lineWidth = w;
       return _g.lineWidth;
    }
+
+   // MOVE_TO AND LINE_TO WHILE POSSIBLY ADDING NOISE.
 
    var prev_x = 0, prev_y = 0;
 
@@ -342,16 +360,6 @@
          _g.lineTo(x, y);
       else
          _g_sketchTo(x, y, 1);
-   }
-
-   function _g_sketchStart() {
-      _g.xp1 = sk().xStart;
-      _g.yp1 = sk().yStart;
-      _g.inSketch = true;
-   }
-
-   function _g_sketchEnd() {
-      _g.inSketch = false;
    }
 
    function _g_sketchTo(x, y, isLine) {
@@ -447,6 +455,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
+   // FROM A SKETCH, BUILD A TRACE (AN ARRAY OF CURVES).
+
    function sketchToTrace(sketch) {
       var src = sketch.sp;
       var dst = [];
@@ -455,12 +465,16 @@
       return dst;
    }
 
+   // COMPUTE THE BOUNDING BOX FOR A TRACE.
+
    function traceComputeBounds(trace) {
       var bounds = [];
       for (var n = 0 ; n < trace.length ; n++)
          bounds.push(computeCurveBounds(trace[n]));
       return bounds;
    }
+
+   // RESAMPLE ALL OF THE CURVES OF A TRACE.
 
    function resampleTrace(src) {
       var dst = [];
@@ -3164,6 +3178,7 @@ console.log(lo + " " + hi);
    }
 
    // MW TORUS GEOMETRY
+
    function addTorusShaderSketch(vertexShader, fragmentShader) {
        return addGeometryShaderSketch(new THREE.TorusGeometry(1.0, 0.5, 11.0, 9.0), vertexShader, fragmentShader);
    }
@@ -3317,6 +3332,8 @@ console.log(lo + " " + hi);
       }
    }
 
+   // RENDERING MATERIAL CORRESPONDING TO A CANVAS RGB COLOR.
+
    function setMeshMaterialToRGB(mesh, rgb) {
       var r = rgb[0] / 255;
       var g = rgb[1] / 255;
@@ -3324,6 +3341,16 @@ console.log(lo + " " + hi);
       mesh.setMaterial(new phongMaterial().setAmbient(.3*r,.3*g,.3*b)
                                           .setDiffuse(.5*r,.5*g,.5*b)
                                           .setSpecular(0,0,0,1));
+   }
+
+   // RENDERING MATERIALS CORRESPONDING TO BACKGROUND AND FOREGROUND COLORS.
+
+   function bgMaterial() {
+      return backgroundColor == 'white' ? whiteMaterial : blackMaterial;
+   }
+
+   function penMaterial() {
+      return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
    }
 
 ////////////////////////////////////////////////////////////

@@ -1,11 +1,13 @@
 
+   // ALL THE POSSIBLE DRAWING COLORS FOR A SKETCH.
+
    var paletteRGB = [
-      [255,255,255],
-      [255,  0,  0],
-      [255,255,  0],
-      [  0,255,  0],
-      [  0,  0,255],
-      [255,  0,255],
+      [255,255,255],	// CHANGES BETWEEN WHITE AND BLACK, WHENEVER USER TOGGLES WITH '-' KEY.
+      [255,  0,  0],	// RED
+      [255,255,  0],	// YELLOW
+      [  0,255,  0],	// GREEN
+      [  0,  0,255],	// BLUE
+      [255,  0,255],	// MAGENTA
    ];
 
    var palette = [];
@@ -15,6 +17,8 @@
                             paletteRGB[i][2] + ')' );
 
    function sketchColor() { return palette[sketchPage.colorId]; }
+
+   // THE BASIC SKETCH CLASS, FROM WHICH ALL SKETCHES ARE EXTENDED.
 
    function Sketch() {
       this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
@@ -249,13 +253,8 @@
          utext(label, P[0], P[1], ax, ay);
       }
       this.drawValue = function(value, xy, ax, ay, scale) {
-	 //var textHeight = _g.textHeight;
-	 //_g.textHeight = textHeight * this.sc;
-
          var P = this.adjustXY(xy);
          utext(isNumeric(value) ? roundedString(value) : value, P[0], P[1], ax, ay);
-
-	 //_g.textHeight = textHeight;
       }
       this.drawText = function(context) {
 
