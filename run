@@ -1,3 +1,2 @@
 #!/bin/sh
-arg="$1"; [[ "$arg" == "" ]] && arg="index"
-open -a /Applications/*Chrome.app $arg.html
+open -a /Applications/*Chrome.app http://localhost:8000/
