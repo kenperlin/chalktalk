@@ -202,7 +202,7 @@
       }
    }
    Bounce.prototype = new Sketch;
-
+/*
    function Lightbulb() {
       this.labels = "lightbulb".split(' ');
       this.light = 0;
@@ -252,4 +252,4 @@
       }
    }
    Lightbulb.prototype = new Sketch;
-
+*/
