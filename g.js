@@ -563,7 +563,6 @@
    var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
-   var isRegisteringSketches = true;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
@@ -574,21 +573,54 @@
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
+   var sketchTypesToAdd = [];
+   var needToResetPage = false;
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
+   function addSketchType(name) {
+      sketchTypesToAdd.push(name);
+   }
+
+   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+
+   if (window.haveLoadedSketches === undefined) {
+      try {
+         var lsRequest = new XMLHttpRequest();
+         lsRequest.open("GET", "ls_sketches");
+
+         lsRequest.onloadend = function () {
+            if (lsRequest.responseText != "") {
+               var ls = lsRequest.responseText.trim().split("\n");
+               for (var i = 0; i < ls.length; i++)
+                  importSketch(ls[i]);
+            }
+         }
+         lsRequest.send();
+      } catch (e) { }
+
+      window.haveLoadedSketches = true;
+  }
 
 /////////////////////////////////////////////////////////////////////
 ///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
 ///////////////////////// GOING TO BE MOVED /////////////////////////
 
    function importSketch(filename) {
-      // var sketchRequest = new XMLHttpRequest();
-      // sketchRequest.open("GET", "sketches/" + filename);
-      // sketchRequest.onloadend = function() {
-      //    window.eval(sketchRequest.responseText);
-      // }
-      // sketchRequest.send();
+
+      // IF A FILE IS CURRENTLY BEING EDITED, DON'T TRY TO LOAD ITS SWAP FILE.
+
+      var len = filename.length;
+      if (filename.substring(len-3, len) == "swp")
+         return;
+
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         window.eval(sketchRequest.responseText);
+         needToResetPage = true;
+      }
+      sketchRequest.send();
    }
 
    var ServerUtils = {};
@@ -617,23 +649,6 @@
    function gStart() {
 
       preLoadObjs();
-
-      // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
-
-  //     try {
-  //        var lsRequest = new XMLHttpRequest();
-  //        lsRequest.open("GET", "ls_sketches");
-
-  //        lsRequest.onloadend = function () {
-  //           if (lsRequest.responseText != "") {
-  //              var ls = lsRequest.responseText.trim().split("\n");
-  //              for (var i = 0; i < ls.length; i++)
-  //                 importSketch(ls[i]);
-  //           }
-  //        }
-  //        lsRequest.send();
-	 // isRegisteringSketches = false;
-  //     } catch (e) { }
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
@@ -666,7 +681,7 @@
       +
       (isShowingRenderer
        ?
-	   " <div id='scene_div' tabindex=1"
+           " <div id='scene_div' tabindex=1"
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " </div>"
        :       
@@ -1755,7 +1770,7 @@
       }
       else if (s === undefined) {
          sketchPage.setPageInfo = { x: sketchPage.x, y: sketchPage.y, page: directionsToPage(n1, n2) };
-	 bgClickCount = 0;
+         bgClickCount = 0;
       }
       else
          console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
@@ -1917,18 +1932,24 @@
          tt.pollState(tt.myState);
          for (var i = 0 ; i < 1024 ; i++)
             ttForce[i] = tt.myState.hmd.forces[i] / 4096;
-
+/*
 var hi = -10000, lo = 10000;
 for (var i = 0 ; i < 1024 ; i++) {
    hi = max(hi, ttForce[i]);
    lo = min(lo, ttForce[i]);
 }
 console.log(lo + " " + hi);
-
+*/
       }
    }
 
    var tick = function(g) {
+
+      if (needToResetPage) {
+         needToResetPage = false;
+         setPage(pageIndex);
+      }
+
       var w = width(), h = height();
 
       // SET CONSTANTS FOR projectX() and projectY().
@@ -1940,7 +1961,7 @@ console.log(lo + " " + hi);
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
-      //ttTick();
+      ttTick();
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 
@@ -2257,7 +2278,7 @@ console.log(lo + " " + hi);
                }
                else
                  for (var i = 0 ; i < S.in.length ; i++)
-		    if (isDef(S.in[i]))
+                    if (isDef(S.in[i]))
                        S.outValue[i] = S.inValue[i];
             }
 
@@ -2454,7 +2475,7 @@ console.log(lo + " " + hi);
                annotateEnd();
             }
          }
-	 else {
+         else {
             if (isBottomHover && ! isRightGesture) {
                annotateStart();
                _g.save();
@@ -2537,8 +2558,8 @@ console.log(lo + " " + hi);
 
                _g.restore();
                annotateEnd();
-	    }
-	 }
+            }
+         }
 
          if (visible_sp != null) {
             annotateStart();
@@ -2568,7 +2589,7 @@ console.log(lo + " " + hi);
                   fillRect(x, h - margin - _g.panY, dx/2, margin - 2);
             }
          }
-	 else {
+         else {
             if (this.mouseX >= w - margin || isRightGesture) {
                color(scrimColor(0.06));
                fillRect(w - margin - _g.panX, -_g.panY, margin - 2, h);
@@ -2578,7 +2599,7 @@ console.log(lo + " " + hi);
                for (var y = _g.panY % dy - _g.panY - dy/4 ; y < h - _g.panY ; y += dy)
                   fillRect(w - margin - _g.panX, y, margin - 2, dy/2);
             }
-	 }
+         }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
@@ -2883,7 +2904,7 @@ console.log(lo + " " + hi);
       sk().outValue = [];
       sk().defaultValue = [];
       sk().portBounds = [];
-      //sk().portLocation = [];
+      sk().portLocation = [];
       sk().zoom = sketchPage.zoom;
       sk().isDrawingEnabled = false;
       if (sk() instanceof Sketch2D) {
@@ -2992,7 +3013,7 @@ console.log(lo + " " + hi);
             this._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
             this._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]) * pow((b2[2] - b2[0]) / this.sw, 0.2) * 1.03;
 
-	    delete this.bounds;
+            delete this.bounds;
          }
 
          if (this._dx !== undefined) {
@@ -3014,7 +3035,7 @@ console.log(lo + " " + hi);
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
 
          if (this.mesh.sc !== undefined)
-	    s *= this.mesh.sc;
+            s *= this.mesh.sc;
 
          this.mesh.getMatrix()
              .identity()
@@ -3043,10 +3064,10 @@ console.log(lo + " " + hi);
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
          }
-	 else if (this.mesh.material.alpha !== undefined) {
+         else if (this.mesh.material.alpha !== undefined) {
             this.mesh.setOpacity(this.mesh.material.alpha);
-	    this.mesh.material.alpha = undefined;
-	 }
+            this.mesh.material.alpha = undefined;
+         }
 
          if (this.visibleEdgesMesh !== undefined)
             sketchPage.scene.remove(this.visibleEdgesMesh);
@@ -3061,29 +3082,29 @@ console.log(lo + " " + hi);
 
             var visibleEdges = this.mesh.findVisibleEdges();
 
-	    // MW VISIBLE EDGE FIX
-	    // to restore previous algorithm, comment out the next two lines (and follow instructions below)
+            // MW VISIBLE EDGE FIX
+            // to restore previous algorithm, comment out the next two lines (and follow instructions below)
 
-	    var moreVisibleEdges = this.mesh.findMoreVisibleEdges();
-	    var newVisibleEdges = visibleEdges[0][1].concat(moreVisibleEdges[0][1]);
+            var moreVisibleEdges = this.mesh.findMoreVisibleEdges();
+            var newVisibleEdges = visibleEdges[0][1].concat(moreVisibleEdges[0][1]);
 
-	    // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
-	    // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
-	    // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
+            // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
+            // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
+            // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
 
-	    // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
-	    visibleEdges[0][1] = newVisibleEdges;
+            // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
+            visibleEdges[0][1] = newVisibleEdges;
 
-	    // console.log("length of first element of ve = " + visibleEdges[0].length);
-	    // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
-	    // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
-	    // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
-	    // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
-	    // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
-	    // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
-	    // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
+            // console.log("length of first element of ve = " + visibleEdges[0].length);
+            // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
+            // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
+            // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
+            // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
+            // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
+            // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
+            // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
 
-	    // FROM HERE FORWARD EVERYTHING IS THE SAME
+            // FROM HERE FORWARD EVERYTHING IS THE SAME
 
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
@@ -3095,7 +3116,7 @@ console.log(lo + " " + hi);
             }
 
             // Project the visible edges, and connect them into long 2d strokes.
-	     
+             
             var e2;
             if (this.bounds !== undefined || isShowing2DMeshEdges)
                e2 = this.mesh.projectVisibleEdges(visibleEdges);
@@ -3429,10 +3450,11 @@ console.log(lo + " " + hi);
 
       sketchTypeLabels = [];
 
+      for (var n = 0 ; n < sketchTypes.length ; n++)
+         registerSketch(sketchTypes[n]);
 
-      if (isRegisteringSketches)
-         for (var n = 0 ; n < sketchTypes.length ; n++)
-            registerSketch(sketchTypes[n]);
+      for (var i = 0 ; i < sketchTypesToAdd.length ; i++)
+         registerSketch(sketchTypesToAdd[i]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 

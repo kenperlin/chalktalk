@@ -1,2 +1,5 @@
 #!/bin/sh
-open -a /Applications/*Chrome.app http://localhost:8000/
+if [ `ps | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
+then node server/main.js >> node.log &
+fi
+open -a /Applications/*Chrome.app http://localhost:8888/

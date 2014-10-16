@@ -1,7 +1,7 @@
 var sketchTypes = (
-  "Abacus Ball Bird C2S Control Cyl1 Diagram F1D F2D Flower Teleg "
-+ "Func Graph Lens Logic Grid Hammer IO Lattice Mat4 Motion NGon Bounce Example1 "
-+ "Noises MothAndCandle OldCamera Physics Radio Reflect Rocket Ray1 Vec4 S2C "
+  "Abacus Ball Bird Control Diagram Teleg "
++ "Func Graph Lens Logic Grid Hammer IO Lattice Motion Example1 "
++ "Noises MothAndCandle OldCamera Physics Radio "
 + "Scroll Spike Typewriter Tablet Telegraph Television Book1"
 ).split(' ');
 
