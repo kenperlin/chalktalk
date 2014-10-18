@@ -1,7 +1,7 @@
 var sketchTypes = (
-  "Abacus Ball Bird Control Diagram Teleg "
-+ "Func Graph Lens Logic Grid Hammer IO Lattice Motion Example1 "
-+ "Noises MothAndCandle OldCamera Physics Radio "
+  "Abacus Ball Teleg "
++ "Lens Grid Hammer Lattice Motion Example1 "
++ "Noises MothAndCandle OldCamera Radio "
 + "Scroll Spike Typewriter Tablet Telegraph Television Book1"
 ).split(' ');
 

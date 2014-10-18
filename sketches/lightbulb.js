@@ -48,6 +48,5 @@
       }
    }
    Lightbulb.prototype = new Sketch;
-
-   registerSketch("Lightbulb");
+   addSketchType("Lightbulb");
 

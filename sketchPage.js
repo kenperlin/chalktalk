@@ -509,7 +509,7 @@ var sketchToDelete = null;
             return;
          }
 
-         if (isSketchDragActionEnabled) {
+         if (isSketchDragActionEnabled && this.travel > clickSize) {
             endSketchDragAction(x, y);
             isSketchDragActionEnabled = false;
          }
@@ -1327,6 +1327,9 @@ var sketchToDelete = null;
             break;
          case 'e':
             toggleCodeWidget();
+            break;
+         case 'f':
+	    console.log(tree_obj.vertices.length + " " + tree_obj.faces.length);
             break;
          case 'g':
             this.toggleGroup();
