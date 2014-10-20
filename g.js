@@ -2715,7 +2715,7 @@ console.log(lo + " " + hi);
    var audiencePopup = null, audienceCanvas, audienceContext;
    var cursorX = 0, cursorY = 0;
 
-   function deleteSketch(sketch, num) {
+   function deleteSketch(sketch) {
       if (sketch === undefined)
          return;
 

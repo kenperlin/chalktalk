@@ -1617,7 +1617,6 @@ var sketchToDelete = null;
             if (sk().fadeAway > 0) {
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
-// AHA!!!
                   deleteSketch(sk());
                   _g.restore();
                   _g.globalAlpha = 1;
