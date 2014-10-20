@@ -1617,6 +1617,7 @@ var sketchToDelete = null;
             if (sk().fadeAway > 0) {
                sk().fadeAway = max(0, sk().fadeAway - elapsed / 0.25);
                if (sk().fadeAway == 0) {
+// AHA!!!
                   deleteSketch(sk());
                   _g.restore();
                   _g.globalAlpha = 1;
@@ -2348,7 +2349,7 @@ var sketchToDelete = null;
       for (var n = 0 ; n < glyphs.length ; n++) {
          var glyph = glyphs[n];
          if (indexName == glyph.indexName) {
-            deleteSketch(sketch);
+            deleteSketch(sketch, 6);
             var name = glyph.name;
             if (name.indexOf("(") < 0)
                return;

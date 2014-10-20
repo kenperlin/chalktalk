@@ -2715,7 +2715,7 @@ console.log(lo + " " + hi);
    var audiencePopup = null, audienceCanvas, audienceContext;
    var cursorX = 0, cursorY = 0;
 
-   function deleteSketch(sketch) {
+   function deleteSketch(sketch, num) {
       if (sketch === undefined)
          return;
 
@@ -3055,9 +3055,12 @@ console.log(lo + " " + hi);
             this.update(elapsed);
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
-                               || this.glyphSketch != null) {
+                               || this.glyphSketch != null
+			       || this.meshAlpha !== undefined
+			       || sketchPage.fadeAway > 0) {
             this.alpha = this.fadeAway > 0 ? this.fadeAway :
                          this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+			 this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
             this.mesh.setOpacity(sCurve(this.alpha));
 
@@ -3299,14 +3302,14 @@ console.log(lo + " " + hi);
                this.shapeSketch.tX = this.tX + width() / 2;
                this.shapeSketch.tY = this.tY + height() / 2;
                this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
-               this.shapeSketch.fadeAway = 0.3;
+
+               this.shapeSketch.meshAlpha = 0.3;
                this.shapeSketch.update = function(elapsed) {
-                  this.fadeAway = min(1, this.fadeAway + 5 * elapsed);
-                  if (this.fadeAway == 1) {
-                     this.fadeAway = 0;
+                  this.meshAlpha = min(1, this.meshAlpha + elapsed);
+                  if (this.meshAlpha == 1)
                      delete this.update;
-                  }
                }        
+
                this.fadeAway = 1;
             }
          });
