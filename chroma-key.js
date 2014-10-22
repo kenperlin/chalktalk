@@ -147,6 +147,8 @@ function ChromaKeyedVideo()
 
   this.startVideo = function(stream)
   {
+    console.log("chroma-key: start video");
+
       // init video object
     this.videoStream = stream;
     this.video = document.createElement("video");
@@ -154,7 +156,9 @@ function ChromaKeyedVideo()
     this.video.src = webkitURL.createObjectURL(stream);
 
     // call initGL when the video is ready to play
-    this.video.addEventListener("canplaythrough", function() { videoLayer.initGL();} );
+    this.video.oncanplaythrough = function() { videoLayer.initGL(); }
+
+    // this.video.addEventListener("canplaythrough", function() { videoLayer.initGL();} );
   }
 
   this.noVideo = function()
