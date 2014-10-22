@@ -60,19 +60,57 @@ function ChromaKeyedVideo()
        "float Y = 0.2989 * textureColor.r + 0.5866 * textureColor.g + 0.1145 * textureColor.b;\n"+
        "float Cr = 0.7132 * (textureColor.r - Y);\n"+
        "float Cb = 0.5647 * (textureColor.b - Y);\n"+
-       
-       "//float blendValue = 1.0 - smoothstep(thresholdSensitivity - smoothing, thresholdSensitivity , abs(Cr - maskCr) + abs(Cb - maskCb));\n"+
-       "float blendValue = smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing, distance(vec2(Cr, Cb), vec2(maskCr, maskCb)));\n"+
-       "//if (blendValue < 0.8) { blendValue = 0.0; }\n" +
+       "float blendValue;\n"+
+
+       "//if (Y > 0.8 || Y < 0.1) {\n"+
+       "//    blendValue = 0.9;\n"+
+       "//}\n"+
+       "//else {\n"+
+       "    blendValue = smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing, distance(vec2(Cr, Cb), vec2(maskCr, maskCb)));\n"+
+       "//}\n"+
+       "//if (blendValue < 0.2) { blendValue = 0.0; }\n" +
        "//else if (blendValue < 0.6) {\n"+
        "//  textureColor = vec4(0.0, 0.0, 0.0, 0.2);\n"+
        "//}\n"+
        "gl_FragColor = vec4(textureColor.rgb, textureColor.a * blendValue);\n"+
    "}\n";
 
+   this.chromaShaderFragSRC2 = 
+   "precision highp float;\n" +
+   "varying highp vec2 vTextureCoord;\n" +
+   
+   "uniform float thresholdSensitivity;\n" +
+   "uniform float smoothing;\n" +
+   "uniform vec3 colorToReplace;\n" +
+   "uniform sampler2D uSampler;\n" +
+   "vec3 rgb2hsv(vec3 c)\n"+
+   "{\n"+
+    "vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);\n"+
+    "vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));\n"+
+    "vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));\n"+
+
+    "float d = q.x - min(q.w, q.y);\n"+
+    "float e = 1.0e-10;\n"+
+    "return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);\n"+
+  "}\n"+
+
+   "void main(void)\n" +
+   "{\n" +
+  "     vec4 textureColor = texture2D(uSampler, vTextureCoord);\n"+
+
+  // "     vec3 hsv = rgb2hsv(textureColor.xyz);\n"+
+  // "     vec3 ctrHSV = rgb2hsv(colorToReplace);\n"+
+  "     float blendValue = smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing, distance(textureColor.xyz, colorToReplace));\n"+
+  "     //blendValue = (blendValue - 0.1) / 0.9;\n"+
+  "     gl_FragColor = vec4(textureColor.xyz, blendValue);\n"+
+  "}\n";
+
   this.chromaKeyR = 0.1;
   this.chromaKeyG = 0.76;
-  this.chromaKeyB = 0.85;
+  this.chromaKeyB = 0.48;
+
+  this.chromaThreshold = 0.1;
+  this.chromaSmoothing = 0.3;
 
   this.modelViewZ = -2;
 
@@ -89,12 +127,14 @@ function ChromaKeyedVideo()
                       'x3':-1.0, 'y3': 1.0,  'z3':0.0,
                       'x4': 1.0, 'y4': 1.0,  'z4':0.0};
 
-  this.modelViewTranslateX = 0;
-  this.modelViewTranslateY = 0;
-  this.modelViewTranslateZ = -3;
-  this.modelViewScaleX = 1;
-  this.modelViewScaleY = 1;
-  this.modelViewScaleZ = 1;
+  this.modelViewTranslateX = 0.0;
+  this.modelViewTranslateY = 0.0;
+  this.modelViewTranslateZ = -2.0;
+  this.modelViewScaleX = 1.0;
+  this.modelViewScaleY = 1.0;
+  this.modelViewScaleZ = 1.0;
+
+  this.videoLatency = 150;  // set this above 0 to delay the mouse inputs
 
   this.addGui = function()
   {
@@ -103,12 +143,17 @@ function ChromaKeyedVideo()
     gui.add(this, 'chromaKeyG', 0, 1);
     gui.add(this, 'chromaKeyB', 0, 1);
 
-    gui.add(this, 'modelViewTranslateX', -1, 1);
-    gui.add(this, 'modelViewTranslateY', -1, 1);
-    gui.add(this, 'modelViewTranslateZ', -4, 0);
-    gui.add(this, 'modelViewScaleX', 1, 4);
-    gui.add(this, 'modelViewScaleY', 1, 4);
-    gui.add(this, 'modelViewScaleZ', 1, 4);
+    gui.add(this, 'chromaThreshold', 0, 1);
+    gui.add(this, 'chromaSmoothing', 0, 1);
+
+    gui.add(this, 'modelViewTranslateX', -0.3, 0.3);
+    gui.add(this, 'modelViewTranslateY', -0.5, 0.5);
+    gui.add(this, 'modelViewTranslateZ', -4.0, 0.0);
+    gui.add(this, 'modelViewScaleX', 1.0, 4.0);
+    gui.add(this, 'modelViewScaleY', 1.0, 4.0);
+    gui.add(this, 'modelViewScaleZ', 1.0, 4.0);
+
+    gui.add(this, 'videoLatency', 0, 300);
   }
 
   this.init = function(canvas)
@@ -205,8 +250,8 @@ function ChromaKeyedVideo()
     gl.uniformMatrix4fv(shaderProgram.modelViewMatUni, false, this.modelViewMatrix);
     
     gl.uniform1i(shaderProgram.samplerUniform, 0);
-    gl.uniform1f(shaderProgram.thresholdSensitivity, 0.1);
-    gl.uniform1f(shaderProgram.smoothing, 0.3);
+    gl.uniform1f(shaderProgram.thresholdSensitivity, this.chromaThreshold);
+    gl.uniform1f(shaderProgram.smoothing, this.chromaSmoothing);
     gl.uniform3f(shaderProgram.colorToReplace, this.chromaKeyR, this.chromaKeyG, this.chromaKeyB);
 
     // draw the object

@@ -52,6 +52,7 @@
             // PREVENT BROWSER FROM SCROLLING IN RESPONSE TO CERTAIN KEYS.
 
             switch (event.keyCode) {
+            case 8:  // BACKSPACE
             case 32: // ASCII SPACE
             case 33: // ASCII PAGE UP
             case 34: // ASCII PAGE DOWN
@@ -92,8 +93,15 @@
       // MOUSE PRESSED.
 
       canvas.onmousedown = function(event) {
+         if (videoLayer != undefined && videoLayer.isShowing()) {
+            window.setTimeout(function() {canvas.realMouseDown(event);}, videoLayer.videoLatency);
+         }
+         else {
+            canvas.realMouseDown(event);
+         }
+      }
 
-
+      canvas.realMouseDown = function(event) {
 
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
@@ -138,7 +146,17 @@
 
       // MOUSE RELEASED.
 
+      // this is just to add a delay
       canvas.onmouseup = function(event) {
+         if (videoLayer != undefined && videoLayer.isShowing()) {
+            window.setTimeout(function() {canvas.realMouseUp(event);}, videoLayer.videoLatency);
+         }
+         else {
+            canvas.realMouseUp(event);
+         }
+      }
+
+      canvas.realMouseUp = function(event) {
 
          // RESPOND ONLY TO LEFT MOUSE UP, NOT TO RIGHT MOUSE UP.
 
@@ -198,6 +216,16 @@
       // MOUSE IS MOVED.
 
       canvas.onmousemove = function(event) {
+         if (videoLayer != undefined && videoLayer.isShowing()) {
+            window.setTimeout(function() {canvas.realMouseMove(event);}, videoLayer.videoLatency);
+         }
+         else {
+            canvas.realMouseMove(event);
+         }
+      }
+
+      canvas.realMouseMove = function(event) {
+
          mouseMoveEvent = event;
 
          var handle = getHandle(this);
