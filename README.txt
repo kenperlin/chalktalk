@@ -3,7 +3,7 @@ Here are the instructions for getting started:
 
 (1) Go to http://nodejs.org/download/ and download node.js
 
-(2) In the chalktalk folder, type:
+(2) In the chalktalk/server folder, type:
 
 	npm install
 
