@@ -109,7 +109,7 @@ function ChromaKeyedVideo()
   this.Translate_X = 0;
   this.Translate_Y = 0;
   this.Translate_Z = -2;
-  this.Scale_X = 1.35;
+  this.Scale_X = 1.7;
   this.Scale_Y = 1;
   this.Scale_Z = 1;
 

@@ -498,7 +498,7 @@
                // INCREASE THE SIZE OF THE BOUNDING BOX
                // TO MAKE IT EASIER TO DO GESTURES ON THE BIRD.
 
-               color(backgroundColor);
+               color('rgba(0,0,0,0.01)');
 	       line(ox-10, oy-50, ox+10, oy-50);
 	       line(ox-10, oy+50, ox+10, oy+50);
 
