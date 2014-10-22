@@ -681,21 +681,30 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           }
        };
 
+   var bookPaperColor = 'rgb(255,248,240)';
+
+   function codeIsBook() {
+      return codeSketch != null && codeSketch.isBook !== undefined;
+   }
    function code() {
       return codeSketch == null ? null : codeSketch.code;
    }
    function codeSelectorBgColor() {
+      if (codeIsBook()) return bookPaperColor;
       return backgroundColor === 'white' ? 'rgba(0,0,0,0)'
                                          : 'rgba(128,192,255,' + (0.3 * codeSketch.fade()) + ')';
    }
    function codeSelectorFgColor() {
+      if (codeIsBook()) return 'black';
       return backgroundColor === 'white' ? bgScrimColor(codeSketch.fade())
                                          : 'rgba(192,224,255,' + codeSketch.fade() + ')';
    }
    function codeTextBgColor() {
+      if (codeIsBook()) return bookPaperColor;
       return 'rgba(0,0,0,0)';
    }
    function codeTextFgColor() {
+      if (codeIsBook()) return 'black';
       return (backgroundColor == 'white' ? 'rgba(0,112,224,' : 'rgba(128,192,255,') + codeSketch.fade() + ')';
    }
 
@@ -717,7 +726,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                      + "</option>";
 
          codeElement.innerHTML =
-            "<select id=code_selector onchange='setCodeAreaText()'>"
+          /*"<button id=upload_button>upload</upload>"
+          +*/"<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -725,7 +735,23 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
+/*
+         uploadButton = document.getElementById("upload_button");
+         uploadButton.onclick = function() {
+            var uploadForm = new FormData();
+            var sketchName = sk().glyphName;
+            uploadForm.append("sketchName", sketchName);
 
+            var shader = "var " + sketchName + "FragmentShader = \"" + document.getElementById("code_text").value + "\";";
+            var sketchContent = eval(sketchName);
+            var register = "registerGlyph(" + sk().glyph.toString() + ");";
+            uploadForm.append("sketchContent", [shader, sketchContent, register].join("\n"));
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "http://localhost:8888/upload");
+            request.send(uploadForm);
+         }
+*/
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.borderColor = codeTextFgColor();
@@ -740,8 +766,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = "18px courier";
+         codeTextArea.style.font = codeIsBook() ? "17px serif" : "18px courier";
          codeTextArea.value = code()[codeSelector.selectedIndex][1];
+	 if (codeIsBook()) {
+            codeTextArea.style.width = '650px';
+	 }
          if (code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
@@ -804,21 +833,24 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                     ? xhi + (xhi - xlo) / 2 + w/2
                     : xlo - (xhi - xlo) / 2 - w/2) + _g.panX;
 
-      x1 = max(x1, w/2);
-      x1 = min(x1, width() - w/2);
+      x1 = max(x1, w/2 + _g.panX);
+      x1 = min(x1, width() - w/2 + _g.panX);
 
       codeElement.x1 = x1;
 
       x = codeElement.x = codeElement.x === undefined
                           ? x
                           : isChanged
-                            ? codeElement.x1
-                            : lerp(0.1, codeElement.x, codeElement.x1);
+                            ? codeElement.x1 - _g.panX
+                            : lerp(0.1, codeElement.x, codeElement.x1 - _g.panX);
 
       //////////////////////////////////////////////////////////////////////////////////////
 
       codeElement.style.left = x - w/2 + 10;
       codeElement.style.top = y + 5;
+
+      if (codeIsBook())
+         return;
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
@@ -868,7 +900,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
 
       var fade = codeSketch.fadeAway == 0 ? 1 : codeSketch.fadeAway;
-
       color(backgroundColor == 'white' ? 'rgba(224,224,255,' + (0.5 * fade) + ')'
                                        : 'rgba(  0,  0,255,' + (0.2 * fade) + ')');
       fillCurve(c);

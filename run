@@ -1,3 +1,5 @@
 #!/bin/sh
-arg="$1"; [[ "$arg" == "" ]] && arg="index"
-open -a /Applications/*Chrome.app $arg.html
+if [ `ps -x | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
+then node server/main.js >> node.log &
+fi
+open -a /Applications/*Chrome.app http://localhost:8888/

@@ -1,10 +1,515 @@
 [[-0.3705463965,0.1681142573],[-0.4401231997,0.2015217632],[-0.3831176681,0.3420273783],[-0.486678622,0.5292325585],[-0.42458884,0.7514859123],[-0.3054437766,0.9082298975],[-0.1004551006,0.9962111157],[0.1013220835,0.9999104678],[0.3051325426,0.9073956369],[0.4233779844,0.7519698322],[0.5162729479,0.5388859442],[0.4133142948,0.3451573407],[0.4282487591,0.163480801],[0.1898266722,0.1054116066],[0.01981768996,0.01535104439],[-0.1924553856,0.09529044749],],[[-0.3705463966,0.1681142574],[-0.3399492358,0.08943494051],[0,-1.034526944],[0.3612222715,0.1013154445],],
-
 // registerGlyph("iceCreamCone()", ["PARBUCWCZB]A_?`<`:a7a5`2_0^.[,Z)X(V&T$R!P!M K H!F#D%B&@(?*>,</;1;4:6:9:;:>;@;C=E>G@IBKDLFNHNKNNNPOSOUOXPZQ]R_TaVbXcZd^e`eceeehekemdpcrbt`v_x[zY{W|U}R~P~M~J~H}F|C{Ay@w?u>r=p=m=k>h>f@dAaC`E_H_J`LbNcOfOh"]
 // );
+[[[-0.6156199438,0.8056861794],[-0.5351238768,0.7938771798],[-0.4579206793,0.7637829594],[-0.3871995484,0.7170199381],[-0.3262559886,0.6551060873],[-0.2780600551,0.5805349865],[-0.2441753787,0.4970564834],[-0.2259369887,0.408244764],[-0.2247871368,0.3178386003],[-0.2407775538,0.2299052976],[-0.2725601812,0.1481119186],[-0.3188900672,0.07596656714],[-0.3782979774,0.01714122783],[-0.447875367,-0.02602146701],[-0.5243632071,-0.05217163469],[-0.6046113487,-0.05985556685],[-0.6851074155,-0.04804658202],[-0.7623106396,-0.01795236098],[-0.8330317179,0.02881070351],[-0.8939752906,0.09072452863],[-0.9421712373,0.1652956224],[-0.9760559143,0.24877417],[-0.9942943172,0.3375858601],[-0.9954441691,0.4279920238],[-0.9794537391,0.5159253559],[-0.9476711112,0.5977186903],[-0.901341212,0.6698640488],[-0.8419332889,0.7286894138],[-0.7723559518,0.7718520654],[-0.6958680851,0.7980022324],[-0.6156199438,0.8056861794],],[[0.1653455104,0.7856448749],[0.2458415773,0.7738358752],[0.3230447749,0.7437416549],[0.3937659058,0.6969786336],[0.4547094257,0.6350647838],[0.5029053725,0.5604936826],[0.5367900489,0.4770151796],[0.5550284522,0.3882034598],[0.5561783041,0.2977972961],[0.5401878737,0.2098639937],[0.5084052464,0.1280706147],[0.4620753471,0.05592526362],[0.4026674768,-0.002900076706],[0.3330900872,-0.04606277155],[0.256602247,-0.07221293923],[0.1763541055,-0.07989687139],[0.09585802541,-0.06808788622],[0.01865482787,-0.03799366586],[-0.05206629694,0.008769399829],[-0.1130098569,0.07068322461],[-0.1612057898,0.1452543181],[-0.1950904668,0.2287328657],[-0.2133288564,0.3175445554],[-0.2144787083,0.4079507191],[-0.1984882916,0.4958840515],[-0.1667056637,0.577677386],[-0.1203757783,0.6498227448],[-0.06096786797,0.7086481101],[0.008609515598,0.7518107606],[0.08509735573,0.7779609282],[0.1653455104,0.7856448749],],[[0.3702792642,-0.4028015391],[0.3381344406,-0.3758413645],[0.3215435639,-0.3115517172],[0.3173958447,-0.2400035614],[0.3277651427,-0.1808985632],[0.3516145279,-0.1311259331],[0.376500843,-0.1134981266],[0.3951655793,-0.1176458458],[0.4428643498,-0.1238674245],[0.4708614542,-0.1197197053],[0.4957477693,-0.08861181152],[0.5227079439,-0.08964874131],[0.5486311888,-0.106239618],[0.5952930295,-0.111424267],[0.6326225021,-0.1197197053],[0.6523241682,-0.136310582],[0.6885443224,-0.1312199376],[0.7587408342,-0.1035107882],[0.8862029215,-0.07025980896],[0.9065229644,-0.09057985185],[0.908370241,-0.1663181936],[0.9065229644,-0.2993221107],[0.8880501981,-0.4249369213],[0.8714247085,-0.4748133903],[0.8474101123,-0.4840497734],[0.7864499836,-0.456340624],[0.6996279822,-0.4101587083],[0.6257369171,-0.4009223252],[0.6109587041,-0.4230896447],[0.6072641508,-0.4341733045],[0.5536931287,-0.4360205811],[0.5038166597,-0.4323260278],[0.4650238506,-0.4046168784]]]
 
 
-registerGlyph("iceCreamCone()", [[[-0.3705463965,0.1681142573],[-0.4401231997,0.2015217632],[-0.3831176681,0.3420273783],[-0.486678622,0.5292325585],[-0.42458884,0.7514859123],[-0.3054437766,0.9082298975],[-0.1004551006,0.9962111157],[0.1013220835,0.9999104678],[0.3051325426,0.9073956369],[0.4233779844,0.7519698322],[0.5162729479,0.5388859442],[0.4133142948,0.3451573407],[0.4282487591,0.163480801],[0.1898266722,0.1054116066],[0.01981768996,0.01535104439],[-0.1924553856,0.09529044749],],[[-0.3705463966,0.1681142574],[-0.3399492358,0.08943494051],[0,-1.034526944],[0.3612222715,0.1013154445],],]
+
+function preLoadObjs(){
+
+  preLoaded = {};
+
+  preLoaded.objs = [];
+  preLoaded.tex = [];
+
+  var manager = new THREE.LoadingManager();
+  var loader = new THREE.OBJLoader( manager );
+
+
+  loader.load( 'assets/models/camBody.obj', function ( object ) { preLoaded.objs.push(object.children[0]);preLoaded.objs.camBody = object.children[0];});
+  loader.load( 'assets/models/camLines.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.camLines = object.children[0];});
+  loader.load( 'assets/models/tv.obj', function ( object ) {      preLoaded.objs.push(object.children[0]);preLoaded.objs.tv = object.children[0];});
+  loader.load( 'assets/models/scroll.obj', function ( object ) {  preLoaded.objs.push(object.children[0]);preLoaded.objs.scroll = object.children[0];});
+  loader.load( 'assets/models/tablet.obj', function ( object ) {  preLoaded.objs.push(object.children[0]);preLoaded.objs.tablet = object.children[0];});
+  loader.load( 'assets/models/typewriter3.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriter = object.children[0];});
+  loader.load( 'assets/models/typewriterPaper.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterPaper = object.children[0];});
+  loader.load( 'assets/models/typewriterButtons.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterButtons = object.children[0];});
+  loader.load( 'assets/models/typewriterFrame.obj', function ( object ) {preLoaded.objs.push(object.children[0]);preLoaded.objs.typewriterFrame = object.children[0];});
+
+
+  loader.load( 'assets/models/hammer.obj',  function ( object ) {preLoaded.objs.hammer = object.children[0] } );
+  loader.load( 'assets/models/spike.obj',  function ( object ) {preLoaded.objs.spike = object.children[0] } );
+ loader.load( 'assets/models/telegraph.obj',  function ( object ) {preLoaded.objs.telegraph = object.children[0] } );
+ loader.load( 'assets/models/telegraphBase.obj',  function ( object ) {preLoaded.objs.telegraphBase = object.children[0] } );
+ loader.load( 'assets/models/telegraphButton.obj',  function ( object ) {preLoaded.objs.telegraphButton = object.children[0] } );
+ loader.load( 'assets/models/book.obj',  function ( object ) {preLoaded.objs.book = object.children[0] } );
+
+
+  var imgLoader = new THREE.ImageLoader( manager );
+
+  preLoaded.tex.stone = new THREE.Texture();
+  imgLoader.load( 'assets/textures/stone.jpg', function ( image ) {  preLoaded.tex.stone.image = image;  preLoaded.tex.stone.needsUpdate = true;} );
+  preLoaded.tex.papyrus = new THREE.Texture();
+  imgLoader.load( 'assets/textures/papyrus.jpg', function ( image ) {  preLoaded.tex.papyrus.image = image;  preLoaded.tex.papyrus.needsUpdate = true;} );
+  preLoaded.tex.book = new THREE.Texture();
+   imgLoader.load( 'assets/textures/book.jpg', function ( image ) {  preLoaded.tex.book.image = image;  preLoaded.tex.book.needsUpdate = true;} );
+ 
+  return preLoaded.objs;
+
+}
+
+ function OldCamera() {
+    this.initSketchTo3D(
+       "oldcamera",
+ [
+ [[-0.7097683977,-.6],[-0.7030480539,0.3187892845],[-0.4587086229,0.3779625343],[0.4888720014,0.3448804212],[0.500507355,-0.5699396967],[0.2998481145,-0.602654615],[-0.7097683977,-.6],],[[-0.6156199438,0.8056861794],[-0.5351238768,0.7938771798],[-0.4579206793,0.7637829594],[-0.3871995484,0.7170199381],[-0.3262559886,0.6551060873],[-0.2780600551,0.5805349865],[-0.2441753787,0.4970564834],[-0.2259369887,0.408244764],[-0.2247871368,0.3178386003],[-0.2407775538,0.2299052976],[-0.2725601812,0.1481119186],[-0.3188900672,0.07596656714],[-0.3782979774,0.01714122783],[-0.447875367,-0.02602146701],[-0.5243632071,-0.05217163469],[-0.6046113487,-0.05985556685],[-0.6851074155,-0.04804658202],[-0.7623106396,-0.01795236098],[-0.8330317179,0.02881070351],[-0.8939752906,0.09072452863],[-0.9421712373,0.1652956224],[-0.9760559143,0.24877417],[-0.9942943172,0.3375858601],[-0.9954441691,0.4279920238],[-0.9794537391,0.5159253559],[-0.9476711112,0.5977186903],[-0.901341212,0.6698640488],[-0.8419332889,0.7286894138],[-0.7723559518,0.7718520654],[-0.6958680851,0.7980022324],[-0.6156199438,0.8056861794],],[[0.1653455104,0.7856448749],[0.2458415773,0.7738358752],[0.3230447749,0.7437416549],[0.3937659058,0.6969786336],[0.4547094257,0.6350647838],[0.5029053725,0.5604936826],[0.5367900489,0.4770151796],[0.5550284522,0.3882034598],[0.5561783041,0.2977972961],[0.5401878737,0.2098639937],[0.5084052464,0.1280706147],[0.4620753471,0.05592526362],[0.4026674768,-0.002900076706],[0.3330900872,-0.04606277155],[0.256602247,-0.07221293923],[0.1763541055,-0.07989687139],[0.09585802541,-0.06808788622],[0.01865482787,-0.03799366586],[-0.05206629694,0.008769399829],[-0.1130098569,0.07068322461],[-0.1612057898,0.1452543181],[-0.1950904668,0.2287328657],[-0.2133288564,0.3175445554],[-0.2144787083,0.4079507191],[-0.1984882916,0.4958840515],[-0.1667056637,0.577677386],[-0.1203757783,0.6498227448],[-0.06096786797,0.7086481101],[0.008609515598,0.7518107606],[0.08509735573,0.7779609282],[0.1653455104,0.7856448749],],[[0.3702792642,-0.4028015391],[0.3381344406,-0.3758413645],[0.3215435639,-0.3115517172],[0.3173958447,-0.2400035614],[0.3277651427,-0.1808985632],[0.3516145279,-0.1311259331],[0.376500843,-0.1134981266],[0.3951655793,-0.1176458458],[0.4428643498,-0.1238674245],[0.4708614542,-0.1197197053],[0.4957477693,-0.08861181152],[0.5227079439,-0.08964874131],[0.5486311888,-0.106239618],[0.5952930295,-0.111424267],[0.6326225021,-0.1197197053],[0.6523241682,-0.136310582],[0.6885443224,-0.1312199376],[0.7587408342,-0.1035107882],[0.8862029215,-0.07025980896],[0.9065229644,-0.09057985185],[0.908370241,-0.1663181936],[0.9065229644,-0.2993221107],[0.8880501981,-0.4249369213],[0.8714247085,-0.4748133903],[0.8474101123,-0.4840497734],[0.7864499836,-0.456340624],[0.6996279822,-0.4101587083],[0.6257369171,-0.4009223252],[0.6109587041,-0.4230896447],[0.6072641508,-0.4341733045],[0.5536931287,-0.4360205811],[0.5038166597,-0.4323260278],[0.4650238506,-0.4046168784],]],
+
+ 
+ function() {
+
+    var Cam = root.addNode();
+
+    var camObj = preLoaded.objs.camBody;
+
+    camObj.rotation.x = 5* Math.PI / 180 ;
+    camObj.rotation.y =-30* Math.PI / 180 ;
+  
+    Cam.add(camObj);
+
+    var camObj = preLoaded.objs.camLines;
+
+    camObj.rotation.x = 5* Math.PI / 180 ;
+    camObj.rotation.y =-30* Math.PI / 180 ;
+    camObj.material = new THREE.MeshLambertMaterial( {color:0x000000} );
+ 
+    Cam.add(camObj);
+
+    return Cam;
+  
+
+ }
+    );
+ }
+ OldCamera.prototype = new SketchTo3D;
+
+ function Television() {
+    this.initSketchTo3D(
+       "television",
+   [
+   [[-0.9223644594,-0.7355344194],[-0.9128330052,0.4225372691],[0.5883710355,0.4654288131],[0.8886118436,0.3653485437],[0.8886118436,-0.7974888719],[-0.612592197,-0.8546775972],[-0.9097377684,-0.7324106347],],[[-0.4934490192,-0.5449053349],[-0.4886832921,0.2033138219],[0.5454794914,0.2223767303],[0.5740738541,-0.5592025162],[-0.4886832921,-0.6116255145],],[[-0.2694598449,0.3844114522],[-0.526809109,0.9420015244],],[[-0.2360997551,0.4034743606],[0.04984387169,0.9372357973],],],
+
+   
+      function() {
+
+        var Node = root.addNode();
+        preLoaded.objs.tv.geometry.computeVertexNormals();
+        Node.add(preLoaded.objs.tv);
+
+        return Node;
+      }
+    );
+ }
+ Television.prototype = new SketchTo3D;
+
+
+ function Scroll() {
+    this.initSketchTo3D(
+       "scroll",
+   [
+   [[-0.866929792,-0.2665993999],[-0.814264529,-0.3112566577],[-0.7807198875,-0.2776749314],[-0.8056282657,-0.2191416373],[-0.8694750758,-0.1856782882],[-0.9486245817,-0.1953576224],[-0.9379078272,-0.3051956559],[-0.8470920646,-0.3812179118],[-0.7256709105,-0.3709548013],[-0.7069641721,-0.2594838158],[-0.7923153177,-0.09915887049],[-0.958391834,-0.0613831454],[-1.010804784,-0.1741373576],[-0.9896944144,-0.3292164253],[-0.8724652354,-0.44371656],[-0.7063887192,-0.4814922851],[-0.459517744,-0.4594495005],[-0.2574420458,-0.4194516405],[-0.05518312272,-0.4741345399],[0.1533266116,-0.5436249883],[0.3894316608,-0.5669409008],[0.5199737877,-0.5614582687],[0.6062545187,-0.4797193294],[0.6052142731,-0.3787428024],[0.5334283886,-0.2558465603],[0.4432498329,-0.2227306816],[0.3762404489,-0.2833672848],[0.3981387506,-0.3820114095],[0.4857828668,-0.4658459965],[0.5349533438,-0.4537185862],[0.5512055417,-0.3864394595],[0.5279637717,-0.3401492497],[0.4823589073,-0.3162468575],[0.4499253379,-0.3579906401],[0.474833716,-0.4165239341],],[[-0.9461930949,-0.09216125915],[-0.8079870087,0.0365133729],[-0.6793123766,0.2366739117],[-0.5982950157,0.460663086],[-0.5744663801,0.5607433553],[-0.4743861108,0.5702748096],[-0.3552429329,0.5130860842],[-0.3075856618,0.4225372691],[-0.3123513889,0.3462856353],[-0.3647743872,0.2747997286],[-0.2980542076,0.2795654557],[-0.1360194857,0.2652682743],[0.1117983242,0.2700340014],[0.3929762238,0.2223767303],[0.5931367626,0.1556565507],[0.7027484862,0.1365936423],[0.736108576,0.1699537321],[0.77900012,0.293862637],[0.7837658471,0.3605828166],[0.864783208,0.3701142708],[0.9696292045,0.2843311828],[0.9982235672,0.1842509134],[0.9791606587,0.1127650067],[0.8695489351,-0.04926971513],[0.7170456675,-0.297087525],],],
+
+   
+      function() {
+
+        var Node = root.addNode();
+        var node = Node.addNode();
+	console.log(node.getMatrix());
+	node.getMatrix().translate(0,.05,0);
+
+        node.add(preLoaded.objs.scroll);
+        preLoaded.objs.scroll.geometry.computeVertexNormals();
+        preLoaded.objs.scroll.material.map = preLoaded.tex.papyrus;
+
+        preLoaded.tex.papyrus.wrapS = THREE.RepeatWrapping;
+        preLoaded.tex.papyrus.wrapT = THREE.RepeatWrapping;
+        preLoaded.tex.papyrus.repeat.x=3;
+        preLoaded.tex.papyrus.repeat.y=1.1;
+
+        return Node;
+      }
+    );
+ }
+ Scroll.prototype = new SketchTo3D;
+
+
+ function Tablet() {
+    this.initSketchTo3D(
+       "tablet",
+   [
+   [[-0.4032651548,-0.8223859989],[-0.5693906583,-0.4739276257],[-0.7922419435,0.1095375572],[-0.9624192885,0.551188286],[-0.9056935068,0.8226616697],[-0.7557753695,0.8348171944],[-0.3586948978,0.8672319268],[0.07485214786,0.8672319268],[0.3949476302,0.883439293],[0.459777095,0.7740395712],[0.6096952322,0.3931664656],[0.7596133695,0.03660440937],[0.8852204575,-0.2672837068],[0.9743609716,-0.5347052489],[0.97030913,-0.6360012876],[0.9176351899,-0.7656602172],[0.8122873097,-0.8061786327],[0.3544292147,-0.8061786327],],[[-0.6828422217,0.6524843247],[-0.6620230895,0.6449171473],[-0.6331195878,0.613957874],[-0.5708123061,0.5543034611],[-0.5201727646,0.6312946513],[-0.4461319292,0.7047156914],[-0.3785196015,0.6167998724],[-0.3090021416,0.5185457991],[-0.2642643754,0.594637563],[-0.2387287483,0.6397178403],[-0.1915553786,0.6854455175],[-0.1196047655,0.6573315275],[-0.04900438358,0.6303719157],[0.01093043392,0.6748060167],[0.06428115712,0.7055470804],[0.1351376701,0.7089949766],[0.2140861077,0.6807700666],[0.2896022734,0.7190812388],],[[-0.5896498661,0.4012701487],[-0.5766100329,0.3412812105],[-0.4911373281,0.2065512227],[-0.3963727968,0.3218139638],[-0.3399674956,0.3948115971],[-0.2712361031,0.3617506123],[-0.2407246032,0.3067298891],[-0.2006245588,0.2515980004],[-0.1455581188,0.2220152592],[-0.0945342723,0.2535573914],[-0.06520548645,0.2934884767],[-0.0186985634,0.329082699],[0.04171610403,0.3947669651],[0.1495620893,0.2748707083],[0.176790806,0.3854544515],[0.2459008173,0.4811083884],],[[-0.4437835703,-0.007965847661],[-0.4264876389,-0.01851507775],[-0.3895763748,-0.04929369048],[-0.3148579497,-0.1097050705],[-0.2642894474,-0.04696266279],[-0.2353762637,0.002070311252],[-0.1660146752,0.02959152398],[-0.1051678155,-0.01373320281],[-0.06237550635,-0.05273484703],[-0.002329999027,-0.1098823334],[0.02366028849,-0.03160383477],[0.05972547208,0.009676939239],[0.1043921353,0.06559098824],[0.1850824365,0.03391908484],[0.2229374854,-0.01775437833],[0.2937649344,-0.03974378314],[0.3382656529,0.01928102179],[0.4014321258,0.05546800419],[0.4662701421,0.07229518386],[0.5699810039,0.02603833055],],[[-0.3141246408,-0.3078021222],[-0.3021687935,-0.3203009058],[-0.2806496366,-0.3487896607],[-0.2513566845,-0.3934592452],[-0.2094010441,-0.4340777276],[-0.1629219891,-0.4690339191],[-0.1018202342,-0.4504669242],[-0.07639602098,-0.4014922215],[-0.04621281363,-0.3499809901],[0.008523560149,-0.3092826015],[0.06274543571,-0.3538611045],[0.1162360572,-0.4138945306],[0.2006170533,-0.3658305712],[0.2831515101,-0.3231984667],[0.3379975834,-0.3763224097],[0.3950904678,-0.4124880022],[0.4500503311,-0.376758267],[0.5095804611,-0.3252978038],[0.5911637134,-0.4053935932],],],
+
+   
+      function() {
+
+        var Node = root.addNode();
+        preLoaded.objs.tablet.geometry.computeVertexNormals();
+        preLoaded.objs.tablet.material.map = preLoaded.tex.stone;
+       preLoaded.tex.stone.wrapS = THREE.RepeatWrapping;
+       preLoaded.tex.stone.wrapT = THREE.RepeatWrapping;
+       preLoaded.tex.stone.repeat.x=5;
+       preLoaded.tex.stone.repeat.y=5;
+        Node.add(preLoaded.objs.tablet);
+
+        return Node;
+      }
+    );
+ }
+ Tablet.prototype = new SketchTo3D;
+
+
+ function Typewriter() {
+    this.initSketchTo3D(
+       "typewriter",
+   [[[-0.9991662596,-0.5995361438],[-1.025016935,-0.5004418869],[-0.8139030837,-0.2634773596],[-0.7578932863,-0.1083733054],[-0.7578932863,-0.01358749444],[-0.701883489,0.1587503436],[-0.6631074754,0.3224712897],[-0.4563020698,0.4474162223],[-0.2064122046,0.4086402087],[0.3709195528,0.3095459519],[0.7371374586,0.2793868302],[0.8879330669,0.2923121681],[0.9353259723,0.2707699383],[0.9482513102,0.04673074887],[0.9396344183,-0.1945422244],[0.9525597561,-0.3410293867],[0.8405401614,-0.3668800624],[0.5518742827,-0.5564516842],[0.3235266473,-0.7115557385],[0.2416661742,-0.7158641844],],[[-0.2710388939,0.4301824385],[-0.1977953127,0.7145398712],[-0.1590192992,0.8998030471],[-0.1245517316,0.9342706147],[-0.06423348826,0.9256537228],[0.09517901192,0.908419939],[0.3709195528,0.8739523714],[0.6208094179,0.8567185876],[0.7931472559,0.8394848038],[0.8017641478,0.7877834524],[0.7638341156,0.6866366998],[0.7129787455,0.4385012549],],],
+
+   
+      function() {
+
+        var Node = root.addNode();
+
+        Node.add(preLoaded.objs.typewriterButtons);
+        Node.add(preLoaded.objs.typewriterFrame);
+        Node.add(preLoaded.objs.typewriterPaper);
+
+        return Node;
+      }
+    );
+ }
+ Typewriter.prototype = new SketchTo3D;
+
+
+ function Hammer() {
+    this.initSketchTo3D(
+       "hammer",
+   [[[-0.9803303763,-0.1854977118],[-0.9803303763,0.1825130855],[0.3576970607,0.1840867912],[0.3576970607,0.4959237157],[0.988862054,0.4959237157],[0.988862054,-0.4973346363],[0.3669045917,-0.4973346363],[0.3669045917,-0.1870714176],[-0.9803303763,-0.1854977118],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        preLoaded.objs.hammer.material.color = new THREE.Color( 0xeeaa77 );
+        Node.add(preLoaded.objs.hammer);
+        return Node;
+      }
+    );
+
+     this.render = function(elapsed) {
+        Hammer.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+
+        if (this.shapeSketch !== undefined) {
+          var ham = this.shapeSketch.mesh;
+
+            ham.update = function(elapsed) {
+              if(!this.count)
+                this.count=1;
+              else
+              this.count+=elapsed;
+              // ham.getMatrix().identity();
+              ham.getMatrix().rotateZ(Math.abs(Math.cos(time*4))*.5);
+            }
+        }
+      }
+
+ }
+ Hammer.prototype = new SketchTo3D;
+
+
+ function Book1() {
+    this.initSketchTo3D(
+       "book1",
+   [[[-0.6661593447,-0.02114729705],[-0.6661593447,-1.007312912],[0.6892111311,-1.007312912],[0.6892111311,0.9893081115],[-0.6855911795,0.9893081115],[-0.6855911795,-0.01628933836],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        preLoaded.objs.book.material.map = preLoaded.tex.book;
+        Node.add(preLoaded.objs.book);
+        return Node;
+      }
+    );
+
+    this.render = function(elapsed) {
+       Book1.prototype.render.call(this, elapsed);
+       var sketch = this.shapeSketch;
+       if (sketch !== undefined) {
+          sketch.isBook = true;
+          sketch.code = [
+["page 1",
+"               \n" +
+"               \n" +
+"               It is a truth universally acknowledged, that a single man in possession of a\n" +
+"               good fortune, must be in want of a wife.\n" +
+"               \n" +
+"               However little known the feelings or views of such a man may be on his\n" +
+"               first entering a neighbourhood, this truth is so well fixed in the minds of\n" +
+"               the surrounding families, that he is considered the rightful property of some\n" +
+"               one or other of their daughters.\n" +
+"               \n" +
+"               'My dear Mr.  Bennet,' said his lady to him one day, 'have you heard that\n" +
+"               Netherfield Park is let at last?'\n" +
+"               \n" +
+"               Mr. Bennet replied that he had not.\n" +
+"               \n" +
+"               'But it is,' returned she; 'for Mrs.  Long has just been here, and she told me\n" +
+"               all about it.'\n" +
+"               \n" +
+"               Mr.  Bennet made no answer.  'Do you not want to know who has taken it?'\n" +
+"               cried his wife impatiently.\n" +
+"               \n" +
+"               'You want to tell me, and I have no objection to hearing it.'\n" +
+"               \n" +
+"               This was invitation enough.\n" +
+"               \n" +
+"               'Why, my dear, you must know, Mrs.  Long says that Netherfield is taken by\n" +
+"               a young man of large fortune from the north of England; that he came down\n" +
+"               on Monday in a chaise and four to see the place, and was so much delighted\n" +
+"               with it, that he agreed with Mr.  Morris immediately; that he is to take\n" +
+"               possession before Michaelmas, and some of his servants are to be in the\n" +
+"               house by the end of next week.'\n" +
+"               \n" +
+"               'What is his name?'\n" +
+"               \n" +
+"               'Bingley.'\n" +
+"               \n" +
+"               \n" +
+"               \n" +
+""],
+["page 2", ""],
+["page 3", ""],
+["page 4", ""],
+["page 5", ""],
+["page 6", ""],
+["page 7", ""],
+["page 8", ""],
+["page 9", ""],
+["page 10", ""],
+["page 11", ""],
+["page 12", ""],
+["page 13", ""],
+["page 14", ""],
+["page 15", ""],
+["page 16", ""],
+["page 17", ""],
+["page 18", ""],
+["page 19", ""],
+["page 20", ""],
+["page 21", ""],
+["page 22", ""],
+["page 23", ""],
+["page 24", ""],
+["page 25", ""],
+["page 26", ""],
+["page 27", ""],
+["page 28", ""],
+["page 29", ""],
+["page 30", ""],
+["page 31", ""],
+["page 32", ""],
+["page 33", ""],
+           ];
+       }
+    }
+ }
+ Book1.prototype = new SketchTo3D;
+
+  function Telegraph() {
+    this.initSketchTo3D(
+       "telegraph",
+[[[-0.9953602138,-0.3121770153],[-0.9953602138,-0.06971190482],[1.010487519,-0.06971190482],[1.010487519,-0.3165854719],[-0.9953602138,-0.3165854719],],[[0.274275274,-0.09900632444],[0.274275274,0.4284436859],[0.1067539249,0.4284436859],[0.115570838,0.5298381867],[0.4550219927,0.5254297301],[0.4417966231,0.4284436859],[0.2875006437,0.4284436859],],[[0.7856562344,-0.06530344826],[0.7680224081,0.4284436859],[0.6093179722,0.4284436859],[0.6005010591,0.5430635563],[0.9311353007,0.5474720129],[0.9355437572,0.4284436859],[0.7768393213,0.4196267728],],[[0.9046845613,0.278556163],[-0.5060215362,0.2697392499],[-0.5148384493,0.2300631409],[-0.8498811475,0.2300631409],[-0.8498811475,0.3446830113],[-0.5148384493,0.3358660982],[-0.5060215362,0.2609223368],],],
+   
+      function() {
+        var Node = root.addNode();
+
+        var button = preLoaded.objs.telegraphButton;
+        var base = preLoaded.objs.telegraphBase;
+
+        Node.add(preLoaded.objs.telegraphButton);
+        Node.add(preLoaded.objs.telegraphBase);
+
+        preLoaded.objs.telegraphButton.material = new phongMaterial().setAmbient (.15,.12,.06)
+                                                                     .setDiffuse (.30,.24,.12)
+                                                                     .setSpecular(.50,.40,.20,30);
+
+        preLoaded.objs.telegraphBase.material = new phongMaterial().setAmbient (.18,.10,.06)
+                                                                   .setDiffuse (.18,.10,.06)
+                                                                   .setSpecular(.2,.2,.2,5);
+
+        Node.button = preLoaded.objs.telegraphButton;
+        Node.base = preLoaded.objs.telegraphBase;
+
+        Node.button.position.x = .53  - 0.1;
+        Node.base.position.x   = .262 - 0.1;
+
+        Node.button.position.y = -0.1;
+        Node.base.position.y   = -0.1;;
+
+        return Node;
+      }
+    );
+
+    this.render = function(elapsed) {
+        Telegraph.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+       
+
+        if (this.shapeSketch !== undefined) {
+          var button = this.shapeSketch.mesh;
+          button.up = this;
+
+
+            button.update = function(elapsed) {
+
+            var pressed = 0;
+
+              if(isTelegraphKeyPressed)
+                pressed = 1;
+
+            button.button.getMatrix().identity();
+            button.button.getMatrix().translate(.63,.161,0).rotateZ(pressed*.1);
+            }
+        }
+      }
+ }
+ Telegraph.prototype = new SketchTo3D;
+
+  function Spike() {
+    this.initSketchTo3D(
+       "spike",
+   [[[-0.000952313946,-0.9381778461],[0.1623915114,0.6135988612],[0.3036618467,0.79434558],[0.2992471488,0.9265992766],[0.1447327194,0.9706838422],[-0.221687213,0.9574584725],[-0.2967370787,0.9177823635],[-0.3188105686,0.7899371234],[-0.1687108372,0.6180073178],[-0.000952313946,-0.9602201289],],],
+
+   
+      function() {
+        var Node = root.addNode();
+        preLoaded.objs.spike.material.color = new THREE.Color( 0x887766 );
+
+        Node.add(preLoaded.objs.spike);
+        return Node;
+      }
+    );
+    this.render = function(elapsed) {
+        Spike.prototype.render.call(this, elapsed);
+
+        this.count = 0;
+
+        if (this.shapeSketch !== undefined) {
+          var spike = this.shapeSketch.mesh;
+
+            spike.update = function(elapsed) {
+              if(!this.count)
+                this.count=1;
+              else
+              this.count+=elapsed;
+              // spike.getMatrix().identity();
+              spike.getMatrix().translate(0,Math.abs(Math.cos(time*4))*-.5,0);
+            }
+        }
+      }
+ }
+ Spike.prototype = new SketchTo3D;
+
+
+
+/*
+registerGlyph("oldCamera()", 
+
+["$*!/ 3 8 = A F!K!O#T$Y%^&c'g)l+p-t/y2|6}7x7t7o6j6f5a4[4W3R3M3I3D3?4;78::=>?C@GBKDPFTHXJ^LbNfQjSnWq[t`v`s_n]jZeYaW[VWTRSNRIQEP@P;P6Q3S7V;X?[C^G`KcOeSgWj]laodrhukyn}q}l}h{cz_wZuVsRpMnIlEjAi<g8e4d/c*a&_!",]
+);
+
+THREE.Object3D.prototype.addOldCamera = function() {
+
+  var manager = new THREE.LoadingManager();
+  var loader = new THREE.OBJLoader( manager );
+
+  var that = this;
+
+  var loaded = 0;
+
+  var obj = new THREE.Object3D();
+
+  var Cam = root.addNode();
+
+ 
+  var camBody;
+  var camLines;
+
+  loader.load( 'assets/models/camBody.obj', function ( object ) {
+
+      // that.add(object);
+      // // object.children[0].geometry.computeCentroids();
+      // // object.children[0].geometry.computeFaceNormals();
+      // object.children[0].geometry.computeVertexNormals();
+      // // object.children[0].material = new THREE.MeshLambertMaterial({color:0xffffff});
+      // var sketch = geometrySketch(object.children[0]);
+      // obj.add(object.children[0]);
+
+      // loaded++;
+      // console.log('hi');
+
+       // that.add(object);
+      // object.children[0].geometry.computeCentroids();
+      // object.children[0].geometry.computeFaceNormals();
+      object.children[0].geometry.computeVertexNormals();
+      camBody = object.children[0];
+      Cam.add(camBody);
+      // var sketch = geometrySketch(object.children[0]);
+
+
+    });
+  loader.load( 'assets/models/camLines.obj', function ( object ) {
+
+      // that.add(object);
+      // // object.children[0].geometry.computeCentroids();
+      // // object.children[0].geometry.computeFaceNormals();
+      // object.children[0].geometry.computeVertexNormals();
+      // object.children[0].material = new THREE.MeshLambertMaterial({color:0xffffff});
+      // loaded++;
+      // obj.add(object);
+
+      object.children[0].geometry.computeVertexNormals();
+      camLines = object.children[0];
+      Cam.add(camLines);
+
+      // var sketch = geometrySketch(object);
+
+    });
+
+    // var node = radio.addNode();
+    // node.getMatrix().translate(0,.2,0);
+
+    // var shape1 = node.addCylinder(32);
+    // shape1.getMatrix().rotateX(PI/2).scale(1,.5,1);
+
+    // var shape2 = node.addCube();
+    // shape2.getMatrix().translate(0,-.7,0).scale(1,.7,.5);
+
+    // var shapeMaterial = new phongMaterial().setAmbient(.1,.1,.1)
+    //                              .setDiffuse(.9,.9,.9);
+    // radio.setMaterial(shapeMaterial);
+
+    // var dial1 = node.addCylinder(32);
+    // dial1.getMatrix().rotateX(PI/2).translate(0,.2,0).scale(.7,.5,.7);
+    // var dialMaterial = new phongMaterial().setAmbient(.1,.1,.1)
+    //                             .setDiffuse(.5,.5,.5);
+    // dial1.setMaterial(dialMaterial);
+
+      return Cam;
+
+  // console.log(loaded);
+  // if(loaded>1){
+  //   var sketch = geometrySketch(obj);
+  // }
+}
+
+function oldCamera(){
+
+    root.addOldCamera()
+  
+}
+*/
+
+registerGlyph("iceCream()", [[[-0.3705463965,0.1681142573],[-0.4401231997,0.2015217632],[-0.3831176681,0.3420273783],[-0.486678622,0.5292325585],[-0.42458884,0.7514859123],[-0.3054437766,0.9082298975],[-0.1004551006,0.9962111157],[0.1013220835,0.9999104678],[0.3051325426,0.9073956369],[0.4233779844,0.7519698322],[0.5162729479,0.5388859442],[0.4133142948,0.3451573407],[0.4282487591,0.163480801],[0.1898266722,0.1054116066],[0.01981768996,0.01535104439],[-0.1924553856,0.09529044749],],[[-0.3705463966,0.1681142574],[-0.3399492358,0.08943494051],[0,-1.034526944],[0.3612222715,0.1013154445],],]
 );
 
 THREE.Object3D.prototype.addIceCreamCone = function() {
@@ -25,17 +530,10 @@ THREE.Object3D.prototype.addIceCreamCone = function() {
     });
 }
 
-function iceCreamCone(){
+function iceCream(){
 
     root.addIceCreamCone()
-  // var a = root.add3DRocket();//new THREE.Mesh(new THREE.SphereGeometry(),new THREE.MeshLambertMaterial(0xffffff));//root.add3DRocket();
-  // var sketch = geometrySketch(a);
-  // a.update = function() {
-
-  //  this.getMatrix().translate(0,0,0).scale(1);
-  //  this.shaderMaterial.uniforms['time'].value = time*.1;
-
-  // }
+  
 }
 
 
@@ -861,11 +1359,11 @@ function nFloor() {
 }
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
-
+/*
 registerGlyph("barley()",
 ["P!P P!P#P$P%P&P'P(P)P*P*P+P,P-P.P/P0P1P2P3P4P5P6P7P8P9P:P;P<P=P>P?P@PAPBPCQDQDQEQFQGQHQIQJQKQLQMQNQOQPQQQRQSQTQUQVQWQXQYQZQ[Q]Q^Q_Q_Q`QaQbQcQdQeQfQgQhQiQjQkQlRmRnRoRpRqRrRsRtRuRvRvRwRxRySzS{S|S}S~T}S}","P#P#P$O$N$N%M%M&L&K'K'J(J)J)I*I+I+I,J-J-J.K.L.L/M/N0N0O0P0Q0Q1R1S1S2S2T3T4T4T5T6T7T8T8S9S9R:Q:Q:P:O;N;N;M;L;L;K<K<J=J>J?J@J@JAJBJCJCKDKDLELEMENENFOFPFQFQFRGSGSGTHTITITJTKTLTMTNTNTOTPSQSQSRRRRSQSQTPTPT","P$Q$R$R%R%S%S&T&T'T'T(U)U)U*U+U+U,T-T-T.S.S/R/R0R0Q0Q1P1P2P2O2O3O4N4N5N5M6M6M7M8M8N9N9O:O:O:P;Q;Q;R;R<S<S<S=T=T>T?T?T@TATBTBSCSCRDRDQEQEQFPFPGOGOGOHNHNININJMJMKMKLLLLLMLNLOLOLPLQMQMQNRNRORORPSPRPQPQOP",]
 );
-
+*/
 THREE.Object3D.prototype.addBarley = function() {
   var plane = barleyField.setup();
   var noisePlane = NoisePlane.setup();
@@ -1958,3 +2456,4 @@ flago = {
         
     }
 }
+

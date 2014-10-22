@@ -1,12 +1,13 @@
 
+   // ALL THE POSSIBLE DRAWING COLORS FOR A SKETCH.
+
    var paletteRGB = [
-      [255,255,255],
-      [128, 50, 25],
-      [255,  0,  0],
-      [255,255,  0],
-      [  0,255,  0],
-      [  0,  0,255],
-      [255,  0,255],
+      [255,255,255],	// CHANGES BETWEEN WHITE AND BLACK, WHENEVER USER TOGGLES WITH '-' KEY.
+      [255,  0,  0],	// RED
+      [255,255,  0],	// YELLOW
+      [  0,255,  0],	// GREEN
+      [  0,  0,255],	// BLUE
+      [255,  0,255],	// MAGENTA
    ];
 
    var palette = [];
@@ -14,18 +15,10 @@
       palette.push('rgb(' + paletteRGB[i][0] + ',' +
                             paletteRGB[i][1] + ',' +
                             paletteRGB[i][2] + ')' );
-/*
-      'white',
-      'rgb(128,50,25)',
-      'red',
-      'orange',
-      'green',
-      'blue',
-      'magenta',
-   ];
-*/
 
    function sketchColor() { return palette[sketchPage.colorId]; }
+
+   // THE BASIC SKETCH CLASS, FROM WHICH ALL SKETCHES ARE EXTENDED.
 
    function Sketch() {
       this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
@@ -42,7 +35,8 @@
 
       this.arrowDrag = function(x, y) {
          var n = this.arrows.length - 1;
-         this.arrows[n][0].push([x,y]);
+	 if (this.arrows[n] !== undefined)
+            this.arrows[n][0].push([x,y]);
       }
 
       this.arrowEnd = function(x, y) {
@@ -159,6 +153,8 @@
             else
                dst[prop] = this[prop];
          }
+	 if (dst.initCopy !== undefined)
+	    dst.initCopy();
          return dst;
       }
       this.code = null;
@@ -257,13 +253,8 @@
          utext(label, P[0], P[1], ax, ay);
       }
       this.drawValue = function(value, xy, ax, ay, scale) {
-	 //var textHeight = _g.textHeight;
-	 //_g.textHeight = textHeight * this.sc;
-
          var P = this.adjustXY(xy);
          utext(isNumeric(value) ? roundedString(value) : value, P[0], P[1], ax, ay);
-
-	 //_g.textHeight = textHeight;
       }
       this.drawText = function(context) {
 
@@ -694,7 +685,7 @@
       this.sketchState = 'finished';
       this.styleTransition = 0;
       this.sp = [];
-      this.standardView = function() {
+      this.standardView = function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
             .5 + this.tx() / width(),
@@ -702,9 +693,9 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            this.scale() / 14);
+            this.scale() / 14, matrix);
       }
-      this.standardViewInverse = function() {
+      this.standardViewInverse = function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardViewInverse(
             .5 + this.tx() / width(),
@@ -712,7 +703,7 @@
             this.is3D ? PI * ry          : 0,
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
-            this.scale() / 14);
+            this.scale() / 14, matrix);
       }
       this.tX = 0;
       this.tY = 0;
@@ -1307,7 +1298,6 @@
             }
 	    drawCurve(C);
          }
-	 console.log("b : " + arrayToString(b));
 /*
 	 if (this.geoSketch !== undefined && b[0] > 0) {
 	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
@@ -1323,9 +1313,6 @@
             }
 
 	    var b2 = computeCurveBounds(this.sp, 1);
-
-console.log("b1: " + arrayToString(b1));
-console.log("b2: " + arrayToString(b2));
 
             this.geoSketch._dx = (b[0] + b[2]) / 2 - (b1[0] + b1[2]) / 2;
             this.geoSketch._dy = (b[1] + b[3]) / 2 - (b1[1] + b1[3]) / 2;

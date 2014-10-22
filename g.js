@@ -3,24 +3,28 @@
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
    function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+
+   // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
+
    //function height() { return 720; }
    //function height() { return 800; }
 
-   function bgMaterial() {
-      return backgroundColor == 'white' ? whiteMaterial : blackMaterial;
+   // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
+
+   function scrimColor(alpha, colorId) {
+      if (colorId === undefined)
+         colorId = 0;
+      var p = paletteRGB[colorId];
+      return 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + alpha + ')';
    }
 
-   function penMaterial() {
-      return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
-   }
-
-   function scrimColor(alpha) {
-      return (backgroundColor == 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
-   }
+   // TRANSPARENT INK IN THE BACKGROUND COLOR.
 
    function bgScrimColor(alpha) {
       return (backgroundColor != 'white' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha + ')';
    }
+
+   // LEFT AND TOP COORDINATES OF THE CURRENTLY VISIBLE CANVAS.
 
    function clientX(event) {
       if (isDef(_g.panX)) return event.clientX - _g.panX;
@@ -32,7 +36,9 @@
       return event.clientY;
    }
 
+////////////////////////////////////////////////////////////////
 // INITIALIZE HANDLING OF KEYBOARD AND MOUSE EVENTS ON A CANVAS:
+////////////////////////////////////////////////////////////////
 
    var mouseMoveEvent = null;
 
@@ -93,8 +99,6 @@
 
       canvas.onmousedown = function(event) {
 
-
-
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
          if ((event.which && event.which !== 1) ||
@@ -115,7 +119,6 @@
          handle.mousePressedAtY = handle.mouseY;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
-
 
          if (isDef(handle.mouseDown))
             handle.mouseDown(handle.mouseX, handle.mouseY);
@@ -205,6 +208,7 @@
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = clientY(event) - r.top;
 
+
          //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
          if (handle.mousePressed) {
@@ -276,6 +280,8 @@
    function noiseX(x,y) { return _nA * _noise(_nF*x, _nF*y); }
    function noiseY(x,y) { return _nA * _noise(_nF*x, _nF*(y+128)); }
 
+   // ADD NOISE TO THE X AND Y VALUE OF A POINT ON A LINE BEING DRAWN.
+
    function snx(sketch,x,y) {
       var dx = 0, dy = 0, amp = 1, seed = 0;
       if (isk() && sketch != null) {
@@ -305,11 +311,27 @@
       return y + amp * noiseY(x - dx, y - dy + seed);
    }
 
+   // WRAPPER FUNCTIONS AROUND STARTING AND ENDING DRAWING A SKETCH.
+
+   function _g_sketchStart() {
+      _g.xp1 = sk().xStart;
+      _g.yp1 = sk().yStart;
+      _g.inSketch = true;
+   }
+
+   function _g_sketchEnd() {
+      _g.inSketch = false;
+   }
+
+   // SET OR GET CANVAS LINE WIDTH, DEPENDING ON WHETHER AN ARGUMENT IS SPECIFIED.
+
    function lineWidth(w) {
       if (isDef(w))
          _g.lineWidth = w;
       return _g.lineWidth;
    }
+
+   // MOVE_TO AND LINE_TO WHILE POSSIBLY ADDING NOISE.
 
    var prev_x = 0, prev_y = 0;
 
@@ -338,16 +360,6 @@
          _g.lineTo(x, y);
       else
          _g_sketchTo(x, y, 1);
-   }
-
-   function _g_sketchStart() {
-      _g.xp1 = sk().xStart;
-      _g.yp1 = sk().yStart;
-      _g.inSketch = true;
-   }
-
-   function _g_sketchEnd() {
-      _g.inSketch = false;
    }
 
    function _g_sketchTo(x, y, isLine) {
@@ -443,6 +455,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
+   // FROM A SKETCH, BUILD A TRACE (AN ARRAY OF CURVES).
+
    function sketchToTrace(sketch) {
       var src = sketch.sp;
       var dst = [];
@@ -451,12 +465,16 @@
       return dst;
    }
 
+   // COMPUTE THE BOUNDING BOX FOR A TRACE.
+
    function traceComputeBounds(trace) {
       var bounds = [];
       for (var n = 0 ; n < trace.length ; n++)
          bounds.push(computeCurveBounds(trace[n]));
       return bounds;
    }
+
+   // RESAMPLE ALL OF THE CURVES OF A TRACE.
 
    function resampleTrace(src) {
       var dst = [];
@@ -548,16 +566,89 @@
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
    var isShowingScribbleGlyphs = false;
+   var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var margin = 50;
    var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
+   var sketchTypesToAdd = [];
+   var needToResetPage = false;
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
+   function addSketchType(name) {
+      sketchTypesToAdd.push(name);
+   }
+
+   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+
+   if (window.haveLoadedSketches === undefined) {
+      try {
+         var lsRequest = new XMLHttpRequest();
+         lsRequest.open("GET", "ls_sketches");
+
+         lsRequest.onloadend = function () {
+            if (lsRequest.responseText != "") {
+               var ls = lsRequest.responseText.trim().split("\n");
+               for (var i = 0; i < ls.length; i++)
+                  importSketch(ls[i]);
+            }
+         }
+         lsRequest.send();
+      } catch (e) { }
+
+      window.haveLoadedSketches = true;
+  }
+
+/////////////////////////////////////////////////////////////////////
+///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
+///////////////////////// GOING TO BE MOVED /////////////////////////
+
+   function importSketch(filename) {
+
+      // IF A FILE IS CURRENTLY BEING EDITED, DON'T TRY TO LOAD ITS SWAP FILE.
+
+      var len = filename.length;
+      if (filename.substring(len-3, len) == "swp")
+         return;
+
+      var sketchRequest = new XMLHttpRequest();
+      sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.onloadend = function() {
+         window.eval(sketchRequest.responseText);
+         needToResetPage = true;
+      }
+      sketchRequest.send();
+   }
+
+   var ServerUtils = {};
+
+   ServerUtils.set = function(key, value) {
+      var setForm = new FormData();
+      setForm.append("key", key);
+      setForm.append("value", JSON.stringify(value));
+   
+      var request = new XMLHttpRequest();
+      request.open("POST", "set");
+      request.send(setForm);
+   }
+
+   ServerUtils.get = function(key, fn) {
+      var getRequest = new XMLHttpRequest();
+      getRequest.open("GET", "state/" + key + ".json");
+      getRequest.onloadend = function() {
+         fn(getRequest.responseText);
+      }
+      getRequest.send();
+   }
+
+/////////////////////////////////////////////////////////////////////
+
    function gStart() {
+
+      preLoadObjs();
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
 
@@ -590,7 +681,7 @@
       +
       (isShowingRenderer
        ?
-	   " <div id='scene_div' tabindex=1"
+           " <div id='scene_div' tabindex=1"
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " </div>"
        :       
@@ -649,6 +740,10 @@
          var sceneElement = document.getElementById('scene_div');
          sceneElement.appendChild(renderer.domElement);
       }
+
+      //videoSetup();
+
+      whiteMaterial.map = videoTexture;
 
       // START ALL CANVASES RUNNING
 
@@ -716,7 +811,7 @@
          This().setup();
       //}
 
-      pixelsPerUnit = 5.8 * height() / cameraFOV;
+      pixelsPerUnit = 5.8635 * height() / cameraFOV;
 
       // LOAD ALL THE SCRIBBLE GLYPHS.
 
@@ -1686,11 +1781,10 @@
    function directionsToPage(n1, n2) { return 8 * n1 + n2; }
    function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
 
-   // THIS NEEDS TO BE BUILD OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+   // THIS NEEDS TO BE BUILT OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
 
    function bgGesture(n1, n2, s) {
       if (n2 === undefined) {
-         console.log(n1);
          switch (n1) {
          case 2: setPage(pageIndex - 1); break;
          case 6: setPage(pageIndex + 1); break;
@@ -1698,7 +1792,7 @@
       }
       else if (s === undefined) {
          sketchPage.setPageInfo = { x: sketchPage.x, y: sketchPage.y, page: directionsToPage(n1, n2) };
-	 bgClickCount = 0;
+         bgClickCount = 0;
       }
       else
          console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
@@ -1860,10 +1954,26 @@
          tt.pollState(tt.myState);
          for (var i = 0 ; i < 1024 ; i++)
             ttForce[i] = tt.myState.hmd.forces[i] / 4096;
+/*
+var hi = -10000, lo = 10000;
+for (var i = 0 ; i < 1024 ; i++) {
+   hi = max(hi, ttForce[i]);
+   lo = min(lo, ttForce[i]);
+}
+console.log(lo + " " + hi);
+*/
       }
    }
 
    var tick = function(g) {
+
+      //videoAnimate();
+
+      if (needToResetPage) {
+         needToResetPage = false;
+         setPage(pageIndex);
+      }
+
       var w = width(), h = height();
 
 
@@ -1881,7 +1991,7 @@
 
       // HANDLE THE TACTONIC SENSOR, IF ANY.
 
-      //ttTick();
+      ttTick();
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 
@@ -2197,10 +2307,10 @@
                   if (isDef(S.out[0]))
                      S.outValue[0] = S.inValue[0];
                }
-               else {
+               else
                  for (var i = 0 ; i < S.in.length ; i++)
-                    S.outValue[i] = S.inValue[i];
-               }
+                    if (isDef(S.in[i]))
+                       S.outValue[i] = S.inValue[i];
             }
 
             // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
@@ -2396,7 +2506,7 @@
                annotateEnd();
             }
          }
-	 else {
+         else {
             if (isBottomHover && ! isRightGesture) {
                annotateStart();
                _g.save();
@@ -2479,8 +2589,8 @@
 
                _g.restore();
                annotateEnd();
-	    }
-	 }
+            }
+         }
 
          if (visible_sp != null) {
             annotateStart();
@@ -2510,7 +2620,7 @@
                   fillRect(x, h - margin - _g.panY, dx/2, margin - 2);
             }
          }
-	 else {
+         else {
             if (this.mouseX >= w - margin || isRightGesture) {
                color(scrimColor(0.06));
                fillRect(w - margin - _g.panX, -_g.panY, margin - 2, h);
@@ -2520,7 +2630,7 @@
                for (var y = _g.panY % dy - _g.panY - dy/4 ; y < h - _g.panY ; y += dy)
                   fillRect(w - margin - _g.panX, y, margin - 2, dy/2);
             }
-	 }
+         }
 
          // FAINTLY OUTLINE ENTIRE SCREEN, FOR CASES WHEN PROJECTED IMAGE SHOWS UP SMALL ON NOTEBOOK COMPUTER.
 
@@ -2934,7 +3044,7 @@
             this._dy = (b2[1] + b2[3]) / 2 - (b1[1] + b1[3]) / 2;
             this._ds = (b2[2] - b2[0]) / (b1[2] - b1[0]) * pow((b2[2] - b2[0]) / this.sw, 0.2) * 1.03;
 
-	    delete this.bounds;
+            delete this.bounds;
          }
 
          if (this._dx !== undefined) {
@@ -2955,6 +3065,9 @@
          var s = len(b[2] - b[0] + 2 * sketchPadding,
                      b[3] - b[1] + 2 * sketchPadding) / 4 / pixelsPerUnit;
 
+         if (this.mesh.sc !== undefined)
+            s *= this.mesh.sc;
+
          this.mesh.getMatrix()
              .identity()
              .translate(x, -y, 0)
@@ -2973,15 +3086,21 @@
             this.update(elapsed);
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
-                               || this.glyphSketch != null) {
+                               || this.glyphSketch != null
+			       || this.meshAlpha !== undefined
+			       || sketchPage.fadeAway > 0) {
             this.alpha = this.fadeAway > 0 ? this.fadeAway :
                          this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
+			 this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
-            this.mesh.material.opacity = sCurve(this.alpha);
-            this.mesh.material.transparent = true;
+            this.mesh.setOpacity(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
+         }
+         else if (this.mesh.material.alpha !== undefined) {
+            this.mesh.setOpacity(this.mesh.material.alpha);
+            this.mesh.material.alpha = undefined;
          }
 
          if (this.visibleEdgesMesh !== undefined)
@@ -2997,6 +3116,30 @@
 
             var visibleEdges = this.mesh.findVisibleEdges();
 
+            // MW VISIBLE EDGE FIX
+            // to restore previous algorithm, comment out the next two lines (and follow instructions below)
+
+            var moreVisibleEdges = this.mesh.findMoreVisibleEdges();
+            var newVisibleEdges = visibleEdges[0][1].concat(moreVisibleEdges[0][1]);
+
+            // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
+            // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
+            // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
+
+            // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
+            visibleEdges[0][1] = newVisibleEdges;
+
+            // console.log("length of first element of ve = " + visibleEdges[0].length);
+            // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
+            // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
+            // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
+            // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
+            // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
+            // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
+            // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
+
+            // FROM HERE FORWARD EVERYTHING IS THE SAME
+
             this.visibleEdgesMesh = createVisibleEdgesMesh(visibleEdges);
 
             sketchPage.scene.add(this.visibleEdgesMesh);
@@ -3007,7 +3150,7 @@
             }
 
             // Project the visible edges, and connect them into long 2d strokes.
-	     
+             
             var e2;
             if (this.bounds !== undefined || isShowing2DMeshEdges)
                e2 = this.mesh.projectVisibleEdges(visibleEdges);
@@ -3089,6 +3232,12 @@
        return addGeometryShaderSketch(new THREE.SphereGeometry(1.0, 21.0, 21.0), vertexShader, fragmentShader);
    }
 
+   // MW TORUS GEOMETRY
+
+   function addTorusShaderSketch(vertexShader, fragmentShader) {
+       return addGeometryShaderSketch(new THREE.TorusGeometry(1.0, 0.5, 11.0, 9.0), vertexShader, fragmentShader);
+   }
+
    function createMesh(geometry, vertexShader, fragmentShader) {
       return new THREE.Mesh(geometry, shaderMaterial(vertexShader, fragmentShader));
    }
@@ -3157,7 +3306,7 @@
       mesh.sketch = sketch;
       setMeshUpdateFunction(mesh);
 
-      if (mesh.material == bgMaterial())
+      if (mesh.material == bgMaterial() && ! isShowingMeshEdges)
          setMeshMaterialToRGB(mesh, paletteRGB[sketchPage.colorId]);
 
       addSketch(sketch);
@@ -3165,6 +3314,39 @@
       finishDrawingUnfinishedSketch();
       return sketch;
    }
+
+   function SketchTo3D() {
+      this.initSketchTo3D = function(label, curves, initMesh) {
+         this.labels = [ label ];
+         this.initMesh = initMesh;
+         this.curves = curves;
+      }
+      this.render = function(elapsed) {
+         m.save();
+         for (var n = 0 ; n < this.curves.length ; n++)
+            mCurve(this.curves[n]);
+         m.restore();
+         this.afterSketch(function() {
+            if (this.shapeSketch === undefined) {
+               glyphSketch = null;
+               this.shapeSketch = geometrySketch(this.initMesh());
+               this.shapeSketch.tX = this.tX + width() / 2;
+               this.shapeSketch.tY = this.tY + height() / 2;
+               this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
+
+               this.shapeSketch.meshAlpha = 0.3;
+               this.shapeSketch.update = function(elapsed) {
+                  this.meshAlpha = min(1, this.meshAlpha + elapsed);
+                  if (this.meshAlpha == 1)
+                     delete this.update;
+               }        
+
+               this.fadeAway = 1;
+            }
+         });
+      }
+   }
+   SketchTo3D.prototype = new Sketch;
 
    function setMeshUpdateFunction(mesh) {
       mesh.update = function() {
@@ -3205,6 +3387,8 @@
       }
    }
 
+   // RENDERING MATERIAL CORRESPONDING TO A CANVAS RGB COLOR.
+
    function setMeshMaterialToRGB(mesh, rgb) {
       var r = rgb[0] / 255;
       var g = rgb[1] / 255;
@@ -3212,6 +3396,16 @@
       mesh.setMaterial(new phongMaterial().setAmbient(.3*r,.3*g,.3*b)
                                           .setDiffuse(.5*r,.5*g,.5*b)
                                           .setSpecular(0,0,0,1));
+   }
+
+   // RENDERING MATERIALS CORRESPONDING TO BACKGROUND AND FOREGROUND COLORS.
+
+   function bgMaterial() {
+      return backgroundColor == 'white' ? whiteMaterial : blackMaterial;
+   }
+
+   function penMaterial() {
+      return backgroundColor == 'white' ? blackMaterial : whiteMaterial;
    }
 
 ////////////////////////////////////////////////////////////
@@ -3226,6 +3420,7 @@
    var glyphCountBeforePage = 0;
 
    function setPage(index) {
+
       if (index < 0 || index >= sketchPages.length)
          return;
 
@@ -3291,6 +3486,9 @@
 
       for (var n = 0 ; n < sketchTypes.length ; n++)
          registerSketch(sketchTypes[n]);
+
+      for (var i = 0 ; i < sketchTypesToAdd.length ; i++)
+         registerSketch(sketchTypesToAdd[i]);
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 
@@ -3410,5 +3608,4 @@
 
 var glyphs = [];
 loadGlyphArray(numericGlyphData);
-
 
