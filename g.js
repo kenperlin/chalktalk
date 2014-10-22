@@ -575,7 +575,7 @@
    var sketchTypes = [];
    var sketchAction = null;
    var sketchTypesToAdd = [];
-   var needToResetPage = false;
+   var forceSetPage = 0;
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
@@ -619,7 +619,7 @@
       sketchRequest.open("GET", "sketches/" + filename);
       sketchRequest.onloadend = function() {
          window.eval(sketchRequest.responseText);
-         needToResetPage = true;
+         forceSetPage = 10;
       }
       sketchRequest.send();
    }
@@ -744,7 +744,7 @@
 
       //videoSetup();
 
-      // whiteMaterial.map = videoTexture;
+      //whiteMaterial.map = videoTexture;
 
       // START ALL CANVASES RUNNING
 
@@ -1967,10 +1967,8 @@ console.log(lo + " " + hi);
 
       //videoAnimate();
 
-      if (needToResetPage) {
-         needToResetPage = false;
+      if (forceSetPage > 0 && --forceSetPage == 0)
          setPage(pageIndex);
-      }
 
       var w = width(), h = height();
 
