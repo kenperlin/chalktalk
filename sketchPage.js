@@ -1399,9 +1399,9 @@ var sketchToDelete = null;
             sketchAction = null;
             isManualScaling = false;
             break;
-         case 'v':
-	    isVideoBackground = ! isVideoBackground;
-	    break;
+         // case 'v':
+	    // isVideoBackground = ! isVideoBackground;
+	    // break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
             break;
@@ -1423,6 +1423,19 @@ var sketchToDelete = null;
             isVerticalPan = ! isVerticalPan;
             this.toggleColorScheme();
             this.toggleLinedBackground();
+            break;
+         case 'v':
+            if (videoLayer == null) {
+               // INIT VIDEO LAYER
+               videoLayer = new ChromaKeyedVideo();
+               videoLayer.init(video_canvas);
+            }
+            else {
+               videoLayer.toggle();
+            }
+            break;
+         case 'V':
+            videoLayer.toggleControls();
             break;
          }
       }
@@ -1469,12 +1482,6 @@ var sketchToDelete = null;
          if (codeSelector != null) {
             codeSelector.style.backgroundColor = codeSelectorBgColor();
             codeSelector.style.color = codeSelectorFgColor();
-
-            break;
-
-         case 'v':
-            videoLayer.toggle();
-            break;
          }
       }
 

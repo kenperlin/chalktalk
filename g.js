@@ -65,6 +65,7 @@
             case 38: // ASCII UP ARROW
             case 39: // ASCII RIGHT ARROW
             case 40: // ASCII DOWN ARROW
+            case 8:  // ASCII DELETE
                event.preventDefault();
                break;
             }
@@ -582,7 +583,7 @@
       sketchTypesToAdd.push(name);
    }
 
-   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER 
+   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER
 
    if (window.haveLoadedSketches === undefined) {
       try {
@@ -629,7 +630,7 @@
       var setForm = new FormData();
       setForm.append("key", key);
       setForm.append("value", JSON.stringify(value));
-   
+
       var request = new XMLHttpRequest();
       request.open("POST", "set");
       request.send(setForm);
@@ -675,6 +676,9 @@
       + " <div id='slide' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
+      + " <canvas id='video_canvas' tabindex=1"
+      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+      + " </canvas>"
       + " <canvas id='sketch_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
@@ -684,14 +688,11 @@
            " <div id='scene_div' tabindex=1"
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " </div>"
-       :       
+       :
            " <!!div id='scene_div' tabindex=1"
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " <!!/div>"
       )
-      + " <canvas id='video_canvas' tabindex=1"
-      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
-      + " </canvas>"
       + " <canvas id='events_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
@@ -743,7 +744,7 @@
 
       //videoSetup();
 
-      whiteMaterial.map = videoTexture;
+      // whiteMaterial.map = videoTexture;
 
       // START ALL CANVASES RUNNING
 
@@ -757,9 +758,6 @@
       video_canvas = document.getElementById('video_canvas');
       video_canvas.width = width();
       video_canvas.height = height();
-      // INIT VIDEO LAYER
-      videoLayer = new ChromaKeyedVideo();
-      videoLayer.init(video_canvas);
    }
 
    function e2s() {
@@ -2011,7 +2009,7 @@ console.log(lo + " " + hi);
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
-            : (videoLayer != undefined) && videoLayer.isShowing()            ? 'none'
+            // : (videoLayer != undefined) && videoLayer.isShowing()            ? 'none'
             :                                     'crosshair'
             ;
 
@@ -3124,19 +3122,19 @@ console.log(lo + " " + hi);
 
             // BUT IF YOU WANT TO USE THE NEW EDGES BUT NOT THE ORIGINAL ONES, LEAVE THE ABOVE
             // TWO LINES INTACT BUT UNCOMMENT OUT THE FOLLOWING LINE
-            // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]); 
+            // var newVisibleEdges = [].concat(moreVisibleEdges[0][1]);
 
             // TO ONLY USE THE ORIGINAL ALGORITHM TO GENERATE EDGES, COMMENT OUT THE FOLLOWING LINE
             visibleEdges[0][1] = newVisibleEdges;
 
             // console.log("length of first element of ve = " + visibleEdges[0].length);
-            // console.log("length of 2nd element of ve = " + visibleEdges[1].length); 
-            // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0)); 
-            // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges)); 
-            // console.log("ve " + JSON.stringify(visibleEdges[0][1])); 
-            // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1])); 
+            // console.log("length of 2nd element of ve = " + visibleEdges[1].length);
+            // console.log("ve = " + visibleEdges.length.toFixed(0) + "  mve = " + moreVisibleEdges.length.toFixed(0));
+            // console.log("array test " + Array.isArray(visibleEdges) + "   " + Array.isArray(moreVisibleEdges));
+            // console.log("ve " + JSON.stringify(visibleEdges[0][1]));
+            // console.log("mve " + JSON.stringify(moreVisibleEdges[0][1]));
             // visibleEdges[0][1] = visibleEdges.concat(moreVisibleEdges[0][1]);
-            // console.log("new ve " + JSON.stringify(visibleEdges[0][1])); 
+            // console.log("new ve " + JSON.stringify(visibleEdges[0][1]));
 
             // FROM HERE FORWARD EVERYTHING IS THE SAME
 
@@ -3150,7 +3148,7 @@ console.log(lo + " " + hi);
             }
 
             // Project the visible edges, and connect them into long 2d strokes.
-             
+
             var e2;
             if (this.bounds !== undefined || isShowing2DMeshEdges)
                e2 = this.mesh.projectVisibleEdges(visibleEdges);
@@ -3339,7 +3337,7 @@ console.log(lo + " " + hi);
                   this.meshAlpha = min(1, this.meshAlpha + elapsed);
                   if (this.meshAlpha == 1)
                      delete this.update;
-               }        
+               }
 
                this.fadeAway = 1;
             }

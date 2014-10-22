@@ -1,6 +1,6 @@
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-var videoLayer;
+var videoLayer = null;
 
 
 function ChromaKeyedVideo()
@@ -23,6 +23,7 @@ function ChromaKeyedVideo()
   var shaderProgram, shaderVertexPosAttr, shaderProjectionMatUni, shaderModelViewMatUni;
 
   var bRender;
+  var bFreeze;
 
   this.chromaShaderVertSRC =
     "precision highp float;\n" +
@@ -38,29 +39,45 @@ function ChromaKeyedVideo()
     "       vec4(vertexPos, 1.0);\n" +
     "   }\n";
 
-
-  this.chromaShaderFragSRC =
+  this.normalFragSRC =
   "precision highp float;\n" +
-   
+
    "varying highp vec2 vTextureCoord;\n" +
-   
+
    "uniform float thresholdSensitivity;\n" +
    "uniform float smoothing;\n" +
    "uniform vec3 colorToReplace;\n" +
    "uniform sampler2D uSampler;\n" +
-   
+
    "void main(void)\n" +
    "{\n" +
   "     vec4 textureColor = texture2D(uSampler, vTextureCoord);\n"+
-       
+  "     gl_FragColor = textureColor;\n"+
+   "}\n";
+
+
+  this.chromaShaderFragSRC =
+  "precision highp float;\n" +
+
+   "varying highp vec2 vTextureCoord;\n" +
+
+   "uniform float thresholdSensitivity;\n" +
+   "uniform float smoothing;\n" +
+   "uniform vec3 colorToReplace;\n" +
+   "uniform sampler2D uSampler;\n" +
+
+   "void main(void)\n" +
+   "{\n" +
+  "     vec4 textureColor = texture2D(uSampler, vTextureCoord);\n"+
+
        "float maskY = 0.2989 * colorToReplace.r + 0.5866 * colorToReplace.g + 0.1145 * colorToReplace.b;\n"+
        "float maskCr = 0.7132 * (colorToReplace.r - maskY);\n"+
        "float maskCb = 0.5647 * (colorToReplace.b - maskY);\n"+
-       
+
        "float Y = 0.2989 * textureColor.r + 0.5866 * textureColor.g + 0.1145 * textureColor.b;\n"+
        "float Cr = 0.7132 * (textureColor.r - Y);\n"+
        "float Cb = 0.5647 * (textureColor.b - Y);\n"+
-       
+
        "//float blendValue = 1.0 - smoothstep(thresholdSensitivity - smoothing, thresholdSensitivity , abs(Cr - maskCr) + abs(Cb - maskCb));\n"+
        "float blendValue = smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing, distance(vec2(Cr, Cb), vec2(maskCr, maskCb)));\n"+
        "//if (blendValue < 0.8) { blendValue = 0.0; }\n" +
@@ -89,32 +106,31 @@ function ChromaKeyedVideo()
                       'x3':-1.0, 'y3': 1.0,  'z3':0.0,
                       'x4': 1.0, 'y4': 1.0,  'z4':0.0};
 
-  this.modelViewTranslateX = 0;
-  this.modelViewTranslateY = 0;
-  this.modelViewTranslateZ = -3;
-  this.modelViewScaleX = 1;
-  this.modelViewScaleY = 1;
-  this.modelViewScaleZ = 1;
+  this.Translate_X = 0;
+  this.Translate_Y = 0;
+  this.Translate_Z = -2;
+  this.Scale_X = 1.35;
+  this.Scale_Y = 1;
+  this.Scale_Z = 1;
 
   this.addGui = function()
   {
-    var gui = new dat.GUI({'autoPlace':true});
-    gui.add(this, 'chromaKeyR', 0, 1);
-    gui.add(this, 'chromaKeyG', 0, 1);
-    gui.add(this, 'chromaKeyB', 0, 1);
+    // var gui = new dat.GUI({'autoPlace':true});
+    this.gui = new dat.GUI();
+    this.gui.add(this, 'Translate_X', -1.0, 1.0);
+    this.gui.add(this, 'Translate_Y', -1.0, 1.0);
+    this.gui.add(this, 'Translate_Z', -4.0, 0.0);
+    this.gui.add(this, 'Scale_X', 1.0, 4.0);
+    this.gui.add(this, 'Scale_Y', 1.0, 4.0);
 
-    gui.add(this, 'modelViewTranslateX', -1, 1);
-    gui.add(this, 'modelViewTranslateY', -1, 1);
-    gui.add(this, 'modelViewTranslateZ', -4, 0);
-    gui.add(this, 'modelViewScaleX', 1, 4);
-    gui.add(this, 'modelViewScaleY', 1, 4);
-    gui.add(this, 'modelViewScaleZ', 1, 4);
+    this.gui.domElement.style.visibility = "hidden";
   }
 
   this.init = function(canvas)
   {
     console.log("chroma-key: init");
     this.bRender = false;
+    this.bFreeze = false;
     this.canvas = canvas;
 
     this.isInCalibration = true;
@@ -159,8 +175,9 @@ function ChromaKeyedVideo()
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.enable(this.gl.BLEND);
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-    
-    this.shaderProgram = this.linkShader(this.gl, this.chromaShaderVertSRC, this.chromaShaderFragSRC);
+
+    // this.shaderProgram = this.linkShader(this.gl, this.chromaShaderVertSRC, this.chromaShaderFragSRC);
+    this.shaderProgram = this.linkShader(this.gl, this.chromaShaderVertSRC, this.normalFragSRC);
     this.texture = this.createTexture(this.gl);
 
     this.vertexBuffer = this.createVertexBuffer(this.gl);
@@ -184,7 +201,10 @@ function ChromaKeyedVideo()
     // bind the texture
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+
+    if (!this.bFreeze) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+    }
 
 
     gl.useProgram(shaderProgram);
@@ -203,7 +223,7 @@ function ChromaKeyedVideo()
     // pass parameters to shader
     gl.uniformMatrix4fv(shaderProgram.projectionMatUni, false, this.projectionMatrix);
     gl.uniformMatrix4fv(shaderProgram.modelViewMatUni, false, this.modelViewMatrix);
-    
+
     gl.uniform1i(shaderProgram.samplerUniform, 0);
     gl.uniform1f(shaderProgram.thresholdSensitivity, 0.1);
     gl.uniform1f(shaderProgram.smoothing, 0.3);
@@ -217,9 +237,19 @@ function ChromaKeyedVideo()
 
   this.toggle = function()
   {
-    this.bRender = !this.bRender;
-
-    dat.GUI.toggleHide();
+    // three state toggle (active / freeze / black)
+    if (!this.bRender) {
+      this.bRender = true;
+    }
+    else {
+      if (this.bFreeze) {
+        this.bRender = false;
+        this.bFreeze = false;
+      }
+      else {
+        this.bFreeze = true;
+      }
+    }
 
     if (!this.bRender) {
       // clear layer
@@ -227,6 +257,21 @@ function ChromaKeyedVideo()
       gl.clearColor(0.0, 0.0, 0.0, 0.0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
+  }
+
+  this.toggleControls = function()
+  {
+    if (this.gui.domElement.style.visibility == "hidden")
+    {
+      this.gui.domElement.style.visibility = "visible";
+    }
+    else {
+      this.gui.domElement.style.visibility = "hidden";
+    }
+
+    console.log("Camera Transformation Parameters:");
+    console.log("Translate: " + this.Translate_X + "x" + this.Translate_Y + "x" + this.Translate_Z);
+    console.log("Scale: " + this.Scale_X + "x" + this.Scale_Y);
   }
 
   this.isShowing = function()
@@ -331,8 +376,8 @@ function ChromaKeyedVideo()
     {
       // create model view matrix
       this.modelViewMatrix = mat4.create();
-      mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [this.modelViewTranslateX, this.modelViewTranslateY, this.modelViewTranslateZ]);
-      mat4.scale(this.modelViewMatrix, this.modelViewMatrix, [this.modelViewScaleX, this.modelViewScaleY, this.modelViewScaleZ]);
+      mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [this.Translate_X, this.Translate_Y, this.Translate_Z]);
+      mat4.scale(this.modelViewMatrix, this.modelViewMatrix, [this.Scale_X, this.Scale_Y, this.Scale_Z]);
 
       // create a projection matrix with 45 degree field of view
       this.projectionMatrix = mat4.create();
@@ -412,7 +457,7 @@ function ChromaKeyedVideo()
 
     // bind texture
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -426,4 +471,21 @@ function ChromaKeyedVideo()
     return texture;
   }
 }
+
+
+function removeGui(gui, parent) {
+  if(!parent) {
+    parent = dat.GUI.autoPlaceContainer;
+  }
+  parent.removeChild(gui.domElement);
+}
+
+function addGui(gui, parent) {
+  if(!parent) {
+    parent = dat.GUI.autoPlaceContainer;
+  }
+  parent.appendChild(gui);
+}
+
+
 
