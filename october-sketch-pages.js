@@ -740,6 +740,18 @@ var creolization = {
    "
 };
 
+var ken_video = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr>\
+         <th width=600><img src=imgs/ken_video.jpg width=100%></th>\
+         </tr>\
+      </table>\
+   "
+};
+
 var sketchPages = [
    blankPage(), // (4) clay_tablet,abacus,scroll,book,telegraph,tv,rocket, ... (17) pendulum,oscillator,moth/candle,somewhere/rainbow
    title_page, // (1)
@@ -764,4 +776,5 @@ var sketchPages = [
    creolization, // (21)
    kids_talking2, // (22)
    child_gesture, // (23)
+   ken_video,
 ];

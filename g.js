@@ -737,6 +737,10 @@
          sceneElement.appendChild(renderer.domElement);
       }
 
+      //videoSetup();
+
+      whiteMaterial.map = videoTexture;
+
       // START ALL CANVASES RUNNING
 
       var c = document.getElementsByTagName("canvas");
@@ -1944,6 +1948,8 @@ console.log(lo + " " + hi);
    }
 
    var tick = function(g) {
+
+      //videoAnimate();
 
       if (needToResetPage) {
          needToResetPage = false;
@@ -3275,7 +3281,7 @@ console.log(lo + " " + hi);
       mesh.sketch = sketch;
       setMeshUpdateFunction(mesh);
 
-      if (mesh.material == bgMaterial())
+      if (mesh.material == bgMaterial() && ! isShowingMeshEdges)
          setMeshMaterialToRGB(mesh, paletteRGB[sketchPage.colorId]);
 
       addSketch(sketch);

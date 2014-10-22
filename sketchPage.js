@@ -22,6 +22,7 @@ var isSketchDragActionEnabled = false;
 var isSpacePressed = false;
 var isTogglingMenuType = false;
 var isVerticalPan = false;
+var isVideoBackground = false;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;
@@ -1398,6 +1399,9 @@ var sketchToDelete = null;
             sketchAction = null;
             isManualScaling = false;
             break;
+         case 'v':
+	    isVideoBackground = ! isVideoBackground;
+	    break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
             break;

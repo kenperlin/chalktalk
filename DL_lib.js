@@ -2062,12 +2062,12 @@ function videoSetup(){
 	}, function(stream) {
 		//on webcam enabled
 		video.src = window.URL.createObjectURL(stream);
-		prompt.style.display = 'none';
-		title.style.display = 'inline';
-		container.style.display = 'inline';
-		gui.domElement.style.display = 'inline';
+		//prompt.style.display = 'none';
+		//title.style.display = 'inline';
+		//container.style.display = 'inline';
+		//gui.domElement.style.display = 'inline';
 	}, function(error) {
-		prompt.innerHTML = 'Unable to capture WebCam. Please reload the page.';
+		//prompt.innerHTML = 'Unable to capture WebCam. Please reload the page.';
 	});
 
 	videoTexture = new THREE.Texture(video);

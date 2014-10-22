@@ -8,6 +8,8 @@
    });
 
    THREE.Object3D.prototype.setMaterial = function(material) {
+      if (isShowingMeshEdges)
+         material = bgMaterial();
       this.material = material;
       for (var i = 0 ; i < this.children.length ; i++)
          this.children[i].setMaterial(material);
@@ -417,11 +419,8 @@
    }
 
    var blackMaterial = new phongMaterial(0x000000,0x000000,0x000000,20);
-   var whiteMaterial = new phongMaterial(0xffffff,0xffffff,0xffffff,20);
-/*
-   var whiteMaterial = new phongMaterial();
-   whiteMaterial.setAmbient(.4,.4,.4).setDiffuse(.3,.3,.3).setSpecular(0,0,0,1);
-*/
+   var whiteMaterial = new phongMaterial().setAmbient(.4,.4,.4).setDiffuse(.3,.3,.3);
+
    function node() {
       return new THREE.Mesh();
    }

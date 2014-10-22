@@ -59,6 +59,10 @@ var ___hiddenpoint_count = 0;
 	       console.log("vn is not an array");
 	   }
 	   */
+
+if (face.vertexNormals[2] === undefined)
+   continue;
+
 	   var vna = face.vertexNormals[0].applyMatrix3(normalMatrix).normalize(); 
 	   var vnb = face.vertexNormals[1].applyMatrix3(normalMatrix).normalize(); 
 	   var vnc = face.vertexNormals[2].applyMatrix3(normalMatrix).normalize(); 
