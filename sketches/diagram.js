@@ -2,7 +2,7 @@
    function Diagram() {
       //this.labels = "refract scan square circle triangle flap".split(' ');
       //this.labels = "square circle triangle flap".split(' ');
-      this.labels = "square circle flap".split(' ');
+      this.labels = "square circle flap refract circles".split(' ');
 
       this.raySegment = function(vx, vy, wx, wy, p0, p1) {
          var a = p0[1] - p1[1];
@@ -374,6 +374,7 @@
             this.afterSketch(function() {
 
                color('blue');
+               lineWidth(6);
                drawPolygon(this.region);
 
                if (this.mouseX < -w/2 || this.mouseY < -h/2)

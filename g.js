@@ -554,8 +554,8 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   var darkScrimOverVideo = 'rgba(0,0,0,0.25)';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
+   var forceSetPage = 0;
    var glyphTrace = [];
    var glyphSketch = null;
    var isAltKeyCopySketchEnabled = true;
@@ -577,7 +577,7 @@
    var sketchTypes = [];
    var sketchAction = null;
    var sketchTypesToAdd = [];
-   var forceSetPage = 0;
+   var videoBrightness = 1;
 
    var isVideoLayer = function() {
       return videoLayer != null && videoLayer.bRender;
@@ -2044,8 +2044,9 @@ console.log(lo + " " + hi);
 
 	 // IF THERE IS A VIDEO LAYER, DARKEN IT.
 
-	 if (isVideoLayer()) {
-	    _g.fillStyle = darkScrimOverVideo;
+	 if (isVideoLayer() && videoBrightness < 1) {
+	    var scrimAlpha = max(0, 1 - videoBrightness);
+	    _g.fillStyle = 'rgba(0,0,0,' + scrimAlpha + ')';
 	    _g.beginPath();
 	    _g.moveTo(0,0);
 	    _g.lineTo(w,0);
