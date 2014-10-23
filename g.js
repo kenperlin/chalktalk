@@ -554,6 +554,7 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
+   var darkScrimOverVideo = 'rgba(0,0,0,0.25)';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;
@@ -570,12 +571,21 @@
    var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var margin = 50;
+   var meshOpacityOverVideo = 0.7;
    var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
    var sketchTypesToAdd = [];
    var forceSetPage = 0;
+
+   var isVideoLayer = function() {
+      return videoLayer != null && videoLayer.bRender;
+   }
+
+   var meshOpacity = function() {
+      return isVideoLayer() ? meshOpacityOverVideo : 1;
+   }
 
    var isShowingRenderer = true; // IF THIS IS false, THREE.js STUFF BECOMES INVISIBLE.
 
@@ -741,10 +751,6 @@
          var sceneElement = document.getElementById('scene_div');
          sceneElement.appendChild(renderer.domElement);
       }
-
-      //videoSetup();
-
-      //whiteMaterial.map = videoTexture;
 
       // START ALL CANVASES RUNNING
 
@@ -1965,16 +1971,14 @@ console.log(lo + " " + hi);
 
    var tick = function(g) {
 
-      //videoAnimate();
-
       if (forceSetPage > 0 && --forceSetPage == 0)
          setPage(pageIndex);
 
       var w = width(), h = height();
 
-
       // RENDER CONTENTS OF VIDEO LAYER
-      if (videoLayer != undefined) {
+
+      if (isVideoLayer()) {
          videoLayer.render();
       }
 
@@ -2037,6 +2041,18 @@ console.log(lo + " " + hi);
 
          _g.setTransform(1,0,0,1,0,0);
          _g.translate(_g.panX, _g.panY, 0);
+
+	 // IF THERE IS A VIDEO LAYER, DARKEN IT.
+
+	 if (isVideoLayer()) {
+	    _g.fillStyle = darkScrimOverVideo;
+	    _g.beginPath();
+	    _g.moveTo(0,0);
+	    _g.lineTo(w,0);
+	    _g.lineTo(w,h);
+	    _g.lineTo(0,h);
+	    _g.fill();
+	 }
 
          // PAN 3D OBJECTS TOO
 
@@ -3011,6 +3027,7 @@ console.log(lo + " " + hi);
          if (this.visibleEdgesMesh !== undefined)
             sketchPage.scene.remove(this.visibleEdgesMesh);
       }
+      this.meshAlpha = meshOpacity();
       this.mouseDown = function(x,y) {
          this.downx = this.dragx = x;
          this.downy = this.dragy = y;
@@ -3090,6 +3107,7 @@ console.log(lo + " " + hi);
 			 this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
             this.mesh.setOpacity(sCurve(this.alpha));
+	    console.log(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
@@ -3332,8 +3350,8 @@ console.log(lo + " " + hi);
 
                this.shapeSketch.meshAlpha = 0.3;
                this.shapeSketch.update = function(elapsed) {
-                  this.meshAlpha = min(1, this.meshAlpha + elapsed);
-                  if (this.meshAlpha == 1)
+                  this.meshAlpha = min(meshOpacity(), this.meshAlpha + elapsed);
+                  if (this.meshAlpha == meshOpacity())
                      delete this.update;
                }
 

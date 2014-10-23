@@ -1399,9 +1399,6 @@ var sketchToDelete = null;
             sketchAction = null;
             isManualScaling = false;
             break;
-         // case 'v':
-	    // isVideoBackground = ! isVideoBackground;
-	    // break;
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
             break;
