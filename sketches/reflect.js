@@ -17,7 +17,6 @@
       }
 
       this.render = function(elapsed) {
-         m.save();
          this.duringSketch(function() {
 	    mLine([-1,0],[1,0]);
 	    mLine([0,0],[  0,  1]);
@@ -50,7 +49,6 @@
 	       _g.restore();
 	    }
          });
-         m.restore();
       }
    }
    Reflect.prototype = new Sketch;

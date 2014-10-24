@@ -19,7 +19,6 @@
             this.addPort("t", -1, 0);
             this.addPort("f",  1, 0);
          }
-         m.save();
 
          lineWidth(1);
          mCurve([[-1,0],[1,0]]);
@@ -43,8 +42,6 @@
                mFillCurve([ [0,0], [tt,0], [tt,yy], [0,yy] ]);
             }
          });
-
-         m.restore();
       }
    }
    F1D.prototype = new Sketch;

@@ -72,7 +72,6 @@
          else
             this.selectedIndex = this.selection;
 
-         m.save();
          m.scale(sc);
 
          var x = this.isInValue("x") ? this.getInFloat("x") : time;
@@ -90,8 +89,6 @@
          _g.lineWidth *= 3;
 
          mCurve(curves[s]);
-
-	 m.restore();
       }
    }
    Func.prototype = new Sketch;

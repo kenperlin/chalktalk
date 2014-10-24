@@ -9,7 +9,6 @@
          this.rayY = 2 * (y-this.yhi) / (this.ylo - this.yhi) - 1;
       }
       this.render = function(elapsed) {
-         m.save();
          m.rotateY(2);
 
          var a = [-1,.75], b = [1,.75], c = [1,-.75], d = [-1,-.75];
@@ -27,8 +26,6 @@
             mText("V", [0,.1,-2]);
             mText("W", [this.rayX/4,this.rayY/4 + .1,-1]);
          });
-
-         m.restore();
       }
    }
    Ray1.prototype = new Sketch;

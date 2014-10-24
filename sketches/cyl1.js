@@ -17,7 +17,6 @@
          delete this.y0;
       }
       this.render = function(elapsed) {
-         m.save();
          this.duringSketch(function() {
             mCurve([[1,-1],[-1,-1],[-1,1],[1,1],[1,-1]]);
          });
@@ -43,7 +42,6 @@
             mCurve(C3);
             mCurve(C4);
          });
-         m.restore();
       }
     }
    Cyl1.prototype = new Sketch;

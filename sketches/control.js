@@ -58,7 +58,6 @@
          var value = lerp(t, this.lo, this.hi);
          this.setOutValue("t", value);
 
-         m.save();
          m.scale(sc);
 
          var x = t - .5;
@@ -105,7 +104,6 @@
 	       }
 	    }
          });
-         m.restore();
       }
    }
    Control.prototype = new Sketch;

@@ -18,8 +18,6 @@
             this.altitude += this.velocity;
          }
 
-         m.save();
-
 	 // ANIMATE ROCKET TRAJECTORY
 
          var t = this.altitude;
@@ -44,8 +42,6 @@
 	            [-.08, -1.15], [  0, -1.6 + .7*noise2(10*time, 200)], 
 		    [ .08, -1.15], [ .3, -1.4 + .7*noise2(10*time, 300)], [ .2, -1.1]]);
 	 }});
-
-         m.restore();
       }
    }
    Rocket.prototype = new Sketch;

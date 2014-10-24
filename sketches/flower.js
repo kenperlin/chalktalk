@@ -19,7 +19,6 @@
          this.wiggle = this.wiggleTarget == 1 ? min(1, this.wiggle + elapsed)
                                               : max(0, this.wiggle - elapsed);
          var t = sCurve(this.tall);
-         m.save();
          m.translate(0,-1,0);
 
          // STEM
@@ -64,11 +63,9 @@
                               [sgn*lerp(t,.6,1.2),-.01],
                               [sgn*lerp(t,.3,0.6), -.2],
                               [0,0]]
-            ));
-               m.restore();
+              ));
+            m.restore();
          }
-
-         m.restore();
       }
    }
    Flower.prototype = new Sketch;

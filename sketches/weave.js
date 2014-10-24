@@ -3,7 +3,6 @@
       this.labels = "weave".split(' ');
       this.is3D = true;
       this.render = function(elapsed) {
-         m.save();
 	 var C = [];
 	 this.duringSketch(function() {
 	    for (var i = 0 ; i <= 20 ; i++)
@@ -24,7 +23,6 @@
 	    }
 	 });
          mCurve(C);
-         m.restore();
       }
    }
    Weave.prototype = new Sketch;

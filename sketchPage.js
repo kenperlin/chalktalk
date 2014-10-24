@@ -846,7 +846,13 @@ var sketchToDelete = null;
 
                return;
             }
-            sk().translate(x - this.mx, y - this.my);
+	    var dx = x - this.mx;
+	    var dy = y - this.my;
+	    if (sk().xyz.length > 2) {
+	       dx /= sk().xyz[2];
+	       dy /= sk().xyz[2];
+            }
+            sk().translate(dx, dy);
             if (isSketchInProgress()) {
                cursorX += x - this.mx;
                cursorY += y - this.my;
@@ -953,7 +959,7 @@ var sketchToDelete = null;
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
 
          if (sketchAction != null) {
-            switch (sketchAction) {
+	    switch (sketchAction) {
             case "linking"    : findInSketchAndPort();
                                 if (outPort == -1)
                                    sketchAction = null;
@@ -1651,13 +1657,13 @@ var sketchToDelete = null;
                   sk().x2D = This().mouseX;
                   sk().y2D = This().mouseY;
                }
-               sk().render(elapsed);
+               sk().renderWrapper(elapsed);
                isDrawingSketch2D = false;
             }
             else {
                m.save();
                   sk().standardView();
-                  sk().render(elapsed);
+                  sk().renderWrapper(elapsed);
                m.restore();
             }
 

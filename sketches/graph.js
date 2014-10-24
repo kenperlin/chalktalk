@@ -62,7 +62,6 @@
             }
          });
 
-         m.save();
          m.scale(sc);
 
          mLine([-1,1],[-1,-1]);
@@ -119,8 +118,6 @@
                mLine([(i-1)/100*2-1, y1], [i/100*2-1, y2]);
             }
          }
-
-         m.restore();
       };
    };
    Graph.prototype = new Sketch;

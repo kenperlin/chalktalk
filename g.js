@@ -961,7 +961,7 @@
 
          glyphTrace = [];
          isMakingGlyph = true;
-         sk().render(0.02);
+         sk().renderWrapper(0.02);
          isMakingGlyph = false;
 
          // REGISTER THE GLYPH.

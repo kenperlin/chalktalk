@@ -23,57 +23,56 @@
       this.render = function(elapsed) {
          var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
          var t = 1/3;
-         m.save();
-            m.scale(this.size / 400);
-	    mCurve([[1,1],[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
-	    if ( this.code[cs][1] != this.savedCode ||
-	         isDef(this.in[0]) && this.inValue[0] != this.savedX ||
-	         isDef(this.in[1]) && this.inValue[1] != this.savedY ||
-	         isDef(this.in[2]) && this.inValue[2] != this.savedZ ) {
 
-	       var code = this.savedCode = this.code[cs][1];
+         m.scale(this.size / 400);
+         mCurve([[1,1],[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
+         if ( this.code[cs][1] != this.savedCode ||
+              isDef(this.in[0]) && this.inValue[0] != this.savedX ||
+              isDef(this.in[1]) && this.inValue[1] != this.savedY ||
+              isDef(this.in[2]) && this.inValue[2] != this.savedZ ) {
 
-	       if (isDef(this.in[0])) this.savedX = this.inValue[0];
-	       if (isDef(this.in[1])) this.savedY = this.inValue[1];
-	       if (isDef(this.in[2])) this.savedZ = this.inValue[2];
+            var code = this.savedCode = this.code[cs][1];
 
-	       var var_xyz = "var x=(" + (isDef(this.in[0]) ? this.inValue[0] : 0) + ")," +
-	                         "y=(" + (isDef(this.in[1]) ? this.inValue[1] : 0) + ")," +
-	                         "z=(" + (isDef(this.in[2]) ? this.inValue[2] : 0) + ");" ;
+            if (isDef(this.in[0])) this.savedX = this.inValue[0];
+            if (isDef(this.in[1])) this.savedY = this.inValue[1];
+            if (isDef(this.in[2])) this.savedZ = this.inValue[2];
 
-               // MAKE SURE THE CODE IS VALID.
+            var var_xyz = "var x=(" + (isDef(this.in[0]) ? this.inValue[0] : 0) + ")," +
+                              "y=(" + (isDef(this.in[1]) ? this.inValue[1] : 0) + ")," +
+                              "z=(" + (isDef(this.in[2]) ? this.inValue[2] : 0) + ");" ;
 
-	       var isError = false;
-	       try {
-	          var c = code;
-	          var i = c.indexOf("return ");
-		  if (i >= 0)
-		     c = c.substring(0,i) + c.substring(i+7, c.length);
-	          eval(var_xyz + c);
-               } catch (e) { isError = true; console.log("aha"); }
+            // MAKE SURE THE CODE IS VALID.
 
-               // IF IT IS, SEND THE FUNCTION TO THE OUTPUT.
+            var isError = false;
+            try {
+               var c = code;
+               var i = c.indexOf("return ");
+               if (i >= 0)
+                  c = c.substring(0,i) + c.substring(i+7, c.length);
+               eval(var_xyz + c);
+            } catch (e) { isError = true; console.log("aha"); }
 
-               this.audioShape = null;
-	       if (! isError) {
-		  var i = code.indexOf("return ");
-		  if (i < 0)
-		     code = "return " + code;
-                  var audioFunction = new Function("time", var_xyz + code);
-	          setAudioSignal(audioFunction);
+            // IF IT IS, SEND THE FUNCTION TO THE OUTPUT.
 
-                  this.audioShape = [];
-		  for (var t = 0 ; t <= 1 ; t += .01)
-		     this.audioShape.push([2*t-1, audioFunction(t/100)/TAU]);
-	       }
-	    }
-	    this.afterSketch(function() {
-	       if (this.audioShape != null) {
-	          lineWidth(1);
-	          mCurve(this.audioShape);
-               }
-	    });
-         m.restore();
+            this.audioShape = null;
+            if (! isError) {
+               var i = code.indexOf("return ");
+               if (i < 0)
+                  code = "return " + code;
+               var audioFunction = new Function("time", var_xyz + code);
+               setAudioSignal(audioFunction);
+
+               this.audioShape = [];
+               for (var t = 0 ; t <= 1 ; t += .01)
+                  this.audioShape.push([2*t-1, audioFunction(t/100)/TAU]);
+            }
+         }
+         this.afterSketch(function() {
+            if (this.audioShape != null) {
+               lineWidth(1);
+               mCurve(this.audioShape);
+            }
+         });
       }
    }
    IO.prototype = new Sketch;

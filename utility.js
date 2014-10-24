@@ -904,6 +904,16 @@
       return len;
    }
 
+   // Check whether a curve crosses a line.
+
+   function curveIntersectLine(curve, a, b) {
+      var dst = [], p = null;
+      for (var i = 0 ; i < curve.length - 1 ; i++)
+         if ((p = lineIntersectLine(curve[i], curve[i+1], a, b)) != null)
+	    dst.push(p);
+      return dst;
+   }
+
    // Return distance squared from point [x,y] to curve c.
 
    function dsqFromCurve(x, y, c) {
@@ -941,6 +951,38 @@
 
    function isInRect(x,y, R) {
       return x >= R[0] && y >= R[1] && x < R[2] && y < R[3];
+   }
+
+   // Find the intersection between two line segments.  If no intersection, return null.
+
+   function lineIntersectLine(a, b, c, d) {
+      function L(a) { return a[0] * A[0] + a[1] * A[1]; }
+
+      // FIRST MAKE SURE [c,d] CROSSES [a,b].
+
+      var A = [ b[1] - a[1], a[0] - b[0] ];
+
+      var tb = L(b);
+      var tc = L(c);
+      var td = L(d);
+
+      if ((tc > tb) == (td > tb))
+        return null;
+
+      // THEN FIND THE POINT OF INTERSECTION p.
+
+      var f = (tb - tc) / (td - tc);
+      var p = [ lerp(f, c[0], d[0]), lerp(f, c[1], d[1]) ];
+
+      // THEN MAKE SURE p LIES BETWEEN a AND b.
+
+      var A = [ b[0] - a[0], b[1] - a[1] ];
+
+      var tp = L(p);
+      var ta = L(a);
+      var tb = L(b);
+
+      return tp >= ta && tp <= tb ? p : null;
    }
 
    // Resample a curve to equal geometric spacing.

@@ -11,10 +11,8 @@
       this.mouseUp = function() { }
       this.render = function(elapsed) {
          var v = this.value;
-         m.save();
 	 mCurve([ [-.5,1], [0,-1], [.5,1] ]);
 	 mCurve([ [-.5*v,lerp(v,-1,1)], [.5*v,lerp(v,-1,1)] ]);
-         m.restore();
       }
    }
    Video.prototype = new Sketch;

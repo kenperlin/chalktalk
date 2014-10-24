@@ -2,7 +2,6 @@
    function Vec4() {
       this.labels = "vec4".split(' ');
       this.render = function(elapsed) {
-         m.save();
          var x = .25;
          mCurve([[-x,1],[x,1],[x,-1],[-x,-1],[-x,1]]);
          lineWidth(1);
@@ -23,7 +22,6 @@
                _g.textHeight = textHeight;
             }
          });
-         m.restore();
       }
    }
    Vec4.prototype = new Sketch;

@@ -12,23 +12,23 @@
 
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy, 8)) {
-	 case 0:
-	    this.choice.state(2);
-	    this.isGaze = false;
-	    break;
-	 case 1:
-	    this.isGaze = ! this.isGaze;
-	    break;
-	 case 2:
-	    this.isTall = true;
-	    break;
-	 case 4:
-	    this.choice.state(1);
-	    break;
-	 case 6:
-	    this.isTall = false;
-	    break;
-	 }
+         case 0:
+            this.choice.state(2);
+            this.isGaze = false;
+            break;
+         case 1:
+            this.isGaze = ! this.isGaze;
+            break;
+         case 2:
+            this.isTall = true;
+            break;
+         case 4:
+            this.choice.state(1);
+            break;
+         case 6:
+            this.isTall = false;
+            break;
+         }
       }
 
       this.render = function(elapsed) {
@@ -119,60 +119,57 @@
          var neckX = bob - .3 * lookUp - .1;
          var neckY = spineTop + bounce;
 
+         m.scale(this.size / 400);
+         m.translate(walkX(this.walkT), 0, 0);
+
+         // HEAD
+
          m.save();
-            m.scale(this.size / 400);
-            m.translate(walkX(this.walkT), 0, 0);
-
-            // HEAD
-
-            m.save();
-               m.translate(neckX,neckY,0);
-	       var rotz = lookUp;
-	       if (sketchPage.x !== undefined && isNumeric(this.cx()))
-	          rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
-               m.rotateZ(rotz);
-               m.rotateY(lookSide);
-               mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
-            m.restore();
-
-            // SPINE
-
-            var spine = [];
-            var arching = lerp(tall, .1, .2);
-            for (var t = 0 ; t <= 1 ; t += 1/10) {
-               var arch = arching * sin(PI * t);
-               spine.push([ lerp(t, neckX, hipX) + arch * (1 - 2.7 * bounce),
-                            lerp(t, neckY, hipY),
-                            0 ]);
-            }
-            mCurve(spine);
-
-            // LEGS
-
-            for (var n = 0 ; n < 2 ; n++) {
-               var footLift = max(0, (n==0 ? .3 : -.3) * s2);
-               var Foot = [-hipX + walkX(TFoot[n]) + .15,
-                           footY-hipY + footLift, .6];
-               var Knee = [-1,0,0];
-               ik(uLeg, lLeg, Foot, Knee);
-
-               var c = [];
-               m.save();
-                  m.translate(hipX,hipY,0);
-                  c.push(m.transform([0,0,0]));
-                  c.push(m.transform(Knee));
-                  c.push(m.transform(Foot));
-                  m.save();
-                     m.translate(Foot[0],Foot[1],Foot[2]);
-                     m.rotateZ(.6*footLift);
-                     c.push(m.transform([0,0,0]));
-                     c.push(m.transform([.3,0,0]));
-                  m.restore();
-               m.restore();
-               drawCurve(c);
-            }
-
+            m.translate(neckX,neckY,0);
+            var rotz = lookUp;
+            if (sketchPage.x !== undefined && isNumeric(this.cx()))
+               rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
+            m.rotateZ(rotz);
+            m.rotateY(lookSide);
+            mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
          m.restore();
+
+         // SPINE
+
+         var spine = [];
+         var arching = lerp(tall, .1, .2);
+         for (var t = 0 ; t <= 1 ; t += 1/10) {
+            var arch = arching * sin(PI * t);
+            spine.push([ lerp(t, neckX, hipX) + arch * (1 - 2.7 * bounce),
+                         lerp(t, neckY, hipY),
+                         0 ]);
+         }
+         mCurve(spine);
+
+         // LEGS
+
+         for (var n = 0 ; n < 2 ; n++) {
+            var footLift = max(0, (n==0 ? .3 : -.3) * s2);
+            var Foot = [-hipX + walkX(TFoot[n]) + .15,
+                        footY-hipY + footLift, .6];
+            var Knee = [-1,0,0];
+            ik(uLeg, lLeg, Foot, Knee);
+
+            var c = [];
+            m.save();
+               m.translate(hipX,hipY,0);
+               c.push(m.transform([0,0,0]));
+               c.push(m.transform(Knee));
+               c.push(m.transform(Foot));
+               m.save();
+                  m.translate(Foot[0],Foot[1],Foot[2]);
+                  m.rotateZ(.6*footLift);
+                  c.push(m.transform([0,0,0]));
+                  c.push(m.transform([.3,0,0]));
+               m.restore();
+            m.restore();
+            drawCurve(c);
+         }
 
          this.afterSketch(function() {
             switch (state) {

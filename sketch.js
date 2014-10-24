@@ -575,6 +575,11 @@
          }
       }
       this.render = function() {}
+      this.renderWrapper = function(elapsed) {
+         m.save();
+	 this.render(elapsed);
+         m.restore();
+      }
       this.sc = 1;
       this.scale = function(value) {
          if (value === undefined) {

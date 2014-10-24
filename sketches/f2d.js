@@ -19,7 +19,6 @@
             this.addPort("x", -1, 0);
             this.addPort("f",  1, 0);
          }
-         m.save();
 
          lineWidth(1);
          mCurve([[-1,0],[1,0]]);
@@ -62,8 +61,6 @@
                this.setOutValue("f", z);
             }
          });
-
-         m.restore();
       }
    }
    F2D.prototype = new Sketch;

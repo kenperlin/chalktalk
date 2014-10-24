@@ -34,7 +34,6 @@
 
       this.render = function() {
          var sc = this.size / 180;
-         m.save();
          m.scale(sc);
          var s = (this.selection + 1000 * this.labels.length) % this.labels.length;
 
@@ -74,8 +73,6 @@
 
 	 if (outValue != null)
             this.setOutValue('o', outValue);
-
-         m.restore();
       }
    }
    Logic.prototype = new Sketch;

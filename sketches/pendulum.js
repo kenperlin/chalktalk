@@ -63,7 +63,6 @@
          this.spring.update(elapsed);
 
          var N = 32;
-         m.save();
          m.scale(.5 * this.size / 400);
          m.translate(0, 2-this.ht, 0);
          this.anchor = m.transform([0,this.ht,0]);
@@ -86,8 +85,6 @@
             c.push([this.radius * sin(a), this.radius * cos(a)]);
          }
          mCurve(c);
-
-         m.restore();
       }
    }
    Pendulum.prototype = new Sketch;
