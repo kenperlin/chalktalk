@@ -2,6 +2,7 @@
    function Vec4() {
       this.labels = "vec4".split(' ');
       this.value = [1,0,0,0];
+      this.nRows = 4;
       this.row = 0;
       this.precision = 1;
       this.mxy = [0,0];
@@ -33,16 +34,19 @@
          mLine([-x, .0],[x, .0]);
          mLine([-x,-.5],[x,-.5]);
          this.afterSketch(function() {
+	    textHeight(m.transform([1,0,0,0])[0] / this.nRows);
 	    var outValue = [];
-            for (var j = 0 ; j < 4 ; j++) {
+            for (var j = 0 ; j < this.nRows ; j++) {
                var y = (1.5 - j) / 2;
                var val = this.getInValue(j, this.value[j]);
 	       mText(roundedString(val, this.precision), [0, y], .5, .5);
 	       outValue.push(val);
             }
 	    if (this.portLocation.length == 0)
-               this.addPort("o", x, 0);
-            this.setOutValue("o", outValue);
+	       for (var i = 0 ; i < 2 ; i++)
+                  this.addPort("" + i, i==0 ? -x : x, 0);
+	    for (var i = 0 ; i < 2 ; i++)
+               this.setOutValue("" + i, outValue);
          });
       }
    }

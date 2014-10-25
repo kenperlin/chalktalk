@@ -176,7 +176,7 @@
          var y = this._d( [M[1],M[5],M[ 9],M[13]] , v );
          var z = this._d( [M[2],M[6],M[10],M[14]] , v );
          var w = this._d( [M[3],M[7],M[11],M[15]] , v );
-         return [x / w, y / w, z / w];
+         return v.length == 4 ? [x, y, z, w] : [x / w, y / w, z / w];
       };
       this.transform = function(v) {
          if (v[0] instanceof Array) {
