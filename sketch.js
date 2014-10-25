@@ -21,10 +21,12 @@
    // THE BASIC SKETCH CLASS, FROM WHICH ALL SKETCHES ARE EXTENDED.
 
    function Sketch() {
+      this.adjustD = function(d) { return this.xyz.length == 0 ? d : this.xyz[2] * d; }
       this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
       this.adjustY = function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; }
       this.adjustXY = function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; }
 
+      this.unadjustD = function(d) { return this.xyz.length == 0 ? d : d / this.xyz[2]; }
       this.unadjustX = function(x) { return this.xyz.length == 0 ? x : (x - this.xyz[0]) / this.xyz[2]; }
       this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
       this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
@@ -126,6 +128,7 @@
          this.portLocation = [];
          this.portBounds = [];
          this.inValue = [];
+         this.inValues = [];
          this.outValue = [];
          this.defaultValue = [];
       }
@@ -261,22 +264,26 @@
          var fontSize = floor(24 * this.scale());
 
          if (this instanceof SimpleSketch && this.isNullText()) {
-            if (isDef(this.inValue[0])) {
+            var value = this.inValue[0];
+            if (isDef(value)) {
 
                context.save();
                   context.strokeStyle = backgroundColor;
                   context.fillStyle = dataColor;
                   context.font = fontSize + 'pt Comic Sans MS';
-                  var str = roundedString(this.inValue[0]);
+		  var str = value;
+		  if (isNumeric(value)) {
+                     str = roundedString(value);
 
-                  // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
+                     // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
 
-                  var i = str.indexOf('.');
-                  if (i >= 0)
-                     this.isFloat = true;
-                  if (this.isFloat && i < 0) {
-                     str += ".00";
-                     i = str.indexOf('.');
+                     var i = str.indexOf('.');
+                     if (i >= 0)
+                        this.isFloat = true;
+                     if (this.isFloat && i < 0) {
+                        str += ".00";
+                        i = str.indexOf('.');
+                     }
                   }
                   var dx = this.isFloat ? textWidth(str.substring(0, i))
                                         : textWidth(str) / 2;
@@ -412,6 +419,7 @@
       this.id;
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
+      this.inValues = []; // flattened array of values
       this.insertText = function(str) {
          if (this.code != null && isCodeWidget) {
             var cursorPos = codeTextArea.selectionStart;
@@ -576,9 +584,11 @@
       }
       this.render = function() {}
       this.renderWrapper = function(elapsed) {
+	 _g.save();
          m.save();
 	 this.render(elapsed);
          m.restore();
+	 _g.restore();
       }
       this.sc = 1;
       this.scale = function(value) {
@@ -1429,8 +1439,10 @@
 
       this.render = function() {
          NumericSketch.prototype.render.call(this);
-         if (isDef(this.inValue[0])) {
-            this.setText(roundedString(this.inValue[0]));
+	 var value = this.inValue[0];
+         if (isDef(value)) {
+	    var text = isNumeric(value) ? roundedString(value) : value;
+            this.setText(value);
             this.value = this.text;
          }
       }

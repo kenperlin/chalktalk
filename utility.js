@@ -318,7 +318,6 @@
    function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
-   function value(t) { return isDef(t) ? t : "0"; }
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
@@ -470,7 +469,7 @@
       return dst;
    }
 
-   function findEmptySlot(arr) {
+   function firstUndefinedArrayIndex(arr) {
       var n = 0;
       while (n < arr.length && isDef(arr[n]) && arr[n] != null)
          n++;

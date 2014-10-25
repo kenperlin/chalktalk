@@ -636,10 +636,10 @@
 
    var ServerUtils = {};
 
-   ServerUtils.set = function(key, value) {
+   ServerUtils.set = function(key, val) {
       var setForm = new FormData();
       setForm.append("key", key);
-      setForm.append("value", JSON.stringify(value));
+      setForm.append("value", JSON.stringify(val));
 
       var request = new XMLHttpRequest();
       request.open("POST", "set");
@@ -1149,7 +1149,7 @@
    function findNearestInPort(sketch) {
       return sketch == null ? -1 :
              sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in)
-                                        : findEmptySlot(sketch.in);
+                                        : firstUndefinedArrayIndex(sketch.in);
    }
 
    function findNearestOutPort(sketch) {
@@ -2338,7 +2338,7 @@ console.log(lo + " " + hi);
 
             for (var i = 0 ; i < S.out.length ; i++)
                if (isDef(S.out[i])) {
-                  var outValue = value(S.outValue[i]);
+                  var outValue = isDef(S.outValue[i]) ? S.outValue[i] : "0";
                   for (var k = 0 ; k < S.out[i].length ; k++) {
                      var b = S.out[i][k][0];
                      var j = S.out[i][k][1];
@@ -2346,6 +2346,23 @@ console.log(lo + " " + hi);
                   }
                }
          }
+
+	 // UPDATE FLATTENED ARRAYS OF SKETCH INPUT VALUES.
+
+         for (var I = 0 ; I < nsk() ; I++) {
+	    var S = sk(I);
+            S.inValues = [];
+	    for (var i = 0 ; i < S.in.length ; i++) {
+	       var val = S.inValue[i];
+	       if (isDef(val)) {
+	          if (Array.isArray(val))
+		     for (var k = 0 ; k < val.length ; k++)
+		        S.inValues.push(val[k]);
+                  else
+		     S.inValues.push(val);
+	       }
+	    }
+	 }
 
          // DRAW THE HINT TRACE IF THERE IS ONE.
 
@@ -2394,7 +2411,8 @@ console.log(lo + " " + hi);
                   for (var i = 0 ; i < s.portName.length ; i++)
                      if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
                         var xy = s.portXY(i);
-                        var str = roundedString(s.outValue[i]);
+			var val = s.outValue[i];
+                        var str = isNumeric(val) ? roundedString(val) : val;
 
                         textHeight(20);
                         color(backgroundColor);
@@ -3231,9 +3249,9 @@ console.log(lo + " " + hi);
 */
       }
 
-      this.setUniform = function(name, value) {
+      this.setUniform = function(name, val) {
          if (isDef(this.mesh.material.uniforms[name]))
-            this.mesh.material.uniforms[name].value = value;
+            this.mesh.material.uniforms[name].value = val;
       }
       this.mesh = null;
    }

@@ -846,13 +846,7 @@ var sketchToDelete = null;
 
                return;
             }
-	    var dx = x - this.mx;
-	    var dy = y - this.my;
-	    if (sk().xyz.length > 2) {
-	       dx /= sk().xyz[2];
-	       dy /= sk().xyz[2];
-            }
-            sk().translate(dx, dy);
+            sk().translate(sk().unadjustD(x - this.mx), sk().unadjustD(y - this.my));
             if (isSketchInProgress()) {
                cursorX += x - this.mx;
                cursorY += y - this.my;
