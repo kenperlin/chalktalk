@@ -683,12 +683,12 @@
       // ADD VIEWER ELEMENTS TO DOCUMENT
 
       var viewerHTML = ""
-      + " <div id='slide' tabindex=1"
-      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
-      + " </div>"
       + " <canvas id='video_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
+      + " <div id='slide' tabindex=1"
+      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+      + " </div>"
       + " <canvas id='sketch_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
