@@ -3,18 +3,27 @@
       this.labels = "vec4".split(' ');
       this.value = [1,0,0,0];
       this.row = 0;
+      this.delta = 1;
+      this.mxy = [0,0];
+      this.mm = new M4();
       this.mouseDown = function(x, y) {
-	 var yy = 2 * (y - this.yhi) / (this.ylo - this.yhi) - 1;
-         this.row = yy > .5 ? 0 : yy > 0 ? 1 : yy > -.5 ? 2 : 3;
+         var my = m.transform([x,y])[1];
+         this.row = my > .5 ? 0 : my > 0 ? 1 : my > -.5 ? 2 : 3;
          this.yDrag = y;
       }
       this.mouseDrag = function(x, y) {
          var val = this.value[this.row];
-	 if (this.yDrag - y > 20) { val++; this.yDrag = y; }
-	 if (y - this.yDrag > 20) { val--; this.yDrag = y; }
+	 if (this.yDrag - y > 20) { val += this.delta; this.yDrag = y; }
+	 if (y - this.yDrag > 20) { val -= this.delta; this.yDrag = y; }
 	 this.value[this.row] = val;
       }
       this.mouseUp = function(x, y) { }
+      this.onSwipe = function(dx, dy) {
+         switch (pieMenuIndex(dx, dy)) {
+	 case 0: this.delta /= 10; break;
+	 case 2: this.delta *= 10; break;
+	 }
+      }
       this.render = function(elapsed) {
          var x = .25;
          mCurve([[-x,1],[x,1],[x,-1],[-x,-1],[-x,1]]);

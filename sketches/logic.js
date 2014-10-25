@@ -26,7 +26,7 @@
 
       this.getDelayedValue = function(port) {
          if (time > this.timerStart + this.getInFloat("d")) {
-            this.value = this.getInValue(port);
+            this.value = this.getInValueOf(port);
             this.timerStart = time;
          }
          return this.value;
@@ -68,8 +68,8 @@
          function xor(a, b) { return a == b ? 0 : 1; }
 
          var outValue = this.evalCode(this.code[0][1],
-	     s % 4 == 0 ? this.getDelayedValue("i") : this.getInValue("i"),
-	                                              this.getInValue("j"));
+	     s % 4 == 0 ? this.getDelayedValue("i") : this.getInValueOf("i"),
+	                                              this.getInValueOf("j"));
 
 	 if (outValue != null)
             this.setOutValue('o', outValue);

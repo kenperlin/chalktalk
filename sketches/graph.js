@@ -87,7 +87,8 @@
 
                // Capture input
 
-               recordValue(this.getInValue("Y"));
+               var val = this.getInValueOf("Y");
+               recordValue(Array.isArray(val) ? val[0] : val);
             }
          }
 

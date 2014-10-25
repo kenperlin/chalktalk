@@ -1,10 +1,13 @@
 function Eye() {
    this.labels = "eye".split(' ');
    this.render = function(elapsed) {
-      var open = isDef(this.in[0]) ? max(0, min(1, this.inValue[0]))    : 0.5;
-      var lift = isDef(this.in[1]) ? max(0, min(1, this.inValue[1]))-.5 : 0.0;
-      var x    = isDef(this.in[2]) ? max(0, min(1, this.inValue[2]))-.5 : 0.0;
-      var y    = isDef(this.in[3]) ? max(0, min(1, this.inValue[3]))-.5 : 0.0;
+
+      this.gIV = function(j) { return max(0, min(1, this.getInValue(j, 0.5))); }
+
+      var open = this.gIV(0);
+      var lift = this.gIV(1) - .5;
+      var x    = this.gIV(2) - .5;
+      var y    = this.gIV(3) - .5;
 
       var upper = makeSpline([ [-1,0], [0, (open + lift) / 2], [1,0] ]);
       var lower = makeSpline([ [-1,0], [0,-(open - lift) / 2], [1,0] ]);

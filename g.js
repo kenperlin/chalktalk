@@ -1813,6 +1813,9 @@
          sketchDragActionXY = [x,y];
          sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
          break;
+      case 4:
+         console.log("START CREATING LINK");
+         break;
       case 6:
          sk().arrowBegin(x, y);
          break;
@@ -1834,6 +1837,9 @@
             sketchDragActionXY[0] = x;
             sketchDragActionXY[1] = y;
          }
+      case 4:
+         console.log("CONTINUE CREATING LINK");
+         break;
       case 6:
          sk().arrowDrag(x, y);
          break;
@@ -1844,6 +1850,9 @@
       switch (sketchDragMode) {
       case 2:
          delete sketchPage.definingMotion;
+         break;
+      case 4:
+         console.log("END CREATING LINK");
          break;
       case 6:
          sk().arrowEnd(x, y);

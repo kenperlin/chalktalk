@@ -264,16 +264,16 @@
          var fontSize = floor(24 * this.scale());
 
          if (this instanceof SimpleSketch && this.isNullText()) {
-            var value = this.inValue[0];
-            if (isDef(value)) {
+            var val = this.inValue[0];
+            if (isDef(val)) {
 
                context.save();
                   context.strokeStyle = backgroundColor;
                   context.fillStyle = dataColor;
                   context.font = fontSize + 'pt Comic Sans MS';
-		  var str = value;
-		  if (isNumeric(value)) {
-                     str = roundedString(value);
+		  var str = val;
+		  if (isNumeric(val)) {
+                     str = roundedString(val);
 
                      // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
 
@@ -285,6 +285,11 @@
                         i = str.indexOf('.');
                      }
                   }
+		  else if (Array.isArray(val)) {
+		     str = "";
+		     for (var i = 0 ; i < val.length ; i++)
+		        str += roundedString(val[i]) + (i < val.length-1 ? "," : "");
+		  }
                   var dx = this.isFloat ? textWidth(str.substring(0, i))
                                         : textWidth(str) / 2;
 
@@ -398,10 +403,13 @@
          return ! isDef(value) || value == null ? "0" : value;
       }
       this.getInFloat = function(name) {
-         return parseFloat(this.getInValue(name));
+         return parseFloat(this.getInValueOf(name));
       }
       this.getInIndex = function(s) { return getIndex(this.in, s); }
-      this.getInValue = function(name) {
+      this.getInValue = function(j, dflt) {
+         return this.inValues[j] !== undefined ? this.inValues[j] : dflt;
+      }
+      this.getInValueOf = function(name) {
          var j = getIndex(this.portName, name);
          if (j < 0) return 0;
          var value = this.inValue[j];
