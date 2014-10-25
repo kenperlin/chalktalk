@@ -3,9 +3,9 @@
       this.labels = "vec4".split(' ');
       this.value = [1,0,0,0];
       this.row = 0;
-      this.delta = 1;
+      this.precision = 1;
       this.mxy = [0,0];
-      this.mm = new M4();
+      this.p10 = [1,10,100,1000];
       this.mouseDown = function(x, y) {
          var my = m.transform([x,y])[1];
          this.row = my > .5 ? 0 : my > 0 ? 1 : my > -.5 ? 2 : 3;
@@ -13,15 +13,16 @@
       }
       this.mouseDrag = function(x, y) {
          var val = this.value[this.row];
-	 if (this.yDrag - y > 20) { val += this.delta; this.yDrag = y; }
-	 if (y - this.yDrag > 20) { val -= this.delta; this.yDrag = y; }
+	 var delta = 1 / this.p10[this.precision];
+	 if (y - this.yDrag < -20) { val += delta; this.yDrag = y; }
+	 if (y - this.yDrag >  20) { val -= delta; this.yDrag = y; }
 	 this.value[this.row] = val;
       }
       this.mouseUp = function(x, y) { }
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
-	 case 0: this.delta /= 10; break;
-	 case 2: this.delta *= 10; break;
+	 case 0: this.precision = min(3, this.precision + 1); break;
+	 case 2: this.precision = max(0, this.precision - 1); break;
 	 }
       }
       this.render = function(elapsed) {
@@ -35,8 +36,8 @@
 	    var outValue = [];
             for (var j = 0 ; j < 4 ; j++) {
                var y = (1.5 - j) / 2;
-               var val = isDef(this.inValues[j]) ? this.inValues[j] : this.value[j];
-               this.drawValue(val, m.transform([0,y]), .5, .5);
+               var val = this.getInValue(j, this.value[j]);
+	       mText(roundedString(val, this.precision), [0, y], .5, .5);
 	       outValue.push(val);
             }
 	    if (this.portLocation.length == 0)

@@ -11,10 +11,22 @@
    }
    function isDef(v) { return ! (v === undefined); }
    function isNumeric(v) { return ! isNaN(v); }
-   function roundedString(v) {
+   function roundedString(v, nd) {
+      if (nd === undefined)
+         nd = 2;
       if (typeof(v) == 'string')
          v = parseFloat(v);
-      return "" + ((v < 0 ? -1 : 1) * floor(100 * abs(v) + 0.5) / 100);
+      var p = nd<=0 ? 1 : nd==1 ? 10 : nd==2 ? 100 : 1000;
+      var str = "" + (floor(p * abs(v) + 0.5) / p);
+
+      if (nd > 0) {
+         if (str.length == 1)
+	    str += ".";
+         while (str.length < nd + 2)
+	    str += "0";
+      }
+
+      return (v < 0 ? "-" : "") + str;
    }
 
 // HANDLE PLAYING AN AUDIO SIGNAL:
