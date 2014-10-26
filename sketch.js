@@ -122,6 +122,12 @@
             _g.restore();
          }
       }
+      this.extendBounds = function(ax, ay, bx, by) {
+         this.afterSketch(function() {
+            color('rgba(0,0,0,.01)');
+            mLine([ax, ay], [bx, by]);
+         });
+      }
       this.clearPorts = function() {
          this.nPorts = 0;
          this.portName = [];

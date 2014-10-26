@@ -13,7 +13,7 @@
       this.render = function(elapsed) {
          this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
                                          : max(0, this.bouncing - elapsed);
-         var bouncing = isDef(this.in[0]) ? this.inValue[0] : this.bouncing;
+         var bouncing = max(0, min(1, this.getInValue(0, this.bouncing)));
 
          this.afterSketch(function() {
             color(scrimColor(.25));
@@ -33,9 +33,7 @@
          });
          mCurve(oval);
 
-         if (this.nPorts == 0)
-            this.addPort("y", 0, 0);
-         this.setOutValue("y", y);
+	 this.extendBounds(-1, 0, 1, 2);
       }
    }
    Bounce.prototype = new Sketch;
