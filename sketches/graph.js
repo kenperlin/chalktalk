@@ -55,13 +55,6 @@
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
-
-         this.afterSketch(function() {
-            if (this.portLocation.length == 0) {
-               this.addPort("Y", -sc, 0);
-            }
-         });
-
          m.scale(sc);
 
          mLine([-1,1],[-1,-1]);
@@ -72,7 +65,7 @@
 
          // Record measurement
 
-         if (this.isInValue("Y")) {
+         if (this.inValues.length > 0) {
 
             sinceLastMeasurement += elapsed
 
@@ -87,8 +80,7 @@
 
                // Capture input
 
-               var val = this.getInValueOf("Y");
-               recordValue(Array.isArray(val) ? val[0] : val);
+               recordValue(this.inValues[0]);
             }
          }
 
