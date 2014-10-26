@@ -2345,7 +2345,7 @@ console.log(lo + " " + hi);
             var S = sk(I);
 
             // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
-
+/*
             if (S.isNullText()) {
                if (S instanceof SimpleSketch) {
                   if (isDef(S.out[0]))
@@ -2360,6 +2360,8 @@ console.log(lo + " " + hi);
             // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
 
             else {
+*/
+            if (! S.isNullText()) {
                S.evalResult = S.evalCode(S.text);
                if (S.evalResult != null && isDef(S.out[0]))
                   S.outValue[0] = S.evalResult;
@@ -2393,6 +2395,11 @@ console.log(lo + " " + hi);
 		     S.inValues.push(val);
 	       }
 	    }
+
+	    // IF NOT EVALUATING TEXT, JUST PASS INPUT TO OUTPUT.
+
+            if (S.isNullText())
+	       S.outValue[0] = S.inValues;
 	 }
 
          // DRAW THE HINT TRACE IF THERE IS ONE.

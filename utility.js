@@ -11,15 +11,14 @@
    }
    function isDef(v) { return ! (v === undefined); }
    function isNumeric(v) { return ! isNaN(v); }
-   function roundedString(v, nd) {
-      if (nd === undefined)
-         nd = 2;
+   function roundedString(v, nDigits) {
+      var nd = nDigits === undefined ? 2 : nDigits;
       if (typeof(v) == 'string')
          v = parseFloat(v);
       var p = nd<=0 ? 1 : nd==1 ? 10 : nd==2 ? 100 : 1000;
       var str = "" + (floor(p * abs(v) + 0.5) / p);
 
-      if (nd > 0) {
+      if (nDigits !== undefined && nd > 0) {
          var i = str.indexOf(".");
 	 if (i < 0) {
 	    str += ".";

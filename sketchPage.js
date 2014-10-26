@@ -311,10 +311,12 @@ var sketchToDelete = null;
                sk().y = y;
             }
             if (outPort == -1 || sk() instanceof NumericSketch) {
+
 	       m.save();
 	       sk().standardViewInverse();
                sk().mouseDown(x, y);
 	       m.restore();
+
             }
          }
 
@@ -326,10 +328,12 @@ var sketchToDelete = null;
             sk().sketchState = 'finished';
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
+
 	    m.save();
 	    sk().standardViewInverse();
             sk().mouseDown(x, y);
 	    m.restore();
+
          }
       }
 
@@ -486,10 +490,12 @@ var sketchToDelete = null;
                sk().y = y;
             }
             if (outPort == -1 || sk() instanceof NumericSketch) {
+
 	       m.save();
 	       sk().standardViewInverse();
                sk().mouseDrag(x, y);
 	       m.restore();
+
             }
          }
       }
@@ -762,6 +768,7 @@ var sketchToDelete = null;
             if (sk().sketchProgress == 1)
                sk().isPressed = false;
             sk().isDrawingEnabled = true;
+
 	    m.save();
 	    sk().standardViewInverse();
             sk().mouseUp(x, y);
@@ -778,12 +785,22 @@ var sketchToDelete = null;
             }
 */
             if (this.isClick && isHover() && isDef(sk().onClick)) {
+
+	       m.save();
+	       sk().standardViewInverse();
                sk().onClick(x, y);
+	       m.restore();
+
                return;
             }
 
             if (! this.isClick && isk() && isDef(sk().onSwipe)) {
+
+	       m.save();
+	       sk().standardViewInverse();
                sk().onSwipe(x - this.xDown, y - this.yDown);
+	       m.restore();
+
                return;
             }
          }
@@ -898,8 +915,14 @@ var sketchToDelete = null;
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I).parent == null && sk(I).contains(this.mx, this.my))
                group[I] = true;
-         if (isk())
+         if (isk()) {
+
+	    m.save();
+	    sk().standardViewInverse();
             sk().mouseMove(x, y);
+	    m.restore();
+
+         }
          groupPath.push([x,y]);
       }
 
@@ -1050,10 +1073,12 @@ var sketchToDelete = null;
 
             else if (isk() && sk().sketchState == 'finished') {
                findOutSketchAndPort();
+
 	       m.save();
 	       sk().standardViewInverse();
                sk().mouseMove(x, y);
 	       m.restore();
+
             }
             break;
          }
