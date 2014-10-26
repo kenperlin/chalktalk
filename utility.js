@@ -20,9 +20,12 @@
       var str = "" + (floor(p * abs(v) + 0.5) / p);
 
       if (nd > 0) {
-         if (str.length == 1)
+         var i = str.indexOf(".");
+	 if (i < 0) {
 	    str += ".";
-         while (str.length < nd + 2)
+	    i = str.length - 1;
+         }
+         while (str.length - i < nd + 1)
 	    str += "0";
       }
 

@@ -42,11 +42,7 @@
 	       mText(roundedString(val, this.precision), [0, y], .5, .5);
 	       outValue.push(val);
             }
-	    if (this.portLocation.length == 0)
-	       for (var i = 0 ; i < 2 ; i++)
-                  this.addPort("" + i, i==0 ? -x : x, 0);
-	    for (var i = 0 ; i < 2 ; i++)
-               this.setOutValue("" + i, outValue);
+            this.outValue[0] = outValue;
          });
       }
    }

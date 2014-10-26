@@ -176,6 +176,8 @@ var sketchToDelete = null;
       // HANDLE MOUSE DOWN FOR THE SKETCH PAGE.
 
       this.mouseDown = function(x, y) {
+         this.mx = x;
+         this.my = y;
 
          if (this.setPageInfo !== undefined)
             return;
@@ -334,6 +336,8 @@ var sketchToDelete = null;
       // HANDLE MOUSE DRAG FOR THE SKETCH PAGE.
 
       this.mouseDrag = function(x, y) {
+         this.mx = x;
+         this.my = y;
 
          var w = width();
          var h = height();

@@ -1548,7 +1548,7 @@
 
    var isBgActionEnabled = false;
    var isSketchDragEnabled = false;
-   var sketchDragMode = 0;
+   var sketchDragMode = -1;
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
@@ -1814,7 +1814,8 @@
          sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
          break;
       case 4:
-         console.log("START CREATING LINK");
+         outSketch = sk();
+	 outPort = 0;
          break;
       case 6:
          sk().arrowBegin(x, y);
@@ -1838,7 +1839,6 @@
             sketchDragActionXY[1] = y;
          }
       case 4:
-         console.log("CONTINUE CREATING LINK");
          break;
       case 6:
          sk().arrowDrag(x, y);
@@ -1852,12 +1852,29 @@
          delete sketchPage.definingMotion;
          break;
       case 4:
-         console.log("END CREATING LINK");
+         tryToSelectSketchAtCursor();
+
+	 // DRAG ENDS ON A DIFFERENT SKETCH: CREATE LINK BETWEEN SKETCHES.
+
+         if (sk() != outSketch && sk().isMouseOver) {
+	    inSketch = sk();
+	    inPort = firstUndefinedArrayIndex(inSketch.in);
+	    sketchPage.createLink();
+	 }
+
+	 // DRAG ENDS ON BACKGROUND: CREATE LINK TO A NEW TEXT SKETCH.
+
+	 else if (sk() == outSketch && ! sk().isMouseOver) {
+	    inSketch = sketchPage.createTextSketch("   ");
+	    inPort = 0;
+	    sketchPage.createLink();
+	 }
          break;
       case 6:
          sk().arrowEnd(x, y);
          break;
       }
+      sketchDragMode = -1;
    }
 
    function doSketchClickAction(x, y) {
@@ -1976,6 +1993,14 @@ for (var i = 0 ; i < 1024 ; i++) {
 console.log(lo + " " + hi);
 */
       }
+   }
+
+   var tryToSelectSketchAtCursor = function() {
+      for (var I = nsk() - 1 ; I >= 0 ; I--)
+         if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
+            selectSketch(I);
+            break;
+         }
    }
 
    var tick = function(g) {
@@ -2180,11 +2205,7 @@ console.log(lo + " " + hi);
                                 && letterPressed == '\0'
                                 && (! sketchPage.isPressed || sketchPage.paletteColorDragXY != null)
                                 && sketchAction == null)
-            for (var I = nsk() - 1 ; I >= 0 ; I--)
-               if (sk(I).isMouseOver && sk(I).sketchState == 'finished') {
-                  selectSketch(I);
-                  break;
-               }
+            tryToSelectSketchAtCursor();
 
          // HANDLE TEXT SHORTHAND MODE TIMEOUT
 
@@ -2253,7 +2274,8 @@ console.log(lo + " " + hi);
 
             // START DRAWING A POSSIBLE NEW LINK.
 
-            if ( linkAtCursor == null
+	    if (sketchDragMode == 4 ||
+                 linkAtCursor == null
                  && isk()
                  && sketchAction == "linking"
                  && outSketch != null
