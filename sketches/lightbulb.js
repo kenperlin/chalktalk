@@ -22,11 +22,7 @@
          }
       }
       this.render = function(elapsed) {
-         if (this.nPorts == 0)
-            this.addPort("light", 0, 0);
-         var light = isDef(this.in[0]) ? this.inValue[0] : this.light;
-         this.setOutValue("light", light);
-
+         var light = this.getInValue(0, this.light);
          var C = [[-.5,-1.6],[-.55,-1],[-.7,-.7],[-.95,0],[-.7,.7],
                   [0,1],
                   [.7,.7],[.95,0],[.7,-.7],[.55,-1],[.5,-1.6]];
