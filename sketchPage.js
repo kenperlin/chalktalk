@@ -1465,6 +1465,10 @@ var sketchToDelete = null;
             this.toggleColorScheme();
             this.toggleLinedBackground();
             break;
+         case '^':
+	    if (videoLayer !== null)
+	       videoLayer.Scale_X = 3.1 - videoLayer.Scale_X;
+	    break;
          case 'v':
             if (videoLayer == null) {
                // INIT VIDEO LAYER
