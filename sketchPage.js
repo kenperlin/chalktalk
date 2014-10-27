@@ -721,7 +721,7 @@ var sketchToDelete = null;
 
          // NON-EXPERT MODE: CLICK ON A SKETCH TO BRING UP ITS PULLDOWN MENU.
 
-         if (! isExpertMode) {
+         if (/**** ! isExpertMode ****/ false) {
             if (this.isClick && this.isFocusOnSketch) {
                if (! doSketchClickAction(x, y)) {
                   sk().isPressed = false;
@@ -811,7 +811,7 @@ var sketchToDelete = null;
 
             // EXPERT MODE: TWO CLICKS AT THE SAME PLACE TO BRING UP THE PIE MENU.
 
-            if (isExpertMode || menuType == 1) {
+            if (/**** isExpertMode || menuType == 1 ****/ true) {
                switch (++bgClickCount) {
                case 1:
                   bgClickX = x;

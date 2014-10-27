@@ -898,6 +898,11 @@
    // Compute the curvature of a curved line from A to B which passes through M.
 
    function computeCurvature(A, M, B) {
+      if (M === undefined) {
+	 M = A[floor(A.length / 2)];
+	 B = A[A.length - 1];
+	 A = A[0];
+      }
       var dx = B[0] - A[0];
       var dy = B[1] - A[1];
       var ex = M[0] - (A[0] + B[0]) / 2;

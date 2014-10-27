@@ -1114,10 +1114,7 @@
       color(dataColor);
       if (s.linkCurve != null) {
          var C = s.linkCurve;
-         var n = C.length - 1;
-         var m = floor(C.length/2);
-         var s = computeCurvature(C[0], C[m], C[n]);
-	 drawCurve(createCurve(C[0], C[n], s));
+	 drawCurve(createCurve(C[0], C[C.length-1], computeCurvature(C)));
       }
       else {
          var xy = s.portXY(outPort);
@@ -1882,9 +1879,8 @@
 	    break;
 
 	 sketchPage.createLink();
-	 var n = outSketch.out[outPort].length - 1;
-	 var s = outSketch.linkCurve;
-	 outSketch.out[outPort][n][2] = computeCurvature(s[0],s[s.length/2],s[s.length-1]);
+	 var i = outSketch.out[outPort].length - 1;
+	 outSketch.out[outPort][i][2] = computeCurvature(outSketch.linkCurve);
 
          break;
       case 6:
@@ -1895,6 +1891,7 @@
    }
 
    function doSketchClickAction(x, y) {
+
       if (bgClickCount != 1 || ! isHover())
          return false;
 
