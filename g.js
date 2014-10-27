@@ -1112,8 +1112,17 @@
    function drawPossibleLink(s, x, y) {
       lineWidth(dataLineWidth);
       color(dataColor);
-      var xy = s.portXY(outPort);
-      arrow(xy[0], xy[1], x, y);
+      if (s.linkCurve != null) {
+         var C = s.linkCurve;
+         var n = C.length - 1;
+         var m = floor(C.length/2);
+         var s = computeCurvature(C[0], C[m], C[n]);
+	 drawCurve(createCurve(C[0], C[n], s));
+      }
+      else {
+         var xy = s.portXY(outPort);
+         arrow(xy[0], xy[1], x, y);
+      }
    }
 
    function findOutSketchAndPort() {
@@ -1815,7 +1824,8 @@
          break;
       case 4:
          outSketch = sk();
-	 outPort = 0;
+         outPort = max(0, findPortAtCursor(outSketch));
+	 outSketch.linkCurve = [[x,y]];
          break;
       case 6:
          sk().arrowBegin(x, y);
@@ -1839,6 +1849,7 @@
             sketchDragActionXY[1] = y;
          }
       case 4:
+	 outSketch.linkCurve.push([x,y]);
          break;
       case 6:
          sk().arrowDrag(x, y);
@@ -1859,7 +1870,6 @@
          if (sk() != outSketch && sk().isMouseOver) {
 	    inSketch = sk();
 	    inPort = firstUndefinedArrayIndex(inSketch.in);
-	    sketchPage.createLink();
 	 }
 
 	 // DRAG ENDS ON BACKGROUND: CREATE LINK TO A NEW TEXT SKETCH.
@@ -1867,8 +1877,15 @@
 	 else if (sk() == outSketch && ! sk().isMouseOver) {
 	    inSketch = sketchPage.createTextSketch("   ");
 	    inPort = 0;
-	    sketchPage.createLink();
 	 }
+	 else
+	    break;
+
+	 sketchPage.createLink();
+	 var n = outSketch.out[outPort].length - 1;
+	 var s = outSketch.linkCurve;
+	 outSketch.out[outPort][n][2] = computeCurvature(s[0],s[s.length/2],s[s.length-1]);
+
          break;
       case 6:
          sk().arrowEnd(x, y);
@@ -2045,7 +2062,7 @@ console.log(lo + " " + hi);
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
-            // : (videoLayer != undefined) && videoLayer.isShowing()            ? 'none'
+            // : (videoLayer != undefined) && videoLayer.isShowing() ? 'none'
             :                                     'crosshair'
             ;
 

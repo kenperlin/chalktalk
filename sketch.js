@@ -51,16 +51,8 @@
 	    this.arrows.splice(n, 1);
          }
          else {
-	    // Compute curvature.
-
 	    var s = this.arrows[n][0];
-	    var ns = s.length;
-	    var dx = s[ns-1][0] - s[0][0];
-	    var dy = s[ns-1][1] - s[0][1];
-	    var sum = 0;
-	    for (var k = 1 ; k < ns - 1 ; k++)
-	       sum += dx * (s[k][1] - s[0][1]) - dy * (s[k][0] - s[0][0]);
-            this.arrows[n][0] = 2 * sum / ns / (dx * dx + dy * dy);
+            this.arrows[n][0] = computeCurvature(s[0], s[s.length/2], s[s.length-1]);
 	    this.arrows[n][1] = sketches[0];
          }
       }

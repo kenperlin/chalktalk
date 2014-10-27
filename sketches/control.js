@@ -17,13 +17,9 @@
       this.t = 0.5;
 
       this.mouseDrag = function(x, y) {
-         m.save();
          var sc = this.size / 180;
-         this.standardViewInverse();
          var p = m.transform([x,y]);
-         p = [p[0]/sc, p[1]/sc];
-         this.t = max(0, min(1, p[this.selection] + .5));
-         m.restore();
+         this.t = max(0, min(1, p[this.selection]/sc + .5));
       }
 
       this.render = function(elapsed) {
@@ -32,6 +28,7 @@
 
          this.afterSketch(function() {
             if (this.portLocation.length == 0) {
+               this.addPort("t", 0, 0);
                switch (this.selection) {
                case 0:
                   this.addPort("lo", -.62 * sc, 0);
@@ -42,7 +39,6 @@
                   this.addPort("hi", 0,  .62 * sc);
                   break;
                }
-               this.addPort("t", 0, 0);
 	       this.setDefaultValue("lo", 0);
 	       this.setDefaultValue("hi", 1);
             }

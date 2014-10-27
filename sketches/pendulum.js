@@ -49,8 +49,8 @@
 
          this.afterSketch(function() {
             if (this.portLocation.length == 0) {
-               this.addPort("H", -.25 * sc * this.hubWidth, sc);
                this.addPort("S",  .25 * sc * this.hubWidth, sc);
+               this.addPort("H", -.25 * sc * this.hubWidth, sc);
             }
          });
 
