@@ -367,7 +367,12 @@
 
       if (! isk())
          return;
-
+/*
+var nx = noise(2*x, 2*y, 10) / 10;
+var ny = noise(2*x, 2*y, 20) / 10;
+x += nx;
+y += ny;
+*/
       if (isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
@@ -2085,23 +2090,26 @@ console.log(lo + " " + hi);
          _g.clearRect(-_g.panX - 100, -_g.panY, w + 200, h);
          _g.inSketch = false;
 
-         // DO ACTUAL CANVAS PANNING
-
-         _g.setTransform(1,0,0,1,0,0);
-         _g.translate(_g.panX, _g.panY, 0);
-
 	 // IF THERE IS A VIDEO LAYER, DARKEN IT.
 
 	 if (isVideoLayer() && videoBrightness < 1) {
 	    var scrimAlpha = max(0, 1 - videoBrightness);
-	    _g.fillStyle = 'rgba(0,0,0,' + scrimAlpha + ')';
+	    _g.fillStyle = 'rgba('
+	                 + (backgroundColor == 'white' ? '255,255,255,' : '0,0,0,')
+			 + scrimAlpha + ')';
+            var x = _g.panX, y = _g.panY;
 	    _g.beginPath();
-	    _g.moveTo(0,0);
-	    _g.lineTo(w,0);
-	    _g.lineTo(w,h);
-	    _g.lineTo(0,h);
+	    _g.moveTo(-100-x,0-y);
+	    _g.lineTo(   w-x,0-y);
+	    _g.lineTo(   w-x,h-y);
+	    _g.lineTo(-100-x,h-y);
 	    _g.fill();
 	 }
+
+         // DO ACTUAL CANVAS PANNING
+
+         _g.setTransform(1,0,0,1,0,0);
+         _g.translate(_g.panX, _g.panY, 0);
 
          // PAN 3D OBJECTS TOO
 
