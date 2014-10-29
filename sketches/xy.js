@@ -16,7 +16,7 @@ function XY() {
       this.afterSketch(function() {
          for (var j = 0 ; j < 2 ; j++)
             if (isDef(this.inValues[j]))
-	       this.mxy[j] = this.inValues[j];
+	       this.mxy[j] = max(0, min(1, this.inValues[j] * 2 - 1));
          var x = this.mxy[0];
          var y = this.mxy[1];
 	 lineWidth(.5);
