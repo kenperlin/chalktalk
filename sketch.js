@@ -185,6 +185,7 @@
       }
       this.dSum = 0;
       this.defaultValue = [];
+      this.defaultValueIncr = [];
       this.deleteChar = function() {
          var hasCodeBubble = this.code != null && isCodeWidget;
          var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
@@ -633,8 +634,11 @@
       this.selection = 0;
       this.setDefaultValue = function(name, value) {
          var j = getIndex(this.portName, name);
-         if (j >= 0)
+         if (j >= 0) {
             this.defaultValue[j] = value;
+            if (this.defaultValueIncr[j] === undefined)
+               this.defaultValueIncr[j] = 1;
+         }
       }
       this.setOutValue = function(name, value) {
          var j = getIndex(this.portName, name);

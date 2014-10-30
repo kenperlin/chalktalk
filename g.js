@@ -281,6 +281,9 @@
    function noiseX(x,y) { return _nA * _noise(_nF*x, _nF*y); }
    function noiseY(x,y) { return _nA * _noise(_nF*x, _nF*(y+128)); }
 
+   function NX(x, y) { return x + noise(x/30, y/30, 100) * 2; }
+   function NY(x, y) { return y + noise(x/30, y/30, 200) * 2; }
+
    // ADD NOISE TO THE X AND Y VALUE OF A POINT ON A LINE BEING DRAWN.
 
    function snx(sketch,x,y) {
@@ -342,13 +345,14 @@
          x = sk().transformX2D(xx, yy);
          y = sk().transformY2D(xx, yy);
       }
-      if (noisy <= 0) {
+      if (noisy == 0) {
          _g.moveTo(x, y);
          prev_x = x;
          prev_y = y;
       }
-      else
+      else {
          _g_sketchTo(x, y, 0);
+      }
    }
 
    function _g_lineTo(x,y) {
@@ -357,22 +361,21 @@
          x = sk().transformX2D(xx, yy);
          y = sk().transformY2D(xx, yy);
       }
-      if (noisy == 0)
+      if (noisy == 0) {
          _g.lineTo(x, y);
-      else
+         prev_x = x;
+         prev_y = y;
+      }
+      else {
          _g_sketchTo(x, y, 1);
+      }
    }
 
    function _g_sketchTo(x, y, isLine) {
 
       if (! isk())
          return;
-/*
-var nx = noise(2*x, 2*y, 10) / 10;
-var ny = noise(2*x, 2*y, 20) / 10;
-x += nx;
-y += ny;
-*/
+
       if (isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
