@@ -11,28 +11,29 @@
          var my = m.transform([x,y])[1];
 	 var t = (1 - my) / 2;
          this.row = max(0, min(this.nRows-1, floor(this.nRows * t)));
-         this.yDrag = y;
+         this.xVal = x;
+         this.yVal = y;
       }
       this.mouseDrag = function(x, y) {
-         var val = this.value[this.row];
-	 var delta = 1 / this.p10[this.precision];
-	 if (y - this.yDrag < -20) { val += delta; this.yDrag = y; }
-	 if (y - this.yDrag >  20) { val -= delta; this.yDrag = y; }
-	 this.value[this.row] = val;
+         var ax = abs(x - this.xVal);
+         var ay = abs(y - this.yVal);
+	 if (ay > 2 * ax && ay > 20) {
+            var val = this.value[this.row];
+	    val += (y < this.yVal ? 1 : -1) / this.p10[this.precision];
+	    this.value[this.row] = val;
+	    this.xVal = x;
+	    this.yVal = y;
+         }
       }
       this.mouseUp = function(x, y) { }
       this.onSwipe = function(dx, dy) {
          var my = m.transform([sketchPage.mx,sketchPage.my])[1];
-	 if (my > 0)
-            switch (pieMenuIndex(dx, dy)) {
-	    case 0: this.precision = min(3, this.precision + 1); break;
-	    case 2: this.precision = max(0, this.precision - 1); break;
-	    }
-         else
-            switch (pieMenuIndex(dx, dy)) {
-	    case 0: this.selection = min(2, this.selection + 1); break;
-	    case 2: this.selection = max(0, this.selection - 1); break;
-	    }
+         switch (pieMenuIndex(dx, dy, 8)) {
+	 case 0: this.precision = min(3, this.precision + 1); break;
+	 case 4: this.precision = max(0, this.precision - 1); break;
+	 case 7: this.selection = min(2, this.selection + 1); break;
+	 case 3: this.selection = max(0, this.selection - 1); break;
+	 }
       }
 
       this.render = function(elapsed) {
