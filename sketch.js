@@ -680,8 +680,10 @@
          if (this instanceof NumericSketch)
             this.value = text;
 
-         //this.text = isNumeric(text) ? roundedString(text) : text;
          this.text = text;
+
+         if (this instanceof NumericSketch && isNumeric(text))
+            this.text = roundedString(text);
 
          if (this.textX == 0) {
             this.textX = (this.xlo + this.xhi) / 2;
