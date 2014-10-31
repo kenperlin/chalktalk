@@ -7,6 +7,7 @@
       var ns = "-sin";
       this.row = -1;
       this.col = -1;
+      this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
       this.mxy = [0,0];
       this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
       this.labels = "matrix".split(' ');
@@ -38,14 +39,15 @@
       }
       this.render = function(elapsed) {
          mCurve([[-1,1],[1,1],[1,-1],[-1,-1],[-1,1]]);
-         mLine([-.5,1],[-.5,-1]);
-         mLine([  0,1],[  0,-1]);
-         mLine([ .5,1],[ .5,-1]);
          mLine([-1, .5],[1, .5]);
-         mLine([-1,  0],[1,  0]);
-         mLine([-1,-.5],[1,-.5]);
+         mLine([-.5,1],[-.5,-1]);
 
          this.afterSketch(function() {
+
+            mLine([-1,  0],[1,  0]);
+            mLine([-1,-.5],[1,-.5]);
+            mLine([  0,1],[  0,-1]);
+            mLine([ .5,1],[ .5,-1]);
 
 	    var out = [];
 
@@ -102,7 +104,7 @@
                var x = (col - 1.5) / 2;
                var y = (1.5 - row) / 2;
 	       var val = out[row + 4 * col];
-               textHeight((this.xhi - this.xlo) / 8 / sqrt(("" + val).length));
+               textHeight((this.xhi - this.xlo) / 9 / pow(("" + val).length, 0.4));
                mText(val, [x, y], .5, .5);
             }
 
@@ -118,7 +120,7 @@
 	       mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
 	    }
 
-	    this.outValue[0] = out;
+	    this.outValue[0] = isDef(this.in[0]) ? out : this.identityMatrix;
          });
       }
    }

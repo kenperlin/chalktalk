@@ -680,7 +680,7 @@
          if (this instanceof NumericSketch)
             this.value = text;
 
-         this.text = text;
+         this.text = isNumeric(text) ? roundedString(text) : text;
          if (this.textX == 0) {
             this.textX = (this.xlo + this.xhi) / 2;
             this.textY = (this.ylo + this.yhi) / 2;
