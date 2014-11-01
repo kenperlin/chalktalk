@@ -1,6 +1,19 @@
 
 /////////////// UTILITY FUNCTIONS ///////////////////
 
+// CHECKING FOR SYNTAX ERRORS IN JAVASCRIPT CODE.
+
+    function findSyntaxError( code ) {
+      var error = [];
+      var save_onerror = onerror;
+      onerror = function(errorMsg, url, lineNumber) { error = [lineNumber, errorMsg];  }
+      var element = document.createElement('script');
+      element.appendChild(document.createTextNode( code ));
+      document.body.appendChild(element);
+      onerror = save_onerror;
+      return error;
+   }
+
 // TYPES AND FORMAT CONVERSIONS.
 
    function hexChar(n) {
@@ -514,6 +527,34 @@
    }
 
 // IMAGE PROCESSING.
+
+   function findConnectedComponents(src, nc, dst, f0) {
+      function findConnectedComponent(i, n) {
+         if (src[i] < f0)
+	    return;
+
+         dst[i] = n;
+         var c = i % nc;
+         var r = i / nc;
+	 if (c > 0    && dst[i - 1 ] == 0) findConnectedComponent(i - 1 , n);
+	 if (c < nc-1 && dst[i + 1 ] == 0) findConnectedComponent(i + 1 , n);
+	 if (r > 0    && dst[i - nc] == 0) findConnectedComponent(i - nc, n);
+	 if (r < nr-1 && dst[i + nc] == 0) findConnectedComponent(i + nc, n);
+      }
+
+      if (f0 === undefined)
+         f0 = 0.5;
+
+      var nr = src.length / nc;
+
+      for (var i = 0 ; i < src.length ; i++)
+         dst[i] = 0;
+
+      var n = 0;
+      for (var i = 0 ; i < src.length ; i++)
+         if (src[i] >= f0 && dst[i] == 0)
+	    findConnectedComponent(i, ++n);
+   }
 
    function imageEnlarge(src, dst) {
       if (this.tmp === undefined)
