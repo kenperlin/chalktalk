@@ -16,6 +16,35 @@
       return error;
    }
 
+
+// GET AND SET STATE DATA VIA THE PERSISTENT SERVER.
+
+   function Server() {
+      this.name = name;
+
+      this.set = function(key, val) {
+         var setForm = new FormData();
+         setForm.append("key", key);
+         setForm.append("value", JSON.stringify(val));
+
+         var request = new XMLHttpRequest();
+         request.open("POST", "set");
+         request.send(setForm);
+      }
+
+      this.get = function(key, fn) {
+         var getRequest = new XMLHttpRequest();
+         getRequest.open("GET", "state/" + key + ".json");
+         getRequest.onloadend = function() {
+            fn(getRequest.responseText);
+         }
+         getRequest.send();
+      }
+   }
+
+   var server = new Server();
+
+
 // TYPES AND FORMAT CONVERSIONS.
 
    function hexChar(n) {
@@ -46,6 +75,7 @@
       return (v < 0 ? "-" : "") + str;
    }
 
+
 // HANDLE PLAYING AN AUDIO SIGNAL:
 
    var audioNode = null, audioIndex = 0;
@@ -72,6 +102,7 @@
          }
       }
    }
+
 
 // SET OPERATIONS:
 
@@ -118,6 +149,7 @@
    }
    Set.prototype = new Array;
 
+
 // CHOICE SELECTION WITH CONTINUOUS TRANSITION WEIGHTS.
 
    function Choice() {
@@ -151,6 +183,7 @@
       this.state(0);
    }
 
+
 // ENCODE A FRACTIONAL AMOUNT AS A PRINTABLE CHARACTER (HAS ABOUT 2 SIG. DIGITS PRECISION).
 
    function EncodedFraction() {
@@ -177,6 +210,7 @@
       }
    }
 
+
 // PHYSICS.
 
    // Physics objects must inherit from "Clonable" for cloning to work properly.
@@ -201,6 +235,7 @@
       }
    }
    Spring.prototype = new Clonable;
+
 
 // MATH CONSTANTS AND FUNCTIONS
 
@@ -428,6 +463,7 @@
       return str;
    }
 
+
 // STRING UTILITIES.
 
    function variableToValue(str, name, value) {
@@ -472,6 +508,7 @@
 
       return str;
    }
+
 
 // ARRAY UTILITIES.
 
@@ -527,6 +564,7 @@
          dst.push(0);
       return dst;
    }
+
 
 // IMAGE PROCESSING.
 
@@ -590,6 +628,7 @@
          dst[index(col, row, 2*w)] =  sum;
       }
    }
+
 
 // 2D GEOMETRY UTILITIES.
 
@@ -1245,6 +1284,7 @@
 
       return c2;
    }
+
 
 // VARIOUS MANIPULATIONS OF HTML ELEMENTS.
 

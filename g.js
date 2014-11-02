@@ -620,11 +620,7 @@
       } catch (e) { }
 
       window.haveLoadedSketches = true;
-  }
-
-/////////////////////////////////////////////////////////////////////
-///////////////////// SERVER UTILITY FUNCTIONS //////////////////////
-///////////////////////// GOING TO BE MOVED /////////////////////////
+   }
 
    function importSketch(filename) {
 
@@ -639,9 +635,13 @@
       sketchRequest.filename = filename;
       sketchRequest.onloadend = function() {
 
-         var result = findSyntaxError(sketchRequest.responseText);
-         if (result.length > 0)
-            console.log("In sketches/" + this.filename + " at line " + result[0] + ": " + result[1]);
+         // IF THERE IS A SYNTAX ERROR, REPORT IT.
+
+         var error = findSyntaxError(sketchRequest.responseText);
+         if (error.length > 0)
+            console.log("In sketches/" + this.filename + " at line " + error[0] + ": " + error[1]);
+
+	 // OTHERWISE LOAD THE NEW SKETCH TYPE.
 
          else {
             window.eval(sketchRequest.responseText);
@@ -650,29 +650,6 @@
       }
       sketchRequest.send();
    }
-
-   var ServerUtils = {};
-
-   ServerUtils.set = function(key, val) {
-      var setForm = new FormData();
-      setForm.append("key", key);
-      setForm.append("value", JSON.stringify(val));
-
-      var request = new XMLHttpRequest();
-      request.open("POST", "set");
-      request.send(setForm);
-   }
-
-   ServerUtils.get = function(key, fn) {
-      var getRequest = new XMLHttpRequest();
-      getRequest.open("GET", "state/" + key + ".json");
-      getRequest.onloadend = function() {
-         fn(getRequest.responseText);
-      }
-      getRequest.send();
-   }
-
-/////////////////////////////////////////////////////////////////////
 
    function gStart() {
 
