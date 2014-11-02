@@ -24,7 +24,7 @@
 
       this.set = function(key, val) {
          var setForm = new FormData();
-         setForm.append("key", key);
+         setForm.append("key", key + ".json");
          setForm.append("value", JSON.stringify(val));
 
          var request = new XMLHttpRequest();
@@ -34,7 +34,7 @@
 
       this.get = function(key, fn) {
          var getRequest = new XMLHttpRequest();
-         getRequest.open("GET", "state/" + key + ".json");
+         getRequest.open("GET", key + ".json");
          getRequest.onloadend = function() {
             fn(getRequest.responseText);
          }

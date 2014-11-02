@@ -31,8 +31,7 @@ app.route("/upload").post(function(req, res, next) {
       if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
          filename += suffix; 
 
-      fs.writeFile(form.uploadDir + "/"
-            + filename, fields.sketchContent, function(err) {
+      fs.writeFile(form.uploadDir + "/" + filename, fields.sketchContent, function(err) {
          if (err) {
             console.log(err);
          } else {
@@ -55,7 +54,7 @@ app.route("/set").post(function(req, res, next) {
       if (key.indexOf(suffix, key.length - suffix.length) == -1)
          key += suffix; 
 
-      fs.writeFile("state/" + key, fields.value, function(err) {
+      fs.writeFile(key, fields.value, function(err) {
          if (err) {
             console.log(err);
          } else {
