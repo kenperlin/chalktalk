@@ -48,8 +48,9 @@ app.route("/set").post(function(req, res, next) {
    form.parse(req, function(err, fields, files) {
       res.writeHead(200, {"content-type": "text/plain"});
       res.write('received upload:\n\n');
-   
+
       var key = fields.key;
+
       var suffix = ".json";
       if (key.indexOf(suffix, key.length - suffix.length) == -1)
          key += suffix; 
