@@ -636,9 +636,17 @@
 
       var sketchRequest = new XMLHttpRequest();
       sketchRequest.open("GET", "sketches/" + filename);
+      sketchRequest.filename = filename;
       sketchRequest.onloadend = function() {
-         window.eval(sketchRequest.responseText);
-         forceSetPage = 10;
+
+         var result = findSyntaxError(sketchRequest.responseText);
+         if (result.length > 0)
+            console.log("In sketches/" + this.filename + " at line " + result[0] + ": " + result[1]);
+
+         else {
+            window.eval(sketchRequest.responseText);
+            forceSetPage = 10;
+         }
       }
       sketchRequest.send();
    }

@@ -6,7 +6,9 @@
     function findSyntaxError( code ) {
       var error = [];
       var save_onerror = onerror;
-      onerror = function(errorMsg, url, lineNumber) { error = [lineNumber, errorMsg];  }
+      onerror = function(errorMsg, url, lineNumber) {
+         error = [lineNumber, errorMsg.replace("Uncaught ","")];
+      }
       var element = document.createElement('script');
       element.appendChild(document.createTextNode( code ));
       document.body.appendChild(element);
