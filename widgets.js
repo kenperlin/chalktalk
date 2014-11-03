@@ -675,7 +675,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
        },
        updateF = function() {
           codeSketch.evalCode(codeTextArea.value);
-          if (code() != null) {
+	  if (isCodeScript()) {
+	  }
+          else if (code() != null) {
              code()[codeSelector.selectedIndex][1] = codeTextArea.value;
              codeSketch.selectedIndex = codeSelector.selectedIndex;
           }
@@ -685,6 +687,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function codeIsBook() {
       return codeSketch != null && codeSketch.isBook !== undefined;
+   }
+   function isCodeScript() {
+      return codeSketch != null && codeSketch.isShowingScript !== undefined;
+   }
+   function codeScript() {
+      return sketchScript[codeSketch.typeName];
    }
    function code() {
       return codeSketch == null ? null : codeSketch.code;
@@ -709,8 +717,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    }
 
    function toggleCodeWidget() {
-      if (! isCodeWidget && (codeSketch == null || codeSketch.code == null))
+      if (! isCodeWidget && (codeSketch == null || (! isCodeScript() && codeSketch.code == null)))
          return;
+
+      if (isCodeWidget && codeSketch != null)
+         codeSketch.isShowingScript = undefined;
 
       isCodeWidget = ! isCodeWidget;
 
@@ -720,14 +731,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector = null;
       if (isCodeWidget) {
          var options = "";
-         for (var i = 0 ; i < code().length ; i++)
-            options += "<option value='" + code()[i][1] + "'>"
-                     + code()[i][0]
-                     + "</option>";
+	 if (! isCodeScript())
+            for (var i = 0 ; i < code().length ; i++)
+               options += "<option value='" + code()[i][1] + "'>"
+                        + code()[i][0]
+                        + "</option>";
 
          codeElement.innerHTML =
-          /*"<button id=upload_button>upload</upload>"
-          +*/"<select id=code_selector onchange='setCodeAreaText()'>"
+            "<select id=code_selector onchange='setCodeAreaText()'>"
           + options
           + "</select>"
           + "<br>"
@@ -735,29 +746,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + " style=';outline-width:0;border-style:none;resize:none'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
-/*
-         uploadButton = document.getElementById("upload_button");
-         uploadButton.onclick = function() {
-            var uploadForm = new FormData();
-            var sketchName = sk().glyphName;
-            uploadForm.append("sketchName", sketchName);
 
-            var shader = "var " + sketchName + "FragmentShader = \"" + document.getElementById("code_text").value + "\";";
-            var sketchContent = eval(sketchName);
-            var register = "registerGlyph(" + sk().glyph.toString() + ");";
-            uploadForm.append("sketchContent", [shader, sketchContent, register].join("\n"));
-
-            var request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8888/upload");
-            request.send(uploadForm);
-         }
-*/
          codeSelector = document.getElementById("code_selector");
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.color = codeSelectorFgColor();
          codeSelector.style.font="18px courier";
-         codeSelector.style.visibility = code().length > 1 ? "visible" : "hidden";
+         codeSelector.style.visibility = ! isCodeScript() && code().length > 1 ? "visible" : "hidden";
          if (isDef(codeSketch.selectedIndex))
             codeSelector.selectedIndex = codeSketch.selectedIndex;
 
@@ -766,23 +761,18 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = codeIsBook() ? "17px serif" : "18px courier";
-         codeTextArea.value = code()[codeSelector.selectedIndex][1];
+         codeTextArea.style.font = codeIsBook() ? "17px serif" : isCodeScript() ? "12px courier" : "18px courier";
+         codeTextArea.value = isCodeScript() ? codeScript() : code()[codeSelector.selectedIndex][1];
 	 if (codeIsBook()) {
             codeTextArea.style.width = '650px';
 	 }
-         if (code().length < 2) {
+         if (isCodeScript() || code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
          }
 
          codeTextArea.onclick = function(event) {
             setTextMode(true);
-
-            // ON SCREEN KEYBOARD FOR CODE TEXT IS DISABLED FOR NOW.
-
-/////////// isOnScreenKeyboardMode = true;
-
          };
 
          updateF();
@@ -803,7 +793,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       for (var i = 0 ; i < lines.length ; i++)
          cols = max(cols, lines[i].length);
 
-      if (text.length > 0)
+      if (isCodeScript())
+         cols = 100;
+      else if (text.length > 0)
          for (var i = 0 ; i < text.length ; i++)
             cols = max(cols, text[i][0].length + 3);
 
@@ -816,14 +808,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var w = min(12 * cols + 10, width() * 0.75);
+      var w = isCodeScript() ? 640 : min(12 * cols + 10, width() * 0.75);
 
       if (rows > 3)
          rows += 0.3;
-      if (text.length > 1)
+      if (! isCodeScript() && text.length > 1)
          rows += 1.2;
 
-      var h = floor(21 * rows);
+      var h = isCodeScript() ? floor(14 * rows) : floor(21 * rows);
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 

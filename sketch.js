@@ -742,6 +742,13 @@
       this.textStrs = [];
       this.textX = 0;
       this.textY = 0;
+      this.toTrace = function() {
+         var src = this.sp;
+	 var dst = [];
+	 for (var i = 0 ; i < src.length ; i++)
+	    buildTrace(dst, src[i][0], src[i][1], src[i][2]);
+         return dst;
+      }
       this.translate = function(dx, dy) {
          if (this.isGroup()) {
             this.xlo += dx;

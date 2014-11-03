@@ -1,4 +1,36 @@
 
+   // GLOBAL VARIABLES.
+
+   var PMA = 8; // PIE MENU NUMBER OF ANGLES
+   var backgroundColor = 'black';
+   var bgClickCount = 0;
+   var bgClickX = 0;
+   var bgClickY = 0;
+   var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
+   var forceSetPage = 0;
+   var glyphTrace = [];
+   var glyphSketch = null;
+   var isAltKeyCopySketchEnabled = true;
+   var isAltPressed = false;
+   var isBottomGesture = false;
+   var isExpertMode = true;
+   var isMakingGlyph = false;
+   var isMouseOverBackground = true;
+   var isShowing2DMeshEdges = false;
+   var isShowingMeshEdges = false;
+   var isShowingPresenterView = false;
+   var isShowingScribbleGlyphs = false;
+   var isTelegraphKeyPressed = false;
+   var isTextMode = false;
+   var margin = 50;
+   var meshOpacityOverVideo = 0.7;
+   var scribbleScale = margin;
+   var sketchPadding = 10;
+   var sketchTypes = [];
+   var sketchAction = null;
+   var sketchTypesToAdd = [];
+   var videoBrightness = 1;
+
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
@@ -7,8 +39,8 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   function height() { return 720; }
-   //function height() { return 800; }
+   //function height() { return 720; }
+   function height() { return 800; }
 
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
@@ -465,16 +497,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-   // FROM A SKETCH, BUILD A TRACE (AN ARRAY OF CURVES).
-
-   function sketchToTrace(sketch) {
-      var src = sketch.sp;
-      var dst = [];
-      for (var i = 0 ; i < src.length ; i++)
-         buildTrace(dst, src[i][0], src[i][1], src[i][2]);
-      return dst;
-   }
-
    // COMPUTE THE BOUNDING BOX FOR A TRACE.
 
    function traceComputeBounds(trace) {
@@ -556,38 +578,6 @@
       prev_y = y;
    }
 
-// GLOBAL VARIABLES.
-
-   var PMA = 8; // PIE MENU NUMBER OF ANGLES
-   var backgroundColor = 'black';
-   var bgClickCount = 0;
-   var bgClickX = 0;
-   var bgClickY = 0;
-   var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
-   var forceSetPage = 0;
-   var glyphTrace = [];
-   var glyphSketch = null;
-   var isAltKeyCopySketchEnabled = true;
-   var isAltPressed = false;
-   var isBottomGesture = false;
-   var isExpertMode = true;
-   var isMakingGlyph = false;
-   var isMouseOverBackground = true;
-   var isShowing2DMeshEdges = false;
-   var isShowingMeshEdges = false;
-   var isShowingPresenterView = false;
-   var isShowingScribbleGlyphs = false;
-   var isTelegraphKeyPressed = false;
-   var isTextMode = false;
-   var margin = 50;
-   var meshOpacityOverVideo = 0.7;
-   var scribbleScale = margin;
-   var sketchPadding = 10;
-   var sketchTypes = [];
-   var sketchAction = null;
-   var sketchTypesToAdd = [];
-   var videoBrightness = 1;
-
    var isVideoLayer = function() {
       return videoLayer != null && videoLayer.bRender;
    }
@@ -622,6 +612,8 @@
       window.haveLoadedSketches = true;
    }
 
+   var sketchScript = {};
+
    function importSketch(filename) {
 
       // IF A FILE IS CURRENTLY BEING EDITED, DON'T TRY TO LOAD ITS SWAP FILE.
@@ -637,19 +629,28 @@
 
          // IF THERE IS A SYNTAX ERROR, REPORT IT.
 
-         var error = findSyntaxError(sketchRequest.responseText);
+         var error = findSyntaxError(this.responseText);
          if (error.length > 0)
             console.log("In sketches/" + this.filename + " at line " + error[0] + ": " + error[1]);
 
 	 // OTHERWISE LOAD THE NEW SKETCH TYPE.
 
          else {
-            window.eval(sketchRequest.responseText);
-            forceSetPage = 10;
+	    var script = this.responseText;
+            window.eval(script);
+            forceSetPage = 30;
+
+	    var i = script.indexOf("function "), j = script.indexOf("(");
+	    if (i >= 0 && j > i) {
+	       var type = script.substring(i + 9, j).trim();
+	       sketchScript[type] = script;
+	    }
          }
       }
       sketchRequest.send();
    }
+
+   // MUST BE CALLED WHEN WEB PAGE LOADS.
 
    function gStart() {
 
@@ -831,6 +832,8 @@
             addGlyph(scribbleGlyphs, nameToGlyph(name));
       }
 
+//server.set("state/foobar", "1234");
+
       tick(g);
    }
 
@@ -981,11 +984,13 @@
 
       eval("addSketch(new " + type + "())");
 
+      sk().typeName = type;
+
       sk().width = bounds[2] - bounds[0];
       sk().height = bounds[3] - bounds[1];
       sk().setSelection(selection);
       if (glyphSketch != null) {
-         sk().sketchTrace = resampleTrace(sketchToTrace(glyphSketch));
+         sk().sketchTrace = resampleTrace(glyphSketch.toTrace());
          sk().glyphTransition = 0;
          sk().trace = [];
       }
@@ -2012,6 +2017,8 @@ console.log(lo + " " + hi);
    }
 
    var tick = function(g) {
+
+//server.get("state/foobar", function(val) { console.log(val); });
 
       if (forceSetPage > 0 && --forceSetPage == 0)
          setPage(pageIndex);

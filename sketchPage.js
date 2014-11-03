@@ -1484,6 +1484,15 @@ var sketchToDelete = null;
          case 'V':
             videoLayer.toggleControls();
             break;
+         case 'Z':
+	    if (isk() && isDef(sk().typeName)) {
+	       if (! isDef(sk().isShowingScript)) {
+	          sk().isShowingScript = true;
+	          codeSketch = sk();
+	       }
+               toggleCodeWidget();
+            }
+	    break;
          }
       }
 
@@ -1864,9 +1873,10 @@ var sketchToDelete = null;
          // DRAW THE SPEECH BUBBLE FOR THE CODE WIDGET.
 
          if (isCodeWidget) {
-            drawCodeWidget(code(), codeSketch.xlo, codeSketch.ylo,
-                                   codeSketch.xhi, codeSketch.yhi,
-                                   codeElement.codeSketch != codeSketch);
+            drawCodeWidget(isCodeScript() ? codeScript() : code(),
+	                   codeSketch.xlo, codeSketch.ylo,
+                           codeSketch.xhi, codeSketch.yhi,
+                           codeElement.codeSketch != codeSketch);
             codeElement.codeSketch = codeSketch;
          }
 

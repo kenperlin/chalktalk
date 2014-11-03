@@ -548,7 +548,7 @@ function lathe() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
-    var trace = sketchToTrace(sk());
+    var trace = sk().toTrace();
     var profile = [];
     for (var i = 0 ; i < trace[4].length ; i++)
        profile.push([ trace[4][i][0], 0, trace[4][i][1] ]);
@@ -614,7 +614,7 @@ function hose() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
-    var trace = sketchToTrace(sk());
+    var trace = sk().toTrace();
     if (trace.length < 5)
        return;
 
