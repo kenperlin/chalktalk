@@ -7,7 +7,6 @@
    var bgClickX = 0;
    var bgClickY = 0;
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
-   var forceSetPage = 0;
    var glyphTrace = [];
    var glyphSketch = null;
    var isAltKeyCopySketchEnabled = true;
@@ -592,9 +591,9 @@
       sketchTypesToAdd.push(name);
    }
 
-   // LOAD SKETCHES FROM SERVER'S SKETCHES FOLDER
+   // LOAD ALL THE SKETCHES FROM THE SERVER'S SKETCHES FOLDER.
 
-   if (window.haveLoadedSketches === undefined) {
+   function loadSketches() {
       try {
          var lsRequest = new XMLHttpRequest();
          lsRequest.open("GET", "ls_sketches");
@@ -608,8 +607,6 @@
          }
          lsRequest.send();
       } catch (e) { }
-
-      window.haveLoadedSketches = true;
    }
 
    var sketchScript = {};
@@ -633,18 +630,18 @@
          if (error.length > 0)
             console.log("In sketches/" + this.filename + " at line " + error[0] + ": " + error[1]);
 
-	 // OTHERWISE LOAD THE NEW SKETCH TYPE.
+         // OTHERWISE LOAD THE NEW SKETCH TYPE.
 
          else {
-	    var script = this.responseText;
-            window.eval(script);
-            forceSetPage = 30;
+            var script = this.responseText;
+            eval(script);
+            forceSetPageAtTime = time + 0.5;
 
-	    var i = script.indexOf("function "), j = script.indexOf("(");
-	    if (i >= 0 && j > i) {
-	       var type = script.substring(i + 9, j).trim();
-	       sketchScript[type] = script;
-	    }
+            var i = script.indexOf("function "), j = script.indexOf("(");
+            if (i >= 0 && j > i) {
+               var type = script.substring(i + 9, j).trim();
+               sketchScript[type] = script;
+            }
          }
       }
       sketchRequest.send();
@@ -804,11 +801,9 @@
       g.name = name;
       sketchPage.clear();
 
-      //if (name == 'sketch_canvas') {
-         _g = g;
-         _g.clearRect(0, 0, _g.canvas.width, _g.canvas.height);
-         This().setup();
-      //}
+      _g = g;
+      _g.clearRect(0, 0, _g.canvas.width, _g.canvas.height);
+      This().setup();
 
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
 
@@ -831,6 +826,10 @@
          if (glyphIndex(scribbleGlyphs, name) == -1)
             addGlyph(scribbleGlyphs, nameToGlyph(name));
       }
+
+      // LOAD ALL THE SKETCHES FROM THE SERVER'S SKETCHES FOLDER.
+
+      loadSketches();
 
 //server.set("state/foobar", "1234");
 
@@ -1113,7 +1112,7 @@
       color(dataColor);
       if (s.linkCurve != null) {
          var C = s.linkCurve;
-	 drawCurve(createCurve(C[0], C[C.length-1], computeCurvature(C)));
+         drawCurve(createCurve(C[0], C[C.length-1], computeCurvature(C)));
       }
       else {
          var xy = s.portXY(outPort);
@@ -1821,7 +1820,7 @@
       case 4:
          outSketch = sk();
          outPort = max(0, findPortAtCursor(outSketch));
-	 outSketch.linkCurve = [[x,y]];
+         outSketch.linkCurve = [[x,y]];
          break;
       case 6:
          sk().arrowBegin(x, y);
@@ -1845,7 +1844,7 @@
             sketchDragActionXY[1] = y;
          }
       case 4:
-	 outSketch.linkCurve.push([x,y]);
+         outSketch.linkCurve.push([x,y]);
          break;
       case 6:
          sk().arrowDrag(x, y);
@@ -1861,25 +1860,25 @@
       case 4:
          tryToSelectSketchAtCursor();
 
-	 // DRAG ENDS ON A DIFFERENT SKETCH: CREATE LINK BETWEEN SKETCHES.
+         // DRAG ENDS ON A DIFFERENT SKETCH: CREATE LINK BETWEEN SKETCHES.
 
          if (sk() != outSketch && sk().isMouseOver) {
-	    inSketch = sk();
-	    inPort = firstUndefinedArrayIndex(inSketch.in);
-	 }
+            inSketch = sk();
+            inPort = firstUndefinedArrayIndex(inSketch.in);
+         }
 
-	 // DRAG ENDS ON BACKGROUND: CREATE LINK TO A NEW TEXT SKETCH.
+         // DRAG ENDS ON BACKGROUND: CREATE LINK TO A NEW TEXT SKETCH.
 
-	 else if (sk() == outSketch && ! sk().isMouseOver) {
-	    inSketch = sketchPage.createTextSketch("   ");
-	    inPort = 0;
-	 }
-	 else
-	    break;
+         else if (sk() == outSketch && ! sk().isMouseOver) {
+            inSketch = sketchPage.createTextSketch("   ");
+            inPort = 0;
+         }
+         else
+            break;
 
-	 sketchPage.createLink();
-	 var i = outSketch.out[outPort].length - 1;
-	 outSketch.out[outPort][i][2] = computeCurvature(outSketch.linkCurve);
+         sketchPage.createLink();
+         var i = outSketch.out[outPort].length - 1;
+         outSketch.out[outPort][i][2] = computeCurvature(outSketch.linkCurve);
 
          break;
       case 6:
@@ -2020,8 +2019,10 @@ console.log(lo + " " + hi);
 
 //server.get("state/foobar", function(val) { console.log(val); });
 
-      if (forceSetPage > 0 && --forceSetPage == 0)
+      if (window.forceSetPageAtTime !== undefined && forceSetPageAtTime < time) {
+         forceSetPageAtTime = undefined;
          setPage(pageIndex);
+      }
 
       var w = width(), h = height();
 
@@ -2086,21 +2087,21 @@ console.log(lo + " " + hi);
          _g.clearRect(-_g.panX - 100, -_g.panY, w + 200, h);
          _g.inSketch = false;
 
-	 // IF THERE IS A VIDEO LAYER, DARKEN IT.
+         // IF THERE IS A VIDEO LAYER, DARKEN IT.
 
-	 if (isVideoLayer() && videoBrightness < 1) {
-	    var scrimAlpha = max(0, 1 - videoBrightness);
-	    _g.fillStyle = 'rgba('
-	                 + (backgroundColor == 'white' ? '255,255,255,' : '0,0,0,')
-			 + scrimAlpha + ')';
+         if (isVideoLayer() && videoBrightness < 1) {
+            var scrimAlpha = max(0, 1 - videoBrightness);
+            _g.fillStyle = 'rgba('
+                         + (backgroundColor == 'white' ? '255,255,255,' : '0,0,0,')
+                         + scrimAlpha + ')';
             var x = _g.panX, y = _g.panY;
-	    _g.beginPath();
-	    _g.moveTo(-100-x,0-y);
-	    _g.lineTo(   w-x,0-y);
-	    _g.lineTo(   w-x,h-y);
-	    _g.lineTo(-100-x,h-y);
-	    _g.fill();
-	 }
+            _g.beginPath();
+            _g.moveTo(-100-x,0-y);
+            _g.lineTo(   w-x,0-y);
+            _g.lineTo(   w-x,h-y);
+            _g.lineTo(-100-x,h-y);
+            _g.fill();
+         }
 
          // DO ACTUAL CANVAS PANNING
 
@@ -2292,7 +2293,7 @@ console.log(lo + " " + hi);
 
             // START DRAWING A POSSIBLE NEW LINK.
 
-	    if (sketchDragMode == 4 ||
+            if (sketchDragMode == 4 ||
                  linkAtCursor == null
                  && isk()
                  && sketchAction == "linking"
@@ -2398,27 +2399,27 @@ console.log(lo + " " + hi);
                }
          }
 
-	 // UPDATE FLATTENED ARRAYS OF SKETCH INPUT VALUES.
+         // UPDATE FLATTENED ARRAYS OF SKETCH INPUT VALUES.
 
          for (var I = 0 ; I < nsk() ; I++) {
-	    var S = sk(I);
+            var S = sk(I);
             S.inValues = [];
-	    for (var i = 0 ; i < S.in.length ; i++) {
-	       var val = S.inValue[i];
-	       if (isDef(val)) {
-	          if (Array.isArray(val))
-		     for (var k = 0 ; k < val.length ; k++)
-		        S.inValues.push(val[k]);
+            for (var i = 0 ; i < S.in.length ; i++) {
+               var val = S.inValue[i];
+               if (isDef(val)) {
+                  if (Array.isArray(val))
+                     for (var k = 0 ; k < val.length ; k++)
+                        S.inValues.push(val[k]);
                   else
-		     S.inValues.push(val);
-	       }
-	    }
+                     S.inValues.push(val);
+               }
+            }
 
-	    // IF NOT EVALUATING TEXT, JUST PASS INPUT TO OUTPUT.
+            // IF NOT EVALUATING TEXT, JUST PASS INPUT TO OUTPUT.
 
             if (S.isNullText())
-	       S.outValue[0] = S.inValues;
-	 }
+               S.outValue[0] = S.inValues;
+         }
 
          // DRAW THE HINT TRACE IF THERE IS ONE.
 
@@ -2467,7 +2468,7 @@ console.log(lo + " " + hi);
                   for (var i = 0 ; i < s.portName.length ; i++)
                      if (s.outValue[i] !== undefined && s.inValue[i] === undefined) {
                         var xy = s.portXY(i);
-			var val = s.outValue[i];
+                        var val = s.outValue[i];
                         var str = isNumeric(val) ? roundedString(val) : val;
 
                         textHeight(20);
@@ -3175,14 +3176,14 @@ console.log(lo + " " + hi);
 
          if (this.fadeAway > 0 || sketchPage.fadeAway > 0
                                || this.glyphSketch != null
-			       || this.meshAlpha !== undefined
-			       || sketchPage.fadeAway > 0) {
+                               || this.meshAlpha !== undefined
+                               || sketchPage.fadeAway > 0) {
             this.alpha = this.fadeAway > 0 ? this.fadeAway :
                          this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
-			 this.meshAlpha !== undefined ? this.meshAlpha :
+                         this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
             this.mesh.setOpacity(sCurve(this.alpha));
-	    console.log(sCurve(this.alpha));
+            console.log(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
