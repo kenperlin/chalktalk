@@ -49,12 +49,13 @@
       this.matrixWorldNeedsUpdate = true;
    }
 
-   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
-   function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
-   function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
-   function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
+   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
    function globeGeometry(m,n, p0,p1, t0,t1) { return new THREE.SphereGeometry(1, m,n, p0,p1, t0,t1); }
+   function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
+   function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
+   function planeGeometry(n) { return new THREE.PlaneGeometry(2,2,n,n); }
+   function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
@@ -91,6 +92,13 @@
 
    THREE.Object3D.prototype.addCube = function() {
       var geometry = cubeGeometry();
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
+      this.add(mesh);
+      return mesh;
+   }
+
+   THREE.Object3D.prototype.addPlane = function() {
+      var geometry = planeGeometry();
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
