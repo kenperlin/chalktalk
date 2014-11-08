@@ -1375,9 +1375,6 @@ var sketchToDelete = null;
          case 'e':
             toggleCodeWidget();
             break;
-         case 'f':
-	    console.log(tree_obj.vertices.length + " " + tree_obj.faces.length);
-            break;
          case 'g':
             this.toggleGroup();
             break;

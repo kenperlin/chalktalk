@@ -678,8 +678,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	  if (isCodeScript()) {
 	  }
           else if (code() != null) {
-             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
-             codeSketch.selectedIndex = codeSelector.selectedIndex;
+             var index = codeSelector.selectedIndex;
+             code()[index][1] = codeTextArea.value;
+             codeSketch.selectedIndex = index;
+	     if (code()[index][2] !== undefined) {
+	        codeSketch.temporaryFunction = code()[index][2];
+	        codeSketch.temporaryFunction();
+             }
           }
        };
 

@@ -2858,6 +2858,9 @@ console.log(lo + " " + hi);
 
    function deleteSketchOnly(sketch) {
 
+      if (sketch.mesh !== undefined)
+         root.remove(sketch.mesh);
+
       if (this.visibleEdgesMesh !== undefined)
          sketchPage.scene.remove(this.visibleEdgesMesh);
 
@@ -3183,7 +3186,6 @@ console.log(lo + " " + hi);
                          this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
             this.mesh.setOpacity(sCurve(this.alpha));
-            console.log(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
@@ -3306,10 +3308,6 @@ console.log(lo + " " + hi);
 */
       }
 
-      this.setUniform = function(name, val) {
-         if (isDef(this.mesh.material.uniforms[name]))
-            this.mesh.material.uniforms[name].value = val;
-      }
       this.mesh = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
@@ -3465,7 +3463,9 @@ console.log(lo + " " + hi);
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
 
-         S.setUniform('alpha', (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1));
+	 var alpha = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
+	 mesh.material.transparent = alpha < 1;
+         S.setUniform('alpha', alpha);
 
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 

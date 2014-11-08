@@ -462,11 +462,12 @@ function gl() { return renderer.context; }
 function isValidVertexShader  (string) { return isValidShader(gl().VERTEX_SHADER  , string); }
 function isValidFragmentShader(string) { return isValidShader(gl().FRAGMENT_SHADER, string); }
 function isValidShader(type, string) {
-   string = "precision highp float;\n" + string;
    var shader = gl().createShader(type);
    gl().shaderSource(shader, string);
    gl().compileShader(shader);
-   return gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+   var status = gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+   console.log(status);
+   return status;
 };
 
 function addUniforms(material, string) {
@@ -506,7 +507,7 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
       vertexShader: vertexShader,
    });
 
-   var u = "alpha mx my pixelSize selectedIndex time x y z".split(' ');
+   var u = "alpha mx my mz pixelSize selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" ? 1 : 0) };
 
@@ -518,23 +519,31 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
 
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
-var defaultVertexShader = ["\
-   varying float dx;\
-   varying float dy;\
-   varying vec3 vPosition;\
-   varying vec3 vNormal;\
-   void main() {\
-      dx = 2. * uv.x - 1.;\
-      dy = 2. * uv.y - 1.;\
-      vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);\
-      vPosition = position*.03;\
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
-   }\
-"].join("\n");
+var defaultVertexShader = [
+    'varying float dx;'
+   ,'varying float dy;'
+   ,'varying vec3 vPosition;'
+   ,'varying vec3 vNormal;'
+   ,'void main() {'
+   ,'   dx = 2. * uv.x - 1.;'
+   ,'   dy = 2. * uv.y - 1.;'
+   ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
+   ,'   vPosition = position*.03;'
+   ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);'
+   ,'}'
+].join("\n");
+
+var defaultFragmentShader = [
+    'void main() {'
+   ,'   float c = .1 + .9 * max(0., dot(vNormal, vec3(.7,.7,.7)));'
+   ,'   gl_FragColor = vec4(pow(vec3(c,c,c), vec3(.45,.45,.45)), alpha);'
+   ,'}'
+].join("\n");
 
 // DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
 
 var fragmentShaderHeader = ["\
+   precision mediump float;\
    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }\
@@ -591,6 +600,7 @@ var fragmentShaderHeader = ["\
    varying float dy;\
    uniform float mx;\
    uniform float my;\
+   uniform float mz;\
    uniform float pixelSize;\
    uniform float selectedIndex;\
    uniform float time;\

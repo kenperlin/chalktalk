@@ -78,6 +78,24 @@
          this.colorId = i;
 	 this.color = palette[i];
       }
+      this.setRenderMatrix = function(mat) {
+         var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyz[2];
+         var s = .24 * width();
+         var p = this.toPixel([0,0,0]);
+
+         mat.identity();
+
+	 mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
+
+	 mat.perspective(0, 0, -width()/2);
+
+	 var yy = min(1, 4 * this.rY * this.rY);
+	 mat.rotateX(PI * -this.rY);
+	 mat.rotateY(PI *  this.rX * (1 - yy));
+	 mat.rotateZ(PI *  this.rX * yy);
+
+	 mat.scale(D / s);
+      }
       this.transformX2D = function(x, y) {
          var angle = 2 * this.rX;
          return this.x2D + this.scale() * (cos(angle)*x + sin(angle)*y);
@@ -114,10 +132,12 @@
             _g.restore();
          }
       }
-      this.extendBounds = function(ax, ay, bx, by) {
+      this.extendBounds = function(a, b) {
          this.afterSketch(function() {
+	    var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
-            mLine([ax, ay], [bx, by]);
+            mLine(a, b);
+	    _g.strokeStyle = saveStrokeStyle;
          });
       }
       this.clearPorts = function() {
@@ -420,6 +440,10 @@
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
+      this.hasBounds = function() {
+         return this.xlo !== undefined && this.xhi !== undefined && this.xlo <= this.xhi &&
+                this.ylo !== undefined && this.yhi !== undefined && this.ylo <= this.yhi ;
+      }
       this.hasMotionPath = function() {
          return this.motionPath.length > 0 && this.motionPath[0].length > 1;
       }
@@ -594,6 +618,8 @@
 	 _g.save();
          m.save();
 	 this.render(elapsed);
+	 if (! isMakingGlyph && this.createMesh !== undefined)
+	    this.updateMesh();
          m.restore();
 	 _g.restore();
       }
@@ -708,6 +734,10 @@
 
          _g.restore();
       }
+      this.setUniform = function(name, val) {
+         if (isDef(this.mesh.material.uniforms[name]))
+            this.mesh.material.uniforms[name].value = val;
+      }
       this.sketchLength = 1;
       this.cursorTransition = 0;
       this.sketchProgress = 0;
@@ -742,6 +772,9 @@
       this.textStrs = [];
       this.textX = 0;
       this.textY = 0;
+      this.toPixel = function(point) {
+         return this.adjustXY(m.transform(point));
+      }
       this.toTrace = function() {
          var src = this.sp;
 	 var dst = [];
@@ -827,7 +860,76 @@
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
+      this.updateMesh = function() {
+         if (this.createMesh !== undefined && this.mesh === undefined) {
 
+	    if (this.vertexShader === undefined)
+	       this.vertexShader = defaultVertexShader;
+
+	    if (this.fragmentShader === undefined)
+	       this.fragmentShader = defaultFragmentShader;
+
+            this.shaderMaterial = function() {
+	       return shaderMaterial(this.vertexShader, this.fragmentShader);
+	    }
+
+	    this.updateFragmentShader = function() {
+	       if (this.fragmentShader != codeTextArea.value
+                   && isValidFragmentShader(formFragmentShader(codeTextArea.value))) {
+                  this.fragmentShader = codeTextArea.value;
+                  this.mesh.material = this.shaderMaterial();
+               }
+	    }
+
+	    if (this.code == null)
+	       this.code = [];
+            this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
+
+            this.mesh = this.createMesh();
+	    root.add(this.mesh);
+	    this.is3D = true;
+         }
+	 if (this.mesh !== undefined) {
+
+	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
+
+	    this.setRenderMatrix(this.mesh.getMatrix());
+
+            // SET OPACITY.
+
+            var alpha = max(0, 2 * this.glyphTransition - 1) *
+                        (this.fadeAway == 0 ? 1 : this.fadeAway) *
+		        (isDef(this.alpha) ? this.alpha : 1);
+            this.mesh.material.transparent = alpha < 1;
+
+            // SET VARIOUS UNIFORMS IN THE FRAGMENT SHADER.
+
+	    if (this.mesh.material.uniforms !== undefined) {
+
+	       // SET TIME.
+
+	       this.setUniform('time', time);
+
+	       // SET MOUSE CURSOR.
+
+	       var a = this.toPixel([0,0]);
+	       var b = this.toPixel([1,1]);
+
+	       this.setUniform('mx', (sketchPage.mx - a[0]) / (b[0] - a[0]));
+	       this.setUniform('my', (sketchPage.my - a[1]) / (b[1] - a[1]));
+	       this.setUniform('mz', sketchPage.isPressed ? 1 : 0);
+
+               this.setUniform('alpha', alpha);
+            }
+	    else {
+	       this.mesh.setOpacity(alpha);
+	    }
+
+	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
+
+	    this.extendBounds([-1,-1],[1,1]);
+         }
+      }
       this.value = null;
       this.x = 0;
       this.xyz = [];

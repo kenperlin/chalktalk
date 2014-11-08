@@ -1,6 +1,6 @@
 var sketchTypes = (
-  "Abacus Ball Teleg "
-+ "Lens Grid Hammer Lattice Motion Example1 "
+  "Ball Teleg "
++ "Lens Grid Hammer Lattice Motion "
 + "Noises MothAndCandle OldCamera Radio "
 + "Scroll Spike Typewriter Tablet Telegraph Television Book1"
 ).split(' ');
