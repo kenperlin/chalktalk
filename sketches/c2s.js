@@ -9,7 +9,7 @@ function C2S() {
       //this.setUniform('diffuse', [.5,0,0]);
    }
    this.createMesh = function() {
-      return new THREE.Mesh(globeGeometry(32,16), this.shaderMaterial());
+      return new THREE.Mesh(globeGeometry(40,20), this.shaderMaterial());
    }
 }
 C2S.prototype = new SketchTo3D;

@@ -2975,6 +2975,8 @@ console.log(lo + " " + hi);
       }
 
       addSketch(s.clone());
+      if (sk().createMesh !== undefined)
+         sk().mesh = undefined;
       sk().sketchProgress = 1;
       sk().sketchState = 'finished';
 
