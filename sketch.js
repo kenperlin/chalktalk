@@ -735,8 +735,9 @@
          _g.restore();
       }
       this.setUniform = function(name, val) {
-         if (isDef(this.mesh.material.uniforms[name]))
+         if (isDef(this.mesh.material.uniforms[name])) {
             this.mesh.material.uniforms[name].value = val;
+         }
       }
       this.sketchLength = 1;
       this.cursorTransition = 0;
@@ -870,7 +871,8 @@
 	       this.fragmentShader = defaultFragmentShader;
 
             this.shaderMaterial = function() {
-	       return shaderMaterial(this.vertexShader, this.fragmentShader);
+	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
+	       return material;
 	    }
 
 	    this.updateFragmentShader = function() {
@@ -888,6 +890,12 @@
             this.mesh = this.createMesh();
 	    root.add(this.mesh);
 	    this.is3D = true;
+
+	    if (this.fragmentShader == defaultFragmentShader) {
+	       this.setUniform('ambient', new THREE.Vector3(.1,.1,.1));
+	       this.setUniform('diffuse', new THREE.Vector3(.5,.5,.5));
+	       this.setUniform('specular', new THREE.Vector4(.5,.5,.5,10));
+	    }
          }
 	 if (this.mesh !== undefined) {
 
@@ -921,9 +929,6 @@
 
                this.setUniform('alpha', alpha);
             }
-	    else {
-	       this.mesh.setOpacity(alpha);
-	    }
 
 	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
 
