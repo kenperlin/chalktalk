@@ -7,6 +7,19 @@
       renderer.camera.updateProjectionMatrix();
    });
 
+   THREE.Material.prototype.setUniform = function(name, val) {
+      if (this.uniforms[name] !== undefined) {
+         if (Array.isArray(val)) {
+            switch (val.length) {
+            case 2: val = new THREE.Vector2(val[0],val[1]); break;
+            case 3: val = new THREE.Vector3(val[0],val[1],val[2]); break;
+            case 4: val = new THREE.Vector4(val[0],val[1],val[2],val[3]); break;
+            }
+         }
+         this.uniforms[name].value = val;
+      }
+   }
+
    THREE.Object3D.prototype.setMaterial = function(material) {
       if (isShowingMeshEdges)
          material = bgMaterial();
@@ -542,11 +555,12 @@ var defaultFragmentShader = [
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
    ,'void main() {'
-   ,'   vec3 Ldir = normalize(vec3(1.,1.,1.));'
+   ,'   vec3 N = normalize(vNormal);'
+   ,'   vec3 L = normalize(vec3(1.,1.,1.));'
    ,'   vec3 W = vec3(0.,0.,-1.);'
-   ,'   vec3 R = W - 2. * vNormal * dot(vNormal, W);'
-   ,'   vec3 color = ambient + diffuse * max(0., dot(vNormal, Ldir));'
-   ,'   color += specular.rgb * pow(max(0., dot(R, Ldir)), specular.a);'
+   ,'   vec3 R = W - 2. * N * dot(N, W);'
+   ,'   vec3 color = ambient + diffuse * max(0., dot(N, L));'
+   ,'   color += specular.rgb * pow(max(0., dot(R, L)), specular.a);'
    ,'   gl_FragColor = vec4(pow(color, vec3(.45,.45,.45)), alpha);'
    ,'}'
 ].join("\n");
