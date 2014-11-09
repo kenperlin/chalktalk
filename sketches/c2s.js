@@ -12,6 +12,6 @@ function C2S() {
       return new THREE.Mesh(globeGeometry(40,20), this.shaderMaterial());
    }
 }
-C2S.prototype = new SketchTo3D;
+C2S.prototype = new Sketch;
 addSketchType("C2S");
 

@@ -10,6 +10,6 @@ function S2C() {
       return new THREE.Mesh(cubeGeometry(), this.shaderMaterial());
    }
 }
-S2C.prototype = new SketchTo3D;
+S2C.prototype = new Sketch;
 addSketchType("S2C");
 

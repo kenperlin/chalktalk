@@ -13,7 +13,6 @@
    var isAltPressed = false;
    var isBottomGesture = false;
    var isExpertMode = true;
-   var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
@@ -38,8 +37,8 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   //function height() { return 720; }
-   function height() { return 800; }
+   function height() { return 720; }
+   //function height() { return 800; }
 
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
@@ -408,7 +407,7 @@
       if (! isk())
          return;
 
-      if (isMakingGlyph) {
+      if (sk().isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
          buildTrace(glyphTrace, x, y, isLine);
@@ -956,9 +955,9 @@
          // CREATE GLYPH SHAPE INFO.
 
          glyphTrace = [];
-         isMakingGlyph = true;
+         sk().isMakingGlyph = true;
          sk().renderWrapper(0.02);
-         isMakingGlyph = false;
+         sk().isMakingGlyph = undefined;
 
          // REGISTER THE GLYPH.
 
@@ -3309,8 +3308,6 @@ console.log(lo + " " + hi);
          }
 */
       }
-
-      this.mesh = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
 

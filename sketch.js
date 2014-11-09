@@ -80,7 +80,7 @@
       }
       this.setRenderMatrix = function(mat) {
          var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyz[2];
-         var s = .24 * width();
+         var s = .381872 * height();
          var p = this.toPixel([0,0,0]);
 
          mat.identity();
@@ -111,9 +111,9 @@
          return (y - this.y2D) / this.scale();
       }
       this.duringSketch = function(callbackFunction) {
-         if (this.sketchProgress < 1) {
+         if (this.createMesh !== null ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
             _g.save();
-            _g.globalAlpha = 1 - this.styleTransition;
+	    _g.globalAlpha = 1 - this.styleTransition;
             this.duringSketchCallbackFunction = callbackFunction;
             this.duringSketchCallbackFunction();
             _g.restore();
@@ -618,10 +618,11 @@
 	 _g.save();
          m.save();
 	 this.render(elapsed);
-	 if (! isMakingGlyph && this.createMesh !== undefined)
-	    this.updateMesh();
          m.restore();
 	 _g.restore();
+	 if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
+	    this.updateMesh();
+         }
       }
       this.sc = 1;
       this.scale = function(value) {
@@ -874,8 +875,8 @@
 	       material.setUniform('ambient' , [.025,.025,.025]);
 	       material.setUniform('diffuse' , [.2,.2,.2]);
 	       material.setUniform('specular', [.5,.5,.5,10]);
-	       material.setUniform('L_dir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
-	       material.setUniform('L_rgb', [[ 1.0, 1.0, 1.0], [ 0.2, 0.2, 0.2], [ 0.2, 0.2, 0.2]]);
+	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
+	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
 	       return material;
 	    }
 
@@ -905,7 +906,7 @@
 
             // SET OPACITY.
 
-            var alpha = max(0, 2 * this.glyphTransition - 1) *
+            var alpha = max(0, this.glyphTransition) *
                         (this.fadeAway == 0 ? 1 : this.fadeAway) *
 		        (isDef(this.alpha) ? this.alpha : 1);
             this.mesh.material.transparent = alpha < 1;

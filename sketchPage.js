@@ -1718,7 +1718,15 @@ var sketchToDelete = null;
             }
 
             if (sk().sketchTrace != null && sk().sketchState != 'finished') {
-               morphSketchToGlyphSketch();
+	       if (sk().createMesh !== undefined) {
+	          var alpha = 1 - sk().glyphTransition;
+		  if (alpha > 0) {
+		     _g.globalAlpha = alpha * alpha;
+                     morphSketchToGlyphSketch();
+		  }
+               }
+	       else
+                  morphSketchToGlyphSketch();
 
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);

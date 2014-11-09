@@ -77,6 +77,7 @@
    function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
    function globeGeometry(m,n, p0,p1, t0,t1) { return new THREE.SphereGeometry(1, m,n, p0,p1, t0,t1); }
    function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
+   function nullGeometry() { return new THREE.Geometry(); }
    function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
    function planeGeometry(n) { return new THREE.PlaneGeometry(2,2,n,n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
@@ -570,20 +571,19 @@ var defaultFragmentShader = [
     'uniform vec3 ambient;'
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
-   ,'uniform vec3 L_rgb[3];'
-   ,'uniform vec3 L_dir[3];'
+   ,'uniform vec3 Lrgb[3];'
+   ,'uniform vec3 Ldir[3];'
    ,'void main() {'
    ,'   vec3  color = ambient;'
    ,'   vec3  W     = vec3(0.,0.,-1.);'
    ,'   vec3  N     = normalize(vNormal);'
    ,'   vec3  R     = W - 2. * N * dot(N, W);'
    ,'   for (int i = 0 ; i < 3 ; i++) {'
-   ,'      vec3  Lrgb = L_rgb[i];'
-   ,'      vec3  Ldir = normalize(L_dir[i]);'
-   ,'      float D    = dot(N, Ldir);'
-   ,'      float S    = dot(R, Ldir);'
-   ,'      color += Lrgb * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
-   ,'                        specular.rgb * pow(max(0., S), specular.a) );'
+   ,'      vec3  L = normalize(Ldir[i]);'
+   ,'      float D = dot(N, L);'
+   ,'      float S = dot(R, L);'
+   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
+   ,'                           specular.rgb * pow(max(0., S), specular.a) );'
    ,'   }'
    ,'   gl_FragColor = vec4(sqrt(color), alpha);'
    ,'}'
