@@ -7,14 +7,25 @@
       renderer.camera.updateProjectionMatrix();
    });
 
-   THREE.Material.prototype.setUniform = function(name, val) {
+   function toVec(src) {
+      switch (src.length) {
+      default: return new THREE.Vector2(src[0],src[1]);
+      case 3 : return new THREE.Vector3(src[0],src[1],src[2]);
+      case 4 : return new THREE.Vector4(src[0],src[1],src[2],src[3]);
+      }
+   }
+
+   THREE.Material.prototype.setUniform = function(name, src) {
       if (this.uniforms[name] !== undefined) {
-         if (Array.isArray(val)) {
-            switch (val.length) {
-            case 2: val = new THREE.Vector2(val[0],val[1]); break;
-            case 3: val = new THREE.Vector3(val[0],val[1],val[2]); break;
-            case 4: val = new THREE.Vector4(val[0],val[1],val[2],val[3]); break;
-            }
+         var val = src;
+         if (Array.isArray(src)) {
+	    if (! Array.isArray(src[0]))
+	       val = toVec(src);
+            else {
+	       val = [];
+	       for (var i = 0 ; i < src.length ; i++)
+	          val.push(toVec(src[i]));
+	    }
          }
          this.uniforms[name].value = val;
       }
@@ -487,22 +498,27 @@ function addUniforms(material, string) {
 
    // PARSE THE FRAGMENT SHADER CODE TO FIND CUSTOM UNIFORMS:
 
-   var v2_zero = new THREE.Vector2(0, 0);
-   var v3_zero = new THREE.Vector3(0, 0, 0);
-   var v4_zero = new THREE.Vector4(0, 0, 0, 0);
-   var typeInfo = "float f 0 vec2 v2 v2_zero vec3 v3 v3_zero vec4 v4 v4_zero".split(' ');
+   var typeInfo = "float f 0 vec2 v2 0 vec3 v3 0 vec4 v4 0".split(' ');
    var declarations = string.substring(0, string.indexOf("void main")).split(";");
    for (var i = 0 ; i < declarations.length ; i++) {
       var declaration = declarations[i].trim();
       if (declaration.length > 0) {
-
          var words = declaration.split(" ");
          if (words[0] == 'uniform') {
             var type = words[1];
             var name = words[2];
+	    var j = name.indexOf('[');
+	    if (j >= 0)
+	       name = name.substring(0, j);
             for (var n = 0 ; n < typeInfo.length ; n += 3) {
                if (type == typeInfo[n]) {
-                  material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
+	          var key = typeInfo[n+1];
+	          var val = typeInfo[n+2];
+	          if (j >= 0) {
+		     key += 'v';
+		     val = '[]';
+		  }
+                  material.uniforms[name] = { type: key, value: val };
                   break;
                }
             }
@@ -554,14 +570,22 @@ var defaultFragmentShader = [
     'uniform vec3 ambient;'
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
+   ,'uniform vec3 L_rgb[3];'
+   ,'uniform vec3 L_dir[3];'
    ,'void main() {'
-   ,'   vec3 N = normalize(vNormal);'
-   ,'   vec3 L = normalize(vec3(1.,1.,1.));'
-   ,'   vec3 W = vec3(0.,0.,-1.);'
-   ,'   vec3 R = W - 2. * N * dot(N, W);'
-   ,'   vec3 color = ambient + diffuse * max(0., dot(N, L));'
-   ,'   color += specular.rgb * pow(max(0., dot(R, L)), specular.a);'
-   ,'   gl_FragColor = vec4(pow(color, vec3(.45,.45,.45)), alpha);'
+   ,'   vec3  color = ambient;'
+   ,'   vec3  W     = vec3(0.,0.,-1.);'
+   ,'   vec3  N     = normalize(vNormal);'
+   ,'   vec3  R     = W - 2. * N * dot(N, W);'
+   ,'   for (int i = 0 ; i < 3 ; i++) {'
+   ,'      vec3  Lrgb = L_rgb[i];'
+   ,'      vec3  Ldir = normalize(L_dir[i]);'
+   ,'      float D    = dot(N, Ldir);'
+   ,'      float S    = dot(R, Ldir);'
+   ,'      color += Lrgb * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
+   ,'                        specular.rgb * pow(max(0., S), specular.a) );'
+   ,'   }'
+   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
    ,'}'
 ].join("\n");
 

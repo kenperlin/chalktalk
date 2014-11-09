@@ -871,9 +871,11 @@
 
             this.shaderMaterial = function() {
 	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
-	       material.setUniform('ambient' , [.1,.1,.1]);
-	       material.setUniform('diffuse' , [.3,.3,.3]);
-	       material.setUniform('specular', [.5,.5,.5,20]);
+	       material.setUniform('ambient' , [.025,.025,.025]);
+	       material.setUniform('diffuse' , [.2,.2,.2]);
+	       material.setUniform('specular', [.5,.5,.5,10]);
+	       material.setUniform('L_dir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
+	       material.setUniform('L_rgb', [[ 1.0, 1.0, 1.0], [ 0.2, 0.2, 0.2], [ 0.2, 0.2, 0.2]]);
 	       return material;
 	    }
 
