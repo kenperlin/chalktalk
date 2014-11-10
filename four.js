@@ -491,7 +491,6 @@ function isValidShader(type, string) {
    gl().shaderSource(shader, string);
    gl().compileShader(shader);
    var status = gl().getShaderParameter(shader, gl().COMPILE_STATUS);
-   console.log(status);
    return status;
 };
 

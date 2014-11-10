@@ -1,4 +1,7 @@
 
+   // Do not load any of the following sketches.
+   var ignoredSketches = 'reflect'.split(' ');
+
    // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
@@ -600,8 +603,26 @@
          lsRequest.onloadend = function () {
             if (lsRequest.responseText != "") {
                var ls = lsRequest.responseText.trim().split("\n");
-               for (var i = 0; i < ls.length; i++)
-                  importSketch(ls[i]);
+               for (var n = 0; n < ls.length; n++) {
+	          var filename = ls[n];
+
+		  // Ignore files with no extension.
+	          var iDot = filename.indexOf('.');
+		  if (iDot < 0)
+		     continue;
+
+		  // Ignore files that do not have the .js extension.
+		  var extension = filename.substring(iDot, filename.length);
+		  if (extension !== '.js')
+		     continue;
+
+		  // Ignore the ignoredSketches.
+		  var name = filename.substring(0, iDot);
+		  if (getIndex(ignoredSketches, name) >= 0)
+		     continue;
+
+                  importSketch(filename);
+               }
             }
          }
          lsRequest.send();
@@ -611,13 +632,6 @@
    var sketchScript = {};
 
    function importSketch(filename) {
-
-      // IF A FILE IS CURRENTLY BEING EDITED, DON'T TRY TO LOAD ITS SWAP FILE.
-
-      var len = filename.length;
-      if (filename.substring(len-3, len) == "swp")
-         return;
-
       var sketchRequest = new XMLHttpRequest();
       sketchRequest.open("GET", "sketches/" + filename);
       sketchRequest.filename = filename;

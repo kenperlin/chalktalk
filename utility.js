@@ -544,7 +544,7 @@
 
    function getIndex(arr, obj) {
       var i = arr.length;
-      while (--i >= 0 && arr[i] != obj) ;
+      while (--i >= 0 && arr[i] !== obj) ;
       return i;
    }
 
