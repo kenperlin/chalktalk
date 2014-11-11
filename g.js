@@ -40,8 +40,8 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   function height() { return 720; }
-   //function height() { return 800; }
+   //function height() { return 720; }
+   function height() { return 800; }
 
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
@@ -2123,8 +2123,8 @@ console.log(lo + " " + hi);
 
          // PAN 3D OBJECTS TOO
 
-         root.position.x =  _g.panX / (0.391 * height());
-         root.position.y = -_g.panY / (0.391 * height());
+         root.position.x =  _g.panX / (0.3819 * height());
+         root.position.y = -_g.panY / (0.3819 * height());
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);

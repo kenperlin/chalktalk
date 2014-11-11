@@ -3,7 +3,7 @@
 
 // CHECKING FOR SYNTAX ERRORS IN JAVASCRIPT CODE.
 
-    function findSyntaxError( code ) {
+   function findSyntaxError( code ) {
       var error = [];
       var save_onerror = onerror;
       onerror = function(errorMsg, url, lineNumber) {
