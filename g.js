@@ -664,6 +664,14 @@
 
    function gStart() {
 
+/*
+var harry = { fred: 10 };
+console.log(harry.fred);
+harry._foobar = function() { this.fred = 20; }
+eval('harry._foobar()');
+console.log(harry.fred);
+*/
+
       preLoadObjs();
 
       // PREVENT DOUBLE CLICK FROM SELECTING THE CANVAS:
