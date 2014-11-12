@@ -621,7 +621,7 @@
          m.restore();
 	 _g.restore();
 	 if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
-	    this.updateMesh();
+	    this._updateMesh();
          }
       }
       this.sc = 1;
@@ -861,7 +861,7 @@
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
-      this.updateMesh = function() {
+      this._updateMesh = function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
 	    if (this.vertexShader === undefined)
 	       this.vertexShader = defaultVertexShader;
@@ -943,8 +943,8 @@
                this.setUniform('alpha', alpha);
             }
 
-	    if (this.update !== undefined)
-	       this.update();
+	    if (this.updateMesh !== undefined)
+	       this.updateMesh();
 
 	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
 

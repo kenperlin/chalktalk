@@ -1,4 +1,5 @@
 function C2S() {
+
    this.labels = "c2s".split(' ');
 
    this.render = function() {
@@ -6,6 +7,7 @@ function C2S() {
          mCurve(makeOval(-1,-1,2,2,20,-PI/2,3*PI/2));
       });
    }
+
    this.createMesh = function() {
       return new THREE.Mesh(globeGeometry(80,40), this.shaderMaterial());
    }
