@@ -132,11 +132,11 @@
             _g.restore();
          }
       }
-      this.extendBounds = function(a, b) {
+      this.extendBounds = function(points) {
          this.afterSketch(function() {
 	    var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
-            mLine(a, b);
+            mCurve(points);
 	    _g.strokeStyle = saveStrokeStyle;
          });
       }
@@ -891,7 +891,8 @@
 	       this.code = [];
             this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
 
-	    this.meshBounds = [[-1,-1],[1,1]];
+            if (this.meshBounds == undefined)
+	       this.meshBounds = [ [-1, -1] , [1, 1] ];
             this.mesh = this.createMesh();
 	    root.add(this.mesh);
 	    this.is3D = true;
@@ -944,7 +945,7 @@
 
 	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
 
-	    this.extendBounds(this.meshBounds[0], this.meshBounds[1]);
+	    this.extendBounds(this.meshBounds);
          }
       }
       this.value = null;

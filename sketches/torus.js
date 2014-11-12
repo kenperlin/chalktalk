@@ -2,6 +2,13 @@ function Torus() {
    this.labels = "torus".split(' ');
    this.r = .4;
 
+   var R = 1 + this.r;
+   this.meshBounds = [];
+   for (var theta = 0 ; theta < TAU ; theta += TAU / 8) {
+      this.meshBounds.push([R * cos(theta), R * sin(theta), -this.r]);
+      this.meshBounds.push([R * cos(theta), R * sin(theta),  this.r]);
+   }
+
    this.render = function() {
       this.duringSketch(function() {
          var r = this.r;
@@ -10,9 +17,7 @@ function Torus() {
       });
    }
    this.createMesh = function() {
-      var r = this.r;
-      this.meshBounds = [[-1-r,-1-r], [1+r,1+r]];
-      return new THREE.Mesh(torusGeometry(r, 40,40), this.shaderMaterial());
+      return new THREE.Mesh(torusGeometry(this.r, 40, 40), this.shaderMaterial());
    }
 }
 Torus.prototype = new Sketch;
