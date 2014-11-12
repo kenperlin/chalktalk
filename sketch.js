@@ -861,6 +861,10 @@
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
+      this.setMaterialRGB = function(rgb) {
+         this.mesh.material.setUniform('ambient' , [0.025 * rgb[0], 0.025 * rgb[1], 0.025 * rgb[2]]);
+         this.mesh.material.setUniform('diffuse' , [0.2   * rgb[0], 0.2   * rgb[1], 0.2   * rgb[2]]);
+      }
       this._updateMesh = function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
 	    if (this.vertexShader === undefined)
@@ -906,10 +910,9 @@
 	       var R = rgb[0] / 255;
 	       var G = rgb[1] / 255;
 	       var B = rgb[2] / 255;
-	       this.mesh.material.setUniform('ambient' , [0.025 * R, 0.025 * G, 0.025 * B]);
-	       this.mesh.material.setUniform('diffuse' , [0.2   * R, 0.2   * G, 0.2   * B]);
-
+	       this.setMaterialRGB([R,G,B]);
 	       this.meshColorId = this.colorId;
+
 	    }
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
