@@ -861,10 +861,6 @@
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
-      this.setMaterialRGB = function(rgb) {
-         this.mesh.material.setUniform('ambient' , [0.025 * rgb[0], 0.025 * rgb[1], 0.025 * rgb[2]]);
-         this.mesh.material.setUniform('diffuse' , [0.2   * rgb[0], 0.2   * rgb[1], 0.2   * rgb[2]]);
-      }
       this._updateMesh = function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
 	    if (this.vertexShader === undefined)
@@ -900,20 +896,35 @@
             this.mesh = this.createMesh();
 	    root.add(this.mesh);
 	    this.is3D = true;
+
+	    // DEFAULT VALUES FOR PHONG COEFFICIENTS.
+
+	    this._ambient = [.025,.025,.025];
+	    this._diffuse = [.200,.200,.200];
+	    this._specular = [.5,.5,.5,10];
          }
 	 if (this.mesh !== undefined) {
 
 	    // UPDATE MESH COLOR IF NEEDED.
 
+	    if (this.ambient  === undefined) this.ambient = this._ambient;
+	    if (this.diffuse  === undefined) this.diffuse = this._diffuse;
+	    if (this.specular === undefined) this.specular = this._specular;
+
 	    if (this.meshColorId !== this.colorId) {
 	       var rgb = paletteRGB[this.colorId];
-	       var R = rgb[0] / 255;
-	       var G = rgb[1] / 255;
-	       var B = rgb[2] / 255;
-	       this.setMaterialRGB([R,G,B]);
+	       this.ambient = [0.025 * rgb[0] / 255, 0.025 * rgb[1] / 255, 0.025 * rgb[2] / 255];
+	       this.diffuse = [0.2   * rgb[0] / 255, 0.2   * rgb[1] / 255, 0.2   * rgb[2] / 255];
 	       this.meshColorId = this.colorId;
-
 	    }
+
+            if (this.ambient  != this._ambient ) this.mesh.material.setUniform('ambient' , this.ambient);
+            if (this.diffuse  != this._diffuse ) this.mesh.material.setUniform('diffuse' , this.diffuse);
+            if (this.specular != this._specular) this.mesh.material.setUniform('specular', this.specular);
+
+	    this._ambient  = this.ambient;
+	    this._diffuse  = this.diffuse;
+	    this._specular = this.specular;
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 

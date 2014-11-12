@@ -6,8 +6,6 @@ function C2S() {
       this.duringSketch(function() {
          mCurve(makeOval(-1,-1,2,2,20,-PI/2,3*PI/2));
       });
-      if (this.mesh !== undefined)
-         this.setMaterialRGB([.1,.2,.3]);
    }
 
    this.createMesh = function() {
