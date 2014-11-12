@@ -863,7 +863,6 @@
       }
       this.updateMesh = function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
-
 	    if (this.vertexShader === undefined)
 	       this.vertexShader = defaultVertexShader;
 
@@ -872,8 +871,6 @@
 
             this.shaderMaterial = function() {
 	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
-	       material.setUniform('ambient' , [.025,.025,.025]);
-	       material.setUniform('diffuse' , [.2,.2,.2]);
 	       material.setUniform('specular', [.5,.5,.5,10]);
 	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
 	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
@@ -899,6 +896,19 @@
 	    this.is3D = true;
          }
 	 if (this.mesh !== undefined) {
+
+	    // UPDATE MESH COLOR IF NEEDED.
+
+	    if (this.meshColorId !== this.colorId) {
+	       var rgb = paletteRGB[this.colorId];
+	       var R = rgb[0] / 255;
+	       var G = rgb[1] / 255;
+	       var B = rgb[2] / 255;
+	       this.mesh.material.setUniform('ambient' , [0.025 * R, 0.025 * G, 0.025 * B]);
+	       this.mesh.material.setUniform('diffuse' , [0.2   * R, 0.2   * G, 0.2   * B]);
+
+	       this.meshColorId = this.colorId;
+	    }
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 

@@ -679,6 +679,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
        updateF = function() {
 	  var text = codeTextArea.value;
 	  if (isCodeScript()) {
+
+	     // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
+	     // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
+
              var i = text.indexOf('{');
              var j = text.lastIndexOf('}');
 	     codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));

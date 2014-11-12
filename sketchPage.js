@@ -541,8 +541,9 @@ var sketchToDelete = null;
                bgActionEnd(x, y);
                bgClickCount = 0;
             }
-            else
+            else {
                bgActionUp(x, y);
+            }
             return;
          }
 
