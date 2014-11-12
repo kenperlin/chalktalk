@@ -1,17 +1,20 @@
-function C2S() {
-   this.labels = "c2s".split(' ');
+function Torus() {
+   this.labels = "torus".split(' ');
+   this.r = .4;
 
    this.render = function() {
       this.duringSketch(function() {
-         mCurve(makeOval(-1,-1,2,2,20,-PI/2,3*PI/2));
+         var r = this.r;
+         mCurve(makeOval(-1-r, -1-r, 2+2*r, 2+2*r, 20, -PI/2, 3*PI/2));
+         mCurve(makeOval(-1+r, -1+r, 2-2*r, 2-2*r, 20, -PI/2, 3*PI/2));
       });
-      //this.setUniform('ambient', [.2,0,0]);
-      //this.setUniform('diffuse', [.5,0,0]);
    }
    this.createMesh = function() {
-      return new THREE.Mesh(globeGeometry(80,40), this.shaderMaterial());
+      var r = this.r;
+      this.meshBounds = [[-1-r,-1-r], [1+r,1+r]];
+      return new THREE.Mesh(torusGeometry(r, 40,40), this.shaderMaterial());
    }
 }
-C2S.prototype = new Sketch;
-addSketchType("C2S");
+Torus.prototype = new Sketch;
+addSketchType("Torus");
 
