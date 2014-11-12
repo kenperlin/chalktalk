@@ -943,6 +943,9 @@
                this.setUniform('alpha', alpha);
             }
 
+	    if (this.update !== undefined)
+	       this.update();
+
 	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
 
 	    this.extendBounds(this.meshBounds);
