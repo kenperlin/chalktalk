@@ -741,7 +741,7 @@ var sketchToDelete = null;
 
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
-            if (bgClickCount == 0 && sk().code != null) {
+            if (bgClickCount == 0 && sk().isClick === undefined && sk().code != null) {
                if (isCodeWidget && codeSketch != sk())
                   toggleCodeWidget();
                codeSketch = sk();
