@@ -87,7 +87,7 @@
 
 	 mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
 
-	 mat.perspective(0, 0, -width()/2);
+	 mat.perspective(0, 0, -7 * height() / s);
 
 	 var yy = min(1, 4 * this.rY * this.rY);
 	 mat.rotateX(PI * -this.rY);
