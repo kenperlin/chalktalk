@@ -92,7 +92,7 @@
 	 var yy = min(1, 4 * this.rY * this.rY);
 	 mat.rotateX(PI * -this.rY);
 	 mat.rotateY(PI *  this.rX * (1 - yy));
-	 mat.rotateZ(PI *  this.rX * yy);
+	 mat.rotateZ(PI * -this.rX * yy);
 
 	 mat.scale(D / s);
       }
