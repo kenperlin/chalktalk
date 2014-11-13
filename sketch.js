@@ -879,8 +879,8 @@
 
 	    this.updateVertexShader = function() {
 	       if (this.vertexShader != codeTextArea.value) {
-                  var isValid = isValidVertexShader(formVertexShader(codeTextArea.value));
-                  /*if (isValid)*/ {
+                  var isValid = isValidVertexShader(formSyntaxCheckVertexShader(codeTextArea.value));
+                  if (isValid) {
                      this.vertexShader = codeTextArea.value;
                      this.mesh.material = this.shaderMaterial();
                   }

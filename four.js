@@ -484,13 +484,18 @@
    }
 
 function gl() { return renderer.context; }
-function isValidVertexShader  (string) { return isValidShader(gl().VERTEX_SHADER  , string); }
+function isValidVertexShader  (string) {
+   return isValidShader(gl().VERTEX_SHADER,
+   string);
+}
 function isValidFragmentShader(string) { return isValidShader(gl().FRAGMENT_SHADER, string); }
 function isValidShader(type, string) {
    var shader = gl().createShader(type);
    gl().shaderSource(shader, string);
    gl().compileShader(shader);
    var status = gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+   if (! status)
+      console.log(gl().getShaderInfoLog(shader));
    return status;
 };
 
@@ -527,6 +532,11 @@ function addUniforms(material, string) {
    }
 }
 
+// PREPEND THE HEADER OF PREDEFINED THINGS TO SYNTAX CHECK A VERTEX SHADER:
+function formSyntaxCheckVertexShader(string) {
+   return syntaxCheckVertexShaderHeader.concat(string);
+}
+
 // PREPEND THE HEADER OF PREDEFINED THINGS TO A VERTEX SHADER:
 function formVertexShader(string) {
    return vertexShaderHeader.concat(string);
@@ -556,14 +566,10 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
 var defaultVertexShader = [
-    'varying float dx;'
-   ,'varying float dy;'
    ,'varying vec3 vPosition;'
    ,'varying vec3 vNormal;'
    ,'float displace(vec3 p) { return 0.0 /* * noise(3.0*p + time*vec3(0.0,-1.0,0.0)) */; }'
    ,'void main() {'
-   ,'   dx = 2. * uv.x - 1.;'
-   ,'   dy = 2. * uv.y - 1.;'
    ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
    ,'   vPosition = position*.03;'
    ,'   float _p0 = displace(position);'
@@ -653,6 +659,18 @@ var sharedHeader = [
 ,'   }'
 ,'   return f;'
 ,'}'
+].join('\n');
+
+// THE SYNTAX CHECKING VERSION ALSO INCLUDES VARS THAT WILL BE DECLARED BY THREE.JS.
+
+var syntaxCheckVertexShaderHeader = [
+ sharedHeader
+,'uniform mat4  modelViewMatrix;'
+,'uniform mat4  projectionMatrix;'
+,'varying vec3  normal;'
+,'varying vec3  position;'
+,'uniform float time;'
+,''
 ].join('\n');
 
 var vertexShaderHeader = [
