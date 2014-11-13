@@ -20,7 +20,7 @@ function Torus() {
    }
 
    this.createMesh = function() {
-      return new THREE.Mesh(torusGeometry(this.r, 40, 40), this.shaderMaterial());
+      return new THREE.Mesh(torusGeometry(this.r, 80, 80), this.shaderMaterial());
    }
 }
 Torus.prototype = new Sketch;

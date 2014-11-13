@@ -6,6 +6,10 @@ function Tactonic() {
          mLine([-1,1],[1,1]);
          mLine([0,1],[0,-1]);
       });
+
+      this.afterSketch(function() {
+         mClosedCurve([ [-1.1,-1.1], [1.1,-1.1], [1.1,1.1], [-1.1,1.1] ]);
+      });
    }
 
    this.fragmentShader = [

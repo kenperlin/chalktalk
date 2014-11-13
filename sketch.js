@@ -87,7 +87,7 @@
 
 	 mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
 
-	 mat.perspective(0, 0, -7 * height() / s);
+	 //mat.perspective(0, 0, -7 * height() / s);
 
 	 var yy = min(1, 4 * this.rY * this.rY);
 	 mat.rotateX(PI * -this.rY);
@@ -877,6 +877,16 @@
 	       return material;
 	    }
 
+	    this.updateVertexShader = function() {
+	       if (this.vertexShader != codeTextArea.value) {
+                  var isValid = isValidVertexShader(formVertexShader(codeTextArea.value));
+                  /*if (isValid)*/ {
+                     this.vertexShader = codeTextArea.value;
+                     this.mesh.material = this.shaderMaterial();
+                  }
+               }
+	    }
+
 	    this.updateFragmentShader = function() {
 	       if (this.fragmentShader != codeTextArea.value) {
                   var isValid = isValidFragmentShader(formFragmentShader(codeTextArea.value));
@@ -889,6 +899,7 @@
 
 	    if (this.code == null)
 	       this.code = [];
+            this.code.push(["vertexShader", this.vertexShader, this.updateVertexShader]);
             this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
 
             if (this.meshBounds == undefined)
@@ -899,17 +910,15 @@
 
 	    // DEFAULT VALUES FOR PHONG COEFFICIENTS.
 
-	    this._ambient = [.025,.025,.025];
-	    this._diffuse = [.200,.200,.200];
-	    this._specular = [.5,.5,.5,10];
+	    this.meshColorId = this.colorId;
          }
 	 if (this.mesh !== undefined) {
 
 	    // UPDATE MESH COLOR IF NEEDED.
 
-	    if (this.ambient  === undefined) this.ambient = this._ambient;
-	    if (this.diffuse  === undefined) this.diffuse = this._diffuse;
-	    if (this.specular === undefined) this.specular = this._specular;
+	    if (this.ambient  === undefined) this.ambient = [.025,.025,.025];
+	    if (this.diffuse  === undefined) this.diffuse = [.2,.2,.2];
+	    if (this.specular === undefined) this.specular = [.5,.5,.5,10];
 
 	    if (this.meshColorId !== this.colorId) {
 	       var rgb = paletteRGB[this.colorId];
@@ -918,13 +927,9 @@
 	       this.meshColorId = this.colorId;
 	    }
 
-            if (this.ambient  != this._ambient ) this.mesh.material.setUniform('ambient' , this.ambient);
-            if (this.diffuse  != this._diffuse ) this.mesh.material.setUniform('diffuse' , this.diffuse);
-            if (this.specular != this._specular) this.mesh.material.setUniform('specular', this.specular);
-
-	    this._ambient  = this.ambient;
-	    this._diffuse  = this.diffuse;
-	    this._specular = this.specular;
+            this.mesh.material.setUniform('ambient' , this.ambient);
+            this.mesh.material.setUniform('diffuse' , this.diffuse);
+            this.mesh.material.setUniform('specular', this.specular);
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 

@@ -560,7 +560,7 @@ var defaultVertexShader = [
    ,'varying float dy;'
    ,'varying vec3 vPosition;'
    ,'varying vec3 vNormal;'
-   ,'float displace(vec3 p) { return 0. /* 0.1 * noise(3. * p + vec3(0.,-time,0.)) */; }'
+   ,'float displace(vec3 p) { return 0.0 /* * noise(3.0*p + time*vec3(0.0,-1.0,0.0)) */; }'
    ,'void main() {'
    ,'   dx = 2. * uv.x - 1.;'
    ,'   dy = 2. * uv.y - 1.;'
@@ -658,6 +658,7 @@ var sharedHeader = [
 var vertexShaderHeader = [
  sharedHeader
 ,'uniform float time;'
+,''
 ].join('\n');
 
 var fragmentShaderHeader = [
@@ -676,6 +677,7 @@ var fragmentShaderHeader = [
 ,'uniform float x;'
 ,'uniform float y;'
 ,'uniform float z;'
+,''
 ].join('\n');
 
    function createVisibleEdgesMesh(veds) {
