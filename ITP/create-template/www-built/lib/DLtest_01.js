@@ -1,0 +1,1 @@
+define(["core"],function(){var e=require("core");return e});

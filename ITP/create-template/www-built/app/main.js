@@ -1,0 +1,1 @@
+define(["require","core","./messages","print","DLtest_01","utility/mat"],function(e){var t=e("core"),n=e("./messages"),r=e("print");e("DLtest_01");var i=e("utility/mat");console.log(t),r(n.getHello()),r(t.version())});
