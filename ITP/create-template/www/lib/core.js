@@ -1,7 +1,11 @@
 define(function () {
-    return {
-        version: function () {
-            return 'v.01';
-        }
-    };
+
+	var CT = function(){
+
+		this._version = 'v.001';
+
+	}
+
+    return CT;
+
 });

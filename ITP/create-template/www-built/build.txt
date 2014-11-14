@@ -2,9 +2,5 @@
 app.js
 ----------------
 lib/core.js
-app/messages.js
-lib/print.js
-lib/DLtest_01.js
-lib/utility/mat.js
 app/main.js
 app.js
