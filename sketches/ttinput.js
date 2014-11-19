@@ -72,13 +72,22 @@ function TTInput()
 
    	this.sendValues = function()
    	{
-   		var max = 0;
-   		for (var i=0; i<ttForce.length; i++) {
-   			if (ttForce[i] > max) {
-   				max = ttForce[i];
-   			}
-   		}
-		this.outValue[0] = max;
+   		var frame = {};
+   		frame.width = 32;	// x elements
+   		frame.height = 32;	// y elements
+   		frame.physical_width = 100;
+   		frame.physical_height = 100;
+   		frame.timestamp = Date.now();
+   		frame.data = ttForce;
+
+   		// var max = 0;
+   		// for (var i=0; i<ttForce.length; i++) {
+   			// if (ttForce[i] > max) {
+   				// max = ttForce[i];
+   			// }
+   		// }
+
+		this.outValue[0] = frame;
    	}
 }
 TTInput.prototype = new Sketch;
@@ -190,7 +199,6 @@ InformTable.prototype.applyHeights = function(heights)
 			continue;
 		}
 
-		// cube.position.z += (heights[i]*MAX_HEIGHT - cube.position.z) * (1-this.dampSpeed) + 0.03;
 		cube.scale.z += 0.1 + (heights[i] - cube.scale.z) * (1-this.dampSpeed);
 		cube.position.z = (cube.scale.z * MAX_HEIGHT) / 2;
 
