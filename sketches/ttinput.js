@@ -1,6 +1,6 @@
-function Gal()
+function TTInput()
 {
-	this.labels = "gal".split(' ');
+	this.labels = "ttinput".split(' ');
 	this.myText = "Tactonic";
 
 	this.recordBtn = new Button([-0.9, -0.9], [-0.7, -0.7], function() {
@@ -61,7 +61,7 @@ function Gal()
     this.createMesh = function() {
     	this.table = new InformTable(32, 32);
     	this.table.init();
-    	this.table.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI/8);
+    	this.table.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI/20);
 
     	this.mesh = new THREE.Mesh();
 		this.mesh.setMaterial(this.shaderMaterial());
@@ -81,8 +81,8 @@ function Gal()
 		this.outValue[0] = max;
    	}
 }
-Gal.prototype = new Sketch;
-addSketchType("Gal");
+TTInput.prototype = new Sketch;
+addSketchType("TTInput");
 
 
 function Button(c1, c2, onclick)
@@ -154,8 +154,9 @@ InformTable.prototype.init = function()
 {
 	// create the big table
 	var geo = new THREE.CubeGeometry(this.cols*(this.squareSize + this.spacing) + this.spacing*2,
-			this.rows*(this.squareSize + this.spacing) + this.spacing*2, MAX_HEIGHT-0.1);
+			this.rows*(this.squareSize + this.spacing) + this.spacing*2, 0.1);//MAX_HEIGHT-0.01);
 	this.table = new THREE.Mesh(geo, this.greyMaterial);
+	// this.table.position.set(0, 0, -2);
 	this.add(this.table);
 
 	// create the pixels
@@ -170,7 +171,7 @@ InformTable.prototype.init = function()
 		for (var x=0; x<this.cols; x++)
 		{
 			var cube = new THREE.Mesh(geo, this.whiteMaterial);
-			cube.position.set(topLeft.x + x*(this.squareSize + this.spacing), topLeft.y + y*(this.squareSize + this.spacing), 0);
+			cube.position.set(topLeft.x + x*(this.squareSize + this.spacing), topLeft.y + y*(this.squareSize + this.spacing), 0.1);
 			this.cubes[index++] = cube;
 			this.table.add(cube);
 			cube.castShadow = true;
@@ -189,7 +190,9 @@ InformTable.prototype.applyHeights = function(heights)
 			continue;
 		}
 
-		cube.position.z += (heights[i]*MAX_HEIGHT - cube.position.z) * (1-this.dampSpeed);
+		// cube.position.z += (heights[i]*MAX_HEIGHT - cube.position.z) * (1-this.dampSpeed) + 0.03;
+		cube.scale.z += 0.1 + (heights[i] - cube.scale.z) * (1-this.dampSpeed);
+		cube.position.z = (cube.scale.z * MAX_HEIGHT) / 2;
 
 		if (this.showClipping) {
 			if (heights[i] == 0 || heights[i] == MAX_HEIGHT) {
