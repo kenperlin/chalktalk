@@ -2,7 +2,7 @@ define(function () {
 
 		// var CT = require('core');
 
-		var CT = require('testObject');
+		var CT = require('objects/testObject');
 
 		CT.subObj = function () {
 

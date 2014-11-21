@@ -1,4 +1,6 @@
-define(function(){
+define(function(require){
+
+  'use strict';
 
 	var CT = require('core');
 
