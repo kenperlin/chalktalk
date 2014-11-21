@@ -1,0 +1,1 @@
+define("core",[],function(){return{version:function(){return"v.01"}}}),define("app/main",["require","core"],function(e){var t=e("core");console.log(t)}),requirejs.config({baseUrl:"lib",paths:{app:"../app"}}),requirejs(["app/main"]),define("app",function(){});

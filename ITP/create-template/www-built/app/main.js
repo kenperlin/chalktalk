@@ -1,0 +1,1 @@
+define(["require","core"],function(e){var t=e("core");console.log(t)});

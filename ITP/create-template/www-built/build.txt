@@ -1,0 +1,6 @@
+
+app.js
+----------------
+lib/core.js
+app/main.js
+app.js
