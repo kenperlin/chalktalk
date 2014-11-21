@@ -14,6 +14,10 @@ define(function (require) {
 
     _privateVar: 36,
 
+    /**
+     * documentation
+     * @constructor {object}
+     */
     constructor: CT.obj,
 
     get privateVar() {

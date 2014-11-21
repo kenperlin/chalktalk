@@ -46,11 +46,24 @@ module.exports = function(grunt) {
         tasks: ['requirejs'],
         options: { livereload: true }
       },
+    },
+
+    shell: {  
+      build_docs: {
+          command: "./node_modules/.bin/jsdoc build/chalktalk.js --destination ./docs"
+      }
     }
 
   });
 
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-shell');
+
+  grunt.registerTask('build',['requirejs','shell:build_docs']);
+  // grunt.loadNpmTasks('grunt-contrib-grunt-shell');
+
+  // require('load-grunt-shell')(grunt);
+  // grunt.registerTask('default', ['shell:build_docs']);
 
 };
