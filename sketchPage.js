@@ -541,8 +541,9 @@ var sketchToDelete = null;
                bgActionEnd(x, y);
                bgClickCount = 0;
             }
-            else
+            else {
                bgActionUp(x, y);
+            }
             return;
          }
 
@@ -740,7 +741,7 @@ var sketchToDelete = null;
 
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
-            if (bgClickCount == 0 && sk().code != null) {
+            if (bgClickCount == 0 && sk().onClick === undefined && sk().code != null) {
                if (isCodeWidget && codeSketch != sk())
                   toggleCodeWidget();
                codeSketch = sk();
@@ -1375,9 +1376,6 @@ var sketchToDelete = null;
          case 'e':
             toggleCodeWidget();
             break;
-         case 'f':
-	    console.log(tree_obj.vertices.length + " " + tree_obj.faces.length);
-            break;
          case 'g':
             this.toggleGroup();
             break;
@@ -1721,7 +1719,15 @@ var sketchToDelete = null;
             }
 
             if (sk().sketchTrace != null && sk().sketchState != 'finished') {
-               morphSketchToGlyphSketch();
+	       if (sk().createMesh !== undefined) {
+	          var alpha = 1 - sk().glyphTransition;
+		  if (alpha > 0) {
+		     _g.globalAlpha = alpha * alpha;
+                     morphSketchToGlyphSketch();
+		  }
+               }
+	       else
+                  morphSketchToGlyphSketch();
 
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
                sk().glyphTransition = min(1, sk().glyphTransition + rate * elapsed);

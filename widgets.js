@@ -665,6 +665,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
 ////////////////////////////// CODE TEXT EDITOR //////////////////////////////////
 
+   function innerCode(src) {
+   }
+
    var codeElement,
        codeSelector,
        codeTextArea,
@@ -674,12 +677,27 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           updateF();
        },
        updateF = function() {
-          codeSketch.evalCode(codeTextArea.value);
+	  var text = codeTextArea.value;
 	  if (isCodeScript()) {
+
+	     // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
+	     // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
+
+             var i = text.indexOf('{');
+             var j = text.lastIndexOf('}');
+	     codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
+	     codeSketch._temporaryFunction();
 	  }
           else if (code() != null) {
-             code()[codeSelector.selectedIndex][1] = codeTextArea.value;
-             codeSketch.selectedIndex = codeSelector.selectedIndex;
+             var index = codeSelector.selectedIndex;
+             code()[index][1] = text;
+             codeSketch.selectedIndex = index;
+	     if (code()[index][2] !== undefined) {
+	        codeSketch._temporaryFunction = code()[index][2];
+	        codeSketch._temporaryFunction();
+             }
+	     else
+                codeSketch.evalCode(text);
           }
        };
 

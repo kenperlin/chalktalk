@@ -1,22 +1,16 @@
 This web project has the following setup:
 
-* www/ - the web assets for the project
-    * index.html - the entry point into the app.
-    * app.js - the top-level config script used by index.html
-    * app/ - the directory to store project-specific scripts.
-    * lib/ - the directory to hold third party scripts.
-* tools/ - the build tools to optimize the project.
+* build/ - contains output files generated with grunt chalktalk.js and chalktalk.min.js
 
-To optimize, run:
+* deps/ - the directory to hold third party scripts.
 
-    node tools/r.js -o tools/build.js
+* html/ - example and test index.html files. One loads with require.js, and another loads without require.
 
-That build command creates an optimized version of the project in a
-**www-built** directory. The app.js file will be optimized to include
-all of its dependencies.
+* src/ - our source files for the project
+    * app.js - the top-level config script, used by require.js
 
-For more information on the optimizer:
-http://requirejs.org/docs/optimization.html
-
-For more information on using requirejs:
-http://requirejs.org/docs/api.html
+* gruntfile.js - defines grunt routines
+    * first, from the command line, type ```npm install```. This generated a node_modules folder that includes all the grunt modules.
+    * If you have not already installed the Grunt Command Line Interface (i.e. ```which grunt``` does not give a path to grunt), then install it with ```npm install -g grunt-cli```.
+        * ```grunt requirejs``` --> builds chalktalk.js and chalktalk.min.js
+        * ```grunt watch``` --> builds every time you change a file

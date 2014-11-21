@@ -165,9 +165,9 @@
          var x = this._x(a), y = this._y(a), z = this._z(a), w = this._w(a);
          var X = this._x(t), Y = this._y(t), Z = this._z(t), W = this._w(t);
 
-         return [this._d(x, X), this._d(x, Y), this._d(x, Z), this._d(x, W), 
-	         this._d(y, X), this._d(y, Y), this._d(y, Z), this._d(y, W), 
-		 this._d(z, X), this._d(z, Y), this._d(z, Z), this._d(z, W), 
+         return [this._d(x, X), this._d(x, Y), this._d(x, Z), this._d(x, W),
+	         this._d(y, X), this._d(y, Y), this._d(y, Z), this._d(y, W),
+		 this._d(z, X), this._d(z, Y), this._d(z, Z), this._d(z, W),
 		 this._d(w, X), this._d(w, Y), this._d(w, Z), this._d(w, W)];
       };
       this._mv = function(m,v) {
@@ -354,6 +354,13 @@
       var P = m.transform(p);
       text(str,P[0],P[1],ax,ay);
    };
+   function mDrawRect(c1, c2) {
+      mClosedCurve([c1, [c2[0], c1[1]], c2, [c1[0], c2[1]]]);
+   };
+   function mFillRect(c1, c2) {
+      mFillCurve([c1, [c2[0], c1[1]], c2, [c1[0], c2[1]], c1]);
+   };
+
 
    var m = new M4();
 

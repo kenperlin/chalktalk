@@ -1,4 +1,7 @@
 
+   // Do not load any of the following sketches.
+   var ignoredSketches = 'reflect'.split(' ');
+
    // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
@@ -13,7 +16,6 @@
    var isAltPressed = false;
    var isBottomGesture = false;
    var isExpertMode = true;
-   var isMakingGlyph = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
@@ -408,7 +410,7 @@
       if (! isk())
          return;
 
-      if (isMakingGlyph) {
+      if (sk().isMakingGlyph) {
          if (! (sk() instanceof Sketch2D))
             y = -y;
          buildTrace(glyphTrace, x, y, isLine);
@@ -601,8 +603,26 @@
          lsRequest.onloadend = function () {
             if (lsRequest.responseText != "") {
                var ls = lsRequest.responseText.trim().split("\n");
-               for (var i = 0; i < ls.length; i++)
-                  importSketch(ls[i]);
+               for (var n = 0; n < ls.length; n++) {
+	          var filename = ls[n];
+
+		  // Ignore files with no extension.
+	          var iDot = filename.indexOf('.');
+		  if (iDot < 0)
+		     continue;
+
+		  // Ignore files that do not have the .js extension.
+		  var extension = filename.substring(iDot, filename.length);
+		  if (extension !== '.js')
+		     continue;
+
+		  // Ignore the ignoredSketches.
+		  var name = filename.substring(0, iDot);
+		  if (getIndex(ignoredSketches, name) >= 0)
+		     continue;
+
+                  importSketch(filename);
+               }
             }
          }
          lsRequest.send();
@@ -612,13 +632,6 @@
    var sketchScript = {};
 
    function importSketch(filename) {
-
-      // IF A FILE IS CURRENTLY BEING EDITED, DON'T TRY TO LOAD ITS SWAP FILE.
-
-      var len = filename.length;
-      if (filename.substring(len-3, len) == "swp")
-         return;
-
       var sketchRequest = new XMLHttpRequest();
       sketchRequest.open("GET", "sketches/" + filename);
       sketchRequest.filename = filename;
@@ -650,6 +663,14 @@
    // MUST BE CALLED WHEN WEB PAGE LOADS.
 
    function gStart() {
+
+/*
+var harry = { fred: 10 };
+console.log(harry.fred);
+harry._foobar = function() { this.fred = 20; }
+eval('harry._foobar()');
+console.log(harry.fred);
+*/
 
       preLoadObjs();
 
@@ -956,9 +977,9 @@
          // CREATE GLYPH SHAPE INFO.
 
          glyphTrace = [];
-         isMakingGlyph = true;
+         sk().isMakingGlyph = true;
          sk().renderWrapper(0.02);
-         isMakingGlyph = false;
+         sk().isMakingGlyph = undefined;
 
          // REGISTER THE GLYPH.
 
@@ -2110,8 +2131,8 @@ console.log(lo + " " + hi);
 
          // PAN 3D OBJECTS TOO
 
-         root.position.x =  _g.panX / (0.391 * height());
-         root.position.y = -_g.panY / (0.391 * height());
+         root.position.x =  _g.panX / (0.3819 * height());
+         root.position.y = -_g.panY / (0.3819 * height());
 
          if (sketchPage.isWhiteboard) {
             color(backgroundColor);
@@ -2858,6 +2879,9 @@ console.log(lo + " " + hi);
 
    function deleteSketchOnly(sketch) {
 
+      if (sketch.mesh !== undefined)
+         root.remove(sketch.mesh);
+
       if (this.visibleEdgesMesh !== undefined)
          sketchPage.scene.remove(this.visibleEdgesMesh);
 
@@ -2972,6 +2996,8 @@ console.log(lo + " " + hi);
       }
 
       addSketch(s.clone());
+      if (sk().createMesh !== undefined)
+         sk().mesh = undefined;
       sk().sketchProgress = 1;
       sk().sketchState = 'finished';
 
@@ -3183,7 +3209,6 @@ console.log(lo + " " + hi);
                          this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
             this.mesh.setOpacity(sCurve(this.alpha));
-            console.log(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)
                this.glyphSketch = null;
@@ -3305,12 +3330,6 @@ console.log(lo + " " + hi);
          }
 */
       }
-
-      this.setUniform = function(name, val) {
-         if (isDef(this.mesh.material.uniforms[name]))
-            this.mesh.material.uniforms[name].value = val;
-      }
-      this.mesh = null;
    }
    GeometrySketch.prototype = new SimpleSketch;
 
@@ -3465,7 +3484,9 @@ console.log(lo + " " + hi);
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
 
-         S.setUniform('alpha', (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1));
+	 var alpha = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
+	 mesh.material.transparent = alpha < 1;
+         S.setUniform('alpha', alpha);
 
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 

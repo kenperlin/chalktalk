@@ -3,7 +3,7 @@
 
 // CHECKING FOR SYNTAX ERRORS IN JAVASCRIPT CODE.
 
-    function findSyntaxError( code ) {
+   function findSyntaxError( code ) {
       var error = [];
       var save_onerror = onerror;
       onerror = function(errorMsg, url, lineNumber) {
@@ -64,12 +64,12 @@
 
       if (nDigits !== undefined && nd > 0) {
          var i = str.indexOf(".");
-	 if (i < 0) {
-	    str += ".";
-	    i = str.length - 1;
+   if (i < 0) {
+      str += ".";
+      i = str.length - 1;
          }
          while (str.length - i < nd + 1)
-	    str += "0";
+      str += "0";
       }
 
       return (v < 0 ? "-" : "") + str;
@@ -544,7 +544,7 @@
 
    function getIndex(arr, obj) {
       var i = arr.length;
-      while (--i >= 0 && arr[i] != obj) ;
+      while (--i >= 0 && arr[i] !== obj) ;
       return i;
    }
 
@@ -571,15 +571,15 @@
    function findConnectedComponents(src, nc, dst, f0) {
       function findConnectedComponent(i, n) {
          if (src[i] < f0)
-	    return;
+      return;
 
          dst[i] = n;
          var c = i % nc;
          var r = i / nc;
-	 if (c > 0    && dst[i - 1 ] == 0) findConnectedComponent(i - 1 , n);
-	 if (c < nc-1 && dst[i + 1 ] == 0) findConnectedComponent(i + 1 , n);
-	 if (r > 0    && dst[i - nc] == 0) findConnectedComponent(i - nc, n);
-	 if (r < nr-1 && dst[i + nc] == 0) findConnectedComponent(i + nc, n);
+   if (c > 0    && dst[i - 1 ] == 0) findConnectedComponent(i - 1 , n);
+   if (c < nc-1 && dst[i + 1 ] == 0) findConnectedComponent(i + 1 , n);
+   if (r > 0    && dst[i - nc] == 0) findConnectedComponent(i - nc, n);
+   if (r < nr-1 && dst[i + nc] == 0) findConnectedComponent(i + nc, n);
       }
 
       if (f0 === undefined)
@@ -593,7 +593,7 @@
       var n = 0;
       for (var i = 0 ; i < src.length ; i++)
          if (src[i] >= f0 && dst[i] == 0)
-	    findConnectedComponent(i, ++n);
+      findConnectedComponent(i, ++n);
    }
 
    function imageEnlarge(src, dst) {
@@ -981,9 +981,9 @@
 
    function computeCurvature(A, M, B) {
       if (M === undefined) {
-	 M = A[floor(A.length / 2)];
-	 B = A[A.length - 1];
-	 A = A[0];
+   M = A[floor(A.length / 2)];
+   B = A[A.length - 1];
+   A = A[0];
       }
       var dx = B[0] - A[0];
       var dy = B[1] - A[1];
@@ -1010,7 +1010,7 @@
       var dst = [], p = null;
       for (var i = 0 ; i < curve.length - 1 ; i++)
          if ((p = lineIntersectLine(curve[i], curve[i+1], a, b)) != null)
-	    dst.push(p);
+      dst.push(p);
       return dst;
    }
 

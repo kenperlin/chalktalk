@@ -1,7 +1,15 @@
+function S2C() {
+   this.labels = "s2c".split(' ');
 
-   function S2C() {
-      this.initSketchTo3D("s2c", [ [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ] ], function() { return root.addCube(); });
+   this.render = function() {
+      this.duringSketch(function() {
+         mCurve([ [-1,-1],[1,-1],[1,1],[-1,1],[-1,-1] ]);
+      });
    }
-   S2C.prototype = new SketchTo3D;
-   addSketchType("S2C");
+   this.createMesh = function() {
+      return new THREE.Mesh(cubeGeometry(), this.shaderMaterial());
+   }
+}
+S2C.prototype = new Sketch;
+addSketchType("S2C");
 

@@ -7,6 +7,30 @@
       renderer.camera.updateProjectionMatrix();
    });
 
+   function toVec(src) {
+      switch (src.length) {
+      default: return new THREE.Vector2(src[0],src[1]);
+      case 3 : return new THREE.Vector3(src[0],src[1],src[2]);
+      case 4 : return new THREE.Vector4(src[0],src[1],src[2],src[3]);
+      }
+   }
+
+   THREE.Material.prototype.setUniform = function(name, src) {
+      if (this.uniforms[name] !== undefined) {
+         var val = src;
+         if (Array.isArray(src)) {
+            if (! Array.isArray(src[0]))
+               val = toVec(src);
+            else {
+               val = [];
+               for (var i = 0 ; i < src.length ; i++)
+                  val.push(toVec(src[i]));
+            }
+         }
+         this.uniforms[name].value = val;
+      }
+   }
+
    THREE.Object3D.prototype.setMaterial = function(material) {
       if (isShowingMeshEdges)
          material = bgMaterial();
@@ -49,12 +73,14 @@
       this.matrixWorldNeedsUpdate = true;
    }
 
-   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
-   function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
-   function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
-   function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
+   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
    function globeGeometry(m,n, p0,p1, t0,t1) { return new THREE.SphereGeometry(1, m,n, p0,p1, t0,t1); }
+   function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
+   function nullGeometry() { return new THREE.Geometry(); }
+   function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
+   function planeGeometry(n) { return new THREE.PlaneGeometry(2,2,n,n); }
+   function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
@@ -91,6 +117,13 @@
 
    THREE.Object3D.prototype.addCube = function() {
       var geometry = cubeGeometry();
+      var mesh = new THREE.Mesh(geometry, bgMaterial());
+      this.add(mesh);
+      return mesh;
+   }
+
+   THREE.Object3D.prototype.addPlane = function() {
+      var geometry = planeGeometry();
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
@@ -136,7 +169,7 @@
    THREE.Object3D.prototype.findBoundsWorld = function(bb) {
       if (bb === undefined) {
          this.updateMatrixWorld();
-	 bb = [10000,10000,10000,-10000,-10000,-10000];
+         bb = [10000,10000,10000,-10000,-10000,-10000];
       }
       this.geometry.matrixWorld = this.matrixWorld;
       this.geometry.expandBoundsWorld(bb);
@@ -252,16 +285,16 @@
          var n0 = this.faces[edge[0]].viewNormal;
          var n1 = this.faces[edge[1]].viewNormal;
 
-	 if ((n0.z >= -0.0001 && n1.z <= 0.0001) ||
-	     (n0.z <= 0.0001 && n1.z >= -0.0001) || 
-	     (n0.dot(n1) < 0.5)) 
-	 {
-	     // console.log("v  dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
-	     visibleEdges.push(edge[2]);
-	 }
-	 else {
-	     // console.log("nv dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
-	 }
+         if ((n0.z >= -0.0001 && n1.z <= 0.0001) ||
+             (n0.z <= 0.0001 && n1.z >= -0.0001) || 
+             (n0.dot(n1) < 0.5)) 
+         {
+             // console.log("v  dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
+             visibleEdges.push(edge[2]);
+         }
+         else {
+             // console.log("nv dot = " + (n0.dot(n1).toFixed(6)) + ", " + n0.z.toFixed(6) + ", " + n1.z.toFixed(6)); 
+         }
       }
 
       // console.log("fve: hidden point count = " + ___hiddenpoint_count.toFixed(0));
@@ -296,10 +329,10 @@
 
    THREE.Geometry.prototype.isHiddenPoint = function(p) {
       for (var n = 0 ; n < this.faces.length ; n++)
-	  if (this.isPointHiddenByFace(p, n)) {
-	      ___hiddenpoint_count++;
-	      return true;
-	  }
+          if (this.isPointHiddenByFace(p, n)) {
+              ___hiddenpoint_count++;
+              return true;
+          }
 
       return false;
    }
@@ -307,8 +340,8 @@
    THREE.Geometry.prototype.isPointHiddenByFace = function(p, n) {
       var face = this.faces[n];
       return isPointHiddenByTriangle(p, this.vertexWorld(face.a),
-	                                this.vertexWorld(face.b),
-	                                this.vertexWorld(face.c));
+                                        this.vertexWorld(face.b),
+                                        this.vertexWorld(face.c));
    }
 
    // Find out whether point p is hidden by triangle a,b,c.
@@ -451,54 +484,76 @@
    }
 
 function gl() { return renderer.context; }
-function isValidVertexShader  (string) { return isValidShader(gl().VERTEX_SHADER  , string); }
+function isValidVertexShader  (string) {
+   return isValidShader(gl().VERTEX_SHADER,
+   string);
+}
 function isValidFragmentShader(string) { return isValidShader(gl().FRAGMENT_SHADER, string); }
 function isValidShader(type, string) {
-   string = "precision highp float;\n" + string;
    var shader = gl().createShader(type);
    gl().shaderSource(shader, string);
    gl().compileShader(shader);
-   return gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+   var status = gl().getShaderParameter(shader, gl().COMPILE_STATUS);
+   if (! status)
+      console.log(gl().getShaderInfoLog(shader));
+   return status;
 };
 
 function addUniforms(material, string) {
 
    // PARSE THE FRAGMENT SHADER CODE TO FIND CUSTOM UNIFORMS:
 
-   var typeInfo = "float f 0 vec3 v2 [0,0] vec3 v3 [0,0,0]".split(' ');
+   var typeInfo = "float f 0 vec2 v2 0 vec3 v3 0 vec4 v4 0".split(' ');
    var declarations = string.substring(0, string.indexOf("void main")).split(";");
    for (var i = 0 ; i < declarations.length ; i++) {
       var declaration = declarations[i].trim();
       if (declaration.length > 0) {
-
          var words = declaration.split(" ");
          if (words[0] == 'uniform') {
             var type = words[1];
             var name = words[2];
-            for (var n = 0 ; n < typeInfo.length ; n += 3)
+            var j = name.indexOf('[');
+            if (j >= 0)
+               name = name.substring(0, j);
+            for (var n = 0 ; n < typeInfo.length ; n += 3) {
                if (type == typeInfo[n]) {
-                  material.uniforms[name] = { type: typeInfo[n+1], value: typeInfo[n+2] };
+                  var key = typeInfo[n+1];
+                  var val = typeInfo[n+2];
+                  if (j >= 0) {
+                     key += 'v';
+                     val = '[]';
+                  }
+                  material.uniforms[name] = { type: key, value: val };
                   break;
                }
+            }
          }
       }
    }
 }
 
+// PREPEND THE HEADER OF PREDEFINED THINGS TO SYNTAX CHECK A VERTEX SHADER:
+function formSyntaxCheckVertexShader(string) {
+   return syntaxCheckVertexShaderHeader.concat(string);
+}
+
+// PREPEND THE HEADER OF PREDEFINED THINGS TO A VERTEX SHADER:
+function formVertexShader(string) {
+   return vertexShaderHeader.concat(string);
+}
+
+// PREPEND THE HEADER OF PREDEFINED THINGS TO A FRAGMENT SHADER:
 function formFragmentShader(string) {
-
-   // PREPEND THE HEADER OF PREDEFINED THINGS:
-
    return fragmentShaderHeader.concat(string);
 }
 
 function shaderMaterial(vertexShader, fragmentShaderString) {
    var material = new THREE.ShaderMaterial({
       uniforms: {},
-      vertexShader: vertexShader,
+      vertexShader: formVertexShader(vertexShader),
    });
 
-   var u = "alpha mx my pixelSize selectedIndex time x y z".split(' ');
+   var u = "alpha mx my mz pixelSize selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" ? 1 : 0) };
 
@@ -510,88 +565,138 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
 
 // THIS VERTEX SHADER WILL SUFFICE FOR MOST SHADER PLANES:
 
-var defaultVertexShader = ["\
-   varying float dx;\
-   varying float dy;\
-   varying vec3 vPosition;\
-   varying vec3 vNormal;\
-   void main() {\
-      dx = 2. * uv.x - 1.;\
-      dy = 2. * uv.y - 1.;\
-      vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);\
-      vPosition = position*.03;\
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);\
-   }\
-"].join("\n");
+var defaultVertexShader = [
+   ,'varying vec3 vPosition;'
+   ,'varying vec3 vNormal;'
+   ,'float displace(vec3 p) { return 0.0 /* * noise(3.0*p + time*vec3(0.0,-1.0,0.0)) */; }'
+   ,'void main() {'
+   ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
+   ,'   vPosition = position*.03;'
+   ,'   float _p0 = displace(position);'
+   ,'   float _px = displace(position + vec3(epsilon, 0.0, 0.0));'
+   ,'   float _py = displace(position + vec3(0.0, epsilon, 0.0));'
+   ,'   float _pz = displace(position + vec3(0.0, 0.0, epsilon));'
+   ,'   vNormal = normalize(vNormal + vec3(_px - _p0, _py - _p0, _pz - _p0) / epsilon);'
+   ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(position * (1. - _p0), 1.);'
+   ,'}'
+].join("\n");
+
+var defaultFragmentShader = [
+    'uniform vec3 ambient;'
+   ,'uniform vec3 diffuse;'
+   ,'uniform vec4 specular;'
+   ,'uniform vec3 Lrgb[3];'
+   ,'uniform vec3 Ldir[3];'
+   ,'void main() {'
+   ,'   vec3  color = ambient;'
+   ,'   vec3  W     = vec3(0.,0.,-1.);'
+   ,'   vec3  N     = normalize(vNormal);'
+   ,'   vec3  R     = W - 2. * N * dot(N, W);'
+   ,'   for (int i = 0 ; i < 3 ; i++) {'
+   ,'      vec3  L = normalize(Ldir[i]);'
+   ,'      float D = dot(N, L);'
+   ,'      float S = dot(R, L);'
+   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
+   ,'                           specular.rgb * pow(max(0., S), specular.a) );'
+   ,'   }'
+   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'}'
+].join("\n");
 
 // DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
 
-var fragmentShaderHeader = ["\
-   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
-   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\
-   vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }\
-   vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }\
-   vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }\
-   float noise(vec3 P) {\
-      vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));\
-      vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);\
-      vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);\
-      vec4 iz0 = i0.zzzz, iz1 = i1.zzzz;\
-      vec4 ixy = permute(permute(ix) + iy), ixy0 = permute(ixy + iz0), ixy1 = permute(ixy + iz1);\
-      vec4 gx0 = ixy0 * (1.0 / 7.0), gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;\
-      vec4 gx1 = ixy1 * (1.0 / 7.0), gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;\
-      gx0 = fract(gx0); gx1 = fract(gx1);\
-      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0), sz0 = step(gz0, vec4(0.0));\
-      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1), sz1 = step(gz1, vec4(0.0));\
-      gx0 -= sz0 * (step(0.0, gx0) - 0.5); gy0 -= sz0 * (step(0.0, gy0) - 0.5);\
-      gx1 -= sz1 * (step(0.0, gx1) - 0.5); gy1 -= sz1 * (step(0.0, gy1) - 0.5);\
-      vec3 g0 = vec3(gx0.x,gy0.x,gz0.x), g1 = vec3(gx0.y,gy0.y,gz0.y),\
-           g2 = vec3(gx0.z,gy0.z,gz0.z), g3 = vec3(gx0.w,gy0.w,gz0.w),\
-           g4 = vec3(gx1.x,gy1.x,gz1.x), g5 = vec3(gx1.y,gy1.y,gz1.y),\
-           g6 = vec3(gx1.z,gy1.z,gz1.z), g7 = vec3(gx1.w,gy1.w,gz1.w);\
-      vec4 norm0 = taylorInvSqrt(vec4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3)));\
-      vec4 norm1 = taylorInvSqrt(vec4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7)));\
-      g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;\
-      g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;\
-      vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),\
-                         dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),\
-                    vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),\
-                         dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);\
-      return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);\
-   }\
-   float noise(vec2 P) { return noise(vec3(P, 0.0)); }\
-   float fractal(vec3 P) {\
-      float f = 0., s = 1.;\
-      for (int i = 0 ; i < 9 ; i++) {\
-         f += noise(s * P) / s;\
-         s *= 2.;\
-         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
-      }\
-      return f;\
-   }\
-   float turbulence(vec3 P) {\
-      float f = 0., s = 1.;\
-      for (int i = 0 ; i < 9 ; i++) {\
-         f += abs(noise(s * P)) / s;\
-         s *= 2.;\
-         P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);\
-      }\
-      return f;\
-   }\
-   uniform float alpha;\
-   varying float dx;\
-   varying float dy;\
-   uniform float mx;\
-   uniform float my;\
-   uniform float pixelSize;\
-   uniform float selectedIndex;\
-   uniform float time;\
-   varying vec3 vNormal;\
-   varying vec3 vPosition;\
-   uniform float x;\
-   uniform float y;\
-   uniform float z;\
-"].join("\n");
+var sharedHeader = [
+ 'precision highp float;'
+,'float epsilon = .001;'
+,'vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }'
+,'vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }'
+,'vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }'
+,'vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }'
+,'vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }'
+,'float noise(vec3 P) {'
+,'   vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));'
+,'   vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);'
+,'   vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);'
+,'   vec4 iz0 = i0.zzzz, iz1 = i1.zzzz;'
+,'   vec4 ixy = permute(permute(ix) + iy), ixy0 = permute(ixy + iz0), ixy1 = permute(ixy + iz1);'
+,'   vec4 gx0 = ixy0 * (1.0 / 7.0), gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;'
+,'   vec4 gx1 = ixy1 * (1.0 / 7.0), gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;'
+,'   gx0 = fract(gx0); gx1 = fract(gx1);'
+,'   vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0), sz0 = step(gz0, vec4(0.0));'
+,'   vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1), sz1 = step(gz1, vec4(0.0));'
+,'   gx0 -= sz0 * (step(0.0, gx0) - 0.5); gy0 -= sz0 * (step(0.0, gy0) - 0.5);'
+,'   gx1 -= sz1 * (step(0.0, gx1) - 0.5); gy1 -= sz1 * (step(0.0, gy1) - 0.5);'
+,'   vec3 g0 = vec3(gx0.x,gy0.x,gz0.x), g1 = vec3(gx0.y,gy0.y,gz0.y),'
+,'        g2 = vec3(gx0.z,gy0.z,gz0.z), g3 = vec3(gx0.w,gy0.w,gz0.w),'
+,'        g4 = vec3(gx1.x,gy1.x,gz1.x), g5 = vec3(gx1.y,gy1.y,gz1.y),'
+,'        g6 = vec3(gx1.z,gy1.z,gz1.z), g7 = vec3(gx1.w,gy1.w,gz1.w);'
+,'   vec4 norm0 = taylorInvSqrt(vec4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3)));'
+,'   vec4 norm1 = taylorInvSqrt(vec4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7)));'
+,'   g0 *= norm0.x; g2 *= norm0.y; g1 *= norm0.z; g3 *= norm0.w;'
+,'   g4 *= norm1.x; g6 *= norm1.y; g5 *= norm1.z; g7 *= norm1.w;'
+,'   vec4 nz = mix(vec4(dot(g0, vec3(f0.x, f0.y, f0.z)), dot(g1, vec3(f1.x, f0.y, f0.z)),'
+,'                      dot(g2, vec3(f0.x, f1.y, f0.z)), dot(g3, vec3(f1.x, f1.y, f0.z))),'
+,'                 vec4(dot(g4, vec3(f0.x, f0.y, f1.z)), dot(g5, vec3(f1.x, f0.y, f1.z)),'
+,'                      dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);'
+,'   return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);'
+,'}'
+,'float noise(vec2 P) { return noise(vec3(P, 0.0)); }'
+,'float fractal(vec3 P) {'
+,'   float f = 0., s = 1.;'
+,'   for (int i = 0 ; i < 9 ; i++) {'
+,'      f += noise(s * P) / s;'
+,'      s *= 2.;'
+,'      P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);'
+,'   }'
+,'   return f;'
+,'}'
+,'float turbulence(vec3 P) {'
+,'   float f = 0., s = 1.;'
+,'   for (int i = 0 ; i < 9 ; i++) {'
+,'      f += abs(noise(s * P)) / s;'
+,'      s *= 2.;'
+,'      P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);'
+,'   }'
+,'   return f;'
+,'}'
+].join('\n');
+
+// THE SYNTAX CHECKING VERSION ALSO INCLUDES VARS THAT WILL BE DECLARED BY THREE.JS.
+
+var syntaxCheckVertexShaderHeader = [
+ sharedHeader
+,'uniform mat4  modelViewMatrix;'
+,'uniform mat4  projectionMatrix;'
+,'varying vec3  normal;'
+,'varying vec3  position;'
+,'uniform float time;'
+,''
+].join('\n');
+
+var vertexShaderHeader = [
+ sharedHeader
+,'uniform float time;'
+,''
+].join('\n');
+
+var fragmentShaderHeader = [
+ sharedHeader
+,'uniform float alpha;'
+,'varying float dx;'
+,'varying float dy;'
+,'uniform float mx;'
+,'uniform float my;'
+,'uniform float mz;'
+,'uniform float pixelSize;'
+,'uniform float selectedIndex;'
+,'uniform float time;'
+,'varying vec3 vNormal;'
+,'varying vec3 vPosition;'
+,'uniform float x;'
+,'uniform float y;'
+,'uniform float z;'
+,''
+].join('\n');
 
    function createVisibleEdgesMesh(veds) {
       var material = new THREE.LineBasicMaterial();
@@ -605,7 +710,7 @@ var fragmentShaderHeader = ["\
 
          for (var n = 0 ; n < edges.length ; n++)
             mesh.geometry.addLine(.007, geom.vertexWorld(edges[n][0]),
-	                                geom.vertexWorld(edges[n][1]));
+                                        geom.vertexWorld(edges[n][1]));
       }
 
       return mesh;

@@ -1,7 +1,17 @@
+function C2S() {
 
-   function C2S() {
-      this.initSketchTo3D("c2s", [ makeOval(-1,-1,2,2,20,-PI/2,3*PI/2) ], function() { return root.addGlobe(); });
+   this.labels = "c2s".split(' ');
+
+   this.render = function() {
+      this.duringSketch(function() {
+         mCurve(makeOval(-1,-1,2,2,20,-PI/2,3*PI/2));
+      });
    }
-   C2S.prototype = new SketchTo3D;
-   addSketchType("C2S");
+
+   this.createMesh = function() {
+      return new THREE.Mesh(globeGeometry(80,40), this.shaderMaterial());
+   }
+}
+C2S.prototype = new Sketch;
+addSketchType("C2S");
 

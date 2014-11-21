@@ -78,6 +78,24 @@
          this.colorId = i;
 	 this.color = palette[i];
       }
+      this.setRenderMatrix = function(mat) {
+         var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyz[2];
+         var s = .381872 * height();
+         var p = this.toPixel([0,0,0]);
+
+         mat.identity();
+
+	 mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
+
+	 //mat.perspective(0, 0, -7 * height() / s);
+
+	 var yy = min(1, 4 * this.rY * this.rY);
+	 mat.rotateX(PI * -this.rY);
+	 mat.rotateY(PI *  this.rX * (1 - yy));
+	 mat.rotateZ(PI * -this.rX * yy);
+
+	 mat.scale(D / s);
+      }
       this.transformX2D = function(x, y) {
          var angle = 2 * this.rX;
          return this.x2D + this.scale() * (cos(angle)*x + sin(angle)*y);
@@ -93,9 +111,9 @@
          return (y - this.y2D) / this.scale();
       }
       this.duringSketch = function(callbackFunction) {
-         if (this.sketchProgress < 1) {
+         if (this.createMesh !== null ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
             _g.save();
-            _g.globalAlpha = 1 - this.styleTransition;
+	    _g.globalAlpha = 1 - this.styleTransition;
             this.duringSketchCallbackFunction = callbackFunction;
             this.duringSketchCallbackFunction();
             _g.restore();
@@ -114,10 +132,12 @@
             _g.restore();
          }
       }
-      this.extendBounds = function(ax, ay, bx, by) {
+      this.extendBounds = function(points) {
          this.afterSketch(function() {
+	    var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
-            mLine([ax, ay], [bx, by]);
+            mCurve(points);
+	    _g.strokeStyle = saveStrokeStyle;
          });
       }
       this.clearPorts = function() {
@@ -420,6 +440,10 @@
       this.glyphTransition = 0;
       this.groupPath = [];
       this.groupPathLen = 1;
+      this.hasBounds = function() {
+         return this.xlo !== undefined && this.xhi !== undefined && this.xlo <= this.xhi &&
+                this.ylo !== undefined && this.yhi !== undefined && this.ylo <= this.yhi ;
+      }
       this.hasMotionPath = function() {
          return this.motionPath.length > 0 && this.motionPath[0].length > 1;
       }
@@ -596,6 +620,9 @@
 	 this.render(elapsed);
          m.restore();
 	 _g.restore();
+	 if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
+	    this._updateMesh();
+         }
       }
       this.sc = 1;
       this.scale = function(value) {
@@ -708,6 +735,10 @@
 
          _g.restore();
       }
+      this.setUniform = function(name, val) {
+         if (this.mesh !== undefined)
+            this.mesh.material.setUniform(name, val);
+      }
       this.sketchLength = 1;
       this.cursorTransition = 0;
       this.sketchProgress = 0;
@@ -742,6 +773,9 @@
       this.textStrs = [];
       this.textX = 0;
       this.textY = 0;
+      this.toPixel = function(point) {
+         return this.adjustXY(m.transform(point));
+      }
       this.toTrace = function() {
          var src = this.sp;
 	 var dst = [];
@@ -827,7 +861,115 @@
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
+      this._updateMesh = function() {
+         if (this.createMesh !== undefined && this.mesh === undefined) {
+	    if (this.vertexShader === undefined)
+	       this.vertexShader = defaultVertexShader;
 
+	    if (this.fragmentShader === undefined)
+	       this.fragmentShader = defaultFragmentShader;
+
+            this.shaderMaterial = function() {
+	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
+	       material.setUniform('specular', [.5,.5,.5,10]);
+	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
+	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
+	       return material;
+	    }
+
+	    this.updateVertexShader = function() {
+	       if (this.vertexShader != codeTextArea.value) {
+                  var isValid = isValidVertexShader(formSyntaxCheckVertexShader(codeTextArea.value));
+                  if (isValid) {
+                     this.vertexShader = codeTextArea.value;
+                     this.mesh.material = this.shaderMaterial();
+                  }
+               }
+	    }
+
+	    this.updateFragmentShader = function() {
+	       if (this.fragmentShader != codeTextArea.value) {
+                  var isValid = isValidFragmentShader(formFragmentShader(codeTextArea.value));
+                  if (isValid) {
+                     this.fragmentShader = codeTextArea.value;
+                     this.mesh.material = this.shaderMaterial();
+                  }
+               }
+	    }
+
+	    if (this.code == null)
+	       this.code = [];
+            this.code.push(["vertexShader", this.vertexShader, this.updateVertexShader]);
+            this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
+
+            if (this.meshBounds == undefined)
+	       this.meshBounds = [ [-1, -1] , [1, 1] ];
+            this.mesh = this.createMesh();
+	    root.add(this.mesh);
+	    this.is3D = true;
+
+	    // DEFAULT VALUES FOR PHONG COEFFICIENTS.
+
+	    this.meshColorId = this.colorId;
+         }
+	 if (this.mesh !== undefined) {
+
+	    // UPDATE MESH COLOR IF NEEDED.
+
+	    if (this.ambient  === undefined) this.ambient = [.025,.025,.025];
+	    if (this.diffuse  === undefined) this.diffuse = [.2,.2,.2];
+	    if (this.specular === undefined) this.specular = [.5,.5,.5,10];
+
+	    if (this.meshColorId !== this.colorId) {
+	       var rgb = paletteRGB[this.colorId];
+	       this.ambient = [0.025 * rgb[0] / 255, 0.025 * rgb[1] / 255, 0.025 * rgb[2] / 255];
+	       this.diffuse = [0.2   * rgb[0] / 255, 0.2   * rgb[1] / 255, 0.2   * rgb[2] / 255];
+	       this.meshColorId = this.colorId;
+	    }
+
+            this.mesh.material.setUniform('ambient' , this.ambient);
+            this.mesh.material.setUniform('diffuse' , this.diffuse);
+            this.mesh.material.setUniform('specular', this.specular);
+
+	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
+
+	    this.setRenderMatrix(this.mesh.getMatrix());
+
+            // SET OPACITY.
+
+            var alpha = max(0, this.glyphTransition) *
+                        (this.fadeAway == 0 ? 1 : this.fadeAway) *
+		        (isDef(this.alpha) ? this.alpha : 1);
+            this.mesh.material.transparent = alpha < 1;
+
+            // SET VARIOUS UNIFORMS IN THE FRAGMENT SHADER.
+
+	    if (this.mesh.material.uniforms !== undefined) {
+
+	       // SET TIME.
+
+	       this.setUniform('time', time);
+
+	       // SET MOUSE CURSOR.
+
+	       var a = this.toPixel([0,0]);
+	       var b = this.toPixel([1,1]);
+
+	       this.setUniform('mx', (sketchPage.mx - a[0]) / (b[0] - a[0]));
+	       this.setUniform('my', (sketchPage.my - a[1]) / (b[1] - a[1]));
+	       this.setUniform('mz', sketchPage.isPressed ? 1 : 0);
+
+               this.setUniform('alpha', alpha);
+            }
+
+	    if (this.updateMesh !== undefined)
+	       this.updateMesh();
+
+	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
+
+	    this.extendBounds(this.meshBounds);
+         }
+      }
       this.value = null;
       this.x = 0;
       this.xyz = [];

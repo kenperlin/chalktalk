@@ -66,7 +66,7 @@
 
          var w = this.width;
          var h = this.height;
-	 if (isMakingGlyph) h = w;
+	 if (this.isMakingGlyph !== undefined) h = w;
 
          var sel = (this.selection + 1000 * this.labels.length) % this.labels.length;
 
