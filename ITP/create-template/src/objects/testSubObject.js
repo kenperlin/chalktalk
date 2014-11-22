@@ -37,13 +37,15 @@ define(function () {
 
 		/**
 		 * logs input
-		 * @param  {string} s any string
-		 * @param  {array}  arr array of strings
-		 * @return {null}   returns nothing - only logs a string
+		 * @param  {string=} s any string
+		 * @param  {array=}  arr array of strings		 * 
 		 */
 		CT.subObj.prototype.sayHi = function (s,arr) {
 
-				console.log(s);
+				if(s)
+					console.log(s);
+				else
+					console.log("I haven't the foggiest");
 				if(arr){
 					for(var i = 0 ; i < arr.length ; i++){
 						console.log(arr[i]);
