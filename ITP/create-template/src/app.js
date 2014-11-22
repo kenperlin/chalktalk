@@ -12,6 +12,8 @@ define(function (require) {
     require('objects/testObject');
     require('objects/testSubObject');
     require('basicMath');
+    require('math/M4.js');
+    require('math/math.js');
 
     window.CT = CT;
 
