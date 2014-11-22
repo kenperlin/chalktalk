@@ -1,11 +1,10 @@
 ;(function() {
 var core, DLtest_01, objects_testObject, objects_testSubObject, basicMath, app;
 core = function (require) {
-   /** 
-    * A module representing a shirt.
-    * @export CT
-    * @version 1.0
-    */
+  /**
+  * Chalktalk core 
+  * @constructor
+  */
   var CT = function () {
     this._version = 'v.001';
     this._hello = 'hello';
@@ -30,20 +29,31 @@ DLtest_01 = function (require) {
 }({});
 objects_testObject = function (require) {
   var CT = core;
+  /**
+   * Chalktalk basic object
+   * @constructor
+   * @return {obj} chalktalk base object
+   */
   CT.obj = function () {
-    //public variables go here under 'this'
+    /**public variables go here under 'this'*/
     this.publicVar = Math.PI;
   };
+  /**
+   * [prototype description]
+   * @type {Object}
+   */
   CT.obj.prototype = {
+    /** a test private variable*/
     _privateVar: 36,
-    /**
-     * documentation
-     * @constructor {object}
-     */
     constructor: CT.obj,
+    /**returns the private variable*/
     get privateVar() {
       return this._privateVar;
     },
+    /**
+     * sets a private variable to a number
+     * @type {number} a set a number
+     */
     set privateVar(a) {
       if (typeof a == 'number')
         this._privateVar = a;
@@ -56,10 +66,17 @@ objects_testObject = function (require) {
 objects_testSubObject = function () {
   // var CT = require('core');
   var CT = objects_testObject;
-  CT.subObj = function () {
+  /**
+   *  @class a CT sub object
+   *
+   *	@constructor
+   *	@extends {CT}
+   *	@param {number=} [num=36] private variable value
+   */
+  CT.subObj = function (num) {
     CT.obj.call(this);
     // private variables can go here
-    var _subVar = 36;
+    var _subVar = num || 36;
     // set getters and setters here
     Object.defineProperty(this, 'sub', {
       get: function () {
@@ -72,8 +89,19 @@ objects_testSubObject = function () {
     });
   };
   CT.subObj.prototype = Object.create(CT.obj.prototype);
-  CT.subObj.prototype.sayHi = function (s) {
+  /**
+   * logs input
+   * @param  {string} s any string
+   * @param  {array}  arr array of strings
+   * @return {null}   returns nothing - only logs a string
+   */
+  CT.subObj.prototype.sayHi = function (s, arr) {
     console.log(s);
+    if (arr) {
+      for (var i = 0; i < arr.length; i++) {
+        console.log(arr[i]);
+      }
+    }
   };
   return CT;
 }();

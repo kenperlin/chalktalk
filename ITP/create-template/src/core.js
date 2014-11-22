@@ -1,7 +1,8 @@
 define(function (require) {
 
 	/**
-	 * Chalktalk core
+	 * Chalktalk core 
+	 * @constructor
 	 */
 	var CT = function(){
 
