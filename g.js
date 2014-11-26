@@ -41,7 +41,8 @@
 
    //function height() { return 640; }
    //function height() { return 720; }
-   function height() { return 800; }
+   //function height() { return 800; }
+   function height() { return 920; }
 
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
