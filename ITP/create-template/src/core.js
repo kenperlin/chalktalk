@@ -1,16 +1,15 @@
 define(function (require) {
 
 	/**
-	 * Chalktalk core 
-	 * @constructor
+	 * Chalktalk core
+	 * @author Ken Perlin
+	 * @class
 	 */
-	var CT = function(){
+	var CT = {
 
-		this._version = 'v.001';
-	    this._hello = 'hello';
-	    this._whatisup = 'whatisup';
-	    this._isThing = 'thing';
-	}
+		version:'v.001'
+	
+	};
 
     return CT;
 

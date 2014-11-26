@@ -8,7 +8,6 @@ define(function (require) {
     // 
 
     var CT = require('core');
-    require('DLtest_01');
     require('objects/testObject');
     require('objects/testSubObject');
     require('basicMath');

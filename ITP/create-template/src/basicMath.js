@@ -2,7 +2,7 @@ define(function(){
 
 	var CT = require('core');
 
-	CT.prototype.Math = {
+	CT.Math = {
 
 		square:function(b){
 			var a = b*b;
@@ -15,6 +15,6 @@ define(function(){
 
 	};
 	
-	return CT.Math;
+	return CT;
 
 });
