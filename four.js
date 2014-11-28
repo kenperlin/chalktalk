@@ -547,11 +547,12 @@ function formFragmentShader(string) {
    return fragmentShaderHeader.concat(string);
 }
 
-function shaderMaterial(vertexShader, fragmentShaderString) {
+function shaderMaterial(vertexShaderString, fragmentShaderString) {
    var material = new THREE.ShaderMaterial({
-      uniforms: {},
-      vertexShader: formVertexShader(vertexShader),
+      uniforms: {}
    });
+
+   material.vertexShader = formVertexShader(vertexShaderString);
 
    var u = "alpha mx my mz pixelSize selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
@@ -573,10 +574,10 @@ var defaultVertexShader = [
    ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
    ,'   vPosition = position*.03;'
    ,'   float _d = displace(position);'
-   ,'   float _x = displace(position + vec3(epsilon, 0., 0.));'
-   ,'   float _y = displace(position + vec3(0., epsilon, 0.));'
-   ,'   float _z = displace(position + vec3(0., 0., epsilon));'
-   ,'   vNormal = normalize(vNormal + vec3(_x - _d, _y - _d, _z - _d) / epsilon);'
+   ,'   float _x = displace(position + vec3(.001, 0., 0.));'
+   ,'   float _y = displace(position + vec3(0., .001, 0.));'
+   ,'   float _z = displace(position + vec3(0., 0., .001));'
+   ,'   vNormal = normalize(vNormal + vec3(_x - _d, _y - _d, _z - _d) / .001);'
    ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(position * (1. - _d), 1.);'
    ,'}'
 ].join("\n");
@@ -604,10 +605,6 @@ var defaultFragmentShader = [
 ].join("\n");
 
 // DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
-
-var vertexSharedHeader = [
- 'precision highp float;'
-].join('\n');
 
 var sharedHeader = [
  'precision highp float;'
@@ -668,19 +665,18 @@ var sharedHeader = [
 
 var syntaxCheckVertexShaderHeader = [
  sharedHeader
+,'precision highp float;'
 ,'uniform mat4  modelViewMatrix;'
 ,'uniform mat4  projectionMatrix;'
 ,'varying vec3  normal;'
 ,'varying vec3  position;'
 ,'uniform float time;'
-,'float epsilon = .001;'
 ,''
 ].join('\n');
 
 var vertexShaderHeader = [
- vertexSharedHeader
+ sharedHeader
 ,'uniform float time;'
-,'float epsilon = .001;'
 ,''
 ].join('\n');
 

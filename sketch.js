@@ -31,7 +31,7 @@
       this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
       this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
 
-      this.arrowBegin = function(x, y) {
+      var arrowBegin = function(x, y) {
          this.arrows.push( [ [[x,y]], null ] );
       }
 
@@ -857,7 +857,7 @@
 	 this.update = function() {
             if (isCodeWidget && this.fragmentShader != codeTextArea.value
                              && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
-               this.mesh.material = shaderMaterial(this.mesh.material.vertexShader,
+               this.mesh.material = shaderMaterial(this.vertexShader === undefined ? defaultVertexShader : this.vertexShader,
                                                    this.fragmentShader = codeTextArea.value);
 	 }
       }
