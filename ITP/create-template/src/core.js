@@ -1,9 +1,10 @@
 define(function (require) {
 
 	/**
-	 * Chalktalk core
+	 * Chalktalk is a gesture based communication tool
 	 * @author Ken Perlin
-	 * @class
+	 * @version  .001
+	 * @class _Chalktalk
 	 */
 	var CT = {
 
