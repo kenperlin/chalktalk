@@ -1146,7 +1146,7 @@ console.log(harry.fred);
       outSketch = isHover() ? sk() : null;
       outPort = -1;
       if (outSketch != null) {
-         outPort = findPortAtCursor(outSketch);
+         outPort = findOutPortAtCursor(outSketch);
          inSketch = null;
          inPort = -1;
       }
@@ -1179,7 +1179,12 @@ console.log(harry.fred);
    }
 
    function findNearestOutPort(sketch) {
-      return sketch.portName.length > 0 ? findNearestPortAtCursor(sketch) : 0;
+      if (sketch.portName.length == 0)
+         return 0;
+      var i = findNearestPortAtCursor(sketch);
+      if (outValue[i] == undefined)
+         return -1;
+      return i;
    }
 
    function findNearestPortAtCursor(sketch, slots) {
@@ -1198,7 +1203,7 @@ console.log(harry.fred);
       return n;
    }
 
-   function findPortAtCursor(sketch, slots) {
+   function findOutPortAtCursor(sketch) {
       if (sketch instanceof NumericSketch ||
           sketch instanceof SimpleSketch &&
                  (! sketch.isNullText() || isDef(sketch.inValue[0])))
@@ -1206,7 +1211,7 @@ console.log(harry.fred);
       var x = This().mouseX;
       var y = This().mouseY;
       for (var i = 0 ; i < sketch.portName.length ; i++)
-         if ((slots === undefined) || slots[i] == null) {
+         if (sketch.outValue[i] !== undefined) {
             var xy = sketch.portXY(i);
             if ( x >= xy[0] - portHeight/2 && x < xy[0] + portHeight/2 &&
                  y >= xy[1] - portHeight/2 && y < xy[1] + portHeight/2 )
@@ -1841,7 +1846,11 @@ console.log(harry.fred);
          break;
       case 4:
          outSketch = sk();
-         outPort = max(0, findPortAtCursor(outSketch));
+         outPort = findOutPortAtCursor(outSketch);
+	 if (outPort == -1) {
+	    outSketch.addPort("out", 0, 0);
+	    outPort = outSketch.portName.length - 1;
+         }
          outSketch.linkCurve = [[x,y]];
          break;
       case 6:

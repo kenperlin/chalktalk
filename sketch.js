@@ -534,7 +534,7 @@
       },
       isDefaultValue : function(name) {
          var j = getIndex(this.portName, name);
-         return j >= 0 ? isDef(this.DefaultValue[j]) : false;
+         return j >= 0 ? isDef(this.defaultValue[j]) : false;
       },
       isInValue : function(name) {
          return this.isInValueAt(getIndex(this.portName, name));
@@ -708,6 +708,14 @@
                this.defaultValueIncr[j] = 1;
          }
       },
+
+      setOutPortValue : function(value) {
+         var j = getIndex(this.portName, "out");
+	 if (j == -1)
+	    this.addPort("out", 0, 0);
+         this.setOutValue("out", value);
+      },
+
       setOutValue : function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)

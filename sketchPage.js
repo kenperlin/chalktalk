@@ -717,7 +717,7 @@ var sketchToDelete = null;
 
          // CLICK ON AN OUT PORT STARTS A LINK.
 
-         if (this.isClick && outPort >= 0 && bgClickCount != 1) {
+	 if (this.isClick && outPort >= 0 && outSketch.disableClickToLink === undefined && bgClickCount != 1) {
             sketchAction = "linking";
             return;
          }
@@ -1553,7 +1553,7 @@ var sketchToDelete = null;
 
          // DOUBLE CLICK ON AN OUT-PORT TOGGLES WHETHER TO SHOW LIVE DATA FOR THIS SKETCH.
 
-         else if (outSketch != null && isHover() && sk() == outSketch && findPortAtCursor(sk()) == outPort) {
+         else if (outSketch != null && isHover() && sk() == outSketch && findOutPortAtCursor(sk()) == outPort) {
             sk().isShowingLiveData = ! sk().isShowingLiveData;
             return;
          }

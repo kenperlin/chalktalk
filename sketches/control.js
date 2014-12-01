@@ -3,6 +3,8 @@
 
       this.labels = "slidex slidey".split(' ');
 
+      this.disableClickToLink = true;
+
       this.flip = 1;
 
       this.computeStatistics = function() {
@@ -22,13 +24,19 @@
          this.t = max(0, min(1, p[this.selection]/sc + .5));
       }
 
+      this.mouseUp = function(x, y) {
+         var sc = this.size / 180;
+         var p = m.transform([x,y]);
+         this.t = max(0, min(1, p[this.selection]/sc + .5));
+      }
+
       this.render = function(elapsed) {
 
          var sc = this.size / 180;
 
          this.afterSketch(function() {
             if (this.portLocation.length == 0) {
-               this.addPort("t", 0, 0);
+               //this.addPort("t", 0, 0);
                switch (this.selection) {
                case 0:
                   this.addPort("lo", -.62 * sc, 0);
@@ -52,7 +60,10 @@
          this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
 
          var value = lerp(t, this.lo, this.hi);
-         this.setOutValue("t", value);
+         this.setOutPortValue(value);
+
+	 this.setOutValue("lo", this.lo);
+	 this.setOutValue("hi", this.hi);
 
          m.scale(sc);
 
