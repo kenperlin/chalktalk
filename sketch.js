@@ -41,6 +41,7 @@
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.inValues = []; // flattened array of values
+      this.intersectingSketches = function() { return []; }
       this.is3D = false;
       this.isCard = false;
       this.isMouseOver = false;
