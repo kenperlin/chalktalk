@@ -659,6 +659,22 @@
       }
    }
 
+   // Ajust the distance between two 2D points.
+
+   function adjustDistance2D(A, B, d, e, isAdjustingA, isAdjustingB) {
+      var x = B[0] - A[0];
+      var y = B[1] - A[1];
+      var t = e * (d / Math.sqrt(x * x + y * y) - 1);
+      if (isAdjustingA) {
+         A[0] -= t * x;
+         A[1] -= t * y;
+      }
+      if (isAdjustingB) {
+         B[0] += t * x;
+         B[1] += t * y;
+      }
+   }
+
    // Clip a curve to that part which is entirely outside of a rectangle.
 
    function clipCurveAgainstRect(src, R) {

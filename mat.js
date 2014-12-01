@@ -372,6 +372,9 @@
 
       fillOval(BOTTOMLEFT[0], BOTTOMLEFT[1], SIZE[0], SIZE[1], 32, 0, Math.PI*2);
    }
+   function mTransform(p) {
+      return m.transform(p);
+   }
 
 
    var m = new M4();
