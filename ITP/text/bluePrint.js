@@ -24,10 +24,10 @@ class CT(){
 
 // basic object class, similar to Object3D
 
-class CTObject(){
+class CTObject extends THREE.Object3D(){
 
-	var matrix = mat; //let's check out mat.js
-	var sketchMatrix; //?
+	// var matrix = mat; //let's check out mat.js
+	// var sketchMatrix; //?
 	var boundingBox = [[0,0],[0,1],[1,1],[1,0]];
 	var drawBoundingBox = false;
 	var center = vector;
@@ -69,6 +69,12 @@ class Sketch extends CTObject(){
 	function afterSketch(callback){}
 }
 
+class SketchGroup extends CTObject(){
+
+	//grouped sketches return collected strokes
+	
+}
+
 class Port extends CTObject(){
 
 	function passValue(){
@@ -88,6 +94,13 @@ class CodeBubble extends CTObject(){
 		etc:etc
 	}
 }
+
+class LineLink(){
+
+	var type = [arrow,data,structure]
+
+}
+
 
 class CTCanvasRenderer(){
 
@@ -135,3 +148,4 @@ class CTEventHandler(){
 	//keep track of mouse/keyboard events
 
 }
+

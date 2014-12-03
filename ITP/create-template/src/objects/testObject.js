@@ -12,6 +12,15 @@ define(function (require) {
 		/**public variables go here under 'this'*/
 		this.publicVar = Math.PI;
 
+		//static variable
+		if(CT.obj.count == undefined){
+		    CT.obj.count = 1;
+		}
+		else{
+			CT.obj.count ++;
+		}
+
+		
 	};
 
 	/**
@@ -19,6 +28,10 @@ define(function (require) {
 	* @type {Object}
 	*/
 	CT.obj.prototype = {
+
+		objectCount : function(){
+			console.log(CT.obj.count);
+		},
 
 		//I don't think this is required, not sure
 		// constructor: CT.obj, 
