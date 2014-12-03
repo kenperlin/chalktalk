@@ -661,17 +661,21 @@
 
    // Ajust the distance between two 2D points.
 
-   function adjustDistance2D(A, B, d, e, isAdjustingA, isAdjustingB) {
+   function adjustDistance(A, B, d, e, isAdjustingA, isAdjustingB) {
+      var is3D = A.length > 2 && B.length > 2;
       var x = B[0] - A[0];
       var y = B[1] - A[1];
-      var t = e * (d / Math.sqrt(x * x + y * y) - 1);
+      var z = is3D ? B[2] - A[2] : 0;
+      var t = e * (d / Math.sqrt(x * x + y * y + z * z) - 1);
       if (isAdjustingA) {
          A[0] -= t * x;
          A[1] -= t * y;
+	 if (is3D) A[2] -= t * z;
       }
       if (isAdjustingB) {
          B[0] += t * x;
          B[1] += t * y;
+	 if (is3D) B[2] += t * z;
       }
    }
 
