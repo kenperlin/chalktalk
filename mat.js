@@ -360,6 +360,21 @@
    function mFillRect(c1, c2) {
       mFillCurve([c1, [c2[0], c1[1]], c2, [c1[0], c2[1]], c1]);
    };
+   function mDrawOval(bottomleft, size) {
+      var BOTTOMLEFT = m.transform(bottomleft);
+      var SIZE = m.transform(size);
+
+      drawOval(BOTTOMLEFT[0], BOTTOMLEFT[1], SIZE[0], SIZE[1], 32, 0, Math.PI*2);
+   }
+   function mFillOval(bottomleft, size) {
+      var BOTTOMLEFT = m.transform(bottomleft);
+      var SIZE = m.transform(size);
+
+      fillOval(BOTTOMLEFT[0], BOTTOMLEFT[1], SIZE[0], SIZE[1], 32, 0, Math.PI*2);
+   }
+   function mTransform(p) {
+      return m.transform(p);
+   }
 
 
    var m = new M4();

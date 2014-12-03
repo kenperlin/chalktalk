@@ -21,64 +21,135 @@
    // THE BASIC SKETCH CLASS, FROM WHICH ALL SKETCHES ARE EXTENDED.
 
    function Sketch() {
-      this.adjustD = function(d) { return this.xyz.length == 0 ? d : this.xyz[2] * d; }
-      this.adjustX = function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; }
-      this.adjustY = function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; }
-      this.adjustXY = function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; }
+      this.children = [];
+      this.cleanup = null;
+      this.code = null;
+      this.setColorId(sketchPage.colorindex);
+      this.colorIndex = [];
+      this.computeStatistics = null;
+      this.dSum = 0;
+      this.defaultValue = [];
+      this.defaultValueIncr = [];
+      this.drawFirstLine = false;
+      this.fadeAway = 0;
+      this.sketchTrace = null;
+      this.trace = [];
+      this.glyphTransition = 0;
+      this.groupPath = [];
+      this.groupPathLen = 1;
+      this.id;
+      this.in = []; // array of Sketch
+      this.inValue = []; // array of values
+      this.inValues = []; // flattened array of values
+      this.intersectingSketches = function() { return []; }
+      this.is3D = false;
+      this.isCard = false;
+      this.isMouseOver = false;
+      this.isNegated = false;
+      this.isShowingLiveData = false;
+      this.labels = [];
+      this.motionPath = [];
+      this.keyDown = function(key) {}
+      this.keyUp = function(key) {}
+      this.mouseDown = function(x, y) {}
+      this.mouseDrag = function(x, y) {}
+      this.mouseMove = function(x, y) {}
+      this.mouseUp = function(x, y) {}
+      this.nPorts = 0;
+      this.out = []; // array of array of Sketch
+      this.outValue = []; // array of values
+      this.parent = null;
+      this.parse = function() { }
+      this.portName = [];
+      this.portLocation = [];
+      this.portBounds = [];
+      this.rX = 0;
+      this.rY = 0;
+      this.render = function() {}
+      this.sc = 1;
+      this.scene = null;
+      this.selection = 0;
+      this.size = 400;
+      this.suppressLineTo = false;
+      this.sketchLength = 1;
+      this.cursorTransition = 0;
+      this.sketchProgress = 0;
+      this.sketchState = 'finished';
+      this.styleTransition = 0;
+      this.sp = [];
+      this.tX = 0;
+      this.tY = 0;
+      this.text = "";
+      this.textCursor = 0;
+      this.textHeight = -1;
+      this.textStrs = [];
+      this.textX = 0;
+      this.textY = 0;
+      this.value = null;
+      this.x = 0;
+      this.xyz = [];
+      this.xStart = 0;
+      this.xf = [0,0,1,0,1];
+      this.y = 0;
+      this.yStart = 0;
+      this.zoom = 1;
+   }
 
-      this.unadjustD = function(d) { return this.xyz.length == 0 ? d : d / this.xyz[2]; }
-      this.unadjustX = function(x) { return this.xyz.length == 0 ? x : (x - this.xyz[0]) / this.xyz[2]; }
-      this.unadjustY = function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; }
-      this.unadjustXY = function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; }
+   Sketch.prototype = {
+      adjustD : function(d) { return this.xyz.length == 0 ? d : this.xyz[2] * d; },
+      adjustX : function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; },
+      adjustY : function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; },
+      adjustXY : function(xy) { return [ this.adjustX(xy[0]), this.adjustY(xy[1]) ]; },
 
-      this.arrowBegin = function(x, y) {
+      unadjustD : function(d) { return this.xyz.length == 0 ? d : d / this.xyz[2]; },
+      unadjustX : function(x) { return this.xyz.length == 0 ? x : (x - this.xyz[0]) / this.xyz[2]; },
+      unadjustY : function(y) { return this.xyz.length == 0 ? y : (y - this.xyz[1]) / this.xyz[2]; },
+      unadjustXY : function(xy) { return [ this.unadjustX(xy[0]), this.unadjustY(xy[1]) ]; },
+
+      arrows : [],
+
+      arrowBegin : function(x, y) {
          this.arrows.push( [ [[x,y]], null ] );
-      }
+      },
 
-      this.arrowDrag = function(x, y) {
+      arrowDrag : function(x, y) {
          var n = this.arrows.length - 1;
 	 if (this.arrows[n] !== undefined)
             this.arrows[n][0].push([x,y]);
-      }
+      },
 
-      this.arrowEnd = function(x, y) {
+      arrowEnd : function(x, y) {
          var n = this.arrows.length - 1;
 	 var sketches = sketchPage.sketchesAt(x, y);
 	 if (sketches.length == 0 || sketches[0] == this) {
-
-	    // If this is an arrow to nowhere, just delete it.
-
-	    this.arrows.splice(n, 1);
+	    this.arrows.splice(n, 1); // If this is an arrow to nowhere, just delete it.
          }
          else {
 	    var s = this.arrows[n][0];
             this.arrows[n][0] = computeCurvature(s[0], s[s.length/2], s[s.length-1]);
 	    this.arrows[n][1] = sketches[0];
          }
-      }
+      },
 
-      this.arrowFade = function(sketch) {
+      arrowFade : function(sketch) {
          for (var n = 0 ; n < this.arrows.length ; n++)
 	    if (this.arrows[n][1] == sketch)
 	       this.arrows[n][2] = 1;
-      }
+      },
 
-      this.arrowRemove = function(sketch) {
+      arrowRemove : function(sketch) {
          for (var n = 0 ; n < this.arrows.length ; n++)
 	    if (this.arrows[n][1] == sketch)
 	       this.arrows.splice(n--, 1);
-      }
-
-      this.arrows = [];
-
-      this.fade = function() {
+      },
+      fade : function() {
          return this.fadeAway == 0 ? 1 : this.fadeAway;
-      }
-      this.setColorId = function(i) {
+      },
+      setColorId : function(i) {
          this.colorId = i;
 	 this.color = palette[i];
-      }
-      this.setRenderMatrix = function(mat) {
+      },
+      setRenderMatrix : function(mat) {
          var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyz[2];
          var s = .381872 * height();
          var p = this.toPixel([0,0,0]);
@@ -95,22 +166,22 @@
 	 mat.rotateZ(PI * -this.rX * yy);
 
 	 mat.scale(D / s);
-      }
-      this.transformX2D = function(x, y) {
+      },
+      transformX2D : function(x, y) {
          var angle = 2 * this.rX;
          return this.x2D + this.scale() * (cos(angle)*x + sin(angle)*y);
-      }
-      this.transformY2D = function(x, y) {
+      },
+      transformY2D : function(x, y) {
          var angle = 2 * this.rX;
          return this.y2D + this.scale() * (cos(angle)*y - sin(angle)*x);
-      }
-      this.untransformX2D = function(x, y) {
+      },
+      untransformX2D : function(x, y) {
          return (x - this.x2D) / this.scale();
-      }
-      this.untransformY2D = function(x, y) {
+      },
+      untransformY2D : function(x, y) {
          return (y - this.y2D) / this.scale();
-      }
-      this.duringSketch = function(callbackFunction) {
+      },
+      duringSketch : function(callbackFunction) {
          if (this.createMesh !== null ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
             _g.save();
 	    _g.globalAlpha = 1 - this.styleTransition;
@@ -118,8 +189,8 @@
             this.duringSketchCallbackFunction();
             _g.restore();
          }
-      }
-      this.afterSketch = function(callbackFunction) {
+      },
+      afterSketch : function(callbackFunction) {
          var isg = this.sketchTrace != null && this.glyphTransition >= 0.5;
          if (isg || this.sketchProgress == 1) {
             _g.save();
@@ -131,16 +202,16 @@
             this.afterSketchCallbackFunction();
             _g.restore();
          }
-      }
-      this.extendBounds = function(points) {
+      },
+      extendBounds : function(points) {
          this.afterSketch(function() {
 	    var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
             mCurve(points);
 	    _g.strokeStyle = saveStrokeStyle;
          });
-      }
-      this.clearPorts = function() {
+      },
+      clearPorts : function() {
          this.nPorts = 0;
          this.portName = [];
          this.portLocation = [];
@@ -149,22 +220,20 @@
          this.inValues = [];
          this.outValue = [];
          this.defaultValue = [];
-      }
-      this.addPort = function(name, x, y) {
+      },
+      addPort : function(name, x, y) {
          this.portName[this.nPorts] = name;
          this.portLocation[this.nPorts] = [x, y];
          this.nPorts++;
-      }
-      this.setPortLocation = function(name, x, y) {
+      },
+      setPortLocation : function(name, x, y) {
          var index = getIndex(this.portName, name);
          if (index >= 0 && index < this.portLocation.length) {
             this.portLocation[index][0] = x;
             this.portLocation[index][1] = y;
          }
-      }
-      this.children = [];
-      this.cleanup = null;
-      this.clone = function() {
+      },
+      clone : function() {
          var dst = Object.create(this);
          for (var prop in this) {
             if (this[prop] instanceof Array)
@@ -177,11 +246,8 @@
 	 if (dst.initCopy !== undefined)
 	    dst.initCopy();
          return dst;
-      }
-      this.code = null;
-      this.setColorId(sketchPage.colorindex);
-      this.colorIndex = [];
-      this.computeGroupBounds = function() {
+      },
+      computeGroupBounds : function() {
          this.xlo = this.ylo =  10000;
          this.xhi = this.yhi = -10000;
          for (var j = 0 ; j < this.children.length ; j++) {
@@ -192,21 +258,17 @@
             this.xhi = max(this.xhi, child.xhi);
             this.yhi = max(this.yhi, child.yhi);
          }
-      }
-      this.computeStatistics = null;
-      this.contains = function(x, y) {
+      },
+      contains : function(x, y) {
          return this.xlo <= x && this.ylo <= y && this.xhi > x && this.yhi > y;
-      }
-      this.cx = function() {
+      },
+      cx : function() {
          return (this.xlo + this.xhi) / 2;
-      }
-      this.cy = function() {
+      },
+      cy : function() {
          return (this.ylo + this.yhi) / 2;
-      }
-      this.dSum = 0;
-      this.defaultValue = [];
-      this.defaultValueIncr = [];
-      this.deleteChar = function() {
+      },
+      deleteChar : function() {
          var hasCodeBubble = this.code != null && isCodeWidget;
          var cursorPos = hasCodeBubble ? codeTextArea.selectionStart : this.textCursor;
 
@@ -232,12 +294,12 @@
                 this.textCursor--;
             }
          }
-      }
-      this.drawBounds = function() {
+      },
+      drawBounds : function() {
          if (this.parent == null)
             drawRect(this.xlo, this.ylo, this.xhi - this.xlo, this.yhi - this.ylo);
-      }
-      this.drawCursor = function(x, y, dy, context) {
+      },
+      drawCursor : function(x, y, dy, context) {
          y += 0.35 * dy;
 
          context.save();
@@ -268,17 +330,16 @@
          context.stroke();
 
          context.restore();
-      }
-      this.drawFirstLine = false;
-      this.drawLabel = function(label, xy, ax, ay, scale) {
+      },
+      drawLabel : function(label, xy, ax, ay, scale) {
          var P = this.adjustXY(xy);
          utext(label, P[0], P[1], ax, ay);
-      }
-      this.drawValue = function(value, xy, ax, ay, scale) {
+      },
+      drawValue : function(value, xy, ax, ay, scale) {
          var P = this.adjustXY(xy);
          utext(isNumeric(value) ? roundedString(value) : value, P[0], P[1], ax, ay);
-      }
-      this.drawText = function(context) {
+      },
+      drawText : function(context) {
 
          var fontSize = floor(24 * this.scale());
 
@@ -378,8 +439,8 @@
             j++;
          }
          context.restore();
-      }
-      this.evalCode = function(code, x, y, z) {
+      },
+      evalCode : function(code, x, y, z) {
 
          // FIRST CHECK FOR A NATURAL LANGUAGE COMMAND.
 
@@ -409,49 +470,41 @@
          // ANY ERROR RESULTS IN A RETURN VALUE OF null.
 
          return result;
-      }
-      this.setTextCursor = function(x, y) { this.textCursorXY = [x, y]; }
-      this.fadeAway = 0;
-      this.getDefaultFloat = function(name) {
+      },
+      setTextCursor : function(x, y) { this.textCursorXY = [x, y]; },
+      getDefaultFloat : function(name) {
          return parseFloat(this.getDefaultValue(name));
-      }
-      this.getDefaultValue = function(name) {
+      },
+      getDefaultValue : function(name) {
          var j = this.getPortIndex(name);
          if (j < 0) return 0;
          var value = this.defaultValue[j];
          return ! isDef(value) || value == null ? "0" : value;
-      }
-      this.getInFloat = function(name) {
+      },
+      getInFloat : function(name) {
          return parseFloat(this.getInValueOf(name));
-      }
-      this.getInIndex = function(s) { return getIndex(this.in, s); }
-      this.getInValue = function(j, dflt) {
+      },
+      getInIndex : function(s) { return getIndex(this.in, s); },
+      getInValue : function(j, dflt) {
          return this.inValues[j] !== undefined ? this.inValues[j] : dflt;
-      }
-      this.getInValueOf = function(name) {
+      },
+      getInValueOf : function(name) {
          var j = getIndex(this.portName, name);
          if (j < 0) return 0;
          var value = this.inValue[j];
          return ! isDef(value) || value == null ? "0" : value;
-      }
-      this.getPortIndex = function(name) { return getIndex(this.portName, name); }
-      this.sketchTrace = null;
-      this.trace = [];
-      this.glyphTransition = 0;
-      this.groupPath = [];
-      this.groupPathLen = 1;
-      this.hasBounds = function() {
+      },
+      getPortIndex : function(name) {
+         return getIndex(this.portName, name);
+      },
+      hasBounds : function() {
          return this.xlo !== undefined && this.xhi !== undefined && this.xlo <= this.xhi &&
                 this.ylo !== undefined && this.yhi !== undefined && this.ylo <= this.yhi ;
-      }
-      this.hasMotionPath = function() {
+      },
+      hasMotionPath : function() {
          return this.motionPath.length > 0 && this.motionPath[0].length > 1;
-      }
-      this.id;
-      this.in = []; // array of Sketch
-      this.inValue = []; // array of values
-      this.inValues = []; // flattened array of values
-      this.insertText = function(str) {
+      },
+      insertText : function(str) {
          if (this.code != null && isCodeWidget) {
             var cursorPos = codeTextArea.selectionStart;
             codeTextArea.value = codeTextArea.value.substring(0, cursorPos) +
@@ -465,49 +518,50 @@
                          this.text.substring(this.textCursor, this.text.length));
             this.textCursor += str.length;
          }
-      }
-      this.intersectingSketches = function() {
+      },
+      tntersectingSketches : function() {
          var sketches = [];
          for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
                sketches.push(sk(I));
          return sketches;
-      }
-      this.intersects = function(s) {
+      },
+      intersects : function(s) {
          return this.xhi > s.xlo && this.xlo < s.xhi &&
                 this.yhi > s.ylo && this.ylo < s.yhi ;
-      }
-      this.is3D = false;
-      this.isCard = false;
-      this.isGroup = function() { return this.children.length > 0; }
-      this.isDefaultValue = function(name) {
+      },
+      isGroup : function() {
+         return this.children.length > 0;
+      },
+      isDefaultValue : function(name) {
          var j = getIndex(this.portName, name);
-         return j >= 0 ? isDef(this.DefaultValue[j]) : false;
-      }
-      this.isInValue = function(name) {
+         return j >= 0 ? isDef(this.defaultValue[j]) : false;
+      },
+      isInValue : function(name) {
          return this.isInValueAt(getIndex(this.portName, name));
-      }
-      this.isInValueAt = function(j) {
+      },
+      isInValueAt : function(j) {
          return j >= 0 ? isDef(this.inValue[j]) : false;
-      }
-      this.isMouseOver = false;
-      this.isNegated = false;
-      this.isNullText = function() { return this.text.replace(/ /g, '').length == 0; }
-      this.isParsed = function() { return false; }
-      this.isShowingLiveData = false;
-      this.isSimple = function() { return this instanceof SimpleSketch; }
-      this.keyDown = function(key) {}
-      this.keyUp = function(key) {}
-      this.labels = [];
-      this.m2s = function(p) { return [ this.m2x(p[0]), this.m2y(p[1]) ]; }
-      this.m2x = function(x) { return (x - this.tx()) / this.scale(); }
-      this.m2y = function(y) { return (y - this.ty()) / this.scale(); }
-      this.motionPath = [];
-      this.mouseDown = function(x, y) {}
-      this.mouseDrag = function(x, y) {}
-      this.mouseMove = function(x, y) {}
-      this.mouseUp = function(x, y) {}
-      this.moveCursor = function(incr) {
+      },
+      isNullText : function() {
+         return this.text.replace(/ /g, '').length == 0;
+      },
+      isParsed : function() {
+         return false;
+      },
+      isSimple : function() {
+         return this instanceof SimpleSketch;
+      },
+      m2s : function(p) {
+         return [ this.m2x(p[0]), this.m2y(p[1]) ];
+      },
+      m2x : function(x) {
+         return (x - this.tx()) / this.scale();
+      },
+      m2y : function(y) {
+         return (y - this.ty()) / this.scale();
+      },
+      moveCursor : function(incr) {
          if (this.code != null && isCodeWidget) {
             var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
             codeTextArea.selectionStart = newPos;
@@ -515,8 +569,8 @@
          } else {
             this.textCursor = max(0, min(this.text.length, this.textCursor + incr));
         }
-      }
-      this.moveLine = function(incr) {
+      },
+      moveLine : function(incr) {
          if (this.code != null && isCodeWidget) {
             var currentPos = codeTextArea.selectionStart;
             var lines = codeTextArea.value.split(/\r?\n/);
@@ -560,17 +614,11 @@
          } else {
             // move cursor in normal text area
          }
-      }
-      this.nPorts = 0;
-      this.offsetSelection = function(d) { this.selection += d; }
-      this.out = []; // array of array of Sketch
-      this.outValue = []; // array of values
-      this.parent = null;
-      this.parse = function() { }
-      this.portName = [];
-      this.portLocation = [];
-      this.portBounds = [];
-      this.portXY = function(i) {
+      },
+      offsetSelection : function(d) {
+         this.selection += d;
+      },
+      portXY : function(i) {
          if (isDef(this.portLocation[i])) {
             if (this instanceof Sketch2D) {
                var p = this.portLocation[i];
@@ -587,10 +635,8 @@
             }
          }
          return this.adjustXY([this.cx(),this.cy()]);
-      }
-      this.rX = 0;
-      this.rY = 0;
-      this.lastStrokeSize = function() {
+      },
+      lastStrokeSize : function() {
          if (this.sp.length > 1) {
             var i = this.sp.length;
             var x0 = 10000, y0 = 10000, x1 = -x0, y1 = -y0;
@@ -603,8 +649,8 @@
             return max(x1 - x0, y1 - y0);
          }
          return 0;
-      }
-      this.removeLastStroke = function() {
+      },
+      removeLastStroke : function() {
          if (this.sp.length > 1) {
             var i = this.sp.length;
             while (--i > 0 && this.sp[i][2] == 1) ;
@@ -612,9 +658,8 @@
                this.sp0.splice(i, this.sp.length-i);
             this.sp.splice(i, this.sp.length-i);
          }
-      }
-      this.render = function() {}
-      this.renderWrapper = function(elapsed) {
+      },
+      renderWrapper : function(elapsed) {
 	 _g.save();
          m.save();
 	 this.render(elapsed);
@@ -623,9 +668,8 @@
 	 if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
 	    this._updateMesh();
          }
-      }
-      this.sc = 1;
-      this.scale = function(value) {
+      },
+      scale : function(value) {
          if (value === undefined) {
             var s = this.sc;
             if (this.parent != null)
@@ -656,36 +700,40 @@
                }
             }
          }
-      }
-      this.scene = null;
-      this.selection = 0;
-      this.setDefaultValue = function(name, value) {
+      },
+      setDefaultValue : function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0) {
             this.defaultValue[j] = value;
             if (this.defaultValueIncr[j] === undefined)
                this.defaultValueIncr[j] = 1;
          }
-      }
-      this.setOutValue = function(name, value) {
+      },
+
+      setOutPortValue : function(value) {
+         var j = getIndex(this.portName, "out");
+	 if (j == -1)
+	    this.addPort("out", 0, 0);
+         this.setOutValue("out", value);
+      },
+
+      setOutValue : function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)
             this.outValue[j] = value;
-      }
-      this.setSelection = function(s) {
+      },
+      setSelection : function(s) {
          if (typeof(s) == 'string') {
             this.selectionName = s;
             s = getIndex(this.labels, s);
          }
          this.selection = s;
          this.updateSelectionWeights(0);
-      }
-      this.selectionWeight = function(i) {
+      },
+      selectionWeight : function(i) {
          return sCurve(this.selectionWeights[i]);
-      }
-      this.size = 400;
-      this.suppressLineTo = false;
-      this.updateSelectionWeights = function(delta) {
+      },
+      updateSelectionWeights : function(delta) {
          if (this.labels.length == 0)
             return;
          if (this.selectionWeights === undefined) {
@@ -698,8 +746,8 @@
                this.selectionWeights[i] = min(1, this.selectionWeights[i] + 2 * delta);
             else
                this.selectionWeights[i] = max(0, this.selectionWeights[i] - delta);
-      }
-      this.setText = function(text) {
+      },
+      setText : function(text) {
 
          if (! this.isSimple() && ! (this instanceof Sketch2D))
             return;
@@ -734,18 +782,12 @@
             this.textWidth = max(this.textWidth, textWidth(this.textStrs[n]));
 
          _g.restore();
-      }
-      this.setUniform = function(name, val) {
+      },
+      setUniform : function(name, val) {
          if (this.mesh !== undefined)
             this.mesh.material.setUniform(name, val);
-      }
-      this.sketchLength = 1;
-      this.cursorTransition = 0;
-      this.sketchProgress = 0;
-      this.sketchState = 'finished';
-      this.styleTransition = 0;
-      this.sp = [];
-      this.standardView = function(matrix) {
+      },
+      standardView : function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardView(
             .5 + this.tx() / width(),
@@ -754,8 +796,8 @@
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
             this.scale() / 14, matrix);
-      }
-      this.standardViewInverse = function(matrix) {
+      },
+      standardViewInverse : function(matrix) {
          var rx = this.rX, ry = this.rY, yy = min(1, 4 * ry * ry);
          standardViewInverse(
             .5 + this.tx() / width(),
@@ -764,26 +806,18 @@
             this.is3D ? PI * rx * (1-yy) : 0,
             this.is3D ? PI * rx * yy     : -TAU * rx,
             this.scale() / 14, matrix);
-      }
-      this.tX = 0;
-      this.tY = 0;
-      this.text = "";
-      this.textCursor = 0;
-      this.textHeight = -1;
-      this.textStrs = [];
-      this.textX = 0;
-      this.textY = 0;
-      this.toPixel = function(point) {
+      },
+      toPixel : function(point) {
          return this.adjustXY(m.transform(point));
-      }
-      this.toTrace = function() {
+      },
+      toTrace : function() {
          var src = this.sp;
 	 var dst = [];
 	 for (var i = 0 ; i < src.length ; i++)
 	    buildTrace(dst, src[i][0], src[i][1], src[i][2]);
          return dst;
-      }
-      this.translate = function(dx, dy) {
+      },
+      translate : function(dx, dy) {
          if (this.isGroup()) {
             this.xlo += dx;
             this.ylo += dy;
@@ -805,8 +839,8 @@
             this.textX += dx;
             this.textY += dy;
          }
-      }
-      this.tx = function() {
+      },
+      tx : function() {
          var x = this.tX;
          if (this.parent != null) {
             var cx = this.parent.cx();
@@ -819,8 +853,8 @@
 	 if (this.hasMotionPath())
 	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
-      }
-      this.ty = function() {
+      },
+      ty : function() {
          var y = this.tY;
          if (this.parent != null) {
             var cy = this.parent.cy();
@@ -833,35 +867,34 @@
 	 if (this.hasMotionPath())
 	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
-      }
-
-      this.xform = function(xy) {
+      },
+      xform : function(xy) {
          return [ this.xf[0] + this.xf[4] * ( this.xf[2] * xy[0] + this.xf[3] * xy[1]),
                   this.xf[1] + this.xf[4] * (-this.xf[3] * xy[0] + this.xf[2] * xy[1]) ];
-      }
-      this.xformInverse = function(xy) {
+      },
+      xformInverse : function(xy) {
          var x = (xy[0] - this.xf[0]) / this.xf[4];
          var y = (xy[1] - this.xf[1]) / this.xf[4];
          return [ this.xf[2] * x - this.xf[3] * y, this.xf[3] * x + this.xf[2] * y ];
-      }
-      this.makeXform = function() {
+      },
+      makeXform : function() {
          this.xf = [ this.tx(),
                      this.ty(),
                      cos(PI * this.rX),
                      sin(PI * this.rX),
                      this.scale() ];
-      }
-      this.enableFragmentShaderEditing = function() {
+      },
+      enableFragmentShaderEditing : function() {
          if (this.code === undefined)
             this.code = [["", this.fragmentShader]];
 	 this.update = function() {
             if (isCodeWidget && this.fragmentShader != codeTextArea.value
                              && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
-               this.mesh.material = shaderMaterial(this.mesh.material.vertexShader,
+               this.mesh.material = shaderMaterial(this.vertexShader === undefined ? defaultVertexShader : this.vertexShader,
                                                    this.fragmentShader = codeTextArea.value);
 	 }
-      }
-      this._updateMesh = function() {
+      },
+      _updateMesh : function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
 	    if (this.vertexShader === undefined)
 	       this.vertexShader = defaultVertexShader;
@@ -969,16 +1002,8 @@
 
 	    this.extendBounds(this.meshBounds);
          }
-      }
-      this.value = null;
-      this.x = 0;
-      this.xyz = [];
-      this.xStart = 0;
-      this.xf = [0,0,1,0,1];
-      this.y = 0;
-      this.yStart = 0;
-      this.zoom = 1;
-   }
+      },
+   };
 
    function Sketch2D() {
       this.width = 400;

@@ -547,11 +547,12 @@ function formFragmentShader(string) {
    return fragmentShaderHeader.concat(string);
 }
 
-function shaderMaterial(vertexShader, fragmentShaderString) {
+function shaderMaterial(vertexShaderString, fragmentShaderString) {
    var material = new THREE.ShaderMaterial({
-      uniforms: {},
-      vertexShader: formVertexShader(vertexShader),
+      uniforms: {}
    });
+
+   material.vertexShader = formVertexShader(vertexShaderString);
 
    var u = "alpha mx my mz pixelSize selectedIndex time x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
@@ -568,16 +569,16 @@ function shaderMaterial(vertexShader, fragmentShaderString) {
 var defaultVertexShader = [
    ,'varying vec3 vPosition;'
    ,'varying vec3 vNormal;'
-   ,'float displace(vec3 p) { return 0.0 /* * noise(3.0*p + time*vec3(0.0,-1.0,0.0)) */; }'
+   ,'float displace(vec3 p) { return 0.; }'
    ,'void main() {'
    ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
    ,'   vPosition = position*.03;'
-   ,'   float _p0 = displace(position);'
-   ,'   float _px = displace(position + vec3(epsilon, 0.0, 0.0));'
-   ,'   float _py = displace(position + vec3(0.0, epsilon, 0.0));'
-   ,'   float _pz = displace(position + vec3(0.0, 0.0, epsilon));'
-   ,'   vNormal = normalize(vNormal + vec3(_px - _p0, _py - _p0, _pz - _p0) / epsilon);'
-   ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(position * (1. - _p0), 1.);'
+   ,'   float _d = displace(position);'
+   ,'   float _x = displace(position + vec3(.001, 0., 0.));'
+   ,'   float _y = displace(position + vec3(0., .001, 0.));'
+   ,'   float _z = displace(position + vec3(0., 0., .001));'
+   ,'   vNormal = normalize(vNormal + vec3(_x - _d, _y - _d, _z - _d) / .001);'
+   ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(position * (1. - _d), 1.);'
    ,'}'
 ].join("\n");
 
@@ -607,7 +608,6 @@ var defaultFragmentShader = [
 
 var sharedHeader = [
  'precision highp float;'
-,'float epsilon = .001;'
 ,'vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }'
 ,'vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }'
 ,'vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }'
@@ -665,6 +665,7 @@ var sharedHeader = [
 
 var syntaxCheckVertexShaderHeader = [
  sharedHeader
+,'precision highp float;'
 ,'uniform mat4  modelViewMatrix;'
 ,'uniform mat4  projectionMatrix;'
 ,'varying vec3  normal;'
