@@ -273,7 +273,7 @@
       mat.identity();
 
       mat.translate(width()*x,height()*(1-y),0);
-      mat.perspective(0,0,-width()*2);
+      //mat.perspective(0,0,-width()*2);
 
       mat.rotateX(phi);
       mat.rotateY(theta);
@@ -295,7 +295,7 @@
       mat.rotateY(-theta);
       mat.rotateX(-phi);
 
-      mat.perspective(0,0,width()*2);
+      //mat.perspective(0,0,width()*2);
       mat.translate(-width()*x,-height()*(1-y),0);
    }
    function mLine(a,b) {
