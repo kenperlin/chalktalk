@@ -102,15 +102,15 @@ function Jointed() {
    }
    this.computeLengths();
 
-   function m_transform(xyz, p) {
-      var mp = mTransform(xyz);
-      p.x = mp[0];
-      p.y = mp[1];
-      p.z = mp[2];
+   function pixelToPoint(x, y, p) {
+      p.x = x;
+      p.y = y;
+      p.z = 0;
+      p.applyMatrix4(pixelToPointMatrix);
    }
 
    this.mouseDown = function(x,y) {
-      m_transform([x,y], p);
+      pixelToPoint(x, y, p);
       J = this.findJoint([x,y]);
       if (J != -1) {
          var joint = this.joints[J];
@@ -130,7 +130,7 @@ function Jointed() {
 
    this.mouseDrag = function(x,y) {
       q.copy(p);
-      m_transform([x,y], p);
+      pixelToPoint(x, y, p);
       travel += this.distance(p, q);
       if (jSelected != -1) {
          if (J != -1)
