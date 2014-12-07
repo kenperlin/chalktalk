@@ -2,7 +2,13 @@
    Problem -- right now we can't specify forces properly after object is rotated,
    because distance along pixel ray is not specified accurately.
 
-   To do -- change rendering to use THREE.js ball and stick model.
+   Translate/rotate/scale/etc on one joint.
+   Text for a joint (eg: atomic symbol).
+   Joints do not knock into each other.
+   Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
+   Eg: ethane molecule.
+
+   DONE To do -- change rendering to use THREE.js ball and stick model.
 */
 
 function Jointed() {
@@ -15,12 +21,12 @@ function Jointed() {
       if (isAdjustingA) {
          A.x -= t * x;
          A.y -= t * y;
-	 A.z -= t * z;
+         A.z -= t * z;
       }
       if (isAdjustingB) {
          B.x += t * x;
          B.y += t * y;
-	 B.z += t * z;
+         B.z += t * z;
       }
    }
    this.labels = 'jointed'.split(' ');
@@ -34,7 +40,7 @@ function Jointed() {
       return this.myMaterial;
    }
 
-   var J = -1, isCreatingLink = false, p = nv(0,0,0), q = nv(0,0,0), travel, jSelected = -1;
+   var I = -1, I_ = -1, J = -1, p = nv(0,0,0), q = nv(0,0,0), travel;
 
    this.findLink = function(i, j) {
       if (i != j)
@@ -109,22 +115,105 @@ function Jointed() {
       p.applyMatrix4(pixelToPointMatrix);
    }
 
+////////////////////////////////////////////////////////////////////////////////
+
+   this.onPress = function() {
+      var joint = this.joints[I];
+      if (joint.d === undefined)
+         joint.d = nv(0,0,0);
+      this.joints[I].d.set(p.x - joint.p.x, p.y - joint.p.y, p.z - joint.p.z);
+   }
+
+   this.onPressB = function() {
+      I = this.joints.length;
+      this.joints.push({p:nv(p.x,p.y,p.z)});
+   }
+
+   this.onDrag = function() {
+      this.joints[I].p.copy(p);
+   }
+
+   this.onDragB = function() { }
+
+   this.onRelease = function() { }
+
+   this.onReleaseB = function() { }
+
+   this.onClick = function() { }
+
+   this.onClickB = function() { }
+
+//////////
+
+   this.onClickPress = function() { }
+
+   this.onClickPressJ = function() { }
+
+   this.onClickPressB = function() { }
+
+//////////
+
+   this.onClickDrag = function() {
+      this.joints[I_].p.copy(p);
+   }
+
+   this.onClickDragJ = function() {
+      this.joints[J].p.copy(p);
+   }
+
+   this.onClickDragB = function() { }
+
+//////////
+
+   this.onClickRelease = function() { }
+
+   this.onClickReleaseJ = function() {
+      this.links.push([J, I_, .03]);
+   }
+
+   this.onClickReleaseB = function() { }
+
+//////////
+
+   this.onClickClick = function() {
+      this.removeJoint(I_);
+   }
+
+   this.onClickClickJ = function() {
+      var l = this.findLink(J, I_);
+      if (l == -1)
+         this.links.push([I_, J]);
+      else
+         this.removeLink(l);
+   }
+
+   this.onClickClickB = function() {
+      var joint = this.joints[I_];
+      if (joint.f === undefined)
+         joint.f = nv(0,0,0);
+      joint.f.set(p.x - joint.p.x, p.y - joint.p.y, p.z - joint.p.z);
+   }
+
+////////////////////
+
    this.mouseDown = function(x,y) {
       pixelToPoint(x, y, p);
-      J = this.findJoint([x,y]);
-      if (J != -1) {
-         var joint = this.joints[J];
-         if (joint.d === undefined)
-            joint.d = nv(0,0,0);
-         this.joints[J].d.set(p.x - joint.p.x, p.y - joint.p.y, p.z - joint.p.z);
-      }
       travel = 0;
-      if (jSelected == -1) {
-         isCreatingLink = J == -1;
-         if (isCreatingLink) {
-            J = this.joints.length;
-            this.joints.push({p:nv(p.x,p.y,p.z)});
-         }
+      if (I_ == -1) {
+         I = this.findJoint([x,y]);
+         if (I != -1)
+            this.onPress();
+         else
+            this.onPressB();
+      }
+      else {
+         J = this.findJoint([x,y]);
+         if (J == I_)
+            this.onClickPress();
+         else if (J != -1)
+            this.onClickPressJ();
+          else
+            this.onClickPressB();
       }
    }
 
@@ -132,58 +221,56 @@ function Jointed() {
       q.copy(p);
       pixelToPoint(x, y, p);
       travel += this.distance(p, q);
-      if (jSelected != -1) {
-         if (J != -1)
-            this.joints[J].p.copy(p);
+      if (I_ == -1)
+         if (I != -1)
+            this.onDrag();
          else
-            this.joints[jSelected].p.copy(p);
-      }
-      else if (! isCreatingLink)
-         this.joints[J].p.copy(p);
+            this.onDragB();
+      else
+         if (J == I_)
+            this.onClickDrag();
+         else if (J != -1)
+            this.onClickDragJ();
+         else
+            this.onClickDragB();
    }
 
    this.mouseUp = function(x,y) {
-      if (jSelected != -1) {
+      if (I_ == -1) {
          if (travel >= .1) {
-            if (J != -1) {
-               this.links.push([J, jSelected, .03]);
-            }
+	    J = this.findJoint([x,y]);
+	    if (I != -1)
+               this.onRelease();
+            else
+               this.onReleaseB();
          }
-         else {
-            var j = this.findJoint([x,y]);
-            if (j == jSelected)
-               this.removeJoint(jSelected);
-            else if (j == -1) {
-               var joint = this.joints[jSelected];
-	       if (joint.f === undefined)
-	          joint.f = nv(0,0,0);
-               joint.f.set(p.x - joint.p.x, p.y - joint.p.y, p.z - joint.p.z);
+	 else {
+	    if (I != -1) {
+               I_ = I;
+	       this.onClick();
             }
-            else {
-               var l = this.findLink(j, jSelected);
-               if (l == -1)
-                  this.links.push([j, jSelected]);
-               else
-                  this.removeLink(l);
-            }
-         }
+	    else
+	       this.onClickB();
+	 }
+      }
+      else {
+         if (travel >= .1)
+            if (J == I_)
+               this.onClickRelease();
+            else if (J != -1)
+               this.onClickReleaseJ();
+            else
+               this.onClickReleaseB();
+         else
+            if (J == I_)
+               this.onClickClick();
+            else if (J != -1)
+               this.onClickClickJ();
+            else
+               this.onClickClickB();
          this.computeLengths();
-         jSelected = -1;
+         I_ = -1;
       }
-      else if (isCreatingLink) {
-         var j = this.findJoint([x,y]);
-         if (j == -1) {
-            j = J++;
-            this.joints.push({p:p});
-         }
-         if (j != J) {
-            this.links.push([j, J]);
-            this.computeLengths();
-         }
-         isCreatingLink = false;
-      }
-      else if (travel < .1)
-         jSelected = J;
       J = -1;
    }
 
@@ -211,7 +298,7 @@ function Jointed() {
       renderScale = this.scale() * (this.xyz.length < 3 ? 1 : [2]);
       lineWidth(4 * renderScale);
       this.afterSketch(function() {
-         if (jSelected == -1 && ! isCreatingLink) {
+         if (I_ == -1) {
 
             for (var j = 0 ; j < this.joints.length ; j++) {
                var joint = this.joints[j];
@@ -258,8 +345,6 @@ function Jointed() {
       });
 
       this.afterSketch(function() {
-         if (isCreatingLink)
-            drawLink(this.joints[J].p, p);
 
          for (var j = 0 ; j < this.joints.length ; j++) {
             var joint = this.joints[j];
@@ -267,14 +352,14 @@ function Jointed() {
             joint.pix = mTransform([x, y, z]);
 
             if (joint.g === undefined) {
-	       var geometry = new THREE.SphereGeometry(1, 16, 8);
-	       joint.g = new THREE.Mesh(geometry, this.myShaderMaterial());
-	       jointed.add(joint.g);
-	       joint.g.scale = nv(.1,.1,.1);
-	       joint.g.quaternion = new THREE.Quaternion();
-	       joint.g.position = nv(0,0,0);
+               var geometry = new THREE.SphereGeometry(1, 16, 8);
+               joint.g = new THREE.Mesh(geometry, this.myShaderMaterial());
+               jointed.add(joint.g);
+               joint.g.scale = nv(.1,.1,.1);
+               joint.g.quaternion = new THREE.Quaternion();
+               joint.g.position = nv(0,0,0);
             }
-	    joint.g.position.copy(joint.p);
+            joint.g.position.copy(joint.p);
             //joint.g.getMatrix().identity().translate(x, y, z).scale(.1);
 
             if (joint.f !== undefined) {
@@ -291,9 +376,9 @@ function Jointed() {
             drawJoint(joint.p, j == J ? 1 : .01);
          }
 
-         if (jSelected != -1) {
+         if (I_ != -1) {
             color('red');
-            drawJoint(this.joints[jSelected].p, 1);
+            drawJoint(this.joints[I_].p, 1);
          }
       });
 
@@ -312,17 +397,17 @@ function Jointed() {
          this.afterSketch(function() {
             if (bJoint.g !== undefined) {
                if (link.g === undefined) {
-	          var geometry = new THREE.BoxGeometry(2, 2, 2);
-	          link.g = new THREE.Mesh(geometry, this.myShaderMaterial());
+                  var geometry = new THREE.BoxGeometry(2, 2, 2);
+                  link.g = new THREE.Mesh(geometry, this.myShaderMaterial());
                   link.g.scale.x = .01 * r;
-	          link.g.scale.y = .01 * r;
-	          jointed.add(link.g);
+                  link.g.scale.y = .01 * r;
+                  jointed.add(link.g);
                }
                link.g.position.x = (a.x + b.x) / 2;
                link.g.position.y = (a.y + b.y) / 2;
                link.g.position.z = (a.z + b.z) / 2;
                link.g.lookAt(b);
-	       link.g.scale.z = a.distanceTo(b) / 2;
+               link.g.scale.z = a.distanceTo(b) / 2;
             }
          });
       }
