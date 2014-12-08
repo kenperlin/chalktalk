@@ -357,6 +357,7 @@ function Net() {
             case 'J': R.onClickClickJ(); break;
             case 'B': R.onClickClickB(); break;
             }
+         R.J = -1;
          R.I_ = -1;
          break;
       default:
@@ -413,17 +414,19 @@ function Net() {
       this.afterSketch(function() {
          if (R.clickType == 'none') {
 
+	    // Make any small adjustments to node position needed after mouse press on a node.
+
             for (var j = 0 ; j < this.nodes.length ; j++) {
                var node = this.nodes[j];
                if (node.d !== undefined) {
-                  node.p.x += .1 * node.d.x;
-                  node.p.y += .1 * node.d.y;
-                  node.p.z += .1 * node.d.z;
-                  node.d.x -= .1 * node.d.x;
-                  node.d.y -= .1 * node.d.y;
-                  node.d.z -= .1 * node.d.z;
+	          q.copy(node.d).multiplyScalar(0.1);
+		  node.p.add(q);
+	          q.negate();
+		  node.d.add(q);
                }
             }
+
+	    // Coerce all links to be the proper length.
 
             for (var rep = 0 ; rep < 10 ; rep++)
             for (var n = 0 ; n < this.lengths.length ; n++) {
@@ -520,9 +523,7 @@ function Net() {
       }
       var a = this.nodes[link[0]].p;
       var b = this.nodes[link[1]].p;
-      link.g.position.x = (a.x + b.x) / 2;
-      link.g.position.y = (a.y + b.y) / 2;
-      link.g.position.z = (a.z + b.z) / 2;
+      link.g.position.copy(a).lerp(b, 0.5);
       link.g.lookAt(b);
       link.g.scale.z = a.distanceTo(b) / 2;
    }
