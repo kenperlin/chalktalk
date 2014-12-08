@@ -1,12 +1,14 @@
 /*
+   Problem -- deleting a joint seems to leave links that should not be there.
+
    Problem -- right now we can't specify forces properly after object is rotated,
    because distance along pixel ray is not specified accurately.
 
-   Translate/rotate/scale/etc on one node.
+   Translate/rotate/scale/etc a node.
    Text for a node (eg: atomic symbol).
    Nodes do not knock into each other.
    Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
-   Eg: ethane molecule.
+   Eg: ethane molecule, with repelling H atoms.
 
    DONE Create separate responder object.
    DONE Change rendering to use THREE.js ball and stick model.
@@ -52,11 +54,6 @@ function Net() {
                return l;
          }
       return -1;
-   }
-
-   this.distance = function(a, b) {
-      var x = b.x - a.x, y = b.y - a.y, z = b.z - a.z;
-      return sqrt(x * x + y * y + z * z);
    }
 
    this.pixelDistance = function(a, b) {
@@ -112,7 +109,7 @@ function Net() {
          var l = this.findLink(i, j);
          if (l >= 0) {
             var link = this.links[l];
-            var d = this.distance(this.nodes[i].p, this.nodes[j].p);
+            var d = this.nodes[i].p.distanceTo(this.nodes[j].p);
             var w = link.length == 2 ? 1 : link[2];
             this.lengths.push({ i:i, j:j, d:d, w:w });;
          }
@@ -168,7 +165,9 @@ function Net() {
 
    function MyNetResponder() {
    
-      // RESPONSES NOT AFTER A CLICK.
+// RESPONSES NOT AFTER A CLICK.
+
+      // Drag on a node to move it.
    
       this.onPress = function() {
          var node = this.net.nodes[this.I];
@@ -180,23 +179,37 @@ function Net() {
          this.net.nodes[this.I].p.copy(p);
       }
    
-      // RESPONSES AFTER CLICKING ON A JOINT.
+// RESPONSES AFTER CLICKING ON A JOINT.
+
+      // Click on a node and then drag it to move it while the simulation pauses.
    
       this.onClickDrag = function() {
          this.net.nodes[this.I_].p.copy(p);
       }
+
+      // Click on a node and then drag a different node. The simulation will pause.
+
       this.onClickDragJ = function() {
          this.net.nodes[this.J].p.copy(p);
       }
+
+      // then when the second node is released, create a springy link between them.
+
       this.onClickReleaseJ = function() {
          this.net.removeLink(this.net.findLink(this.I_, this.J));
          this.net.links.push([this.I_, this.J, .03]);
          this.net.computeLengths();
       }
+
+      // Double click on a node to remove it.
+
       this.onClickClick = function() {
          this.net.removeNode(this.I_);
          this.net.computeLengths();
       }
+
+      // Click on a node then click on another node to toggle a link between them.
+
       this.onClickClickJ = function() {
          var l = this.net.findLink(this.I_, this.J);
          if (l == -1)
@@ -205,31 +218,33 @@ function Net() {
             this.net.removeLink(l);
          this.net.computeLengths();
       }
-      this.onClickClickB = function() {
-         var node = this.net.nodes[this.I_];
-         if (node.f === undefined)
-            node.f = nv(0,0,0);
-         node.f.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
-      }
-   
-      // RESPONSES AFTER CLICKING ON THE BACKGROUND.
+
+// RESPONSES AFTER CLICKING ON THE BACKGROUND.
+
+      // Click on the background, then click in the same place to create a new node,
    
       this.onClickBPressB = function() {
-         this.isCreatingNode = this.net.distance(this.clickPoint, p) < .1;
+         this.isCreatingNode = p.distanceTo(this.clickPoint) < .1;
 	 if (this.isCreatingNode) {
             this.newJ = this.net.nodes.length;
             this.net.nodes.push({p:nv(p.x,p.y,p.z)});
          }
       }
+
+      // then optionally drag to move the new node.
+
       this.onClickBDragB = function() {
          if (this.isCreatingNode)
             this.net.nodes[this.newJ].p.copy(p);
       }
-      this.onClickBReleaseJ = function() {
-	 console.log(v2s(this.clickPoint) + " " + v2s(this.net.nodes[this.J].p) + " " + v2s(p));
-      }
       this.onClickBReleaseB = function() {
          this.isCreatingNode = false;
+      }
+
+      // Click on the background and then on a node to do a gesture on that node.
+
+      this.onClickBReleaseJ = function() {
+	 console.log(v2s(this.clickPoint) + " " + v2s(this.net.nodes[this.J].p) + " " + v2s(p));
       }
    }
    MyNetResponder.prototype = new NetResponder;
@@ -286,7 +301,7 @@ function Net() {
    this.mouseDrag = function(x,y) {
       q.copy(p);
       pixelToPoint(x, y, p);
-      travel += this.distance(p, q);
+      travel += p.distanceTo(q);
       switch (R.clickType) {
       case 'B':
          switch (R.actionType) {
@@ -407,30 +422,6 @@ function Net() {
                   node.d.x -= .1 * node.d.x;
                   node.d.y -= .1 * node.d.y;
                   node.d.z -= .1 * node.d.z;
-               }
-            }
-
-            var fx = 0, fy = 0, fz = 0;
-            for (var j = 0 ; j < this.nodes.length ; j++) {
-               if (j == R.J) continue;
-               var node = this.nodes[j];
-               if (node.f !== undefined) {
-                  fx += node.f.x;
-                  fy += node.f.y;
-                  fz += node.f.z;
-               }
-            }
-            var epsilon = 0.1;
-            for (var j = 0 ; j < this.nodes.length ; j++) {
-               var node = this.nodes[j];
-               node.p.x -= epsilon * fx / this.nodes.length;
-               node.p.y -= epsilon * fy / this.nodes.length;
-               node.p.z -= epsilon * fz / this.nodes.length;
-               if (j == R.J) continue;
-               if (node.f !== undefined) {
-                  node.p.x += epsilon * node.f.x;
-                  node.p.y += epsilon * node.f.y;
-                  node.p.z += epsilon * node.f.x;
                }
             }
 
