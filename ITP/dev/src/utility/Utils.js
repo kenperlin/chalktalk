@@ -22,6 +22,10 @@ define(function(){
 			return true;
 		},
 
+		sphere:function(s){
+			return new THREE.Mesh(new THREE.SphereGeometry(s),new THREE.MeshLambertMaterial());
+		}
+
 	};
 	
 	return CT;

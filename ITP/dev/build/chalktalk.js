@@ -102,7 +102,7 @@ main = function (require) {
 requirejs.config({
   'baseUrl': '../../src',
   'paths': {
-    'app': './src',
+    // "app": "./src",
     'THREE': '../deps/three'
   },
   'shim': { 'THREE': { exports: 'THREE' } }
