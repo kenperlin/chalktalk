@@ -76,14 +76,13 @@ function Net() {
          return;
 
       var node = this.nodes[j];
-      if (node.g !== undefined)
-         mesh.remove(node.g);
+      this.removeGeometry(node);
 
       this.nodes.splice(j, 1);
 
       for (var l = 0 ; l < this.links.length ; l++)
          if (this.links[l][0] == j || this.links[l][1] == j)
-            this.removeLink(l);
+            this.removeLink(l--);
 
       for (var l = 0 ; l < this.links.length ; l++)
          for (var n = 0 ; n < 2 ; n++)
@@ -96,8 +95,7 @@ function Net() {
          return;
 
       var link = this.links[l];
-      if (link.g !== undefined)
-         mesh.remove(link.g);
+      this.removeGeometry(link);
 
       this.links.splice(l, 1);
    }
@@ -241,8 +239,11 @@ function Net() {
          this.isCreatingNode = false;
       }
 
-      // Click on the background and then on a node to do a gesture on that node.
+      // Click on the background and then drag on a node to do a gesture on that node.
 
+      this.onClickBDragJ = function() {
+	 console.log("DRAG " + v2s(p));
+      }
       this.onClickBReleaseJ = function() {
 	 console.log(v2s(this.clickPoint) + " " + v2s(this.net.nodes[this.J].p) + " " + v2s(p));
       }
@@ -385,6 +386,7 @@ function Net() {
          R.J = -1;
          break;
       }
+      R.J = -1;
       R.K = -1;
    }
 
@@ -472,9 +474,7 @@ function Net() {
 
          if (R.clickType == 'B' && ! R.isCreatingNode) {
             color('red');
-            drawNode(R.clickPoint, 1);
-            color('black');
-            drawNode(R.clickPoint, 0.8);
+            drawNode(R.clickPoint, 0.5);
          }
       });
 
@@ -506,10 +506,10 @@ function Net() {
          var geometry = new THREE.SphereGeometry(1, 16, 8);
          node.g = new THREE.Mesh(geometry, this.myShaderMaterial());
          mesh.add(node.g);
-         node.g.scale = nv(.1,.1,.1);
          node.g.quaternion = new THREE.Quaternion();
-         node.g.position = nv(0,0,0);
+         node.r = 0.1;
       }
+      node.g.scale.set(node.r,node.r,node.r);
       node.g.position.copy(node.p);
    }
 
@@ -526,6 +526,11 @@ function Net() {
       link.g.position.copy(a).lerp(b, 0.5);
       link.g.lookAt(b);
       link.g.scale.z = a.distanceTo(b) / 2;
+   }
+
+   this.removeGeometry = function(node) {
+      if (node.g !== undefined)
+         mesh.remove(node.g);
    }
 
 //////////////////////////////////////////////////
