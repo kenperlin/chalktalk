@@ -62,6 +62,14 @@ var sketchToDelete = null;
       this.clear();
    }
 
+   var pixelToPointMatrix = new THREE.Matrix4();
+
+   function computeStandardViewInverse() {
+      sk().standardViewInverse();
+      for (var i = 0 ; i < 16 ; i++)
+         pixelToPointMatrix.elements[i] = m._m()[i];
+   }
+
    var sketchBook = new SketchBook();
 
 // MOST USER INTERACTION IS MEDIATED BY THE CURRENT SKETCH PAGE.
@@ -313,7 +321,7 @@ var sketchToDelete = null;
             if (outPort == -1 || sk() instanceof NumericSketch) {
 
 	       m.save();
-	       sk().standardViewInverse();
+	       computeStandardViewInverse();
                sk().mouseDown(x, y);
 	       m.restore();
 
@@ -330,7 +338,7 @@ var sketchToDelete = null;
             y = sk().unadjustY(y);
 
 	    m.save();
-	    sk().standardViewInverse();
+	    computeStandardViewInverse();
             sk().mouseDown(x, y);
 	    m.restore();
 
@@ -492,7 +500,7 @@ var sketchToDelete = null;
             if (outPort == -1 || sk() instanceof NumericSketch) {
 
 	       m.save();
-	       sk().standardViewInverse();
+	       computeStandardViewInverse();
                sk().mouseDrag(x, y);
 	       m.restore();
 
@@ -773,7 +781,7 @@ var sketchToDelete = null;
             sk().isDrawingEnabled = true;
 
 	    m.save();
-	    sk().standardViewInverse();
+	    computeStandardViewInverse();
             sk().mouseUp(x, y);
 	    m.restore();
 
@@ -790,7 +798,7 @@ var sketchToDelete = null;
             if (this.isClick && isHover() && isDef(sk().onClick)) {
 
 	       m.save();
-	       sk().standardViewInverse();
+	       computeStandardViewInverse();
                sk().onClick(x, y);
 	       m.restore();
 
@@ -800,7 +808,7 @@ var sketchToDelete = null;
             if (! this.isClick && isk() && isDef(sk().onSwipe)) {
 
 	       m.save();
-	       sk().standardViewInverse();
+	       computeStandardViewInverse();
                sk().onSwipe(x - this.xDown, y - this.yDown);
 	       m.restore();
 
@@ -921,7 +929,7 @@ var sketchToDelete = null;
          if (isk()) {
 
 	    m.save();
-	    sk().standardViewInverse();
+	    computeStandardViewInverse();
             sk().mouseMove(x, y);
 	    m.restore();
 
@@ -1078,7 +1086,7 @@ var sketchToDelete = null;
                findOutSketchAndPort();
 
 	       m.save();
-	       sk().standardViewInverse();
+	       computeStandardViewInverse();
                sk().mouseMove(x, y);
 	       m.restore();
 
