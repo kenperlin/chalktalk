@@ -37,9 +37,8 @@ define(["THREE"], function (THREE) {
 
 	CT.Utils.extend(CT.CTObject,THREE.Object3D);
 
-	 //= {
 
-	CT.CTObject.prototype.	objectCount = function(){
+	CT.CTObject.prototype.objectCount = function(){
 		return (CT.CTObject.count);
 	};
 
@@ -48,8 +47,41 @@ define(["THREE"], function (THREE) {
 	};
 
 	CT.CTObject.prototype.getOutValue = function(){
-		// this.outValue = this.operation(this.inValues);
 		return this.outValue;
+	};
+
+	/**
+	 * Add a new port
+	 * @param {object} portIndex,position,rotation,scale [description]
+	 */
+	CT.CTObject.prototype.addPort = function(params){
+
+		var args = params || {};
+
+		var portIndex = args.portIndex || this.ports.length;
+
+		var position = args.position || CT.Utils.zeroVec();
+		var rotation = args.rotation || new THREE.Euler(0,0,0);
+		var scale = args.scale || CT.Utils.zeroVec();
+
+		var port = new CT.Port();
+
+		port.position = position;
+		port.rotation = rotation;
+		port.scale = scale;
+
+		this.ports.splice(portIndex,0,port);
+
+	};
+
+	/**
+	 * remove a port at index
+	 * @param  {int} index [description]
+	 */
+	CT.CTObject.prototype.removePort = function(index){
+
+		this.ports.splice(portIndex,1);
+
 	};
 	
 	CT.CTObject.prototype.evalCode  = function(code, x, y, z) {
@@ -82,7 +114,6 @@ define(["THREE"], function (THREE) {
 		return result;
 
   	};
-	// };
 
 	return CT;
 

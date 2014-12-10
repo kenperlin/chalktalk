@@ -10,6 +10,7 @@ define(function (require) {
     var CT = require('core');
     require('utility/Utils');
     require('objects/CTObject');
+    require('objects/Port');
     require('objects/testObject');
     require('UI/CTUI');
     CT.ui = new CT.UI();

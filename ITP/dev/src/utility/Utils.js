@@ -22,8 +22,27 @@ define(function(){
 			return true;
 		},
 
-		sphere:function(s){
-			return new THREE.Mesh(new THREE.SphereGeometry(s),new THREE.MeshLambertMaterial());
+		sphere:function(s,x,y){
+			var divX = x || 12;
+			var divY = y || 12;
+			return new THREE.Mesh(new THREE.SphereGeometry(s,x,y),new THREE.MeshLambertMaterial());
+		},
+
+		vec:function(x,y,z){
+			return new THREE.Vector3(x,y,z);
+		},
+
+		zeroVec:function(){
+			return new THREE.Vector3(0,0,0);
+		},
+
+
+		isUndef : function(thing){
+			return thing === void 0;
+		},
+
+		isDef : function(thing){
+			return !(thing === void 0);
 		}
 
 	};
