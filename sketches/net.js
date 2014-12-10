@@ -529,7 +529,7 @@ function Net() {
          node.g = new THREE.Mesh(geometry, this.myShaderMaterial());
          mesh.add(node.g);
          node.g.quaternion = new THREE.Quaternion();
-         node.r = 0.3;
+         node.r = 0.1;
       }
       node.g.scale.set(node.r,node.r,node.r);
       node.g.position.copy(node.p);
