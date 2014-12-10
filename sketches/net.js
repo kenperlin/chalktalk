@@ -184,6 +184,9 @@ function Net() {
       this.onClickDrag = function() {
          this.net.nodes[this.I_].p.copy(p);
       }
+      this.onClickRelease = function() {
+         this.net.computeLengths();
+      }
 
       // Click on a node and then drag a different node. The simulation will pause.
 
