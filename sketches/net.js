@@ -1,9 +1,6 @@
 /*
    Problem -- deleting a joint seems to leave links that should not be there.
 
-   Problem -- right now we can't specify forces properly after object is rotated,
-   because distance along pixel ray is not specified accurately.
-
    Translate/rotate/scale/etc a node.
    Text for a node (eg: atomic symbol).
    Nodes do not knock into each other.
@@ -65,7 +62,10 @@ function Net() {
    this.findNode = function(pix) {
       for (var j = 0 ; j < this.nodes.length ; j++) {
          var node = this.nodes[j];
-         if (this.pixelDistance(pix, node.pix) < 5 * renderScale)
+	 var d = 5;
+	 if (node.r !== undefined)
+	    d *= node.r * 10;
+         if (this.pixelDistance(pix, node.pix) < d * renderScale)
             return j;
       }
       return -1;
@@ -431,13 +431,32 @@ function Net() {
                }
             }
 
+	    // Make sure nodes do not intersect.
+
+            for (var i = 0 ; i < this.nodes.length-1 ; i++)
+               for (var j = i+1 ; j < this.nodes.length ; j++) {
+                  var a = this.nodes[i];
+                  var b = this.nodes[j];
+	          if (a.r !== undefined && b.r !== undefined) {
+	             var d = a.p.distanceTo(b.p);
+	             if (d < a.r + b.r) {
+	                var t = (a.r + b.r) / d;
+	                q.copy(a.p).lerp(b.p,.5);
+	                a.p.lerp(q, 1 - t);
+	                b.p.lerp(q, 1 - t);
+	             }
+	          }
+	       }
+
 	    // Coerce all links to be the proper length.
 
             for (var rep = 0 ; rep < 10 ; rep++)
-            for (var n = 0 ; n < this.lengths.length ; n++) {
-               var L = this.lengths[n];
-               adjustDistance(this.nodes[L.i].p, this.nodes[L.j].p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
-            }
+               for (var n = 0 ; n < this.lengths.length ; n++) {
+                  var L = this.lengths[n];
+                  var a = this.nodes[L.i];
+                  var b = this.nodes[L.j];
+                  adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
+               }
          }
       });
 
@@ -510,7 +529,7 @@ function Net() {
          node.g = new THREE.Mesh(geometry, this.myShaderMaterial());
          mesh.add(node.g);
          node.g.quaternion = new THREE.Quaternion();
-         node.r = 0.1;
+         node.r = 0.3;
       }
       node.g.scale.set(node.r,node.r,node.r);
       node.g.position.copy(node.p);
