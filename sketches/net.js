@@ -1,5 +1,11 @@
 /*
+   Create a Network base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
+
+   Should gradually drift toward origin (adjust translation accordingly) so rotation is always around center.
+
    Problem -- deleting a joint seems to leave links that should not be there.
+
+   Bug whereby bounding box is clearly too big -- maybe there are phantom nodes?
 
    Translate/rotate/scale/etc a node.
    Text for a node (eg: atomic symbol).
