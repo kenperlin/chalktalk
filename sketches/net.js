@@ -165,6 +165,7 @@ function Net() {
       this.onClickBReleaseJ = function() { }
       this.onClickBClickJ = function() { }
       this.onClickBClickB = function() { }
+      this.simulate = function() { }
    };
 
    function MyNetResponder() {
@@ -250,11 +251,18 @@ function Net() {
 
       // Click on the background and then drag on a node to do a gesture on that node.
 
+      this.onClickBPressJ = function() {
+         var node = this.net.nodes[this.J];
+	 node.r_at_click = node.r;
+      }
+
       this.onClickBDragJ = function() {
-	 console.log("DRAG " + v2s(p));
+         var node = this.net.nodes[this.J];
+         var a = this.clickPoint.distanceTo(node.p);
+	 var b = this.clickPoint.distanceTo(p);
+         node.r = node.r_at_click * b / a;
       }
       this.onClickBReleaseJ = function() {
-	 console.log(v2s(this.clickPoint) + " " + v2s(this.net.nodes[this.J].p) + " " + v2s(p));
       }
    }
    MyNetResponder.prototype = new NetResponder;
@@ -403,7 +411,7 @@ function Net() {
 
    function drawNode(p, r) {
       _g.save();
-      lineWidth(r * 16 * renderScale);
+      lineWidth(r * 160 * renderScale);
       mLine([p.x-.001,p.y,p.z],[p.x+.001,p.y,p.z]);
       _g.restore();
    }
@@ -422,8 +430,22 @@ function Net() {
       var a = m._m();
       renderScale = 2 * this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
       lineWidth(4 * renderScale);
+
+      // DURING THE INITIAL SKETCH, DRAW EACH LINK.
+
+      this.duringSketch(function() {
+         for (var l = 0 ; l < this.links.length ; l++)
+            drawLink(this.nodes[this.links[l][0]].p, this.nodes[this.links[l][1]].p);
+      });
+
+      // AFTER SKETCH IS DONE, DO FANCIER PROCESSING AND RENDERING.
+
       this.afterSketch(function() {
          if (R.clickType == 'none') {
+
+	    // Call any user defined simulation.
+
+	    R.simulate();
 
 	    // Make any small adjustments to node position needed after mouse press on a node.
 
@@ -464,59 +486,41 @@ function Net() {
                   adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
                }
          }
-      });
-
-      this.afterSketch(function() {
 
          for (var j = 0 ; j < this.nodes.length ; j++) {
             var node = this.nodes[j];
             var x = node.p.x, y = node.p.y, z = node.p.z;
             node.pix = mTransform([x, y, z]);
 
-            this.renderNode(node);
+	    // RENDER THE 3D NODE OBJECT.
 
-            if (node.f !== undefined) {
-               _g.save();
-               _g.strokeStyle = 'yellow';
-               _g.lineWidth = 2;
-               mLine([x,y,z], [ node.p.x + node.f.x,
-                                node.p.y + node.f.y,
-                                node.p.z + node.f.z ]);
-               _g.restore();
-            }
+            this.renderNode(node);
 
             // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
 
             color('cyan');
-            drawNode(node.p, j == R.J ? 1 : .01);
+            drawNode(node.p, node.r * (j == R.J ? 1 : .01));
          }
 
          // HIGHLIGHT JOINT THAT WAS JUST CLICKED ON.
 
          if (R.I_ != -1) {
             color('red');
-            drawNode(this.nodes[R.I_].p, 1);
+            drawNode(this.nodes[R.I_].p, node.r);
          }
 
          // AFTER A CLICK OVER BACKGROUND, SHOW THAT A SECOND CLICK AT SAME PLACE WOULD CREATE A NEW JOINT.
 
          if (R.clickType == 'B' && ! R.isCreatingNode) {
             color('red');
-            drawNode(R.clickPoint, 0.5);
+            drawNode(R.clickPoint, 0.05);
          }
+
+	 // RENDER EACH 3D LINK.
+
+         for (var l = 0 ; l < this.links.length ; l++)
+	    this.renderLink(this.links[l]);
       });
-
-      for (var l = 0 ; l < this.links.length ; l++) {
-         var link = this.links[l];
-
-         this.duringSketch(function() {
-            drawLink(this.nodes[link[0]].p, this.nodes[link[1]].p);
-         });
-
-         this.afterSketch(function() {
-	    this.renderLink(link);
-         });
-      }
    }
 
 ///////////////// THREE.js STUFF /////////////////
