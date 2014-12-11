@@ -420,7 +420,7 @@ function Net() {
       this.code = null;
 
       var a = m._m();
-      renderScale = this.scale() * (this.xyz.length < 3 ? 1 : [2]);
+      renderScale = 2 * this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
       lineWidth(4 * renderScale);
       this.afterSketch(function() {
          if (R.clickType == 'none') {
