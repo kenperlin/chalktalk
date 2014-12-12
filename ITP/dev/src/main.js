@@ -8,9 +8,11 @@ define(function (require) {
     // 
     // var THREE = require('../deps/three');
     var CT = require('core');
+    require('utility/threeExtension')
     require('utility/Utils');
     require('objects/CTObject');
     require('objects/Port');
+    require('objects/Sketch');
     require('objects/testObject');
     require('UI/CTUI');
     CT.ui = new CT.UI();

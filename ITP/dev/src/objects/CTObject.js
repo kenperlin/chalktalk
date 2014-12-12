@@ -16,7 +16,8 @@ define(["THREE"], function (THREE) {
 		this.strokes = [];
 		this.boundingBox = {};
 
-		this.inValue = this.args.inValue || [];
+		this.inValue = this.args.inValue || null;
+		this.inValues = this.args.inValues || [];
 		this.outValue = null;
 
 		this.ports = [];
@@ -39,17 +40,43 @@ define(["THREE"], function (THREE) {
 
 
 	CT.CTObject.prototype.objectCount = function(){
-		return (CT.CTObject.count);
+		return CT.CTObject.count;
 	};
 
-	CT.CTObject.prototype.setInValue = function(index,value){
-		this.inValue[index]=value;
+	CT.CTObject.prototype.setInValue = function(value,index){
+		var i = index || this.inValues.length;
+		this.inValues[index]=value;
 	};
 
 	CT.CTObject.prototype.getOutValue = function(){
 		return this.outValue;
 	};
 
+	CT.CTObject.prototype.portsToValues = function(){
+		for(var i = 0 ; i < this.ports.length ; i++){
+			this.setInValue(this.ports[i].getOutValue(),i);
+		}
+
+	};
+
+	CT.CTObject.prototype.getPort = function(index){
+		if(CT.Utils.isDef(this.ports[index]))
+			return this.ports[index];
+		else
+			return null;
+	};
+
+	CT.CTObject.prototype.getPortValue = function(index){
+		if(CT.Utils.isDef(this.ports[index]))
+			return this.ports[index].getOutValue();
+		else
+			return null;
+	};
+
+	CT.CTObject.prototype.setPortValue = function(index){
+		if(CT.Utils.isDef(this.ports[index]))
+			this.ports[index].setInValue();
+	};
 	/**
 	 * Add a new port
 	 * @param {object} portIndex,position,rotation,scale [description]
@@ -83,37 +110,6 @@ define(["THREE"], function (THREE) {
 		this.ports.splice(portIndex,1);
 
 	};
-	
-	CT.CTObject.prototype.evalCode  = function(code, x, y, z) {
-
-		// IF NO ARGS ARE SUPPLIED, USE VALUES FROM THE SKETCH'S INPUT PORTS.
-
-		function defaultToZero(arg) { return arg===undefined ? 0 : arg; }
-
-		if (x === undefined) x = defaultToZero(this.inValue[0]);
-		if (y === undefined) y = defaultToZero(this.inValue[1]);
-		if (z === undefined) z = defaultToZero(this.inValue[2]);
-
-		// IF NO RETURN STATEMENT, SUPPLY ONE.
-
-		if (code.indexOf('return') == -1)
-		code = "return " + code;
-
-		// EVAL THE CODE, REFERRING TO THE SKETCH AS "me".
-
-		var result = null;
-
-		try {
-			result = Function("me","x","y","z", code)(this, x, y, z);
-		} catch (e) { }
-
-		// ANY ERROR RESULTS IN A RETURN VALUE OF null.
-
-		this.outValue = result;
-
-		return result;
-
-  	};
 
 	return CT;
 

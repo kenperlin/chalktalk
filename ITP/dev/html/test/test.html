@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script data-main="../../src/app" src="../../deps/require.js"></script>
+        <script>
+	    setTimeout(function(){ 
+
+	    	var sketches = [];
+	    	for(var i = 0 ; i < 3 ; i++){
+	    		var s = new CT.Sketch();
+	    		for(var j = 0 ; j < 3 ; j++){
+	    			s.addPort();
+	    			s.ports[j].setInValue(Math.random());
+	    			s.evaluator = function(o){return o[0]+o[1]+o[2];}
+	    		}
+	    		sketches.push(s);
+	    	}
+
+	    	console.log(sketches); 
+
+
+	    }, 100);
+	    
+	    </script>
+    </head>
+    <body>
+        <h1>Hello World</h1>
+        <div id="canvasDiv"></div>
+
+    </body>
+   
+</html>

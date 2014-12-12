@@ -10,7 +10,6 @@ define(["THREE"], function (THREE) {
 	CT.Port = function (params) {
 
 		this.args = params || {};
-
 		THREE.Object3D.call(this);
 
 		this.strokes = [];
@@ -18,6 +17,8 @@ define(["THREE"], function (THREE) {
 
 		this.inValue = null;
 		this.outValue = null;
+
+		this.evaluator = this.args.evaluator || function(o){return o;};
 
 	};
 
@@ -36,6 +37,15 @@ define(["THREE"], function (THREE) {
 		if(CT.Utils.isDef(val)){
 			this.inValue = val;
 		}
+		this.outValue = this.evaluator(this.inValue);
+	};
+
+	CT.Port.prototype.processValue = function(f){
+
+		var that = this;
+		var func = f || this.evaluator;
+		this.outValue = func(this.inValue);
+
 	};
 
 	/**
@@ -43,7 +53,7 @@ define(["THREE"], function (THREE) {
 	 * @return {[type]}     [description]
 	 */
 	CT.Port.prototype.getOutValue = function(){
-		return outValue;
+		return this.outValue;
 	};
 
 
