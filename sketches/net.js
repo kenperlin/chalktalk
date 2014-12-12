@@ -1,6 +1,4 @@
 /*
-   findNode should pick the front-most one.
-
    Should gradually drift toward origin (adjust translation accordingly) so rotation is always around center.
 
    Problem -- deleting a joint seems to leave links that should not be there.
@@ -12,6 +10,7 @@
    Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
    Eg: ethane molecule, with repelling H atoms.
 
+   DONE findNode should pick the front-most one.
    DONE Create a Graph base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
    DONE Nodes do not knock into each other.
    DONE Gesture to scale a node.
@@ -184,7 +183,7 @@ function VisibleGraph() {
    this.pixelSize = 1;
 
    this.findNode = function(pix) {
-      var zNearest = -1000000;
+      var zNearest = -Number.MAX_VALUE;
       var jNearest = -1;
       for (var j = 0 ; j < this.nodes.length ; j++) {
          var node = this.nodes[j];
