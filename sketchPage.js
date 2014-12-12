@@ -62,7 +62,14 @@ var sketchToDelete = null;
       this.clear();
    }
 
+   var pointToPixelMatrix = new THREE.Matrix4();
    var pixelToPointMatrix = new THREE.Matrix4();
+
+   function computeStandardView() {
+      sk().standardView();
+      for (var i = 0 ; i < 16 ; i++)
+         pointToPixelMatrix.elements[i] = m._m()[i];
+   }
 
    function computeStandardViewInverse() {
       sk().standardViewInverse();
@@ -1721,7 +1728,7 @@ var sketchToDelete = null;
             }
             else {
                m.save();
-                  sk().standardView();
+	          computeStandardView();
                   sk().renderWrapper(elapsed);
                m.restore();
             }
