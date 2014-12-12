@@ -17,9 +17,57 @@
    DONE Change rendering to use THREE.js ball and stick model.
 */
 
+function NetResponder() {
+   this.clickType = 'none';
+   this.clickPoint = new THREE.Vector3(0,0,0);
+   this.net;
+   this.I = -1;
+   this.I_ = -1;
+   this.J = -1;
+   this.K = -1;
+   this.onPress = function() { }
+   this.onPressB = function() { }
+   this.onDrag = function() { }
+   this.onDragB = function() { }
+   this.onRelease = function() { }
+   this.onReleaseJ = function() { }
+   this.onReleaseB = function() { }
+   this.onClick = function() { }
+   this.onClickB = function() { }
+   this.onClickPress = function() { }
+   this.onClickPressJ = function() { }
+   this.onClickPressB = function() { }
+   this.onClickDrag = function() { }
+   this.onClickDragJ = function() { }
+   this.onClickDragB = function() { }
+   this.onClickRelease = function() { }
+   this.onClickReleaseJ = function() { }
+   this.onClickReleaseB = function() { }
+   this.onClickClick = function() { }
+   this.onClickClickJ = function() { }
+   this.onClickClickB = function() { }
+   this.onClickBPressB = function() { }
+   this.onClickBPressJ = function() { }
+   this.onClickBDragB = function() { }
+   this.onClickBDragJ = function() { }
+   this.onClickBReleaseB = function() { }
+   this.onClickBReleaseJ = function() { }
+   this.onClickBClickJ = function() { }
+   this.onClickBClickB = function() { }
+   this.simulate = function() { }
+};
+
+////////////////////////////////////////////////
+
 function Net() {
    function nv(x,y,z) { return new THREE.Vector3(x,y,z); }
    function v2s(v) { return "(" + v.x + "," + v.y + "," + v.z + ")"; }
+
+   this.nodes = [{p:nv(0,1,0)},{p:nv(0,0,0)},{p:nv(-.5,-1,0)},{p:nv(.5,-1,0)}];
+   this.links = [[0,1],[1,2],[1,3]];
+
+   var p = nv(0,0,0), q = nv(0,0,0), travel;
+
    var adjustDistance = function(A, B, d, e, isAdjustingA, isAdjustingB) {
       var x = B.x - A.x;
       var y = B.y - A.y;
@@ -36,18 +84,51 @@ function Net() {
          B.z += t * z;
       }
    }
-   this.labels = 'net'.split(' ');
-   this.nodes = [{p:nv(0,1,0)},{p:nv(0,0,0)},{p:nv(-.5,-1,0)},{p:nv(.5,-1,0)}];
-   this.links = [[0,1],[1,2],[1,3]];
-   this.is3D = true;
 
-   this.myShaderMaterial = function() {
-      if (this.myMaterial === undefined)
-         this.myMaterial = this.shaderMaterial();
-      return this.myMaterial;
+   this.adjustNodePositions = function() {
+      for (var j = 0 ; j < this.nodes.length ; j++) {
+         var node = this.nodes[j];
+         if (node.d !== undefined) {
+            q.copy(node.d).multiplyScalar(0.1);
+            node.p.add(q);
+            q.negate();
+            node.d.add(q);
+         }
+      }
    }
 
-   var p = nv(0,0,0), q = nv(0,0,0), travel;
+   this.nodesAvoidEachOther = function() {
+      for (var i = 0 ; i < this.nodes.length-1 ; i++)
+         for (var j = i+1 ; j < this.nodes.length ; j++) {
+            var a = this.nodes[i];
+            var b = this.nodes[j];
+            if (a.r !== undefined && b.r !== undefined) {
+               var d = a.p.distanceTo(b.p);
+               if (d < a.r + b.r) {
+                  var t = (a.r + b.r) / d;
+                  q.copy(a.p).lerp(b.p,.5);
+                  a.p.lerp(q, 1 - t);
+                  b.p.lerp(q, 1 - t);
+               }
+            }
+         }
+   }
+
+   this.adjustEdgeLengths = function() {
+      for (var rep = 0 ; rep < 10 ; rep++)
+         for (var n = 0 ; n < this.lengths.length ; n++) {
+            var L = this.lengths[n];
+            var a = this.nodes[L.i];
+            var b = this.nodes[L.j];
+            adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
+         }
+   }
+
+   this.updatePositions = function() {
+      this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
+      this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
+      this.adjustEdgeLengths();   // Coerce all links to be the proper length.
+   }
 
    this.findLink = function(i, j) {
       if (i != j)
@@ -56,24 +137,6 @@ function Net() {
             if (link[0] == i && link[1] == j || link[0] == j && link[1] == i)
                return l;
          }
-      return -1;
-   }
-
-   this.pixelDistance = function(a, b) {
-      if (a === undefined || b === undefined) return 100;
-      var x = b[0] - a[0], y = b[1] - a[1];
-      return sqrt(x * x + y * y);
-   }
-
-   this.findNode = function(pix) {
-      for (var j = 0 ; j < this.nodes.length ; j++) {
-         var node = this.nodes[j];
-	 var d = 5;
-	 if (node.r !== undefined)
-	    d *= node.r * 10;
-         if (this.pixelDistance(pix, node.pix) < d * renderScale)
-            return j;
-      }
       return -1;
    }
 
@@ -121,6 +184,26 @@ function Net() {
    }
    this.computeLengths();
 
+/////////////////////////////////////////
+
+   this.pixelDistance = function(a, b) {
+      if (a === undefined || b === undefined) return 100;
+      var x = b[0] - a[0], y = b[1] - a[1];
+      return sqrt(x * x + y * y);
+   }
+
+   this.findNode = function(pix) {
+      for (var j = 0 ; j < this.nodes.length ; j++) {
+         var node = this.nodes[j];
+         var d = 5;
+         if (node.r !== undefined)
+            d *= node.r * 10;
+         if (this.pixelDistance(pix, node.pix) < d * renderScale)
+            return j;
+      }
+      return -1;
+   }
+
    function pixelToPoint(x, y, p) {
       p.x = x;
       p.y = y;
@@ -128,45 +211,147 @@ function Net() {
       p.applyMatrix4(pixelToPointMatrix);
    }
 
-   function NetResponder() {
-      this.clickType = 'none';
-      this.clickPoint = new THREE.Vector3(0,0,0);
-      this.net;
-      this.I = -1;
-      this.I_ = -1;
-      this.J = -1;
-      this.K = -1;
-      this.onPress = function() { }
-      this.onPressB = function() { }
-      this.onDrag = function() { }
-      this.onDragB = function() { }
-      this.onRelease = function() { }
-      this.onReleaseJ = function() { }
-      this.onReleaseB = function() { }
-      this.onClick = function() { }
-      this.onClickB = function() { }
-      this.onClickPress = function() { }
-      this.onClickPressJ = function() { }
-      this.onClickPressB = function() { }
-      this.onClickDrag = function() { }
-      this.onClickDragJ = function() { }
-      this.onClickDragB = function() { }
-      this.onClickRelease = function() { }
-      this.onClickReleaseJ = function() { }
-      this.onClickReleaseB = function() { }
-      this.onClickClick = function() { }
-      this.onClickClickJ = function() { }
-      this.onClickClickB = function() { }
-      this.onClickBPressB = function() { }
-      this.onClickBPressJ = function() { }
-      this.onClickBDragB = function() { }
-      this.onClickBDragJ = function() { }
-      this.onClickBReleaseB = function() { }
-      this.onClickBReleaseJ = function() { }
-      this.onClickBClickJ = function() { }
-      this.onClickBClickB = function() { }
-      this.simulate = function() { }
-   };
+   this.mouseMove = function(x,y) {
+   }
+
+   this.mouseDown = function(x,y) {
+      pixelToPoint(x, y, p);
+      travel = 0;
+      switch (R.clickType) {
+      case 'B':
+         R.J = this.findNode([x,y]);
+         R.actionType = R.J != -1 ? 'J' : 'B';
+         switch (R.actionType) {
+         case 'J':
+            R.onClickBPressJ();
+            break;
+         case 'B':
+            R.onClickBPressB();
+            break;
+         }
+         break;
+      case 'J':
+         R.J = this.findNode([x,y]);
+         R.actionType = R.J == R.I_ ? 'I' : R.J != -1 ? 'J' : 'B';
+         switch (R.actionType) {
+         case 'I':
+            R.onClickPress();
+            break;
+         case 'J':
+            R.onClickPressJ();
+            break;
+         case 'B':
+            R.onClickPressB();
+            break;
+         }
+         break;
+      default:
+         R.I = this.findNode([x,y]);
+         R.actionType = R.I != -1 ? 'I' : 'B';
+         switch (R.actionType) {
+         case 'I':
+            R.onPress();
+            break;
+         case 'B':
+            R.onPressB();
+            break;
+         }
+         break;
+      }
+   }
+
+   this.mouseDrag = function(x,y) {
+      q.copy(p);
+      pixelToPoint(x, y, p);
+      travel += p.distanceTo(q);
+      switch (R.clickType) {
+      case 'B':
+         switch (R.actionType) {
+         case 'J': R.onClickBDragJ(); break;
+         case 'B': R.onClickBDragB(); break;
+         }
+         break;
+      case 'J':
+         switch (R.actionType) {
+         case 'I': R.onClickDrag(); break;
+         case 'J': R.onClickDragJ(); break;
+         case 'B': R.onClickDragB(); break;
+         }
+         break;
+      default:
+         switch (R.actionType) {
+         case 'I': R.onDrag(); break;
+         case 'B': R.onDragB(); break;
+         }
+         break;
+      }
+   }
+
+   this.mouseUp = function(x,y) {
+      R.K = this.findNode([x,y]);
+      switch (R.clickType) {
+      case 'B':
+         R.clickType = 'none';
+         if (travel >= .1) {
+            switch (R.actionType) {
+            case 'J': R.onClickBReleaseJ(); break;
+            case 'B': R.onClickBReleaseB(); break;
+            }
+         }
+         else {
+            switch (R.actionType) {
+            case 'J': R.onClickBClickJ(); break;
+            case 'B': R.onClickBClickB(); break;
+            }
+         }
+         break;
+      case 'J':
+         R.clickType = 'none';
+         if (travel >= .1)
+            switch (R.actionType) {
+            case 'I': R.onClickRelease(); break;
+            case 'J': R.onClickReleaseJ(); break;
+            case 'B': R.onClickReleaseB(); break;
+            }
+         else
+            switch (R.actionType) {
+            case 'I': R.onClickClick(); break;
+            case 'J': R.onClickClickJ(); break;
+            case 'B': R.onClickClickB(); break;
+            }
+         R.J = -1;
+         R.I_ = -1;
+         break;
+      default:
+         if (travel >= .1) {
+            switch (R.actionType) {
+            case 'I': R.onRelease(); break;
+            case 'B': R.onReleaseB(); break;
+            }
+         }
+         else {
+            switch (R.actionType) {
+            case 'I':
+               R.I_ = R.I;
+               R.onClick();
+               R.clickType = 'J';
+               break;
+            case 'B':
+               R.onClickB();
+               R.clickType = 'B';
+               break;
+            }
+            R.clickPoint.copy(p);
+         }
+         R.I = -1;
+         R.J = -1;
+         break;
+      }
+      R.J = -1;
+      R.K = -1;
+   }
+
+//////////////////////////////////
 
    function MyNetResponder() {
    
@@ -233,7 +418,7 @@ function Net() {
    
       this.onClickBPressB = function() {
          this.isCreatingNode = p.distanceTo(this.clickPoint) < .1;
-	 if (this.isCreatingNode) {
+         if (this.isCreatingNode) {
             this.newJ = this.net.nodes.length;
             this.net.nodes.push({p:nv(p.x,p.y,p.z)});
          }
@@ -253,13 +438,13 @@ function Net() {
 
       this.onClickBPressJ = function() {
          var node = this.net.nodes[this.J];
-	 node.r_at_click = node.r;
+         node.r_at_click = node.r;
       }
 
       this.onClickBDragJ = function() {
          var node = this.net.nodes[this.J];
          var a = this.clickPoint.distanceTo(node.p);
-	 var b = this.clickPoint.distanceTo(p);
+         var b = this.clickPoint.distanceTo(p);
          node.r = node.r_at_click * b / a;
       }
       this.onClickBReleaseJ = function() {
@@ -267,167 +452,16 @@ function Net() {
    }
    MyNetResponder.prototype = new NetResponder;
 
+////////////////////////////////////////////
+
    var R = new MyNetResponder();
    R.net = this;
-
-   this.mouseDown = function(x,y) {
-      pixelToPoint(x, y, p);
-      travel = 0;
-      switch (R.clickType) {
-      case 'B':
-         R.J = this.findNode([x,y]);
-	 R.actionType = R.J != -1 ? 'J' : 'B';
-	 switch (R.actionType) {
-	 case 'J':
-            R.onClickBPressJ();
-	    break;
-	 case 'B':
-            R.onClickBPressB();
-	    break;
-         }
-         break;
-      case 'J':
-         R.J = this.findNode([x,y]);
-	 R.actionType = R.J == R.I_ ? 'I' : R.J != -1 ? 'J' : 'B';
-	 switch (R.actionType) {
-         case 'I':
-            R.onClickPress();
-	    break;
-         case 'J':
-            R.onClickPressJ();
-	    break;
-         case 'B':
-            R.onClickPressB();
-	    break;
-         }
-         break;
-      default:
-         R.I = this.findNode([x,y]);
-	 R.actionType = R.I != -1 ? 'I' : 'B';
-	 switch (R.actionType) {
-         case 'I':
-            R.onPress();
-	    break;
-         case 'B':
-            R.onPressB();
-	    break;
-         }
-         break;
-      }
-   }
-
-   this.mouseDrag = function(x,y) {
-      q.copy(p);
-      pixelToPoint(x, y, p);
-      travel += p.distanceTo(q);
-      switch (R.clickType) {
-      case 'B':
-         switch (R.actionType) {
-         case 'J': R.onClickBDragJ(); break;
-         case 'B': R.onClickBDragB(); break;
-         }
-         break;
-      case 'J':
-         switch (R.actionType) {
-         case 'I': R.onClickDrag(); break;
-         case 'J': R.onClickDragJ(); break;
-         case 'B': R.onClickDragB(); break;
-         }
-         break;
-      default:
-         switch (R.actionType) {
-	 case 'I': R.onDrag(); break;
-	 case 'B': R.onDragB(); break;
-         }
-         break;
-      }
-   }
-
-   this.mouseUp = function(x,y) {
-      R.K = this.findNode([x,y]);
-      switch (R.clickType) {
-      case 'B':
-         R.clickType = 'none';
-         if (travel >= .1) {
-	    switch (R.actionType) {
-	    case 'J': R.onClickBReleaseJ(); break;
-	    case 'B': R.onClickBReleaseB(); break;
-            }
-         }
-         else {
-	    switch (R.actionType) {
-	    case 'J': R.onClickBClickJ(); break;
-	    case 'B': R.onClickBClickB(); break;
-            }
-         }
-         break;
-      case 'J':
-         R.clickType = 'none';
-         if (travel >= .1)
-	    switch (R.actionType) {
-            case 'I': R.onClickRelease(); break;
-            case 'J': R.onClickReleaseJ(); break;
-            case 'B': R.onClickReleaseB(); break;
-            }
-         else
-	    switch (R.actionType) {
-            case 'I': R.onClickClick(); break;
-            case 'J': R.onClickClickJ(); break;
-            case 'B': R.onClickClickB(); break;
-            }
-         R.J = -1;
-         R.I_ = -1;
-         break;
-      default:
-         if (travel >= .1) {
-	    switch (R.actionType) {
-            case 'I': R.onRelease(); break;
-            case 'B': R.onReleaseB(); break;
-            }
-         }
-         else {
-	    switch (R.actionType) {
-            case 'I':
-               R.I_ = R.I;
-               R.onClick();
-               R.clickType = 'J';
-	       break;
-            case 'B':
-               R.onClickB();
-               R.clickType = 'B';
-	       break;
-            }
-            R.clickPoint.copy(p);
-         }
-         R.I = -1;
-         R.J = -1;
-         break;
-      }
-      R.J = -1;
-      R.K = -1;
-   }
-
+   this.labels = 'net'.split(' ');
+   this.is3D = true;
    var renderScale = 1;
-
-   function drawNode(p, r) {
-      _g.save();
-      lineWidth(r * 160 * renderScale);
-      mLine([p.x-.001,p.y,p.z],[p.x+.001,p.y,p.z]);
-      _g.restore();
-   }
-
-   function drawLink(a, b, radius) {
-      if (radius === undefined) radius = 1;
-      _g.save();
-      lineWidth(radius * renderScale);
-      mLine([a.x,a.y,a.z], [b.x,b.y,b.z]);
-      _g.restore();
-   }
 
    this.render = function() {
       this.code = null;
-
-      var a = m._m();
       renderScale = 2 * this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
       lineWidth(4 * renderScale);
 
@@ -442,85 +476,45 @@ function Net() {
 
       this.afterSketch(function() {
          if (R.clickType == 'none') {
-
-	    // Call any user defined simulation.
-
-	    R.simulate();
-
-	    // Make any small adjustments to node position needed after mouse press on a node.
-
-            for (var j = 0 ; j < this.nodes.length ; j++) {
-               var node = this.nodes[j];
-               if (node.d !== undefined) {
-	          q.copy(node.d).multiplyScalar(0.1);
-		  node.p.add(q);
-	          q.negate();
-		  node.d.add(q);
-               }
-            }
-
-	    // Make sure nodes do not intersect.
-
-            for (var i = 0 ; i < this.nodes.length-1 ; i++)
-               for (var j = i+1 ; j < this.nodes.length ; j++) {
-                  var a = this.nodes[i];
-                  var b = this.nodes[j];
-	          if (a.r !== undefined && b.r !== undefined) {
-	             var d = a.p.distanceTo(b.p);
-	             if (d < a.r + b.r) {
-	                var t = (a.r + b.r) / d;
-	                q.copy(a.p).lerp(b.p,.5);
-	                a.p.lerp(q, 1 - t);
-	                b.p.lerp(q, 1 - t);
-	             }
-	          }
-	       }
-
-	    // Coerce all links to be the proper length.
-
-            for (var rep = 0 ; rep < 10 ; rep++)
-               for (var n = 0 ; n < this.lengths.length ; n++) {
-                  var L = this.lengths[n];
-                  var a = this.nodes[L.i];
-                  var b = this.nodes[L.j];
-                  adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
-               }
+            R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
+            this.updatePositions();
          }
-
          for (var j = 0 ; j < this.nodes.length ; j++) {
             var node = this.nodes[j];
             var x = node.p.x, y = node.p.y, z = node.p.z;
             node.pix = mTransform([x, y, z]);
-
-	    // RENDER THE 3D NODE OBJECT.
-
-            this.renderNode(node);
-
-            // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
-
+            this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             color('cyan');
-            drawNode(node.p, node.r * (j == R.J ? 1 : .01));
+            drawNode(node.p, node.r * (j == R.J ? 1 : .01)); // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
          }
-
-         // HIGHLIGHT JOINT THAT WAS JUST CLICKED ON.
-
          if (R.I_ != -1) {
             color('red');
-            drawNode(this.nodes[R.I_].p, node.r);
+            drawNode(this.nodes[R.I_].p, node.r);            // HIGHLIGHT JOINT THAT WAS JUST CLICKED ON.
          }
-
-         // AFTER A CLICK OVER BACKGROUND, SHOW THAT A SECOND CLICK AT SAME PLACE WOULD CREATE A NEW JOINT.
-
-         if (R.clickType == 'B' && ! R.isCreatingNode) {
+         if (R.clickType == 'B' && ! R.isCreatingNode) {     // AFTER A CLICK OVER BACKGROUND,
             color('red');
-            drawNode(R.clickPoint, 0.05);
+            drawNode(R.clickPoint, 0.05);                    // SHOW THAT A SECOND CLICK WOULD CREATE A NEW JOINT.
          }
-
-	 // RENDER EACH 3D LINK.
-
          for (var l = 0 ; l < this.links.length ; l++)
-	    this.renderLink(this.links[l]);
+            this.renderLink(this.links[l]);                  // RENDER EACH 3D LINK.
       });
+   }
+
+////////////// CANVAS DRAWING STUFF //////////////
+
+   function drawNode(p, r) {
+      _g.save();
+      lineWidth(r * 160 * renderScale);
+      mLine([p.x-.001,p.y,p.z],[p.x+.001,p.y,p.z]);
+      _g.restore();
+   }
+
+   function drawLink(a, b, radius) {
+      if (radius === undefined) radius = 1;
+      _g.save();
+      lineWidth(radius * renderScale);
+      mLine([a.x,a.y,a.z], [b.x,b.y,b.z]);
+      _g.restore();
    }
 
 ///////////////// THREE.js STUFF /////////////////
@@ -563,6 +557,12 @@ function Net() {
    this.removeGeometry = function(node) {
       if (node.g !== undefined)
          mesh.remove(node.g);
+   }
+
+   this.myShaderMaterial = function() {
+      if (this.myMaterial === undefined)
+         this.myMaterial = this.shaderMaterial();
+      return this.myMaterial;
    }
 
 //////////////////////////////////////////////////
