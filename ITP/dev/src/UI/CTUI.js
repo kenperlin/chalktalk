@@ -85,7 +85,7 @@ define(["THREE","utility/Utils"], function (THREE,Utils) {
 
 			this.standin = [];
 			for(var i = 0 ; i < 3 ; i++){
-				this.standin[i] = new CT.CTObject();//Utils.Utils.sphere(10);
+				this.standin[i] = new CT.Sketch();//Utils.Utils.sphere(10);
 				this.standin[i].outValue = i;
 				this.standin[i].add(Utils.Utils.sphere(10));
 				this.scene.add(this.standin[i]);

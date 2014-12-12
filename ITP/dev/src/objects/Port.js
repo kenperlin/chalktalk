@@ -18,6 +18,8 @@ define(["THREE"], function (THREE) {
 		this.inValue = null;
 		this.outValue = null;
 
+		this.update = true;
+
 		this.evaluator = this.args.evaluator || function(o){return o;};
 
 	};
@@ -44,7 +46,20 @@ define(["THREE"], function (THREE) {
 
 		var that = this;
 		var func = f || this.evaluator;
-		this.outValue = func(this.inValue);
+
+		var process = null;
+
+		//if the in value is a sketch evaluate it
+		//if not pass the value
+
+		if(this.inValue.getOutValue){
+			this.inValue.evaluate();
+			process = this.inValue.getOutValue();
+		}
+		else
+			process = this.inValue;
+
+		this.outValue = func(process);
 
 	};
 
@@ -53,6 +68,8 @@ define(["THREE"], function (THREE) {
 	 * @return {[type]}     [description]
 	 */
 	CT.Port.prototype.getOutValue = function(){
+		if(this.update)
+			this.processValue();
 		return this.outValue;
 	};
 

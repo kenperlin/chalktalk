@@ -20,6 +20,10 @@ define(["THREE"], function (THREE) {
 		this.inValues = this.args.inValues || [];
 		this.outValue = null;
 
+		this.update = true;
+
+		this.evaluator = this.args.evaluator || function(o){return o;};
+
 		this.ports = [];
 
 		if(CT.CTObject.count === undefined){
@@ -38,7 +42,6 @@ define(["THREE"], function (THREE) {
 
 	CT.Utils.extend(CT.CTObject,THREE.Object3D);
 
-
 	CT.CTObject.prototype.objectCount = function(){
 		return CT.CTObject.count;
 	};
@@ -49,14 +52,20 @@ define(["THREE"], function (THREE) {
 	};
 
 	CT.CTObject.prototype.getOutValue = function(){
+		if(this.update);
+			this.evaluate();
 		return this.outValue;
+	};
+
+	CT.CTObject.prototype.evaluate = function(){
+		this.portsToValues();
+		this.outValue = this.evaluator(this.inValues);
 	};
 
 	CT.CTObject.prototype.portsToValues = function(){
 		for(var i = 0 ; i < this.ports.length ; i++){
 			this.setInValue(this.ports[i].getOutValue(),i);
 		}
-
 	};
 
 	CT.CTObject.prototype.getPort = function(index){
@@ -73,10 +82,11 @@ define(["THREE"], function (THREE) {
 			return null;
 	};
 
-	CT.CTObject.prototype.setPortValue = function(index){
+	CT.CTObject.prototype.setPortValue = function(value,index){
 		if(CT.Utils.isDef(this.ports[index]))
-			this.ports[index].setInValue();
+			this.ports[index].setInValue(value);
 	};
+
 	/**
 	 * Add a new port
 	 * @param {object} portIndex,position,rotation,scale [description]

@@ -129,9 +129,17 @@ define(function(){
 			return "(" + v.x + "," + v.y + "," + v.z + ")";
 		},
 
+		//array to vec
+		toVec : function(src) {
+			switch (src.length) {
+			default: return new THREE.Vector2(src[0],src[1]);
+			case 3 : return new THREE.Vector3(src[0],src[1],src[2]);
+			case 4 : return new THREE.Vector4(src[0],src[1],src[2],src[3]);
+			}
+		},
+
 		//Math
-		
-		
+
 		hexChar : function(n) {
 			return String.fromCharCode((n < 10 ? 48 : 87) + n);
 		},
@@ -198,15 +206,34 @@ define(function(){
 
 			// THEN MAKE SURE p LIES BETWEEN a AND b.
 
-			var A = [ b[0] - a[0], b[1] - a[1] ];
+			A = [ b[0] - a[0], b[1] - a[1] ];
 
 			var tp = L(p);
 			var ta = L(a);
-			var tb = L(b);
+			tb = L(b);
 
 			var vec = new THREE.Vector3(p[0],p[1],0);
 
 			return tp >= ta && tp <= tb ? vec : null;
+		},
+
+		ik : function(len1, len2, footIn, aimIn) {
+
+			var foot = footIn.clone();
+			var aim = aimIn.clone();
+
+			var cc = foot.dot(foot);
+			var x = (1 + (len1*len1 - len2*len2)/cc) / 2;
+			var y = foot.dot(aim)/cc;
+
+			foot.multiplyScalar(y);
+			aim.sub(foot);
+			
+			y = Math.sqrt(Math.max(0,len1*len1 - cc*x*x) / aim.dot(aim));
+			return new THREE.Vector3(
+				x * footIn.x + y * aim.x,
+				x * footIn.y + y * aim.y,
+				x * footIn.z + y * aim.z);
 		},
 		
 

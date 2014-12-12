@@ -8,7 +8,7 @@ define(function (require) {
     // 
     // var THREE = require('../deps/three');
     var CT = require('core');
-    require('utility/threeExtension')
+    require('utility/threeExtension');
     require('utility/Utils');
     require('objects/CTObject');
     require('objects/Port');

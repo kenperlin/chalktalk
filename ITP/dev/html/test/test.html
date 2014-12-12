@@ -8,16 +8,52 @@
 	    	var sketches = [];
 	    	for(var i = 0 ; i < 3 ; i++){
 	    		var s = new CT.Sketch();
-	    		for(var j = 0 ; j < 3 ; j++){
+	    		for(var j = 0 ; j < 12 ; j++){
 	    			s.addPort();
-	    			s.ports[j].setInValue(Math.random());
-	    			s.evaluator = function(o){return o[0]+o[1]+o[2];}
+	    			s.ports[j].setInValue( (i+1) + "*" );
 	    		}
+	    		s.portsToValues();
+	    		s.evaluator = function(o){var up = 0 ; for(j in o){up+=o[j]} return up;}
+	    		s.evaluate();
 	    		sketches.push(s);
 	    	}
 
-	    	console.log(sketches); 
+	    	
 
+	    	sketches[2].setPortValue(sketches[0],0);
+	    	sketches[2].setPortValue(sketches[1],1);
+	    	sketches[2].setPortValue(3,2);
+
+			sketches[2].evaluate();
+
+			console.log(sketches[2].getOutValue());
+
+			// console.log(sketches[2])
+
+			sketches[1].setPortValue(" :bug: ",0);
+			sketches[1].setPortValue(" :bear: ",1);
+
+			
+			// console.log(sketches[2].getOutValue());
+
+			// // console.log((sketches[0].getOutValue()));
+	  //   	console.log(sketches[2].getOutValue());
+
+	  //   	sketches[1].ports[1].setInValue(25);
+
+	  //   	// sketches[1].portsToValues();
+	  //   	sketches[1].evaluate();
+	  //   	console.log(sketches[1]);
+
+			// sketches[2].ports[1].setInValue(sketches[1].getOutValue());
+	  //   	// sketches[2].portsToValues();
+	  //   	sketches[2].evaluate();
+	    	console.log(sketches[2].getOutValue());
+	    	console.log(sketches[2].getDescendants());
+
+	  		// var b = new CT.UI();
+	  		// // b.init();
+	  		// b.initScene();
 
 	    }, 100);
 	    

@@ -1,10 +1,9 @@
 requirejs.config({
-    "baseUrl": "../../src",
+    // "baseUrl": "../../src",
     "paths": {
       // "app": "./src",
       "THREE" : "../deps/three",
     },
-    
     "shim": {
       "THREE" : {
 			 exports : "THREE"

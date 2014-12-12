@@ -63,7 +63,7 @@ define(["THREE"], function (THREE) {
       var mesh = new THREE.Mesh( geometry, bgMaterial() );
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addLathe = function(p, nSegments) {
       var points = [];
@@ -73,7 +73,7 @@ define(["THREE"], function (THREE) {
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addCylinder = function(n) {
       if (n === undefined) n = 24;
@@ -81,7 +81,7 @@ define(["THREE"], function (THREE) {
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addOpenCylinder = function(n) {
       if (n === undefined) n = 24;
@@ -89,21 +89,21 @@ define(["THREE"], function (THREE) {
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addCube = function() {
       var geometry = cubeGeometry();
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addPlane = function() {
       var geometry = planeGeometry();
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addGlobe = function(m,n, p0,p1, t0,t1) {
       if (m === undefined) m = 32;
@@ -112,13 +112,13 @@ define(["THREE"], function (THREE) {
       var mesh = new THREE.Mesh(geometry, bgMaterial());
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Object3D.prototype.addNode = function() {
       var mesh = new THREE.Mesh();
       this.add(mesh);
       return mesh;
-   }
+   };
 
    THREE.Geometry.prototype.computeEdges = function() {
       function testEdge(edges, a, b) {
@@ -136,11 +136,11 @@ define(["THREE"], function (THREE) {
          testEdge(this.edges, face.b, face.c);
          testEdge(this.edges, face.c, face.a);
       }
-   }
+   };
 
    THREE.Object3D.prototype.toStrokes = function() {
       return edgesToStrokes(this.projectVisibleEdges(this.findVisibleEdges()));
-   }
+   };
 
    THREE.Object3D.prototype.findBoundsWorld = function(bb) {
       if (bb === undefined) {
@@ -152,7 +152,7 @@ define(["THREE"], function (THREE) {
       for (var k = 0 ; k < this.children.length ; k++)
          this.children[k].findBoundsWorld(bb);
       return bb;
-   }
+   };
 
    THREE.Object3D.prototype.findVisibleEdges = function(ve) {
       if (ve === undefined) {
@@ -164,7 +164,7 @@ define(["THREE"], function (THREE) {
       for (var k = 0 ; k < this.children.length ; k++)
          this.children[k].findVisibleEdges(ve);
       return ve;
-   }
+   };
 
    THREE.Object3D.prototype.projectVisibleEdges = function(veds) {
       var e2 = [];
@@ -309,7 +309,6 @@ define(["THREE"], function (THREE) {
               ___hiddenpoint_count++;
               return true;
           }
-
       return false;
    };
 

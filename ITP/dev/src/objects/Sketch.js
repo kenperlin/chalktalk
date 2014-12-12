@@ -12,8 +12,6 @@ define(["THREE"], function (THREE) {
 		this.args = params || {};
 		CT.CTObject.call(this,params);
 
-		this.evaluator = this.args.evaluator || function(o){return o;};
-
 	};
 
 	/**
@@ -22,12 +20,6 @@ define(["THREE"], function (THREE) {
 	*/
 
 	CT.Utils.extend(CT.Sketch,CT.CTObject);
-
-	CT.Sketch.prototype.evaluate = function(){
-
-		this.evaluator(this.ports);
-		
-	};
 	
 	CT.Sketch.prototype.evalCode  = function(code, x, y, z) {
 
