@@ -63,26 +63,17 @@ function Net() {
    function nv(x,y,z) { return new THREE.Vector3(x,y,z); }
    function v2s(v) { return "(" + v.x + "," + v.y + "," + v.z + ")"; }
 
-   this.nodes = [{p:nv(0,1,0)},{p:nv(0,0,0)},{p:nv(-.5,-1,0)},{p:nv(.5,-1,0)}];
-   this.links = [{i:0,j:1},{i:1,j:2},{i:1,j:3}];
+   this.nodes = [ {p:nv(0,1,0)}, {p:nv(0,0,0)}, {p:nv(-.5,-1,0)}, {p:nv(.5,-1,0)} ];
+   this.links = [ {i:0, j:1}, {i:1, j:2}, {i:1, j:3} ];
 
-   var p = nv(0,0,0), q = nv(0,0,0), pix = nv(0,0,0), travel;
+   var p = nv(0,0,0), q = nv(0,0,0);
 
    var adjustDistance = function(A, B, d, e, isAdjustingA, isAdjustingB) {
-      var x = B.x - A.x;
-      var y = B.y - A.y;
-      var z = B.z - A.z;
-      var t = e * (d / Math.sqrt(x * x + y * y + z * z) - 1);
-      if (isAdjustingA) {
-         A.x -= t * x;
-         A.y -= t * y;
-         A.z -= t * z;
-      }
-      if (isAdjustingB) {
-         B.x += t * x;
-         B.y += t * y;
-         B.z += t * z;
-      }
+      q.copy(B).sub(A).multiplyScalar( e * (d / A.distanceTo(B) - 1) );
+      if (isAdjustingA)
+         A.sub(q);
+      if (isAdjustingB)
+         B.add(q);
    }
 
    this.adjustNodePositions = function() {
@@ -185,6 +176,8 @@ function Net() {
    this.computeLengths();
 
 /////////////////////////////////////////
+
+   var pix = nv(0,0,0), travel;
 
    this.pixelDistance = function(a, b) {
       if (a === undefined || b === undefined) return 100;
