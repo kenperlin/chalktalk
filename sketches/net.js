@@ -1,5 +1,5 @@
 /*
-   Create a Network base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
+   findNode should pick the front-most one.
 
    Should gradually drift toward origin (adjust translation accordingly) so rotation is always around center.
 
@@ -9,10 +9,12 @@
 
    Translate/rotate/scale/etc a node.
    Text for a node (eg: atomic symbol).
-   Nodes do not knock into each other.
    Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
    Eg: ethane molecule, with repelling H atoms.
 
+   DONE Create a Graph base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
+   DONE Nodes do not knock into each other.
+   DONE Gesture to scale a node.
    DONE Create separate responder object.
    DONE Change rendering to use THREE.js ball and stick model.
 */
@@ -182,6 +184,8 @@ function VisibleGraph() {
    this.pixelSize = 1;
 
    this.findNode = function(pix) {
+      var zNearest = -1000000;
+      var jNearest = -1;
       for (var j = 0 ; j < this.nodes.length ; j++) {
          var node = this.nodes[j];
          var d = 10;
@@ -189,10 +193,12 @@ function VisibleGraph() {
             d *= node.r * 10;
          var dx = pix.x - node.pix.x;
          var dy = pix.y - node.pix.y;
-         if (Math.sqrt(dx * dx + dy * dy) < d * this.pixelSize)
-            return j;
+         if (Math.sqrt(dx * dx + dy * dy) < d * this.pixelSize && node.pix.z > zNearest) {
+            jNearest = j;
+	    zNearest = node.pix.z;
+         }
       }
-      return -1;
+      return jNearest;
    }
 
    this.mouseMove = function(x,y) {
@@ -478,23 +484,24 @@ function Net() {
 
       this.afterSketch(function() {
 
-         // REMOVE ANY GEOMETRY THAT IS NO LONGER IN THE GRAPH.
+         //////// REMOVE ANY GEOMETRY THAT IS NO LONGER IN THE GRAPH. //////
 
          for (var i = 0 ; i < mesh.children.length ; i++)
-	    mesh.children[i].tagForRemoval = true;
+	    mesh.children[i].tagForRemoval = true;                 // TAG ALL GEOMETRY OBJECTS FOR REMOVAL.
 
          for (var i = 0 ; i < nodes.length ; i++)
 	    if (nodes[i].g !== undefined)
-	       nodes[i].g.tagForRemoval = undefined;
+	       nodes[i].g.tagForRemoval = undefined;               // UNTAG IF NODE IS STILL IN THE GRAPH.
 
          for (var i = 0 ; i < links.length ; i++)
 	    if (links[i].g !== undefined)
-	       links[i].g.tagForRemoval = undefined;
+	       links[i].g.tagForRemoval = undefined;               // UNTAG IF LINK IS STILL IN THE GRAPH.
 
          for (var i = 0 ; i < mesh.children.length ; i++)
 	    if (mesh.children[i].tagForRemoval !== undefined)
-	       mesh.remove(mesh.children[i]);
+	       mesh.remove(mesh.children[i]);                      // REMOVE ALL OBJECTS THAT ARE STILL TAGGED.
 
+         / //////////////////////////////////////////////////////////////////
 
          if (R.clickType == 'none') {
             R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
