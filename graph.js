@@ -17,10 +17,14 @@ Graph.prototype = {
 
    addNode: function(x,y,z) {
       this.nodes.push({p:newVec(x,y,z)});
+      return this.nodes.length - 1;
    },
 
-   addLink: function(i, j) {
-      this.links.push({i:i, j:j});
+   addLink: function(i, j, w) {
+      if (w === undefined)
+         w = 1;
+      this.links.push({i:i, j:j, w:w});
+      return this.links.length - 1;
    },
 
    adjustDistance: function(A, B, d, e, isAdjustingA, isAdjustingB) {
@@ -123,8 +127,7 @@ Graph.prototype = {
          if (l >= 0) {
             var link = this.links[l];
             var d = this.nodes[i].p.distanceTo(this.nodes[j].p);
-            var w = link.w === undefined ? 1 : link.w;
-            this.lengths.push({ i:i, j:j, d:d, w:w });;
+            this.lengths.push({ i:i, j:j, d:d, w:link.w });;
          }
       }
    },

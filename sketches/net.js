@@ -20,6 +20,8 @@
 
 function NetResponder() {
 
+   this.defaultNodeRadius = 0.1;
+
 // RESPONSES NOT AFTER A CLICK.
 
    // Drag on a node to move it.
@@ -63,7 +65,7 @@ function NetResponder() {
 
    this.onClickReleaseJ = function() {
       this.graph.removeLink(this.graph.findLink(this.I_, this.J));
-      this.graph.links.push({i:this.I_, j:this.J, w:.03});
+      this.graph.addLink(this.I_, this.J, 0.03);
       this.graph.computeLengths();
    }
 
@@ -72,7 +74,7 @@ function NetResponder() {
    this.onClickClickJ = function() {
       var l = this.graph.findLink(this.I_, this.J);
       if (l == -1)
-         this.graph.links.push({i:this.I_, j:this.J});
+         this.graph.addLink(this.I_, this.J);
       else
          this.graph.removeLink(l);
       this.graph.computeLengths();
@@ -84,11 +86,9 @@ function NetResponder() {
 
    this.onClickBPressB = function() {
       var p = this.graph.p;
-      this.isCreatingNode = p.distanceTo(this.clickPoint) < .1;
-      if (this.isCreatingNode) {
-         this.newJ = this.graph.nodes.length;
-         this.graph.nodes.push({p:newVec(p.x,p.y,p.z)});
-      }
+      this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
+      if (this.isCreatingNode)
+         this.newJ = this.graph.addNode(p.x, p.y, p.z);
    }
 
    // then optionally drag to move the new node.
@@ -111,20 +111,16 @@ function NetResponder() {
       var node = this.graph.nodes[this.J];
       node.r_at_click = node.r;
    }
-
    this.onClickBDragJ = function() {
       var node = this.graph.nodes[this.J];
       var a = this.clickPoint.distanceTo(node.p);
       var b = this.clickPoint.distanceTo(this.graph.p);
       node.r = node.r_at_click * b / a;
    }
-   this.onClickBReleaseJ = function() {
-   }
 }
 NetResponder.prototype = new GraphResponder;
 
 function Net() {
-
    this.labels = 'net'.split(' ');
    this.is3D = true;
 
@@ -245,17 +241,16 @@ function Net() {
 
    this.createMesh = function() {
       mesh = new THREE.Mesh();
-      mesh.setMaterial(this.myShaderMaterial());
+      mesh.setMaterial(this.netMaterial());
       return mesh;
    }
 
    this.renderNode = function(node) {
       if (node.g === undefined) {
-         var geometry = new THREE.SphereGeometry(1, 16, 8);
-         node.g = new THREE.Mesh(geometry, this.myShaderMaterial());
-         mesh.add(node.g);
+         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), this.netMaterial());
          node.g.quaternion = new THREE.Quaternion();
-         node.r = 0.1;
+         node.r = this.graph.R.defaultNodeRadius;
+         mesh.add(node.g);
       }
       node.g.scale.set(node.r,node.r,node.r);
       node.g.position.copy(node.p);
@@ -263,10 +258,8 @@ function Net() {
 
    this.renderLink = function(link) {
       if (link.g === undefined) {
-         var geometry = new THREE.BoxGeometry(2, 2, 2);
-         link.g = new THREE.Mesh(geometry, this.myShaderMaterial());
-         var w = link.w === undefined ? 1 : link.w;
-         link.g.scale.x = link.g.scale.y = .03 * Math.sqrt(w);
+         link.g = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), this.netMaterial());
+         link.g.scale.x = link.g.scale.y = .03 * Math.sqrt(link.w);
          mesh.add(link.g);
       }
       var a = this.graph.nodes[link.i].p;
@@ -276,10 +269,10 @@ function Net() {
       link.g.scale.z = a.distanceTo(b) / 2;
    }
 
-   this.myShaderMaterial = function() {
-      if (this.myMaterial === undefined)
-         this.myMaterial = this.shaderMaterial();
-      return this.myMaterial;
+   this.netMaterial = function() {
+      if (this._netMaterial === undefined)
+         this._netMaterial = this.shaderMaterial();
+      return this._netMaterial;
    }
 
 //////////////////////////////////////////////////
