@@ -259,6 +259,9 @@
             this.yhi = max(this.yhi, child.yhi);
          }
       },
+      computePixelSize : function() {
+         return this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+      },
       contains : function(x, y) {
          return this.xlo <= x && this.ylo <= y && this.xhi > x && this.yhi > y;
       },

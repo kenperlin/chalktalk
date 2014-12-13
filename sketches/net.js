@@ -148,7 +148,7 @@ function Net() {
 
    this.render = function() {
       this.code = null;
-      this.graph.pixelSize = this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+      this.graph.pixelSize = this.computePixelSize();
       var nodes = this.graph.nodes;
       var links = this.graph.links;
       var R = this.graph.R;
