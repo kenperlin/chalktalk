@@ -1,24 +1,5 @@
-/*
-   Should gradually drift toward origin (adjust translation accordingly) so rotation is always around center.
 
-   Create nested Graphs (that is, a node can be a Graph).
-
-   Translate/rotate/scale/etc a node.
-   Text for a node (eg: atomic symbol).
-   Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
-   Eg: ethane molecule, with repelling H atoms.
-
-   DONE Put Graph method definitions into prototype.
-   DONE Bug whereby bounding box is clearly too big -- maybe there are phantom nodes?
-   DONE findNode should pick the front-most one.
-   DONE Create a Graph base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
-   DONE Nodes do not knock into each other.
-   DONE Gesture to scale a node.
-   DONE Create separate responder object.
-   DONE Change rendering to use THREE.js ball and stick model.
-*/
-
-function NetResponder() {
+function EthaneResponder() {
 
    this.defaultNodeRadius = 0.1;
 
@@ -117,23 +98,56 @@ function NetResponder() {
       var b = this.clickPoint.distanceTo(this.graph.p);
       node.r = node.r_at_click * b / a;
    }
-}
-NetResponder.prototype = new GraphResponder;
 
-function Net() {
-   this.labels = 'net'.split(' ');
+   this.simulate = function() {
+      var nodes = this.graph.nodes;
+      var nn = nodes.length - 2;
+      for (var n = 0 ; n < 10 ; n++) {
+         var i = 2 + Math.floor(nn * random());
+         var j = 2 + Math.floor(nn * random());
+	 if (i == j)
+	    continue;
+         var a = nodes[i].p;
+         var b = nodes[j].p;
+	 this.graph.adjustDistance(a, b, a.distanceTo(b) + 0.5, i<5==j<5 ? 0.1 : 0.05,
+	      i != this.I && i != this.J,
+	      j != this.I && j != this.J);
+      }
+   }
+}
+EthaneResponder.prototype = new GraphResponder;
+
+function Ethane() {
+   this.labels = 'ethane'.split(' ');
    this.is3D = true;
 
    this.graph = new VisibleGraph();
-   this.graph.setResponder(new NetResponder());
+   this.graph.setResponder(new EthaneResponder());
    this.graph.clear();
-   this.graph.addNode(  0, 1, 0);
-   this.graph.addNode(  0, 0, 0);
-   this.graph.addNode(-.5,-1, 0);
-   this.graph.addNode( .5,-1, 0);
+   var sq3 = Math.sqrt(3)/2;
+   var hd = 0.7;
+
+   this.graph.addNode( -0.5,  0.0,  0.0);
+   this.graph.addNode(  0.5,  0.0,  0.0);
+
+   var hx = lerp(hd, 0.5, 1);
+   this.graph.addNode( -hx,  3/4 * hd,   sq3/2 * hd);
+   this.graph.addNode( -hx,  0.0     ,  -sq3   * hd);
+   this.graph.addNode( -hx, -3/4 * hd,   sq3/2);
+
+   this.graph.addNode(  hx,  3/4 * hd,  -sq3/2 * hd);
+   this.graph.addNode(  hx,  0.0     ,   sq3   * hd);
+   this.graph.addNode(  hx, -3/4 * hd,  -sq3/2 * hd);
+
    this.graph.addLink(0, 1);
-   this.graph.addLink(1, 2);
-   this.graph.addLink(1, 3);
+
+   this.graph.addLink(0, 2, 0.5);
+   this.graph.addLink(0, 3, 0.5);
+   this.graph.addLink(0, 4, 0.5);
+
+   this.graph.addLink(1, 5, 0.5);
+   this.graph.addLink(1, 6, 0.5);
+   this.graph.addLink(1, 7, 0.5);
 
    this.graph.computeLengths();
 
@@ -148,6 +162,9 @@ function Net() {
       var nodes = this.graph.nodes;
       var links = this.graph.links;
       var R = this.graph.R;
+
+      for (var i = 0 ; i < nodes.length ; i++)
+         nodes[i].r = i < 2 ? 0.3 : 0.15;
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
@@ -278,6 +295,6 @@ function Net() {
 //////////////////////////////////////////////////
 
 }
-Net.prototype = new Sketch;
-addSketchType('Net');
+Ethane.prototype = new Sketch;
+addSketchType('Ethane');
 

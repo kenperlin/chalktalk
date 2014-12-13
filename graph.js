@@ -16,6 +16,8 @@ Graph.prototype = {
    },
 
    addNode: function(x,y,z) {
+      if (z === undefined)
+         z = 0;
       this.nodes.push({p:newVec(x,y,z)});
       return this.nodes.length - 1;
    },
@@ -24,14 +26,15 @@ Graph.prototype = {
       if (w === undefined)
          w = 1;
       this.links.push({i:i, j:j, w:w});
+      this.computeLengths();
       return this.links.length - 1;
    },
 
    adjustDistance: function(A, B, d, e, isAdjustingA, isAdjustingB) {
       this.tmp.copy(B).sub(A).multiplyScalar( e * (d / A.distanceTo(B) - 1) );
-      if (isAdjustingA)
+      if (isAdjustingA === undefined || isAdjustingA)
          A.sub(this.tmp);
-      if (isAdjustingB)
+      if (isAdjustingB === undefined || isAdjustingB)
          B.add(this.tmp);
    },
 
@@ -66,19 +69,20 @@ Graph.prototype = {
 
    adjustEdgeLengths: function() {
       var R = this.R;
-      for (var rep = 0 ; rep < 10 ; rep++)
+      for (var rep = 0 ; rep < 10 ; rep++) {
          for (var n = 0 ; n < this.lengths.length ; n++) {
             var L = this.lengths[n];
             var a = this.nodes[L.i];
             var b = this.nodes[L.j];
             this.adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
          }
+      }
    },
 
-   updatePositions: function() {
+   updatePositions: function(simulate) {
       this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
       this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
-      this.adjustEdgeLengths();   // Coerce all links to be the proper length.
+      this.adjustEdgeLengths(simulate);   // Coerce all links to be the proper length.
    },
 
    findLink: function(i, j) {
