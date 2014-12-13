@@ -784,6 +784,7 @@
    // FIND x,y,scale FOR CURVE P TO BEST FIT CURVE Q.
 
    function bestCurveFit(P, Q) {
+
       var n = min(P.length, Q.length), a=0, b=0, c=0, d=0, e=0, f=0;
       for (var i = 0 ; i < n ; i++) {
          var px = P[i][0], py = P[i][1], qx = Q[i][0], qy = Q[i][1];
