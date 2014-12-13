@@ -3,13 +3,16 @@
 
    Problem -- deleting a joint seems to leave links that should not be there.
 
-   Bug whereby bounding box is clearly too big -- maybe there are phantom nodes?
+   Create nested Graphs (that is, a node can be a Graph).
+
+   Put Graph method definitions into prototype.
 
    Translate/rotate/scale/etc a node.
    Text for a node (eg: atomic symbol).
    Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
    Eg: ethane molecule, with repelling H atoms.
 
+   DONE Bug whereby bounding box is clearly too big -- maybe there are phantom nodes?
    DONE findNode should pick the front-most one.
    DONE Create a Graph base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
    DONE Nodes do not knock into each other.
@@ -65,12 +68,20 @@ function GraphResponder() {
 function Graph() {
    function v2s(v) { return "(" + v.x + "," + v.y + "," + v.z + ")"; }
 
-   this.nodes = [ {p:nv(0,1,0)}, {p:nv(0,0,0)}, {p:nv(-.5,-1,0)}, {p:nv(.5,-1,0)} ];
-   this.links = [ {i:0, j:1}, {i:1, j:2}, {i:1, j:3} ];
+   this.addNode = function(x,y,z) {
+      this.nodes.push({p:nv(x,y,z)});
+   }
+
+   this.addLink = function(i, j) {
+      this.links.push({i:i, j:j});
+   }
+
+   this.nodes = [];
+   this.links = [];
 
    var tmp = nv(0,0,0);
 
-   var adjustDistance = function(A, B, d, e, isAdjustingA, isAdjustingB) {
+   this.adjustDistance = function(A, B, d, e, isAdjustingA, isAdjustingB) {
       tmp.copy(B).sub(A).multiplyScalar( e * (d / A.distanceTo(B) - 1) );
       if (isAdjustingA)
          A.sub(tmp);
@@ -114,7 +125,7 @@ function Graph() {
             var L = this.lengths[n];
             var a = this.nodes[L.i];
             var b = this.nodes[L.j];
-            adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
+            this.adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
          }
    }
 
@@ -460,6 +471,19 @@ function Net() {
    this.is3D = true;
    this.graph = new VisibleGraph();
 
+   this.graph.nodes = [];
+   this.graph.addNode(  0, 1, 0);
+   this.graph.addNode(  0, 0, 0);
+   this.graph.addNode(-.5,-1, 0);
+   this.graph.addNode( .5,-1, 0);
+
+   this.graph.links = [];
+   this.graph.addLink(0, 1);
+   this.graph.addLink(1, 2);
+   this.graph.addLink(1, 3);
+
+   this.graph.computeLengths();
+
    this.mouseMove = function(x,y) { return this.graph.mouseMove(x, y); }
    this.mouseDown = function(x,y) { return this.graph.mouseDown(x, y); }
    this.mouseDrag = function(x,y) { return this.graph.mouseDrag(x, y); }
@@ -513,8 +537,21 @@ function Net() {
 	       node.pix = nv(0,0,0);
 	    node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
+	    if (j == R.J)
+               this.drawNode(node.p, node.r);                // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
             this.drawNode(node.p, node.r * (j==R.J?1:.01));  // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
          }
+
+         this.meshBounds = [];
+         for (var j = 0 ; j < nodes.length ; j++) {
+	    var node = nodes[j], p = node.p, r = node.r;
+	    for (var a = -r ; a <= r ; a += r + r)
+	    for (var b = -r ; b <= r ; b += r + r)
+	    for (var c = -r ; c <= r ; c += r + r)
+	       this.meshBounds.push([p.x + a, p.y + b, p.z + c]);
+         }
+	 this.extendBounds(this.meshBounds);
+
          color('red');
          if (R.I_ != -1) {
             var node = nodes[R.I_];                          // HIGHLIGHT JOINT THAT WAS JUST CLICKED ON.

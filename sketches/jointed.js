@@ -31,7 +31,7 @@ function Jointed() {
    }
    this.labels = 'jointed'.split(' ');
    this.joints = [{p:nv(0,1,0)},{p:nv(0,0,0)},{p:nv(-.5,-1,0)},{p:nv(.5,-1,0)}];
-   this.links = [[0,1],[1,2],[1,3]];
+   this.links = [[0,1],[1,2],[1,3],[3,2]];
    this.is3D = true;
 
    this.myShaderMaterial = function() {
