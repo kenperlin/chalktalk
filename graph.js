@@ -5,6 +5,9 @@ function vecToString(v) { return "(" + v.x + "," + v.y + "," + v.z + "}"; }
 function Graph() {
    this.nodes = [];
    this.links = [];
+
+   this.removedNodes = [];
+   this.removedLinks = [];
 }
 
 Graph.prototype = {
@@ -79,10 +82,10 @@ Graph.prototype = {
       }
    },
 
-   updatePositions: function(simulate) {
+   updatePositions: function() {
       this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
       this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
-      this.adjustEdgeLengths(simulate);   // Coerce all links to be the proper length.
+      this.adjustEdgeLengths();   // Coerce all links to be the proper length.
    },
 
    findLink: function(i, j) {
@@ -113,6 +116,7 @@ Graph.prototype = {
             link.j--;
       }
 
+      this.removedNodes.push(this.nodes[j]);
       this.nodes.splice(j, 1);
    },
 
@@ -120,6 +124,7 @@ Graph.prototype = {
       if (l < 0 || l >= this.links.length)
          return;
 
+      this.removedLinks.push(this.links[l]);
       this.links.splice(l, 1);
    },
 

@@ -22,20 +22,22 @@ function NetResponder() {
 
    this.defaultNodeRadius = 0.1;
 
-// RESPONSES NOT AFTER A CLICK.
-
    // Drag on a node to move it.
 
-   this.onPress = function() {
-      var node = this.graph.nodes[this.I];
-      if (node.d === undefined)
-         node.d = newVec(0,0,0);
-      var p = this.graph.p;
-      node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
+   this.doDragToMove = function() {
+      this.onPress = function() {
+         var node = this.graph.nodes[this.I];
+         if (node.d === undefined)
+            node.d = newVec(0,0,0);
+         var p = this.graph.p;
+         node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
+      }
+      this.onDrag = function() {
+         this.graph.nodes[this.I].p.copy(this.graph.p);
+      }
    }
-   this.onDrag = function() {
-      this.graph.nodes[this.I].p.copy(this.graph.p);
-   }
+
+   this.doDragToMove();
 
 // RESPONSES AFTER CLICKING ON A JOINT.
 
@@ -160,24 +162,12 @@ function Net() {
 
       this.afterSketch(function() {
 
-         //////// REMOVE ANY GEOMETRY THAT IS NO LONGER IN THE GRAPH. //////
+         while (this.graph.removedNodes.length > 0) 
+	    mesh.remove(this.graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES.
 
-         for (var i = 0 ; i < mesh.children.length ; i++)
-            mesh.children[i].tagForRemoval = true;                 // TAG ALL GEOMETRY OBJECTS FOR REMOVAL.
-
-         for (var i = 0 ; i < nodes.length ; i++)
-            if (nodes[i].g !== undefined)
-               nodes[i].g.tagForRemoval = undefined;               // UNTAG IF NODE IS STILL IN THE GRAPH.
-
-         for (var i = 0 ; i < links.length ; i++)
-            if (links[i].g !== undefined)
-               links[i].g.tagForRemoval = undefined;               // UNTAG IF LINK IS STILL IN THE GRAPH.
-
-         for (var i = 0 ; i < mesh.children.length ; i++)
-            if (mesh.children[i].tagForRemoval !== undefined)
-               mesh.remove(mesh.children[i]);                      // REMOVE ALL OBJECTS THAT ARE STILL TAGGED.
-
-         / //////////////////////////////////////////////////////////////////
+         while (this.graph.removedLinks.length > 0) 
+	    mesh.remove(this.graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS.
+	    
 
          if (R.clickType == 'none') {
             R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
