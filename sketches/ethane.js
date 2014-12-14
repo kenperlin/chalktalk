@@ -23,7 +23,7 @@ function EthaneResponder() {
          var a = nodes[i].p;
          var b = nodes[j].p;
 	 var d = a.distanceTo(b);
-	 this.graph.adjustDistance(a, b, d + 0.5, 0.1 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
+	 this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
       }
    }
 }
@@ -32,6 +32,8 @@ EthaneResponder.prototype = new GraphResponder;
 function Ethane() {
    this.labels = 'ethane'.split(' ');
    this.is3D = true;
+
+   this.createTime = time;
 
    this.graph = new VisibleGraph();
    this.graph.setResponder(new EthaneResponder());
@@ -165,23 +167,31 @@ function Ethane() {
       return mesh;
    }
 
+   function createPhongMaterial(rgb) {
+      var material = new THREE.MeshPhongMaterial();
+      material.color = material.emissive = new THREE.Color(rgb);
+      return material;
+   }
+
+   this.carbonMaterial = createPhongMaterial(0x080808);
+   this.hydrogenMaterial = createPhongMaterial(0x404040);
+   this.linkMaterial = createPhongMaterial(0x202020);
+
    this.renderNode = function(node) {
       if (node.g === undefined) {
          var material =  new THREE.MeshPhongMaterial();
-	 var color = node.r < .25 ? 0x404040 : 0x080808;
-	 material.color = new THREE.Color(color);
-	 material.emissive = new THREE.Color(color);
-         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
+         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial);
          node.g.quaternion = new THREE.Quaternion();
          mesh.add(node.g);
       }
-      node.g.scale.set(node.r,node.r,node.r);
+      var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
+      node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
       if (link.g === undefined) {
-         link.g = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), this.netMaterial());
+         link.g = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), this.linkMaterial);
          link.g.scale.x = link.g.scale.y = 0.03 * Math.sqrt(link.w);
          mesh.add(link.g);
       }

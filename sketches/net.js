@@ -40,26 +40,26 @@ function NetResponder() {
       }
    );
 
-   this.doI_I(
-      function() {                                       // Click on a node and then
+   this.doI_I(                                           // Click on a node and then
+      null,
+      function() {                                       // drag it to move it while the simulation pauses.
          this.graph.nodes[this.I_].p.copy(this.graph.p);
       },
-      function() {                                       // drag it to move it while the simulation pauses.
+      function() {
          this.graph.computeLengths();                   
       },
-      null,
       function() {                                       // Double click on a node to remove it.
          this.graph.removeNode(this.I_);
          this.graph.computeLengths();
       }
    );
 
-   this.doI_J(
+   this.doI_J(                                           // Click on node I, then
       null,
-      function() {                                       // Click node I, then drag node J. Simulation will pause.
+      function() {                                       // drag node J while the simulation pauses.
          this.graph.nodes[this.J].p.copy(this.graph.p);
       },
-      function() {                                       // then release to create a springy link.
+      function() {                                       // upon release, create a springy link.
          this.graph.removeLink(this.graph.findLink(this.I_, this.J));
          this.graph.addLink(this.I_, this.J, 0.03);
          this.graph.computeLengths();
