@@ -102,16 +102,13 @@ function EthaneResponder() {
    this.simulate = function() {
       var nodes = this.graph.nodes;
       var nn = nodes.length - 2;
-      for (var n = 0 ; n < 10 ; n++) {
-         var i = 2 + Math.floor(nn * random());
-         var j = 2 + Math.floor(nn * random());
-	 if (i == j)
-	    continue;
+      var i = 2 + Math.floor(nn * random());
+      var j = 2 + Math.floor(nn * random());
+      if (i != j) {
          var a = nodes[i].p;
          var b = nodes[j].p;
-	 this.graph.adjustDistance(a, b, a.distanceTo(b) + 0.5, i<5==j<5 ? 0.1 : 0.05,
-	      i != this.I && i != this.J,
-	      j != this.I && j != this.J);
+	 var d = a.distanceTo(b);
+	 this.graph.adjustDistance(a, b, d + 0.5, 0.1 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
       }
    }
 }
@@ -149,7 +146,10 @@ function Ethane() {
    this.graph.addLink(1, 6, 0.5);
    this.graph.addLink(1, 7, 0.5);
 
-   this.graph.computeLengths();
+   for (var i = 0 ; i < this.graph.nodes.length - 1 ; i++)
+   for (var j = i + 1 ; j < this.graph.nodes.length ; j++)
+      if (this.graph.findLink(i, j) == -1)
+         this.graph.addLink(i, j, 0.1);
 
    this.mouseMove = function(x,y) { return this.graph.mouseMove(x, y); }
    this.mouseDown = function(x,y) { return this.graph.mouseDown(x, y); }
@@ -169,7 +169,7 @@ function Ethane() {
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
       this.duringSketch(function() {
-         for (var l = 0 ; l < links.length ; l++)
+         for (var l = 0 ; l < 7 ; l++)
             this.drawLink(nodes[links[l].i].p, nodes[links[l].j].p);
       });
 
@@ -197,7 +197,7 @@ function Ethane() {
          / //////////////////////////////////////////////////////////////////
 
          if (R.clickType == 'none') {
-            R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
+            //R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
             this.graph.updatePositions();
          }
          color('cyan');
@@ -230,7 +230,7 @@ function Ethane() {
 
          if (R.clickType == 'B' && ! R.isCreatingNode)       // AFTER A CLICK OVER BACKGROUND,
             this.drawNode(R.clickPoint, 0.05);               // SHOW THAT A SECOND CLICK WOULD CREATE A NEW JOINT.
-         for (var l = 0 ; l < links.length ; l++)
+         for (var l = 0 ; l < 7 ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
       });
    }
