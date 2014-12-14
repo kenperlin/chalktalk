@@ -1,8 +1,12 @@
 
 function newVec(x,y,z) { return new THREE.Vector3(x,y,z); }
 function vecToString(v) { return "(" + v.x + "," + v.y + "," + v.z + "}"; }
+function isNotNull(arg) { return arg !== undefined && arg != null; }
+
 
 function Graph() {
+   this.isUpdating = function() { return true; }
+
    this.nodes = [];
    this.links = [];
 
@@ -82,6 +86,13 @@ Graph.prototype = {
       }
    },
 
+   update: function() {
+      if (this.isUpdating()) {
+         this.R.simulate();
+         this.updatePositions();
+      }
+   },
+
    updatePositions: function() {
       this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
       this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
@@ -150,37 +161,96 @@ function GraphResponder() {
    this.I_ = -1;
    this.J = -1;
    this.K = -1;
+   this.setup = function() { }
+   this.simulate = function() { }
+
    this.onPress = function() { }
-   this.onPressB = function() { }
    this.onDrag = function() { }
-   this.onDragB = function() { }
    this.onRelease = function() { }
-   this.onReleaseJ = function() { }
-   this.onReleaseB = function() { }
    this.onClick = function() { }
+
+   this.onPressB = function() { }
+   this.onDragB = function() { }
+   this.onReleaseB = function() { }
    this.onClickB = function() { }
+
    this.onClickPress = function() { }
-   this.onClickPressJ = function() { }
-   this.onClickPressB = function() { }
    this.onClickDrag = function() { }
-   this.onClickDragJ = function() { }
-   this.onClickDragB = function() { }
    this.onClickRelease = function() { }
-   this.onClickReleaseJ = function() { }
-   this.onClickReleaseB = function() { }
    this.onClickClick = function() { }
+
+   this.onClickPressJ = function() { }
+   this.onClickDragJ = function() { }
+   this.onClickReleaseJ = function() { }
    this.onClickClickJ = function() { }
+
+   this.onClickPressB = function() { }
+   this.onClickDragB = function() { }
+   this.onClickReleaseB = function() { }
    this.onClickClickB = function() { }
-   this.onClickBPressB = function() { }
+
    this.onClickBPressJ = function() { }
-   this.onClickBDragB = function() { }
    this.onClickBDragJ = function() { }
-   this.onClickBReleaseB = function() { }
    this.onClickBReleaseJ = function() { }
    this.onClickBClickJ = function() { }
+
+   this.onClickBPressB = function() { }
+   this.onClickBDragB = function() { }
+   this.onClickBReleaseB = function() { }
    this.onClickBClickB = function() { }
-   this.simulate = function() { }
-};
+}
+
+GraphResponder.prototype = {
+   doI : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onPress   = onPress  ;
+      if (isNotNull(onDrag   )) this.onDrag    = onDrag   ;
+      if (isNotNull(onRelease)) this.onRelease = onRelease;
+      if (isNotNull(onClick  )) this.onClick   = onClick  ;
+   },
+
+   doB : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onPressB   = onPress  ;
+      if (isNotNull(onDrag   )) this.onDragB    = onDrag   ;
+      if (isNotNull(onRelease)) this.onReleaseB = onRelease;
+      if (isNotNull(onClick  )) this.onClickB   = onClick  ;
+   },
+
+   doI_I : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onClickPress   = onPress  ;
+      if (isNotNull(onDrag   )) this.onClickDrag    = onDrag   ;
+      if (isNotNull(onRelease)) this.onClickRelease = onRelease;
+      if (isNotNull(onClick  )) this.onClickClick   = onClick  ;
+   },
+
+   doI_J : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onClickPressJ   = onPress  ;
+      if (isNotNull(onDrag   )) this.onClickDragJ    = onDrag   ;
+      if (isNotNull(onRelease)) this.onClickReleaseJ = onRelease;
+      if (isNotNull(onClick  )) this.onClickClickJ   = onClick  ;
+   },
+
+   doI_B : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onClickPressB   = onPress  ;
+      if (isNotNull(onDrag   )) this.onClickDragB    = onDrag   ;
+      if (isNotNull(onRelease)) this.onClickReleaseB = onRelease;
+      if (isNotNull(onClick  )) this.onClickClickB   = onClick  ;
+   },
+
+   doB_J : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onClickBPressJ   = onPress  ;
+      if (isNotNull(onDrag   )) this.onClickBDragJ    = onDrag   ;
+      if (isNotNull(onRelease)) this.onClickBReleaseJ = onRelease;
+      if (isNotNull(onClick  )) this.onClickBClickJ   = onClick  ;
+   },
+
+   doB_B : function(onPress, onDrag, onRelease, onClick)  {
+      if (isNotNull(onPress  )) this.onClickBPressB   = onPress  ;
+      if (isNotNull(onDrag   )) this.onClickBDragB    = onDrag   ;
+      if (isNotNull(onRelease)) this.onClickBReleaseB = onRelease;
+      if (isNotNull(onClick  )) this.onClickBClickB   = onClick  ;
+   },
+}
+
 
 function VisibleGraph() {
    this.p = newVec(0,0,0);
@@ -192,6 +262,7 @@ function VisibleGraph() {
    this.setResponder = function(R) {
       this.R = R;
       R.graph = this;
+      R.setup();
    }
 
    this.findNodeAtPixel = function(pix) {

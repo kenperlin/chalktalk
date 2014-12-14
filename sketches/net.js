@@ -20,105 +20,91 @@
 
 function NetResponder() {
 
+   this.setup = function() {
+      this.graph.isUpdating = function() {
+         return this.R.clickType == 'none';
+      }
+   }
+
    this.defaultNodeRadius = 0.1;
 
-   // Drag on a node to move it.
-
-   this.doDragToMove = function() {
-      this.onPress = function() {
+   this.doI(
+      function() {                                       // Drag on a node to move it.
          var node = this.graph.nodes[this.I];
          if (node.d === undefined)
             node.d = newVec(0,0,0);
-         var p = this.graph.p;
-         node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
-      }
-      this.onDrag = function() {
+         node.d.copy(this.graph.p).sub(node.p);
+      },
+      function() {
          this.graph.nodes[this.I].p.copy(this.graph.p);
       }
-   }
+   );
 
-   this.doDragToMove();
+   this.doI_I(
+      function() {                                       // Click on a node and then
+         this.graph.nodes[this.I_].p.copy(this.graph.p);
+      },
+      function() {                                       // drag it to move it while the simulation pauses.
+         this.graph.computeLengths();                   
+      },
+      null,
+      function() {                                       // Double click on a node to remove it.
+         this.graph.removeNode(this.I_);
+         this.graph.computeLengths();
+      }
+   );
 
-// RESPONSES AFTER CLICKING ON A JOINT.
+   this.doI_J(
+      null,
+      function() {                                       // Click node I, then drag node J. Simulation will pause.
+         this.graph.nodes[this.J].p.copy(this.graph.p);
+      },
+      function() {                                       // then release to create a springy link.
+         this.graph.removeLink(this.graph.findLink(this.I_, this.J));
+         this.graph.addLink(this.I_, this.J, 0.03);
+         this.graph.computeLengths();
+      },
+      function() {                                       // Click node I, then click other node J.
+         var l = this.graph.findLink(this.I_, this.J);
+         if (l == -1)
+            this.graph.addLink(this.I_, this.J);         // If there was no link betw I and J, create one.
+         else
+            this.graph.removeLink(l);                    // If there was a link betw I and J, remove it.
+         this.graph.computeLengths();
+      }
+   );
 
-   // Click on a node and then drag it to move it while the simulation pauses.
+   this.doB_B(
+      function() {                                       // Click on bg twice to create a new node,
+         var p = this.graph.p;
+         this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
+         if (this.isCreatingNode)
+            this.newJ = this.graph.addNode(p.x, p.y, p.z);
+      },
+      function() {                                       // and optionally drag.
+         if (this.isCreatingNode)
+            this.graph.nodes[this.newJ].p.copy(this.graph.p);
+      },
+      function() {
+         this.isCreatingNode = false;
+      },
+      function() {
+         this.isCreatingNode = false;
+      }
+   );
 
-   this.onClickDrag = function() {
-      this.graph.nodes[this.I_].p.copy(this.graph.p);
-   }
-   this.onClickRelease = function() {
-      this.graph.computeLengths();
-   }
-
-   // Double click on a node to remove it.
-
-   this.onClickClick = function() {
-      this.graph.removeNode(this.I_);
-      this.graph.computeLengths();
-   }
-
-   // Click on a node and then drag a different node. The simulation will pause.
-
-   this.onClickDragJ = function() {
-      this.graph.nodes[this.J].p.copy(this.graph.p);
-   }
-
-   // then when the second node is released, create a springy link between them.
-
-   this.onClickReleaseJ = function() {
-      this.graph.removeLink(this.graph.findLink(this.I_, this.J));
-      this.graph.addLink(this.I_, this.J, 0.03);
-      this.graph.computeLengths();
-   }
-
-   // Click on a node then click on another node to toggle a link between them.
-
-   this.onClickClickJ = function() {
-      var l = this.graph.findLink(this.I_, this.J);
-      if (l == -1)
-         this.graph.addLink(this.I_, this.J);
-      else
-         this.graph.removeLink(l);
-      this.graph.computeLengths();
-   }
-
-// RESPONSES AFTER CLICKING ON THE BACKGROUND.
-
-   // Click on the background, then click in the same place to create a new node,
-
-   this.onClickBPressB = function() {
-      var p = this.graph.p;
-      this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
-      if (this.isCreatingNode)
-         this.newJ = this.graph.addNode(p.x, p.y, p.z);
-   }
-
-   // then optionally drag to move the new node.
-
-   this.onClickBDragB = function() {
-      if (this.isCreatingNode)
-         this.graph.nodes[this.newJ].p.copy(this.graph.p);
-   }
-   this.onClickBReleaseB = function() {
-      this.isCreatingNode = false;
-   }
-
-   this.onClickBClickB = function() {
-      this.isCreatingNode = false;
-   }
-
-   // Click on the background and then drag on a node to do a gesture on that node.
-
-   this.onClickBPressJ = function() {
-      var node = this.graph.nodes[this.J];
-      node.r_at_click = node.r;
-   }
-   this.onClickBDragJ = function() {
-      var node = this.graph.nodes[this.J];
-      var a = this.clickPoint.distanceTo(node.p);
-      var b = this.clickPoint.distanceTo(this.graph.p);
-      node.r = node.r_at_click * b / a;
-   }
+   this.doB_J(
+      function() {                                       // After clicking on the background
+         var node = this.graph.nodes[this.J];
+         node.r_at_click = node.r;
+      },
+      function() {                                       // drag on a node to do a gesture on that node.
+         var node = this.graph.nodes[this.J];
+         var a = this.clickPoint.distanceTo(node.p);
+         var b = this.clickPoint.distanceTo(this.graph.p);
+         node.r = node.r_at_click * b / a;
+      }
+   );
 }
 NetResponder.prototype = new GraphResponder;
 
@@ -128,11 +114,14 @@ function Net() {
 
    this.graph = new VisibleGraph();
    this.graph.setResponder(new NetResponder());
+
    this.graph.clear();
+
    this.graph.addNode(  0, 1, 0);
    this.graph.addNode(  0, 0, 0);
    this.graph.addNode(-.5,-1, 0);
    this.graph.addNode( .5,-1, 0);
+
    this.graph.addLink(0, 1);
    this.graph.addLink(1, 2);
    this.graph.addLink(1, 3);
@@ -146,10 +135,11 @@ function Net() {
 
    this.render = function() {
       this.code = null;
-      this.graph.pixelSize = this.computePixelSize();
-      var nodes = this.graph.nodes;
-      var links = this.graph.links;
-      var R = this.graph.R;
+      var graph = this.graph;
+      graph.pixelSize = this.computePixelSize();
+      var nodes = graph.nodes;
+      var links = graph.links;
+      var R = graph.R;
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
@@ -162,17 +152,14 @@ function Net() {
 
       this.afterSketch(function() {
 
-         while (this.graph.removedNodes.length > 0) 
-	    mesh.remove(this.graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES.
+         while (graph.removedNodes.length > 0) 
+	    mesh.remove(graph.removedNodes.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD NODES.
 
-         while (this.graph.removedLinks.length > 0) 
-	    mesh.remove(this.graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS.
-	    
+         while (graph.removedLinks.length > 0) 
+	    mesh.remove(graph.removedLinks.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD LINKS.
 
-         if (R.clickType == 'none') {
-            R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
-            this.graph.updatePositions();
-         }
+         graph.update();
+
          color('cyan');
          for (var j = 0 ; j < nodes.length ; j++) {
             var node = nodes[j];

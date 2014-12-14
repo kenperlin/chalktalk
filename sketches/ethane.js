@@ -1,103 +1,18 @@
 
 function EthaneResponder() {
 
-   this.defaultNodeRadius = 0.1;
-
-// RESPONSES NOT AFTER A CLICK.
-
-   // Drag on a node to move it.
-
-   this.onPress = function() {
-      var node = this.graph.nodes[this.I];
-      if (node.d === undefined)
-         node.d = newVec(0,0,0);
-      var p = this.graph.p;
-      node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
-   }
-   this.onDrag = function() {
-      this.graph.nodes[this.I].p.copy(this.graph.p);
-   }
-
-// RESPONSES AFTER CLICKING ON A JOINT.
-
-   // Click on a node and then drag it to move it while the simulation pauses.
-
-   this.onClickDrag = function() {
-      this.graph.nodes[this.I_].p.copy(this.graph.p);
-   }
-   this.onClickRelease = function() {
-      this.graph.computeLengths();
-   }
-
-   // Double click on a node to remove it.
-
-   this.onClickClick = function() {
-      this.graph.removeNode(this.I_);
-      this.graph.computeLengths();
-   }
-
-   // Click on a node and then drag a different node. The simulation will pause.
-
-   this.onClickDragJ = function() {
-      this.graph.nodes[this.J].p.copy(this.graph.p);
-   }
-
-   // then when the second node is released, create a springy link between them.
-
-   this.onClickReleaseJ = function() {
-      this.graph.removeLink(this.graph.findLink(this.I_, this.J));
-      this.graph.addLink(this.I_, this.J, 0.03);
-      this.graph.computeLengths();
-   }
-
-   // Click on a node then click on another node to toggle a link between them.
-
-   this.onClickClickJ = function() {
-      var l = this.graph.findLink(this.I_, this.J);
-      if (l == -1)
-         this.graph.addLink(this.I_, this.J);
-      else
-         this.graph.removeLink(l);
-      this.graph.computeLengths();
-   }
-
-// RESPONSES AFTER CLICKING ON THE BACKGROUND.
-
-   // Click on the background, then click in the same place to create a new node,
-
-   this.onClickBPressB = function() {
-      var p = this.graph.p;
-      this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
-      if (this.isCreatingNode)
-         this.newJ = this.graph.addNode(p.x, p.y, p.z);
-   }
-
-   // then optionally drag to move the new node.
-
-   this.onClickBDragB = function() {
-      if (this.isCreatingNode)
-         this.graph.nodes[this.newJ].p.copy(this.graph.p);
-   }
-   this.onClickBReleaseB = function() {
-      this.isCreatingNode = false;
-   }
-
-   this.onClickBClickB = function() {
-      this.isCreatingNode = false;
-   }
-
-   // Click on the background and then drag on a node to do a gesture on that node.
-
-   this.onClickBPressJ = function() {
-      var node = this.graph.nodes[this.J];
-      node.r_at_click = node.r;
-   }
-   this.onClickBDragJ = function() {
-      var node = this.graph.nodes[this.J];
-      var a = this.clickPoint.distanceTo(node.p);
-      var b = this.clickPoint.distanceTo(this.graph.p);
-      node.r = node.r_at_click * b / a;
-   }
+   this.doI(
+      function() {                                             // Drag on a node to move it.
+         var node = this.graph.nodes[this.I];
+         if (node.d === undefined)
+            node.d = newVec(0,0,0);
+         var p = this.graph.p;
+         node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
+      },
+      function() {
+         this.graph.nodes[this.I].p.copy(this.graph.p);
+      }
+   );
 
    this.simulate = function() {
       var nodes = this.graph.nodes;
@@ -158,13 +73,14 @@ function Ethane() {
 
    this.render = function() {
       this.code = null;
-      this.graph.pixelSize = this.computePixelSize();
-      var nodes = this.graph.nodes;
-      var links = this.graph.links;
-      var R = this.graph.R;
+      var graph = this.graph;
+      graph.pixelSize = this.computePixelSize();
+      var nodes = graph.nodes;
+      var links = graph.links;
+      var R = graph.R;
 
       for (var i = 0 ; i < nodes.length ; i++)
-         nodes[i].r = i < 2 ? 0.3 : 0.15;
+         nodes[i].r = i < 2 ? 0.3 : 0.2;
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
@@ -177,15 +93,15 @@ function Ethane() {
 
       this.afterSketch(function() {
 
-         while (this.graph.removedNodes.length > 0)
-            mesh.remove(this.graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES
+         while (graph.removedNodes.length > 0)
+            mesh.remove(graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES
 
-         while (this.graph.removedLinks.length > 0)
-            mesh.remove(this.graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
+         while (graph.removedLinks.length > 0)
+            mesh.remove(graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
 
          if (R.clickType == 'none') {
             R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
-            this.graph.updatePositions();
+            graph.updatePositions();
          }
          color('cyan');
          for (var j = 0 ; j < nodes.length ; j++) {
@@ -251,9 +167,12 @@ function Ethane() {
 
    this.renderNode = function(node) {
       if (node.g === undefined) {
-         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), this.netMaterial());
+         var material =  new THREE.MeshPhongMaterial();
+	 var color = node.r < .25 ? 0x404040 : 0x080808;
+	 material.color = new THREE.Color(color);
+	 material.emissive = new THREE.Color(color);
+         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
          node.g.quaternion = new THREE.Quaternion();
-         node.r = this.graph.R.defaultNodeRadius;
          mesh.add(node.g);
       }
       node.g.scale.set(node.r,node.r,node.r);

@@ -905,13 +905,16 @@
 	    if (this.fragmentShader === undefined)
 	       this.fragmentShader = defaultFragmentShader;
 
-            this.shaderMaterial = function() {
+            this.shaderMaterial = function(r, g, b) {
+	       if (r === undefined) r = g = b = 1;
 	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
+	       material.setUniform('ambient' , [r*.05,g*.05,b*.05]);
+	       material.setUniform('diffuse' , [r,g,b]);
 	       material.setUniform('specular', [.5,.5,.5,10]);
 	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
 	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
 	       return material;
-	    }
+            }
 
 	    this.updateVertexShader = function() {
 	       if (this.vertexShader != codeTextArea.value) {
@@ -952,9 +955,9 @@
 
 	    // UPDATE MESH COLOR IF NEEDED.
 
-	    if (this.ambient  === undefined) this.ambient = [.025,.025,.025];
-	    if (this.diffuse  === undefined) this.diffuse = [.2,.2,.2];
-	    if (this.specular === undefined) this.specular = [.5,.5,.5,10];
+	    var ambient  = this.ambient !==undefined ? this.ambient  : [.025,.025,.025];
+	    var diffuse  = this.diffuse !==undefined ? this.diffuse  : [.200,.200,.200];
+	    var specular = this.specular!==undefined ? this.specular : [.500,.500,.500, 10];
 
 	    if (this.meshColorId !== this.colorId) {
 	       var rgb = paletteRGB[this.colorId];
@@ -963,9 +966,9 @@
 	       this.meshColorId = this.colorId;
 	    }
 
-            this.mesh.material.setUniform('ambient' , this.ambient);
-            this.mesh.material.setUniform('diffuse' , this.diffuse);
-            this.mesh.material.setUniform('specular', this.specular);
+            this.mesh.material.setUniform('ambient' , ambient);
+            this.mesh.material.setUniform('diffuse' , diffuse);
+            this.mesh.material.setUniform('specular', specular);
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 
