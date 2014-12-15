@@ -178,26 +178,16 @@ function Ethane() {
    this.linkMaterial = createPhongMaterial(0x202020);
 
    this.renderNode = function(node) {
-      if (node.g === undefined) {
-         var material =  new THREE.MeshPhongMaterial();
-         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial);
-         node.g.quaternion = new THREE.Quaternion();
-         mesh.add(node.g);
-      }
+      if (node.g === undefined)
+	 mesh.add(node.g = new_NodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
-      if (link.g === undefined) {
-	 var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), this.linkMaterial);
-	 tube.rotation.x = Math.PI / 2;
-	 link.g = new THREE.Mesh();
-	 link.g.add(tube);
-         link.g.scale.x = link.g.scale.y = 0.05;
-         mesh.add(link.g);
-      }
+      if (link.g === undefined)
+         mesh.add(link.g = new_LinkMesh(this.linkMaterial, 0.05));
       var a = this.graph.nodes[link.i].p;
       var b = this.graph.nodes[link.j].p;
       link.g.position.copy(a).lerp(b, 0.5);

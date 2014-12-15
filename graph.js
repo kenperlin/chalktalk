@@ -431,3 +431,23 @@ function VisibleGraph() {
 }
 VisibleGraph.prototype = new Graph;
 
+// CONVENIENCE FUNCTIONS FOR BUILDING GRAPH GEOMETRY
+
+   function new_NodeMesh(material, radius) {
+      var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
+      if (radius !== undefined)
+         mesh.scale.x = mesh.scale.y = radius;
+      return mesh;
+   }
+
+   function new_LinkMesh(material, radius) {
+      var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), material);
+      tube.rotation.x = Math.PI / 2;
+      var mesh = new THREE.Mesh();
+      mesh.add(tube);
+      if (radius !== undefined)
+         mesh.scale.x = mesh.scale.y = radius;
+      return mesh;
+   }
+
+
