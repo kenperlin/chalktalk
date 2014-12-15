@@ -151,6 +151,32 @@ Graph.prototype = {
          }
       }
    },
+
+   // CONVENIENCE FUNCTIONS FOR BUILDING AND PLACING GRAPH COMPONENTS AS THREE.js OBJECTS.
+
+   newNodeMesh: function(material, radius) {
+      var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
+      if (radius !== undefined)
+         mesh.scale.x = mesh.scale.y = mesh.scale.z = radius;
+      return mesh;
+   },
+
+   newLinkMesh: function(material, radius) {
+      var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), material);
+      tube.rotation.x = Math.PI / 2;
+      var mesh = new THREE.Mesh();
+      mesh.add(tube);
+      if (radius !== undefined)
+         mesh.scale.x = mesh.scale.y = radius;
+      return mesh;
+   },
+
+   placeLinkMesh: function(linkMesh, a, b) {
+      linkMesh.position.copy(a).lerp(b, 0.5);
+      linkMesh.lookAt(b);
+      linkMesh.scale.z = a.distanceTo(b) / 2;
+   },
+
 };
 
 function GraphResponder() {
@@ -431,23 +457,5 @@ function VisibleGraph() {
 }
 VisibleGraph.prototype = new Graph;
 
-// CONVENIENCE FUNCTIONS FOR BUILDING GRAPH GEOMETRY
-
-   function new_NodeMesh(material, radius) {
-      var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
-      if (radius !== undefined)
-         mesh.scale.x = mesh.scale.y = radius;
-      return mesh;
-   }
-
-   function new_LinkMesh(material, radius) {
-      var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), material);
-      tube.rotation.x = Math.PI / 2;
-      var mesh = new THREE.Mesh();
-      mesh.add(tube);
-      if (radius !== undefined)
-         mesh.scale.x = mesh.scale.y = radius;
-      return mesh;
-   }
 
 

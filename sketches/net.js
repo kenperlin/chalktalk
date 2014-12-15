@@ -223,27 +223,16 @@ function Net() {
    }
 
    this.renderNode = function(node) {
-      if (node.g === undefined) {
-         node.g = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), this.netMaterial());
-         node.g.quaternion = new THREE.Quaternion();
-         node.r = this.graph.R.defaultNodeRadius;
-         mesh.add(node.g);
-      }
-      node.g.scale.set(node.r,node.r,node.r);
+      node.r = this.graph.R.defaultNodeRadius;
+      if (node.g === undefined)
+         mesh.add(node.g = this.graph.newNodeMesh(this.netMaterial(), node.r));
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
-      if (link.g === undefined) {
-         link.g = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), this.netMaterial());
-         link.g.scale.x = link.g.scale.y = 0.03 * Math.sqrt(link.w);
-         mesh.add(link.g);
-      }
-      var a = this.graph.nodes[link.i].p;
-      var b = this.graph.nodes[link.j].p;
-      link.g.position.copy(a).lerp(b, 0.5);
-      link.g.lookAt(b);
-      link.g.scale.z = a.distanceTo(b) / 2;
+      if (link.g === undefined)
+         mesh.add(link.g = this.graph.newLinkMesh(this.netMaterial(), 0.03 * Math.sqrt(link.w)));
+      this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
    this.netMaterial = function() {

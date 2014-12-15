@@ -179,7 +179,7 @@ function Ethane() {
 
    this.renderNode = function(node) {
       if (node.g === undefined)
-	 mesh.add(node.g = new_NodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
+	 mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);
@@ -187,12 +187,8 @@ function Ethane() {
 
    this.renderLink = function(link) {
       if (link.g === undefined)
-         mesh.add(link.g = new_LinkMesh(this.linkMaterial, 0.05));
-      var a = this.graph.nodes[link.i].p;
-      var b = this.graph.nodes[link.j].p;
-      link.g.position.copy(a).lerp(b, 0.5);
-      link.g.lookAt(b);
-      link.g.scale.z = a.distanceTo(b) / 2;
+         mesh.add(link.g = this.graph.newLinkMesh(this.linkMaterial, 0.05));
+      this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
    this.netMaterial = function() {
