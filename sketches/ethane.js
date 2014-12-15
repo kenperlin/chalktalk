@@ -191,8 +191,11 @@ function Ethane() {
 
    this.renderLink = function(link) {
       if (link.g === undefined) {
-         link.g = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), this.linkMaterial);
-         link.g.scale.x = link.g.scale.y = 0.03 * Math.sqrt(link.w);
+	 var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), this.linkMaterial);
+	 tube.rotation.x = Math.PI / 2;
+	 link.g = new THREE.Mesh();
+	 link.g.add(tube);
+         link.g.scale.x = link.g.scale.y = 0.05;
          mesh.add(link.g);
       }
       var a = this.graph.nodes[link.i].p;
