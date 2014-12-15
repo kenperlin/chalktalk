@@ -2205,7 +2205,7 @@ console.log(lo + " " + hi);
                   // PORTS EXTEND THE BOUNDING BOX OF A SKETCH.
 
                   for (var i = 0 ; i < sk(I).portName.length ; i++) {
-                     if (sk(I).portBounds[i] === undefined)
+                     if (sk(I).portBounds[i] === undefined || !isNumeric(sk(I).portBounds[i][0]))
                         continue;
                      xlo = min(xlo, sk(I).portBounds[i][0]);
                      ylo = min(ylo, sk(I).portBounds[i][1]);
