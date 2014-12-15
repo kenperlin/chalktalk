@@ -21,8 +21,8 @@ function MoleculeResponder() {
       if (i != j) {
          var a = nodes[i].p;
          var b = nodes[j].p;
-	 var d = a.distanceTo(b);
-	 this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
+         var d = a.distanceTo(b);
+         this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
       }
    }
 }
@@ -136,6 +136,8 @@ function Molecule() {
             this.drawNode(R.clickPoint, 0.05);               // SHOW THAT A SECOND CLICK WOULD CREATE A NEW JOINT.
          for (var l = 0 ; l < 7 ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
+
+         this.setOpacity(this.fade());
       });
    }
 
@@ -172,15 +174,17 @@ function Molecule() {
       return material;
    }
 
-   this.carbonMaterial = createPhongMaterial(0x080808);
-   this.hydrogenMaterial = createPhongMaterial(0x404040);
-   this.nitrogenMaterial = createPhongMaterial(0x002040);
-   this.oxygenMaterial = createPhongMaterial(0x600000);
-   this.linkMaterial = createPhongMaterial(0x202020);
+   this.materials = {
+      carbon   : createPhongMaterial(0x080808),
+      hydrogen : createPhongMaterial(0x404040),
+      nitrogen : createPhongMaterial(0x002040),
+      oxygen   : createPhongMaterial(0x600000),
+      link     : createPhongMaterial(0x202020),
+   }
 
    this.renderNode = function(node) {
       if (node.g === undefined)
-	 mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
+         mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.materials.hydrogen : this.materials.carbon));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);
@@ -188,7 +192,7 @@ function Molecule() {
 
    this.renderLink = function(link) {
       if (link.g === undefined)
-         mesh.add(link.g = this.graph.newLinkMesh(this.linkMaterial, 0.05));
+         mesh.add(link.g = this.graph.newLinkMesh(this.materials.link, 0.05));
       this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
@@ -197,6 +201,16 @@ function Molecule() {
          this._netMaterial = this.shaderMaterial();
       return this._netMaterial;
    }
+
+   this.setOpacity = function(f) {
+      if (f < 1)
+         for (var prop in this.materials) {
+            var material = this.materials[prop];
+            material.transparent = true;
+            material.opacity = sCurve(f);
+         }
+   }
+      
 
 //////////////////////////////////////////////////
 
