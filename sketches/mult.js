@@ -57,9 +57,8 @@ function Mult() {
    this.labels = "mult".split(' ');
    this.code = [["","mult(x,y)"]];
    this.render = function() {
-      mLine( [ 0.0, 1.0], [ 0.0, -1.0] );
-      mLine( [-1.0, 0.5], [ 1.0, -0.5] );
-      mLine( [ 1.0, 0.5], [-1.0, -0.5] );
+      mLine( [-1, 1], [ 1, -1] );
+      mLine( [ 1, 1], [-1, -1] );
 
       if (isDef(this.in[0]) && isDef(this.in[1])) {
          this.outValue[0] = mult(this.inValue[0], this.inValue[1]);
