@@ -17,6 +17,7 @@
    var isBottomGesture = false;
    var isExpertMode = true;
    var isMouseOverBackground = true;
+   var isRegisteringSketch = false;
    var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
@@ -962,6 +963,7 @@ console.log(harry.fred);
    }
 
    function registerSketch(type) {
+      isRegisteringSketch = true;
 
       var names = [];
 
@@ -992,6 +994,7 @@ console.log(harry.fred);
 
       deleteSketch(sk());
 
+      isRegisteringSketch = false;
       return names;
    }
 
