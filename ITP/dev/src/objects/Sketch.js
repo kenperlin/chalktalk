@@ -1,4 +1,4 @@
-define(["THREE"], function (THREE) {
+define(function () {
 
 	var CT = require('core');
 

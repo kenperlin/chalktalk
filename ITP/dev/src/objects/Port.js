@@ -1,6 +1,6 @@
-define(["THREE"], function (THREE) {
+define(["core"], function ( CT) {
 
-	var CT = require('core');
+	// var CT = require('core');
 
 	/**
 	* Chalktalk basic object

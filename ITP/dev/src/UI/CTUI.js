@@ -1,4 +1,4 @@
-define(["THREE","utility/Utils"], function (THREE,Utils) {
+define(["utility/Utils"], function (Utils) {
 
 	var CT = require('core');
 

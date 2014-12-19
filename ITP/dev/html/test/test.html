@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html>
     <head>
+    	<script src="../../deps/three.js"></script>
         <script data-main="../../src/app" src="../../deps/require.js"></script>
         <script>
 	    setTimeout(function(){ 
 
 	    	var sketches = [];
+
 	    	for(var i = 0 ; i < 3 ; i++){
+
 	    		var s = new CT.Sketch();
+
 	    		for(var j = 0 ; j < 12 ; j++){
 	    			s.addPort();
 	    			s.ports[j].setInValue( (i+1) + "*" );
 	    		}
+
 	    		s.portsToValues();
-	    		s.evaluator = function(o){var up = 0 ; for(j in o){up+=o[j]} return up;}
+
+	    		s.evaluator = function( o ){var up = 0 ; for(j in o){up+=o[j]+"yoyoyo"} return up;}
+
 	    		s.evaluate();
 	    		sketches.push(s);
 	    	}

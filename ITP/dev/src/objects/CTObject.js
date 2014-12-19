@@ -1,4 +1,4 @@
-define(["THREE"], function (THREE) {
+define( function () {
 
 	var CT = require('core');
 
@@ -18,6 +18,8 @@ define(["THREE"], function (THREE) {
 
 		this.inValue = this.args.inValue || null;
 		this.inValues = this.args.inValues || [];
+		this.nodeTree = {};
+		
 		this.outValue = null;
 
 		this.update = true;

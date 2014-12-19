@@ -5,11 +5,12 @@ module.exports = function(grunt) {
     requirejs: {
       unmin: {
         options: {
+          // exclude: 'THREE',
           baseUrl: './src',
-          include: ['app', 'THREE'],
-          paths: {
-            "THREE" : "../deps/three"
-          },
+          include: ['app'],
+          // paths: {
+          //   "THREE" : "../deps/three"
+          // },
           out: 'build/chalktalk.js',
           optimize: 'none',
           findNestedDependencies: true,
@@ -26,7 +27,7 @@ module.exports = function(grunt) {
       min: {
         options: {
           baseUrl: './src',
-          include: ['app', 'THREE'],
+          include: ['app'],
           out: 'build/chalktalk.min.js',
           optimize: 'uglify2',
           paths: '<%= requirejs.unmin.options.paths %>',

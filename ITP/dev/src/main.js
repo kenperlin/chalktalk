@@ -1,4 +1,5 @@
-define(function (require) {
+define(["core", 'utility/threeExtension','utility/Utils','objects/CTObject','objects/Port','objects/Sketch','objects/testObject','UI/CTUI',
+], function (CT) {
 
     'use strict';
 
@@ -7,19 +8,20 @@ define(function (require) {
     // like:
     // 
     // var THREE = require('../deps/three');
-    var CT = require('core');
-    require('utility/threeExtension');
-    require('utility/Utils');
-    require('objects/CTObject');
-    require('objects/Port');
-    require('objects/Sketch');
-    require('objects/testObject');
-    require('UI/CTUI');
-    CT.ui = new CT.UI();
+    // var CT = require('core');
+    // require('utility/threeExtension');
+    // require('utility/Utils');
+    // require('objects/CTObject');
+    // require('objects/Port');
+    // require('objects/Sketch');
+    // require('objects/testObject');
+    // require('UI/CTUI');
+    // CT.ui = new CT.UI();
     // require('objects/testSubObject');
     // require('basicMath');
     console.log('hi');
     window.CT = CT;
+
 
     // var UI = require('UI/CTUI');
     // CT.CTUI = new UI(1024,768);

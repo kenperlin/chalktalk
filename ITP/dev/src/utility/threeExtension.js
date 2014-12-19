@@ -1,4 +1,4 @@
-define(["THREE"], function (THREE) {
+define(function () {
 
    THREE.Material.prototype.setUniform = function(name, src) {
       if (this.uniforms[name] !== undefined) {
