@@ -14,58 +14,81 @@ function MoleculeResponder() {
    );
 
    this.simulate = function() {
-      var nodes = this.graph.nodes;
-      var nn = nodes.length - 2;
-      var i = 2 + Math.floor(nn * random());
-      var j = 2 + Math.floor(nn * random());
-      if (i != j) {
-         var a = nodes[i].p;
-         var b = nodes[j].p;
-         var d = a.distanceTo(b);
-         this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
-      }
+      var l = this.graph.linkCount + Math.floor((this.graph.links.length - this.graph.linkCount) * random());
+      var link = this.graph.links[l];
+      var i = link.i;
+      var j = link.j;
+
+      var a = this.graph.nodes[i].p;
+      var b = this.graph.nodes[j].p;
+      var d = a.distanceTo(b);
+      this.graph.adjustDistance(a, b, d + random(), 0.1 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
    }
 }
 MoleculeResponder.prototype = new GraphResponder;
 
 function Molecule() {
-   this.labels = 'ethane'.split(' ');
+   this.labels = 'water ethane'.split(' ');
    this.is3D = true;
 
    this.createTime = time;
 
    this.graph = new VisibleGraph();
    this.graph.setResponder(new MoleculeResponder());
-   this.graph.clear();
    var sq3 = Math.sqrt(3)/2;
    var hd = 0.7;
-
-   this.graph.addNode( -0.5,  0.0,  0.0);
-   this.graph.addNode(  0.5,  0.0,  0.0);
-
    var hx = lerp(hd, 0.5, 1);
-   this.graph.addNode( -hx,  3/4 * hd,   sq3/2 * hd);
-   this.graph.addNode( -hx,  0.0     ,  -sq3   * hd);
-   this.graph.addNode( -hx, -3/4 * hd,   sq3/2);
+   var atoms = [];
 
-   this.graph.addNode(  hx,  3/4 * hd,  -sq3/2 * hd);
-   this.graph.addNode(  hx,  0.0     ,   sq3   * hd);
-   this.graph.addNode(  hx, -3/4 * hd,  -sq3/2 * hd);
+   this.setup = function() {
+      this.graph.clear();
 
-   this.graph.addLink(0, 1);
+      switch (this.labels[this.selection]) {
+      case 'water':
 
-   this.graph.addLink(0, 2, 0.5);
-   this.graph.addLink(0, 3, 0.5);
-   this.graph.addLink(0, 4, 0.5);
+         this.graph.addNode( 0.0,  0.0,  0.0, 'O');
 
-   this.graph.addLink(1, 5, 0.5);
-   this.graph.addLink(1, 6, 0.5);
-   this.graph.addLink(1, 7, 0.5);
+         this.graph.addNode(-0.5,  0.35,  0.0, 'H');
+         this.graph.addNode( 0.5,  0.35,  0.0, 'H');
 
-   for (var i = 0 ; i < this.graph.nodes.length - 1 ; i++)
-   for (var j = i + 1 ; j < this.graph.nodes.length ; j++)
-      if (this.graph.findLink(i, j) == -1)
-         this.graph.addLink(i, j, 0.1);
+         this.graph.addLink(0, 1);
+         this.graph.addLink(0, 2);
+
+	 break;
+
+      case 'ethane':
+
+         this.graph.addNode( -0.5,  0.0,  0.0, 'C');
+         this.graph.addNode(  0.5,  0.0,  0.0, 'C');
+
+         this.graph.addNode( -hx,  3/4 * hd,   sq3/2 * hd, 'H');
+         this.graph.addNode( -hx,  0.0     ,  -sq3   * hd, 'H');
+         this.graph.addNode( -hx, -3/4 * hd,   sq3/2 * hd, 'H');
+
+         this.graph.addNode(  hx,  3/4 * hd,  -sq3/2 * hd, 'H');
+         this.graph.addNode(  hx,  0.0     ,   sq3   * hd, 'H');
+         this.graph.addNode(  hx, -3/4 * hd,  -sq3/2 * hd, 'H');
+
+         this.graph.addLink(0, 1);
+
+         this.graph.addLink(0, 2, 0.5);
+         this.graph.addLink(0, 3, 0.5);
+         this.graph.addLink(0, 4, 0.5);
+
+         this.graph.addLink(1, 5, 0.5);
+         this.graph.addLink(1, 6, 0.5);
+         this.graph.addLink(1, 7, 0.5);
+
+	 break;
+      }
+
+      this.graph.linkCount = this.graph.links.length;
+
+      for (var i = 0 ; i < this.graph.nodes.length - 1 ; i++)
+      for (var j = i + 1 ; j < this.graph.nodes.length ; j++)
+         if (this.graph.findLink(i, j) == -1)
+            this.graph.addLink(i, j, 0.1);
+   }
 
    this.mouseMove = function(x,y) { return this.graph.mouseMove(x, y); }
    this.mouseDown = function(x,y) { return this.graph.mouseDown(x, y); }
@@ -80,13 +103,19 @@ function Molecule() {
       var links = graph.links;
       var R = graph.R;
 
-      for (var i = 0 ; i < nodes.length ; i++)
-         nodes[i].r = i < 2 ? 0.3 : 0.2;
+      for (var i = 0 ; i < nodes.length ; i++) {
+         var node = nodes[i];
+	 switch (node.type) {
+	 case 'C': node.r = 0.3; break;
+	 case 'O': node.r = 0.3; break;
+	 case 'H': node.r = 0.2; break;
+	 }
+      }
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
       this.duringSketch(function() {
-         for (var l = 0 ; l < 7 ; l++)
+         for (var l = 0 ; l < this.graph.linkCount ; l++)
             this.drawLink(nodes[links[l].i].p, nodes[links[l].j].p);
       });
 
@@ -101,7 +130,7 @@ function Molecule() {
             mesh.remove(graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
 
          if (R.clickType == 'none') {
-            R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
+            //R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
             graph.updatePositions();
          }
          color('cyan');
@@ -134,7 +163,7 @@ function Molecule() {
 
          if (R.clickType == 'B' && ! R.isCreatingNode)       // AFTER A CLICK OVER BACKGROUND,
             this.drawNode(R.clickPoint, 0.05);               // SHOW THAT A SECOND CLICK WOULD CREATE A NEW JOINT.
-         for (var l = 0 ; l < 7 ; l++)
+         for (var l = 0 ; l < this.graph.linkCount ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
 
          this.setOpacity(this.fade());
@@ -175,16 +204,16 @@ function Molecule() {
    }
 
    this.materials = {
-      carbon   : createPhongMaterial(0x080808),
-      hydrogen : createPhongMaterial(0x404040),
-      nitrogen : createPhongMaterial(0x002040),
-      oxygen   : createPhongMaterial(0x600000),
-      link     : createPhongMaterial(0x202020),
+      C    : createPhongMaterial(0x080808),
+      H    : createPhongMaterial(0x404040),
+      N    : createPhongMaterial(0x002040),
+      O    : createPhongMaterial(0x600000),
+      link : createPhongMaterial(0x202020),
    }
 
    this.renderNode = function(node) {
       if (node.g === undefined)
-         mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.materials.hydrogen : this.materials.carbon));
+         mesh.add(node.g = this.graph.newNodeMesh(this.materials[node.type]));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);

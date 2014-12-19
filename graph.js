@@ -22,17 +22,17 @@ Graph.prototype = {
       this.links = [];
    },
 
-   addNode: function(x,y,z) {
+   addNode: function(x,y,z,type) {
       if (z === undefined)
          z = 0;
-      this.nodes.push({p:newVec(x,y,z)});
+      this.nodes.push({p:newVec(x,y,z),type:type});
       return this.nodes.length - 1;
    },
 
-   addLink: function(i, j, w) {
+   addLink: function(i, j, w, type) {
       if (w === undefined)
          w = 1;
-      this.links.push({i:i, j:j, w:w});
+      this.links.push({i:i, j:j, w:w, type:type});
       this.computeLengths();
       return this.links.length - 1;
    },

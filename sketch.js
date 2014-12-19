@@ -41,7 +41,7 @@
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.inValues = []; // flattened array of values
-      this.intersectingSketches = function() { return []; }
+      this.intersectingSketches = function() { return []; },
       this.is3D = false;
       this.isCard = false;
       this.isMouseOver = false;
@@ -49,26 +49,27 @@
       this.isShowingLiveData = false;
       this.labels = [];
       this.motionPath = [];
-      this.keyDown = function(key) {}
-      this.keyUp = function(key) {}
-      this.mouseDown = function(x, y) {}
-      this.mouseDrag = function(x, y) {}
-      this.mouseMove = function(x, y) {}
-      this.mouseUp = function(x, y) {}
+      this.keyDown = function(key) {};
+      this.keyUp = function(key) {};
+      this.mouseDown = function(x, y) {};
+      this.mouseDrag = function(x, y) {};
+      this.mouseMove = function(x, y) {};
+      this.mouseUp = function(x, y) {};
       this.nPorts = 0;
       this.out = []; // array of array of Sketch
       this.outValue = []; // array of values
       this.parent = null;
-      this.parse = function() { }
+      this.parse = function() {};
       this.portName = [];
       this.portLocation = [];
       this.portBounds = [];
       this.rX = 0;
       this.rY = 0;
-      this.render = function() {}
+      this.render = function() {};
       this.sc = 1;
       this.scene = null;
       this.selection = 0;
+      this.setup = function() {};
       this.size = 400;
       this.suppressLineTo = false;
       this.sketchLength = 1;
@@ -392,14 +393,17 @@
                                                               : 'Comic Sans MS');
 
          var isCursor = isTextMode && context == _g && this == sk(sketchPage.trueIndex);
-         if (! isCursor && this.text.length == 0)
+         if (! isCursor && this.text.length == 0) {
+            context.restore();
             return;
+         }
 
          var x1 = this instanceof Sketch2D ? this.x2D : lerp(this.scale(), this.tx(), this.textX);
          var y1 = this instanceof Sketch2D ? this.y2D : lerp(this.scale(), this.ty(), this.textY);
 
 	 if (this.text.length == 0) {
 	    this.drawCursor(x1, y1, fontHeight, context);
+            context.restore();
 	    return;
 	 }
 
@@ -506,6 +510,9 @@
       },
       hasMotionPath : function() {
          return this.motionPath.length > 0 && this.motionPath[0].length > 1;
+      },
+      hasPortBounds : function(i) {
+         return this.portBounds[i] !== undefined && isNumeric(this.portBounds[i][0]);
       },
       insertText : function(str) {
          if (this.code != null && isCodeWidget) {
@@ -619,7 +626,7 @@
          }
       },
       offsetSelection : function(d) {
-         this.selection += d;
+         this.setSelection(this.selection + d);
       },
       portXY : function(i) {
          if (isDef(this.portLocation[i])) {
@@ -732,6 +739,7 @@
          }
          this.selection = s;
          this.updateSelectionWeights(0);
+	 this.setup();
       },
       selectionWeight : function(i) {
          return sCurve(this.selectionWeights[i]);
