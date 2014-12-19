@@ -41,7 +41,7 @@
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.inValues = []; // flattened array of values
-      this.intersectingSketches = function() { return []; }
+      this.intersectingSketches = function() { return []; },
       this.is3D = false;
       this.isCard = false;
       this.isMouseOver = false;
@@ -49,26 +49,27 @@
       this.isShowingLiveData = false;
       this.labels = [];
       this.motionPath = [];
-      this.keyDown = function(key) {}
-      this.keyUp = function(key) {}
-      this.mouseDown = function(x, y) {}
-      this.mouseDrag = function(x, y) {}
-      this.mouseMove = function(x, y) {}
-      this.mouseUp = function(x, y) {}
+      this.keyDown = function(key) {};
+      this.keyUp = function(key) {};
+      this.mouseDown = function(x, y) {};
+      this.mouseDrag = function(x, y) {};
+      this.mouseMove = function(x, y) {};
+      this.mouseUp = function(x, y) {};
       this.nPorts = 0;
       this.out = []; // array of array of Sketch
       this.outValue = []; // array of values
       this.parent = null;
-      this.parse = function() { }
+      this.parse = function() {};
       this.portName = [];
       this.portLocation = [];
       this.portBounds = [];
       this.rX = 0;
       this.rY = 0;
-      this.render = function() {}
+      this.render = function() {};
       this.sc = 1;
       this.scene = null;
       this.selection = 0;
+      this.setup = function() {};
       this.size = 400;
       this.suppressLineTo = false;
       this.sketchLength = 1;
@@ -259,6 +260,9 @@
             this.yhi = max(this.yhi, child.yhi);
          }
       },
+      computePixelSize : function() {
+         return this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+      },
       contains : function(x, y) {
          return this.xlo <= x && this.ylo <= y && this.xhi > x && this.yhi > y;
       },
@@ -389,14 +393,17 @@
                                                               : 'Comic Sans MS');
 
          var isCursor = isTextMode && context == _g && this == sk(sketchPage.trueIndex);
-         if (! isCursor && this.text.length == 0)
+         if (! isCursor && this.text.length == 0) {
+            context.restore();
             return;
+         }
 
          var x1 = this instanceof Sketch2D ? this.x2D : lerp(this.scale(), this.tx(), this.textX);
          var y1 = this instanceof Sketch2D ? this.y2D : lerp(this.scale(), this.ty(), this.textY);
 
 	 if (this.text.length == 0) {
 	    this.drawCursor(x1, y1, fontHeight, context);
+            context.restore();
 	    return;
 	 }
 
@@ -503,6 +510,9 @@
       },
       hasMotionPath : function() {
          return this.motionPath.length > 0 && this.motionPath[0].length > 1;
+      },
+      hasPortBounds : function(i) {
+         return this.portBounds[i] !== undefined && isNumeric(this.portBounds[i][0]);
       },
       insertText : function(str) {
          if (this.code != null && isCodeWidget) {
@@ -616,7 +626,7 @@
          }
       },
       offsetSelection : function(d) {
-         this.selection += d;
+         this.setSelection(this.selection + d);
       },
       portXY : function(i) {
          if (isDef(this.portLocation[i])) {
@@ -729,6 +739,7 @@
          }
          this.selection = s;
          this.updateSelectionWeights(0);
+	 this.setup();
       },
       selectionWeight : function(i) {
          return sCurve(this.selectionWeights[i]);
@@ -902,13 +913,16 @@
 	    if (this.fragmentShader === undefined)
 	       this.fragmentShader = defaultFragmentShader;
 
-            this.shaderMaterial = function() {
+            this.shaderMaterial = function(r, g, b) {
+	       if (r === undefined) r = g = b = 1;
 	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
+	       material.setUniform('ambient' , [r*.05,g*.05,b*.05]);
+	       material.setUniform('diffuse' , [r,g,b]);
 	       material.setUniform('specular', [.5,.5,.5,10]);
 	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
 	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
 	       return material;
-	    }
+            }
 
 	    this.updateVertexShader = function() {
 	       if (this.vertexShader != codeTextArea.value) {
@@ -949,9 +963,9 @@
 
 	    // UPDATE MESH COLOR IF NEEDED.
 
-	    if (this.ambient  === undefined) this.ambient = [.025,.025,.025];
-	    if (this.diffuse  === undefined) this.diffuse = [.2,.2,.2];
-	    if (this.specular === undefined) this.specular = [.5,.5,.5,10];
+	    var ambient  = this.ambient !==undefined ? this.ambient  : [.025,.025,.025];
+	    var diffuse  = this.diffuse !==undefined ? this.diffuse  : [.200,.200,.200];
+	    var specular = this.specular!==undefined ? this.specular : [.500,.500,.500, 10];
 
 	    if (this.meshColorId !== this.colorId) {
 	       var rgb = paletteRGB[this.colorId];
@@ -960,9 +974,9 @@
 	       this.meshColorId = this.colorId;
 	    }
 
-            this.mesh.material.setUniform('ambient' , this.ambient);
-            this.mesh.material.setUniform('diffuse' , this.diffuse);
-            this.mesh.material.setUniform('specular', this.specular);
+            this.mesh.material.setUniform('ambient' , ambient);
+            this.mesh.material.setUniform('diffuse' , diffuse);
+            this.mesh.material.setUniform('specular', specular);
 
 	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 

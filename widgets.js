@@ -799,6 +799,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function drawCodeWidget(text, xlo, ylo, xhi, yhi, isChanged) {
 
+      xlo += _g.panX;
+      xhi += _g.panX;
+
       var x = (xlo + xhi) / 2;
       var y = 10;
 
@@ -866,7 +869,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var cr = width() / 70;
 
-      var c = createRoundRect(x - _g.panX - w/2, y - _g.panY, w, h, cr);
+      var cx = x - _g.panX - w/2;
+      var cy = y - _g.panY;
+      var c = createRoundRect(cx, cy, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.
 
@@ -897,14 +902,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 }
       }
 
+      ay = y + h;
       if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h), y     + cr, y+h   - cr);
       else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w), x-w/2 + cr, x+w/2 - cr);
 
-      for (var i = c.length - 1 ; i >= 0 ; i--) {
-         if (len(c[i][0] - ax, c[i][1] - ay) < cr) {
-	    c[i][0] = bx;
-	    c[i][1] = by;
-	 }
+      if (by > ay) {
+         ax = min(ax, x + w/2 - 2*cr - _g.panX);
+         ax = max(ax, x - w/2 + 2*cr - _g.panX);
+         bx -= _g.panX;
+         for (var i = c.length - 1 ; i >= 0 ; i--) {
+            if (c[i][1] >= cy + h - 1 && len(c[i][0] - ax, c[i][1] - ay) < cr) {
+	       c[i][0] = bx;
+	       c[i][1] = by;
+	    }
+         }
       }
 
       // DRAW THE SPEECH BUBBLE AS AN OUTLINE AND A HIGHLY TRANSPARENT FILL.
@@ -917,6 +928,20 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       lineWidth(2);
       color(codeTextFgColor());
       drawCurve(c);
+   }
+
+   // DRAW A DOT ON THE SCREEN FOR DEBUGGING PURPOSES.
+
+   function debugDot(x, y, color) {
+      _g.save();
+      _g.fillStyle = color === undefined ? 'red' : color;
+      _g.beginPath();
+      _g.moveTo(x-3,y-3);
+      _g.lineTo(x+3,y-3);
+      _g.lineTo(x+3,y+3);
+      _g.lineTo(x-3,y+3);
+      _g.fill();
+      _g.restore();
    }
 
 

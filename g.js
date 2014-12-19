@@ -44,6 +44,11 @@
    //function height() { return 800; }
    function height() { return 920; }
 
+   // BEST RESOLUTION FOR CINTIQ
+
+   function width() { return 1920 - 103 * 1920 / 1080; }
+   function height() { return 1080 - 103; }
+
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
    function scrimColor(alpha, colorId) {
@@ -1090,8 +1095,8 @@ console.log(harry.fred);
       var A = a.portXY(i), ax = A[0], ay = A[1];
       var B = b.portXY(j), bx = B[0], by = B[1];
 
-      var aR = a.portName.length > 0 ? a.portBounds[i] : [a.xlo,a.ylo,a.xhi,a.yhi];
-      var bR = b.portName.length > 0 ? b.portBounds[j] : [b.xlo,b.ylo,b.xhi,b.yhi];
+      var aR = a.hasPortBounds(i) ? a.portBounds[i] : [a.xlo,a.ylo,a.xhi,a.yhi];
+      var bR = b.hasPortBounds(j) ? b.portBounds[j] : [b.xlo,b.ylo,b.xhi,b.yhi];
 
       // ONLY RECOMPUTE LINK SHAPE WHEN NECESSARY.
 
@@ -1819,6 +1824,7 @@ console.log(harry.fred);
    // THIS NEEDS TO BE BUILT OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
 
    function bgGesture(n1, n2, s) {
+console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       if (n2 === undefined) {
          switch (n1) {
          case 2: setPage(pageIndex - 1); break;
@@ -2205,7 +2211,7 @@ console.log(lo + " " + hi);
                   // PORTS EXTEND THE BOUNDING BOX OF A SKETCH.
 
                   for (var i = 0 ; i < sk(I).portName.length ; i++) {
-                     if (sk(I).portBounds[i] === undefined)
+                     if (! sk(I).hasPortBounds(i))
                         continue;
                      xlo = min(xlo, sk(I).portBounds[i][0]);
                      ylo = min(ylo, sk(I).portBounds[i][1]);

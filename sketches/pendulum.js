@@ -46,7 +46,7 @@
 
       this.render = function(elapsed) {
          var sc = this.size / 400;
-
+/*
          this.afterSketch(function() {
             if (this.portLocation.length == 0) {
                this.addPort("S",  .25 * sc * this.hubWidth, sc);
@@ -56,7 +56,7 @@
 
          if (this.isInValue("H"))
             this.ht = this.getInFloat("H");
-
+*/
          this.spring.setMass(this.ht / this.ht0);
          this.spring.setForce(this.force);
          this.force *= 0.9;
@@ -68,11 +68,12 @@
          this.anchor = m.transform([0,this.ht,0]);
          mCurve([[-.5*this.hubWidth,this.ht], [.5*this.hubWidth,this.ht]]);
 
-         var angle = this.isInValue("S") ? this.getInFloat("S")
-                                         : this.spring.getPosition();
+         var angle = /* this.isInValue("S") ? this.getInFloat("S")
+                                            : */ this.spring.getPosition();
          if (isNaN(angle)) angle = 0;
 
-         this.setOutValue("S", "" + angle);
+         //this.setOutValue("S", "" + angle);
+         this.setOutPortValue(angle);
 
          m.translate(0,this.ht,0);
          m.rotateZ(angle);

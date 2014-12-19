@@ -220,8 +220,9 @@ var sketchToDelete = null;
          isSketchDragActionEnabled = false;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
-            if (isSketchDragActionEnabled = isHover())
+            if (isSketchDragActionEnabled = isHover()) {
                needToStartSketchDragAction = true;
+            }
             else {
                isBgActionEnabled = true;
                bgActionDown(x, y);
