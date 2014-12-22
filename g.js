@@ -833,6 +833,7 @@ console.log(harry.fred);
       This().setup();
 
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
+      pixelsPerUnit = 5.8635 * height() / cameraFOV;
 
       // LOAD ALL THE SCRIBBLE GLYPHS.
 

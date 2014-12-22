@@ -2072,6 +2072,7 @@ var sketchToDelete = null;
       }
 
       this.overlay = function() {
+
          var w = width(), h = height();
          var dx = -_g.panX;
 
@@ -2219,8 +2220,8 @@ var sketchToDelete = null;
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 18;
-               text(hotKeyMenu[j][0], dx + 8, y, 0, 0);
-               text(hotKeyMenu[j][1], dx +38, y, 0, 0);
+               utext(hotKeyMenu[j][0], dx + 8, y, 0, 0);
+               utext(hotKeyMenu[j][1], dx +38, y, 0, 0);
                if (hotKeyMenu[j][0] == letterPressed)
                   drawRect(dx + 3, y - 3, 30, 20);
             }

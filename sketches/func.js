@@ -74,14 +74,7 @@
 
          m.scale(sc);
 
-         var x = this.isInValue("x") ? this.getInFloat("x") : time;
-         var y = this.getInFloat("y1") + this.getInFloat("y2");
-         var result = null;
-         try {
-            eval("result = (" + this.code[s][1] + ")");
-         } catch (e) { console.log(e); }
-	 if (result != null)
-            this.setOutValue("f", result);
+         this.setOutPortValue(this.evalCode(this.code[s][1]));
 
          _g.lineWidth /= 3;
 	 mLine([ 0,1],[0,-1]);
