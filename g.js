@@ -1121,7 +1121,15 @@ console.log(harry.fred);
             else
                arrow(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
 
-         if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
+         if (! isExpertMode) {
+            var cx = (ax + bx) / 2 + (ay - by) * s;
+            var cy = (ay + by) / 2 + (bx - ax) * s;
+            color(defaultPenColor);
+            textHeight(12);
+            utext(roundedString(a.outValue[i]), cx, cy, .5, .5);
+	 }
+
+         else if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
             var cx = (ax + bx) / 2 + (ay - by) * s;
             var cy = (ay + by) / 2 + (bx - ax) * s;
             color(backgroundColor);
@@ -1180,7 +1188,7 @@ console.log(harry.fred);
 
    function findNearestInPort(sketch) {
       return sketch == null ? -1 :
-             sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in)
+             sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in, true)
                                         : firstUndefinedArrayIndex(sketch.in);
    }
 
@@ -1193,11 +1201,15 @@ console.log(harry.fred);
       return i;
    }
 
-   function findNearestPortAtCursor(sketch, slots) {
+   function findNearestPortAtCursor(sketch, slots, isOnlyInPorts) {
+      if (isOnlyInPorts === undefined)
+         isOnlyInPorts = false;
       var x = This().mouseX;
       var y = This().mouseY;
       var n = -1, ddMin = 10000;
-      for (var i = 0 ; i < sketch.portName.length ; i++)
+      for (var i = 0 ; i < sketch.portName.length ; i++) {
+         if (isOnlyInPorts && sketch.portName[i] == "out")
+	    continue;
          if ((slots === undefined) || slots[i] == null) {
             var xy = sketch.portXY(i);
             var dd = (xy[0]-x)*(xy[0]-x) + (xy[1]-y)*(xy[1]-y);
@@ -1206,6 +1218,7 @@ console.log(harry.fred);
                ddMin = dd;
             }
          }
+      }
       return n;
    }
 
@@ -1855,8 +1868,11 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          outSketch = sk();
          outPort = findOutPortAtCursor(outSketch);
 	 if (outPort == -1) {
-	    outSketch.addPort("out", 0, 0);
-	    outPort = outSketch.portName.length - 1;
+	    outPort = outSketch.getPortIndex("out");
+	    if (outPort == -1) {
+	       outSketch.addPort("out", 0, 0);
+	       outPort = outSketch.portName.length - 1;
+            }
          }
          outSketch.linkCurve = [[x,y]];
          break;
@@ -1902,7 +1918,10 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          if (sk() != outSketch && sk().isMouseOver) {
             inSketch = sk();
-            inPort = firstUndefinedArrayIndex(inSketch.in);
+            //inPort = firstUndefinedArrayIndex(inSketch.in);
+	    console.log(arrayToString(inSketch.in) + " " + arrayToString(inSketch.portName));
+            inPort = findNearestInPort(inSketch);
+	    console.log(inPort);
          }
 
          // DRAG ENDS ON BACKGROUND: CREATE LINK TO A NEW TEXT SKETCH.

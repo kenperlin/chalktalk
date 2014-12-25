@@ -73,7 +73,7 @@
          }
          if (s >= 4)
             mCurve(this.INVERT);
-/*
+
          if (s != this.s) {
             this.s = s;
             this.clearPorts();
@@ -86,7 +86,7 @@
                this.addPort("i", x * sc,  .2 * sc);
                this.addPort("j", x * sc, -.2 * sc);
             }
-            this.addPort("o", sc * (s < 4 ? .5 : .6), 0);
+            this.addPort("out", sc * (s < 4 ? .5 : .6), 0);
          }
 
          var outValue = this.evalCode(this.code[0][1],
@@ -94,9 +94,9 @@
 	                                              this.getInValueOf("j"));
 
 	 if (outValue != null)
-            this.setOutValue('o', outValue);
-*/
-         this.setOutPortValue(this.evalCode(this.code[0][1]));
+            this.setOutPortValue(outValue);
+
+         //this.setOutPortValue(this.evalCode(this.code[0][1]));
       }
    }
    Logic.prototype = new Sketch;

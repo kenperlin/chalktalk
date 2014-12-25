@@ -60,10 +60,10 @@
          var sc = this.size / 400;
 
          if (this.nPorts == 0) {
-            this.addPort("x" , -sc,   0);
-            this.addPort("y1",   0, -sc);
-            this.addPort("y2",   0,  sc);
-            this.addPort("f" ,  sc,   0);
+            this.addPort("x"  , -sc,   0);
+            this.addPort("y1" ,   0, -sc);
+            this.addPort("y2" ,   0,  sc);
+            this.addPort("out",  sc,   0);
          }
 
 	 var s = this.selection;
@@ -74,7 +74,16 @@
 
          m.scale(sc);
 
-         this.setOutPortValue(this.evalCode(this.code[s][1]));
+         var x = this.isInValue("x") ? this.getInFloat("x") : time;
+         var y = this.getInFloat("y1") + this.getInFloat("y2");
+         var result = null;
+         try {
+            eval("result = (" + this.code[s][1] + ")");
+         } catch (e) { console.log(e); }
+         if (result != null)
+            this.setOutPortValue(result);
+
+         // this.setOutPortValue(this.evalCode(this.code[s][1]));
 
          _g.lineWidth /= 3;
 	 mLine([ 0,1],[0,-1]);
