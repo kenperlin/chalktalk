@@ -345,32 +345,31 @@
          cc.push(m.transform(c[n]));
       fillCurve(cc);
    };
-   function mArrow(a,b){
+   function mArrow(a, b, r){
       var A = m.transform(a);
       var B = m.transform(b);
-      arrow(A[0],A[1],B[0],B[1],len(A[0]-B[0],A[1]-B[1])/10);
+      var R = r === undefined ? len(A[0]-B[0], A[1]-B[1]) / 10 : norm(m.transform([r,0,0,0]));
+      arrow(A[0],A[1], B[0],B[1], R);
    };
    function mText(str,p,ax,ay){
       var P = m.transform(p);
       text(str,P[0],P[1],ax,ay);
    };
-   function mDrawRect(c1, c2) {
-      mClosedCurve([c1, [c2[0], c1[1]], c2, [c1[0], c2[1]]]);
+   function mDrawRect(a, b) {
+      mClosedCurve([a, [b[0], a[1]], b, [a[0], b[1]]]);
    };
-   function mFillRect(c1, c2) {
-      mFillCurve([c1, [c2[0], c1[1]], c2, [c1[0], c2[1]], c1]);
+   function mFillRect(a, b) {
+      mFillCurve([a, [b[0], a[1]], b, [a[0], b[1]], a]);
    };
-   function mDrawOval(bottomleft, size) {
-      var BOTTOMLEFT = m.transform(bottomleft);
-      var SIZE = m.transform(size);
-
-      drawOval(BOTTOMLEFT[0], BOTTOMLEFT[1], SIZE[0], SIZE[1], 32, 0, Math.PI*2);
+   function mDrawOval(a, b) {
+      var A = m.transform(a);
+      var B = m.transform(b);
+      drawOval(min(A[0],B[0]), min(A[1],B[1]), abs(B[0]-A[0]), abs(B[1]-A[1]), 32, 0, Math.PI*2);
    }
-   function mFillOval(bottomleft, size) {
-      var BOTTOMLEFT = m.transform(bottomleft);
-      var SIZE = m.transform(size);
-
-      fillOval(BOTTOMLEFT[0], BOTTOMLEFT[1], SIZE[0], SIZE[1], 32, 0, Math.PI*2);
+   function mFillOval(a, b) {
+      var A = m.transform(a);
+      var B = m.transform(b);
+      fillOval(min(A[0],B[0]), min(A[1],B[1]), abs(B[0]-A[0]), abs(B[1]-A[1]), 32, 0, Math.PI*2);
    }
    function mTransform(p) {
       return m.transform(p);

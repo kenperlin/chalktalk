@@ -382,6 +382,14 @@
    function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
+   function valuesToQuadratic(src, dst) {
+      if (dst === undefined)
+         dst = [0,0,0];
+      dst[0] = (src[0] + src[2]) / 2 - src[1];
+      dst[1] = (src[2] - src[0]) / 2;
+      dst[2] =  src[1];
+      return dst;
+   }
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
