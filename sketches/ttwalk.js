@@ -13,6 +13,9 @@ function TTWalk() {
 
    this.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy)) {
+      case 0:
+         this.isShowingTrail = this.isShowingTrail === undefined ? true : undefined;
+	 break;
       case 1:
          this.walkIndex = (this.walkIndex + 1) % tt_walks.length;
          this.setWalk(this.walkIndex);
@@ -24,6 +27,7 @@ function TTWalk() {
       }
    }
    this.setWalk = function(n) {
+      this.trail = [];
       this.walkIndex = n;
       this.tt_walk = tt_walks[this.walkIndex];
       this.nRows = this.tt_walk[0][0];
@@ -40,6 +44,8 @@ function TTWalk() {
    this.setWalk(0);
 
    this.frame = 0;
+
+   this.trail = [];
 
    this.getFrame = function(time) {
       //time *= 0.1;
@@ -127,6 +133,11 @@ function TTWalk() {
          color('red');
 	 var radius = 1 / this.nCols;
 	 mDrawOval([x - radius,y - radius], [x + radius,y + radius]);
+	 if (this.isShowingTrail !== undefined) {
+	    this.trail.push([x,y]);
+	    lineWidth(0.5);
+	    mCurve(this.trail);
+         }
       });
    }
 }

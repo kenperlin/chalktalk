@@ -870,6 +870,25 @@
       }
    }();
 
+   // Create a rounded right-angle corner curve.
+
+   function createRoundCorner(a, b, axis) {
+      var xPos = a[0] < b[0];
+      var yPos = a[1] < b[1];
+      if (axis == 0) {
+         if ( xPos &&  yPos) return createArc(a[0], b[1], b[0]-a[0],-TAU/4,     0, 10);
+         if ( xPos && !yPos) return createArc(a[0], b[1], b[0]-a[0], TAU/4,     0, 10);
+         if (!xPos &&  yPos) return createArc(a[0], b[1], a[0]-b[0],-TAU/4,-TAU/2, 10);
+         if (!xPos && !yPos) return createArc(a[0], b[1], a[0]-b[0], TAU/4, TAU/2, 10);
+      }
+      else {
+         if ( xPos &&  yPos) return createArc(b[0], a[1], b[0]-a[0], TAU/2, TAU/4, 10);
+         if ( xPos && !yPos) return createArc(b[0], a[1], b[0]-a[0],-TAU/2,-TAU/4, 10);
+         if (!xPos &&  yPos) return createArc(b[0], a[1], a[0]-b[0],     0, TAU/4, 10);
+         if (!xPos && !yPos) return createArc(b[0], a[1], a[0]-b[0],     0,-TAU/4, 10);
+      }
+   }
+
    // Create an arc of a circle.
 
    function createArc(x, y, r, angle0, angle1, n) {
