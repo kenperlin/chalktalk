@@ -571,6 +571,11 @@
       m2y : function(y) {
          return (y - this.ty()) / this.scale();
       },
+      mScale : function(t) {
+         if (t === undefined)
+            t = 1;
+         return norm(m.transform([t,0,0,0])) * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+      },
       moveCursor : function(incr) {
          if (this.code != null && isCodeWidget) {
             var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
@@ -1650,4 +1655,3 @@
       }
    }
    NumericSketch.prototype = new SimpleSketch;
-

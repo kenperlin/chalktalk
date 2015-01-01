@@ -20,7 +20,7 @@ function Mist() {
       var e =  0.23;
 
       _g.lineCap = 'square';
-      var lw = norm(m.transform([.3,0,0,0])) * this.xyz[2];
+      var lw = this.mScale(.3);
       lineWidth(lw);
 
       var w = .95;
@@ -35,13 +35,15 @@ function Mist() {
       mCurve(createPipe(path));
 
       var path = [];
-      path.push([w    ,-h]);
-      path.push([w    , h - f]);
-      path.push([w-2*f, h + f]);
-      path.push([  2*f, h + f]);
-      path.push([0    , h - f]);
       path.push([0    ,-h]);
+      path.push([0    , h - f]);
+      path.push([  2*f, h + f]);
+      path.push([w-2*f, h + f]);
+      path.push([w    , h - f]);
+      path.push([w    ,-h]);
       mCurve(createPipe(path));
+
+      this.afterSketch(function() {
 
       m.translate(2.55,0,0);
 
@@ -65,11 +67,13 @@ function Mist() {
       m.translate(0.95,0,0);
 
       var path = [];
-      path.push([0,h-e/4]);
+      path.push([0,h-e/3]);
       path.push([0,-h+e*3/2]);
       path.push([e*3/2,-h]);
       path.push([.4,-h]);
       mCurve(createPipe(path));
+
+      });
    }
 }
 Mist.prototype = new Sketch;

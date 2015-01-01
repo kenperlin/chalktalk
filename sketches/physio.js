@@ -4,8 +4,10 @@ function Physio() {
       color('rgb(128,200,255)');
       mLine([.3,.2],[.3,-.2]);
       mCurve([[.3,.2],[-.3,.2],[-.3,-.2],[.3,-.2]]);
-      var textScale = norm(m.transform([1,0,0,0])) * .3 * this.xyz[2];
+      var textScale = this.mScale(.3);
       this.afterSketch(function() {
+
+         // MIST Mat
 
 	 color('rgba(128,200,255,.17)');
 	 mFillRect([-.3,-.2],[.3,.2]);
@@ -21,6 +23,8 @@ function Physio() {
 	 mCurve([[.75,.15],[.75,.4]]);
          lineWidth(2);
 
+	 // PATIENT AND THERAPIST
+
          color('rgb(128,255,128)');
 	 mDrawOval([-.25,.4],[.25,.6]);
 	 mText("patient", [0,.5], .5,.5);
@@ -30,17 +34,24 @@ function Physio() {
 
          color('white');
 
+	 // PHONE
+
 	 mClosedCurve(createRoundRect(-.6,-.15, .15,.3, .03));
          textHeight(.1 * textScale);
 	 mText("phone", [-.525,0], .5,.5);
 
+	 // COMPUTER
+
 	 mText("computer", [.75,0], .5,.5);
 	 mDrawRect([.55,-.15],[.95,.15]);
 
+	 // CLOUD STORAGE
 
          textHeight(.17 * textScale);
 	 mText("cloud storage", [0,-.55], .5,.5);
 	 mDrawRect([-.35,-.7],[.35,-.4]);
+
+	 // ANALYSIS
 
          textHeight(.13 * textScale);
 	 mText("analysis", [.75,-.55], .5,.5);

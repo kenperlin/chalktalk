@@ -875,6 +875,7 @@
    function createRoundCorner(a, b, axis) {
       var xPos = a[0] < b[0];
       var yPos = a[1] < b[1];
+      var r = [ abs(b[0] - a[0]), abs(b[1] - a[1]) ];
       if (axis == 0) {
          if ( xPos &&  yPos) return createArc(a[0], b[1], b[0]-a[0],-TAU/4,     0, 10);
          if ( xPos && !yPos) return createArc(a[0], b[1], b[0]-a[0], TAU/4,     0, 10);
