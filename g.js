@@ -90,6 +90,11 @@
       handle.mouseY = 1000;
       handle.mousePressed = false;
 
+      document.addEventListener("touchstart"  , function(e) {e.preventDefault(); debugMessage = "touchstart " ; canvas.onmousedown(e); }, false);
+      document.addEventListener("touchmove"   , function(e) {e.preventDefault(); debugMessage = "touchmove "  ; canvas.onmousemove(e); }, false);
+      document.addEventListener("touchend"    , function(e) {e.preventDefault(); debugMessage = "touchend "   ; canvas.onmouseup  (e); }, false);
+      document.addEventListener("touchcancel" , function(e) {e.preventDefault(); debugMessage = "touchcancel "; canvas.onmouseup  (e); }, false);
+
       canvas.onkeydown = function(event) {
          var handle = getHandle(this);
          if (isDef(handle.keyDown)) {
@@ -136,9 +141,17 @@
          }
       }
 
+      function enableTouchEvent(event) {
+         if (event.touches !== undefined) {
+	    event.clientX = event.touches[0].clientX;
+	    event.clientY = event.touches[0].clientY;
+	 }
+      }
+
       // MOUSE PRESSED.
 
       canvas.onmousedown = function(event) {
+         enableTouchEvent(event);
 
          // RESPOND DIFFERENTLY TO LEFT AND RIGHT MOUSE BUTTONS
 
@@ -183,6 +196,8 @@
       // MOUSE RELEASED.
 
       canvas.onmouseup = function(event) {
+	 event.clientX = mouseMoveClientX;
+	 event.clientY = mouseMoveClientY;
 
          // RESPOND ONLY TO LEFT MOUSE UP, NOT TO RIGHT MOUSE UP.
 
@@ -205,6 +220,10 @@
                      sk().over(s[i]);
                   if (isDef(s[i].under))
                      s[i].under(sk());
+               }
+
+               if (linkAtCursor != null) {
+                  console.log("DRAGGED SKETCH ONTO A LINK");
                }
 
                // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
@@ -242,7 +261,12 @@
       // MOUSE IS MOVED.
 
       canvas.onmousemove = function(event) {
+         enableTouchEvent(event);
+
          mouseMoveEvent = event;
+
+	 mouseMoveClientX = event.clientX;
+	 mouseMoveClientY = event.clientY;
 
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
@@ -861,7 +885,9 @@ console.log(harry.fred);
 
 //server.set("state/foobar", "1234");
 
-      tick(g);
+      //tick(g);
+
+      setInterval( function() { tick(g); }, 1000 / 60);
    }
 
    var sketchType = 0;
@@ -1052,12 +1078,12 @@ console.log(harry.fred);
 /////////////////////////////////////////////////////////////////////
 
    function computeLinkCurvature(link, C) {
-      var a = link[0];
-      var i = link[1];
-      var b = link[3][0];
-      var j = link[3][1];
-      link[3][2] = computeCurvature(a.portXY(i), C, b.portXY(j));
-      link[3][3] = undefined;
+      var a = link.a;
+      var i = link.i;
+      var b = link.linkData.a;
+      var j = link.linkData.i;
+      link.linkData.s = computeCurvature(a.portXY(i), C, b.portXY(j));
+      link.linkData.status = undefined;
    }
 
    var portDataValues = [], outSketchPrev = null, outPortPrev = -1;
@@ -1089,9 +1115,9 @@ console.log(harry.fred);
    }
 
    function drawLink(a, i, linkData, isVisible) {
-      var b = linkData[0];
-      var j = linkData[1];
-      var s = linkData[2];
+      var b = linkData.a;
+      var j = linkData.i;
+      var s = linkData.s;
 
       var A = a.portXY(i), ax = A[0], ay = A[1];
       var B = b.portXY(j), bx = B[0], by = B[1];
@@ -1102,19 +1128,17 @@ console.log(harry.fred);
       // ONLY RECOMPUTE LINK SHAPE WHEN NECESSARY.
 
       var status = [ax,ay,bx,by,s, aR[0],aR[1],aR[2],aR[3], bR[0],bR[1],bR[2],bR[3]];
-      if (! isEqualArray(status, linkData[3])) {
-         linkData[3] = status;
-
-         linkData[4] = createCurve(A, B, s);
-
-         linkData[4] = clipCurveAgainstRect(linkData[4], aR);
-         linkData[4] = clipCurveAgainstRect(linkData[4], bR);
+      if (! isEqualArray(status, linkData.status)) {
+         linkData.status = status;
+         linkData.C = createCurve(A, B, s);
+         linkData.C = clipCurveAgainstRect(linkData.C, aR);
+         linkData.C = clipCurveAgainstRect(linkData.C, bR);
       }
 
       if (isVisible) {
          lineWidth(dataLineWidth);
          color(dataColor);
-         var C = linkData[4];
+         var C = linkData.C;
          for (var n = 0 ; n < C.length-1 ; n++)
             if (n < C.length-2)
                line(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
@@ -1240,11 +1264,11 @@ console.log(harry.fred);
    }
 
    function deleteLinkAtCursor() {
-      var a = linkAtCursor[0];
-      var i = linkAtCursor[1];
-      var k = linkAtCursor[2];
-      var b = linkAtCursor[3][0];
-      var j = linkAtCursor[3][1];
+      var a = linkAtCursor.a;
+      var i = linkAtCursor.i;
+      var k = linkAtCursor.k;
+      var b = linkAtCursor.linkData.a;
+      var j = linkAtCursor.linkData.i;
 
       deleteOutLink(a, i, k);
       deleteInLink(b, j);
@@ -1722,10 +1746,12 @@ console.log(harry.fred);
       // ELSE IF LINE STARTS AT CLICK, ENTER SCRIBBLE-TEXT MODE.
 
       else if (len(x - bgClickX, y - bgClickY) < clickSize) {
+/*
          bgs = new BgScribble(x, y);
          bgsText = "";
          bgsTextUndo = [];
          sketchPage.beginTextSketch();
+*/
       }
 
       else {
@@ -1935,7 +1961,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          sketchPage.createLink();
          var i = outSketch.out[outPort].length - 1;
-         outSketch.out[outPort][i][2] = computeCurvature(outSketch.linkCurve);
+         outSketch.out[outPort][i].s = computeCurvature(outSketch.linkCurve);
 
          break;
       case 6:
@@ -2118,7 +2144,7 @@ console.log(lo + " " + hi);
             : isRightHover && ! isBottomGesture ? 'pointer'
             : isBottomGesture                   ? '-webkit-grabbing'
             : isBottomHover                     ? '-webkit-grab'
-            // : (videoLayer != undefined) && videoLayer.isShowing() ? 'none'
+         // : (videoLayer != undefined) && videoLayer.isShowing() ? 'none'
             :                                     'crosshair'
             ;
 
@@ -2370,8 +2396,8 @@ console.log(lo + " " + hi);
                      if (isDef(a.out[i]))
                         for (var k = 0 ; k < a.out[i].length ; k++) {
                            drawLink(a, i, a.out[i][k], true);
-                           if (! this.isPressed && isMouseNearCurve(a.out[i][k][4]))
-                              linkAtCursor = [a, i, k, a.out[i][k]];
+                           if (! this.isPressed && isMouseNearCurve(a.out[i][k].C))
+                               linkAtCursor = new SketchLink(a, i, k, a.out[i][k]);
                         }
                }
 
@@ -2449,8 +2475,8 @@ console.log(lo + " " + hi);
                if (isDef(S.out[i])) {
                   var outValue = isDef(S.outValue[i]) ? S.outValue[i] : "0";
                   for (var k = 0 ; k < S.out[i].length ; k++) {
-                     var b = S.out[i][k][0];
-                     var j = S.out[i][k][1];
+                     var b = S.out[i][k].a;
+                     var j = S.out[i][k].i;
                      b.inValue[j] = outValue;
                   }
                }
@@ -2855,9 +2881,19 @@ console.log(lo + " " + hi);
          }
       }
 
+      if (window.debugMessage !== undefined) {
+         annotateStart();
+	 _g.fillStyle = _g.strokeStyle = 'cyan';
+	 textHeight(50);
+	 text(debugMessage, w/2, h/2);
+         annotateEnd();
+	 console.log(debugMessage);
+	 debugMessage = undefined;
+      }
+
       // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
 
-      requestAnimFrame(function() { tick(g); });
+      // requestAnimFrame(function() { tick(g); });
    }
 
    var ef = new EncodedFraction();
@@ -2939,7 +2975,7 @@ console.log(lo + " " + hi);
 
                // LOOP THROUGH ACTIVE OUT-PORTS OF SKETCH s LINKING TO IT.
 
-               var s = sketch.in[inPort][0];
+               var s = sketch.in[inPort].a;
                for (var outPort = 0 ; outPort < s.out.length ; outPort++)
 
                   // FOR EACH ACTIVE OUT-PORT OF s, LOOP THROUGH THE SKETCHES s LINKS TO.
@@ -2949,7 +2985,7 @@ console.log(lo + " " + hi);
 
                         // WHERE s LINKS TO sketch, REMOVE THAT OUT-LINK.
 
-                        if (s.out[outPort][k][0] == sketch)
+                        if (s.out[outPort][k].a == sketch)
                            deleteOutLink(s, outPort, k);
             }
 
@@ -2958,8 +2994,8 @@ console.log(lo + " " + hi);
          for (var outPort = 0 ; outPort < sketch.out.length ; outPort++)
             if (isDef(sketch.out[outPort]))
                for (k = sketch.out[outPort].length - 1 ; k >= 0 ; k--) {
-                  var inSketch = sketch.out[outPort][k][0];
-                  var inPort   = sketch.out[outPort][k][1];
+                  var inSketch = sketch.out[outPort][k].a;
+                  var inPort   = sketch.out[outPort][k].i;
                   deleteInLink(inSketch, inPort);
                }
       }

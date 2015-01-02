@@ -1,6 +1,4 @@
 
-function newVec(x,y,z) { return new THREE.Vector3(x,y,z); }
-function vecToString(v) { return "(" + v.x + "," + v.y + "," + v.z + "}"; }
 function isNotNull(arg) { return arg !== undefined && arg != null; }
 
 function GraphNode(x, y, z, type) {

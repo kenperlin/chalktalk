@@ -1,5 +1,14 @@
 function Physio() {
    this.labels = 'physio'.split(' ');
+   this.phoneRect = new Rectangle(-.6, -.15, .15, .3);
+
+   var pt = newVec(), mx = 0, my = 0;
+
+   this.mouseMove = function(x, y) {
+      mx = x;
+      my = y;
+   }
+
    this.render = function() {
       color('rgb(128,200,255)');
       mLine([.3,.2],[.3,-.2]);
@@ -36,12 +45,21 @@ function Physio() {
 
 	 // PHONE
 
-	 mClosedCurve(createRoundRect(-.6,-.15, .15,.3, .03));
-         textHeight(.1 * textScale);
+         var p = this.phoneRect;
+
+	 pt.set(p.left,p.top,0).applyMatrix4(pointToPixelMatrix);
+	 var xlo = pt.x, yhi = pt.y;
+	 pt.set(p.left+p.width,p.top+p.height,0).applyMatrix4(pointToPixelMatrix);
+	 var xhi = pt.x, ylo = pt.y;
+	 var isInPhone = mx >= xlo && mx < xhi && my >= ylo && my < yhi;
+
+	 mClosedCurve(createRoundRect(p.left, p.top, p.width, p.height, .03));
+         textHeight((isInPhone ? .13 : .1) * textScale);
 	 mText("phone", [-.525,0], .5,.5);
 
 	 // COMPUTER
 
+         textHeight(.1 * textScale);
 	 mText("computer", [.75,0], .5,.5);
 	 mDrawRect([.55,-.15],[.95,.15]);
 

@@ -29,6 +29,14 @@ var paletteColorId = 0;
 var showingLiveDataMode = 0;
 var sketchToDelete = null;
 
+   function SketchLink(a, i, k, linkData) {
+      this.a = a;
+      this.i = i;
+      this.k = k;
+      this.linkData = linkData;
+      this.s = 0;
+   }
+
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
 
    function paletteX(i) { return 30 - _g.panX; }
@@ -129,8 +137,8 @@ var sketchToDelete = null;
          // AVOID CREATING DUPLICATE LINKS.
 
          if (inPort < inSketch.in.length && inSketch.in[inPort] != undefined
-                                         && inSketch.in[inPort][0] == outSketch
-                                         && inSketch.in[inPort][1] == outPort )
+                                         && inSketch.in[inPort].a == outSketch
+                                         && inSketch.in[inPort].i == outPort )
              return;
 
          // IF NO OUTPUT SLOTS YET, CREATE EMPTY ARRAY OF OUTPUT SLOTS.
@@ -138,8 +146,8 @@ var sketchToDelete = null;
          if (outPort >= outSketch.out.length || outSketch.out[outPort] === undefined)
             outSketch.out[outPort] = [];
 
-         outSketch.out[outPort].push([inSketch,inPort,0]);
-         inSketch.in[inPort] = [outSketch,outPort];
+         outSketch.out[outPort].push(new SketchLink(inSketch, inPort, 0));
+         inSketch.in[inPort] = new SketchLink(outSketch,outPort,0);
       }
 
       this.clearAfterFadeAway = function() {
@@ -707,7 +715,7 @@ var sketchToDelete = null;
             // CAUSES ALL INSTANCES OF THAT VARIABLE TO BE REPLACED BY ITS VALUE.
 
             else if (isCodeWidget && codeSketch.contains(x, y)) {
-               var i = linkAtCursor[3][1];
+               var i = linkAtCursor.linkData.i;
                codeTextArea.value = variableToValue(codeTextArea.value,
                                                     "xyz".substring(i, i+1),
                                                     roundedString(codeSketch.inValue[i]));
@@ -2241,20 +2249,17 @@ var sketchToDelete = null;
                for (var i = 0 ; i < a.out.length ; i++)
                   if (isDef(a.out[i]))
                      for (var k = 0 ; k < a.out[i].length ; k++) {
-                        var b = a.out[i][k][0];
-                        var j = a.out[i][k][1];
-                        var s = a.out[i][k][2];
                         drawLink(a, i, a.out[i][k], ! isAudiencePopup());
-                        C = a.out[i][k][4];
+                        C = a.out[i][k].C;
 
                         // HIGHLIGHT LINK AT CURSOR -- IN RED IF IT IS BEING DELETED.
 
                         if (! this.isPressed && isMouseNearCurve(C))
-                           linkAtCursor = [a, i, k, a.out[i][k]];
+                           linkAtCursor = new SketchLink(a, i, k, a.out[i][k]);
 
-                        if ( linkAtCursor != null && a == linkAtCursor[0]
-                                                  && i == linkAtCursor[1]
-                                                  && k == linkAtCursor[2] ) {
+                        if ( linkAtCursor != null && a == linkAtCursor.a
+                                                  && i == linkAtCursor.i
+                                                  && k == linkAtCursor.k ) {
                            _g.save();
                            color(linkHighlightColor);
                            lineWidth(20);

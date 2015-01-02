@@ -81,6 +81,10 @@
    function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
    function planeGeometry(n) { return new THREE.PlaneGeometry(2,2,n,n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
+   function newVec(x, y, z) {
+      if (x === undefined) x = y = z = 0;
+      return new THREE.Vector3(x, y, z);
+   }
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);

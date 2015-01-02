@@ -474,6 +474,14 @@
 
 // STRING UTILITIES.
 
+   function toString(obj) {
+      var str = "{";
+      for (var prop in obj) {
+         str += prop + ":" + obj[prop] + ",";
+      }
+      return str + "}";
+   }
+
    function variableToValue(str, name, value) {
 
       var cp = '.'.charCodeAt(0);
@@ -639,6 +647,22 @@
 
 
 // 2D GEOMETRY UTILITIES.
+
+   // A Rectangle object.
+
+   function Rectangle(left, top, width, height) {
+      this.left = left;
+      this.top = top;
+      this.width = width;
+      this.height = height;
+   };
+   Rectangle.prototype = {
+      contains : function(x, y) {
+         return x >= this.left && x < this.left + this.width &&
+                y >= this.top  && y < this.top  + this.height ;
+      }
+   };
+
 
    // Change the length of a curve.
 
