@@ -225,11 +225,12 @@
 	       // DRAGGING A SKETCH TO A LINK INSERTS THE SKETCH, SPLITTING THE LINK IN TWO.
 
                if (linkAtCursor != null) {
+	          var s = linkAtCursor.s;
 	          linkAtCursor.removeFromInSketch();
 	          linkAtCursor.removeFromOutSketch();
-	          new SketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0);
+	          (new SketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0)).s = s / 2;
 		  var i = sk().outPortIndex(true);
-	          new SketchLink(sk(), i, linkAtCursor.b, linkAtCursor.j);
+	          (new SketchLink(sk(), i, linkAtCursor.b, linkAtCursor.j)).s = s / 2;
                }
 
                // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
