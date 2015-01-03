@@ -15,6 +15,11 @@ function SketchLink(a, i, b, j) {
 
 SketchLink.prototype = {
 
+   computeCurvature : function(xy) {
+      this.s = computeCurvature(this.a.portXY(this.i), xy, this.b.portXY(this.j));
+      this.status = undefined;
+   },
+
    draw : function(isVisible) {
       var a = this.a;
       var i = this.i;

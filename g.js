@@ -2936,7 +2936,7 @@ console.log(lo + " " + hi);
          // IF POSSIBLE, LINK DELETED SKETCH'S INPUT TO ITS OUTPUT.
 
          if (inLink != null && outLink != null)
-	    new SketchLink(inLink.a, inLink.i, outLink.b, outLink.j);
+	    (new SketchLink(inLink.a, inLink.i, outLink.b, outLink.j)).s = inLink.s + outLink.s;
       }
 
       if (isCodeWidget && sketch == codeSketch)

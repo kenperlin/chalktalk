@@ -481,7 +481,7 @@ var sketchToDelete = null;
 
          if (this.isFocusOnLink) {
             if (linkAtCursor != null)
-               computeLinkCurvature(linkAtCursor, [x, y]);
+	       linkAtCursor.computeCurvature([x,y]);
             return;
          }
 
