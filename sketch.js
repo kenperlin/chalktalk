@@ -724,14 +724,18 @@
                this.defaultValueIncr[j] = 1;
          }
       },
-
-      setOutPortValue : function(value) {
-         var j = getIndex(this.portName, "out");
-	 if (j == -1)
-	    this.addPort("out", 0, 0);
-         this.setOutValue("out", value);
+      outPortIndex : function(forceCreation) {
+         var i = getIndex(this.portName, 'out');
+	 if (i == -1 && forceCreation !== undefined) {
+	    this.addPort('out', 0, 0);
+            i = getIndex(this.portName, 'out');
+         }
+	 return i;
       },
-
+      setOutPortValue : function(value) {
+         this.outPortIndex(true);
+         this.setOutValue('out', value);
+      },
       setOutValue : function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)
