@@ -40,8 +40,8 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   function height() { return 720; }
-   //function height() { return 800; }
+   //function height() { return 720; }
+   function height() { return 800; }
    //function height() { return 920; }
 
    // BEST RESOLUTION FOR CINTIQ

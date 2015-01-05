@@ -16,7 +16,7 @@
    }
 
    THREE.Material.prototype.setUniform = function(name, src) {
-      if (this.uniforms[name] !== undefined) {
+      if (this.uniforms !== undefined && this.uniforms[name] !== undefined) {
          var val = src;
          if (Array.isArray(src)) {
             if (! Array.isArray(src[0]))
@@ -74,7 +74,7 @@
    }
 
    function cubeGeometry() { return new THREE.BoxGeometry(2, 2, 2); }
-   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, false); }
+   function cylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, n/2, false); }
    function globeGeometry(m,n, p0,p1, t0,t1) { return new THREE.SphereGeometry(1, m,n, p0,p1, t0,t1); }
    function latheGeometry(points, n) { return new THREE.LatheGeometry(points, n); }
    function nullGeometry() { return new THREE.Geometry(); }
