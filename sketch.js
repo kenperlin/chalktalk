@@ -571,6 +571,11 @@
       m2y : function(y) {
          return (y - this.ty()) / this.scale();
       },
+      mScale : function(t) {
+         if (t === undefined)
+            t = 1;
+         return norm(m.transform([t,0,0,0])) * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+      },
       moveCursor : function(incr) {
          if (this.code != null && isCodeWidget) {
             var newPos = max(0, min(codeTextArea.value.length, codeTextArea.selectionStart + incr));
@@ -719,14 +724,18 @@
                this.defaultValueIncr[j] = 1;
          }
       },
-
-      setOutPortValue : function(value) {
-         var j = getIndex(this.portName, "out");
-	 if (j == -1)
-	    this.addPort("out", 0, 0);
-         this.setOutValue("out", value);
+      outPortIndex : function(forceCreation) {
+         var i = getIndex(this.portName, 'out');
+	 if (i == -1 && forceCreation !== undefined) {
+	    this.addPort('out', 0, 0);
+            i = getIndex(this.portName, 'out');
+         }
+	 return i;
       },
-
+      setOutPortValue : function(value) {
+         this.outPortIndex(true);
+         this.setOutValue('out', value);
+      },
       setOutValue : function(name, value) {
          var j = getIndex(this.portName, name);
          if (j >= 0)
@@ -1650,4 +1659,3 @@
       }
    }
    NumericSketch.prototype = new SimpleSketch;
-

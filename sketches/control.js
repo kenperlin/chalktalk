@@ -58,12 +58,11 @@
 
          this.lo = this.isInValue("lo") ? this.getInFloat("lo") : this.getDefaultValue("lo");
          this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
-
          var value = lerp(t, this.lo, this.hi);
-         this.setOutPortValue(value);
 
 	 this.setOutValue("lo", this.lo);
 	 this.setOutValue("hi", this.hi);
+         this.setOutPortValue(value);
 
          m.scale(sc);
 

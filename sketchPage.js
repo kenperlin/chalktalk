@@ -128,18 +128,11 @@ var sketchToDelete = null;
 
          // AVOID CREATING DUPLICATE LINKS.
 
-         if (inPort < inSketch.in.length && inSketch.in[inPort] != undefined
-                                         && inSketch.in[inPort][0] == outSketch
-                                         && inSketch.in[inPort][1] == outPort )
-             return;
+         if (inPort >= inSketch.in.length || inSketch.in[inPort] === undefined
+                                          || inSketch.in[inPort].a != outSketch
+                                          || inSketch.in[inPort].i != outPort )
 
-         // IF NO OUTPUT SLOTS YET, CREATE EMPTY ARRAY OF OUTPUT SLOTS.
-
-         if (outPort >= outSketch.out.length || outSketch.out[outPort] === undefined)
-            outSketch.out[outPort] = [];
-
-         outSketch.out[outPort].push([inSketch,inPort,0]);
-         inSketch.in[inPort] = [outSketch,outPort];
+            new SketchLink(outSketch, outPort, inSketch, inPort);
       }
 
       this.clearAfterFadeAway = function() {
@@ -488,7 +481,7 @@ var sketchToDelete = null;
 
          if (this.isFocusOnLink) {
             if (linkAtCursor != null)
-               computeLinkCurvature(linkAtCursor, [x, y]);
+	       linkAtCursor.computeCurvature([x,y]);
             return;
          }
 
@@ -707,10 +700,10 @@ var sketchToDelete = null;
             // CAUSES ALL INSTANCES OF THAT VARIABLE TO BE REPLACED BY ITS VALUE.
 
             else if (isCodeWidget && codeSketch.contains(x, y)) {
-               var i = linkAtCursor[3][1];
+               var j = linkAtCursor.j;
                codeTextArea.value = variableToValue(codeTextArea.value,
-                                                    "xyz".substring(i, i+1),
-                                                    roundedString(codeSketch.inValue[i]));
+                                                    "xyz".substring(j, j+1),
+                                                    roundedString(codeSketch.inValue[j]));
                deleteLinkAtCursor();
             }
             return;
@@ -2072,6 +2065,7 @@ var sketchToDelete = null;
       }
 
       this.overlay = function() {
+
          var w = width(), h = height();
          var dx = -_g.panX;
 
@@ -2219,8 +2213,8 @@ var sketchToDelete = null;
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 18;
-               text(hotKeyMenu[j][0], dx + 8, y, 0, 0);
-               text(hotKeyMenu[j][1], dx +38, y, 0, 0);
+               utext(hotKeyMenu[j][0], dx + 8, y, 0, 0);
+               utext(hotKeyMenu[j][1], dx +38, y, 0, 0);
                if (hotKeyMenu[j][0] == letterPressed)
                   drawRect(dx + 3, y - 3, 30, 20);
             }
@@ -2240,20 +2234,15 @@ var sketchToDelete = null;
                for (var i = 0 ; i < a.out.length ; i++)
                   if (isDef(a.out[i]))
                      for (var k = 0 ; k < a.out[i].length ; k++) {
-                        var b = a.out[i][k][0];
-                        var j = a.out[i][k][1];
-                        var s = a.out[i][k][2];
-                        drawLink(a, i, a.out[i][k], ! isAudiencePopup());
-                        C = a.out[i][k][4];
+		        var link = a.out[i][k];
+                        link.draw(! isAudiencePopup());
 
                         // HIGHLIGHT LINK AT CURSOR -- IN RED IF IT IS BEING DELETED.
 
+                        var C = link.C;
                         if (! this.isPressed && isMouseNearCurve(C))
-                           linkAtCursor = [a, i, k, a.out[i][k]];
-
-                        if ( linkAtCursor != null && a == linkAtCursor[0]
-                                                  && i == linkAtCursor[1]
-                                                  && k == linkAtCursor[2] ) {
+                           linkAtCursor = link;
+                        if (linkAtCursor == link) {
                            _g.save();
                            color(linkHighlightColor);
                            lineWidth(20);

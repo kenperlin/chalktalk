@@ -28,7 +28,17 @@ function MoleculeResponder() {
 MoleculeResponder.prototype = new GraphResponder;
 
 function Molecule() {
-   this.labels = 'water ethane'.split(' ');
+
+   this.clone = function() {
+      var sketch = Sketch.prototype.clone.call(this);
+      sketch.graph = this.graph.clone();
+      sketch.graph.linkCount = this.graph.linkCount;
+      sketch.graph.setResponder(Object.create(this.graph.R));
+      sketch.isCopy = true;
+      return sketch;
+   }
+
+   this.labels = 'ethane water'.split(' ');
    this.is3D = true;
 
    this.createTime = time;
@@ -38,7 +48,6 @@ function Molecule() {
    var sq3 = Math.sqrt(3)/2;
    var hd = 0.7;
    var hx = lerp(hd, 0.5, 1);
-   var atoms = [];
 
    this.setup = function() {
       this.graph.clear();
@@ -96,6 +105,12 @@ function Molecule() {
    this.mouseUp   = function(x,y) { return this.graph.mouseUp  (x, y); }
 
    this.render = function() {
+
+      if (this.isCopy !== undefined) {
+         root.add(this.mesh = this.createMesh());
+	 this.isCopy = undefined;
+      }
+
       this.code = null;
       var graph = this.graph;
       graph.pixelSize = this.computePixelSize();
@@ -142,7 +157,6 @@ function Molecule() {
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             if (j == R.J)
                this.drawNode(node.p, node.r);                // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
-            this.drawNode(node.p, node.r * (j==R.J?1:.01));  // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
          }
 
          this.meshBounds = [];
@@ -189,8 +203,6 @@ function Molecule() {
 
 ///////////////// THREE.js STUFF /////////////////
 
-   var mesh;
-
    this.createMesh = function() {
       mesh = new THREE.Mesh();
       mesh.setMaterial(this.netMaterial());
@@ -213,7 +225,7 @@ function Molecule() {
 
    this.renderNode = function(node) {
       if (node.g === undefined)
-         mesh.add(node.g = this.graph.newNodeMesh(this.materials[node.type]));
+         this.mesh.add(node.g = this.graph.newNodeMesh(this.materials[node.type]));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);
@@ -221,7 +233,7 @@ function Molecule() {
 
    this.renderLink = function(link) {
       if (link.g === undefined)
-         mesh.add(link.g = this.graph.newLinkMesh(this.materials.link, 0.05));
+         this.mesh.add(link.g = this.graph.newLinkMesh(this.materials.link, 0.05));
       this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
@@ -239,7 +251,6 @@ function Molecule() {
             material.opacity = sCurve(f);
          }
    }
-      
 
 //////////////////////////////////////////////////
 

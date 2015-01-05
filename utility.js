@@ -382,6 +382,14 @@
    function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
+   function valuesToQuadratic(src, dst) {
+      if (dst === undefined)
+         dst = [0,0,0];
+      dst[0] = (src[0] + src[2]) / 2 - src[1];
+      dst[1] = (src[2] - src[0]) / 2;
+      dst[2] =  src[1];
+      return dst;
+   }
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
@@ -465,6 +473,14 @@
 
 
 // STRING UTILITIES.
+
+   function toString(obj) {
+      var str = "{";
+      for (var prop in obj) {
+         str += prop + ":" + obj[prop] + ",";
+      }
+      return str + "}";
+   }
 
    function variableToValue(str, name, value) {
 
@@ -631,6 +647,22 @@
 
 
 // 2D GEOMETRY UTILITIES.
+
+   // A Rectangle object.
+
+   function Rectangle(left, top, width, height) {
+      this.left = left;
+      this.top = top;
+      this.width = width;
+      this.height = height;
+   };
+   Rectangle.prototype = {
+      contains : function(x, y) {
+         return x >= this.left && x < this.left + this.width &&
+                y >= this.top  && y < this.top  + this.height ;
+      }
+   };
+
 
    // Change the length of a curve.
 
@@ -861,6 +893,26 @@
          return W[0] * tri[0][2] + W[1] * tri[1][2] + W[2] * tri[2][2] > p[2];
       }
    }();
+
+   // Create a rounded right-angle corner curve.
+
+   function createRoundCorner(a, b, axis) {
+      var xPos = a[0] < b[0];
+      var yPos = a[1] < b[1];
+      var r = [ abs(b[0] - a[0]), abs(b[1] - a[1]) ];
+      if (axis == 0) {
+         if ( xPos &&  yPos) return createArc(a[0], b[1], b[0]-a[0],-TAU/4,     0, 10);
+         if ( xPos && !yPos) return createArc(a[0], b[1], b[0]-a[0], TAU/4,     0, 10);
+         if (!xPos &&  yPos) return createArc(a[0], b[1], a[0]-b[0],-TAU/4,-TAU/2, 10);
+         if (!xPos && !yPos) return createArc(a[0], b[1], a[0]-b[0], TAU/4, TAU/2, 10);
+      }
+      else {
+         if ( xPos &&  yPos) return createArc(b[0], a[1], b[0]-a[0], TAU/2, TAU/4, 10);
+         if ( xPos && !yPos) return createArc(b[0], a[1], b[0]-a[0],-TAU/2,-TAU/4, 10);
+         if (!xPos &&  yPos) return createArc(b[0], a[1], a[0]-b[0],     0, TAU/4, 10);
+         if (!xPos && !yPos) return createArc(b[0], a[1], a[0]-b[0],     0,-TAU/4, 10);
+      }
+   }
 
    // Create an arc of a circle.
 

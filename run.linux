@@ -1,0 +1,7 @@
+#!/bin/sh
+killall node
+# ./start_chrome.sh
+if [ `ps -x | grep 'node server/mainx.js' | wc | cut -c-10` -lt 2 ]
+then node server/mainx.js >> node.log &
+fi
+xdg-open 'http://localhost:8888/'

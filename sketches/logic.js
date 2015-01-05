@@ -1,10 +1,29 @@
 
+   function Delay() {
+      this.time = 0;
+      this.value = 0;
+      this.update = function(value, delayed) {
+         if (delayed === undefined)
+	    return value;
+         if (time > this.time + delayed) {
+	    this.value = value;
+	    this.time = time;
+	 }
+	 return this.value;
+      }
+   }
+   var logicDelay = new Delay();
+
+   function delay(value, delayed) {
+      return logicDelay.update(value, delayed);
+   }
+
    function Logic() {
       this.labels = "buf and or xor not nand nor xnor".split(' ');
 
       this.codes = [
-         "x>0" , "min(x>0, y>0)",   "max(x>0, y>0)"  , "(x>0)!=(y>0)",
-         "1 - (x>0)", "1 - min(x>0, y>0)", "1 - max(x>0, y>0)", "(x>0)==(y>0)"
+         "delay(x>0, y)" , "min(x>0, y>0)",   "max(x>0, y>0)"  , "(x>0)!=(y>0)",
+         "delay(1 - (x>0), y)", "1 - min(x>0, y>0)", "1 - max(x>0, y>0)", "(x>0)==(y>0)"
       ];
 
       this.IDENT = [[-.5,.4],[.5,0],[-.5,-.4],[-.5,.4]];
@@ -32,7 +51,12 @@
          return this.value;
       }
 
+      this.logicDelay = new Delay();
+
+      function xor(a, b) { return a == b ? 0 : 1; }
+
       this.render = function() {
+         logicDelay = this.logicDelay;
          var sc = this.size / 180;
          m.scale(sc);
          var s = (this.selection + 1000 * this.labels.length) % this.labels.length;
@@ -62,17 +86,17 @@
                this.addPort("i", x * sc,  .2 * sc);
                this.addPort("j", x * sc, -.2 * sc);
             }
-            this.addPort("o", sc * (s < 4 ? .5 : .6), 0);
+            this.addPort("out", sc * (s < 4 ? .5 : .6), 0);
          }
-
-         function xor(a, b) { return a == b ? 0 : 1; }
 
          var outValue = this.evalCode(this.code[0][1],
 	     s % 4 == 0 ? this.getDelayedValue("i") : this.getInValueOf("i"),
 	                                              this.getInValueOf("j"));
 
 	 if (outValue != null)
-            this.setOutValue('o', outValue);
+            this.setOutPortValue(outValue);
+
+         //this.setOutPortValue(this.evalCode(this.code[0][1]));
       }
    }
    Logic.prototype = new Sketch;
