@@ -1,12 +1,10 @@
 function Physio() {
    this.labels = 'physio'.split(' ');
    this.phoneRect = new Rectangle(-.6, -.15, .15, .3);
-
-   var pt = newVec(), mx = 0, my = 0;
+   var mouse = newVec();
 
    this.mouseMove = function(x, y) {
-      mx = x;
-      my = y;
+      mouse.set(this.unadjustX(x), this.unadjustY(y), 0).applyMatrix4(pixelToPointMatrix);
    }
 
    this.render = function() {
@@ -47,12 +45,7 @@ function Physio() {
 
          var p = this.phoneRect;
 
-	 pt.set(p.left,p.top,0).applyMatrix4(pointToPixelMatrix);
-	 var xlo = pt.x, yhi = pt.y;
-	 pt.set(p.left+p.width,p.top+p.height,0).applyMatrix4(pointToPixelMatrix);
-	 var xhi = pt.x, ylo = pt.y;
-	 var isInPhone = mx >= xlo && mx < xhi && my >= ylo && my < yhi;
-
+	 var isInPhone = p.contains(mouse.x, mouse.y);
 	 mClosedCurve(createRoundRect(p.left, p.top, p.width, p.height, .03));
          textHeight((isInPhone ? .13 : .1) * textScale);
 	 mText("phone", [-.525,0], .5,.5);
@@ -87,7 +80,6 @@ function Physio() {
 	 mArrow([-.525,-.55],[-.35,-.55]);
 	 mArrow([ .35,-.55],[.5,-.55]);
 	 mArrow([.75,-.4],[.75,-.22]);
-
       });
    }
 }

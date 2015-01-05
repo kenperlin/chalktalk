@@ -29,14 +29,6 @@ var paletteColorId = 0;
 var showingLiveDataMode = 0;
 var sketchToDelete = null;
 
-   function SketchLink(a, i, k, linkData) {
-      this.a = a;
-      this.i = i;
-      this.k = k;
-      this.linkData = linkData;
-      this.s = 0;
-   }
-
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
 
    function paletteX(i) { return 30 - _g.panX; }
@@ -136,18 +128,11 @@ var sketchToDelete = null;
 
          // AVOID CREATING DUPLICATE LINKS.
 
-         if (inPort < inSketch.in.length && inSketch.in[inPort] != undefined
-                                         && inSketch.in[inPort].a == outSketch
-                                         && inSketch.in[inPort].i == outPort )
-             return;
+         if (inPort >= inSketch.in.length || inSketch.in[inPort] === undefined
+                                          || inSketch.in[inPort].a != outSketch
+                                          || inSketch.in[inPort].i != outPort )
 
-         // IF NO OUTPUT SLOTS YET, CREATE EMPTY ARRAY OF OUTPUT SLOTS.
-
-         if (outPort >= outSketch.out.length || outSketch.out[outPort] === undefined)
-            outSketch.out[outPort] = [];
-
-         outSketch.out[outPort].push(new SketchLink(inSketch, inPort, 0));
-         inSketch.in[inPort] = new SketchLink(outSketch,outPort,0);
+            new SketchLink(outSketch, outPort, inSketch, inPort);
       }
 
       this.clearAfterFadeAway = function() {
@@ -496,7 +481,7 @@ var sketchToDelete = null;
 
          if (this.isFocusOnLink) {
             if (linkAtCursor != null)
-               computeLinkCurvature(linkAtCursor, [x, y]);
+	       linkAtCursor.computeCurvature([x,y]);
             return;
          }
 
@@ -715,10 +700,10 @@ var sketchToDelete = null;
             // CAUSES ALL INSTANCES OF THAT VARIABLE TO BE REPLACED BY ITS VALUE.
 
             else if (isCodeWidget && codeSketch.contains(x, y)) {
-               var i = linkAtCursor.linkData.i;
+               var j = linkAtCursor.j;
                codeTextArea.value = variableToValue(codeTextArea.value,
-                                                    "xyz".substring(i, i+1),
-                                                    roundedString(codeSketch.inValue[i]));
+                                                    "xyz".substring(j, j+1),
+                                                    roundedString(codeSketch.inValue[j]));
                deleteLinkAtCursor();
             }
             return;
@@ -2249,17 +2234,15 @@ var sketchToDelete = null;
                for (var i = 0 ; i < a.out.length ; i++)
                   if (isDef(a.out[i]))
                      for (var k = 0 ; k < a.out[i].length ; k++) {
-                        drawLink(a, i, a.out[i][k], ! isAudiencePopup());
-                        C = a.out[i][k].C;
+		        var link = a.out[i][k];
+                        link.draw(! isAudiencePopup());
 
                         // HIGHLIGHT LINK AT CURSOR -- IN RED IF IT IS BEING DELETED.
 
+                        var C = link.C;
                         if (! this.isPressed && isMouseNearCurve(C))
-                           linkAtCursor = new SketchLink(a, i, k, a.out[i][k]);
-
-                        if ( linkAtCursor != null && a == linkAtCursor.a
-                                                  && i == linkAtCursor.i
-                                                  && k == linkAtCursor.k ) {
+                           linkAtCursor = link;
+                        if (linkAtCursor == link) {
                            _g.save();
                            color(linkHighlightColor);
                            lineWidth(20);
