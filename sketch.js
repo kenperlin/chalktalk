@@ -398,8 +398,8 @@
             return;
          }
 
-         var x1 = this instanceof Sketch2D ? this.x2D : lerp(this.scale(), this.tx(), this.textX);
-         var y1 = this instanceof Sketch2D ? this.y2D : lerp(this.scale(), this.ty(), this.textY);
+         var x1 = this instanceof Sketch2D ? this.x2D : mix(this.tx(), this.textX, this.scale());
+         var y1 = this instanceof Sketch2D ? this.y2D : mix(this.ty(), this.textY, this.scale());
 
 	 if (this.text.length == 0) {
 	    this.drawCursor(x1, y1, fontHeight, context);
@@ -1360,7 +1360,7 @@
 
          annotateStart();
 
-         lineWidth(sketchLineWidth * lerp(transition, 1, .6) * sketchPage.zoom / this.zoom);
+         lineWidth(sketchLineWidth * mix(1, .6, transition) * sketchPage.zoom / this.zoom);
          this.makeXform();
 
          var curves = parsedStrokesToCurves(this.parsedStrokes, transition);

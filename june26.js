@@ -53,7 +53,7 @@
             this.cream = [];
             for (var i = 0 ; i < 100 ; i++) {
                var t = i / 100;
-               this.cream.push( [ lerp(t, -1, 1) , 0 ] );
+               this.cream.push( [ mix(-1, 1, t) , 0 ] );
             }
             break;
          }
@@ -90,7 +90,7 @@
                cy += elapsed * dy;
 
                var rr = cx * cx + cy * cy;
-               var f = lerp(1 - rr, .995, 1);
+               var f = mix(.995, 1, 1 - rr);
                cx *= f;
                cy *= f;
 
@@ -127,11 +127,11 @@
                this.cream = fillIn(this.cream, 0.1);
 
             _g.save();
-            _g.lineWidth = (this.xhi - this.xlo) * lerp(fade * fade, .0025, .005);
+            _g.lineWidth = (this.xhi - this.xlo) * mix(.0025, .005, fade * fade);
             _g.strokeStyle = 'rgba(255,255,255,' + (1-fade) + ')';
             _g.beginPath();
 
-            var scale = lerp(dt/5, .55, .75), xPrev = 0, yPrev = 0;
+            var scale = mix(.55, .75, dt/5), xPrev = 0, yPrev = 0;
             for (var i = 0 ; i < this.cream.length ; i++) {
                var x = x0 + r * this.cream[i][0] * scale;
                var y = y0 + r * this.cream[i][1] * scale;
@@ -143,7 +143,7 @@
                yPrev = y;
             }
 
-            sketch.coffee.setMaterial(new phongMaterial().setAmbient(lerp(fade*fade,.07,.16),0,0));
+            sketch.coffee.setMaterial(new phongMaterial().setAmbient(mix(.07,.16,fade*fade),0,0));
 
             _g.stroke();
             _g.restore();
@@ -777,7 +777,7 @@ function MothAndCandle() {
 
          // DRAW TORSO
 
-         lineWidth(lerp(transition, 2, 0.5));
+         lineWidth(mix(2, 0.5, transition));
 
          m.scale(this.size / 250);
          m.translate(0,-.1,0);
@@ -813,7 +813,7 @@ function MothAndCandle() {
 
          // DRAW LEFT AND RIGHT ANTENNAE
 
-         lineWidth(lerp(transition, 2, 0.5));
+         lineWidth(mix(2, 0.5, transition));
 
          mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
          mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));

@@ -41,8 +41,10 @@
 
    //function height() { return 640; }
    //function height() { return 720; }
-   function height() { return 800; }
    //function height() { return 920; }
+
+   function width() { return 1280 + 100; }
+   function height() { return 800; }
 
    // BEST RESOLUTION FOR CINTIQ
 /*
@@ -228,9 +230,9 @@
 	          var s = linkAtCursor.s;
 	          linkAtCursor.removeFromInSketch();
 	          linkAtCursor.removeFromOutSketch();
-	          (new SketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0)).s = s / 2;
+	          new SketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0, s / 2);
 		  var i = sk().outPortIndex(true);
-	          (new SketchLink(sk(), i, linkAtCursor.b, linkAtCursor.j)).s = s / 2;
+	          new SketchLink(sk(), i, linkAtCursor.b, linkAtCursor.j, s / 2);
                }
 
                // STIll NEED TO IMPLEMENT EFFECTS OF DROPPING ONE SKETCH ONTO ANOTHER.
@@ -508,8 +510,8 @@
 
       else if (d > 0) {
          for (var i = 20 ; i < d ; i += 20) {
-            var xx = lerp(i/d, xPrev, cx);
-            var yy = lerp(i/d, yPrev, cy);
+            var xx = mix(xPrev, cx, i/d);
+            var yy = mix(yPrev, cy, i/d);
             var sx = snx(sk(), xx, yy);
             var sy = sny(sk(), xx, yy);
             _g.lineTo(sx, sy);
@@ -595,13 +597,11 @@
       var C = [];
       for (var n = 0 ; n < A.length ; n++) {
          C.push([]);
-         for (var i = 0 ; i < A[n].length ; i++) {
-            C[C.length-1].push([ lerp(s, A[n][i][0], B[n][i][0]),
-                                 lerp(s, A[n][i][1], B[n][i][1]) ]);
-         }
+         for (var i = 0 ; i < A[n].length ; i++)
+            C[C.length-1].push(mix(A[n][i], B[n][i], s));
       }
 
-      _g.lineWidth = sketchLineWidth * lerp(t, 1, .6);
+      _g.lineWidth = sketchLineWidth * mix(1, .6, t);
       drawTrace(C);
    }
 
@@ -1531,8 +1531,7 @@ console.log(harry.fred);
             if (i == 0)
                this.data[n].push([stroke[i][0], stroke[i][1]]);
             else
-               this.data[n].push([lerp(u, stroke[i-1][0], stroke[i][0]),
-                                  lerp(u, stroke[i-1][1], stroke[i][1])]);
+               this.data[n].push(mix(stroke[i-1], stroke[i], u));
          }
       }
    }
@@ -1660,7 +1659,7 @@ console.log(harry.fred);
       }
       this.interpret = function() {
          var glyph = findGlyph([this.path], scribbleGlyphs);
-         scribbleScale = lerp(0.1, scribbleScale, computeCurveLength(this.path) / glyph.pathLength);
+         scribbleScale = mix(scribbleScale, computeCurveLength(this.path) / glyph.pathLength, 0.1);
          return glyph == null ? "" : glyph.name;
       }
    }
@@ -1855,7 +1854,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
             sketchDragActionXY[1] = y;
          }
       case 4:
-         outSketch.linkCurve.push([x,y]);
+         if (outSketch.linkCurve !== undefined)
+            outSketch.linkCurve.push([x,y]);
          break;
       case 6:
          sk().arrowDrag(x, y);
@@ -2198,8 +2198,8 @@ console.log(lo + " " + hi);
                   if (sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
-                     var x1 = lerp(sk(I).scale(), sk(I).tx(), sk(I).textX);
-                     var y1 = lerp(sk(I).scale(), sk(I).ty(), sk(I).textY);
+                     var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
+                     var y1 = mix(sk(I).ty(), sk(I).textY, sk(I).scale());
                      xlo = min(xlo, x1 - rx);
                      ylo = min(ylo, y1 - ry);
                      xhi = max(xhi, x1 + rx);
@@ -2935,8 +2935,14 @@ console.log(lo + " " + hi);
 
          // IF POSSIBLE, LINK DELETED SKETCH'S INPUT TO ITS OUTPUT.
 
-         if (inLink != null && outLink != null)
-	    (new SketchLink(inLink.a, inLink.i, outLink.b, outLink.j)).s = inLink.s + outLink.s;
+         if (inLink != null && outLink != null) {
+	    var ca = inLink.C, cb = outLink.C;
+	    var p0 = ca[0];
+	    var p1 = mix(ca[ca.length-1], cb[0], .5);
+	    var p2 = cb[cb.length-1];
+	    new SketchLink(inLink.a, inLink.i, outLink.b, outLink.j,
+	       computeCurvature(ca[0], mix(ca[ca.length-1], cb[0], .5), cb[cb.length-1]));
+         }
       }
 
       if (isCodeWidget && sketch == codeSketch)

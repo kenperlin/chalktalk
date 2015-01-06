@@ -1,10 +1,10 @@
 
-function SketchLink(a, i, b, j) {
+function SketchLink(a, i, b, j, s) {
    this.a = a;
    this.i = i;
    this.b = b;
    this.j = j;
-   this.s = 0;
+   this.s = s === undefined ? 0 : s;
 
    if (i >= a.out.length || a.out[i] === undefined)
       a.out[i] = [];

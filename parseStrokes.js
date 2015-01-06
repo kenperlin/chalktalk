@@ -244,8 +244,7 @@
             var src = getPointOnCurve(cSrc, u);
             var dst = getPointOnCurve(cDst, t);
 
-            curves[n].push([lerp(transition, src[0], dst[0]),
-                            lerp(transition, src[1], dst[1])]);
+            curves[n].push(mix(src, dst, transition));
          }
       }
 

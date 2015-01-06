@@ -38,8 +38,8 @@
 	          annotateStart();
 		  var n = 20;
 	          for (var i = 0 ; i < n ; i += 3) {
-                     color('rgba(' + floor(lerp(i/n,0,32)) + ',0,0,' + lerp(i/n, 0.0, 0.1) + ')');
-	             var rr = lerp(t, 0.7, 1.1) * r - i;
+                     color('rgba(' + floor(mix(0,32,i/n)) + ',0,0,' + mix(0.0, 0.1, i/n) + ')');
+	             var rr = mix(0.7, 1.1, t) * r - i;
 	             fillOval(x - rr, y - rr, 2 * rr, 2 * rr);
                   }
 	          annotateEnd();

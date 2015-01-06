@@ -8,7 +8,7 @@
 
 	 sk().lpb.push(x);
 
-	 var n = max(1, floor(30 * d));
+	 var n = max(2, floor(100 * d));
 	 while (sk().lpb.length > n)
 	    sk().lpb.splice(0, 1);
 

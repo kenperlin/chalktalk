@@ -1583,10 +1583,10 @@ var sketchToDelete = null;
          if (isk() && ! isManualScaling) {
             if (sketchAction == "scaling") {
                if (this.scaleRate < 1)
-                  this.scaleRate = lerp(0.1, this.scaleRate, 1);
+                  this.scaleRate = mix(this.scaleRate, 1, .1);
             }
             else if (this.scaleRate > 0) {
-               if ((this.scaleRate = lerp(0.1, this.scaleRate, 0)) < .01)
+               if ((this.scaleRate = mix(this.scaleRate, 0)) < .01, .1)
                   this.scaleRate = 0;
             }
             if (this.scaleRate > 0) {
@@ -1687,7 +1687,7 @@ var sketchToDelete = null;
 
             color(sk().color);
 
-            lineWidth(sketchLineWidth * lerp(sk().styleTransition, 1, .6)
+            lineWidth(sketchLineWidth * mix(1, .6, sk().styleTransition)
                                       * this.zoom / sk().zoom);
 
             _g.save();
@@ -2051,12 +2051,12 @@ var sketchToDelete = null;
          for (var n = 0 ; n < nn ; n++) {
 
             var d = glyph.data[n];
-            if (selected && lerp(n / nn, i, i+1) <= t)
+            if (selected && mix(i, i+1, n / nn) <= t)
                fillOval(x + d[0][0] * sc - 3, y + d[0][1] * sc - 3, 6, 6);
             _g.beginPath();
             _g.moveTo(x + d[0][0] * sc, y + d[0][1] * sc);
             for (var j = 1 ; j < d.length ; j++) {
-               if (selected && lerp((n + j / d.length) / nn, i, i+1) > t)
+               if (selected && mix(i, i+1, (n + j / d.length) / nn) > t)
                   break;
                _g.lineTo(x + d[j][0] * sc, y + d[j][1] * sc);
             }
@@ -2367,8 +2367,8 @@ var sketchToDelete = null;
             }
             else {
                var t = sCurve(sk().cursorTransition);
-               cursorX = lerp(t, sk().cursorX, This().mouseX);
-               cursorY = lerp(t, sk().cursorY, This().mouseY);
+               cursorX = mix(sk().cursorX, This().mouseX, t);
+               cursorY = mix(sk().cursorY, This().mouseY, t);
 
                sk().styleTransition  = min(1, sk().styleTransition + 1.4 * This().elapsed);
                sk().cursorTransition = min(1, sk().cursorTransition + This().elapsed);

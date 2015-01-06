@@ -202,9 +202,6 @@
          return a[0]*b[0] + a[1]*b[1];
       return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
    };
-   function lerp(t, a, b) {
-      return a + t * (b - a);
-   };
    function norm(v) {
       return sqrt(normSqr(v));
    };
@@ -213,9 +210,6 @@
    };
    function vecDiff(a, b) {
       return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
-   };
-   function vecLerp(t,a,b) {
-      return [lerp(t,a[0],b[0]),lerp(t,a[1],b[1]),lerp(t,a[2],b[2])];
    };
    function vecScale(v, s) {
       return [v[0] * s, v[1] * s, v[2] * s];

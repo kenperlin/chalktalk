@@ -304,10 +304,18 @@
          return sqrt(x[0] * x[0] + x[1] * x[1]);
       return sqrt(x * x + y * y);
    }
-
-   function lerp(t, a, b) { return a + t * (b - a); }
+   function lerp(t,a,b) { return a + t * (b - a); }
    function max(a,b) { return Math.max(a,b); }
    function min(a,b) { return Math.min(a,b); }
+   function mix(a, b, t) {
+      if (isNumeric(a))
+         return a + (b - a) * t;
+
+      var dst = [];
+      for (var i = 0 ; i < a.length ; i++)
+         dst.push(a[i] + (b[i] - a[i]) * t);
+      return dst;
+   }
 
    var noise2P = [], noise2U = [], noise2V = [];
    function fractal(x) {
@@ -352,8 +360,8 @@
       var j = floor(y), v = y - j, t = sCurve(v);
       var a = P[P[i] + j  ], b = P[P[i+1] + j  ];
       var c = P[P[i] + j+1], d = P[P[i+1] + j+1];
-      return lerp(t, lerp(s, u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b]),
-                     lerp(s, u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d]));
+      return mix(mix(u*U[a] +  v   *V[a], (u-1)*U[b] +  v   *V[b], s),
+                 mix(u*U[c] + (v-1)*V[c], (u-1)*U[d] + (v-1)*V[d], s), t);
    }
    function pieMenuIndex(x,y,n) {
       if (n === undefined)
@@ -571,7 +579,7 @@
          return arr[0];
       var i = floor((n-1) * t);
       var f = (n-1) * t - i;
-      return lerp(f, arr[i], arr[i+1]);
+      return mix(arr[i], arr[i+1], f);
    }
 
    function newZeroArray(size) {
@@ -681,8 +689,8 @@
       for (var i = 2 ; i <= n-2 ; i++) {
          var t = 1 - 4*(i-n/2)*(i-n/2)/n/n;
          var dr = t * (ratio - 1) + 1;
-         p[i][0] = lerp(dr, x0, p[i][0]);
-         p[i][1] = lerp(dr, y0, p[i][1]);
+         p[i][0] = mix(x0, p[i][0], dr);
+         p[i][1] = mix(y0, p[i][1], dr);
       }
 
       for (var i = 2 ; i <= n-2 ; i++) {
@@ -836,7 +844,7 @@
       var ty = by < R[1] ? (R[1] - ay) / (by - ay) :
                by > R[3] ? (R[3] - ay) / (by - ay) : 10000;
       var t = max(0, min(1, min(tx, ty)));
-      return [lerp(t, ax, bx), lerp(t, ay, by)];
+      return [mix(ax, bx, t), mix(ay, by, t)];
    }
 
    /*
@@ -919,7 +927,7 @@
    function createArc(x, y, r, angle0, angle1, n) {
       var c = [];
       for (var i = 0 ; i <= n ; i++) {
-         var angle = lerp(i / n, angle0, angle1);
+         var angle = mix(angle0, angle1, i / n);
          c.push([x + r * cos(angle), y + r * sin(angle)]);
       }
       return c;
@@ -974,7 +982,7 @@
 
       if (curvature == 0) {
          for (var n = 0 ; n <= N ; n++)
-            dst.push([lerp(n/N, ax, bx), lerp(n/N, ay, by)]);
+            dst.push([mix(ax, bx, n/N), mix(ay, by, n/N)]);
          return dst;
       }
 
@@ -999,10 +1007,10 @@
 
       for (var n = 0 ; n <= N ; n++) {
          var t = n / N;
-         var s = lerp(abs(curvature), t, sCurve(t));
+         var s = mix(t, sCurve(t), abs(curvature));
          var e = t * (1 - t);
-         dst.push([lerp(s, ax, bx) - e * dy,
-                   lerp(s, ay, by) + e * dx]);
+         dst.push([mix(ax, bx, s) - e * dy,
+                   mix(ay, by, s) + e * dx]);
       }
       return dst;
    }
@@ -1118,8 +1126,7 @@
       var n = curve.length - 1;
       var i = floor(t * n);
       var f = t * n - i;
-      return [ lerp(f, curve[i][0], curve[i+1][0]) ,
-               lerp(f, curve[i][1], curve[i+1][1]) ];
+      return mix(curve[i], curve[i+1], f);
    }
 
    function isInRect(x,y, R) {
@@ -1145,7 +1152,7 @@
       // THEN FIND THE POINT OF INTERSECTION p.
 
       var f = (tb - tc) / (td - tc);
-      var p = [ lerp(f, c[0], d[0]), lerp(f, c[1], d[1]) ];
+      var p = mix(c, d, f);
 
       // THEN MAKE SURE p LIES BETWEEN a AND b.
 
@@ -1176,8 +1183,7 @@
          while (D[i] < d && i < src.length-1)
             i++;
          var f = (d - D[i-1]) / (D[i] - D[i-1]);
-         dst.push([lerp(f, src[i-1][0], src[i][0]),
-                   lerp(f, src[i-1][1], src[i][1])]);
+         dst.push(mix(src[i-1], src[i], f));
       }
 
       // ACCOUNT FOR THE SOURCE CURVE BEING A CLOSED LOOP.

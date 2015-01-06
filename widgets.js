@@ -72,8 +72,8 @@
    function pieMenuUpdate(x, y) {
       if (pieMenuCursorWeight > 0) {
          pieMenuCursorWeight = max(0, pieMenuCursorWeight - This().elapsed);
-         pieMenuX = lerp(pieMenuCursorWeight, x, pieMenuXDown);
-         pieMenuY = lerp(pieMenuCursorWeight, y, pieMenuYDown);
+         pieMenuX = mix(x, pieMenuXDown, pieMenuCursorWeight);
+         pieMenuY = mix(y, pieMenuYDown, pieMenuCursorWeight);
          if (pieMenuCursorWeight == 0) {
             pieMenuIsActive = false;
             pieMenuXDown = width() / 2;
@@ -855,7 +855,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
                           ? x
                           : isChanged
                             ? codeElement.x1 - _g.panX
-                            : lerp(0.1, codeElement.x, codeElement.x1 - _g.panX);
+                            : mix(codeElement.x, codeElement.x1 - _g.panX, 0.1);
 
       //////////////////////////////////////////////////////////////////////////////////////
 
@@ -889,8 +889,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 	 var tx1 = x0 < xhi ? 0 : (xhi - x0) / (x1 - x0);
 	 var ty1 = y0 < yhi ? 0 : (yhi - y0) / (y1 - y0);
 	 var t = max(tx0, max(ty0, max(tx1, ty1)));
-	 x1 = lerp(t, x0, x1);
-	 y1 = lerp(t, y0, y1);
+	 x1 = mix(x0, x1, t);
+	 y1 = mix(y0, y1, t);
 
 	 var dd = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
 	 if (dd < ddMin) {
@@ -903,8 +903,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       }
 
       ay = y + h;
-      if      (ay >= y     && ay < y+h  ) ay = lerp(sCurve((ay -  y     ) / h), y     + cr, y+h   - cr);
-      else if (ax >= x-w/2 && ax < x+w/2) ax = lerp(sCurve((ax - (x-w/2)) / w), x-w/2 + cr, x+w/2 - cr);
+      if      (ay >= y     && ay < y+h  ) ay = mix(y     + cr, y+h   - cr, sCurve((ay -  y     ) / h));
+      else if (ax >= x-w/2 && ax < x+w/2) ax = mix(x-w/2 + cr, x+w/2 - cr, sCurve((ax - (x-w/2)) / w));
 
       if (by > ay) {
          ax = min(ax, x + w/2 - 2*cr - _g.panX);
