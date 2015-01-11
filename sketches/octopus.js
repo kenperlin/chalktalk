@@ -8,7 +8,10 @@ function OctopusResponder() {
       }
    );
 
-   this.h2t = newVec();
+   this.xVec = newVec();
+   this.yVec = newVec();
+   this.difVec = newVec();
+   this.tmpVec = newVec();
 
    this.simulate = function() {
       var nodes = this.graph.nodes;
@@ -32,17 +35,28 @@ function OctopusResponder() {
 	 nodes[1].p.x -= dx / 2;
 	 nodes[2].p.x -= dx / 2;
       }
-      for (var limb = 0 ; limb < this.graph.nLimbs ; limb++) {
-         for (var joint = 1 ; joint < this.graph.nJoints ; joint++) {
-	    var p = nodes[this.graph.jointIndex(limb, joint)].p;
-	    var x = 3 * p.x, y = 3 * p.y, z = 3 * p.z;
-	    var dr = 0.02 * noise(x, y + time, z + 10);
-	    var xz = sqrt(p.x * p.x + p.z * p.z);
-	    if (joint == this.graph.nJoints - 1)
-	       dr *= 2;
-	    p.x += dr * p.x / xz;
-	    p.z += dr * p.z / xz;
-	 }
+
+      if (nodes[0].g !== undefined) {
+	 var X = this.xVec, Y = this.yVec, D = this.difVec, V = this.tmpVec;
+
+         var E = nodes[0].g.matrix.elements;
+	 X.set(E[0], E[1], E[2]);
+	 Y.set(E[4], E[5], E[6]);
+
+         for (var limb = 0 ; limb < this.graph.nLimbs ; limb++) {
+            for (var joint = 1 ; joint < this.graph.nJoints ; joint++) {
+	       var P = nodes[this.graph.jointIndex(limb, joint)].p;
+
+               D.copy(P).sub(nodes[0].p);
+
+	       var t = noise(2*D.x, 2*D.y + time, 2*D.z + 100 * limb) *
+	               (joint < this.graph.nJoints - 1 ? .08 : .2);
+
+	       var lenSq = X.lengthSq() + Y.lengthSq();
+               P.add(V.copy(X).multiplyScalar(t * X.dot(D) / lenSq))
+                .add(V.copy(Y).multiplyScalar(t * Y.dot(D) / lenSq));
+	    }
+         }
       }
    }
 }
@@ -56,7 +70,7 @@ function Octopus() {
    this.graph.setResponder(new OctopusResponder());
 
    var nLimbs = this.graph.nLimbs = 8;
-   var nJoints = this.graph.nJoints = 10;
+   var nJoints = this.graph.nJoints = 8;
 
    this.graph.nLimbs = nLimbs;
    this.graph.nJoints = nJoints;
@@ -75,16 +89,16 @@ function Octopus() {
       this.graph.addNode(  0,.5, 0);
 
       var v = newVec();
-      v.set(1, 0, 1).normalize().multiplyScalar(0.5);
+      v.set(1, 0, 1).normalize().multiplyScalar(0.55);
       this.graph.addNode(-v.x, .5+v.y, v.z);
       this.graph.addNode( v.x, .5+v.y, v.z);
 
       this.graph.addNode(0, 0, 0);
 
-      for (var n = 0 ; n < 3 ; n++)
-         this.graph.nodes[n].nm = n == 0 ? 32 : n < 3 ? 16 : 2;
-
       this.graph.headLastIndex = this.graph.nodes.length - 1;
+
+      for (var n = 0 ; n <= this.graph.headLastIndex ; n++)
+         this.graph.nodes[n].nm = n == 0 ? 32 : n < 3 ? 16 : 2;
 
       for (var limb = 0 ; limb < nLimbs ; limb++) {
          var theta = TAU * limb / nLimbs;
@@ -102,11 +116,12 @@ function Octopus() {
          }
       }
 
+      var eyeLinkIndex0 = this.graph.addLink(0,1,2);
+      var eyeLinkIndex1 = this.graph.addLink(0,2,2);
+
       this.nNodesToRender = this.graph.nodes.length;
       this.nLinksToRender = this.graph.links.length;
 
-      this.graph.addLink(0,1,2);
-      this.graph.addLink(0,2,2);
       this.graph.addLink(1,2,2);
 
       for (var limb = 0 ; limb < nLimbs ; limb++) {
@@ -115,7 +130,7 @@ function Octopus() {
 	 for (var i = 0 ; i <= this.graph.headLastIndex ; i++)
 	    this.graph.addLink(i, nodeIndex0, 2);
 
-	 this.graph.addLink(nodeIndex0, this.graph.jointIndex((limb + 1) % nLimbs));
+	 this.graph.addLink(nodeIndex0, this.graph.jointIndex((limb + 1) % nLimbs, 0));
 
          var nodeIndex1 = this.graph.jointIndex(limb, nJoints - 1);
 
@@ -126,19 +141,25 @@ function Octopus() {
       }
 
       this.graph.nodes[0].r = .5;
-      this.graph.nodes[1].r = .07;
-      this.graph.nodes[2].r = .05;
+      this.graph.nodes[1].r = .06;
+      this.graph.nodes[2].r = .06;
       this.graph.nodes[3].r = .01;
 
       for (var limb = 0 ; limb < nLimbs ; limb++)
       for (var joint = 0 ; joint < nJoints ; joint++) {
          var i = this.graph.jointIndex(limb, joint);
-         this.graph.nodes[i].r = this.graph.jointRadius(joint) * .85;
+         this.graph.nodes[i].r = this.graph.jointRadius(joint);
       }
 
-      this.graph.computeLengths();
+      for (var n = this.graph.headLastIndex + 1 ; n < this.graph.nodes.length ; n++)
+         this.graph.nodes[n].nm = 4;
 
-      this.lengths = cloneArray(this.graph.lengths);
+      for (var n = 0 ; n < this.graph.links.length ; n++)
+         this.graph.links[n].nm = 4;
+      this.graph.links[eyeLinkIndex0].nm = 16;
+      this.graph.links[eyeLinkIndex1].nm = 16;
+
+      this.graph.computeLengths();
    }
 
    this.mouseMove = function(x,y) { return this.graph.mouseMove(x, y); }
@@ -165,9 +186,6 @@ function Octopus() {
 
       this.afterSketch(function() {
 
-         for (var i = 0 ; i < this.lengths ; i++)
-            this.graph.lengths[i] = this.lengths[i];
-
          graph.update();
          for (var j = 0 ; j < this.nNodesToRender ; j++)
             this.renderNode(nodes[j]);
@@ -192,25 +210,25 @@ function Octopus() {
    this.renderNode = function(node) {
       if (node.g === undefined) {
          var material = node == this.graph.nodes[1] || node == this.graph.nodes[2]
-	              ? this.getEyeMaterial() : this.getMaterial();
+	              ? this.getEyeMaterial() : this.getNodeMaterial();
          this.mesh.add(node.g = this.graph.newNodeMesh(material, node.r, node.nm));
       }
 
       if (node == this.graph.nodes[0]) {
-         var shape = node.g.geometry;
-         var vertices = shape.vertices;
+         var geometry = node.g.geometry;
+         var vertices = geometry.vertices;
          for (var i = 0 ; i < vertices.length ; i++) {
             var v = vertices[i];
 	    if (v.z > 0) {
-	       var t = sCurve(1 - v.z);
-	       var r = mix(.7, 1, t);
+	       var r = 1 - .3 * (v.z * v.z);
+	       v.x *= r;
+	       v.y *= r;
 	       v.z = sin(PI * v.z);
-	       v.x = mix(v.x, v.x * r, t);
-	       v.y = mix(v.y, v.y * r, t);
 	    }
          }
-         shape.computeCentroids();
-         shape.computeVertexNormals();
+         geometry.computeCentroids();
+         geometry.computeVertexNormals();
+	 node.g.up.set(0,0,1);
 	 node.g.lookAt(this.graph.nodes[3].p);
       }
 
@@ -221,24 +239,39 @@ function Octopus() {
       if (link.g === undefined) {
          var weight = Math.sqrt(link.w);
 	 var joint = link.joint === undefined ? 0 : link.joint;
-         var radius1 = weight * this.graph.jointRadius(joint + 1);
-         var radius0 = weight * this.graph.jointRadius(joint);
-         this.mesh.add(link.g = this.graph.newLinkMesh(this.getMaterial(), radius1, radius0));
+         var radius1 = .8 * weight * this.graph.jointRadius(joint + 1);
+         var radius0 = .8 * weight * this.graph.jointRadius(joint);
+         this.mesh.add(link.g = this.graph.newLinkMesh(this.getLinkMaterial(), radius1, radius0, link.nm));
       }
       this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
-   this.getMaterial = function() {
-      if (this._getMaterial === undefined) {
-         this._getMaterial = new phongMaterial().setAmbient(.2,.1,.05).setDiffuse(.2,.1,.05).setSpecular(.2,.2,.2,20);
+   this.getNodeMaterial = function() {
+      if (this._nodeMaterial === undefined) {
+         var r = 1, g = .75, b = .5;
+         this._nodeMaterial = new phongMaterial().setAmbient (.05*r,.05*g,.05*b)
+	                                         .setDiffuse (.20*r,.20*g,.20*b)
+	 			                 .setSpecular(.17*r,.17*g,.17*b,30);
       }
-      return this._getMaterial;
+      return this._nodeMaterial;
+   }
+
+   this.getLinkMaterial = function() {
+      if (this._linkMaterial === undefined) {
+         var r = 1, g = 1, b = 1;
+         this._linkMaterial = new phongMaterial().setAmbient (.05*r,.05*g,.05*b)
+	                                         .setDiffuse (.20*r,.20*g,.20*b)
+	 			                 .setSpecular(.17*r,.17*g,.17*b,30);
+      }
+      return this._linkMaterial;
    }
 
    this.getEyeMaterial = function() {
-      if (this._getEyeMaterial === undefined)
-         this._getEyeMaterial = new phongMaterial().setAmbient(.05,.05,.05).setDiffuse(.05,.05,.05).setSpecular(.2,.2,.2,20);
-      return this._getEyeMaterial;
+      if (this._eyeMaterial === undefined)
+         this._eyeMaterial = new phongMaterial().setAmbient(.65,.05,.05)
+                                                .setDiffuse(.05,.05,.05)
+  		 			        .setSpecular(.2,.2,.2,20);
+      return this._eyeMaterial;
    }
 }
 Octopus.prototype = new Sketch;

@@ -196,17 +196,20 @@ Graph.prototype = {
    // CONVENIENCE FUNCTIONS FOR BUILDING AND PLACING GRAPH COMPONENTS AS THREE.js OBJECTS.
 
    newNodeMesh: function(material, radius, n) {
-      if (n === undefined) n = 8;
+      if (n === undefined)
+         n = 8;
       var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 2 * n, n), material);
       if (radius !== undefined)
          mesh.scale.x = mesh.scale.y = mesh.scale.z = radius;
       return mesh;
    },
 
-   newLinkMesh: function(material, radius0, radius1) {
+   newLinkMesh: function(material, radius0, radius1, n) {
       if (radius1 === undefined)
          radius1 = radius0;
-      var tube = new THREE.Mesh(new THREE.CylinderGeometry(radius0, radius1, 2, 8, 1, true), material);
+      if (n === undefined)
+         n = 8;
+      var tube = new THREE.Mesh(new THREE.CylinderGeometry(radius0, radius1, 2, n, 1, true), material);
       tube.rotation.x = Math.PI / 2;
       var mesh = new THREE.Mesh();
       mesh.add(tube);
