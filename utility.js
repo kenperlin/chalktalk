@@ -299,6 +299,7 @@
       y = sqrt(max(0,a*a - cc*x*x) / dot(D,D));
       for (var i = 0 ; i < 3 ; i++) D[i] = x * C[i] + y * D[i];
    }
+   function irandom(n) { return floor(n * random()); }
    function len(x, y) {
       if (y === undefined)
          return sqrt(x[0] * x[0] + x[1] * x[1]);

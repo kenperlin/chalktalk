@@ -33,6 +33,7 @@ function Graph() {
 
    this.removedNodes = [];
    this.removedLinks = [];
+   this.lengths = [];
 }
 
 Graph.prototype = {
@@ -59,7 +60,6 @@ Graph.prototype = {
    addNode: function(x,y,z,type) {
       if (z === undefined)
          z = 0;
-      //this.nodes.push({p:newVec(x,y,z),type:type});
       this.nodes.push(new GraphNode(x,y,z,type));
       return this.nodes.length - 1;
    },
@@ -67,7 +67,6 @@ Graph.prototype = {
    addLink: function(i, j, w, type) {
       if (w === undefined)
          w = 1;
-      //this.links.push({i:i, j:j, w:w, type:type});
       this.links.push(new GraphLink(i, j, w, type));
       this.computeLengths();
       return this.links.length - 1;
@@ -96,6 +95,10 @@ Graph.prototype = {
    nodesAvoidEachOther: function() {
       for (var i = 0 ; i < this.nodes.length-1 ; i++)
          for (var j = i+1 ; j < this.nodes.length ; j++) {
+	    if (i == this.R.I || j == this.R.I)
+	       continue;
+	    if (i == this.R.J || j == this.R.J)
+	       continue;
             var a = this.nodes[i];
             var b = this.nodes[j];
             if (a.r !== undefined && b.r !== undefined) {
@@ -131,14 +134,16 @@ Graph.prototype = {
 
    updatePositions: function() {
       this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
-      this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
+      //this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
       this.adjustEdgeLengths();   // Coerce all links to be the proper length.
    },
 
-   findLink: function(i, j) {
+   findLink: function(i, j, links) {
+      if (links === undefined)
+         links = this.links;
       if (i != j)
-         for (var l = 0 ; l < this.links.length ; l++) {
-            var link = this.links[l];
+         for (var l = 0 ; l < links.length ; l++) {
+            var link = links[l];
             if (link.i == i && link.j == j || link.i == j && link.j == i)
                return l;
          }
@@ -190,20 +195,21 @@ Graph.prototype = {
 
    // CONVENIENCE FUNCTIONS FOR BUILDING AND PLACING GRAPH COMPONENTS AS THREE.js OBJECTS.
 
-   newNodeMesh: function(material, radius) {
-      var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), material);
+   newNodeMesh: function(material, radius, n) {
+      if (n === undefined) n = 8;
+      var mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 2 * n, n), material);
       if (radius !== undefined)
          mesh.scale.x = mesh.scale.y = mesh.scale.z = radius;
       return mesh;
    },
 
-   newLinkMesh: function(material, radius) {
-      var tube = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 8, 1, true), material);
+   newLinkMesh: function(material, radius0, radius1) {
+      if (radius1 === undefined)
+         radius1 = radius0;
+      var tube = new THREE.Mesh(new THREE.CylinderGeometry(radius0, radius1, 2, 8, 1, true), material);
       tube.rotation.x = Math.PI / 2;
       var mesh = new THREE.Mesh();
       mesh.add(tube);
-      if (radius !== undefined)
-         mesh.scale.x = mesh.scale.y = radius;
       return mesh;
    },
 
@@ -343,6 +349,11 @@ VisibleGraph.prototype.findNodeAtPixel = function(pix) {
       var d = 10;
       if (node.r !== undefined)
          d *= node.r * 10;
+
+      if (node.pix === undefined)
+         node.pix = newVec(0,0,0);
+      node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
+
       var dx = pix.x - node.pix.x;
       var dy = pix.y - node.pix.y;
       if (Math.sqrt(dx * dx + dy * dy) < d * this.pixelSize && node.pix.z > zNearest) {

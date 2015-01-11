@@ -59,6 +59,11 @@ function Physio() {
 	    m.translate(1,0,0);
 	    m.scale(4);
 	    mClosedCurve(createRoundRect(p.left, p.top, p.width, p.height, .03));
+            textHeight(.3 * textScale);
+	    mText('"Now,', [-.525,.06], .5,.5);
+	    mText('balance', [-.525,.02], .5,.5);
+	    mText('on your', [-.525,-.02], .5,.5);
+	    mText('left foot."', [-.525,-.06], .5,.5);
 	    m.restore();
 	    _g.restore();
 	 }
@@ -79,6 +84,10 @@ function Physio() {
 	    m.translate(-.4,0,0);
 	    m.scale(3);
 	    mDrawRect([x0, y0],[x1, y1]);
+	    textHeight(.2 * textScale);
+	    mText("Inform therapist", [xc,yc + .05], .5,.5);
+	    mText("of updated", [xc,yc + .00], .5,.5);
+	    mText("patient status.", [xc,yc - .05], .5,.5);
 	    color('rgb(100,100,100)');
 	    mFillCurve([[.545,-.15],[.955,-.15],[1,-.2],[.5,-.2]]);
 	    color('rgb(50,50,50)');
@@ -103,6 +112,10 @@ function Physio() {
 	    m.translate(0,-.1,0);
 	    m.scale(2);
 	    mDrawRect([x0,y0],[x1,y1]);
+	    textHeight(.2 * textScale);
+	    mText("Add raw data", [xc,yc + .05], .5,.5);
+	    mText("to the", [xc,yc + .00], .5,.5);
+	    mText("database.", [xc,yc - .05], .5,.5);
 	    m.restore();
 	    _g.restore();
 	 }
@@ -123,6 +136,11 @@ function Physio() {
 	    m.translate(-.75,-.1,0);
 	    m.scale(2);
 	    mClosedCurve([[x0,yc],[xc,y0],[x1,yc],[xc,y1]]);
+	    textHeight(.2 * textScale);
+	    mText("Compare", [xc,yc + .05], .5,.5);
+	    mText("against normative", [xc,yc + .00], .5,.5);
+	    mText("data.", [xc,yc - .05], .5,.5);
+	    m.restore();
 	    m.restore();
 	    _g.restore();
 	 }
