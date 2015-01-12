@@ -18,10 +18,11 @@ define( function () {
 
 		this.inValue = this.args.inValue || null;
 		this.inValues = this.args.inValues || [];
-		this.nodeTree = {};
 		
-		this.outValue = null;
+		this.root = new THREE.Object3D();
+		this.add(this.root);
 
+		this.outValue = null;
 		this.update = true;
 
 		this.evaluator = this.args.evaluator || function(o){return o;};
@@ -54,8 +55,8 @@ define( function () {
 	};
 
 	CT.CTObject.prototype.getOutValue = function(){
-		if(this.update);
-			this.evaluate();
+		// if(this.update);
+		// 	this.evaluate();
 		return this.outValue;
 	};
 
@@ -109,6 +110,7 @@ define( function () {
 		port.rotation = rotation;
 		port.scale = scale;
 
+		this.root.add(port);
 		this.ports.splice(portIndex,0,port);
 
 	};

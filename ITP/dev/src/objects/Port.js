@@ -20,6 +20,8 @@ define(["core"], function ( CT) {
 
 		this.update = true;
 
+		//mostly for type checking
+		//
 		this.evaluator = this.args.evaluator || function(o){return o;};
 
 	};
@@ -39,7 +41,6 @@ define(["core"], function ( CT) {
 		if(CT.Utils.isDef(val)){
 			this.inValue = val;
 		}
-		this.outValue = this.evaluator(this.inValue);
 	};
 
 	CT.Port.prototype.processValue = function(f){
@@ -53,7 +54,7 @@ define(["core"], function ( CT) {
 		//if not pass the value
 
 		if(this.inValue.getOutValue){
-			this.inValue.evaluate();
+			// this.inValue.evaluate();
 			process = this.inValue.getOutValue();
 		}
 		else

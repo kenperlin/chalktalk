@@ -4,7 +4,6 @@ define(function(){
 
 	CT.Utils = {
 
-
 		//JS
 
 		extend:function(child, parent){
@@ -118,6 +117,10 @@ define(function(){
 		},
 
 		vec:function(x,y,z){
+			return new THREE.Vector3(x,y,z);
+		},
+
+		newVec:function(x,y,z){
 			return new THREE.Vector3(x,y,z);
 		},
 

@@ -4,65 +4,146 @@
     	<script src="../../deps/three.js"></script>
         <script data-main="../../src/app" src="../../deps/require.js"></script>
         <script>
-	    setTimeout(function(){ 
+	    setTimeout(function(){
 
-	    	var sketches = [];
+	    	var b = new CT.UI();
+	    	b.init();
+	    	b.initScene();
 
-	    	for(var i = 0 ; i < 3 ; i++){
+	    // 	var context = new AudioContext();
 
-	    		var s = new CT.Sketch();
+	    // 	var sketches = [];
 
-	    		for(var j = 0 ; j < 12 ; j++){
-	    			s.addPort();
-	    			s.ports[j].setInValue( (i+1) + "*" );
-	    		}
+	    // 	for(var i = 0 ; i < 3 ; i++){
 
-	    		s.portsToValues();
+	    // 		var s = new CT.Sketch();
 
-	    		s.evaluator = function( o ){var up = 0 ; for(j in o){up+=o[j]+"yoyoyo"} return up;}
+	    // 		for(var j = 0 ; j < 3 ; j++){
+	    // 			s.addPort();
+	    // 			s.ports[j].setInValue('((0*0))');
+	    // 		}
 
-	    		s.evaluate();
-	    		sketches.push(s);
-	    	}
+	    // 		s.evaluator = function( o ){var up = '' ; 
+	    // 		for(var i = 0 ; i < o[0] ; i++)
+	    // 			{up+='XO'} 
+	    // 			return up;}
+
+	    // 		s.evaluate();
+	    // 		sketches.push(s);
+	    // 	}
 
 	    	
 
-	    	sketches[2].setPortValue(sketches[0],0);
-	    	sketches[2].setPortValue(sketches[1],1);
-	    	sketches[2].setPortValue(3,2);
+	    // 	sketches[2].setPortValue(0,0);
+	    // 	sketches[2].setPortValue('',1);
+	    // 	sketches[2].setPortValue(sketches[2],2);
+	    	
 
-			sketches[2].evaluate();
+	  		// var time = 0;
 
-			console.log(sketches[2].getOutValue());
+	  		// animate();
 
-			// console.log(sketches[2])
+	  		// function animate(){
+	  		// 	sketches[2].setPortValue((1+Math.sin(time*.1))*30,0);
+	  		// 	setTimeout(function(){
+		  	// 		for(var s in sketches)
+		  	// 			sketches[s].evaluate();
 
-			sketches[1].setPortValue(" :bug: ",0);
-			sketches[1].setPortValue(" :bear: ",1);
-
-			
-			// console.log(sketches[2].getOutValue());
-
-			// // console.log((sketches[0].getOutValue()));
-	  //   	console.log(sketches[2].getOutValue());
-
-	  //   	sketches[1].ports[1].setInValue(25);
-
-	  //   	// sketches[1].portsToValues();
-	  //   	sketches[1].evaluate();
-	  //   	console.log(sketches[1]);
-
-			// sketches[2].ports[1].setInValue(sketches[1].getOutValue());
-	  //   	// sketches[2].portsToValues();
-	  //   	sketches[2].evaluate();
-	    	console.log(sketches[2].getOutValue());
-	    	console.log(sketches[2].getDescendants());
-
-	  		// var b = new CT.UI();
-	  		// // b.init();
-	  		// b.initScene();
+		  	// 		time++;
+					// console.log(sketches[2].getOutValue());
+		  	// 		requestAnimationFrame(animate);
+	  		// 	 }, 100);
+	  		// }
 
 	    }, 100);
+
+
+// var context = new AudioContext();
+
+// 	    	var sketches = [];
+
+// 	    	for(var i = 0 ; i < 3 ; i++){
+
+// 	    		var s = new CT.Sketch();
+// 	    		// s.audio = context.createOscillator();
+// 	    		// s.audio.connect(context.destination); // Connect sound to output 
+// 	    		// s.audio.frequency.value = (i+1)*90;
+// 	    		// s.audio.start(0); // Play instantly
+
+
+// 	    		for(var j = 0 ; j < 3 ; j++){
+// 	    			s.addPort();
+// 	    			s.ports[j].setInValue(1);
+// 	    		}
+
+// 	    		// s.portsToValues();
+
+// 	    		s.evaluator = function( o ){var up = 1 ; for(j in o){up*=o[j]} return up;}
+
+// 	    		s.evaluate();
+// 	    		sketches.push(s);
+// 	    	}
+// // 
+	    	
+
+// 	    	sketches[2].setPortValue(2,0);
+// 	    	sketches[2].setPortValue(1,2);
+// 	    	sketches[2].setPortValue(sketches[2],1);
+// 	    	// sketches[2].setPortValue(3,2);
+
+// 			// sketches[2].evaluate();
+
+// 			// console.log(sketches[2].getOutValue());
+
+// 			// console.log(sketches[2])
+
+// 			// sketches[1].setPortValue(2,0);
+// 			// sketches[1].setPortValue(1,1);
+
+			
+// 			// console.log(sketches[2].getOutValue());
+
+// 			// // console.log((sketches[0].getOutValue()));
+// 	  //   	console.log(sketches[2].getOutValue());
+
+// 	  //   	sketches[1].ports[1].setInValue(25);
+
+// 	  //   	// sketches[1].portsToValues();
+// 	  //   	sketches[1].evaluate();
+// 	  //   	console.log(sketches[1]);
+
+// 			// sketches[2].ports[1].setInValue(sketches[1].getOutValue());
+// 	  //   	// sketches[2].portsToValues();
+// 	  //   	sketches[2].evaluate();
+// 	    	// console.log(sketches[2].getOutValue());
+// 	    	// console.log(sketches[2].getDescendants());
+
+// 	  		// var b = new CT.UI();
+// 	  		// // b.init();
+// 	  		// b.initScene();
+
+// 	  		var time = 0;
+
+// 	  		animate();
+
+// 	  		function animate(){
+// 	  			setTimeout(function(){
+// 	  				// sketches[1].setPortValue(10,1);
+// 		  			for(var s in sketches)
+// 		  				sketches[s].evaluate();
+
+// 		  			time++;
+// 		  			// console.log(time);
+// 		  			// sketches[1].setPortValue(0,0);
+// 					console.log(sketches[2].getOutValue());
+// 					// console.log(sketches[1].getOutValue());
+// 					// console.log(sketches[0].getOutValue());
+
+// 		  			requestAnimationFrame(animate);
+// 	  			 }, 1);
+// 	  		}
+
+// 	    }, 100);
 	    
 	    </script>
     </head>
