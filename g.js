@@ -40,11 +40,11 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   //function height() { return 720; }
+   function height() { return 720; }
    //function height() { return 920; }
 
    function width() { return 1280 + 100; }
-   function height() { return 800; }
+   //function height() { return 800; }
 
    // BEST RESOLUTION FOR CINTIQ
 /*
@@ -3624,6 +3624,7 @@ console.log(lo + " " + hi);
          sketchPage.scene = new THREE.Scene();
          sketchPage.scene.add(ambientLight(0x333333));
          sketchPage.scene.add(directionalLight(1,1,1, 0xffffff));
+         sketchPage.scene.add(directionalLight(-1,0,-1, 0x808080));
          sketchPage.scene.root = new node();
          sketchPage.scene.add(sketchPage.scene.root);
       }

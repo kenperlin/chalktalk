@@ -267,35 +267,17 @@
                 - add texture (show code).
 */
 
-var planetFragmentShader1 = [
- '   void main(void) {'
-,'      float dz = sqrt(1.-dx*dx-dy*dy);                  /* DEPTH  */'
-,'      float s = .3*dx + .3*dy + .9*dz; s *= s; s *= s;  /* LIGHT  */'
-,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
-,'      float cV = cos(.1*time), sV = sin(.1*time);'
-,'      vec3 P = vec3(cR*dx+sR*dz+cV,dy,-sR*dx+cR*dz+sV);'
-,'      float g = turbulence(P);                          /* CLOUDS */'
-,'      float d = 1. - 1.2 * (dx*dx + dy*dy);             /* EDGE   */'
-,'      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : max(0.,d+.1);'
-,'      float f = -.2 + sin(4. * P.x + 8. * g + 4.);      /* FIRE   */'
-,'      f = f > 0. ? 1. : 1. - f * f * f;'
-,'      f *= d > .1 ? 1. : (g + 5.) / 3.;'
-,'      vec3 color = vec3(d*f*f*.85, d*f, d*.7);          /* COLOR  */'
-,'      gl_FragColor = vec4(color,alpha*min(1.,10.*d));'
-,'   }'
-].join("\n");
-
 var planetFragmentShader = [
  '   void main(void) {'
-,'      float _x = vPosition.x/.03;'
-,'      float _y = vPosition.y/.03;'
-,'      float dz = sqrt(1.-_x*_x-_y*_y);                  /* DEPTH  */'
-,'      float s = .3*_x + .3*_y + .9*dz; s *= s; s *= s;  /* LIGHT  */'
+,'      float x = vPosition.x/.03;'
+,'      float y = vPosition.y/.03;'
+,'      float dz = sqrt(1.-x*x-y*y);                      /* DEPTH  */'
+,'      float s = .3*x + .3*y + .9*dz; s *= s; s *= s;    /* LIGHT  */'
 ,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
 ,'      float cV = cos(.1*time), sV = sin(.1*time);'
-,'      vec3 P = vec3(cR*_x+sR*dz+cV,_y,-sR*_x+cR*dz+sV);'
+,'      vec3 P = vec3(cR*x+sR*dz+cV,y,-sR*x+cR*dz+sV);'
 ,'      float g = turbulence(P);                          /* CLOUDS */'
-,'      float d = 1. - 1.2 * (_x*_x + _y*_y);             /* EDGE   */'
+,'      float d = 1. - 1.2 * (x*x + y*y);                 /* EDGE   */'
 ,'      d = d>0. ? .1+.05*g+.6*(.1+g)*s*s : max(0.,d+.1);'
 ,'      float f = -.2 + sin(4. * P.x + 8. * g + 4.);      /* FIRE   */'
 ,'      f = f > 0. ? 1. : 1. - f * f * f;'
@@ -312,13 +294,17 @@ registerGlyph("planet()",[
 
 function planet() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, planetFragmentShader);
-   sketch.code = [["planet", planetFragmentShader] /*,["flame", flameFragmentShader] */];
+   sketch.code = [["planet", planetFragmentShader],
+                  ["flame", flameFragmentShader],
+                  ["corona", coronaFragmentShader] ];
    sketch.vertexShader = defaultVertexShader;
    sketch.enableFragmentShaderEditing();
 }
 
 var marbleFragmentShader = ["\
    void main(void) {\n\
+      float dx = vPosition.x / .03;\
+      float dy = vPosition.y / .03;\
       float t = selectedIndex == 3. ? .7 * noise(vec3(dx,dy,0.)) :\n\
                 selectedIndex == 4. ? .5 * fractal(vec3(dx,dy,5.)) :\n\
                 selectedIndex == 5. ? .4 * (turbulence(vec3(dx*1.5,dy*1.5,10.))+1.8)\n\
@@ -351,9 +337,10 @@ function marble() {
    ];
 }
 
-
 var coronaFragmentShader = ["\
    void main(void) {\n\
+      float dx = vPosition.x / .03;\
+      float dy = vPosition.y / .03;\
       float a = .7;\n\
       float b = .72;\n\
       float s = 0.;\n\

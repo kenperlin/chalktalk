@@ -8,36 +8,44 @@ function OctopusResponder() {
       }
    );
 
+   this.dVec = newVec();
+   this.vVec = newVec();
+   this.wVec = newVec();
    this.xVec = newVec();
    this.yVec = newVec();
-   this.difVec = newVec();
-   this.tmpVec = newVec();
 
    this.simulate = function() {
       var nodes = this.graph.nodes;
 
       if (this.I == -1) {
+
+         // KEEP HEAD ABOVE BODY
+
          var upForce = .1;
-
          nodes[0].p.y += upForce;
-
 	 var n = nodes.length;
          for (var i = 3 ; i < n ; i++)
             nodes[i].p.y -= upForce / (n - 3);
+
+         // KEEP EYES LEVEL
 
 	 var iUpperEye = nodes[1].p.y >= nodes[2].p.y ? 1 : 2;
 	 var iLowerEye = nodes[1].p.y <  nodes[2].p.y ? 1 : 2;
          nodes[iLowerEye].p.y += .01;
          nodes[iUpperEye].p.y -= .01;
 
-	 var dx = (nodes[1].p.x + nodes[2].p.x) / 2 - nodes[0].p.x;
-	 nodes[0].p.x += dx;
-	 nodes[1].p.x -= dx / 2;
-	 nodes[2].p.x -= dx / 2;
+	 // FACE FORWARD
+
+	 var t = nodes[2].p.z - nodes[1].p.z;
+	 var i = t > 0 ? 1 : 2;
+	 if (nodes[3-i].p.z < nodes[0].p.z) i = 3 - i;
+	 t = .1 * abs(t);
+	 nodes[0].p.z -= t;
+	 nodes[i].p.z += t;
       }
 
       if (nodes[0].g !== undefined) {
-	 var X = this.xVec, Y = this.yVec, D = this.difVec, V = this.tmpVec;
+	 var D = this.dVec, V = this.vVec, W = this.wVec, X = this.xVec, Y = this.yVec;
 
          var E = nodes[0].g.matrix.elements;
 	 X.set(E[0], E[1], E[2]);
@@ -49,8 +57,11 @@ function OctopusResponder() {
 
                D.copy(P).sub(nodes[0].p);
 
-	       var t = noise(2*D.x, 2*D.y + time, 2*D.z + 100 * limb) *
-	               (joint < this.graph.nJoints - 1 ? .08 : .2);
+	       V.copy(D).sub(W.copy(X).multiplyScalar(.5 * D.dot(X) / X.dot(X)))
+	                .sub(W.copy(Y).multiplyScalar(.5 * D.dot(Y) / Y.dot(Y)));
+
+	       var t = noise(2*V.x + 100 * this.graph.id, 2*V.y + this.graph.frequency * time, 2*V.z + 100 * limb)
+	               * this.graph.amplitude * (joint < this.graph.nJoints - 1 ? .08 : .2);
 
 	       var lenSq = X.lengthSq() + Y.lengthSq();
                P.add(V.copy(X).multiplyScalar(t * X.dot(D) / lenSq))
@@ -76,7 +87,7 @@ function Octopus() {
    this.graph.nJoints = nJoints;
 
    this.graph.jointRadius = function(joint) {
-      return mix(0.07, .015, joint / this.nJoints);
+      return mix(0.08, .015, joint / this.nJoints);
    }
 
    this.graph.jointIndex = function(limb, joint) {
@@ -84,6 +95,7 @@ function Octopus() {
    }
 
    this.setup = function() {
+      this.graph.id = this.id;
       this.graph.clear();
 
       this.graph.addNode(  0,.5, 0);
@@ -104,8 +116,8 @@ function Octopus() {
          var theta = TAU * limb / nLimbs;
          for (var joint = 0 ; joint < nJoints ; joint++) {
 	    var t = joint / nJoints;
-	    var r = mix(0.20,  1.0, .3 * t + .5 * t * t * t);
-            var y = mix(0.10, -0.8, pow(t, 0.7));
+	    var r = mix(0.20,  1.0, mix(t, t * t * t, .9));
+            var y = mix(0.10, -1.0, 1 - (1 - t) * (1 - t));
             this.graph.addNode(r * cos(theta), y, r * sin(theta));
 
 	    if (joint > 0) {
@@ -124,20 +136,13 @@ function Octopus() {
 
       this.graph.addLink(1,2,2);
 
-      for (var limb = 0 ; limb < nLimbs ; limb++) {
-         var nodeIndex0 = this.graph.jointIndex(limb, 0);
-
-	 for (var i = 0 ; i <= this.graph.headLastIndex ; i++)
-	    this.graph.addLink(i, nodeIndex0, 2);
-
-	 this.graph.addLink(nodeIndex0, this.graph.jointIndex((limb + 1) % nLimbs, 0));
-
-         var nodeIndex1 = this.graph.jointIndex(limb, nJoints - 1);
-
-	 for (var i = 0 ; i <= this.graph.headLastIndex ; i++)
-	    this.graph.addLink(i, nodeIndex1, 0.2);
-
-	 this.graph.addLink(nodeIndex1, this.graph.jointIndex((limb + 1) % nLimbs, nJoints - 1), 0.2);
+      for (var limb = 0 ; limb < nLimbs ; limb++)
+      for (var joint = 0 ; joint < nJoints ; joint++) {
+         var weight = joint == 0 ? 2 : 0.01;
+         var nodeIndex = this.graph.jointIndex(limb, joint);
+         for (var i = 0 ; i <= this.graph.headLastIndex ; i++)
+            this.graph.addLink(i, nodeIndex, weight);
+         this.graph.addLink(nodeIndex, this.graph.jointIndex((limb + 1) % nLimbs, joint), weight);
       }
 
       this.graph.nodes[0].r = .5;
@@ -174,6 +179,9 @@ function Octopus() {
       var links = graph.links;
       graph.pixelSize = this.computePixelSize();
 
+      graph.amplitude = isDef(this.inValues[0]) ? this.inValues[0] : 1;
+      graph.frequency = isDef(this.inValues[1]) ? this.inValues[1] : 1;
+
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 
       this.duringSketch(function() {
@@ -189,8 +197,8 @@ function Octopus() {
          graph.update();
          for (var j = 0 ; j < this.nNodesToRender ; j++)
             this.renderNode(nodes[j]);
-         for (var j = 0 ; j < this.nLinksToRender ; j++)
-         //for (var j = 0 ; j < this.graph.links.length ; j++)
+         //for (var j = 0 ; j < this.nLinksToRender ; j++)
+         for (var j = 0 ; j < this.graph.links.length ; j++)
             this.renderLink(links[j]);
 
          this.meshBounds = [];
@@ -250,7 +258,7 @@ function Octopus() {
       if (this._nodeMaterial === undefined) {
          var r = 1, g = .75, b = .5;
          this._nodeMaterial = new phongMaterial().setAmbient (.05*r,.05*g,.05*b)
-	                                         .setDiffuse (.20*r,.20*g,.20*b)
+	                                         .setDiffuse (.40*r,.40*g,.40*b)
 	 			                 .setSpecular(.17*r,.17*g,.17*b,30);
       }
       return this._nodeMaterial;

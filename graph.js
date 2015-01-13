@@ -134,7 +134,7 @@ Graph.prototype = {
 
    updatePositions: function() {
       this.adjustNodePositions(); // Adjust position as needed after mouse press on a node.
-      //this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
+      this.nodesAvoidEachOther(); // Make sure nodes do not intersect.
       this.adjustEdgeLengths();   // Coerce all links to be the proper length.
    },
 
