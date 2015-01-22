@@ -26,28 +26,24 @@
       _g.stroke();
    }
 
-   function drawClosedCurve(c, i0) {
-      drawCurve(c.concat([c[0]]), i0);
+   function drawClosedCurve(c) {
+      drawCurve(c.concat([c[0]]));
    }
 
-   function drawCurve(c, i0) {
-      startCurve(c, i0);
+   function drawCurve(c) {
+      startCurve(c);
       _g.stroke();
    }
 
-   function fillCurve(c, i0) {
-      startCurve(c, i0);
+   function fillCurve(c) {
+      startCurve(c);
       _g.fill();
    }
 
-   function startCurve(c, i0) {
-      if (i0 === undefined)
-         i0 = 0;
-      if (c.length <= i0)
-         return;
+   function startCurve(c) {
       _g.beginPath();
-      _g_moveTo(c[i0][0], c[i0][1]);
-      for (var i = i0 + 1 ; i < c.length ; i++)
+      _g_moveTo(c[0][0], c[0][1]);
+      for (var i = 1 ; i < c.length ; i++)
          _g_lineTo(c[i][0], c[i][1]);
    }
 

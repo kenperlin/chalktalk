@@ -1,5 +1,5 @@
 function Physio() {
-   this.labels = 'physio'.split(' ');
+   this.label = 'physio';
    this.phoneRect = new Rectangle(-.6, -.15, .15, .3);
    this.computerRect = new Rectangle(.55, -.15, .4, .3);
    this.storageRect = new Rectangle(-.35,-.7,.7,.3);

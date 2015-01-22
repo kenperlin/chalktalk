@@ -109,7 +109,7 @@ function NetResponder() {
 NetResponder.prototype = new GraphResponder;
 
 function Net() {
-   this.labels = 'net'.split(' ');
+   this.label = 'net';
    this.is3D = true;
 
    this.graph = new VisibleGraph();

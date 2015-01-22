@@ -1,6 +1,6 @@
 function TTInput()
 {
-	this.labels = "ttinput".split(' ');
+	this.label = "ttinput";
 	this.myText = "Tactonic";
 
 	this.recordBtn = new Button([-0.9, -0.9], [-0.7, -0.7], function() {

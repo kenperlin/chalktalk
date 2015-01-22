@@ -910,22 +910,23 @@
       var yPos = a[1] < b[1];
       var r = [ abs(b[0] - a[0]), abs(b[1] - a[1]) ];
       if (axis == 0) {
-         if ( xPos &&  yPos) return createArc(a[0], b[1], b[0]-a[0],-TAU/4,     0, 10);
-         if ( xPos && !yPos) return createArc(a[0], b[1], b[0]-a[0], TAU/4,     0, 10);
-         if (!xPos &&  yPos) return createArc(a[0], b[1], a[0]-b[0],-TAU/4,-TAU/2, 10);
-         if (!xPos && !yPos) return createArc(a[0], b[1], a[0]-b[0], TAU/4, TAU/2, 10);
+         if ( xPos &&  yPos) return arc(a[0], b[1], b[0]-a[0],-TAU/4,     0, 10);
+         if ( xPos && !yPos) return arc(a[0], b[1], b[0]-a[0], TAU/4,     0, 10);
+         if (!xPos &&  yPos) return arc(a[0], b[1], a[0]-b[0],-TAU/4,-TAU/2, 10);
+         if (!xPos && !yPos) return arc(a[0], b[1], a[0]-b[0], TAU/4, TAU/2, 10);
       }
       else {
-         if ( xPos &&  yPos) return createArc(b[0], a[1], b[0]-a[0], TAU/2, TAU/4, 10);
-         if ( xPos && !yPos) return createArc(b[0], a[1], b[0]-a[0],-TAU/2,-TAU/4, 10);
-         if (!xPos &&  yPos) return createArc(b[0], a[1], a[0]-b[0],     0, TAU/4, 10);
-         if (!xPos && !yPos) return createArc(b[0], a[1], a[0]-b[0],     0,-TAU/4, 10);
+         if ( xPos &&  yPos) return arc(b[0], a[1], b[0]-a[0], TAU/2, TAU/4, 10);
+         if ( xPos && !yPos) return arc(b[0], a[1], b[0]-a[0],-TAU/2,-TAU/4, 10);
+         if (!xPos &&  yPos) return arc(b[0], a[1], a[0]-b[0],     0, TAU/4, 10);
+         if (!xPos && !yPos) return arc(b[0], a[1], a[0]-b[0],     0,-TAU/4, 10);
       }
    }
 
    // Create an arc of a circle.
 
-   function createArc(x, y, r, angle0, angle1, n) {
+   function arc(x, y, r, angle0, angle1, n) {
+      if (n === undefined) n = floor(32 * abs(angle1 - angle0));
       var c = [];
       for (var i = 0 ; i <= n ; i++) {
          var angle = mix(angle0, angle1, i / n);
@@ -936,13 +937,13 @@
 
    function createRoundRect(x, y, w, h, r) {
       var c = [];
-      c = c.concat(createArc(x+r,y+h-r,r,PI/2,PI,8));
+      c = c.concat(arc(x+r,y+h-r,r,PI/2,PI,8));
       c = c.concat([[x,y+h-r],[x,y+r]]);
-      c = c.concat(createArc(x+r,y+r,r,PI,3*PI/2,8));
+      c = c.concat(arc(x+r,y+r,r,PI,3*PI/2,8));
       c = c.concat([[x+r,y],[x+w-r,y]]);
-      c = c.concat(createArc(x+w-r,y+r,r,-PI/2,0,8));
+      c = c.concat(arc(x+w-r,y+r,r,-PI/2,0,8));
       c = c.concat([[x+w,y+r],[x+w,y+h-r]]);
-      c = c.concat(createArc(x+w-r,y+h-r,r,0,PI/2,8));
+      c = c.concat(arc(x+w-r,y+h-r,r,0,PI/2,8));
       c = c.concat([[x+w-r,y+h],[x+r,y+h]]);
       return c;
    }

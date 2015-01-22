@@ -10,7 +10,7 @@
       this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
       this.mxy = [0,0];
       this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
-      this.labels = "matrix".split(' ');
+      this.label = "matrix";
       this.vals = [
           [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
           [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    "A","B","C", 1],

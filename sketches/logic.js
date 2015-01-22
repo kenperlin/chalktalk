@@ -22,19 +22,19 @@
       this.labels = "buf and or xor not nand nor xnor".split(' ');
 
       this.codes = [
-         "delay(x>0, y)" , "min(x>0, y>0)",   "max(x>0, y>0)"  , "(x>0)!=(y>0)",
-         "delay(1 - (x>0), y)", "1 - min(x>0, y>0)", "1 - max(x>0, y>0)", "(x>0)==(y>0)"
+         "delay(x>0.5, y)"      ,     "min(x>0.5, y>0.5)",     "max(x>0.5, y>0.5)", "(x>0.5)!=(y>0.5)",
+         "delay(1 - (x>0.5), y)", "1 - min(x>0.5, y>0.5)", "1 - max(x>0.5, y>0.5)", "(x>0.5)==(y>0.5)"
       ];
 
       this.IDENT = [[-.5,.4],[.5,0],[-.5,-.4],[-.5,.4]];
-      this.AND   = [[-.5,.4]].concat(createArc(.1, 0, .4, PI/2, -PI/2, 12))
+      this.AND   = [[-.5,.4]].concat(arc(.1, 0, .4, PI/2, -PI/2, 12))
                              .concat([[-.5,-.4],[-.5,.4]]);
-      this.OR    = [[-.5,.4]].concat(createArc( -.2 ,-.4, .80,  PI/2  ,  PI/6  , 12))
-                             .concat(createArc( -.2 , .4, .80, -PI/6  , -PI/2  , 12))
-                             .concat(createArc(-0.904,  0, .565, -PI/4  ,  PI/4  , 12));
-      this.X     =                   createArc(-1.00,  0, .51,  PI/3.5, -PI/3.5, 12);
+      this.OR    = [[-.5,.4]].concat(arc( -.2 ,-.4, .80,  PI/2  ,  PI/6  , 12))
+                             .concat(arc( -.2 , .4, .80, -PI/6  , -PI/2  , 12))
+                             .concat(arc(-0.904,  0, .565, -PI/4  ,  PI/4  , 12));
+      this.X     =                   arc(-1.00,  0, .51,  PI/3.5, -PI/3.5, 12);
 
-      this.INVERT = createArc(.6, .0, .1, PI, -PI, 24);
+      this.INVERT = arc(.6, .0, .1, PI, -PI, 24);
 
       this.s = -1;
 
@@ -89,14 +89,19 @@
             this.addPort("out", sc * (s < 4 ? .5 : .6), 0);
          }
 
+	 this.afterSketch(function() {
+	    textHeight(this.mScale(0.25));
+	    color(scrimColor(0.5));
+	    var x = ([-0.23,-0.05,-0.04,-0.01,-0.22,-0.04,-0.01, 0.02])[this.selection];
+	    mText(this.labels[this.selection], [x, .03], .5, .5);
+	 });
+
          var outValue = this.evalCode(this.code[0][1],
 	     s % 4 == 0 ? this.getDelayedValue("i") : this.getInValueOf("i"),
 	                                              this.getInValueOf("j"));
 
 	 if (outValue != null)
             this.setOutPortValue(outValue);
-
-         //this.setOutPortValue(this.evalCode(this.code[0][1]));
       }
    }
    Logic.prototype = new Sketch;

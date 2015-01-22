@@ -61,7 +61,7 @@ function TTWalk() {
 */
    }
 
-   this.labels = 'ttwalk'.split(' ');
+   this.label = 'ttwalk';
 
    this.rowToY = function(row) { return (row - this.nRows / 2) / (this.nCols / 2); }
    this.colToX = function(col) { return (col - this.nCols / 2) / (this.nCols / 2); }

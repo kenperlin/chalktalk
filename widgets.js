@@ -8,7 +8,7 @@
 
    function helpMenuDraw() {
       if (isk()) {
-         var msg = "del,unparse,translate,copy,scale,text,rotate,undraw".split(",");
+         var msg = "delete,unparse,translate,copy,scale,text,rotate,undraw".split(",");
 	 var rx = 50 + (sk().xhi - sk().xlo) / 2;
 	 var ry = 50 + (sk().yhi - sk().ylo) / 2;
 	 for (var i = 0 ; i < 8 ; i++) {

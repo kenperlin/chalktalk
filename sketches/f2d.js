@@ -1,7 +1,7 @@
 
    function F2D() {
       this.code = [["function", "(x*x + y*y)/2 - 1/8"]];
-      this.labels = "f2d".split(' ');
+      this.label = "f2d";
       this.is3D = true;
       this.f = function(x,y) {
          var result = this._f(x,y);

@@ -54,7 +54,7 @@ function mult(x,y) {
    return dst;
 }
 function Mult() {
-   this.labels = "mult".split(' ');
+   this.label = "mult";
    this.code = [["","mult(x,y)"]];
    this.render = function() {
       mLine( [-1, 1], [ 1, -1] );

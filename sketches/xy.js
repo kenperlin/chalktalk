@@ -1,5 +1,5 @@
 function XY() {
-   this.labels = "xy".split(' ');
+   this.label = "xy";
    this.mxy = [-1,-1];
    this.mouseDown = function(x,y) {
       this.mouseDrag(x,y);

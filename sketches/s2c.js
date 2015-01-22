@@ -1,5 +1,5 @@
 function S2C() {
-   this.labels = "s2c".split(' ');
+   this.label = "s2c";
 
    this.render = function() {
       this.duringSketch(function() {

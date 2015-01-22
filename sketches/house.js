@@ -1,9 +1,6 @@
 function House() {
-   this.labels = "house".split(' ');
+   this.label = "house";
    this.render = function(elapsed) {
-
-      // A SIMPLE OUTLINE OF A HOUSE WITH A POINTED ROOF.
-
       mClosedCurve([ [-1,.8], [-1,-1], [1,-1], [1,.8], [0,1.7] ]);
    }
 }

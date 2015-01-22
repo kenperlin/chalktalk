@@ -1,5 +1,5 @@
 function Coord() {
-   this.labels = "coord".split(' ');
+   this.label = "coord";
    this.is3D = true;
    this.radius = 0.3;
    this.edges = [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];

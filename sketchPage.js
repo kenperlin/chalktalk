@@ -181,6 +181,15 @@ var sketchToDelete = null;
 
       this.isFocusOnLink = false;
 
+      this.skCallback = function(action, x, y) {
+         if (sk()[action] !== undefined) {
+            if (sk()._cursorPoint === undefined)
+               sk()._cursorPoint = newVec();
+            sk()._cursorPoint.set(x,y,0).applyMatrix4(pixelToPointMatrix);
+            sk()[action](sk()._cursorPoint);
+         }
+      }
+
       // HANDLE MOUSE DOWN FOR THE SKETCH PAGE.
 
       this.mouseDown = function(x, y) {
@@ -321,10 +330,11 @@ var sketchToDelete = null;
             }
             if (outPort == -1 || sk() instanceof NumericSketch) {
 
-	       m.save();
-	       computeStandardViewInverse();
+               m.save();
+               computeStandardViewInverse();
                sk().mouseDown(x, y);
-	       m.restore();
+               this.skCallback('onPress', x, y);
+               m.restore();
 
             }
          }
@@ -338,10 +348,10 @@ var sketchToDelete = null;
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
 
-	    m.save();
-	    computeStandardViewInverse();
+            m.save();
+            computeStandardViewInverse();
             sk().mouseDown(x, y);
-	    m.restore();
+            m.restore();
 
          }
       }
@@ -481,7 +491,7 @@ var sketchToDelete = null;
 
          if (this.isFocusOnLink) {
             if (linkAtCursor != null)
-	       linkAtCursor.computeCurvature([x,y]);
+               linkAtCursor.computeCurvature([x,y]);
             return;
          }
 
@@ -500,10 +510,11 @@ var sketchToDelete = null;
             }
             if (outPort == -1 || sk() instanceof NumericSketch) {
 
-	       m.save();
-	       computeStandardViewInverse();
+               m.save();
+               computeStandardViewInverse();
                sk().mouseDrag(x, y);
-	       m.restore();
+               this.skCallback('onDrag', x, y);
+               m.restore();
 
             }
          }
@@ -726,7 +737,7 @@ var sketchToDelete = null;
 
          // CLICK ON AN OUT PORT STARTS A LINK.
 
-	 if (this.isClick && outPort >= 0 && outSketch.disableClickToLink === undefined && bgClickCount != 1) {
+         if (this.isClick && outPort >= 0 && outSketch.disableClickToLink === undefined && bgClickCount != 1) {
             sketchAction = "linking";
             return;
          }
@@ -781,10 +792,11 @@ var sketchToDelete = null;
                sk().isPressed = false;
             sk().isDrawingEnabled = true;
 
-	    m.save();
-	    computeStandardViewInverse();
+            m.save();
+            computeStandardViewInverse();
             sk().mouseUp(x, y);
-	    m.restore();
+            this.skCallback('onRelease', x, y);
+            m.restore();
 
             // BEGINNING OF IMPLEMENTATION OF SENTENCE LOGIC IN DRAWING LANGUAGE.
 /*
@@ -798,20 +810,20 @@ var sketchToDelete = null;
 */
             if (this.isClick && isHover() && isDef(sk().onClick)) {
 
-	       m.save();
-	       computeStandardViewInverse();
+               m.save();
+               computeStandardViewInverse();
                sk().onClick(x, y);
-	       m.restore();
+               m.restore();
 
                return;
             }
 
             if (! this.isClick && isk() && isDef(sk().onSwipe)) {
 
-	       m.save();
-	       computeStandardViewInverse();
+               m.save();
+               computeStandardViewInverse();
                sk().onSwipe(x - this.xDown, y - this.yDown);
-	       m.restore();
+               m.restore();
 
                return;
             }
@@ -897,10 +909,12 @@ var sketchToDelete = null;
                cursorY += y - this.my;
                sk().sp[0] = [sk().xStart = cursorX, sk().yStart = cursorY, 0];
             }
-            if (isDef(sk().hitOnDrag)) {
-               var sketches = this.intersectingSketches();
-               for (var i = 0 ; i < sketches.length ; i++)
-                  sk().hitOnDrag(sketches[i]);
+            var sketches = sk().intersectingSketches();
+            for (var i = 0 ; i < sketches.length ; i++) {
+               if (isDef(sk().onIntersect))
+                  sk().onIntersect(sketches[i]);
+               if (isDef(sketches[i].onIntersect))
+                  sketches[i].onIntersect(sk());
             }
          }
       }
@@ -928,12 +942,11 @@ var sketchToDelete = null;
             if (sk(I).parent == null && sk(I).contains(this.mx, this.my))
                group[I] = true;
          if (isk()) {
-
-	    m.save();
-	    computeStandardViewInverse();
+            m.save();
+            computeStandardViewInverse();
             sk().mouseMove(x, y);
-	    m.restore();
-
+            this.skCallback('onMove', x, y);
+            m.restore();
          }
          groupPath.push([x,y]);
       }
@@ -1004,7 +1017,7 @@ var sketchToDelete = null;
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
 
          if (sketchAction != null) {
-	    switch (sketchAction) {
+            switch (sketchAction) {
             case "linking"    : findInSketchAndPort();
                                 if (outPort == -1)
                                    sketchAction = null;
@@ -1086,10 +1099,10 @@ var sketchToDelete = null;
             else if (isk() && sk().sketchState == 'finished') {
                findOutSketchAndPort();
 
-	       m.save();
-	       computeStandardViewInverse();
+               m.save();
+               computeStandardViewInverse();
                sk().mouseMove(x, y);
-	       m.restore();
+               m.restore();
 
             }
             break;
@@ -1285,7 +1298,7 @@ var sketchToDelete = null;
             this.clear();
             break;
          case '#':
-	    this.toggleLinedBackground();
+            this.toggleLinedBackground();
             break;
          case PAGE_UP:
             break;
@@ -1475,9 +1488,9 @@ var sketchToDelete = null;
             this.toggleLinedBackground();
             break;
          case '^':
-	    if (videoLayer !== null)
-	       videoLayer.Scale_X = 3.1 - videoLayer.Scale_X;
-	    break;
+            if (videoLayer !== null)
+               videoLayer.Scale_X = 3.1 - videoLayer.Scale_X;
+            break;
          case 'v':
             if (videoLayer == null) {
                // INIT VIDEO LAYER
@@ -1492,14 +1505,14 @@ var sketchToDelete = null;
             videoLayer.toggleControls();
             break;
          case 'Z':
-	    if (isk() && isDef(sk().typeName)) {
-	       if (! isDef(sk().isShowingScript)) {
-	          sk().isShowingScript = true;
-	          codeSketch = sk();
-	       }
+            if (isk() && isDef(sk().typeName)) {
+               if (! isDef(sk().isShowingScript)) {
+                  sk().isShowingScript = true;
+                  codeSketch = sk();
+               }
                toggleCodeWidget();
             }
-	    break;
+            break;
          }
       }
 
@@ -1514,18 +1527,18 @@ var sketchToDelete = null;
          if (backgroundColor === 'white') {
             backgroundColor = 'black';
             defaultPenColor = 'white';
-	    paletteRGB[0][0] =
-	    paletteRGB[0][1] =
-	    paletteRGB[0][2] = 255;
-	    palette[0] = 'rgb(255,255,255)';
+            paletteRGB[0][0] =
+            paletteRGB[0][1] =
+            paletteRGB[0][2] = 255;
+            palette[0] = 'rgb(255,255,255)';
          }
          else {
             backgroundColor = 'white';
             defaultPenColor = 'black';
-	    paletteRGB[0][0] =
-	    paletteRGB[0][1] =
-	    paletteRGB[0][2] = 0;
-	    palette[0] = 'rgb(0,0,0)';
+            paletteRGB[0][0] =
+            paletteRGB[0][1] =
+            paletteRGB[0][2] = 0;
+            palette[0] = 'rgb(0,0,0)';
          }
 
          document.getElementsByTagName('body')[0].style.backgroundColor = backgroundColor;
@@ -1722,20 +1735,20 @@ var sketchToDelete = null;
             }
             else {
                m.save();
-	          computeStandardView();
+                  computeStandardView();
                   sk().renderWrapper(elapsed);
                m.restore();
             }
 
             if (sk().sketchTrace != null && sk().sketchState != 'finished') {
-	       if (sk().createMesh !== undefined) {
-	          var alpha = 1 - sk().glyphTransition;
-		  if (alpha > 0) {
-		     _g.globalAlpha = alpha * alpha;
+               if (sk().createMesh !== undefined) {
+                  var alpha = 1 - sk().glyphTransition;
+                  if (alpha > 0) {
+                     _g.globalAlpha = alpha * alpha;
                      morphSketchToGlyphSketch();
-		  }
+                  }
                }
-	       else
+               else
                   morphSketchToGlyphSketch();
 
                var rate = sk().glyphTransition < 0.5 ? 1 : 1.5;
@@ -1889,7 +1902,7 @@ var sketchToDelete = null;
 
          if (isCodeWidget) {
             drawCodeWidget(isCodeScript() ? codeScript() : code(),
-	                   codeSketch.xlo, codeSketch.ylo,
+                           codeSketch.xlo, codeSketch.ylo,
                            codeSketch.xhi, codeSketch.yhi,
                            codeElement.codeSketch != codeSketch);
             codeElement.codeSketch = codeSketch;
@@ -1979,7 +1992,8 @@ var sketchToDelete = null;
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200 - _g.panY, height());
 
-         _g.font = '8pt Trebuchet MS';
+         //_g.font = '7pt Trebuchet MS';
+         _g.font = '7pt Arial';
 
          this.glyphT = this.isDraggingGlyph
                      ? this.iDragged + 0.99
@@ -2234,7 +2248,7 @@ var sketchToDelete = null;
                for (var i = 0 ; i < a.out.length ; i++)
                   if (isDef(a.out[i]))
                      for (var k = 0 ; k < a.out[i].length ; k++) {
-		        var link = a.out[i][k];
+                        var link = a.out[i][k];
                         link.draw(! isAudiencePopup());
 
                         // HIGHLIGHT LINK AT CURSOR -- IN RED IF IT IS BEING DELETED.

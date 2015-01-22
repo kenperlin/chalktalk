@@ -1,5 +1,5 @@
 function Mist() {
-   this.labels = 'mist'.split(' ');
+   this.label = 'mist';
 
    function createPipe(path) {
       var curve = [];

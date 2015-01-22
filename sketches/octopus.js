@@ -74,7 +74,7 @@ function OctopusResponder() {
 OctopusResponder.prototype = new GraphResponder;
 
 function Octopus() {
-   this.labels = 'octopus'.split(' ');
+   this.label = 'octopus';
    this.is3D = true;
 
    this.graph = new VisibleGraph();
@@ -197,8 +197,8 @@ function Octopus() {
          graph.update();
          for (var j = 0 ; j < this.nNodesToRender ; j++)
             this.renderNode(nodes[j]);
-         //for (var j = 0 ; j < this.nLinksToRender ; j++)
-         for (var j = 0 ; j < this.graph.links.length ; j++)
+         for (var j = 0 ; j < this.nLinksToRender ; j++)
+         //for (var j = 0 ; j < this.graph.links.length ; j++)
             this.renderLink(links[j]);
 
          this.meshBounds = [];
@@ -216,13 +216,14 @@ function Octopus() {
    this.createMesh = function() { return new THREE.Mesh(); }
 
    this.renderNode = function(node) {
+      var nodes = this.graph.nodes;
       if (node.g === undefined) {
-         var material = node == this.graph.nodes[1] || node == this.graph.nodes[2]
+         var material = node == nodes[1] || node == nodes[2]
 	              ? this.getEyeMaterial() : this.getNodeMaterial();
          this.mesh.add(node.g = this.graph.newNodeMesh(material, node.r, node.nm));
       }
 
-      if (node == this.graph.nodes[0]) {
+      if (node == nodes[0]) {
          var geometry = node.g.geometry;
          var vertices = geometry.vertices;
          for (var i = 0 ; i < vertices.length ; i++) {
@@ -236,30 +237,57 @@ function Octopus() {
          }
          geometry.computeCentroids();
          geometry.computeVertexNormals();
-	 node.g.up.set(0,0,1);
-	 node.g.lookAt(this.graph.nodes[3].p);
+	 node.g.up.copy(nodes[1].p).sub(node.p)
+	           .add(nodes[2].p).sub(node.p); // AIM HEAD Y AXIS MID-WAY BETWEEN EYES.
+	 node.g.lookAt(nodes[3].p);              // AIM HEAD Z AXIS DOWNWARD.
       }
 
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
+      var graph = this.graph;
       if (link.g === undefined) {
          var weight = Math.sqrt(link.w);
 	 var joint = link.joint === undefined ? 0 : link.joint;
-         var radius1 = .8 * weight * this.graph.jointRadius(joint + 1);
-         var radius0 = .8 * weight * this.graph.jointRadius(joint);
-         this.mesh.add(link.g = this.graph.newLinkMesh(this.getLinkMaterial(), radius1, radius0, link.nm));
+         var radius1 = .8 * weight * graph.jointRadius(joint + 1);
+         var radius0 = .8 * weight * graph.jointRadius(joint);
+         this.mesh.add(link.g = graph.newLinkMesh(this.getLinkMaterial(), radius1, radius0, link.nm));
       }
-      this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
+      graph.placeLinkMesh(link.g, graph.nodes[link.i].p, graph.nodes[link.j].p);
    }
+
+   var nodeFragmentShader = [
+    'uniform vec3 ambient;'
+   ,'uniform vec3 diffuse;'
+   ,'uniform vec4 specular;'
+   ,'uniform vec3 Lrgb[3];'
+   ,'uniform vec3 Ldir[3];'
+   ,'void main() {'
+   ,'   vec3 P = vPosition / .03;'
+   ,'   vec3 N = normalize(vNormal);'
+   ,'   vec3 W = vec3(0.,0.,-1.);'
+   ,'   vec3 R = W - 2. * N * dot(N, W);'
+   ,'   float n = 1. + .7 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
+   ,'   vec3 color = ambient;'
+   ,'   for (int i = 0 ; i < 3 ; i++) {'
+   ,'      vec3  L = normalize(Ldir[i]);'
+   ,'      float D = dot(N, L);'
+   ,'      float S = dot(R, L);'
+   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
+   ,'                           specular.rgb * pow(max(0., S), specular.a * n * n) );'
+   ,'   }'
+   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'}'
+   ].join("\n");
 
    this.getNodeMaterial = function() {
       if (this._nodeMaterial === undefined) {
-         var r = 1, g = .75, b = .5;
-         this._nodeMaterial = new phongMaterial().setAmbient (.05*r,.05*g,.05*b)
-	                                         .setDiffuse (.40*r,.40*g,.40*b)
-	 			                 .setSpecular(.17*r,.17*g,.17*b,30);
+         this.fragmentShader = nodeFragmentShader;
+         var r = 1, g = .5, b = .25;
+         this._nodeMaterial = this.shaderMaterial([r/200,g/200,b/200],
+	                                          [r/ 30,g/ 30,b/ 30],
+						  [r/  2,g/  2,b/  2, 7]);
       }
       return this._nodeMaterial;
    }
@@ -284,6 +312,4 @@ function Octopus() {
 }
 Octopus.prototype = new Sketch;
 addSketchType('Octopus');
-
-
 

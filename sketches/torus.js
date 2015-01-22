@@ -1,5 +1,5 @@
 function Torus() {
-   this.labels = "torus".split(' ');
+   this.label = "torus";
    this.r = .4;
 
    this.meshBounds = [];

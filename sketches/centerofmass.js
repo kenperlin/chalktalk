@@ -1,6 +1,6 @@
 function CenterOfMass()
 {
-	this.labels = "centerofmass".split(' ');
+	this.label = "centermass";
 
 	this.onClick = function(x, y) {};
 

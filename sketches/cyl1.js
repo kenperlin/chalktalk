@@ -1,6 +1,6 @@
 
    function Cyl1() {
-      this.labels = "cyl1".split(' ');
+      this.label = "cyl1";
       this.is3D = true;
       this.nSteps = 8;
       this.mouseDrag = function(x, y) {

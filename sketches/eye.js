@@ -1,5 +1,5 @@
 function Eye() {
-   this.labels = "eye".split(' ');
+   this.label = "eye";
    this.render = function(elapsed) {
 
       this.gIV = function(j) { return max(0, min(1, this.getInValue(j, 0.5))); }

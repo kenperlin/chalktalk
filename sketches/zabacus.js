@@ -1,5 +1,5 @@
 function Abacus() {
-   this.labels = "abacus".split(' ');
+   this.label = "abacus";
 
    this.digits = [0,0,0];
    this.digitsIndex = 0;

@@ -1,6 +1,6 @@
 
    function Bounce() {
-      this.labels = "bounce".split(' ');
+      this.label = "bounce";
       this.isBouncing = false;
       this.bouncing = 0;
       this.onSwipe = function(dx, dy) {

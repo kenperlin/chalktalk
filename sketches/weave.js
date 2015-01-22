@@ -1,6 +1,6 @@
 
    function Weave() {
-      this.labels = "weave".split(' ');
+      this.label = "weave";
       this.is3D = true;
       this.render = function(elapsed) {
 	 var C = [];

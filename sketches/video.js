@@ -1,6 +1,6 @@
 
    function Video() {
-      this.labels = "video".split(' ');
+      this.label = "video";
       this.value = videoBrightness;
       this.mouseDown = function() { }
       this.mouseDrag = function(x,y) {

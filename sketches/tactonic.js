@@ -1,5 +1,5 @@
 function Tactonic() {
-   this.labels = "tactonic".split(' ');
+   this.label = "tactonic";
 
    this.render = function() {
       this.duringSketch(function() {

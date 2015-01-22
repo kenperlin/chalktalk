@@ -1,6 +1,6 @@
 function C2S() {
 
-   this.labels = "c2s".split(' ');
+   this.label = "c2s";
 
    this.render = function() {
       this.duringSketch(function() {

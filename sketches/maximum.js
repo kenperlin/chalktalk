@@ -1,5 +1,5 @@
 function Maximum() {
-   this.labels = 'maximum'.split(' ');
+   this.label = 'maximum';
    var eps = 0.01;
 
    var P = [.7, .2, .4], A = [0,0,0];
@@ -22,6 +22,8 @@ function Maximum() {
 	    mLine([x, -1], [x, 0]);
          }
       });
+
+      mLine([0,0],[0,-1]);
 
       var curve = [];
       for (var x = -1 ; x <= 1 ; x += eps)

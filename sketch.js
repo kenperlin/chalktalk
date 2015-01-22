@@ -41,7 +41,6 @@
       this.in = []; // array of Sketch
       this.inValue = []; // array of values
       this.inValues = []; // flattened array of values
-      this.intersectingSketches = function() { return []; },
       this.is3D = false;
       this.isCard = false;
       this.isMouseOver = false;
@@ -529,7 +528,7 @@
             this.textCursor += str.length;
          }
       },
-      tntersectingSketches : function() {
+      intersectingSketches : function() {
          var sketches = [];
          for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I) != this && sk(I).parent == null && this.intersects(sk(I)))
@@ -630,8 +629,9 @@
             // move cursor in normal text area
          }
       },
-      offsetSelection : function(d) {
-         this.setSelection(this.selection + d);
+      offsetSelection : function(ds) {
+         var ns = this.labels.length;
+         this.setSelection((this.selection + ds + ns) % ns);
       },
       portXY : function(i) {
          if (isDef(this.portLocation[i])) {
@@ -923,13 +923,23 @@
 	       this.fragmentShader = defaultFragmentShader;
 
             this.shaderMaterial = function(r, g, b) {
-	       if (r === undefined) r = g = b = 1;
 	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
-	       material.setUniform('ambient' , [r*.05,g*.05,b*.05]);
-	       material.setUniform('diffuse' , [r,g,b]);
-	       material.setUniform('specular', [.5,.5,.5,10]);
-	       material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
-	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
+	       //material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
+	       //material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
+	       material.setUniform('Ldir', [[ 1.0, 1.0, 1.0], [-1.0,-0.5,-1.0]]);
+	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1]]);
+	       if (r === undefined)
+	          r = g = b = 1;
+	       if (Array.isArray(r)) {
+	          material.setUniform('ambient' , r);
+	          material.setUniform('diffuse' , g);
+	          material.setUniform('specular', b);
+	       }
+	       else {
+	          material.setUniform('ambient' , [r*.05,g*.05,b*.05]);
+	          material.setUniform('diffuse' , [r,g,b]);
+	          material.setUniform('specular', [.5,.5,.5,10]);
+               }
 	       return material;
             }
 

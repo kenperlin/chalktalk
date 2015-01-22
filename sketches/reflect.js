@@ -1,6 +1,6 @@
 
    function Reflect() {
-      this.labels = "reflect".split(' ');
+      this.label = "reflect";
       this.rx = .707;
       this.ry = .707;
       this.code = [["", "R = 2 * N * dot(N,L) - L"]];

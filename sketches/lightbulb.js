@@ -1,6 +1,6 @@
 
    function Lightbulb() {
-      this.labels = "lightbulb".split(' ');
+      this.label = "lightbulb";
       this.light = 0;
       this.mouseDown = function(){};
       this.mouseDrag = function(){};

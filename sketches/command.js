@@ -1,5 +1,5 @@
 function Command() {
-   this.labels = 'dict'.split(' ');
+   this.label = 'dict';
    this.render = function() {
       switch (this.labels[this.selection]) {
       case 'dict':

@@ -2,7 +2,7 @@
    var __audio__volume__ = 1;
 
    function IO() {
-      this.labels = "audio".split(' ');
+      this.label = "audio";
       this.code = [
          ["sin", "sin(2 * PI * x * time)"],
          ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],

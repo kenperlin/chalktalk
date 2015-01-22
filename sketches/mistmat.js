@@ -1,5 +1,5 @@
 function Mistmat() {
-   this.labels = "mistmat".split(' ');
+   this.label = "mistmat";
    this.isRolled = false;
 
    this.onSwipe = function(dx, dy) {

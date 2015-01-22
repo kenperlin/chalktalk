@@ -1,6 +1,6 @@
 
    function Ray1() {
-      this.labels = "ray1".split(' ');
+      this.label = "ray1";
       this.is3D = true;
       this.rayX = 0;
       this.rayY = 0;

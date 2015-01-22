@@ -73,7 +73,9 @@ Graph.prototype = {
    },
 
    adjustDistance: function(A, B, d, e, isAdjustingA, isAdjustingB) {
-      this.tmp.copy(B).sub(A).multiplyScalar( e * (d / A.distanceTo(B) - 1) );
+      var ratio = d / A.distanceTo(B);
+      ratio = max(0.5, min(1.5, ratio));
+      this.tmp.copy(B).sub(A).multiplyScalar( e * (ratio - 1) );
       if (isAdjustingA === undefined || isAdjustingA)
          A.sub(this.tmp);
       if (isAdjustingB === undefined || isAdjustingB)
@@ -120,7 +122,12 @@ Graph.prototype = {
             var L = this.lengths[n];
             var a = this.nodes[L.i];
             var b = this.nodes[L.j];
-            this.adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J, L.j != R.I && L.j != R.J);
+            this.adjustDistance(a.p, b.p, L.d, L.w/2, L.i != R.I && L.i != R.J,
+	                                              L.j != R.I && L.j != R.J);
+/*
+            if (L.i != R.I && L.i != R.J && L.j != R.I && L.j != R.J)
+               this.adjustDistance(a.p, b.p, L.d, L.w/2);
+*/
          }
       }
    },

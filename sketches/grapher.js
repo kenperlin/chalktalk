@@ -1,6 +1,6 @@
 
    function Grapher() {
-      this.labels = "grapher".split(' ');
+      this.label = "grapher";
 
       this.choice = new Choice();
       this.s = 0;

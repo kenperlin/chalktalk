@@ -1,6 +1,6 @@
 
    function Flower() {
-      this.labels = "flower".split(' ');
+      this.label = "flower";
       this.tall = 0;
       this.tallTarget = 0;
       this.wiggle = 0;

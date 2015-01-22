@@ -1,7 +1,7 @@
 
    function Bird() {
       this.T = 0;
-      this.labels = "bird".split(' ');
+      this.label = "bird";
       this.isGaze = false;
       this.isTall = false;
       this.gaze = 0.0;

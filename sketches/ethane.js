@@ -30,7 +30,7 @@ function EthaneResponder() {
 EthaneResponder.prototype = new GraphResponder;
 
 function Ethane() {
-   this.labels = 'ethane'.split(' ');
+   this.label = 'ethane';
    this.is3D = true;
 
    this.createTime = time;

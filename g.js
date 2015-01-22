@@ -43,7 +43,7 @@
    function height() { return 720; }
    //function height() { return 920; }
 
-   function width() { return 1280 + 100; }
+   //function width() { return 1280 + 100; }
    //function height() { return 800; }
 
    // BEST RESOLUTION FOR CINTIQ
@@ -3053,6 +3053,8 @@ console.log(lo + " " + hi);
    }
 
    function addSketch(sketch) {
+      if (sketch.labels.length == 0)
+         sketch.labels.push(sketch.label);
       sketchPage.add(sketch);
       sk().arrows = [];
       sk().id = globalSketchId++;

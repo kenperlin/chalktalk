@@ -1,6 +1,6 @@
 
    function Rocket() {
-      this.labels = "rocket".split(' ');
+      this.label = "rocket";
       this.swipeTime = 0;
       this.velocity = 0;
       this.altitude = 0;

@@ -1,7 +1,7 @@
 
    function F1D() {
       this.code = [["", "t*t/2 - 1/8"]];
-      this.labels = "f1d".split(' ');
+      this.label = "f1d";
 
       this.f = function(t) {
          var result = this._f(t);

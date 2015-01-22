@@ -1,5 +1,5 @@
 function Airfoil() {
-   this.labels = "airfoil".split(' ');
+   this.label = "airfoil";
 
    this.render = function(elapsed) {
       this.duringSketch(function() {

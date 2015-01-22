@@ -1,6 +1,6 @@
 
    function Pendulum() {
-      this.labels = "pendulum".split(' ');
+      this.label = "pendulum";
 
       this.computeStatistics = function() {
          var b = traceComputeBounds(this.sketchTrace);
