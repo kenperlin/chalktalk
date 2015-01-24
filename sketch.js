@@ -4,6 +4,7 @@
    var paletteRGB = [
       [255,255,255],	// CHANGES BETWEEN WHITE AND BLACK, WHENEVER USER TOGGLES WITH '-' KEY.
       [255,  0,  0],	// RED
+      [255,128,  0],	// ORANGE
       [255,255,  0],	// YELLOW
       [  0,255,  0],	// GREEN
       [  0,  0,255],	// BLUE
@@ -96,6 +97,8 @@
    }
 
    Sketch.prototype = {
+      xyzS : function() { return this.xyz.length < 3 ? 1 : this.xyz[2]; },
+
       adjustD : function(d) { return this.xyz.length == 0 ? d : this.xyz[2] * d; },
       adjustX : function(x) { return this.xyz.length == 0 ? x : this.xyz[2] * x + this.xyz[0]; },
       adjustY : function(y) { return this.xyz.length == 0 ? y : this.xyz[2] * y + this.xyz[1]; },
@@ -150,7 +153,7 @@
 	 this.color = palette[i];
       },
       setRenderMatrix : function(mat) {
-         var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyz[2];
+         var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyzS();
          var s = .381872 * height();
          var p = this.toPixel([0,0,0]);
 
@@ -260,7 +263,7 @@
          }
       },
       computePixelSize : function() {
-         return this.scale() * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+         return this.scale() * this.xyzS();
       },
       contains : function(x, y) {
          return this.xlo <= x && this.ylo <= y && this.xhi > x && this.yhi > y;
@@ -573,7 +576,7 @@
       mScale : function(t) {
          if (t === undefined)
             t = 1;
-         return norm(m.transform([t,0,0,0])) * (this.xyz.length < 3 ? 1 : this.xyz[2]);
+         return norm(m.transform([t,0,0,0])) * this.xyzS();
       },
       moveCursor : function(incr) {
          if (this.code != null && isCodeWidget) {

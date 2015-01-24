@@ -1,34 +1,4 @@
 
-// GLOBAL VARIABLES PRIMARILY RELATED TO SKETCH PAGES.
-
-var clickSize = 30;
-var codeSketch = null;
-var isAudioSignal = false;
-var isBgDragActionEnabled = false;
-var isBottomHover = false;
-var isCommandPressed = false;
-var isControlPressed = false;
-var isDrawingSketch2D = false;
-var isFakeMouseDown = false;
-var isManualScaling = false;
-var isPanning = false;
-var isRightGesture = false;
-var isRightHover = false;
-var isShiftPressed = false;
-var isShorthandMode = false;
-var isShorthandTimeout = false;
-var isShowingGlyphs = false;
-var isSketchDragActionEnabled = false;
-var isSpacePressed = false;
-var isTogglingMenuType = false;
-var isVerticalPan = false;
-var isVideoBackground = false;
-var menuType = 0;
-var needToStartSketchDragAction = false;
-var paletteColorId = 0;
-var showingLiveDataMode = 0;
-var sketchToDelete = null;
-
 // POSITION AND SIZE OF THE COLOR PALETTE ON THE UPPER LEFT OF THE SKETCH PAGE.
 
    function paletteX(i) { return 30 - _g.panX; }
@@ -62,9 +32,6 @@ var sketchToDelete = null;
       this.clear();
    }
 
-   var pointToPixelMatrix = new THREE.Matrix4();
-   var pixelToPointMatrix = new THREE.Matrix4();
-
    function computeStandardView() {
       sk().standardView();
       for (var i = 0 ; i < 16 ; i++)
@@ -77,20 +44,32 @@ var sketchToDelete = null;
          pixelToPointMatrix.elements[i] = m._m()[i];
    }
 
-   var sketchBook = new SketchBook();
-
 // MOST USER INTERACTION IS MEDIATED BY THE CURRENT SKETCH PAGE.
 
    function SketchPage() {
-      this.fadeAway = 0;
+      this.altCmdState = 0;
+      this.fadeAway = 1;
+      this.glyphT = 0;
+      this.glyphsPerCol = 10;
+      this.iDragged = 0;
+      this.isCreatingGroup = false;
+      this.isDraggingGlyph = false;
+      this.isFocusOnLink = false;
       this.isGlyphable = true;
+      this.isOnPanStrip = false;
+      this.keyPressed = -1;
       this.paletteColorDragXY = null;
-      this.sketches = [];
       this.scaleRate = 0;
+      this.sketches = [];
+      this.zoom = 1;
+   }
 
-      this.clear = function() { this.fadeAway = 1; }
+   SketchPage.prototype = {
+      clear : function() {
+         this.fadeAway = 1;
+      },
 
-      this.doFadeAway = function(elapsed) {
+      doFadeAway : function(elapsed) {
          this.fadeAway = max(0.0, this.fadeAway - elapsed / 0.25);
          _g.globalAlpha = this.fadeAway;
          if (this.fadeAway == 0.0) {
@@ -100,31 +79,31 @@ var sketchToDelete = null;
             _g.xp0 = _g.yp0 = _g.xp1 = _g.yp1 = 0;
             _g.globalAlpha = 1.0;
          }
-      }
+      },
 
-      this.beginTextSketch = function() {
+      beginTextSketch : function() {
          this.keyDown(64 + 9);            // enter text insertion mode
          this.keyUp(64 + 9);
          return sk();
-      }
+      },
 
-      this.addTextToTextSketch = function(text) {
+      addTextToTextSketch : function(text) {
          for (var i = 0 ; i < text.length ; i++) {
             var charCode = text.charCodeAt(i);
             this.keyDown(charCode);
             this.keyUp(charCode);
          }
          return sk();
-      }
+      },
 
-      this.createTextSketch = function(text) {
+      createTextSketch : function(text) {
          this.beginTextSketch();
          this.addTextToTextSketch(text);
          setTextMode(false);
          return sk();
-      }
+      },
 
-      this.createLink = function() {
+      createLink : function() {
 
          // AVOID CREATING DUPLICATE LINKS.
 
@@ -133,9 +112,9 @@ var sketchToDelete = null;
                                           || inSketch.in[inPort].i != outPort )
 
             new SketchLink(outSketch, outPort, inSketch, inPort);
-      }
+      },
 
-      this.clearAfterFadeAway = function() {
+      clearAfterFadeAway : function() {
          if (isCodeWidget)
             toggleCodeWidget();
 
@@ -151,48 +130,43 @@ var sketchToDelete = null;
                for (var i = root.children.length ; i > 0 ; i--)
                   root.remove(i);
          }
-      }
+      },
 
-      this.clear();
-
-      this.findIndex = function(sketch) {
+      findIndex : function(sketch) {
          for (var i = 0 ; i < this.sketches.length ; i++)
             if (this.sketches[i] == sketch)
                return i;
          return -1;
-      }
+      },
 
-      this.add = function(sketch) {
+      add : function(sketch) {
          this.sketches.push(sketch);
          this.index = this.sketches.length - 1;
          sketch.index = this.index;
          pullDownLabels = sketchActionLabels.concat(sketch.labels);
-      }
+      },
 
-      this.getSketchesByLabel = function(label) {
+      getSketchesByLabel : function(label) {
          var sketches = [];
          for (var i = 0 ; i < this.sketches.length ; i++)
             if (label == this.sketches[i].labels[this.sketches[i].selection])
                   sketches.push(this.sketches[i]);
          return sketches;
-      }
+      },
 
-      this.isCreatingGroup = false;
 
-      this.isFocusOnLink = false;
-
-      this.skCallback = function(action, x, y) {
+      skCallback : function(action, x, y) {
          if (sk()[action] !== undefined) {
             if (sk()._cursorPoint === undefined)
                sk()._cursorPoint = newVec();
             sk()._cursorPoint.set(x,y,0).applyMatrix4(pixelToPointMatrix);
             sk()[action](sk()._cursorPoint);
          }
-      }
+      },
 
       // HANDLE MOUSE DOWN FOR THE SKETCH PAGE.
 
-      this.mouseDown = function(x, y) {
+      mouseDown : function(x, y) {
          this.mx = x;
          this.my = y;
 
@@ -354,11 +328,11 @@ var sketchToDelete = null;
             m.restore();
 
          }
-      }
+      },
 
       // HANDLE MOUSE DRAG FOR THE SKETCH PAGE.
 
-      this.mouseDrag = function(x, y) {
+      mouseDrag : function(x, y) {
          this.mx = x;
          this.my = y;
 
@@ -518,11 +492,11 @@ var sketchToDelete = null;
 
             }
          }
-      }
+      },
 
       // HANDLE MOUSE UP FOR THE SKETCH PAGE.
 
-      this.mouseUp = function(x, y) {
+      mouseUp : function(x, y) {
 
          if (this.setPageInfo !== undefined) {
             setPage(this.setPageInfo.page);
@@ -856,27 +830,27 @@ var sketchToDelete = null;
                pullDownStart(this.x, this.y);
             }
          }
-      }
+      },
 
       // ROTATE CURRENT SKETCH.
 
-      this.doRotate = function(x, y) {
+      doRotate : function(x, y) {
          if (isk()) {
             sk().rX += 2 * (x - this.mx) /  width();
             sk().rY += 2 * (y - this.my) / -height();
          }
-      }
+      },
 
       // SCALE CURRENT SKETCH.
 
-      this.doScale = function(x, y) {
+      doScale : function(x, y) {
          if (isk())
             sk().scale(pow(16, (y - this.my) / -height()));
-      }
+      },
 
       // TRANSLATE CURRENT SKETCH.
 
-      this.doTranslate = function(x, y) {
+      doTranslate : function(x, y) {
          if (isk()) {
             if (sk().hasMotionPath()) {
                var X = sk().motionPath[0];
@@ -917,27 +891,25 @@ var sketchToDelete = null;
                   sketches[i].onIntersect(sk());
             }
          }
-      }
+      },
 
       // TEMPORARILY UNDRAW CURRENT SKETCH.
 
-      this.doUndraw = function(x, y) {
+      doUndraw : function(x, y) {
          if (isk() && sk() instanceof SimpleSketch) {
             this.tUndraw = max(0, min(1, (x - this.xDown) / 200));
          }
-      }
-
-      this.zoom = 1;
+      },
 
       // ZOOM THE SKETCH PAGE
 
-      this.doZoom = function(x, y) {
+      doZoom : function(x, y) {
          this.zoom *= 1 - (y - this.my) / height();
-      }
+      },
 
       // RESPONSE TO MOUSE MOVE WHILE IN CREATING GROUP PATH MODE.
 
-      this.groupMouseMove = function(x, y) {
+      groupMouseMove : function(x, y) {
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I).parent == null && sk(I).contains(this.mx, this.my))
                group[I] = true;
@@ -949,11 +921,11 @@ var sketchToDelete = null;
             m.restore();
          }
          groupPath.push([x,y]);
-      }
+      },
 
       // UNPACK GROUP IF THERE IS ONE.  ELSE CREATE A NEW GROUP.
 
-      this.toggleGroup = function() {
+      toggleGroup : function() {
 
          // FOUND A GROUP: UNPACK IT.
 
@@ -979,11 +951,11 @@ var sketchToDelete = null;
          sk().labels = "ungroup".split(' ');
          group = {};
          groupPath = [];
-      }
+      },
 
       // HANDLE MOUSE MOVE FOR THE SKETCH PAGE.
 
-      this.mouseMove = function(x, y) {
+      mouseMove : function(x, y) {
 
          if (this.setPageInfo !== undefined) {
             if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize)
@@ -1114,27 +1086,23 @@ var sketchToDelete = null;
          // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
          paletteColorId = findPaletteColorIndex(x, y);
-      }
+      },
 
-      var altCmdState = 0;
-
-      var keyPressed = -1;
-
-      this.keyDown = function(key) {
+      keyDown : function(key) {
 
          // Ignore multiple presses of the same key
 
-         if (key == keyPressed)
+         if (key == this.keyPressed)
             return;
-         keyPressed = key;
+         this.keyPressed = key;
 
          // Catch ALT-CMD-key escape, because it won't trigger
          // any keyUp to reset letterPressed to '\0'.
 
-         if (key == 18) altCmdState |= 1;
-         else if (key == 91) altCmdState |= 2;
-         else if (altCmdState == 3) {
-            altCmdState = 0;
+         if (key == 18) this.altCmdState |= 1;
+         else if (key == 91) this.altCmdState |= 2;
+         else if (this.altCmdState == 3) {
+            this.altCmdState = 0;
             letterPressed = '\0';
             return;
          }
@@ -1176,9 +1144,9 @@ var sketchToDelete = null;
             isPanning = true;
             break;
          }
-      }
+      },
 
-      this.handleDrawnTextChar = function(textChar) {
+      handleDrawnTextChar : function(textChar) {
          if (textChar.length > 0 && textChar.indexOf('(') > 0) {
             if (textChar == 'kbd()')
                kbd();
@@ -1195,9 +1163,9 @@ var sketchToDelete = null;
             this.handleTextChar(shift(textChar));
             break;
          }
-      }
+      },
 
-      this.handleTextChar = function(letter) {
+      handleTextChar : function(letter) {
          switch (letter) {
          case 'control': if (isk()) sk().insertText(CONTROL); break;
          case 'alt'    : if (isk()) sk().insertText(ALT    ); break;
@@ -1245,13 +1213,13 @@ var sketchToDelete = null;
             if (isk()) sk().insertText(letter);
          break;
          }
-      }
+      },
 
-      this.keyUp = function(key) {
+      keyUp : function(key) {
 
          // Part of logic to account for multiple presses of the same key.
 
-         keyPressed = -1;
+         this.keyPressed = -1;
 
          // Convert key to the proper letter encoding.
 
@@ -1514,16 +1482,16 @@ var sketchToDelete = null;
             }
             break;
          }
-      }
+      },
 
-      this.toggleLinedBackground = function() {
+      toggleLinedBackground : function() {
          if (this.isLinedPaper === undefined)
             this.isLinedPaper = true;
          else
             delete this.isLinedPaper;
-      }
+      },
 
-      this.toggleColorScheme = function() {
+      toggleColorScheme : function() {
          if (backgroundColor === 'white') {
             backgroundColor = 'black';
             defaultPenColor = 'white';
@@ -1559,9 +1527,9 @@ var sketchToDelete = null;
             codeSelector.style.backgroundColor = codeSelectorBgColor();
             codeSelector.style.color = codeSelectorFgColor();
          }
-      }
+      },
 
-      this.figureOutLink = function() {
+      figureOutLink : function() {
 
          // END ON A LINK: DELETE THE LINK.
 
@@ -1590,9 +1558,9 @@ var sketchToDelete = null;
 
          outSketch = inSketch = null;
          outPort = inPort = -1;
-      }
+      },
 
-      this.scaleSelectedSketch = function() {
+      scaleSelectedSketch : function() {
          if (isk() && ! isManualScaling) {
             if (sketchAction == "scaling") {
                if (this.scaleRate < 1)
@@ -1607,11 +1575,9 @@ var sketchToDelete = null;
                sk().scale(pow(dy > 0 ? 1.015 : 1/1.015, this.scaleRate * abs(dy) / 100));
             }
          }
-      }
+      },
 
-      this.isOnPanStrip = false;
-
-      this.animate = function(elapsed) {
+      animate : function(elapsed) {
 
          var w = width();
          var h = height();
@@ -1926,9 +1892,9 @@ var sketchToDelete = null;
          _g.fillText(msg, 70, 30);
          _g.restore();
 */
-      }
+      },
 
-      this.showShorthand = function() {
+      showShorthand : function() {
          var x0 = This().mousePressedAtX;
          var y0 = This().mousePressedAtY;
          _g.lineWidth = 1;
@@ -1968,24 +1934,23 @@ var sketchToDelete = null;
                  x0 + cx - r*.65 * x + r*.60 * y,
                  y0 + cy - r*.65 * y - r*.60 * x, .5, .5);
          }
-      }
+      },
 
-      var glyphsPerCol = 10;
-
-      this.glyphBounds = function(i) {
-         var ht = height() / glyphsPerCol;
-         var x = ht / glyphsPerCol / 2 + ht * floor(i / glyphsPerCol) - _g.panX;
-         var y = ((i % glyphsPerCol) * height()) / glyphsPerCol + ht * .1 - _g.panY;
+      glyphBounds : function(i) {
+         var ht = height() / this.glyphsPerCol;
+         var x = ht / this.glyphsPerCol / 2 + ht * floor(i / this.glyphsPerCol) - _g.panX;
+         var y = ((i % this.glyphsPerCol) * height()) / this.glyphsPerCol + ht * .1 - _g.panY;
          return [ x, y, x + ht * .7, y + ht * .8 ];
-      }
+      },
 
-      this.glyphColor = function() { return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ; }
-      this.glyphScrim = function() { return backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)'; }
-      this.glyphT = 0;
-      this.isDraggingGlyph = false;
-      this.iDragged = 0;
+      glyphColor : function() {
+         return backgroundColor == 'white' ? 'rgb(0,100,200)'       : 'rgb(128,192,255)' ;
+      },
+      glyphScrim : function() {
+         return backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)';
+      },
 
-      this.showGlyphs = function() {
+      showGlyphs : function() {
          _g.save();
          _g.globalAlpha = 1.0;
 
@@ -1997,7 +1962,7 @@ var sketchToDelete = null;
 
          this.glyphT = this.isDraggingGlyph
                      ? this.iDragged + 0.99
-                     : glyphsPerCol * (floor((this.mx + _g.panX) / (height()/glyphsPerCol)) +
+                     : this.glyphsPerCol * (floor((this.mx + _g.panX) / (height()/this.glyphsPerCol)) +
                              max(0, _g.panY + min(.99, this.my / height())));
 
          for (var i = 0 ; i < glyphs.length ; i++)
@@ -2007,9 +1972,9 @@ var sketchToDelete = null;
             this.showGlyph(this.iDragged, This().mouseX, This().mouseY);
 
          _g.restore();
-      }
+      },
 
-      this.showGlyph = function(i, cx, cy) {
+      showGlyph : function(i, cx, cy) {
          var glyph = glyphs[i];
          var b = this.glyphBounds(i);
          var gX = b[0], gY = b[1], gW = b[2]-b[0], gH = b[3]-b[1];
@@ -2017,7 +1982,7 @@ var sketchToDelete = null;
             gX += cx - (b[0] + b[2]) / 2;
             gY += cy - (b[1] + b[3]) / 2;
          }
-         var x = gX + (height()/glyphsPerCol) * .1;
+         var x = gX + (height()/this.glyphsPerCol) * .1;
          var y = gY;
          var t = this.glyphT;
 
@@ -2052,7 +2017,7 @@ var sketchToDelete = null;
          var tw = textWidth(txt);
          _g.fillText(txt, gX + 2, y + 10.5);
 
-         y += height() / 45 * 10 / glyphsPerCol;
+         y += height() / 45 * 10 / this.glyphsPerCol;
 
          var selected = t >= i && t < i+1;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
@@ -2061,7 +2026,7 @@ var sketchToDelete = null;
 
          var nn = glyph.data.length;
 
-         var sc = height() / 2000 * 10 / glyphsPerCol;
+         var sc = height() / 2000 * 10 / this.glyphsPerCol;
          for (var n = 0 ; n < nn ; n++) {
 
             var d = glyph.data[n];
@@ -2076,9 +2041,9 @@ var sketchToDelete = null;
             }
             _g.stroke();
          }
-      }
+      },
 
-      this.overlay = function() {
+      overlay : function() {
 
          var w = width(), h = height();
          var dx = -_g.panX;
@@ -2346,9 +2311,9 @@ var sketchToDelete = null;
          pieMenuOverlay();
 
          annotateEnd();
-      }
+      },
 
-      this.computePortBounds = function() {
+      computePortBounds : function() {
          var saveFont = _g.font;
          _g.font = '12pt Calibri';
          for (var I = 0 ; I < nsk() ; I++) {
@@ -2367,9 +2332,9 @@ var sketchToDelete = null;
                   }
          }
          _g.font = saveFont;
-      }
+      },
 
-      this.advanceCurrentSketch = function() {
+      advanceCurrentSketch : function() {
 
          // AFTER SKETCHING: TRANSITION SKETCH STYLE AND RESTORE CURSOR POSITION.
 
@@ -2390,9 +2355,9 @@ var sketchToDelete = null;
                if (sk().cursorTransition == 1)
                   sk().sketchState = 'finished';
             }
-      }
+      },
 
-      this.drawTextModeMessage = function() {
+      drawTextModeMessage : function() {
          var w = width(), h = height();
          color('rgba(0,32,128,.07)');
          fillRect(0,0,w,h);
@@ -2406,9 +2371,9 @@ var sketchToDelete = null;
             var str = "outputting glyphs";
             _g.fillText(str, (w - textWidth(str)) / 2, 200);
          }
-      }
+      },
 
-      this.drawTextStrokes = function() {
+      drawTextStrokes : function() {
          if (isCreatingGlyphData || This().mousePressed) {
             var ts = This().mousePressed ? strokes[0]
                                          : strokesGlyph == null ? []
@@ -2431,16 +2396,16 @@ var sketchToDelete = null;
          if (isShowingShorthand)
             this.showShorthand();
          }
-      }
+      },
 
-      this.sketchesAt = function(x, y) {
+      sketchesAt : function(x, y) {
          var sketches = [];
          for (var I = nsk() - 1 ; I >= 0 ; I--)
             if (sk(I).parent == null && sk(I).contains(x,y))
                sketches.push(sk(I));
          return sketches;
-      }
-   }
+      },
+   };
 
    function convertTextSketchToGlyphSketch(sketch, x, y) {
       var indexName = sketch.text.trim();
@@ -2477,6 +2442,37 @@ var sketchToDelete = null;
       }
    }
 
-   var sketchPage = sketchBook.setPage(0);
+// GLOBAL VARIABLES PRIMARILY RELATED TO SKETCH PAGES.
 
+var clickSize = 30;
+var codeSketch = null;
+var isAudioSignal = false;
+var isBgDragActionEnabled = false;
+var isBottomHover = false;
+var isCommandPressed = false;
+var isControlPressed = false;
+var isDrawingSketch2D = false;
+var isFakeMouseDown = false;
+var isManualScaling = false;
+var isPanning = false;
+var isRightGesture = false;
+var isRightHover = false;
+var isShiftPressed = false;
+var isShorthandMode = false;
+var isShorthandTimeout = false;
+var isShowingGlyphs = false;
+var isSketchDragActionEnabled = false;
+var isSpacePressed = false;
+var isTogglingMenuType = false;
+var isVerticalPan = false;
+var isVideoBackground = false;
+var menuType = 0;
+var needToStartSketchDragAction = false;
+var paletteColorId = 0;
+var pixelToPointMatrix = new THREE.Matrix4();
+var pointToPixelMatrix = new THREE.Matrix4();
+var showingLiveDataMode = 0;
+var sketchBook = new SketchBook();
+var sketchPage = sketchBook.setPage(0);
+var sketchToDelete = null;
 

@@ -3460,7 +3460,7 @@ console.log(lo + " " + hi);
                this.shapeSketch = geometrySketch(this.initMesh());
                this.shapeSketch.tX = this.tX + width() / 2;
                this.shapeSketch.tY = this.tY + height() / 2;
-               this.shapeSketch.mesh.sc = 1.75 * this.xyz[2];
+               this.shapeSketch.mesh.sc = 1.75 * (this.xyz.length < 3 ? 1 : this.xyz[2]);
 
                this.shapeSketch.meshAlpha = 0.3;
                this.shapeSketch.update = function(elapsed) {
