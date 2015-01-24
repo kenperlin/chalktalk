@@ -537,14 +537,14 @@ function iceCream(){
 }
 
 
-registerGlyph("lathe()", [
+registerGlyph("lathe1()", [
    [[0, .5],[ 0,-.5]],
    [[0,-.5],[-1,-.5]],
    [[0,-.5],[ 1,-.5]],
    [[0, .5],[-1, .5],[-1,-.5],[0,-.5]]
 ]);
 
-function lathe() {
+function lathe1() {
 
     // PROFILE IS THE SECOND OF THE TWO STROKES, SCALED FROM SCREEN SPACE TO 3D SPACE.
 
@@ -596,7 +596,7 @@ function lathe() {
        this.mesh.setMaterial(shaderMaterial(defaultVertexShader, fragmentShader));
     }
 }
-lathe.prototype = new Sketch;
+lathe1.prototype = new Sketch;
 
 
 //\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_

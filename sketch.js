@@ -936,9 +936,9 @@
 	          material.setUniform('specular', b);
 	       }
 	       else {
-	          material.setUniform('ambient' , [r*.05,g*.05,b*.05]);
-	          material.setUniform('diffuse' , [r,g,b]);
-	          material.setUniform('specular', [.5,.5,.5,10]);
+	          material.setUniform('ambient' , [r*.02,g*.02,b*.02]);
+	          material.setUniform('diffuse' , [r*.10,g*.10,b*.10]);
+	          material.setUniform('specular', [.5,.5,.5,15]);
                }
 	       return material;
             }

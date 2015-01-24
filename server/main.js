@@ -2,7 +2,7 @@ var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
 var fs = require("fs");
-var git = require("nodegit");
+//var git = require("nodegit");
 var path = require("path");
 var readline = require("readline-sync");
 
@@ -10,7 +10,7 @@ var readline = require("readline-sync");
 //var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
 
 var app = express();
-var port = process.argv[2] || 8888;
+var port = process.argv[2] || 11235;
 
 // serve static files from main directory
 app.use(express.static("./"));
@@ -67,13 +67,14 @@ app.route("/set").post(function(req, res, next) {
    });
 });
 
+/*
 // open git repo
 var repository;
 git.Repo.open(".git", function(err, repo) {
    if (err) throw err;
    repository = repo;
 });
-
+*/
 
 // handle commit requests
 app.route("/commit").post(function(req, res, next) {
@@ -87,7 +88,7 @@ app.route("/commit").post(function(req, res, next) {
       var suffix = ".js";
       if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
          filename += suffix; 
-
+/*
       // I know this is confusing but I'll fix it 
       repository.openIndex(function(err, index) {
          if (err) throw err;
@@ -117,6 +118,7 @@ app.route("/commit").post(function(req, res, next) {
          });
 
       });
+*/
    });
 });
 
