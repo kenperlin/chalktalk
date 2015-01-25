@@ -1957,7 +1957,6 @@
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200 - _g.panY, height());
 
-         //_g.font = '7pt Trebuchet MS';
          _g.font = '7pt Arial';
 
          this.glyphT = this.isDraggingGlyph

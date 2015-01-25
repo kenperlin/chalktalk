@@ -678,6 +678,8 @@
          }
       },
       renderWrapper : function(elapsed) {
+	 this.afterSketchTransition = this.glyphTransition < 1 ? 0 :
+	                              min(1, this.afterSketchTransition + 2 * elapsed);
 	 _g.save();
          m.save();
 	 this.render(elapsed);

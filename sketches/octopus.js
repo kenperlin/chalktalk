@@ -210,8 +210,28 @@ function Octopus() {
                this.meshBounds.push([p.x + a, p.y + b, p.z + c]);
          }
          this.extendBounds(this.meshBounds);
+
+	 // GRADUALLY RECENTER THE OCTOPUS TO ITS LOCAL ORIGIN.
+
+         var p = this._p, q = this._q;
+         p.copy(nodes[0].p).applyMatrix4(pointToPixelMatrix);
+         q.set(0,1,0).applyMatrix4(pointToPixelMatrix);
+         this.xyzw.set(p.x - q.x, p.y - q.y, 0, 0).applyMatrix4(pixelToPointMatrix);
+         for (var n = 0 ; n < nodes.length ; n++) 
+            nodes[n].p.sub(this.xyzw);
+         this.tX += p.x - q.x;
+         this.tY += p.y - q.y;
+
+         //annotateStart();
+         //color('green');
+         //drawRect(q.x - 100, q.y - 100, 200, 200);
+         //annotateEnd();
       });
    }
+
+   this._p = newVec();
+   this._q = newVec();
+   this.xyzw = new THREE.Vector4();
 
    this.createMesh = function() { return new THREE.Mesh(); }
 

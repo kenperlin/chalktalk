@@ -250,39 +250,15 @@
    function cotan(t) { return Math.cotan(t); }
    function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
-   function solve(A) { /* From http://martin-thoma.com */
-      // Solve a system of linear equations given as an n x n+1 matrix.
-      var n = A.length;
-      for (var i=0; i<n; i++) {
-         // Search for maximum in this column.
-         var maxRow = i, maxEl = Math.abs(A[i][i]);
-         for (var k=i+1; k<n; k++)
-            if (Math.abs(A[k][i]) > maxEl) {
-               maxEl = Math.abs(A[k][i]);
-               maxRow = k;
-            }
-         // Swap maximum row with current row (column by column).
-         for (var k=i; k<n+1; k++) {
-            var tmp = A[maxRow][k];
-            A[maxRow][k] = A[i][k];
-            A[i][k] = tmp;
-         }
-         // Make all rows below this one 0 in current column.
-         for (k=i+1; k<n; k++) {
-            var c = -A[k][i] / A[i][i];
-            for(var j=i; j<n+1; j++)
-               A[k][j] = i==j ? 0 : A[k][j] + c * A[i][j];
-         }
-      }
-      // Solve equation Ax=b for an upper triangular matrix A.
-      var x = new Array(n);
-      for (var i=n-1; i>-1; i--) {
-         x[i] = A[i][n] / A[i][i];
-         for (var k=i-1; k>-1; k--)
-            A[k][n] -= A[k][i] * x[i];
-      }
-      return x; // Return n x 1 result vector.
+   function dot4(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]; }
+   function floor(t) { return Math.floor(t); }
+   function ik(a, b, C, D) {
+      var cc = dot(C,C), x = (1 + (a*a - b*b)/cc) / 2, y = dot(C,D)/cc;
+      for (var i = 0 ; i < 3 ; i++) D[i] -= y * C[i];
+      y = sqrt(max(0,a*a - cc*x*x) / dot(D,D));
+      for (var i = 0 ; i < 3 ; i++) D[i] = x * C[i] + y * D[i];
    }
+   function irandom(n) { return floor(n * random()); }
    function isEqualArray(a, b) {
       if (a === undefined || b === undefined ||
           a == null || b == null || a.length != b.length)
@@ -292,14 +268,6 @@
             return false;
       return true;
    }
-   function floor(t) { return Math.floor(t); }
-   function ik(a, b, C, D) {
-      var cc = dot(C,C), x = (1 + (a*a - b*b)/cc) / 2, y = dot(C,D)/cc;
-      for (var i = 0 ; i < 3 ; i++) D[i] -= y * C[i];
-      y = sqrt(max(0,a*a - cc*x*x) / dot(D,D));
-      for (var i = 0 ; i < 3 ; i++) D[i] = x * C[i] + y * D[i];
-   }
-   function irandom(n) { return floor(n * random()); }
    function len(x, y) {
       if (y === undefined)
          return sqrt(x[0] * x[0] + x[1] * x[1]);
@@ -388,6 +356,39 @@
    function saw(t) { t = 2*t % 2; return t<1 ? t : 2-t; }
    function sign(t) { return Math.sign(t); }
    function sin(t) { return Math.sin(t); }
+   function solve(A) { /* From http://martin-thoma.com */
+      // Solve a system of linear equations given as an n x n+1 matrix.
+      var n = A.length;
+      for (var i=0; i<n; i++) {
+         // Search for maximum in this column.
+         var maxRow = i, maxEl = Math.abs(A[i][i]);
+         for (var k=i+1; k<n; k++)
+            if (Math.abs(A[k][i]) > maxEl) {
+               maxEl = Math.abs(A[k][i]);
+               maxRow = k;
+            }
+         // Swap maximum row with current row (column by column).
+         for (var k=i; k<n+1; k++) {
+            var tmp = A[maxRow][k];
+            A[maxRow][k] = A[i][k];
+            A[i][k] = tmp;
+         }
+         // Make all rows below this one 0 in current column.
+         for (k=i+1; k<n; k++) {
+            var c = -A[k][i] / A[i][i];
+            for(var j=i; j<n+1; j++)
+               A[k][j] = i==j ? 0 : A[k][j] + c * A[i][j];
+         }
+      }
+      // Solve equation Ax=b for an upper triangular matrix A.
+      var x = new Array(n);
+      for (var i=n-1; i>-1; i--) {
+         x[i] = A[i][n] / A[i][i];
+         for (var k=i-1; k>-1; k--)
+            A[k][n] -= A[k][i] * x[i];
+      }
+      return x; // Return n x 1 result vector.
+   }
    function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
@@ -1248,6 +1249,24 @@
 
       return dst;
    }
+
+
+// 3D GEOMETRY UTILITIES.
+
+   function clipLineToPlane(line, plane) {
+      var A = line[0],
+          B = line[1],
+          a = dot4(A, plane),
+          b = dot4(B, plane);
+      if (a <= 0 && b <= 0)
+         line = [];
+      else if (a <= 0)
+         line = [ mix(B, A, b / (b - a)), B ];
+      else if (b <= 0)
+         line = [ A, mix(A, B, a / (a - b)) ];
+      return line;
+   }
+
 
    ///////////////////////////////////////////////////////////////////
    // Rearrange edges into long chains, suitable for defining a glyph.

@@ -40,17 +40,17 @@
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
-   function height() { return 720; }
+   //function height() { return 720; }
    //function height() { return 920; }
 
    //function width() { return 1280 + 100; }
    //function height() { return 800; }
 
    // BEST RESOLUTION FOR CINTIQ
-/*
-   function width() { return 1920 - 103 * 1920 / 1080; }
-   function height() { return 1080 - 103; }
-*/
+
+   //function width() { return 1920 - 103 * 1920 / 1080; }
+   //function height() { return 1080 - 103; }
+
    // TRANSPARENT INK IN THE DEFAULT PEN COLOR.
 
    function scrimColor(alpha, colorId) {
@@ -891,8 +891,6 @@ console.log(harry.fred);
       loadSketches();
 
 //server.set("state/foobar", "1234");
-
-      //tick(g);
 
       setInterval( function() { tick(g); }, 1000 / 60);
    }
@@ -2415,7 +2413,7 @@ console.log(lo + " " + hi);
          for (var I = 0 ; I < nsk() ; I++) {
             var S = sk(I);
             S.inValues = [];
-            for (var i = 0 ; i < S.in.length ; i++) {
+            for (var i = -1 ; i < S.in.length ; i++) {
                var val = S.inValue[i];
                if (isDef(val)) {
                   if (Array.isArray(val))
@@ -2818,10 +2816,6 @@ console.log(lo + " " + hi);
 	 console.log(debugMessage);
 	 debugMessage = undefined;
       }
-
-      // THIS NEEDS TO BE THE LAST LINE OF FUNCTION tick().
-
-      // requestAnimFrame(function() { tick(g); });
    }
 
    var ef = new EncodedFraction();

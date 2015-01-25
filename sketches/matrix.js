@@ -51,9 +51,10 @@
 
 	    var out = [];
 
-	    if (isDef(this.in[0]) && isDef(this.inValue[0]) && this.inValue[0].length == 16)
+	    if (this.inValues.length == 16)
 
-	       out = this.inValue[0];
+               for (var i = 0 ; i < 16 ; i++)
+	          out.push(roundedString(this.inValues[i]));
 
 	    else {
 	       var sub = ["x","y","z"];
@@ -66,9 +67,9 @@
 	       }
 
 	       if (this.inValues.length > 0) {
-	          var x = roundedString(this.getInValue(0, 0));
-	          var y = roundedString(this.getInValue(1, x));
-	          var z = roundedString(this.getInValue(2, y));
+	          var x = rounded(this.getInValue(0, 0));
+	          var y = rounded(this.getInValue(1, x));
+	          var z = rounded(this.getInValue(2, y));
 
 	          switch (this.mode) {
 	          case 1:
@@ -92,9 +93,12 @@
                for (var col = 0 ; col < 4 ; col++)
                for (var row = 0 ; row < 4 ; row++) {
                   var val = "" + vals[row + 4 * col];
-	          if (val == "A") val = "" + sub[0];
-	          if (val == "B") val = "" + sub[1];
-	          if (val == "C") val = "" + sub[2];
+	          //if (val == "A") val = "" + sub[0];
+	          //if (val == "B") val = "" + sub[1];
+	          //if (val == "C") val = "" + sub[2];
+	          if (val == "A") val = sub[0];
+	          if (val == "B") val = sub[1];
+	          if (val == "C") val = sub[2];
 	          out.push(val);
                }
             }
@@ -120,7 +124,7 @@
 	       mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
 	    }
 
-	    this.outValue[0] = isDef(this.in[0]) ? out : this.identityMatrix;
+	    this.setOutPortValue(this.inValues.length > 0 ? out : this.identityMatrix);
          });
       }
    }
