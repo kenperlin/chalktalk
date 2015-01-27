@@ -284,7 +284,7 @@ function Octopus() {
    ,'uniform vec3 Lrgb[3];'
    ,'uniform vec3 Ldir[3];'
    ,'void main() {'
-   ,'   vec3 P = vPosition / .03;'
+   ,'   vec3 P = vPosition;'
    ,'   vec3 N = normalize(vNormal);'
    ,'   vec3 W = vec3(0.,0.,-1.);'
    ,'   vec3 R = W - 2. * N * dot(N, W);'

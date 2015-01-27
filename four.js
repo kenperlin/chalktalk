@@ -576,7 +576,7 @@ var defaultVertexShader = [
    ,'float displace(vec3 p) { return 0.; }'
    ,'void main() {'
    ,'   vNormal = normalize((modelViewMatrix * vec4(normal, 0.)).xyz);'
-   ,'   vPosition = position*.03;'
+   ,'   vPosition = position;'
    ,'   float _d = displace(position);'
    ,'   float _x = displace(position + vec3(.001, 0., 0.));'
    ,'   float _y = displace(position + vec3(0., .001, 0.));'

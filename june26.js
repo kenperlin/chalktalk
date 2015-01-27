@@ -269,8 +269,8 @@
 
 var planetFragmentShader = [
  '   void main(void) {'
-,'      float x = vPosition.x/.03;'
-,'      float y = vPosition.y/.03;'
+,'      float x = vPosition.x;'
+,'      float y = vPosition.y;'
 ,'      float dz = sqrt(1.-x*x-y*y);                      /* DEPTH  */'
 ,'      float s = .3*x + .3*y + .9*dz; s *= s; s *= s;    /* LIGHT  */'
 ,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
@@ -303,15 +303,15 @@ function planet() {
 
 var marbleFragmentShader = ["\
    void main(void) {\n\
-      float dx = vPosition.x / .03;\
-      float dy = vPosition.y / .03;\
-      float t = selectedIndex == 3. ? .7 * noise(vec3(dx,dy,0.)) :\n\
-                selectedIndex == 4. ? .5 * fractal(vec3(dx,dy,5.)) :\n\
-                selectedIndex == 5. ? .4 * (turbulence(vec3(dx*1.5,dy*1.5,10.))+1.8)\n\
+      float x = vPosition.x;\
+      float y = vPosition.y;\
+      float t = selectedIndex == 3. ? .7 * noise(vec3(x,y,0.)) :\n\
+                selectedIndex == 4. ? .5 * fractal(vec3(x,y,5.)) :\n\
+                selectedIndex == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8)\n\
                                     : .0 ;\n\
-      float s = .5 + .5*cos(7.*dx+6.*t);\n\
+      float s = .5 + .5*cos(7.*x+6.*t);\n\
       if (selectedIndex == 2.) \n\
-         s = .5 + noise(vec3(3.*dx,3.*dy,10.));\n\
+         s = .5 + noise(vec3(3.*x,3.*y,10.));\n\
       else if (selectedIndex > 0.)\n\
          s = pow(s, .1);\n\
       vec3 color = vec3(s,s*s,s*s*s);\n\
@@ -339,21 +339,21 @@ function marble() {
 
 var coronaFragmentShader = ["\
    void main(void) {\n\
-      float dx = vPosition.x / .03;\
-      float dy = vPosition.y / .03;\
+      float x = vPosition.x;\
+      float y = vPosition.y;\
       float a = .7;\n\
       float b = .72;\n\
       float s = 0.;\n\
-      float r0 = sqrt(dx*dx + dy*dy);\n\
+      float r0 = sqrt(x*x + y*y);\n\
       if (r0 > a && r0 <= 1.) {\n\
          float r = r0;\n\
          if (selectedIndex == 2.)\n\
-            r = min(1., r + 0.2 * turbulence(vec3(dx,dy,0.)));\n\
+            r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\n\
          else if (selectedIndex == 3.) {\n\
             float ti = time*.3;\n\
             float t = mod(ti, 1.);\n\
-            float u0 = turbulence(vec3(dx*(2.-t)/2., dy*(2.-t)/2., .1* t    +2.));\n\
-            float u1 = turbulence(vec3(dx*(2.-t)   , dy*(2.-t)   , .1*(t-1.)+2.));\n\
+            float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\n\
+            float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));\n\
             r = min(1., r - .1 + 0.3 * mix(u0, u1, t));\n\
          }\n\
          s = (1. - r) / (1. - b);\n\
@@ -388,7 +388,7 @@ function corona() {
 
 var flameFragmentShader = ["\
 void main(void) {\n\
-   vec3 p = 20.*vPosition;\n\
+   vec3 p = vPosition;\n\
    float nx = .5 * noise(.1*p);\n\
    float ny = .5 * noise(.1*p + vec3(100., 0., 0.));\n\
    float s = .25*p.z+turbulence(vec3(p.x+nx,p.y+ny,p.z+.3*time));\n\
@@ -404,23 +404,25 @@ var slicedFragmentShader = ["\
    uniform float frequency;\n\
    uniform float spinAngle;\n\
    void main(void) {\n\
-      float rr = dx*dx + dy*dy;\n\
-      float dz = rr >= 1. ? 0. : sqrt(1. - rr);\n\
+      float x = vPosition.x;\n\
+      float y = vPosition.y;\n\
+      float rr = x*x + y*y;\n\
+      float z = rr >= 1. ? 0. : sqrt(1. - rr);\n\
       float dzdx = -1.3;\n\
-      float zp = dzdx * (dx - mx * 1.3 - .2);\n\
-      if (zp < -dz)\n\
+      float zp = dzdx * (x - mx * 1.3 - .2);\n\
+      if (zp < -z)\n\
          rr = 1.;\n\
       vec3 color = vec3(0.);\n\
       if (rr < 1.) {\n\
-         vec3 nn = vec3(dx, dy, dz);\n\
-         if (zp < dz) {\n\
-            dz = zp;\n\
+         vec3 nn = vec3(x, y, z);\n\
+         if (zp < z) {\n\
+            z = zp;\n\
             nn = normalize(vec3(-dzdx,0.,1.));\n\
          }\n\
          float s = rr >= 1. ? 0. : .3 + max(0., dot(vec3(.3), nn));\n\
-         float X =  dx * cos(spinAngle) + dz * sin(spinAngle);\n\
-         float Y =  dy;\n\
-         float Z = -dx * sin(spinAngle) + dz * cos(spinAngle);\n\
+         float X =  x * cos(spinAngle) + z * sin(spinAngle);\n\
+         float Y =  y;\n\
+         float Z = -x * sin(spinAngle) + z * cos(spinAngle);\n\
          vec3 P = vec3(.9*X,.9*Y,.9*Z + 8.);\n\
          float t = selectedIndex == 3. ? 0.7 * noise(vec3(X,Y,Z)) :\n\
                    selectedIndex == 5. ? 0.5 * fractal(vec3(X,Y,Z)) :\n\
