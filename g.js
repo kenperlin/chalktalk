@@ -2049,9 +2049,12 @@ console.log(lo + " " + hi);
       pyM = -344 * w / 1440;
       pyB =  h / 2;
 
-      // HANDLE THE TACTONIC SENSOR, IF ANY.
 
-      ttTick();
+// THE CALL TO ttTick IS COMMENTED OUT SO CHALKTALK WILL WORK OVER THE WEB.
+// IF YOU WANT TO USE THE PRESSURE IMAGING SENSOR, UNCOMMENT THIS LINE.
+
+      // ttTick();     // HANDLE THE TACTONIC SENSOR, IF ANY.
+
 
       // TURN OFF ALL DOCUMENT SCROLLING.
 
