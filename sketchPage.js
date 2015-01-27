@@ -1847,8 +1847,7 @@
          if (isExpertMode) {
             if (letterPressed == 'g' || this.isCreatingGroup)
                drawGroupPath(groupPath);
-            if (this.paletteColorDragXY != null ||
-                This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs)
+            if (this.isShowingPalette())
                drawPalette();
             if (isSpacePressed)
                helpMenuDraw();
@@ -1952,6 +1951,11 @@
       },
       glyphScrim : function() {
          return backgroundColor == 'white' ? 'rgba(128,192,255,.5)' : 'rgba(0,80,128,.5)';
+      },
+
+      isShowingPalette : function() {
+         return this.paletteColorDragXY != null ||
+	        This().mouseX < margin - _g.panX && ! isBottomGesture && ! isShowingGlyphs;
       },
 
       showGlyphs : function() {
@@ -2086,7 +2090,7 @@
 
          // DRAW THE COLOR PALETTE
 
-         if (! isShowingGlyphs)
+         if (this.isShowingPalette())
             drawPalette();
 
          color(overlayColor);
