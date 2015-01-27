@@ -945,6 +945,7 @@ console.log(harry.fred);
       ['g'  , "group/ungroup"],
       ['h'  , "draw hint lines"],
       ['i'  , "insert text"],
+      ['j'  , "joined stroke"],
       ['k'  , "toggle char glyphs"],
       ['l'  , "toggle edge render"],
       ['m'  , "toggle menu type"],

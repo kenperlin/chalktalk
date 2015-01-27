@@ -1011,7 +1011,18 @@
             var alpha = max(0, this.glyphTransition) *
                         (this.fadeAway == 0 ? 1 : this.fadeAway) *
 		        (isDef(this.alpha) ? this.alpha : 1);
-            this.mesh.material.transparent = alpha < 1;
+
+            // MAKE SURE TO SET THE OPACITY OF ALL THIS MESH'S CHILDREN, RECURSIVELY.
+
+            if (alpha < 1) {
+	       function setAlpha(mesh) {
+	          mesh.material.transparent = true;
+		  mesh.material.setUniform('alpha', alpha);
+	          for (var i = 0 ; i < mesh.children.length ; i++)
+		     setAlpha(mesh.children[i]);
+	       }
+	       setAlpha(this.mesh);
+            }
 
             // SET VARIOUS UNIFORMS IN THE FRAGMENT SHADER.
 
@@ -1127,7 +1138,12 @@
 
          var p = this.m2s([x,y]);
          this.sp0.push(p);
-         this.sp.push([p[0],p[1],0]);
+	 if (this.joinNextStroke !== undefined) {
+            this.sp.push([p[0],p[1],1]);
+	    this.joinNextStroke = undefined;
+         }
+         else
+            this.sp.push([p[0],p[1],0]);
       }
       this.mouseDrag = function(x, y) {
          if (this.isGroup())

@@ -1378,6 +1378,10 @@
          case 'i':
             toggleTextMode();
             break;
+         case 'j':
+	    if (isk() && sk() instanceof SimpleSketch)
+	       sk().joinNextStroke = true;
+            break;
          case 'k':
             if (isk() && sk() instanceof GeometrySketch) {
                var type = sk().glyph.indexName;
@@ -2187,10 +2191,10 @@
          if (! isShowingGlyphs && ! isTextMode) {
             color(overlayClearColor());
             lineWidth(1);
-            textHeight(11);
+            textHeight(10);
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
-               var y = y0 + j * 18;
+               var y = y0 + j * 16;
                utext(hotKeyMenu[j][0], dx + 8, y, 0, 0);
                utext(hotKeyMenu[j][1], dx +38, y, 0, 0);
                if (hotKeyMenu[j][0] == letterPressed)

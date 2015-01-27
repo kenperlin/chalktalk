@@ -58,6 +58,8 @@ var raysFragmentShader = [
 ,'   }'
 ,'   void main(void) {'
 ,'      vec3 V = vec3(0.,0.,0.);'
+,'      float dx = vPosition.x / .03;'
+,'      float dy = vPosition.y / .03;'
 ,'      vec3 W = normalize(vec3(dx,dy,-10.));'
 ,'      vec4 S = vec4(0.,0.,-10.5,1.);'
 ,'      float t = raySphere(V, W, S);'

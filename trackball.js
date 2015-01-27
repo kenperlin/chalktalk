@@ -16,29 +16,44 @@ function Trackball(size) {
    this.tmp = newMat(size);
    this.err = newMat(size);
 
-   this.identity(this.mat);
+   this.identity();
 }
 
 Trackball.prototype = {
 
-   identity : function(mat) {
-      for (var row = 0 ; row < this.size ; row++)
-         for (var col = 0 ; col < this.size ; col++)
-            mat[row][col] = row == col ? 1 : 0;
+   identity : function() {
+      this._identity(this.mat);
+   },
+
+   multiply : function(src) {
+      this._multiply(src, this.mat, this.tmp);
+      this._copy(this.tmp, this.mat);
    },
 
 // Compute rotation that brings unit length A to nearby unit length B.
 
    rotate : function(A, B) {
-      computeRotation(this.rot, A, B);
-      multiply(this.rot);
+      this._computeRotation(this.rot, A, B);
+      this.multiply(this.rot);
    },
 
-   computeRotation : function(rot, A, B) {
+   transform : function(src, dst) {
+      this._transform(this.mat, src, dst);
+   },
+
+   // INTERNAL METHODS
+
+   _identity : function(mat) {
+      for (var row = 0 ; row < this.size ; row++)
+         for (var col = 0 ; col < this.size ; col++)
+            mat[row][col] = row == col ? 1 : 0;
+   },
+
+   _computeRotation : function(rot, A, B) {
 
       // Start with matrix I + product ( 2*transpose(B-A) , A )
 
-      identity(rot);
+      this._identity(rot);
       for (var row = 0 ; row < this.size ; row++)
          for (var col = 0 ; col < this.size ; col++)
             rot[row][col] += 2 * (B[row] - A[row]) * A[col];
@@ -51,16 +66,16 @@ Trackball.prototype = {
 
          for (var i = 0 ; i < this.size ; i++)
             for (var k = 0 ; k < this.size ; k++)
-                err[i][k] = 0;
+                this.err[i][k] = 0;
 
          // Add to error between each pair of rows:
 
          for (var i = 0 ; i < this.size - 1 ; i++) {
             for (var j = i + 1 ; j < this.size ; j++) {
-               var t = dot(rot[i], rot[j]);
+               var t = this._dot(rot[i], rot[j]);
                for (var k = 0 ; k < this.size ; k++) {
-                  err[i][k] += rot[j][k] * t / 2;
-                  err[j][k] += rot[i][k] * t / 2;
+                  this.err[i][k] += rot[j][k] * t / 2;
+                  this.err[j][k] += rot[i][k] * t / 2;
                }
             }
          }
@@ -70,17 +85,12 @@ Trackball.prototype = {
          totalError = 0;
          for (var i = 0 ; i < this.size ; i++) {
             for (var k = 0 ; k < this.size ; k++) {
-               rot[i][k] -= err[i][k];
-	       totalError += err[i][k] * err[i][k];
+               rot[i][k] -= this.err[i][k];
+	       totalError += this.err[i][k] * this.err[i][k];
             }
-            normalize(rot[i]);
+            this._normalize(rot[i]);
          }
       }
-   },
-
-   multiply : function(src) {
-      this._multiply(src, mat, tmp);
-      this.copy(tmp, mat);
    },
 
    _multiply : function(a, b, dst) {
@@ -92,10 +102,6 @@ Trackball.prototype = {
          }
    },
 
-   transform : function(src, dst) {
-      _transform(mat, src, dst);
-   },
-
    _transform : function(mat, src, dst) {
       for (var row = 0 ; row < this.size ; row++) {
 	 dst[row] = 0.0;
@@ -104,29 +110,23 @@ Trackball.prototype = {
       }
    },
 
-   copy : function(src, dst) {
+   _copy : function(src, dst) {
       for (var row = 0 ; row < this.size ; row++)
          for (var col = 0 ; col < this.size ; col++)
 	    dst[row][col] = src[row][col];
    },
 
-   dot : function(a, b) {
+   _dot : function(a, b) {
       var t = 0;
       for (var k = 0 ; k < this.size ; k++)
          t += a[k] * b[k];
       return t;
    },
 
-   normalize : function(a) {
-      var s = Math.sqrt(dot(a, a));
+   _normalize : function(a) {
+      var s = Math.sqrt(this._dot(a, a));
       for (var k = 0 ; k < this.size ; k++)
          a[k] /= s;
-   },
-
-   transpose : function(src, dst) {
-      for (var row = 0 ; row < this.size ; row++)
-         for (var col = 0 ; col < this.size ; col++)
-	    dst[col][row] = src[row][col];
    },
 }
 
