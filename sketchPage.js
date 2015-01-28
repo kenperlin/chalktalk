@@ -156,7 +156,7 @@
 
 
       skCallback : function(action, x, y) {
-         if (sk()[action] !== undefined) {
+         if (isk() && sk()[action] !== undefined) {
             if (sk()._cursorPoint === undefined)
                sk()._cursorPoint = newVec();
             sk()._cursorPoint.set(x,y,0).applyMatrix4(pixelToPointMatrix);
@@ -783,12 +783,10 @@
             }
 */
             if (this.isClick && isHover() && isDef(sk().onClick)) {
-
                m.save();
                computeStandardViewInverse();
-               sk().onClick(x, y);
+               this.skCallback('onClick', x, y);
                m.restore();
-
                return;
             }
 
@@ -1849,8 +1847,6 @@
                drawGroupPath(groupPath);
             if (this.isShowingPalette())
                drawPalette();
-            if (isSpacePressed)
-               helpMenuDraw();
             if (isTextMode && isShorthandMode) {
                color(defaultPenColor);
                lineWidth(1);
@@ -1858,6 +1854,9 @@
                         This().mousePressedAtY - 4, 8, 8);
             }
          }
+
+         if (isSpacePressed)
+            drawHelpMenu();
 
          if (isTextMode)
             this.drawTextStrokes();

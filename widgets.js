@@ -6,14 +6,19 @@
 
 /////////////////////////////////// HELP MENU //////////////////////////////////
 
-   function helpMenuDraw() {
+   function drawHelpMenu() {
       if (isk()) {
-         var msg = "delete,unparse,translate,copy,scale,text,rotate,undraw".split(",");
-	 var rx = 50 + (sk().xhi - sk().xlo) / 2;
-	 var ry = 50 + (sk().yhi - sk().ylo) / 2;
+         var msg = "delete,unparse,move,copy,scale,cmd,rotate,undraw".split(",");
+	 var cx = (sk().xlo + sk().xhi) / 2;
+	 var cy = (sk().ylo + sk().yhi) / 2;
+	 var rx = (sk().xhi - sk().xlo) / 2 + 60;
+	 var ry = (sk().yhi - sk().ylo) / 2 + 40;
 	 for (var i = 0 ; i < 8 ; i++) {
-	    var x = sk().cx() + rx * cos(TAU * i / 8);
-	    var y = sk().cy() - ry * sin(TAU * i / 8);
+	    var c = cos(TAU * i / 8);
+	    var s = sin(TAU * i / 8);
+            var t = pow (pow(c, 4) + pow(s, 4) , 1/4);
+	    var x = cx + rx * c / t;
+	    var y = cy - ry * s / t;
             text(msg[i], x, y, .5, .5, 'Comic Sans MS');
 	 }
       }

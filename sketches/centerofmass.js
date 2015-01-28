@@ -1,46 +1,44 @@
 function CenterOfMass()
 {
-	this.label = "centermass";
+  this.label = "centermass";
 
-	this.onClick = function(x, y) {};
+  this.onClick = function() {};
 
   this.mouseDown = function(x, y) {}
   this.mouseDrag = function() {}
   this.mouseUp = function() {}
 
 
-	this.render = function()
-	{
-		this.duringSketch(function() {
+  this.render = function() {
+     this.duringSketch(function() {
+        mDrawOval([-0.8, -0.8], [1.6, 1.6]);
+        mDrawOval([-0.2, -0.2], [0.4, 0.4]);
+     });
 
-      mDrawOval([-0.8, -0.8], [1.6, 1.6]);
-      mDrawOval([-0.2, -0.2], [0.4, 0.4]);
-		});
+     this.afterSketch(function() {
+         // main rectangle
+         mDrawRect([-1, -1], [1, 1]);
 
-		this.afterSketch(function() {
-			// main rectangle
-			mDrawRect([-1, -1], [1, 1]);
+         // draw coordinate grid
+         mLine([0, -1], [0, 1]);
+         mLine([-1, 0], [1, 0]);
 
-      // draw coordinate grid
-      mLine([0, -1], [0, 1]);
-      mLine([-1, 0], [1, 0]);
+         if (this.inValue[0]) {
+           var center = this.getCenterOfMass(this.inValue[0]);
 
-      if (this.inValue[0]) {
-        var center = this.getCenterOfMass(this.inValue[0]);
+           // draw center of mass
 
-        // draw center of mass
+           var x = center.x/(this.inValue[0].width/2)-1;
+           var y = center.y/(this.inValue[0].height/2)-1;
+           color(255, 100, 100);
+           mFillRect([x-0.03, y-0.03], [x+0.03, y+0.03]);
 
-        var x = center.x/(this.inValue[0].width/2)-1;
-        var y = center.y/(this.inValue[0].height/2)-1;
-        color(255, 100, 100);
-        mFillRect([x-0.03, y-0.03], [x+0.03, y+0.03]);
+           // send center of mass
+           this.outValue[0] = [center.x, center.y];
+         }
 
-        // send center of mass
-        this.outValue[0] = [center.x, center.y];
-      }
-
-		});
-	};
+       });
+    };
 
     this.getCenterOfMass = function(frame)
     {

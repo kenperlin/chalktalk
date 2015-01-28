@@ -20,7 +20,7 @@
           ["A",0  ,0  ,0,   0  ,"B",0  ,0,    0  ,0  ,"C",0,    0  ,0  ,0  , 1],
       ];
       this.mode = 0;
-      this.onClick = function(x, y) {
+      this.onClick = function() {
          this.mode = (this.mode + 1) % this.vals.length;
       }
       this.mouseDown = function(x,y) { this.computeMxy(x, y); }

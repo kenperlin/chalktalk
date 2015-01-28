@@ -1932,7 +1932,14 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          sketchAction = "scaling";      // W -- SCALE
          break;
       case 5:
-         toggleTextMode();              // SW -- TOGGLE TEXT MODE
+         if (sk() instanceof SimpleSketch)
+            toggleTextMode();           // SW -- IF SIMPLE SKETCH, TOGGLE TEXT MODE
+         else if (isDef(sk().onCmdClick)) { //   ELSE CMD CLICK
+	    m.save();
+	    computeStandardViewInverse();
+	    sketchPage.skCallback('onCmdClick', x, y);
+	    m.restore();
+	 }
          break;
       case 6:
          sketchAction = "rotating";     // S -- ROTATE
