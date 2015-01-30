@@ -37,7 +37,7 @@ function Eye() {
       mCurve(makeOval(x-.5,y-.5,1,1, 32, (.5-ul)*TAU, (.5+ll)*TAU));
       mCurve(makeOval(x-.5,y-.5,1,1, 32,     ur *TAU,    -lr *TAU));
 
-      this.extendBounds(-1, -.8, 1, .8);
+      this.extendBounds([[-1, -.8], [1, .8]]);
    }
 }
 Eye.prototype = new Sketch;
