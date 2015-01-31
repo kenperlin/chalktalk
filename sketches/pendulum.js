@@ -72,7 +72,6 @@
                                             : */ this.spring.getPosition();
          if (isNaN(angle)) angle = 0;
 
-         //this.setOutValue("S", "" + angle);
          this.setOutPortValue(angle);
 
          m.translate(0,this.ht,0);

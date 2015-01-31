@@ -282,6 +282,11 @@
             return;
          }
 
+	 if (arrowNearCursor != null) {
+	    this.isFocusOnArrow = true;
+	    return;
+	 }
+
          if (this.isCreatingGroup)
             return;
 
@@ -466,6 +471,16 @@
          if (this.isFocusOnLink) {
             if (linkAtCursor != null)
                linkAtCursor.computeCurvature([x,y]);
+            return;
+         }
+
+         if (this.isFocusOnArrow) {
+            if (arrowNearCursor != null) {
+	       var n = arrowNearCursor.n;
+	       var a = arrowNearCursor.s;
+	       var b = a.arrows[n][1];
+	       a.arrows[n][0] = computeCurvature([a.cx(),a.cy()], [x,y], [b.cx(),b.cy()]);
+            }
             return;
          }
 
@@ -696,7 +711,7 @@
 
 	 // CLICK ON AN ARROW TO DELETE IT.
 
-         if (arrowNearCursor != null && bgClickCount != 1) {
+         if (this.isClick && arrowNearCursor != null && bgClickCount != 1) {
 	    var s = arrowNearCursor.s;
 	    var n = arrowNearCursor.n;
 	    s.arrows[n][2] = 0.9;

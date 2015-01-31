@@ -85,6 +85,16 @@
       _g.fill();
    }
 
+   function drawRoundRect(x, y, w, h, r) {
+      makePath(createRoundRect(x, y, w, h, r));
+      _g.stroke();
+   }
+
+   function fillRoundRect(x, y, w, h, r) {
+      makePath(createRoundRect(x, y, w, h, r));
+      _g.fill();
+   }
+
    function drawOval(x, y, w, h, n, angle0, angle1) {
       makeOvalPath(x, y, w, h, n, angle0, angle1);
       _g.stroke();
