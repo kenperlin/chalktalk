@@ -6,7 +6,10 @@
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
          case 1:
-            this.isBouncing = ! this.isBouncing;
+            this.isBouncing = true;
+            break;
+         case 3:
+            this.isBouncing = false;
             break;
          }
       }
@@ -33,7 +36,8 @@
          });
          mCurve(oval);
 
-	 this.extendBounds(-1, 0, 1, 2);
+	 this.extendBounds([[-1, 0], [1, 2]]);
+	 this.setOutPortValue(y);
       }
    }
    Bounce.prototype = new Sketch;

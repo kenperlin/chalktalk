@@ -8,7 +8,8 @@
 
    function drawHelpMenu() {
       if (isk()) {
-         var msg = "delete,unparse,move,copy,scale,cmd,rotate,undraw".split(",");
+         var clickOp = 'delete,unparse,move,copy,scale,cmd,rotate,undraw'.split(',');
+         var dragOp = ',,path,copies,link,,arrow,group,'.split(',');
 	 var cx = (sk().xlo + sk().xhi) / 2;
 	 var cy = (sk().ylo + sk().yhi) / 2;
 	 var rx = (sk().xhi - sk().xlo) / 2 + 60;
@@ -19,7 +20,12 @@
             var t = pow (pow(c, 4) + pow(s, 4) , 1/4);
 	    var x = cx + rx * c / t;
 	    var y = cy - ry * s / t;
-            text(msg[i], x, y, .5, .5, 'Comic Sans MS');
+	    if (dragOp[i].length > 0) {
+               text(clickOp[i], x, y, .5, 1.3, 'Comic Sans MS');
+               text('(' + dragOp[i] + ')', x, y, .5, -.3, 'Comic Sans MS');
+            }
+	    else
+               text(clickOp[i], x, y, .5, .5, 'Comic Sans MS');
 	 }
       }
    }

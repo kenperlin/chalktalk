@@ -129,7 +129,7 @@
          }
          else {
 	    var s = this.arrows[n][0];
-            this.arrows[n][0] = computeCurvature(s[0], s[s.length/2], s[s.length-1]);
+            this.arrows[n][0] = computeCurvature(s[0], s[floor(s.length/2)], s[s.length-1]);
 	    this.arrows[n][1] = sketches[0];
          }
       },
@@ -400,8 +400,15 @@
             return;
          }
 
-         var x1 = this instanceof Sketch2D ? this.x2D : mix(this.tx(), this.textX, this.scale());
-         var y1 = this instanceof Sketch2D ? this.y2D : mix(this.ty(), this.textY, this.scale());
+         var xlo = Number.MAX_VALUE, ylo = xlo, xhi = -xlo, yhi = -ylo;
+         for (var i = 1 ; i < this.sp.length ; i++) {
+            xlo = min(xlo, this.sp[i][0]);
+            xhi = max(xhi, this.sp[i][0]);
+            ylo = min(ylo, this.sp[i][1]);
+            yhi = max(yhi, this.sp[i][1]);
+         }
+         var x1 = (xlo + xhi) / 2;
+         var y1 = (ylo + yhi) / 2;
 
 	 if (this.text.length == 0) {
 	    this.drawCursor(x1, y1, fontHeight, context);
@@ -1155,8 +1162,10 @@
       }
 
       this.mouseUp = function(x, y) {
-         if (this.isGroup())
+         if (this.isGroup()) {
+	    sketchPage.toggleGroup();
             return;
+         }
 
          if (isTextMode)
             return;
@@ -1359,6 +1368,7 @@
 	    glyphSketch.fadeAway = 1;
          else
             deleteSketch(glyphSketch);
+console.log(sk().glyphName);
       }
 
       this.getStrokes = function() {
@@ -1497,7 +1507,7 @@
          this.drawText(_g);
 
          if (this.isGroup()) {
-            color('rgba(255,1,0,.07)');
+            color(scrimColor(0.2));
             fillRect(this.xlo, this.ylo, this.xhi-this.xlo, this.yhi-this.ylo);
          }
 

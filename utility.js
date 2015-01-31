@@ -574,6 +574,13 @@
       return i;
    }
 
+   function reverse(arr) {
+      var dst = [];
+      for (var i = arr.length - 1 ; i >= 0 ; i--)
+         dst.push(arr[i]);
+      return dst;
+   }
+
    function sample(arr, t) {
       t = max(0, min(0.999, t));
       var n = arr.length;

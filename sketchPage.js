@@ -694,17 +694,19 @@
             return;
          }
 
+	 // CLICK ON AN ARROW TO DELETE IT.
+
+         if (arrowNearCursor != null && bgClickCount != 1) {
+	    var s = arrowNearCursor.s;
+	    var n = arrowNearCursor.n;
+	    s.arrows[n][2] = 0.9;
+	    return;
+	 }
+
          // CLICK AFTER DRAWING A GROUP-DEFINING PATH CREATES A NEW GROUP.
 
          if (this.isCreatingGroup) {
             this.isCreatingGroup = false;
-            this.toggleGroup();
-            return;
-         }
-
-         // CLICK ON A GROUP TO UNGROUP IT.
-
-         if (isHover() && sk().isGroup()) {
             this.toggleGroup();
             return;
          }
@@ -753,6 +755,13 @@
 
          else if (bgClickCount == 1) {
             bgClickCount = 0;
+            return;
+         }
+
+         // CLICK ON A GROUP TO UNGROUP IT.
+
+         if (isHover() && sk().isGroup()) {
+            this.toggleGroup();
             return;
          }
 
@@ -907,10 +916,10 @@
 
       // RESPONSE TO MOUSE MOVE WHILE IN CREATING GROUP PATH MODE.
 
-      groupMouseMove : function(x, y) {
+      groupDragPath : function(x, y) {
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I).parent == null && sk(I).contains(this.mx, this.my))
-               group[I] = true;
+               groupSketches[I] = true;
          if (isk()) {
             m.save();
             computeStandardViewInverse();
@@ -927,8 +936,9 @@
 
          // FOUND A GROUP: UNPACK IT.
 
-         if (Object.keys(group).length == 0) {
+         if (Object.keys(groupSketches).length == 0) {
             if (isHover() && sk().isGroup()) {
+               if ("is unpacking group");
                for (var i = 0 ; i < sk().children.length ; i++)
                   sk().children[i].parent = null;
                deleteSketchOnly(sk());
@@ -941,13 +951,13 @@
          addSketch(new SimpleSketch());
          sk().sketchProgress = 1;
          sk().sketchState = 'finished';
-         for (var j in group)
+         for (var j in groupSketches)
             sk().children.push(sk(j));
          sk().computeGroupBounds();
          sk().groupPath = cloneArray(groupPath);
          sk().groupPathLen = computeCurveLength(groupPath);
          sk().labels = "ungroup".split(' ');
-         group = {};
+         groupSketches = {};
          groupPath = [];
       },
 
@@ -1036,7 +1046,7 @@
                bendCurve(sk().sp0, sk().m2s([x,y]), sk().len, 1);
             break;
          case 'g':
-            this.groupMouseMove(x, y);
+            this.groupDragPath(x, y);
             break;
          case 'r':
             this.doRotate(x, y);
@@ -1062,7 +1072,7 @@
             // IF IN GROUP-CREATE MODE, EXTEND THE GROUP PATH.
 
             if (this.isCreatingGroup)
-               this.groupMouseMove(x, y);
+               this.groupDragPath(x, y);
 
             // OTHERWISE IF CURRENT SKETCH IS FINISHED, SEND EVENT TO THE SKETCH.
 
@@ -2452,6 +2462,8 @@
 
 var clickSize = 30;
 var codeSketch = null;
+var groupPath = [];
+var groupSketches = {};
 var isAudioSignal = false;
 var isBgDragActionEnabled = false;
 var isBottomHover = false;

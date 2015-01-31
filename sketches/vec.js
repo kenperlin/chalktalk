@@ -1,12 +1,12 @@
 
    function Vec() {
       this.nRows = function() {
-         return 1 + floor(this.selection / 2);
+         return 2 + floor(this.selection / 2);
       }
       this.axis = function() {
          return 1 - this.selection % 2;
       }
-      this.labels = 'hvec1 vvec1 hvec2 vvec2 hvec3 vvec3 hvec4 vvec4'.split(' ');
+      this.labels = 'hvec2 vvec2 hvec3 vvec3 hvec4 vvec4'.split(' ');
       this.value = [1,0,0,0];
       this.row = 0;
       this.precision = 1;

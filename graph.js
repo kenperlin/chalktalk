@@ -374,14 +374,54 @@ VisibleGraph.prototype.findNodeAtPixel = function(pix) {
    return jNearest;
 }
 
+
+VisibleGraph.prototype.onMove = function(point) {
+}
+
+VisibleGraph.prototype.onPress = function(point) {
+   this.p.copy(point);
+   this.pix.copy(point).applyMatrix4(pointToPixelMatrix);
+   this._PRESS();
+}
+
+VisibleGraph.prototype.onDrag = function(point) {
+   this.p.copy(point);
+   this.pix.copy(point).applyMatrix4(pointToPixelMatrix);
+   this._DRAG();
+}
+
+VisibleGraph.prototype.onRelease = function(point) {
+   this.p.copy(point);
+   this.pix.copy(point).applyMatrix4(pointToPixelMatrix);
+   this._RELEASE();
+}
+
+
 VisibleGraph.prototype.mouseMove = function(x,y) {
 }
 
 VisibleGraph.prototype.mouseDown = function(x,y) {
-   var R = this.R;
    this.pix.set(x,y,0);
    this.p.copy(this.pix).applyMatrix4(pixelToPointMatrix);
+   this._PRESS();
+}
+
+VisibleGraph.prototype.mouseDrag = function(x,y) {
+   this.q.copy(this.p);
+   this.pix.set(x,y,0);
+   this.p.copy(this.pix).applyMatrix4(pixelToPointMatrix);
+   this._DRAG();
+}
+
+VisibleGraph.prototype.mouseUp = function(x,y) {
+   this.pix.set(x,y,0);
+   this._RELEASE();
+}
+
+
+VisibleGraph.prototype._PRESS = function() {
    this.travel = 0;
+   var R = this.R;
    switch (R.clickType) {
    case 'B':
       R.J = this.findNodeAtPixel(this.pix);
@@ -425,12 +465,9 @@ VisibleGraph.prototype.mouseDown = function(x,y) {
    }
 }
 
-VisibleGraph.prototype.mouseDrag = function(x,y) {
-   var R = this.R;
-   this.q.copy(this.p);
-   this.pix.set(x,y,0);
-   this.p.copy(this.pix).applyMatrix4(pixelToPointMatrix);
+VisibleGraph.prototype._DRAG = function() {
    this.travel += this.p.distanceTo(this.q);
+   var R = this.R;
    switch (R.clickType) {
    case 'B':
       switch (R.actionType) {
@@ -454,9 +491,8 @@ VisibleGraph.prototype.mouseDrag = function(x,y) {
    }
 }
 
-VisibleGraph.prototype.mouseUp = function(x,y) {
+VisibleGraph.prototype._RELEASE = function() {
    var R = this.R;
-   this.pix.set(x,y,0);
    R.K = this.findNodeAtPixel(this.pix);
    switch (R.clickType) {
    case 'B':
@@ -519,7 +555,4 @@ VisibleGraph.prototype.mouseUp = function(x,y) {
    R.J = -1;
    R.K = -1;
 }
-
-
-
 

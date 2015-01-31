@@ -239,7 +239,7 @@
 
                if (s.length > 0) {
                   console.log(sk().glyphName + " -> " + s[0].glyphName);
-                  deleteSketch(sk());
+                  //deleteSketch(sk());
                }
 
                break;
@@ -976,9 +976,6 @@ console.log(harry.fred);
    var dataColor = 'rgb(128,128,128)'
    var dataLineWidth = 2.4;
    var globalSketchId = 0;
-   var group = {};
-   var groupLineWidth = 8;
-   var groupPath = [];
    var linkDeleteColor = 'rgba(255,0,0,.1)';
    var linkHighlightColor = 'rgba(0,192,96,.2)';
    var liveDataColor = 'rgb(128,192,255)'
@@ -1065,8 +1062,8 @@ console.log(harry.fred);
    function drawGroupPath(groupPath) {
       if (groupPath == null)
          return;
-      color('rgba(255,1,0,.3)');
-      lineWidth(groupLineWidth);
+      color(scrimColor(0.3));
+      lineWidth(width() / 100);
       _g.beginPath();
       for (var i = 0 ; i < groupPath.length ; i++) {
          var x = groupPath[i][0];
@@ -1156,6 +1153,7 @@ console.log(harry.fred);
    }
 
    var linkAtCursor = null;
+   var arrowAtCursor = null;
    var outSketch = null, inSketch = null;
    var outPort = -1, inPort = -1;
 
@@ -1256,8 +1254,8 @@ console.log(harry.fred);
          children[i].textX += dx;
          children[i].textY += dy;
          if (children[i] instanceof Sketch2D) {
-            children[i].x2D += dx;
-            children[i].y2D += dy;
+            children[i].x2D += children[i].unadjustD(dx);
+            children[i].y2D += children[i].unadjustD(dy);
          }
       }
    }
@@ -1831,6 +1829,14 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          }
          outSketch.linkCurve = [[x,y]];
          break;
+      case 5:
+         if (isDef(sk().onCmdPress)) {
+	    m.save();
+	    computeStandardViewInverse();
+	    sketchPage.skCallback('onCmdPress', x, y);
+	    m.restore();
+	 }
+         break;
       case 6:
          sk().arrowBegin(x, y);
          break;
@@ -1856,8 +1862,20 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          if (outSketch.linkCurve !== undefined)
             outSketch.linkCurve.push([x,y]);
          break;
+      case 5:
+         if (isDef(sk().onCmdDrag)) {
+	    m.save();
+	    computeStandardViewInverse();
+	    sketchPage.skCallback('onCmdDrag', x, y);
+	    m.restore();
+	 }
+         break;
       case 6:
          sk().arrowDrag(x, y);
+         break;
+      case 7:
+         sketchPage.isCreatingGroup = true;
+         sketchPage.groupDragPath(x, y);
          break;
       }
    }
@@ -1891,8 +1909,20 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          outSketch.out[outPort][i].s = computeCurvature(outSketch.linkCurve);
 
          break;
+      case 5:
+         if (isDef(sk().onCmdRelease)) {
+	    m.save();
+	    computeStandardViewInverse();
+	    sketchPage.skCallback('onCmdRelease', x, y);
+	    m.restore();
+	 }
+         break;
       case 6:
          sk().arrowEnd(x, y);
+         break;
+      case 7:
+         sketchPage.isCreatingGroup = false;
+         sketchPage.toggleGroup();
          break;
       }
       sketchDragMode = -1;
@@ -2204,7 +2234,7 @@ console.log(lo + " " + hi);
 
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
-                  if (sk(I).text.length > 0) {
+                  if (sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
                      var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
@@ -2253,6 +2283,9 @@ console.log(lo + " " + hi);
 
          // DRAW ARROWS.
 
+         if (! sketchPage.isPressed)
+            arrowNearCursor = null;
+
          annotateStart();
          for (var I = 0 ; I < nsk() ; I++)
             if (sk(I).parent == null) {
@@ -2272,6 +2305,7 @@ console.log(lo + " " + hi);
                      }
                      a.arrows[n][2] = alpha;
                   }
+		  alpha *= sk(I).fade();
 
                   var C = b == null ? c : createCurve([a.cx(),a.cy()], [b.cx(),b.cy()], c);
 
@@ -2282,6 +2316,10 @@ console.log(lo + " " + hi);
 
                   if (C[0] === undefined)
                      continue;
+
+		  if (! sketchPage.isPressed && isMouseNearCurve(C))
+		     arrowNearCursor = { s: sk(I), n: n };
+
                   var nc = C.length;
                   _g.strokeStyle = defaultPenColor;
                   _g.lineWidth = width() / 300;

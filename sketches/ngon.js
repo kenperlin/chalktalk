@@ -77,7 +77,7 @@ function NGon() {
       }
    }
    this.render = function() {
-      function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 + TAU * (n-1) / n); }
+      function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 - TAU * (n-1) / n); }
       if (! isNumeric(this.xlo)) {
          switch (this.labels[this.selection]) {
          case 'triangle': this.P = makeNgon(3); break;
