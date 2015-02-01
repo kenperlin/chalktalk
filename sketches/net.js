@@ -128,10 +128,10 @@ function Net() {
 
    this.graph.computeLengths();
 
-   this.mouseMove = function(x,y) { return this.graph.mouseMove(x, y); }
-   this.mouseDown = function(x,y) { return this.graph.mouseDown(x, y); }
-   this.mouseDrag = function(x,y) { return this.graph.mouseDrag(x, y); }
-   this.mouseUp   = function(x,y) { return this.graph.mouseUp  (x, y); }
+   this.onMove    = function(point) { return this.graph.onMove   (point); }
+   this.onPress   = function(point) { return this.graph.onPress  (point); }
+   this.onDrag    = function(point) { return this.graph.onDrag   (point); }
+   this.onRelease = function(point) { return this.graph.onRelease(point); }
 
    this.render = function() {
       this.code = null;

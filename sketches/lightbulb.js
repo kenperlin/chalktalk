@@ -2,9 +2,6 @@
    function Lightbulb() {
       this.label = "lightbulb";
       this.light = 0;
-      this.mouseDown = function(){};
-      this.mouseDrag = function(){};
-      this.mouseUp   = function(){};
       this.onSwipe = function(dx, dy) {
          switch (pieMenuIndex(dx, dy)) {
          case 0:
@@ -28,7 +25,7 @@
                   [.7,.7],[.95,0],[.7,-.7],[.55,-1],[.5,-1.6]];
          mCurve(makeSpline(C));
          this.afterSketch(function() {
-            color(scrimColor(lerp(light, .25, 1), this.colorId));
+            color(scrimColor(mix(.25, 1, light), this.colorId));
             mFillCurve(makeSpline(C));
             color(palette[this.colorId]);
          });
@@ -40,6 +37,7 @@
                     [s*.45,-2.0],[s*.5,-2.05],[s*.5,-2.15],
                     [s*.45,-2.2],[s*.3,-2.2]]);
          mCurve(makeOval(-.3,-2.5,.6,.6,10,PI,2*PI));
+	 this.setOutPortValue(light);
       }
    }
    Lightbulb.prototype = new Sketch;
