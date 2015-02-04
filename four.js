@@ -565,6 +565,9 @@ function shaderMaterial(vertexShaderString, fragmentShaderString) {
    addUniforms(material, fragmentShaderString);
    material.fragmentShader = formFragmentShader(fragmentShaderString);
 
+   console.log(material.vertexShader);
+   console.log(material.fragmentShader);
+
    return material;
 }
 

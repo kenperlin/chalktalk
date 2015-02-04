@@ -292,6 +292,12 @@
       //mat.perspective(0,0,width()*2);
       mat.translate(-width()*x,-height()*(1-y),0);
    }
+   function mDot(a,r) {
+      _g.save();
+      lineWidth(norm(m.transform([r,0,0,0])));
+      mLine(a,[a[0]+.001,a[1],a[2]]);
+      _g.restore();
+   }
    function mLine(a,b) {
       var A = m.transform(a);
       var B = m.transform(b);
@@ -339,7 +345,7 @@
          cc.push(m.transform(c[n]));
       fillCurve(cc);
    };
-   function mArrow(a, b, r){
+   function mArrow(a, b, r) {
       var A = m.transform(a);
       var B = m.transform(b);
       var R = r === undefined ? len(A[0]-B[0], A[1]-B[1]) / 10 : norm(m.transform([r,0,0,0]));

@@ -65,6 +65,15 @@
    }
 
    SketchPage.prototype = {
+      bringToFront : function(s) {
+         for (var i = 0 ; i < this.sketches.length ; i++)
+	    if (this.sketches[i] == s) {
+	       this.sketches.splice(i, 1);
+	       break;
+	    }
+         this.sketches.push(s);
+      },
+
       clear : function() {
          this.fadeAway = 1;
       },
@@ -1388,6 +1397,10 @@
             break;
          case 'e':
             toggleCodeWidget();
+            break;
+         case 'f':
+	    if (isk())
+	       this.bringToFront(sk());
             break;
          case 'g':
             this.toggleGroup();

@@ -942,6 +942,7 @@ console.log(harry.fred);
       ['c'  , "toggle card"],
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
+      ['f'  , "bring sketch to front"],
       ['g'  , "group/ungroup"],
       ['h'  , "draw hint lines"],
       ['i'  , "insert text"],

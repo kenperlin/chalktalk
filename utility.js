@@ -274,8 +274,8 @@
       return sqrt(x * x + y * y);
    }
    function lerp(t,a,b) { return a + t * (b - a); }
-   function max(a,b) { return Math.max(a,b); }
-   function min(a,b) { return Math.min(a,b); }
+   function max(a,b,c) { return c===undefined ? Math.max(a,b) : Math.max(a,Math.max(b,c)); }
+   function min(a,b,c) { return c===undefined ? Math.min(a,b) : Math.min(a,Math.min(b,c)); }
    function mix(a, b, t) {
       if (isNumeric(a))
          return a + (b - a) * t;

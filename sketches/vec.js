@@ -1,5 +1,22 @@
 
    function Vec() {
+
+      this.code = [['',[''
+,'function Vector3() {'
+,'   this.x = 0;'
+,'   this.y = 0;'
+,'   this.z = 0;'
+,'}'
+,''
+,'Vector3.prototype = {'
+,'   set : function(x,y,z) {'
+,'      this.x = x;'
+,'      this.y = y;'
+,'      this.z = z;'
+,'   },'
+,'}'
+].join('\n')]]
+
       this.nRows = function() {
          return 2 + floor(this.selection / 2);
       }
