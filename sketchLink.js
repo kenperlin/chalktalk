@@ -42,7 +42,7 @@ SketchLink.prototype = {
          this.C = clipCurveAgainstRect(this.C, aR);
          this.C = clipCurveAgainstRect(this.C, bR);
          //this.C = clipCurveAgainstRect(this.C, [a.xlo,a.ylo,a.xhi,a.yhi]);
-         //this.C = clipCurveAgainstRect(this.C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+           this.C = clipCurveAgainstRect(this.C, [b.xlo,b.ylo,b.xhi,b.yhi]);
       }
 
       if (isVisible) {

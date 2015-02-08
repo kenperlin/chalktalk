@@ -369,17 +369,6 @@
       return (A * p.x + B * p.y + C) / (A * a.x + B * a.y + C);
    }
 
-   var PI = Math.PI;
-   var TAU = 2 * PI;
-   function abs(t) { return Math.abs(t); }
-   function acos(t) { return Math.acos(t); }
-   function asin(t) { return Math.asin(t); }
-   function atan(t) { return Math.atan(t); }
-   function atan2(a,b) { return Math.atan2(a,b); }
-   function ceil(t) { return Math.ceil(t); }
-   function cos(t) { return Math.cos(t); }
-   function exp(t) { return Math.exp(t); }
-   function floor(t) { return Math.floor(t); }
    function ik(a, b, C, D) {
       if (C instanceof THREE.Vector3) {
          var cc = C.dot(C), x = (1 + (a*a - b*b)/cc) / 2, y = C.dot(D)/cc;
@@ -394,7 +383,7 @@
          for (var i = 0 ; i < 3 ; i++) D[i] = x * C[i] + y * D[i];
       }
    }
-   function log(a,b) { return Math.log(a,b); }
+
    function matToEuler(mat, e) {
       e.y = asin(mat[0+4*2]);
       var C = cos(e.y);
@@ -564,9 +553,6 @@ function shaderMaterial(vertexShaderString, fragmentShaderString) {
 
    addUniforms(material, fragmentShaderString);
    material.fragmentShader = formFragmentShader(fragmentShaderString);
-
-   console.log(material.vertexShader);
-   console.log(material.fragmentShader);
 
    return material;
 }

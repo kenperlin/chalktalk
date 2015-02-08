@@ -1,5 +1,5 @@
 function Hypershape() {
-   this.labels = ['hypercube', 'aerochoron', 'octaplex'];
+   this.labels = ['pentatope', 'hypercube', 'aerochoron', 'octaplex'];
    this.is3D = true;
 
    var trackball = new Trackball(4);
@@ -32,6 +32,15 @@ function Hypershape() {
       A.push([ axis==0 ? bit(n  , 0) : 0, axis==1 ? bit(n-2, 0) : 0,
                axis==2 ? bit(n-4, 0) : 0, axis==3 ? bit(n-6, 0) : 0 ]);
    }
+
+   var r5 = sqrt(5);
+   var S = [
+      [ 1,-1,-1, -1/r5],
+      [-1, 1,-1, -1/r5],
+      [-1,-1, 1, -1/r5],
+      [ 1, 1, 1, -1/r5],
+      [ 0, 0, 0, r5 - 1/r5],
+   ];
 
    var V = [];
    for (var n = 0 ; n < 24 ; n++)
@@ -71,6 +80,24 @@ function Hypershape() {
    this.render = function() {
       this.code = null;
       switch (this.labels[this.selection]) {
+
+      case 'pentatope':
+         if (this.glyphTransition < 1) {
+            mClosedCurve([[-.85,-.85], [.85,-.85], [.85,.85], [-.85,.85]]);
+            mCurve([[-.85,.85], [.85,-.85]]);
+            mCurve([[.85,.85], [-.85,-.85]]);
+	    this.extendBounds([[-1,-1],[1,1]]);
+         }
+	 this.afterSketch(function() {
+            var n = 0;
+	    for ( ; n < S.length ; n++)
+	       this.placeVertex(n, S[n]);
+	    for (var i = 0   ; i < 4 ; i++)
+	    for (var j = i+1 ; j < 5 ; j++)
+	       this.placeEdge(n++, P[i], P[j]);
+	 });
+         break;
+
       case 'hypercube':
          if (this.glyphTransition < 1) {
             mClosedCurve([[-1 ,-1 ],[1 ,-1 ],[1 ,1 ],[-1 ,1 ]]);
@@ -173,15 +200,22 @@ function Hypershape() {
    var materials = [];
 
    this.createMesh = function() {
-      var R = [1,1,0,0,2],
-          G = [1,0,1,0,2],
-	  B = [1,0,0,1,0];
+      var R = [1,2,0,0,2,2],
+          G = [1,0,1,0,2,0],
+	  B = [1,0,0,2,0,2];
       for (var i = 0 ; i < R.length ; i++)
          materials.push(this.shaderMaterial(R[i], G[i], B[i]));
 
       var mesh = new THREE.Mesh();
 
       switch (this.labels[this.selection]) {
+      case 'pentatope':
+         for (var i = 0 ; i < 5 ; i++)
+            mesh.add(this.createVertex(materials[i+1]));
+         for (var i = 0 ; i < 10 ; i++)
+	    mesh.add(this.createEdge(materials[0], .035));
+         break;
+
       case 'hypercube':
          for (var i = 0 ; i < 16 ; i++)
             mesh.add(this.createVertex(materials[0]));

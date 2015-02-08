@@ -2044,14 +2044,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          tt.pollState(tt.myState);
          for (var i = 0 ; i < 1024 ; i++)
             ttForce[i] = tt.myState.hmd.forces[i] / 4096;
-/*
-var hi = -10000, lo = 10000;
-for (var i = 0 ; i < 1024 ; i++) {
-   hi = max(hi, ttForce[i]);
-   lo = min(lo, ttForce[i]);
-}
-console.log(lo + " " + hi);
-*/
       }
    }
 

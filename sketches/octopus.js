@@ -221,11 +221,14 @@ function Octopus() {
             nodes[n].p.sub(this.xyzw);
          this.tX += p.x - q.x;
          this.tY += p.y - q.y;
-
-         //annotateStart();
-         //color('green');
-         //drawRect(q.x - 100, q.y - 100, 200, 200);
-         //annotateEnd();
+/*
+         if (this.blinkTime === undefined)
+	    this.blinkTime = time;
+         if (time > this.blinkTime)
+	    this.blinkTime = time + mix(1, 3, random());  
+         var eyesOpen = this.blinkTime - time < .1 ? 0 : 1;
+	 this._eyeMaterial.setAmbient(.05 + .6 * eyesOpen, .05, .05);
+*/
       });
    }
 

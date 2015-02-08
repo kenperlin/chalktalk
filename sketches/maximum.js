@@ -15,8 +15,9 @@ function Maximum() {
 
       valuesToQuadratic(P, A);
 
+      mLine([-1.5, 0], [1.5, 0]);
+
       this.afterSketch(function() {
-	 mLine([-1.5, 0], [1.5, 0]);
 	 for (var x = -1 ; x <= 1 ; x++) {
 	    color('gray');
 	    mLine([x, -1], [x, 0]);

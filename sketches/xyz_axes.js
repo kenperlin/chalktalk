@@ -1,16 +1,16 @@
 function Axes() {
    this.label = 'axes';
    this.is3D = true;
-   var v = newVec();
+   var tmp = newVec();
    this.render = function() {
       this.duringSketch(function() {
-         mLine([-1,0],[1,0]);
-         mLine([0,-1],[0,1]);
+         mCurve([[-1,0],[1,0]]);
+         mCurve([[0,-1],[0,1]]);
       });
       this.afterSketch(function() {
 
          var e = pointToPixelMatrix.elements;
-	 var showZ = v.set(e[8],e[9],e[10]).normalize().z < .975;
+	 var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
         
 	 textHeight(this.mScale(.1));
 	 mText("x=-1",[-1.2,0,0],.5,.5);

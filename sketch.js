@@ -400,15 +400,19 @@
             return;
          }
 
-         var xlo = Number.MAX_VALUE, ylo = xlo, xhi = -xlo, yhi = -ylo;
-         for (var i = 1 ; i < this.sp.length ; i++) {
-            xlo = min(xlo, this.sp[i][0]);
-            xhi = max(xhi, this.sp[i][0]);
-            ylo = min(ylo, this.sp[i][1]);
-            yhi = max(yhi, this.sp[i][1]);
+	 var x1 = (this.xlo + this.xhi) / 2;
+	 var y1 = (this.ylo + this.yhi) / 2;
+         if (this.sp.length > 1) {
+            var xlo = Number.MAX_VALUE, ylo = xlo, xhi = -xlo, yhi = -ylo;
+            for (var i = 1 ; i < this.sp.length ; i++) {
+               xlo = min(xlo, this.sp[i][0]);
+               xhi = max(xhi, this.sp[i][0]);
+               ylo = min(ylo, this.sp[i][1]);
+               yhi = max(yhi, this.sp[i][1]);
+            }
+            x1 = (xlo + xhi) / 2;
+            y1 = (ylo + yhi) / 2;
          }
-         var x1 = (xlo + xhi) / 2;
-         var y1 = (ylo + yhi) / 2;
 
 	 if (this.text.length == 0) {
 	    this.drawCursor(x1, y1, fontHeight, context);
@@ -1368,7 +1372,6 @@
 	    glyphSketch.fadeAway = 1;
          else
             deleteSketch(glyphSketch);
-console.log(sk().glyphName);
       }
 
       this.getStrokes = function() {
