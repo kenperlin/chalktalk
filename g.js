@@ -1,6 +1,7 @@
 
-   // Do not load any of the following sketches.
-   var ignoredSketches = 'reflect'.split(' ');
+   // Do not load any sketches whose labels are in ignoredSketches.
+
+   var ignoredSketches = [];
 
    // GLOBAL VARIABLES.
 
@@ -3524,7 +3525,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          // TELL THE MATERIAL ABOUT THE CURRENT TIME.
 
-         S.setUniform('time', time);
+         S.setUniform('uTime', time);
 
          // TELL THE MATERIAL WHAT THE CURRENT SKETCH LOCATION IS IN PIXELS.
 
@@ -3536,8 +3537,12 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          // TELL THE MATERIAL WHAT THE CURRENT MOUSE LOCATION IS ON THE SKETCH, ON A RANGE FROM FROM -1 TO +1.
 
          if (! S.isClick) {
-            S.setUniform('mx', (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2));
-            S.setUniform('my',-(S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2));
+            var x =  (S.x - (S.xlo + S.xhi)/2) / ((S.xhi - S.xlo)/2);
+            var y = -(S.y - (S.ylo + S.yhi)/2) / ((S.yhi - S.ylo)/2);
+            S.setUniform('mx', x);
+            S.setUniform('my', y);
+
+	    S.setUniform('uCursor', [x, y, S.mousePressed ? 1 : 0]);
          }
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.
@@ -3545,6 +3550,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          var alpha = (S.fadeAway == 0 ? 1 : S.fadeAway) * (isDef(S.alpha) ? S.alpha : 1);
          mesh.material.transparent = alpha < 1;
          S.setUniform('alpha', alpha);
+         S.setUniform('uAlpha', alpha);
 
          // TELL THE MATERIAL WHICH INDEX IS SELECTED IN THE SKETCH'S CODE TEXT BUBBLE.
 

@@ -547,9 +547,11 @@ function shaderMaterial(vertexShaderString, fragmentShaderString) {
 
    material.vertexShader = formVertexShader(vertexShaderString);
 
-   var u = "alpha mx my mz pixelSize selectedIndex time x y z".split(' ');
+   var u = "alpha uAlpha mx my mz pixelSize selectedIndex uTime x y z".split(' ');
    for (var i = 0 ; i < u.length ; i++)
-      material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" ? 1 : 0) };
+      material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" || u[i]=="uAlpha" ? 1 : 0) };
+
+   material.uniforms.uCursor = { type: "v3", value: newVec() };
 
    addUniforms(material, fragmentShaderString);
    material.fragmentShader = formFragmentShader(fragmentShaderString);
@@ -593,11 +595,11 @@ var defaultFragmentShader = [
    ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
    ,'                           specular.rgb * pow(max(0., S), specular.a) );'
    ,'   }'
-   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'   gl_FragColor = vec4(sqrt(color), uAlpha);'
    ,'}'
 ].join("\n");
 
-// DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, time and alpha.
+// DEFINES FRAGMENT SHADER FUNCTIONS noise() and turbulence() AND VARS x, y, uTime and uAlpha.
 
 var sharedHeader = [
  'precision highp float;'
@@ -663,13 +665,14 @@ var syntaxCheckVertexShaderHeader = [
 ,'uniform mat4  projectionMatrix;'
 ,'varying vec3  normal;'
 ,'varying vec3  position;'
-,'uniform float time;'
+,'uniform float uTime;'
+,'uniform vec3  uCursor;'
 ,''
 ].join('\n');
 
 var vertexShaderHeader = [
  sharedHeader
-,'uniform float time;'
+,'uniform float uTime;'
 ,''
 ].join('\n');
 
@@ -683,9 +686,11 @@ var fragmentShaderHeader = [
 ,'uniform float mz;'
 ,'uniform float pixelSize;'
 ,'uniform float selectedIndex;'
-,'uniform float time;'
-,'varying vec3 vNormal;'
-,'varying vec3 vPosition;'
+,'uniform float uAlpha;'
+,'uniform vec3  uCursor;'
+,'uniform float uTime;'
+,'varying vec3  vNormal;'
+,'varying vec3  vPosition;'
 ,'uniform float x;'
 ,'uniform float y;'
 ,'uniform float z;'

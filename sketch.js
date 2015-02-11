@@ -935,7 +935,9 @@
 	    if (this.vertexShader === undefined)
 	       this.vertexShader = defaultVertexShader;
 
-	    if (this.fragmentShader === undefined)
+	    if (this.fragmentShaders !== undefined)
+	       this.fragmentShader = this.fragmentShaders[0];
+	    else if (this.fragmentShader === undefined)
 	       this.fragmentShader = defaultFragmentShader;
 
             this.shaderMaterial = function(r, g, b) {
@@ -982,7 +984,19 @@
 	    if (this.code == null)
 	       this.code = [];
             this.code.push(["vertexShader", this.vertexShader, this.updateVertexShader]);
-            this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
+
+	    if (this.fragmentShaders !== undefined)
+	       for (var i = 0 ; i < this.fragmentShaders.length ; i++)
+                   this.code.push(["fragmentShader " + (i+1), this.fragmentShaders[i], this.updateFragmentShader]);
+            else
+               this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
+
+            if (! isCodeWidget) {
+	       if (this.fragmentShader === undefined)
+	          this.fragmentShader = this.fragmentShaders[0];
+            }
+	    else
+	       this.fragmentShader = this.fragmentShaders[codeSelector.selectedIndex];
 
             if (this.meshBounds == undefined)
 	       this.meshBounds = [ [-1, -1] , [1, 1] ];
@@ -1041,18 +1055,26 @@
 
 	       // SET TIME.
 
-	       this.setUniform('time', time);
+	       this.setUniform('uTime', time);
 
 	       // SET MOUSE CURSOR.
 
 	       var a = this.toPixel([0,0]);
 	       var b = this.toPixel([1,1]);
 
-	       this.setUniform('mx', (sketchPage.mx - a[0]) / (b[0] - a[0]));
-	       this.setUniform('my', (sketchPage.my - a[1]) / (b[1] - a[1]));
-	       this.setUniform('mz', sketchPage.isPressed ? 1 : 0);
+	       var x = (sketchPage.mx - a[0]) / (b[0] - a[0]);
+	       var y = (sketchPage.my - a[1]) / (b[1] - a[1]);
+	       var z = sketchPage.isPressed ? 1 : 0;
+
+
+	       this.setUniform('mx', x);
+	       this.setUniform('my', y);
+	       this.setUniform('mz', z);
+
+	       this.setUniform('uCursor', [x, y, z]);
 
                this.setUniform('alpha', alpha);
+               this.setUniform('uAlpha', alpha);
             }
 
 	    if (this.updateMesh !== undefined)

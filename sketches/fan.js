@@ -1,5 +1,12 @@
 function Fan() {
    this.label = "fan";
+   this.defaultTurnRate = 0;
+   this.onSwipe = function(dx, dy) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 1: this.defaultTurnRate++; break;
+      case 3: this.defaultTurnRate--; break;
+      }
+   }
    this.turnRate = 0;
    this.angle = 0;
    this.blades = makeSpline([[0,0],[.8,.2],[1,0],[.8,-.1],[0,0],[-.8,.1],[-1,0],[-.8,-.2],[0,0]]);
@@ -35,7 +42,8 @@ function Fan() {
          this.drawBlades();
          m.rotateZ(PI/2);
 	 this.drawBlades();
-	 this.turnRate = mix(this.turnRate, isDef(this.inValues[0]) ? this.inValues[0] : 0, 3 * elapsed);
+	 this.turnRate = mix(this.turnRate, isDef(this.inValues[0])
+	                     ? this.inValues[0] : this.defaultTurnRate, 3 * elapsed);
          this.angle -= 4 * this.turnRate * elapsed;
 	 this.extendBounds(arc(0, 0, 1, 0, TAU, 20));
       });

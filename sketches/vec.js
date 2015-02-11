@@ -66,23 +66,29 @@
       this.render = function(elapsed) {
          var a = 1 / this.nRows();
 	 switch (this.axis()) {
-         case 0: mCurve([[-1,a],[1,a],[1,-a],[-1,-a],[-1,a]]); break;
-         case 1: mCurve([[-a,1],[a,1],[a,-1],[-a,-1],[-a,1]]); break;
+         case 0: mCurve([[1,a],[1,-a],[-1,-a]]); break;
+         case 1: mCurve([[a,1],[a,-1],[-a,-1]]); break;
 	 }
+         this.afterSketch(function() {
+	    switch (this.axis()) {
+	    case 0: mCurve([[-1,-a],[-1,a],[1,a]]); break;
+	    case 1: mCurve([[-a,-1],[-a,1],[a,1]]); break;
+	    }
+	 });
          lineWidth(1);
 	 for (var i = 1 ; i < this.nRows() ; i++) {
-	    var b = lerp(i / this.nRows(), 1, -1);
+	    var b = mix(1, -1, i / this.nRows());
 	    switch (this.axis()) {
             case 0: mLine([-b, a],[-b,-a]); break;
             case 1: mLine([-a, b],[ a, b]); break;
 	    }
          }
          this.afterSketch(function() {
-	    textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (1.5 + this.precision));
+	    textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (2 + this.precision));
 	    var outValue = [];
             for (var i = 0 ; i < this.nRows() ; i++) {
 	       var t = (i+.5) / this.nRows();
-	       var a = this.axis() == 0 ? lerp(t, -1, 1) : lerp(t, 1, -1);
+	       var a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t);
 	       var p = this.axis() == 0 ? [a,0] : [0,a];
                var val = this.getInValue(i, this.value[i]);
 	       mText(roundedString(val, this.precision), p, .5, .5);

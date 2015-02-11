@@ -243,14 +243,17 @@
    var TAU = 2 * PI;
 
    function abs(a) { return Math.abs(a); }
+   function acos(a) { return Math.acos(a); }
    function asin(a) { return Math.asin(a); }
    function atan(a) { return Math.atan(a); }
    function atan2(a, b) { return Math.atan2(a, b); }
+   function ceil(t) { return Math.ceil(t); }
    function cos(t) { return Math.cos(t); }
    function cotan(t) { return Math.cotan(t); }
    function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
    function dot4(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]; }
+   function exp(t) { return Math.exp(t); }
    function floor(t) { return Math.floor(t); }
    function ik(a, b, C, D) {
       var cc = dot(C,C), x = (1 + (a*a - b*b)/cc) / 2, y = dot(C,D)/cc;
@@ -274,6 +277,7 @@
       return sqrt(x * x + y * y);
    }
    function lerp(t,a,b) { return a + t * (b - a); }
+   function log(a, b) { return Math.log(a, b); }
    function max(a,b,c) { return c===undefined ? Math.max(a,b) : Math.max(a,Math.max(b,c)); }
    function min(a,b,c) { return c===undefined ? Math.min(a,b) : Math.min(a,Math.min(b,c)); }
    function mix(a, b, t) {

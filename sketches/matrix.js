@@ -38,16 +38,18 @@
 	 }
       }
       this.render = function(elapsed) {
-         mCurve([[-1,1],[1,1],[1,-1],[-1,-1],[-1,1]]);
-         mLine([-1, .5],[1, .5]);
-         mLine([-.5,1],[-.5,-1]);
+         mCurve([[1,1],[1,-1],[-1,-1]]);
+	 lineWidth(1);
+         mLine([ .5,1],[ .5,-1]);
+         mLine([-1,-.5],[1,-.5]);
 
          this.afterSketch(function() {
-
-            mLine([-1,  0],[1,  0]);
-            mLine([-1,-.5],[1,-.5]);
-            mLine([  0,1],[  0,-1]);
-            mLine([ .5,1],[ .5,-1]);
+            mLine([-1, .5],[1,  .5]);
+            mLine([-1,  0],[1,   0]);
+            mLine([-.5, 1],[-.5,-1]);
+            mLine([  0, 1],[  0,-1]);
+	    lineWidth(2);
+            mCurve([[-1,-1],[-1,1],[1,1]]);
 
 	    var out = [];
 
@@ -92,10 +94,7 @@
 
                for (var col = 0 ; col < 4 ; col++)
                for (var row = 0 ; row < 4 ; row++) {
-                  var val = "" + vals[row + 4 * col];
-	          //if (val == "A") val = "" + sub[0];
-	          //if (val == "B") val = "" + sub[1];
-	          //if (val == "C") val = "" + sub[2];
+	          var val = "" + vals[row + 4 * col];
 	          if (val == "A") val = sub[0];
 	          if (val == "B") val = sub[1];
 	          if (val == "C") val = sub[2];

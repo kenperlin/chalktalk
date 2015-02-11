@@ -790,7 +790,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = codeIsBook() ? "17px serif" : isCodeScript() ? "12px courier" : "18px courier";
+         codeTextArea.style.font = codeIsBook() ? "17px serif" : isCodeScript() ? "12px courier" : "15px courier";
          codeTextArea.value = isCodeScript() ? codeScript() : code()[codeSelector.selectedIndex][1];
 	 if (codeIsBook()) {
             codeTextArea.style.width = '650px';
@@ -840,14 +840,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var w = isCodeScript() ? 640 : min(12 * cols + 10, width() * 0.75);
+      var w = isCodeScript() ? 640 : min(10 * cols + 10, width() * 0.75);
 
       if (rows > 3)
          rows += 0.3;
       if (! isCodeScript() && text.length > 1)
          rows += 1.2;
 
-      var h = isCodeScript() ? floor(14 * rows) : floor(21 * rows);
+      var h = isCodeScript() ? floor(14 * rows) : floor(15.2 * rows);
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 

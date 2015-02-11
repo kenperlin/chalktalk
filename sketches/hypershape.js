@@ -118,8 +118,8 @@ function Hypershape() {
       case 'aerochoron':
          if (this.glyphTransition < 1) {
             mClosedCurve([[0,-1],[1,0],[0,1],[-1,0]]);
+            mLine([0,1],[0,-1]);
             mLine([-1,0],[1,0]);
-            mLine([0,-1],[0,1]);
          }
 	 this.afterSketch(function() {
             for (var n = 0 ; n < 8 ; n++)
