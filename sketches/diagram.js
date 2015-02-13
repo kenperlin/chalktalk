@@ -37,11 +37,24 @@
       this.sx = 1;
       this.sy = 1;
 
+      this.mouseDown = function() {}
+      this.mouseDrag = function() {}
+      this.mouseUp   = function() {}
+
       this.onSwipe = function(dx, dy) {
-         var dir = pieMenuIndex(dx, dy);
          switch (this.labels[this.selection]) {
+         case "circle":
+	    switch (pieMenuIndex(dx, dy, 8)) {
+	    case 1:
+	       this.showParts = true;
+	       break;
+	    case 3:
+	       this.showNormal = true;
+	       break;
+	    }
+	    break;
          case "flap":
-	    switch (dir) {
+            switch (pieMenuIndex(dx, dy)) {
 	    case 1:
                this.exitTime = time;
                this.isExiting = ! this.isExiting;
@@ -424,9 +437,21 @@
 	    var xx = w/2 * this.sx;
 	    var yy = h/2 * this.sy;
             var c = [];
-            for (var a = 0 ; a < TAU ; a += 0.2)
+            for (var a = 0 ; a < TAU ; a += 0.1)
                c.push([xx*cos(a),-yy*sin(a)]);
             drawClosedCurve(c);
+	    var X = xx * cos(PI/4), Y = yy * sin(PI/4);
+	    if (this.showParts !== undefined) {
+	       line(0, 0, X, -Y);
+	       text("x,y,z", 0, 0, .5, -.5);
+	       text("r", X/2, -Y/2, 1.3, 1.2);
+	    }
+	    if (this.showNormal !== undefined) {
+	       arrow(-X, -Y, -X*1.5, -Y*1.5);
+	       text("N", -X*1.7, -Y*1.7, .5, .5);
+	       text("xyz", 0, 0, .5, .5);
+	       text("S", -X, -Y, -.25, -.25);
+	    }
             break;
 
          case "triangle":

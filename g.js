@@ -2236,7 +2236,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
-                  if (sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
+                  if (sk(I) instanceof NumericSketch ||
+		      sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
                      var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
