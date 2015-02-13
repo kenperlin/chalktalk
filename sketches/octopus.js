@@ -277,7 +277,7 @@ function Octopus() {
          var radius0 = .8 * weight * graph.jointRadius(joint);
          this.mesh.add(link.g = graph.newLinkMesh(this.getLinkMaterial(), radius1, radius0, link.nm));
       }
-      graph.placeLinkMesh(link.g, graph.nodes[link.i].p, graph.nodes[link.j].p);
+      link.g.placeLink(graph.nodes[link.i].p, graph.nodes[link.j].p);
    }
 
    var nodeFragmentShader = [

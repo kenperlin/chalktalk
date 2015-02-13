@@ -232,7 +232,7 @@ function Net() {
    this.renderLink = function(link) {
       if (link.g === undefined)
          mesh.add(link.g = this.graph.newLinkMesh(this.netMaterial(), 0.03 * Math.sqrt(link.w)));
-      this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
+      link.g.placeLink(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
    this.netMaterial = function() {

@@ -234,7 +234,7 @@ function Molecule() {
    this.renderLink = function(link) {
       if (link.g === undefined)
          this.mesh.add(link.g = this.graph.newLinkMesh(this.materials.link, 0.05));
-      this.graph.placeLinkMesh(link.g, this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
+      link.g.placeLink(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
    this.netMaterial = function() {

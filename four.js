@@ -148,6 +148,12 @@
       return mesh;
    }
 
+   THREE.Object3D.prototype.placeLink = function(a, b) {
+      this.position.copy(a).lerp(b, 0.5);
+      this.lookAt(b);
+      this.scale.z = a.distanceTo(b) / 2;
+   }
+
    THREE.Geometry.prototype.computeEdges = function() {
       function testEdge(edges, a, b) {
          var h = Math.min(a, b) + "," + Math.max(a, b);

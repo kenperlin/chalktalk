@@ -222,13 +222,6 @@ Graph.prototype = {
       mesh.add(tube);
       return mesh;
    },
-
-   placeLinkMesh: function(linkMesh, a, b) {
-      linkMesh.position.copy(a).lerp(b, 0.5);
-      linkMesh.lookAt(b);
-      linkMesh.scale.z = a.distanceTo(b) / 2;
-   },
-
 };
 
 function GraphResponder() {
