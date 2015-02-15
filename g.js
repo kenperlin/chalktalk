@@ -6,7 +6,8 @@
    // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
-   var backgroundColor = 'black';
+   //var backgroundColor = 'black';
+   var backgroundColor = 'rgb(24,43,62)';
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
@@ -3268,6 +3269,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                          this.glyphSketch != null ? 1.0 - this.glyphSketch.fadeAway :
                          this.meshAlpha !== undefined ? this.meshAlpha :
                          sketchPage.fadeAway;
+            this.mesh.material.transparent = this.alpha < 1;
             this.mesh.setOpacity(sCurve(this.alpha));
 
             if (this.glyphSketch != null && this.glyphSketch.fadeAway == 0)

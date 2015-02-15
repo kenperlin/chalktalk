@@ -20,11 +20,15 @@ function Hypershape() {
       T0.copy(T1);
    }
 
+   // VERTICES OF HYPERCUBE
+
    function _bit(n, b) { return n >> b & 1; }
    function bit(n, b) { return n >> b & 1 ? 1 : -1; }
    var C = [];
    for (var n = 0 ; n < 16 ; n++)
       C.push([ bit(n, 0), bit(n, 1), bit(n, 2), bit(n, 3) ]);
+
+   // VERTICES OF AEROCHORON
 
    var A = [];
    for (var n = 0 ; n < 8 ; n++) {
@@ -32,6 +36,8 @@ function Hypershape() {
       A.push([ axis==0 ? bit(n  , 0) : 0, axis==1 ? bit(n-2, 0) : 0,
                axis==2 ? bit(n-4, 0) : 0, axis==3 ? bit(n-6, 0) : 0 ]);
    }
+
+   // VERTICES OF PENTATOPE
 
    var r5 = sqrt(5);
    var S = [
@@ -42,9 +48,19 @@ function Hypershape() {
       [ 0, 0, 0, r5 - 1/r5],
    ];
 
-   var V = [];
-   for (var n = 0 ; n < 24 ; n++)
-      V.push([0,0,0,0]);
+   // VERTICES OF OCTAPLEX
+
+   var V = [], v = [0,0,0,0];
+   for (var i = 0   ; i < 3 ; i++)
+   for (var j = i+1 ; j < 4 ; j++)
+   for (var k = 0   ; k < 4 ; k++) {
+      v[0] = v[1] = v[2] = v[3] = 0;
+      v[i] = bit(k, 0);
+      v[j] = bit(k, 1);
+      V.push([v[0],v[1],v[2],v[3]]);
+   }
+
+   // TEMPORARY STORAGE FOR 4D VERTICES PROJECTED DOWN TO 3D
 
    var P = [];
    for (var n = 0 ; n < 24 ; n++)
@@ -66,11 +82,10 @@ function Hypershape() {
    }
 
    this.placeEdge = function(n, a, b) {
-      var edge = this.mesh.children[n];
-      edge.position.copy(a).lerp(b, 0.5);
-      edge.lookAt(b);
-      edge.scale.z = a.distanceTo(b) / 2;
+      this.mesh.children[n].placeLink(a, b);
    }
+
+   // EDGES OF HYPERCUBE.  EACH EDGE VALUE j = e[axis][i] CONNECTS VERTEX j TO VERTEX j + (1<<axis)
 
    var edges = [ [0,2,4,6,8,10,12,14],
                  [0,1,4,5,8, 9,12,13],
@@ -158,16 +173,10 @@ function Hypershape() {
 		  break;
 	       }
 	    }
-	    var n = 0;
-	    for (var i = 0   ; i < 4 ; i++)
-	    for (var j = i+1 ; j < 4 ; j++)
-	    for (var k = 0   ; k < 4 ; k++) {
-	       var v = V[n];
-	       v[0] = v[1] = v[2] = v[3] = 0;
-	       v[i] = bit(k, 0);
-	       v[j] = bit(k, 1);
-	       this.placeVertex(n++, v);
-	    }
+
+            for (var n = 0 ; n < V.length ; n++)
+	       this.placeVertex(n, V[n]);
+
 	    for (var i = 0   ; i < 23 ; i++)
 	    for (var j = i+1 ; j < 24 ; j++) {
 	       var k = edgeColor(V[i], V[j]);

@@ -177,7 +177,7 @@ function preLoadObjs(){
  }
  Typewriter.prototype = new SketchTo3D;
 
-
+/*
  function Hammer() {
     this.initSketchTo3D(
        "hammer",
@@ -213,6 +213,7 @@ function preLoadObjs(){
 
  }
  Hammer.prototype = new SketchTo3D;
+*/
 
 
  function Book1() {

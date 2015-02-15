@@ -185,7 +185,7 @@
          return (y - this.y2D) / this.scale();
       },
       duringSketch : function(callbackFunction) {
-         if (this.createMesh !== null ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
+         if (this.createMesh !== undefined ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
             _g.save();
 	    _g.globalAlpha = 1 - this.styleTransition;
             this.duringSketchCallbackFunction = callbackFunction;
@@ -1043,6 +1043,7 @@
 	       function setAlpha(mesh) {
 	          mesh.material.transparent = true;
 		  mesh.material.setUniform('alpha', alpha);
+		  mesh.material.setUniform('uAlpha', alpha);
 	          for (var i = 0 ; i < mesh.children.length ; i++)
 		     setAlpha(mesh.children[i]);
 	       }
