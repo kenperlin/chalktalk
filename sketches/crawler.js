@@ -1,9 +1,12 @@
 function Crawler() {
    this.label = "crawler";
+
+   this.velocity = 0;
    var n = 20;
 
    var myFragmentShader = [
     'uniform vec3 ambient;'
+   ,'uniform float uFoggy;'
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
    ,'uniform vec3 Lrgb[3];'
@@ -14,15 +17,16 @@ function Crawler() {
    ,'   vec3 W = vec3(0.,0.,-1.);'
    ,'   vec3 R = W - 2. * N * dot(N, W);'
    ,'   float n = 1. + .5 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
-   ,'   vec3 color = ambient;'
+   ,'   vec3 color = vec3(.01,.01,.01);'
    ,'   for (int i = 0 ; i < 3 ; i++) {'
    ,'      vec3  L = normalize(Ldir[i]);'
    ,'      float D = dot(N, L);'
    ,'      float S = dot(R, L);'
-   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
-   ,'                           specular.rgb * pow(max(0., S), specular.a * n * n) );'
+   ,'      color += Lrgb[i] * ( .05 * max(0.,D) + pow(max(0., S), 10.) ) * n * n;'
    ,'   }'
-   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'   color *= vec3(.5,.25,.125);'
+   ,'   vec3 fog = vec3(24.,43.,62.) / 255.;'
+   ,'   gl_FragColor = vec4(mix(sqrt(color), fog, uFoggy), alpha);'
    ,'}'
    ].join("\n");
 
@@ -34,6 +38,13 @@ function Crawler() {
                                                 [r/  2,g/  2,b/  2, 2]);
       }
       return this._myMaterial;
+   }
+   
+   this.onSwipe = function(dx, dy) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 0: this.velocity++; break;
+      case 2: this.velocity--; break;
+      }
    }
 
    this.render = function(elapsed) {
@@ -47,16 +58,17 @@ function Crawler() {
       this.fragmentShader = myFragmentShader;
 
       this.afterSketch(function() {
-         if (this.mesh.children.length == 0)
+	 var body = this.mesh.children[0];
+         if (body.children.length == 0) {
             for (var i = 0 ; i < n ; i++) {
 
-               var body = new THREE.Mesh(globeGeometry(32,16), this.getMaterial());
-               var leg1 = new THREE.Mesh(globeGeometry( 4, 2), this.getMaterial());
-               var leg2 = new THREE.Mesh(globeGeometry( 4, 2), this.getMaterial());
+               var blob = new THREE.Mesh(globeGeometry(32,16));
+               var leg1 = new THREE.Mesh(globeGeometry( 4, 2));
+               var leg2 = new THREE.Mesh(globeGeometry( 4, 2));
 
 	       var t = i / (n - 1);
 	       var s = mix(.6, 3, sCurve(t));
-               body.scale.set(mix(2,s*1.3,t)/n, s*1.3/n, s*.3/n);
+               blob.scale.set(mix(2,s*1.3,t)/n, s*1.3/n, s*.3/n);
                leg1.position.set(0, .03*s, 0);
                leg2.position.set(0,-.03*s, 0);
                leg1.rotation.set(0,0, .2);
@@ -65,25 +77,34 @@ function Crawler() {
                leg2.scale.set(.01*s, .1*s, .005*s);
 
                var segment = new THREE.Mesh();
-               segment.add(body);
+               segment.add(blob);
 	       segment.add(leg1);
 	       segment.add(leg2);
 
-               this.mesh.add(segment);
+               body.add(segment);
             }
+            this.mesh.setMaterial(this.getMaterial());
+         }
          for (var i = 0 ; i < n ; i++) {
 	    var t = i / (n - 1);
 	    var s = mix(.6, 3, sCurve(t));
-	    var segment = this.mesh.children[i];
+	    var segment = body.children[i];
 	    var theta = 10. * t + 10 * time;
             segment.position.set(2*t - 1, .03 * sin(theta), s*.3/n);
 	    segment.rotation.z = .1 * cos(theta);
          }
+
+	 body.position.x += this.velocity * elapsed;
+
+	 this.setUniform('uFoggy', exp(-this.scale()));
       });
    }
 
    this.createMesh = function() {
-      return new THREE.Mesh();
+      var body = new THREE.Mesh();
+      var mesh = new THREE.Mesh();
+      mesh.add(body);
+      return mesh;
    }
 }
 Crawler.prototype = new Sketch;

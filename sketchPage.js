@@ -1392,6 +1392,9 @@
             if (isk())
                sk().isCard = ! sk().isCard;
             break;
+         case 'C':
+	    this.hideCursor = this.hideCursor === undefined ? true : undefined;
+            break;
          case 'd':
             showingLiveDataMode = (showingLiveDataMode + 1) % 3;
             break;

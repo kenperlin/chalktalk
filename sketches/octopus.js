@@ -213,14 +213,21 @@ function Octopus() {
 
 	 // GRADUALLY RECENTER THE OCTOPUS TO ITS LOCAL ORIGIN.
 
-         var p = this._p, q = this._q;
+         var p = this._p;
          p.copy(nodes[0].p).applyMatrix4(pointToPixelMatrix);
+
+	 var q = this._q;
          q.set(0,1,0).applyMatrix4(pointToPixelMatrix);
-         this.xyzw.set(p.x - q.x, p.y - q.y, 0, 0).applyMatrix4(pixelToPointMatrix);
+
+	 var dx = (p.x - q.x) * .1;
+	 var dy = (p.y - q.y) * .1;
+
+         this.xyzw.set(dx, dy, 0, 0).applyMatrix4(pixelToPointMatrix);
          for (var n = 0 ; n < nodes.length ; n++) 
             nodes[n].p.sub(this.xyzw);
-         this.tX += p.x - q.x;
-         this.tY += p.y - q.y;
+
+         this.tX += dx;
+         this.tY += dy;
 /*
          if (this.blinkTime === undefined)
 	    this.blinkTime = time;
@@ -229,6 +236,7 @@ function Octopus() {
          var eyesOpen = this.blinkTime - time < .1 ? 0 : 1;
 	 this._eyeMaterial.setAmbient(.05 + .6 * eyesOpen, .05, .05);
 */
+         this.setUniform('uFoggy', exp(-this.scale()));
       });
    }
 
@@ -236,7 +244,11 @@ function Octopus() {
    this._q = newVec();
    this.xyzw = new THREE.Vector4();
 
-   this.createMesh = function() { return new THREE.Mesh(); }
+   this.createMesh = function() {
+      var mesh = new THREE.Mesh();
+      mesh.setMaterial(this.getNodeMaterial());
+      return mesh;
+   }
 
    this.renderNode = function(node) {
       var nodes = this.graph.nodes;
@@ -282,25 +294,27 @@ function Octopus() {
 
    var nodeFragmentShader = [
     'uniform vec3 ambient;'
+   ,'uniform float uFoggy;'
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
    ,'uniform vec3 Lrgb[3];'
    ,'uniform vec3 Ldir[3];'
    ,'void main() {'
-   ,'   vec3 P = vPosition;'
+   ,'   vec3 P = vPosition * .5;'
    ,'   vec3 N = normalize(vNormal);'
    ,'   vec3 W = vec3(0.,0.,-1.);'
    ,'   vec3 R = W - 2. * N * dot(N, W);'
-   ,'   float n = 1. + .7 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
-   ,'   vec3 color = ambient;'
+   ,'   float n = 1. + 1.1 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
+   ,'   vec3 color = vec3(.01,.01,.01);'
    ,'   for (int i = 0 ; i < 3 ; i++) {'
    ,'      vec3  L = normalize(Ldir[i]);'
    ,'      float D = dot(N, L);'
    ,'      float S = dot(R, L);'
-   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) +'
-   ,'                           specular.rgb * pow(max(0., S), specular.a * n * n) );'
+   ,'      color += Lrgb[i] * ( .05 * max(0.,D) + 1.3 * pow(max(0., S), 10.) ) * n * n;'
    ,'   }'
-   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'   color *= vec3(.5,.1,.05);'
+   ,'   vec3 fog = vec3(24.,43.,62.) / 255.;'
+   ,'   gl_FragColor = vec4(mix(sqrt(color), fog, uFoggy), alpha);'
    ,'}'
    ].join("\n");
 

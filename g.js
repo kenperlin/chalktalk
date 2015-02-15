@@ -741,9 +741,6 @@ console.log(harry.fred);
       + " <div id='slide' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
-      + " <canvas id='sketch_canvas' tabindex=1"
-      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
-      + " </canvas>"
       +
       (isShowingRenderer
        ?
@@ -755,6 +752,9 @@ console.log(harry.fred);
          + "    style='z-index:1;position:absolute;left:0;top:0;'>"
          + " <!!/div>"
       )
+      + " <canvas id='sketch_canvas' tabindex=1"
+      + "    style='z-index:1;position:absolute;left:0;top:0;'>"
+      + " </canvas>"
       + " <canvas id='events_canvas' tabindex=1"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </canvas>"
@@ -894,8 +894,13 @@ console.log(harry.fred);
 
 //server.set("state/foobar", "1234");
 
+      OR_imageObj = new Image();
+      OR_imageObj.src = "imgs/smoke_0.png";
+
       setInterval( function() { tick(g); }, 1000 / 60);
    }
+
+   var OR_imageObj;
 
    var sketchType = 0;
    var pageIndex = 0;
@@ -942,6 +947,7 @@ console.log(harry.fred);
       ['a'  , "toggle audience"],
       ['b'  , "bend line"],
       ['c'  , "toggle card"],
+      ['C'  , "hide/show cursor"],
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['f'  , "bring sketch to front"],
@@ -2108,6 +2114,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          document.body.style.cursor =
             (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
+	    sketchPage.hideCursor !== undefined ||
             isExpertMode && (pieMenuIsActive || isSketchInProgress())
                                                 ? 'none'
             : bgClickCount == 1                 ? 'cell'
@@ -2855,6 +2862,14 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          }
       }
 
+      var motionNoise = new Noise();
+      var orw = width() + 1000;
+      for (var i = 0 ; i < 10 ; i++) {
+         var x = 500 * (motionNoise.noise([  .5, .1 * time, 10 * i + .5]) - 1);
+         var y = 500 * (motionNoise.noise([10.5, .1 * time, 10 * i + .5]) - 1);
+         _g.drawImage(OR_imageObj, x, y, orw, orw);
+      }
+
       if (window.debugMessage !== undefined) {
          annotateStart();
          _g.fillStyle = _g.strokeStyle = 'cyan';
@@ -3254,6 +3269,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          if (this.inValue[0] !== undefined) this.setUniform("x", this.inValue[0]);
          if (this.inValue[1] !== undefined) this.setUniform("y", this.inValue[1]);
          if (this.inValue[2] !== undefined) this.setUniform("z", this.inValue[2]);
+
+	 this.setUniform('uTime', time);
 
          if (isDef(this.mesh.update))
             this.mesh.update(elapsed);

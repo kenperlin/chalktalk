@@ -21,6 +21,7 @@ function Spiky() {
 
    var myFragmentShader = [
     'uniform vec3 ambient;'
+   ,'uniform float uFoggy;'
    ,'uniform vec3 diffuse;'
    ,'uniform vec4 specular;'
    ,'uniform vec3 Lrgb[3];'
@@ -29,19 +30,18 @@ function Spiky() {
    ,'   vec3 P = vPosition * 15.;'
    ,'   vec3 N = normalize(vNormal);'
    ,'   vec3 W = vec3(0.,0.,-1.);'
-   ,'   vec3 bg = vec3(0.24,0.43,0.62);'
    ,'   vec3 R = W - 2. * N * dot(N, W);'
    ,'   float n = 1. + .5 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
-   ,'   vec3 color = bg * .2;'
+   ,'   vec3 color = vec3(.01,.01,.01);'
    ,'   for (int i = 0 ; i < 3 ; i++) {'
    ,'      vec3  L = normalize(Ldir[i]);'
    ,'      float D = dot(N, L);'
    ,'      float S = dot(R, L);'
-   ,'      color += Lrgb[i] * ( diffuse * mix(max(0.,D),max(0.,.5+.5*D),.5) * bg +'
-   ,'                           specular.rgb * pow(max(0., S), specular.a * n * n) );'
-   ,'      color *= vec3(1.,.5,.25);'
+   ,'      color += Lrgb[i] * ( .05 * max(0.,D) + pow(max(0., S), 10.) ) * n * n;'
    ,'   }'
-   ,'   gl_FragColor = vec4(sqrt(color), alpha);'
+   ,'   color *= vec3(.5,.15,.05);'
+   ,'   vec3 fog = vec3(24.,43.,62.) / 255.;'
+   ,'   gl_FragColor = vec4(mix(sqrt(color), fog, uFoggy), alpha);'
    ,'}'
    ].join("\n");
 
@@ -55,6 +55,8 @@ function Spiky() {
    var a = newVec();
    var b = newVec();
 
+   var r = 0.3;
+
    this.render = function() {
 
       this.duringSketch(function() {
@@ -62,16 +64,16 @@ function Spiky() {
 	 case 'spiky1':
 	    if (V.length == 0) {
                function bit(n, b) { return n >> b & 1 ? 1 : -1; }
-               V = [newVec(-1,0,0), newVec(1,0,0),
-                    newVec(0,-1,0), newVec(0,1,0),
-                    newVec(0,0,-1), newVec(0,0,1)];
+               V = [newVec(-r,0,0), newVec(r,0,0),
+                    newVec(0,-r,0), newVec(0,r,0),
+                    newVec(0,0,-r), newVec(0,0,r)];
                for (var i = 0 ; i <= 1 ; i++)
                for (var j = 2 ; j <= 3 ; j++)
                for (var k = 4 ; k <= 5 ; k++)
                   T.push([i,j,k]);
 	    }
-            mCurve([[0,-1],[ 1,0],[0, 1]]);
-            mCurve([[0, 1],[-1,0],[0,-1]]);
+            mCurve([[0,-r],[ r,0],[0, r]]);
+            mCurve([[0, r],[-r,0],[0,-r]]);
             break;
 
 	 case 'spiky2':
@@ -97,10 +99,12 @@ function Spiky() {
          for (var i = 0 ; i < V.length ; i++) {
             var spike = this.mesh.children[T.length + i];
 	    var v = V[i];
-	    a.copy(v).multiplyScalar(0.8 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time]));
+	    var radius = this.selection == 0 ? .7 : .8;
+	    a.copy(v).multiplyScalar(radius * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
 	    b.copy(a).multiplyScalar(1.8);
             spike.placeLink(a, b);
          }
+	 this.setUniform('uFoggy', exp(-this.scale()));
       });
    }
 
@@ -121,7 +125,8 @@ function Spiky() {
       }
 
       for (var i = 0 ; i < V.length ; i++) { 
-         var tube = new THREE.Mesh(new THREE.CylinderGeometry(0.0, 0.1, 2, 4, 1, true));
+         var radius = this.selection == 0 ? .05 : .1;
+         var tube = new THREE.Mesh(new THREE.CylinderGeometry(0.0, radius, 2, 4, 1, true));
          tube.rotation.x = Math.PI / 2;
          var spike = new THREE.Mesh();
          spike.add(tube);
