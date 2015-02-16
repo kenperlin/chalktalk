@@ -55,31 +55,33 @@ function Spiky() {
    var a = newVec();
    var b = newVec();
 
-   var r = 0.3;
-
    this.render = function() {
 
       this.duringSketch(function() {
          switch (this.labels[this.selection]) {
+
 	 case 'spiky1':
+
 	    if (V.length == 0) {
-               function bit(n, b) { return n >> b & 1 ? 1 : -1; }
-               V = [newVec(-r,0,0), newVec(r,0,0),
-                    newVec(0,-r,0), newVec(0,r,0),
-                    newVec(0,0,-r), newVec(0,0,r)];
+               V = [newVec(-1,0,0), newVec(1,0,0),
+                    newVec(0,-1,0), newVec(0,1,0),
+                    newVec(0,0,-1), newVec(0,0,1)];
+
                for (var i = 0 ; i <= 1 ; i++)
                for (var j = 2 ; j <= 3 ; j++)
                for (var k = 4 ; k <= 5 ; k++)
                   T.push([i,j,k]);
 	    }
-            mCurve([[0,-r],[ r,0],[0, r]]);
-            mCurve([[0, r],[-r,0],[0,-r]]);
+            mCurve([[0,-1],[ 1,0],[0, 1]]);
+            mCurve([[0, 1],[-1,0],[0,-1]]);
             break;
 
 	 case 'spiky2':
+
 	    if (V.length == 0) {
                for (var i = 0 ; i < P.length ; i++)
                   V.push(newVec(P[i][0]*.6,P[i][1]*.6,P[i][2]*.6));
+
                T = [ [0, 11, 5],  [0,  5,  1],  [ 0,  1,  7],  [ 0, 7, 10],  [0, 10, 11],
                      [1,  5, 9],  [5, 11,  4],  [11, 10,  2],  [10, 7,  6],  [7,  1,  8],
                      [3,  9, 4],  [3,  4,  2],  [ 3,  2,  6],  [ 3, 6,  8],  [3,  8,  9],
@@ -99,12 +101,11 @@ function Spiky() {
          for (var i = 0 ; i < V.length ; i++) {
             var spike = this.mesh.children[T.length + i];
 	    var v = V[i];
-	    var radius = this.selection == 0 ? .7 : .8;
-	    a.copy(v).multiplyScalar(radius * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
+	    a.copy(v).multiplyScalar(.8 * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
 	    b.copy(a).multiplyScalar(1.8);
             spike.placeLink(a, b);
          }
-	 this.setUniform('uFoggy', exp(-this.scale()));
+	 this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
       });
    }
 

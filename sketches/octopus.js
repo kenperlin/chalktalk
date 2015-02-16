@@ -236,7 +236,9 @@ function Octopus() {
          var eyesOpen = this.blinkTime - time < .1 ? 0 : 1;
 	 this._eyeMaterial.setAmbient(.05 + .6 * eyesOpen, .05, .05);
 */
-         this.setUniform('uFoggy', exp(-this.scale()));
+         var foggy = exp(-this.scale());
+         this._nodeMaterial.setUniform('uFoggy', foggy);
+         this._linkMaterial.setUniform('uFoggy', foggy);
       });
    }
 
@@ -318,6 +320,32 @@ function Octopus() {
    ,'}'
    ].join("\n");
 
+   var linkFragmentShader = [
+    'uniform vec3 ambient;'
+   ,'uniform float uFoggy;'
+   ,'uniform vec3 diffuse;'
+   ,'uniform vec4 specular;'
+   ,'uniform vec3 Lrgb[3];'
+   ,'uniform vec3 Ldir[3];'
+   ,'void main() {'
+   ,'   vec3 P = vPosition * .5;'
+   ,'   vec3 N = normalize(vNormal);'
+   ,'   vec3 W = vec3(0.,0.,-1.);'
+   ,'   vec3 R = W - 2. * N * dot(N, W);'
+   ,'   float n = 1. + 1.1 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 12.) * P) / 12.);'
+   ,'   vec3 color = vec3(.01,.01,.01);'
+   ,'   for (int i = 0 ; i < 3 ; i++) {'
+   ,'      vec3  L = normalize(Ldir[i]);'
+   ,'      float D = dot(N, L);'
+   ,'      float S = dot(R, L);'
+   ,'      color += Lrgb[i] * ( .05 * max(0.,D) + 1.3 * pow(max(0., S), 20.) ) * n * n;'
+   ,'   }'
+   ,'   color *= vec3(.5,.5,.5);'
+   ,'   vec3 fog = vec3(24.,43.,62.) / 255.;'
+   ,'   gl_FragColor = vec4(mix(sqrt(color), fog, uFoggy), alpha);'
+   ,'}'
+   ].join("\n");
+
    this.getNodeMaterial = function() {
       if (this._nodeMaterial === undefined) {
          this.fragmentShader = nodeFragmentShader;
@@ -332,9 +360,10 @@ function Octopus() {
    this.getLinkMaterial = function() {
       if (this._linkMaterial === undefined) {
          var r = 1, g = 1, b = 1;
-         this._linkMaterial = new phongMaterial().setAmbient (.05*r,.05*g,.05*b)
-	                                         .setDiffuse (.20*r,.20*g,.20*b)
-	 			                 .setSpecular(.17*r,.17*g,.17*b,30);
+         this.fragmentShader = linkFragmentShader;
+         this._linkMaterial = this.shaderMaterial([r/200,g/200,b/200],
+	                                          [r/ 30,g/ 30,b/ 30],
+						  [r/  2,g/  2,b/  2, 7]);
       }
       return this._linkMaterial;
    }
