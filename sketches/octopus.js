@@ -213,22 +213,14 @@ function Octopus() {
 
 	 // GRADUALLY RECENTER THE OCTOPUS TO ITS LOCAL ORIGIN.
 
-         var p = this._p;
-         p.copy(nodes[0].p).applyMatrix4(pointToPixelMatrix);
-
-	 var q = this._q;
-         q.set(0,1,0).applyMatrix4(pointToPixelMatrix);
-
-	 var dx = (p.x - q.x) * .1;
-	 var dy = (p.y - q.y) * .1;
-
-         this.xyzw.set(dx, dy, 0, 0).applyMatrix4(pixelToPointMatrix);
+         if (this._recenter_point === undefined)
+            this._recenter_point = newVec(0,1,0);
+	 var dp = this.recenter3DSketch(nodes[0].p, this._recenter_point);
          for (var n = 0 ; n < nodes.length ; n++) 
-            nodes[n].p.sub(this.xyzw);
-
-         this.tX += dx;
-         this.tY += dy;
+            nodes[n].p.sub(dp);
 /*
+         // BLINKING LOGIC (DISABLED FOR NOW).
+
          if (this.blinkTime === undefined)
 	    this.blinkTime = time;
          if (time > this.blinkTime)
@@ -236,6 +228,8 @@ function Octopus() {
          var eyesOpen = this.blinkTime - time < .1 ? 0 : 1;
 	 this._eyeMaterial.setAmbient(.05 + .6 * eyesOpen, .05, .05);
 */
+         // MODIFY ALL MATERIALS FOR FOG DISTANCE.
+
          var foggy = exp(-this.scale());
          this._nodeMaterial.setUniform('uFoggy', foggy);
          this._linkMaterial.setUniform('uFoggy', foggy);

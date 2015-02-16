@@ -327,10 +327,18 @@
          color(PUSHED_color);
       }
    }
+   var _mCurveXYZ = [0,0,0];
    function mCurve(c) {
       var cc = [];
       for (var n = 0 ; n < c.length ; n++)
-         cc.push(m.transform(c[n]));
+         if (c[n] instanceof THREE.Vector3) {
+	    _mCurveXYZ[0] = c[n].x;
+	    _mCurveXYZ[1] = c[n].y;
+	    _mCurveXYZ[2] = c[n].z;
+            cc.push(m.transform(_mCurveXYZ));
+         }
+	 else
+            cc.push(m.transform(c[n]));
       drawCurve(cc);
    };
    function mClosedCurve(c) {

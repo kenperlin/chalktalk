@@ -2,13 +2,13 @@
    // ALL THE POSSIBLE DRAWING COLORS FOR A SKETCH.
 
    var paletteRGB = [
-      [255,255,255],	// CHANGES BETWEEN WHITE AND BLACK, WHENEVER USER TOGGLES WITH '-' KEY.
-      [255,  0,  0],	// RED
-      [255,128,  0],	// ORANGE
-      [255,255,  0],	// YELLOW
-      [  0,255,  0],	// GREEN
-      [  0,  0,255],	// BLUE
-      [255,  0,255],	// MAGENTA
+      [255,255,255],        // CHANGES BETWEEN WHITE AND BLACK, WHENEVER USER TOGGLES WITH '-' KEY.
+      [255,  0,  0],        // RED
+      [255,128,  0],        // ORANGE
+      [255,255,  0],        // YELLOW
+      [  0,255,  0],        // GREEN
+      [  0,  0,255],        // BLUE
+      [255,  0,255],        // MAGENTA
    ];
 
    var palette = [];
@@ -117,40 +117,40 @@
 
       arrowDrag : function(x, y) {
          var n = this.arrows.length - 1;
-	 if (this.arrows[n] !== undefined)
+         if (this.arrows[n] !== undefined)
             this.arrows[n][0].push([x,y]);
       },
 
       arrowEnd : function(x, y) {
          var n = this.arrows.length - 1;
-	 var sketches = sketchPage.sketchesAt(x, y);
-	 if (sketches.length == 0 || sketches[0] == this) {
-	    this.arrows.splice(n, 1); // If this is an arrow to nowhere, just delete it.
+         var sketches = sketchPage.sketchesAt(x, y);
+         if (sketches.length == 0 || sketches[0] == this) {
+            this.arrows.splice(n, 1); // If this is an arrow to nowhere, just delete it.
          }
          else {
-	    var s = this.arrows[n][0];
+            var s = this.arrows[n][0];
             this.arrows[n][0] = computeCurvature(s[0], s[floor(s.length/2)], s[s.length-1]);
-	    this.arrows[n][1] = sketches[0];
+            this.arrows[n][1] = sketches[0];
          }
       },
 
       arrowFade : function(sketch) {
          for (var n = 0 ; n < this.arrows.length ; n++)
-	    if (this.arrows[n][1] == sketch)
-	       this.arrows[n][2] = 1;
+            if (this.arrows[n][1] == sketch)
+               this.arrows[n][2] = 1;
       },
 
       arrowRemove : function(sketch) {
          for (var n = 0 ; n < this.arrows.length ; n++)
-	    if (this.arrows[n][1] == sketch)
-	       this.arrows.splice(n--, 1);
+            if (this.arrows[n][1] == sketch)
+               this.arrows.splice(n--, 1);
       },
       fade : function() {
          return this.fadeAway == 0 ? 1 : this.fadeAway;
       },
       setColorId : function(i) {
          this.colorId = i;
-	 this.color = palette[i];
+         this.color = palette[i];
       },
       setRenderMatrix : function(mat) {
          var D = norm(vecDiff(m.transform([0,0,0]), m.transform([1,0,0]))) * this.xyzS();
@@ -159,16 +159,16 @@
 
          mat.identity();
 
-	 mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
+         mat.translate((p[0] - width()/2) / s, (height()/2 - p[1]) / s, 0);
 
-	 //mat.perspective(0, 0, -7 * height() / s);
+         //mat.perspective(0, 0, -7 * height() / s);
 
-	 var yy = min(1, 4 * this.rY * this.rY);
-	 mat.rotateX(PI * -this.rY);
-	 mat.rotateY(PI *  this.rX * (1 - yy));
-	 mat.rotateZ(PI * -this.rX * yy);
+         var yy = min(1, 4 * this.rY * this.rY);
+         mat.rotateX(PI * -this.rY);
+         mat.rotateY(PI *  this.rX * (1 - yy));
+         mat.rotateZ(PI * -this.rX * yy);
 
-	 mat.scale(D / s);
+         mat.scale(D / s);
       },
       transformX2D : function(x, y) {
          var angle = 2 * this.rX;
@@ -187,7 +187,7 @@
       duringSketch : function(callbackFunction) {
          if (this.createMesh !== undefined ? this.glyphTransition < 0.5 : this.sketchProgress < 1) {
             _g.save();
-	    _g.globalAlpha = 1 - this.styleTransition;
+            _g.globalAlpha = 1 - this.styleTransition;
             this.duringSketchCallbackFunction = callbackFunction;
             this.duringSketchCallbackFunction();
             _g.restore();
@@ -208,10 +208,10 @@
       },
       extendBounds : function(points) {
          this.afterSketch(function() {
-	    var saveStrokeStyle = _g.strokeStyle;
+            var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
             mCurve(points);
-	    _g.strokeStyle = saveStrokeStyle;
+            _g.strokeStyle = saveStrokeStyle;
          });
       },
       clearPorts : function() {
@@ -246,8 +246,8 @@
             else
                dst[prop] = this[prop];
          }
-	 if (dst.initCopy !== undefined)
-	    dst.initCopy();
+         if (dst.initCopy !== undefined)
+            dst.initCopy();
          return dst;
       },
       computeGroupBounds : function() {
@@ -357,8 +357,8 @@
                   context.strokeStyle = backgroundColor;
                   context.fillStyle = dataColor;
                   context.font = fontSize + 'pt Comic Sans MS';
-		  var str = val;
-		  if (isNumeric(val)) {
+                  var str = val;
+                  if (isNumeric(val)) {
                      str = roundedString(val);
 
                      // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
@@ -371,11 +371,11 @@
                         i = str.indexOf('.');
                      }
                   }
-		  else if (Array.isArray(val)) {
-		     str = "";
-		     for (var i = 0 ; i < val.length ; i++)
-		        str += roundedString(val[i]) + (i < val.length-1 ? "," : "");
-		  }
+                  else if (Array.isArray(val)) {
+                     str = "";
+                     for (var i = 0 ; i < val.length ; i++)
+                        str += roundedString(val[i]) + (i < val.length-1 ? "," : "");
+                  }
                   var dx = this.isFloat ? textWidth(str.substring(0, i))
                                         : textWidth(str) / 2;
 
@@ -400,8 +400,8 @@
             return;
          }
 
-	 var x1 = (this.xlo + this.xhi) / 2;
-	 var y1 = (this.ylo + this.yhi) / 2;
+         var x1 = (this.xlo + this.xhi) / 2;
+         var y1 = (this.ylo + this.yhi) / 2;
          if (this.sp.length > 1) {
             var xlo = Number.MAX_VALUE, ylo = xlo, xhi = -xlo, yhi = -ylo;
             for (var i = 1 ; i < this.sp.length ; i++) {
@@ -414,11 +414,11 @@
             y1 = (ylo + yhi) / 2;
          }
 
-	 if (this.text.length == 0) {
-	    this.drawCursor(x1, y1, fontHeight, context);
+         if (this.text.length == 0) {
+            this.drawCursor(x1, y1, fontHeight, context);
             context.restore();
-	    return;
-	 }
+            return;
+         }
 
          var j = 0;
          for (var n = 0 ; n < this.textStrs.length ; n++) {
@@ -652,7 +652,7 @@
             if (this instanceof Sketch2D) {
                var p = this.portLocation[i];
                p = [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
-	       return this.adjustXY(p);
+               return this.adjustXY(p);
             }
             else {
                m.save();
@@ -660,7 +660,7 @@
                var p = this.portLocation[i];
                var xy = m.transform(p);
                m.restore();
-	       return this.adjustXY(xy);
+               return this.adjustXY(xy);
             }
          }
          return this.adjustXY([this.cx(),this.cy()]);
@@ -683,21 +683,21 @@
          if (this.sp.length > 1) {
             var i = this.sp.length;
             while (--i > 0 && this.sp[i][2] == 1) ;
-	    if (this.sp0 !== undefined)
+            if (this.sp0 !== undefined)
                this.sp0.splice(i, this.sp.length-i);
             this.sp.splice(i, this.sp.length-i);
          }
       },
       renderWrapper : function(elapsed) {
-	 this.afterSketchTransition = this.glyphTransition < 1 ? 0 :
-	                              min(1, this.afterSketchTransition + 2 * elapsed);
-	 _g.save();
+         this.afterSketchTransition = this.glyphTransition < 1 ? 0 :
+                                      min(1, this.afterSketchTransition + 2 * elapsed);
+         _g.save();
          m.save();
-	 this.render(elapsed);
+         this.render(elapsed);
          m.restore();
-	 _g.restore();
-	 if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
-	    this._updateMesh();
+         _g.restore();
+         if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
+            this._updateMesh();
          }
       },
       scale : function(value) {
@@ -742,11 +742,36 @@
       },
       outPortIndex : function(forceCreation) {
          var i = getIndex(this.portName, 'out');
-	 if (i == -1 && forceCreation !== undefined) {
-	    this.addPort('out', 0, 0);
+         if (i == -1 && forceCreation !== undefined) {
+            this.addPort('out', 0, 0);
             i = getIndex(this.portName, 'out');
          }
-	 return i;
+         return i;
+      },
+      recenter3DSketch : function(p, q) {
+         if (this._recenter_p === undefined) {
+            this._recenter_p = newVec();
+            this._recenter_q = newVec(); 
+            this._recenter_r = newVec4();
+         }
+         var _p = this._recenter_p,
+             _q = this._recenter_q,
+             _r = this._recenter_r;
+
+         _p.copy(p);
+         if (q === undefined)
+            _q.set(0,0,0);
+         else
+            _q.copy(q);
+
+         _p.applyMatrix4(pointToPixelMatrix);
+         _q.applyMatrix4(pointToPixelMatrix);
+         var dx = (_p.x - _q.x) * .1;
+         var dy = (_p.y - _q.y) * .1;
+         this.tX += dx;
+         this.tY += dy;
+         _r.set(dx, dy, 0, 0).applyMatrix4(pixelToPointMatrix);
+         return _r;
       },
       setOutPortValue : function(value) {
          this.outPortIndex(true);
@@ -764,7 +789,7 @@
          }
          this.selection = s;
          this.updateSelectionWeights(0);
-	 this.setup();
+         this.setup();
       },
       selectionWeight : function(i) {
          return sCurve(this.selectionWeights[i]);
@@ -848,9 +873,9 @@
       },
       toTrace : function() {
          var src = this.sp;
-	 var dst = [];
-	 for (var i = 0 ; i < src.length ; i++)
-	    buildTrace(dst, src[i][0], src[i][1], src[i][2]);
+         var dst = [];
+         for (var i = 0 ; i < src.length ; i++)
+            buildTrace(dst, src[i][0], src[i][1], src[i][2]);
          return dst;
       },
       translate : function(dx, dy) {
@@ -886,8 +911,8 @@
             x = this.parent.tx() + this.parent.scale() * x;
             x += cx;
          }
-	 if (this.hasMotionPath())
-	    x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
+         if (this.hasMotionPath())
+            x += sample(this.motionPath[0], motion[this.colorId]) - this.motionPath[0][0];
          return x;
       },
       ty : function() {
@@ -900,8 +925,8 @@
             y = this.parent.ty() + this.parent.scale() * y;
             y += cy;
          }
-	 if (this.hasMotionPath())
-	    y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
+         if (this.hasMotionPath())
+            y += sample(this.motionPath[1], motion[this.colorId]) - this.motionPath[1][0];
          return y;
       },
       xform : function(xy) {
@@ -923,167 +948,167 @@
       enableFragmentShaderEditing : function() {
          if (this.code === undefined)
             this.code = [["", this.fragmentShader]];
-	 this.update = function() {
+         this.update = function() {
             if (isCodeWidget && this.fragmentShader != codeTextArea.value
                              && isValidFragmentShader(formFragmentShader(codeTextArea.value)))
                this.mesh.material = shaderMaterial(this.vertexShader === undefined ? defaultVertexShader : this.vertexShader,
                                                    this.fragmentShader = codeTextArea.value);
-	 }
+         }
       },
       _updateMesh : function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
-	    if (this.vertexShader === undefined)
-	       this.vertexShader = defaultVertexShader;
+            if (this.vertexShader === undefined)
+               this.vertexShader = defaultVertexShader;
 
-	    if (this.fragmentShaders !== undefined)
-	       this.fragmentShader = this.fragmentShaders[0];
-	    else if (this.fragmentShader === undefined)
-	       this.fragmentShader = defaultFragmentShader;
+            if (this.fragmentShaders !== undefined)
+               this.fragmentShader = this.fragmentShaders[0];
+            else if (this.fragmentShader === undefined)
+               this.fragmentShader = defaultFragmentShader;
 
             this.shaderMaterial = function(r, g, b) {
-	       var material = shaderMaterial(this.vertexShader, this.fragmentShader);
-	       //material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
-	       //material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
-	       material.setUniform('Ldir', [[ 1.0, 1.0, 1.0], [-1.0,-0.5,-1.0]]);
-	       material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1]]);
-	       if (r === undefined)
-	          r = g = b = 1;
-	       if (Array.isArray(r)) {
-	          material.setUniform('ambient' , r);
-	          material.setUniform('diffuse' , g);
-	          material.setUniform('specular', b);
-	       }
-	       else {
-	          material.setUniform('ambient' , [r*.02,g*.02,b*.02]);
-	          material.setUniform('diffuse' , [r*.10,g*.10,b*.10]);
-	          material.setUniform('specular', [.5,.5,.5,15]);
+               var material = shaderMaterial(this.vertexShader, this.fragmentShader);
+               //material.setUniform('Ldir', [[ 1.0, 1.0, 0.5], [-1.0,-0.5,-1.0], [ 0.0,-1.0,-1.2]]);
+               //material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1], [ 0.1, 0.1, 0.1]]);
+               material.setUniform('Ldir', [[ 1.0, 1.0, 1.0], [-1.0,-0.5,-1.0]]);
+               material.setUniform('Lrgb', [[ 1.0, 1.0, 1.0], [ 0.1, 0.1, 0.1]]);
+               if (r === undefined)
+                  r = g = b = 1;
+               if (Array.isArray(r)) {
+                  material.setUniform('ambient' , r);
+                  material.setUniform('diffuse' , g);
+                  material.setUniform('specular', b);
                }
-	       return material;
+               else {
+                  material.setUniform('ambient' , [r*.02,g*.02,b*.02]);
+                  material.setUniform('diffuse' , [r*.10,g*.10,b*.10]);
+                  material.setUniform('specular', [.5,.5,.5,15]);
+               }
+               return material;
             }
 
-	    this.updateVertexShader = function() {
-	       if (this.vertexShader != codeTextArea.value) {
+            this.updateVertexShader = function() {
+               if (this.vertexShader != codeTextArea.value) {
                   var isValid = isValidVertexShader(formSyntaxCheckVertexShader(codeTextArea.value));
                   if (isValid) {
                      this.vertexShader = codeTextArea.value;
                      this.mesh.material = this.shaderMaterial();
                   }
                }
-	    }
+            }
 
-	    this.updateFragmentShader = function() {
-	       if (this.fragmentShader != codeTextArea.value) {
+            this.updateFragmentShader = function() {
+               if (this.fragmentShader != codeTextArea.value) {
                   var isValid = isValidFragmentShader(formFragmentShader(codeTextArea.value));
                   if (isValid) {
                      this.fragmentShader = codeTextArea.value;
                      this.mesh.material = this.shaderMaterial();
                   }
                }
-	    }
+            }
 
-	    if (this.code == null)
-	       this.code = [];
+            if (this.code == null)
+               this.code = [];
             this.code.push(["vertexShader", this.vertexShader, this.updateVertexShader]);
 
-	    if (this.fragmentShaders !== undefined)
-	       for (var i = 0 ; i < this.fragmentShaders.length ; i++)
+            if (this.fragmentShaders !== undefined)
+               for (var i = 0 ; i < this.fragmentShaders.length ; i++)
                    this.code.push(["fragmentShader " + (i+1), this.fragmentShaders[i], this.updateFragmentShader]);
             else
                this.code.push(["fragmentShader", this.fragmentShader, this.updateFragmentShader]);
 
             if (! isCodeWidget) {
-	       if (this.fragmentShader === undefined)
-	          this.fragmentShader = this.fragmentShaders[0];
+               if (this.fragmentShader === undefined)
+                  this.fragmentShader = this.fragmentShaders[0];
             }
-	    else
-	       this.fragmentShader = this.fragmentShaders[codeSelector.selectedIndex];
+            else
+               this.fragmentShader = this.fragmentShaders[codeSelector.selectedIndex];
 
             if (this.meshBounds == undefined)
-	       this.meshBounds = [ [-1, -1] , [1, 1] ];
+               this.meshBounds = [ [-1, -1] , [1, 1] ];
             this.mesh = this.createMesh();
-	    root.add(this.mesh);
-	    this.is3D = true;
+            root.add(this.mesh);
+            this.is3D = true;
 
-	    // DEFAULT VALUES FOR PHONG COEFFICIENTS.
+            // DEFAULT VALUES FOR PHONG COEFFICIENTS.
 
-	    this.meshColorId = this.colorId;
+            this.meshColorId = this.colorId;
          }
-	 if (this.mesh !== undefined) {
+         if (this.mesh !== undefined) {
 
-	    // UPDATE MESH COLOR IF NEEDED.
+            // UPDATE MESH COLOR IF NEEDED.
 
-	    var ambient  = this.ambient !==undefined ? this.ambient  : [.025,.025,.025];
-	    var diffuse  = this.diffuse !==undefined ? this.diffuse  : [.200,.200,.200];
-	    var specular = this.specular!==undefined ? this.specular : [.500,.500,.500, 10];
+            var ambient  = this.ambient !==undefined ? this.ambient  : [.025,.025,.025];
+            var diffuse  = this.diffuse !==undefined ? this.diffuse  : [.200,.200,.200];
+            var specular = this.specular!==undefined ? this.specular : [.500,.500,.500, 10];
 
-	    if (this.meshColorId !== this.colorId) {
-	       var rgb = paletteRGB[this.colorId];
-	       this.ambient = [0.025 * rgb[0] / 255, 0.025 * rgb[1] / 255, 0.025 * rgb[2] / 255];
-	       this.diffuse = [0.2   * rgb[0] / 255, 0.2   * rgb[1] / 255, 0.2   * rgb[2] / 255];
-	       this.meshColorId = this.colorId;
-	    }
+            if (this.meshColorId !== this.colorId) {
+               var rgb = paletteRGB[this.colorId];
+               this.ambient = [0.025 * rgb[0] / 255, 0.025 * rgb[1] / 255, 0.025 * rgb[2] / 255];
+               this.diffuse = [0.2   * rgb[0] / 255, 0.2   * rgb[1] / 255, 0.2   * rgb[2] / 255];
+               this.meshColorId = this.colorId;
+            }
 
             this.mesh.material.setUniform('ambient' , ambient);
             this.mesh.material.setUniform('diffuse' , diffuse);
             this.mesh.material.setUniform('specular', specular);
 
-	    // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
+            // SET MESH MATRIX TO MATCH SKETCH'S POSITION/ROTATION/SCALE.
 
-	    this.setRenderMatrix(this.mesh.getMatrix());
+            this.setRenderMatrix(this.mesh.getMatrix());
 
             // SET OPACITY.
 
             var alpha = max(0, this.glyphTransition) *
                         (this.fadeAway == 0 ? 1 : this.fadeAway) *
-		        (isDef(this.alpha) ? this.alpha : 1);
+                        (isDef(this.alpha) ? this.alpha : 1);
 
             // MAKE SURE TO SET THE OPACITY OF ALL THIS MESH'S CHILDREN, RECURSIVELY.
 
             if (alpha < 1) {
-	       function setAlpha(mesh) {
-	          mesh.material.transparent = true;
-		  mesh.material.setUniform('alpha', alpha);
-		  mesh.material.setUniform('uAlpha', alpha);
-	          for (var i = 0 ; i < mesh.children.length ; i++)
-		     setAlpha(mesh.children[i]);
-	       }
-	       setAlpha(this.mesh);
+               function setAlpha(mesh) {
+                  mesh.material.transparent = true;
+                  mesh.material.setUniform('alpha', alpha);
+                  mesh.material.setUniform('uAlpha', alpha);
+                  for (var i = 0 ; i < mesh.children.length ; i++)
+                     setAlpha(mesh.children[i]);
+               }
+               setAlpha(this.mesh);
             }
 
             // SET VARIOUS UNIFORMS IN THE FRAGMENT SHADER.
 
-	    if (this.mesh.material.uniforms !== undefined) {
+            if (this.mesh.material.uniforms !== undefined) {
 
-	       // SET TIME.
+               // SET TIME.
 
-	       this.setUniform('uTime', time);
+               this.setUniform('uTime', time);
 
-	       // SET MOUSE CURSOR.
+               // SET MOUSE CURSOR.
 
-	       var a = this.toPixel([0,0]);
-	       var b = this.toPixel([1,1]);
+               var a = this.toPixel([0,0]);
+               var b = this.toPixel([1,1]);
 
-	       var x = (sketchPage.mx - a[0]) / (b[0] - a[0]);
-	       var y = (sketchPage.my - a[1]) / (b[1] - a[1]);
-	       var z = sketchPage.isPressed ? 1 : 0;
+               var x = (sketchPage.mx - a[0]) / (b[0] - a[0]);
+               var y = (sketchPage.my - a[1]) / (b[1] - a[1]);
+               var z = sketchPage.isPressed ? 1 : 0;
 
 
-	       this.setUniform('mx', x);
-	       this.setUniform('my', y);
-	       this.setUniform('mz', z);
+               this.setUniform('mx', x);
+               this.setUniform('my', y);
+               this.setUniform('mz', z);
 
-	       this.setUniform('uCursor', [x, y, z]);
+               this.setUniform('uCursor', [x, y, z]);
 
                this.setUniform('alpha', alpha);
                this.setUniform('uAlpha', alpha);
             }
 
-	    if (this.updateMesh !== undefined)
-	       this.updateMesh();
+            if (this.updateMesh !== undefined)
+               this.updateMesh();
 
-	    // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
+            // FORCE BOUNDING BOX OF SKETCH EVEN IF IT HAS NO STROKES.
 
-	    this.extendBounds(this.meshBounds);
+            this.extendBounds(this.meshBounds);
          }
       },
    };
@@ -1172,9 +1197,9 @@
 
          var p = this.m2s([x,y]);
          this.sp0.push(p);
-	 if (this.joinNextStroke !== undefined) {
+         if (this.joinNextStroke !== undefined) {
             this.sp.push([p[0],p[1],1]);
-	    this.joinNextStroke = undefined;
+            this.joinNextStroke = undefined;
          }
          else
             this.sp.push([p[0],p[1],0]);
@@ -1190,7 +1215,7 @@
 
       this.mouseUp = function(x, y) {
          if (this.isGroup()) {
-	    sketchPage.toggleGroup();
+            sketchPage.toggleGroup();
             return;
          }
 
@@ -1199,22 +1224,22 @@
 
          // WHEN THE STROKE'S LAST POINT LANDS ON ANOTHER SKETCH:
 
-	 if (sk().drewFirstLine) {
-	    var xy = sk().xform(sk().sp0[sk().sp0.length-1]);
+         if (sk().drewFirstLine) {
+            var xy = sk().xform(sk().sp0[sk().sp0.length-1]);
             for (var I = 0 ; I < nsk() ; I++)
                if (sk(I) != sk() && sk(I).parent == null && sk(I).contains(xy[0], xy[1])) {
 
                   // EVENTUALLY WE NEED TO APPLY THE CONVERTED OBJECT AS AN ACTION TO THE OTHER OBJECT.
 
                   var glyphName = sk(I).glyphName;
-		  sk().removeLastStroke();
-	          copySketch(sk());
-	          sk().convertToGlyphSketch();
-		  console.log(sk().glyphName + " -> " + glyphName);
-	          deleteSketch(sk());
-	          return;
-	       }
-	 }
+                  sk().removeLastStroke();
+                  copySketch(sk());
+                  sk().convertToGlyphSketch();
+                  console.log(sk().glyphName + " -> " + glyphName);
+                  deleteSketch(sk());
+                  return;
+               }
+         }
 
          // COMPUTE BOUNDING BOX OF DRAWING.
 
@@ -1274,13 +1299,13 @@
             // JOIN: APPEND STROKE TO sk(I), INVERT sk(I) XFORM FOR EACH PT OF STROKE.
 
             if (action == "joining" && isk() && isDef(sk(I))
-	                            && ! (sk(I) instanceof GeometrySketch)) {
+                                    && ! (sk(I) instanceof GeometrySketch)) {
                sk(I).makeXform();
                for (var i = 1 ; i < sk().sp0.length ; i++) {
                   var xy = sk().sp0[i];
                   xy = [ xy[0], xy[1] ];
                   xy = sk(I).xformInverse(xy);
-		  if (isDef(sk(I).sp0))
+                  if (isDef(sk(I).sp0))
                      sk(I).sp0.push(xy);
                   sk(I).sp.push([xy[0], xy[1], i == 1 ? 0 : 1]);
                }
@@ -1345,8 +1370,8 @@
 
          if (this.isClick) {
             this.removeLastStroke();
-	    if (sketchPage.isGlyphable && this.isGlyphable)
-	       this.convertToGlyphSketch();
+            if (sketchPage.isGlyphable && this.isGlyphable)
+               this.convertToGlyphSketch();
             return;
          }
 
@@ -1368,21 +1393,21 @@
       this.useStrokes = function(strokes) {
          var xx = 0, yy = 0, kk = 0;
          for (var n = 0 ; n < strokes.length ; n++)
-	    for (var i = 0 ; i < strokes[n].length ; i++) {
-	       xx += strokes[n][i][0];
-	       yy += strokes[n][i][1];
-	       kk++;
-	    }
+            for (var i = 0 ; i < strokes[n].length ; i++) {
+               xx += strokes[n][i][0];
+               yy += strokes[n][i][1];
+               kk++;
+            }
          this.tX = xx / kk;
          this.tY = yy / kk;
 
          for (var n = 0 ; n < strokes.length ; n++)
-	    for (var i = 0 ; i < strokes[n].length ; i++) {
-	       var x = strokes[n][i][0] - this.tX;
-	       var y = strokes[n][i][1] - this.tY;
-	       this.sp0.push([x,y]);
-	       this.sp.push([x,y,i>0]);
-	    }
+            for (var i = 0 ; i < strokes[n].length ; i++) {
+               var x = strokes[n][i][0] - this.tX;
+               var y = strokes[n][i][1] - this.tY;
+               this.sp0.push([x,y]);
+               this.sp.push([x,y,i>0]);
+            }
       }
 
       this.convertToGlyphSketch = function() {
@@ -1392,7 +1417,7 @@
             glyph.toSketch();
          sk().glyph = glyph;
          if (sk() instanceof Picture)
-	    glyphSketch.fadeAway = 1;
+            glyphSketch.fadeAway = 1;
          else
             deleteSketch(glyphSketch);
       }
@@ -1450,7 +1475,7 @@
          }
 
          var isUndrawing = sketchAction == "undrawing" &&
-	                   this == sketchPage.sketches[sketchPage.trueIndex];
+                           this == sketchPage.sketches[sketchPage.trueIndex];
 
          annotateStart();
          lineWidth(isUndrawing ? 2 : sketchLineWidth * sketchPage.zoom / this.zoom);
@@ -1464,7 +1489,7 @@
 
             var strokeIndex = -1;
 
-	    // IF UNDRAWING, DRAW ONLY PART OF THE SKETCH.
+            // IF UNDRAWING, DRAW ONLY PART OF THE SKETCH.
 
             var n = sp.length;
             if (isUndrawing)
@@ -1498,7 +1523,7 @@
                else {
                   _g.lineTo(sp[i][0], sp[i][1]);
 
-		  // HANDLE CARD-STYLE RENDERING.
+                  // HANDLE CARD-STYLE RENDERING.
 
                   if (isCard && (i == sp.length - 1 || sp[i+1][2] == 0)) {
                      _g.stroke();
@@ -1514,20 +1539,20 @@
                   }
                }
             }
-	    if (startedAnyStrokes)
+            if (startedAnyStrokes)
                _g.stroke();
 
-	    // IF IN UNDRAW MODE, DRAW ARROW HEAD.
+            // IF IN UNDRAW MODE, DRAW ARROW HEAD.
 
-	    if (isUndrawing && n >= 4) {
-	       var ax = sp[n-3][0], ay = sp[n-3][1];
-	       var bx = sp[n-1][0], by = sp[n-1][1];
-	       var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
-	       dx *= 6 / d;
-	       dy *= 6 / d;
-	       line(bx, by, bx - dx - dy, by - dy + dx);
-	       line(bx, by, bx - dx + dy, by - dy - dx);
-	    }
+            if (isUndrawing && n >= 4) {
+               var ax = sp[n-3][0], ay = sp[n-3][1];
+               var bx = sp[n-1][0], by = sp[n-1][1];
+               var dx = (bx - ax), dy = (by - ay), d = len(dx, dy);
+               dx *= 6 / d;
+               dy *= 6 / d;
+               line(bx, by, bx - dx - dy, by - dy + dx);
+               line(bx, by, bx - dx + dy, by - dy - dx);
+            }
          }
 
          this.drawText(_g);
@@ -1549,54 +1574,54 @@
          // FIRST TIME ONLY: GET THE TARGET SHAPE FROM THE GLYPH.
 
          if (this.src.length == 0) {
-	    this.src = cloneArray(this.glyph.src);
-	    this.info = this.glyph.info;
+            this.src = cloneArray(this.glyph.src);
+            this.info = this.glyph.info;
 
-	    for (var n = 0 ; n < this.src.length ; n++)
-	       for (var i = 0 ; i < this.src[n].length ; i++) {
-	          this.src[n][i][0] -= this.info.x0;
-	          this.src[n][i][1] -= this.info.y0;
-	       }
+            for (var n = 0 ; n < this.src.length ; n++)
+               for (var i = 0 ; i < this.src[n].length ; i++) {
+                  this.src[n][i][0] -= this.info.x0;
+                  this.src[n][i][1] -= this.info.y0;
+               }
             this.tX += this.info.x0;
             this.tY += this.info.y0;
 /*
-	    eval(this.info.type + "Sketch()");
-	    sk().isOutline = true;
-	    sk().mesh.setMaterial(bgMaterial());
-	    sk().rX = this.info.rX;
-	    sk().rY = this.info.rY;
-	    this.geoSketch = sk();
+            eval(this.info.type + "Sketch()");
+            sk().isOutline = true;
+            sk().mesh.setMaterial(bgMaterial());
+            sk().rX = this.info.rX;
+            sk().rY = this.info.rY;
+            this.geoSketch = sk();
 */
-	 }
+         }
 
-	 // REBUILD THE STROKES EVERY FRAME.
+         // REBUILD THE STROKES EVERY FRAME.
 
-	 this.sp = [[0,0]];
-	 this.sp0 = [[0,0,0]];
+         this.sp = [[0,0]];
+         this.sp0 = [[0,0,0]];
 
          var b = [10000,10000,-10000,-10000];
 
-	 for (var n = 0 ; n < this.src.length ; n++) {
-	    var C = [];
-	    for (var i = 0 ; i < this.src[n].length ; i++) {
-	       C.push(this.xform(this.src[n][i]));
+         for (var n = 0 ; n < this.src.length ; n++) {
+            var C = [];
+            for (var i = 0 ; i < this.src[n].length ; i++) {
+               C.push(this.xform(this.src[n][i]));
 
-	       var p = C[C.length-1];
-	       var x = this.adjustX(p[0]);
-	       var y = this.adjustY(p[1]);
-	       b[0] = min(b[0], x);
-	       b[1] = min(b[1], y);
-	       b[2] = max(b[2], x);
-	       b[3] = max(b[3], y);
+               var p = C[C.length-1];
+               var x = this.adjustX(p[0]);
+               var y = this.adjustY(p[1]);
+               b[0] = min(b[0], x);
+               b[1] = min(b[1], y);
+               b[2] = max(b[2], x);
+               b[3] = max(b[3], y);
             }
-	    drawCurve(C);
+            drawCurve(C);
          }
 /*
-	 if (this.geoSketch !== undefined && b[0] > 0) {
-	    var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
-	    var e2 = this.geoSketch.mesh.projectVisibleEdges(visibleEdges);
+         if (this.geoSketch !== undefined && b[0] > 0) {
+            var visibleEdges = this.geoSketch.mesh.findVisibleEdges();
+            var e2 = this.geoSketch.mesh.projectVisibleEdges(visibleEdges);
 
-	    var b1 = [10000,10000,-10000,-10000];
+            var b1 = [10000,10000,-10000,-10000];
             for (var n = 0 ; n < e2.length ; n++)
             for (var i = 0 ; i < e2[n].length ; i++) {
                b1[0] = min(b1[0], e2[n][i][0]);
@@ -1605,26 +1630,26 @@
                b1[3] = max(b1[3], e2[n][i][1]);
             }
 
-	    var b2 = computeCurveBounds(this.sp, 1);
+            var b2 = computeCurveBounds(this.sp, 1);
 
             this.geoSketch._dx = (b[0] + b[2]) / 2 - (b1[0] + b1[2]) / 2;
             this.geoSketch._dy = (b[1] + b[3]) / 2 - (b1[1] + b1[3]) / 2;
             this.geoSketch._ds = (b[2] - b[0]) / (b1[2] - b1[0]);
 
-	    delete this.geoSketch;
-	 }
+            delete this.geoSketch;
+         }
 */
 
-	 // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
+         // AFTER TRANSITION TO GLYPH, BEGIN TRANSITION TO 3D OBJECT.
 
-	 if (this.glyphTransition == 1 && this.info !== undefined) {
-	    this.shapeInfo = { type  : this.info.type,
-	                       rX    : this.info.rX,
-			       rY    : this.info.rY,
-			       sw    : this.info.sw,
-	                       bounds: b };
-	    this.fadeAway = 1;
-	    delete this.info;
+         if (this.glyphTransition == 1 && this.info !== undefined) {
+            this.shapeInfo = { type  : this.info.type,
+                               rX    : this.info.rX,
+                               rY    : this.info.rY,
+                               sw    : this.info.sw,
+                               bounds: b };
+            this.fadeAway = 1;
+            delete this.info;
          }
       }
    }
@@ -1717,9 +1742,9 @@
 
       this.render = function() {
          NumericSketch.prototype.render.call(this);
-	 var value = this.inValue[0];
+         var value = this.inValue[0];
          if (isDef(value)) {
-	    var text = isNumeric(value) ? roundedString(value) : value;
+            var text = isNumeric(value) ? roundedString(value) : value;
             this.setText(value);
             this.value = this.text;
          }

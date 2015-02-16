@@ -17,6 +17,10 @@ function Leviathan() {
    for (var i = 0 ; i < n ; i++)
       c.push(newVec());
 
+   var d = [];
+   for (var i = 0 ; i < n ; i++)
+      d.push(newVec());
+
    var e = [newVec(), newVec()];
 
    var eyeFragmentShader = [
@@ -117,7 +121,7 @@ function Leviathan() {
             for (var i = 0 ; i < n ; i++) {
 	       var t = i / (n - 1);
 	       var s = mix(.007, .07, t);
-	       for (var j = 0 ; j < 2 ; j++) {
+	       for (var j = 0 ; j < 3 ; j++) {
 	          var tube = new THREE.Mesh(new THREE.CylinderGeometry(0, s, 2, 16, 1, true), this.getBodyMaterial());
 	          tube.rotation.x = Math.PI / 2;
 	          var spike = new THREE.Mesh();
@@ -140,6 +144,9 @@ function Leviathan() {
 
 	    var phi = .2 * cos(theta);
 
+	    if (i == 1) s = .02;
+	    if (i == 0) s = .03;
+
 	    b[i].copy(a[i]);
 	    b[i].x += -2 * s * sin(phi);
 	    b[i].y +=  2 * s * cos(phi);
@@ -150,10 +157,14 @@ function Leviathan() {
 	    c[i].y += -2 * s * cos(phi);
 	    c[i].z +=  s;
 
-	    var node = body.children[i];
-	    node.position.copy(a[i]);
-	    node.rotation.y = -phi;
-	    node.scale.set(s, s, s * .95);
+	    d[i].copy(a[i]);
+	    d[i].z -= 2 * s;
+
+	    if (i <= 1) {
+	       b[i].x -= 2*s;
+	       c[i].x -= 2*s;
+	       d[i].x -= 2*s;
+	    }
 
 	    if (i == n-1) {
 	       var phi0 = phi - PI / 16;
@@ -166,18 +177,44 @@ function Leviathan() {
 	       e[1].copy(a[i]);
 	       e[1].x += s * cos(phi1);
 	       e[1].y += s * sin(phi1);
-
-	       this.extendBounds([[e[0].x,e[0].y,e[0].z]]);
-	       this.extendBounds([[e[1].x,e[1].y,e[1].z]]);
 	    }
+         }
+
+	 this.myExtendBounds = function(a) {
+	    var p = [0,0,0];
+	    for (var i = 0 ; i < a.length ; i++) {
+	       p[0] = a[i].x + body.position.x;
+	       p[1] = a[i].y;
+	       p[2] = a[i].z;
+	       this.extendBounds([p]);
+	    }
+	 }
+
+         this.myExtendBounds(a);
+         this.myExtendBounds(b);
+         this.myExtendBounds(c);
+         this.myExtendBounds(d);
+         this.myExtendBounds(e);
+
+         for (var i = 0 ; i < n ; i++) {
+	    var t = i / (n - 1);
+	    var s = mix(.01, .15, t);
+	    var theta = TAU * t + time;
+	    var phi = .2 * cos(theta);
+
+	    var node = body.children[i];
+	    node.position.copy(a[i]);
+	    node.rotation.z = phi;
+	    node.scale.set(s, s, s * .95);
          }
 
          for (var i = 0 ; i < n-1 ; i++)
 	    body.children[n + i].placeLink(a[i], a[i+1]);
 
          for (var i = 0 ; i < n ; i++) {
-	    body.children[n + n-1 + 2 * i    ].placeLink(a[i], b[i]);
-	    body.children[n + n-1 + 2 * i + 1].placeLink(a[i], c[i]);
+	    body.children[n + n-1 + 3 * i    ].placeLink(a[i], b[i]);
+	    body.children[n + n-1 + 3 * i + 1].placeLink(a[i], c[i]);
+	    body.children[n + n-1 + 3 * i + 2].placeLink(a[i], d[i]);
          }
 
 	 var leftEye  = body.children[body.children.length - 2];

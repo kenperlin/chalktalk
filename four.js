@@ -85,6 +85,11 @@
       if (x === undefined) x = y = z = 0;
       return new THREE.Vector3(x, y, z);
    }
+   function newVec4(x, y, z, w) {
+      if (x === undefined) x = y = z = w = 0;
+      return new THREE.Vector4(x, y, z, w);
+   }
+
 
    THREE.Object3D.prototype.addTorus = function(r, m, n) {
       var geometry = torusGeometry(r, m, n);
