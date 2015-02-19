@@ -188,7 +188,7 @@ function Ethane() {
    this.renderLink = function(link) {
       if (link.g === undefined)
          mesh.add(link.g = this.graph.newLinkMesh(this.linkMaterial, 0.05));
-      link.g.placeLink(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
+      link.g.placeStick(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
    }
 
    this.netMaterial = function() {

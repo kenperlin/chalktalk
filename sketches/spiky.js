@@ -1,7 +1,15 @@
 
+var spike_wander = false;
+
 function Spiky() {
    this.labels = 'spiky1 spiky2'.split(' ');
    this.noise = new Noise();
+
+   this.onSwipe = function(dx, dy) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 0: spike_wander = true; break;
+      }
+   }
 
    var myVertexShader = [
    ,'varying vec3 vPosition;'
@@ -55,7 +63,7 @@ function Spiky() {
    var a = newVec();
    var b = newVec();
 
-   this.render = function() {
+   this.render = function(elapsed) {
 
       this.duringSketch(function() {
          switch (this.labels[this.selection]) {
@@ -98,14 +106,27 @@ function Spiky() {
       this.fragmentShader = myFragmentShader;
 
       this.afterSketch(function() {
+         var body = this.mesh.children[0];
+	 if (spike_wander) {
+	    var s = elapsed / this.scale();
+	    var freq = this.selection == 0 ? 2 : 1;
+
+	    body.position.x += 2 * s;
+	    body.position.y += 4 * s * noise2(freq * time, this.id);
+	    body.position.z += 4 * s * noise2(freq * time, this.id + 10);
+
+	    body.rotation.y += 4 * s * freq * noise2(freq * time, this.id + 30);
+	    body.rotation.x +=     s * freq * noise2(freq * time, this.id + 40);
+         }
          for (var i = 0 ; i < V.length ; i++) {
-            var spike = this.mesh.children[T.length + i];
+            var spike = body.children[T.length + i];
 	    var v = V[i];
 	    a.copy(v).multiplyScalar(.8 * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
 	    b.copy(a).multiplyScalar(1.8);
-            spike.placeLink(a, b);
+            spike.placeStick(a, b);
          }
-	 this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
+	 if (window.isFog !== undefined)
+	    this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
       });
    }
 
@@ -113,27 +134,14 @@ function Spiky() {
 
       var mesh = new THREE.Mesh();
 
-      for (var n = 0 ; n < T.length ; n++) {
-         var geom = new THREE.Geometry();
-	 for (var i = 0 ; i < 3 ; i++)
-            geom.vertices.push(V[T[n][i]]);
-         geom.faces.push(new THREE.Face3(0, 1, 2));
-         geom.faces.push(new THREE.Face3(2, 1, 0));
-         geom.computeFaceNormals();
+      var body = new THREE.Mesh();
+      mesh.add(body);
 
-	 var facet = new THREE.Mesh(geom);
-	 mesh.add(facet);
-      }
+      for (var n = 0 ; n < T.length ; n++)
+         body.addTriangle(V[T[n][0]], V[T[n][1]], V[T[n][2]]);
 
-      for (var i = 0 ; i < V.length ; i++) { 
-         var radius = this.selection == 0 ? .05 : .1;
-         var tube = new THREE.Mesh(new THREE.CylinderGeometry(0.0, radius, 2, 4, 1, true));
-         tube.rotation.x = Math.PI / 2;
-         var spike = new THREE.Mesh();
-         spike.add(tube);
-
-         mesh.add(spike);
-      }
+      for (var i = 0 ; i < V.length ; i++) 
+         body.addStick(this.selection==0 ? .05 : .1, 0);
 
       mesh.setMaterial(this.shaderMaterial());
       return mesh;
@@ -141,4 +149,6 @@ function Spiky() {
 }
 Spiky.prototype = new Sketch;
 addSketchType('Spiky');
+
+
 

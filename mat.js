@@ -295,7 +295,7 @@
    function mDot(a,r) {
       _g.save();
       lineWidth(norm(m.transform([r,0,0,0])));
-      mLine(a,[a[0]+.001,a[1],a[2]]);
+      mLine(a,[a[0]+.001,a[1],def(a[2])]);
       _g.restore();
    }
    function mLine(a,b) {

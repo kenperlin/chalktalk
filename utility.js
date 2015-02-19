@@ -53,6 +53,7 @@
    function hex(n) {
       return hexChar(n >> 4) + hexChar(n & 15);
    }
+   function def(v, d) { return v !== undefined ? v : d !== undefined ? d : 0; }
    function isDef(v) { return ! (v === undefined); }
    function isNumeric(v) { return ! isNaN(v); }
    function roundedString(v, nDigits) {
@@ -1177,6 +1178,22 @@
       var tb = L(b);
 
       return tp >= ta && tp <= tb ? p : null;
+   }
+
+   function rayIntersectCircle(V, W, S) {
+      var vx = V[0] - S[0];
+      var vy = V[1] - S[1];
+      var wx = W[0];
+      var wy = W[1];
+      var r = S[2];
+      var A = wx * wx + wy * wy;
+      var B = 2 * (wx * vx + wy * vy);
+      var C = vx * vx + vy * vy - r * r;
+      var discr = B * B - 4 * A * C;
+      if (discr < 0)
+         return [];
+      var d = sqrt(discr);
+      return [(-B - d) / (2 * A), (-B + d) / (2 * A)];
    }
 
    // Resample a curve to equal geometric spacing.

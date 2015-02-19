@@ -1,10 +1,26 @@
 
+var isRushingCamera = false;
 function OctopusResponder() {
+   var velocity = 0;
    this.doI(
       undefined,
       function() {                                             // Drag on a node to move it.
-         if (this.I <= this.graph.headLastIndex)
-            this.graph.nodes[this.I].p.copy(this.graph.p);
+         if (this.I <= this.graph.headLastIndex) {
+	    var dst = this.graph.nodes[this.I].p;
+	    if (isRushingCamera) {
+	       dst.z += velocity;
+	       dst.y -= velocity * .72;
+	       sk().scale(1 + velocity);
+	       velocity += 0.001;
+	    }
+	    else {
+	       var blend = 0.1;
+	       var src = this.graph.p;
+	       dst.x = mix(dst.x, src.x, blend);
+	       dst.y = mix(dst.y, src.y, blend);
+	       dst.z = mix(dst.z, src.z, blend);
+            }
+         }
       }
    );
 
@@ -230,9 +246,12 @@ function Octopus() {
 */
          // MODIFY ALL MATERIALS FOR FOG DISTANCE.
 
-         var foggy = exp(-this.scale());
-         this._nodeMaterial.setUniform('uFoggy', foggy);
-         this._linkMaterial.setUniform('uFoggy', foggy);
+
+         if (window.isFog !== undefined || isRushingCamera) {
+	    var foggy = exp(-this.scale() * .1);
+            this._nodeMaterial.setUniform('uFoggy', foggy);
+            this._linkMaterial.setUniform('uFoggy', foggy);
+         }
       });
    }
 
@@ -285,7 +304,7 @@ function Octopus() {
          var radius0 = .8 * weight * graph.jointRadius(joint);
          this.mesh.add(link.g = graph.newLinkMesh(this.getLinkMaterial(), radius1, radius0, link.nm));
       }
-      link.g.placeLink(graph.nodes[link.i].p, graph.nodes[link.j].p);
+      link.g.placeStick(graph.nodes[link.i].p, graph.nodes[link.j].p);
    }
 
    var nodeFragmentShader = [

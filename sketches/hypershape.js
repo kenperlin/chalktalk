@@ -82,7 +82,7 @@ function Hypershape() {
    }
 
    this.placeEdge = function(n, a, b) {
-      this.mesh.children[n].placeLink(a, b);
+      this.mesh.children[n].placeStick(a, b);
    }
 
    // EDGES OF HYPERCUBE.  EACH EDGE VALUE j = e[axis][i] CONNECTS VERTEX j TO VERTEX j + (1<<axis)

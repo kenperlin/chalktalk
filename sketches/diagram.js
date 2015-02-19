@@ -389,14 +389,20 @@
                lineWidth(6);
                drawPolygon(this.region);
 
-               if (this.mouseX < -w/2 || this.mouseY < -h/2)
+               var mouseX = -1000, mouseY = -1000;
+               if (isNumeric(this.xlo)) {
+                  mouseX = this.x - (this.xlo + this.xhi) / 2;
+                  mouseY = this.y - (this.ylo + this.yhi) / 2;
+               }
+
+               if (mouseX < -w/2 || mouseY < -h/2)
                   return;
 
                color('red');
                var x0 = -w*0.35;
                var y0 = -h*0.35;
-               var x1 = this.mouseX;
-               var y1 = this.mouseY;
+               var x1 = mouseX;
+               var y1 = mouseY;
                var dx = x1-x0, dy = y1-y0, d = Math.sqrt(dx*dx + dy*dy);
                dx /= d;
                dy /= d;

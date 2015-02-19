@@ -96,7 +96,8 @@ function Crawler() {
 
 	 body.position.x += this.velocity * elapsed;
 
-	 this.setUniform('uFoggy', exp(-this.scale() * .1));
+         if (window.isFog !== undefined)
+	    this.setUniform('uFoggy', exp(-this.scale() * .1));
       });
    }
 

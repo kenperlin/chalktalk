@@ -1,23 +1,24 @@
 function Ray2() {
    this.label = 'ray2';
-   this.is3D = true;
-   this.p = [1,0,0];
-   this.onDown = function(point) { this.p[0] = point.x; }
-   this.onDrag = function(point) { this.p[0] = point.x; }
+   var a = [-1,0,0], b = [0,0,0], c = [1,0,0];
+   this.onDown = function(point) { c[0] = point.x; }
+   this.onDrag = function(point) { c[0] = point.x; }
    this.render = function() {
       this.duringSketch(function() {
-         mLine([-1,0],[1,0]);
-         mCurve([[.8,.2],[1,0],[.8,-.2]]);
+         mLine(a, c);
+         mCurve([[c[0]-.2,c[1]+.2],c,[c[0]-.2,c[1]-.2]]);
       });
       this.afterSketch(function() {
          textHeight(this.mScale(0.1));
-	 mArrow([-1,0],[-.5,0]);
+	 mArrow(a, b);
 	 lineWidth(1);
-	 mLine([-.5,0],this.p);
-         mText("V", [-1,0], 0, 2);
-         mText("W", [-.5,0], 0, 2);
-         mText("t", this.p, 0, 2);
-         mDot(this.p, .1);
+	 mLine(b,c);
+/*
+         mText("V", a, 0, 2);
+         mText("W", b, 0, 2);
+         mText("t", c, 0, 2);
+*/
+         mDot(c, .1);
       });
    }
 }

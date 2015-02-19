@@ -4,6 +4,7 @@ function Leviathan() {
    this.velocity = 0;
 
    var n = 20;
+   var nt = 40;
 
    var a = [];
    for (var i = 0 ; i < n ; i++)
@@ -32,7 +33,7 @@ function Leviathan() {
    ,'}'
    ].join("\n");
 
-   var myFragmentShader = [
+   var bodyFragmentShader = [
     'uniform vec3 ambient;'
    ,'uniform float uFoggy;'
    ,'uniform vec3 diffuse;'
@@ -58,6 +59,32 @@ function Leviathan() {
    ,'}'
    ].join("\n");
 
+   var tentacleFragmentShader = [
+    'uniform vec3 ambient;'
+   ,'uniform float uFoggy;'
+   ,'uniform vec3 diffuse;'
+   ,'uniform vec4 specular;'
+   ,'uniform vec3 Lrgb[3];'
+   ,'uniform vec3 Ldir[3];'
+   ,'void main() {'
+   ,'   vec3 P = vPosition * 10.;'
+   ,'   vec3 N = normalize(vNormal);'
+   ,'   vec3 W = vec3(0.,0.,-1.);'
+   ,'   vec3 R = W - 2. * N * dot(N, W);'
+   ,'   float n = 1. + .5 * (noise(P) + noise(4. * P) / 4. + noise(vec3(24., 24., 24.) * P) / 12.);'
+   ,'   vec3 color = vec3(.01,.01,.01);'
+   ,'   for (int i = 0 ; i < 3 ; i++) {'
+   ,'      vec3  L = normalize(Ldir[i]);'
+   ,'      float D = dot(N, L);'
+   ,'      float S = dot(R, L);'
+   ,'      color += Lrgb[i] * ( .05 * max(0.,D) + pow(max(0., S), 10.) ) * n * n;'
+   ,'   }'
+   ,'   color *= vec3(.5,.5,.5);'
+   ,'   vec3 fog = vec3(24.,43.,62.) / 255.;'
+   ,'   gl_FragColor = vec4(mix(sqrt(color), fog, uFoggy), 1.);'
+   ,'}'
+   ].join("\n");
+
    this.getEyeMaterial = function() {
       if (this._eyeMaterial === undefined) {
          this.fragmentShader = eyeFragmentShader;
@@ -68,13 +95,18 @@ function Leviathan() {
 
    this.getBodyMaterial = function() {
       if (this._bodyMaterial === undefined) {
-         this.fragmentShader = myFragmentShader;
-         var r = 1, g = .5, b = .25;
-         this._bodyMaterial = this.shaderMaterial([r/200,g/200,b/200],
-                                                [r/ 30,g/ 30,b/ 30],
-                                                [r/  2,g/  2,b/  2, 2]);
+         this.fragmentShader = bodyFragmentShader;
+         this._bodyMaterial = this.shaderMaterial();
       }
       return this._bodyMaterial;
+   }
+
+   this.getTentacleMaterial = function() {
+      if (this._tentacleMaterial === undefined) {
+         this.fragmentShader = tentacleFragmentShader;
+         this._tentacleMaterial = this.shaderMaterial();
+      }
+      return this._tentacleMaterial;
    }
 
    this.getLinkMaterial = function() {
@@ -122,11 +154,33 @@ function Leviathan() {
 	       var t = i / (n - 1);
 	       var s = mix(.007, .07, t);
 	       for (var j = 0 ; j < 3 ; j++) {
-	          var tube = new THREE.Mesh(new THREE.CylinderGeometry(0, s, 2, 16, 1, true), this.getBodyMaterial());
+	          var tube = new THREE.Mesh(new THREE.CylinderGeometry(0, s, 2, 16, 1, true), this.getTentacleMaterial());
 	          tube.rotation.x = Math.PI / 2;
 	          var spike = new THREE.Mesh();
 	          spike.add(tube);
 	          body.add(spike);
+	       }
+	    }
+
+            var tentacles = new THREE.Mesh();
+            body.add(tentacles);
+	    for (var k = 0 ; k < 3 ; k++)
+	       tentacles.add(new THREE.Mesh());
+
+	    for (var k = 0 ; k < 3 ; k++) {
+	       var tentacle = tentacles.children[k];
+
+	       var firstNode = new THREE.Mesh();
+	       tentacle.add(firstNode);
+
+	       var node = firstNode;
+	       for (var i = 0 ; i < nt ; i++) {
+	          var blob = new THREE.Mesh(globeGeometry(32,16), this.getTentacleMaterial());
+	          node.add(blob);
+
+	          var child = new THREE.Mesh();
+	          node.add(child);
+		  node = child;
 	       }
 	    }
 
@@ -195,6 +249,7 @@ function Leviathan() {
          this.myExtendBounds(c);
          this.myExtendBounds(d);
          this.myExtendBounds(e);
+         this.extendBounds([[2.2,0,0]]);
 
          for (var i = 0 ; i < n ; i++) {
 	    var t = i / (n - 1);
@@ -206,15 +261,45 @@ function Leviathan() {
 	    node.position.copy(a[i]);
 	    node.rotation.z = phi;
 	    node.scale.set(s, s, s * .95);
+
+	    if (i == n-1) {
+	       var head = node;
+	       var tentacles = body.children[body.children.length - 3];
+	       tentacles.position.copy(head.position);
+	       tentacles.rotation.copy(head.rotation);
+	       for (var k = 0 ; k < 3 ; k++) {
+	          var tentacle = tentacles.children[k];
+
+		  tentacle.rotation.x = TAU * k / 3;
+		  tentacle.rotation.y = .5;
+		  tentacle.scale.set(1.1,1.1,1.1);
+
+		  var firstNode = tentacle.children[0];
+		  firstNode.position.x = .1;
+		  firstNode.rotation.y = -.2;
+
+	          var node = firstNode;
+	          for (var j = 0 ; j < nt ; j++) {
+	             var t = j / (nt - 1);
+		     var s = mix(.05, .01, t);
+		     var blob = node.children[0];
+	             blob.scale.set(s, s, s);
+	             node = node.children[1];
+	             node.position.x = s;
+	             node.rotation.x =      noise(10 * k, .2 * time, 4 * TAU * t);
+	             node.rotation.z = .5 * noise(10 * k, .2 * time, 4 * TAU * t + 10);
+	          }
+	       }
+	    }
          }
 
          for (var i = 0 ; i < n-1 ; i++)
-	    body.children[n + i].placeLink(a[i], a[i+1]);
+	    body.children[n + i].placeStick(a[i], a[i+1]);
 
          for (var i = 0 ; i < n ; i++) {
-	    body.children[n + n-1 + 3 * i    ].placeLink(a[i], b[i]);
-	    body.children[n + n-1 + 3 * i + 1].placeLink(a[i], c[i]);
-	    body.children[n + n-1 + 3 * i + 2].placeLink(a[i], d[i]);
+	    body.children[n + n-1 + 3 * i    ].placeStick(a[i], b[i]);
+	    body.children[n + n-1 + 3 * i + 1].placeStick(a[i], c[i]);
+	    body.children[n + n-1 + 3 * i + 2].placeStick(a[i], d[i]);
          }
 
 	 var leftEye  = body.children[body.children.length - 2];
@@ -228,9 +313,12 @@ function Leviathan() {
 
          body.position.x += this.velocity * elapsed;
 
-         var foggy = exp(-this.scale() * .03);
-         this._eyeMaterial .setUniform('uFoggy', foggy);
-         this._bodyMaterial.setUniform('uFoggy', foggy);
+         if (window.isFog !== undefined) {
+            var foggy = exp(-this.scale() * .07);
+            this._eyeMaterial .setUniform('uFoggy', foggy);
+            this._bodyMaterial.setUniform('uFoggy', foggy);
+            this._tentacleMaterial.setUniform('uFoggy', foggy);
+         }
       });
    }
 

@@ -1,4 +1,6 @@
 
+   //isFog = true;
+
    // Do not load any sketches whose labels are in ignoredSketches.
 
    var ignoredSketches = [];
@@ -6,8 +8,13 @@
    // GLOBAL VARIABLES.
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
-   //var backgroundColor = 'black';
-   var backgroundColor = 'rgb(24,43,62)';
+   var backgroundColor = 'black';
+   //backgroundColor = 'rgb(0,255,0)';
+
+   if (window.isFog !== undefined)
+      backgroundColor = 'rgb(24,43,62)';
+   //backgroundColor = 'rgb(24,43,62)';
+
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
@@ -2862,12 +2869,14 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          }
       }
 
-      var motionNoise = new Noise();
-      var orw = width() + 1000;
-      for (var i = 0 ; i < 10 ; i++) {
-         var x = 500 * (motionNoise.noise([  .5, .1 * time, 10 * i + .5]) - 1);
-         var y = 500 * (motionNoise.noise([10.5, .1 * time, 10 * i + .5]) - 1);
-         _g.drawImage(OR_imageObj, x, y, orw, orw);
+      if (window.isFog) {
+         var motionNoise = new Noise();
+         var orw = width() + 1000;
+         for (var i = 0 ; i < 10 ; i++) {
+            var x = 500 * (motionNoise.noise([  .5, .1 * time, 10 * i + .5]) - 1);
+            var y = 500 * (motionNoise.noise([10.5, .1 * time, 10 * i + .5]) - 1);
+            _g.drawImage(OR_imageObj, x, y, orw, orw);
+         }
       }
 
       if (window.debugMessage !== undefined) {

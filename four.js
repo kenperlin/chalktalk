@@ -81,8 +81,34 @@
    function openCylinderGeometry(n) { return new THREE.CylinderGeometry(1, 1, 2, n, 1, true); }
    function planeGeometry(n) { return new THREE.PlaneGeometry(2,2,n,n); }
    function torusGeometry(r, m, n) { return new THREE.TorusGeometry(1, r, m, n); }
+   function quadrangleGeometry(a, b, c, d) {
+      var geom = new THREE.Geometry();
+      geom.vertices.push(a);
+      geom.vertices.push(b);
+      geom.vertices.push(c);
+      geom.vertices.push(d);
+      geom.faces.push(new THREE.Face3(0, 1, 2));
+      geom.faces.push(new THREE.Face3(2, 3, 0));
+      geom.faces.push(new THREE.Face3(2, 1, 0));
+      geom.faces.push(new THREE.Face3(0, 3, 2));
+      geom.computeFaceNormals(); 
+      return geom;
+   } 
+   function triangleGeometry(a, b, c) {
+      var geom = new THREE.Geometry();
+      geom.vertices.push(a);
+      geom.vertices.push(b);
+      geom.vertices.push(c);
+      geom.faces.push(new THREE.Face3(0, 1, 2));
+      geom.faces.push(new THREE.Face3(2, 1, 0));
+      geom.computeFaceNormals(); 
+      return geom;
+   } 
+
    function newVec(x, y, z) {
       if (x === undefined) x = y = z = 0;
+      if (y === undefined) y = z = 0;
+      if (z === undefined) z = 0;
       return new THREE.Vector3(x, y, z);
    }
    function newVec4(x, y, z, w) {
@@ -153,7 +179,32 @@
       return mesh;
    }
 
-   THREE.Object3D.prototype.placeLink = function(a, b) {
+   THREE.Object3D.prototype.addStick = function(r0, r1, n) {
+      if (r1 === undefined) r1 = r0;
+      if (n === undefined) n = 4;
+      var tube = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, 2, n, 1, true));
+      tube.rotation.x = Math.PI / 2;
+      var stick = new THREE.Mesh(); 
+      stick.add(tube);
+      this.add(stick);
+      return stick;
+   }
+
+   THREE.Object3D.prototype.addQuadrangle = function(a, b, c, d) {
+      var geometry = quadrangleGeometry(a, b, c, d);
+      var mesh = new THREE.Mesh( geometry, bgMaterial() );
+      this.add(mesh);
+      return mesh;
+   }
+
+   THREE.Object3D.prototype.addTriangle = function(a, b, c) {
+      var geometry = triangleGeometry(a, b, c);
+      var mesh = new THREE.Mesh( geometry, bgMaterial() );
+      this.add(mesh);
+      return mesh;
+   }
+
+   THREE.Object3D.prototype.placeStick = function(a, b) {
       this.position.copy(a).lerp(b, 0.5);
       this.lookAt(b);
       this.scale.z = a.distanceTo(b) / 2;
