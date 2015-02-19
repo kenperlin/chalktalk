@@ -86,7 +86,7 @@ var video_page_template = {
 };
 
 var sketchPages = [
+   blankPage(),
    or_background,
    or_background_down,
-   blankPage(),
 ];
