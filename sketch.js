@@ -1066,11 +1066,14 @@
 
             if (alpha < 1) {
                function setAlpha(mesh) {
-                  mesh.material.transparent = true;
-                  mesh.material.setUniform('alpha', alpha);
-                  mesh.material.setUniform('uAlpha', alpha);
-                  for (var i = 0 ; i < mesh.children.length ; i++)
-                     setAlpha(mesh.children[i]);
+	          if (mesh.material !== undefined) {
+                     mesh.material.transparent = true;
+                     mesh.material.opacity = alpha;
+                     mesh.material.setUniform('alpha', alpha);
+                     mesh.material.setUniform('uAlpha', alpha);
+                     for (var i = 0 ; i < mesh.children.length ; i++)
+                        setAlpha(mesh.children[i]);
+                  }
                }
                setAlpha(this.mesh);
             }

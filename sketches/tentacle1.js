@@ -12,8 +12,8 @@ function Tentacle1() {
    this.createMesh = function() {
       var mesh = new THREE.Mesh();
       var tentacle = createTentacle(40, 16, function(t) { return mix(.05,.015,sCurve(t)); },
-                                            function(node, t) { node.rotation.x = .3 * noise(t - .5*time + 10.5);
-	                                                        node.rotation.z = .3 * noise(t - .5*time + 20.5); });
+                                            function(node, t) { node.rotation.x = .3 * noise(t - .2*time + 10.5);
+	                                                        node.rotation.z = .3 * noise(t - .2*time + 20.5); });
       tentacle.position.y = -1;
       tentacle.scale.set(2,2,2);
       mesh.add(tentacle);
