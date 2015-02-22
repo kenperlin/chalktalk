@@ -15,8 +15,8 @@ function Tentacle2() {
    this.createMesh = function() {
       var material = new THREE.MeshPhongMaterial({
          ambient  : 0,
-         emissive : 0x333333,
-	 color    : 0x666666,
+         emissive : 0x330000,
+	 color    : 0x660000,
 	 specular : 0x121212,
 	 shininess: 70,
       });

@@ -1,16 +1,19 @@
 
 function newTentacle(material, nBones, nRadial, radiusFunction, xRotateFunction, zRotateFunction) {
+
+console.log(nRadial);
+
    function bone(parent) {
       return { pos:[0,0,0], rot:[0,0,0], scl:[1,1,1], rotq:[0,0,0,1], parent:parent };
    }
 
-   var geometry = new THREE.CylinderGeometry(1,1,2,8,nBones,true);
+   var geometry = new THREE.CylinderGeometry(1,1,2,nRadial,nBones,true);
 
    var capRadius = radiusFunction(1);
 
    // ADD FLAT CAP ON BOTTOM
 
-   var cap = new THREE.CircleGeometry(1, 8);
+   var cap = new THREE.CircleGeometry(1, nRadial);
    for (var i = 0 ; i < cap.vertices.length ; i++) {
       var v = cap.vertices[i];
       v.set(v.x, -1, v.y);
@@ -19,7 +22,7 @@ function newTentacle(material, nBones, nRadial, radiusFunction, xRotateFunction,
 
    // ADD HEMISPHERICAL CAP ON TOP
 
-   var cap = new THREE.SphereGeometry(1, 8,8, 0,TAU, 0,PI/2);
+   var cap = new THREE.SphereGeometry(1, nRadial,8, 0,TAU, 0,PI/2);
    for (var i = 0 ; i < cap.vertices.length ; i++) {
       var v = cap.vertices[i];
       v.set(v.x, capRadius * v.y + 1, v.z);
