@@ -1,6 +1,9 @@
 function TestNoise() {
    this.label = 'testNoise';
    var noise = new Noise();
+/*
+   var noise2 = new Noise2();
+*/
    this.render = function() {
       mCurve([[-1,1],[-1,-1],[1,-1]]);
       this.duringSketch(function() {
@@ -13,6 +16,14 @@ function TestNoise() {
 	    C.push([x, y]);
          }
          mCurve(C);
+/*
+         var C = [];
+         for (var x = -1 ; x <= 1 ; x += .01) {
+	    var y = .1 * noise2.noise([10*x,time,.5]);
+	    C.push([x, y + .1]);
+         }
+         mCurve(C);
+*/
       });
    }
 }
