@@ -1,4 +1,4 @@
-function ShadowRay() {
+function() {
    this.label = 'shadowRay';
    var sx = -.5, sy = 0, lx = .5, ly = 1, cx = .5, cy = 0, r = .25;
 
@@ -17,5 +17,3 @@ function ShadowRay() {
       cy = point.y;
    }
 }
-ShadowRay.prototype = new Sketch;
-addSketchType('ShadowRay');

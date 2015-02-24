@@ -1,4 +1,4 @@
-function Axes() {
+function() {
    this.label = 'axes';
    this.is3D = true;
    var tmp = newVec();
@@ -44,5 +44,3 @@ function Axes() {
       });
    }
 }
-Axes.prototype = new Sketch;
-addSketchType('Axes');

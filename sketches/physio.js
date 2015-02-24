@@ -1,4 +1,4 @@
-function Physio() {
+function() {
    this.label = 'physio';
    this.phoneRect = new Rectangle(-.6, -.15, .15, .3);
    this.computerRect = new Rectangle(.55, -.15, .4, .3);
@@ -160,5 +160,3 @@ function Physio() {
       });
    }
 }
-Physio.prototype = new Sketch;
-addSketchType('Physio');

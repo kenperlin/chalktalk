@@ -1,4 +1,4 @@
-function TTWalk() {
+function() {
 
    function uncompressData(src) {
       var dst = [];
@@ -141,6 +141,3 @@ function TTWalk() {
       });
    }
 }
-TTWalk.prototype = new Sketch;
-addSketchType('TTWalk');
-

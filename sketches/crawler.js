@@ -1,4 +1,4 @@
-function Crawler() {
+function() {
    this.label = "crawler";
 
    this.velocity = 0;
@@ -108,6 +108,3 @@ function Crawler() {
       return mesh;
    }
 }
-Crawler.prototype = new Sketch;
-addSketchType("Crawler");
-

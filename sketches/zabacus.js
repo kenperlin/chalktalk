@@ -1,4 +1,4 @@
-function Abacus() {
+function() {
    this.label = "abacus";
 
    this.digits = [0,0,0];
@@ -115,7 +115,3 @@ function Abacus() {
       return abacus;
    }
 }
-Abacus.prototype = new Sketch;
-addSketchType("Abacus");
-
-

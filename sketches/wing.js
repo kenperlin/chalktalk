@@ -1,4 +1,4 @@
-function Airfoil() {
+function() {
    this.label = "airfoil";
 
    this.render = function(elapsed) {
@@ -29,7 +29,3 @@ function Airfoil() {
       return new THREE.Mesh();
    }
 }
-Airfoil.prototype = new Sketch;
-addSketchType("Airfoil");
-
-

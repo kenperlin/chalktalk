@@ -1,4 +1,4 @@
-function Torus() {
+function() {
    this.label = "torus";
    this.r = .4;
 
@@ -23,6 +23,3 @@ function Torus() {
       return new THREE.Mesh(torusGeometry(this.r, 80, 80), this.shaderMaterial());
    }
 }
-Torus.prototype = new Sketch;
-addSketchType("Torus");
-

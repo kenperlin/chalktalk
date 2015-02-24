@@ -1,4 +1,4 @@
-function Lathe() {
+function() {
    this.label = "lathe";
 
    this.computeStatistics = function() {
@@ -68,6 +68,3 @@ function Lathe() {
       return mesh;
    }
 }
-Lathe.prototype = new Sketch;
-addSketchType("Lathe");
-

@@ -1,5 +1,4 @@
-
-function Sum() {
+function() {
 
 function sum(x,y) {
    function pad(v) {
@@ -44,5 +43,3 @@ function sum(x,y) {
       }
    }
 }
-Sum.prototype = new Sketch;
-addSketchType("Sum");

@@ -1,4 +1,3 @@
-
 function EthaneResponder() {
 
    this.doI(
@@ -200,6 +199,3 @@ function Ethane() {
 //////////////////////////////////////////////////
 
 }
-Ethane.prototype = new Sketch;
-addSketchType('Ethane');
-

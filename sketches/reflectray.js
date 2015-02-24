@@ -1,4 +1,4 @@
-function ReflectRay() {
+function() {
    this.label = 'reflectRay';
    var ax = -1, ay = -.5;
    var sx = .3, sy = 0, sr = .5;
@@ -33,5 +33,3 @@ function ReflectRay() {
       cy = point.y;
    }
 }
-ReflectRay.prototype = new Sketch;
-addSketchType('ReflectRay');

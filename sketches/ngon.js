@@ -1,4 +1,4 @@
-function NGon() {
+function() {
    this.labels = "triangle diamond pentagon hexagon".split(' ');
 
    var jNext = function(j, P) { return (j + 1) % P.length; }
@@ -103,6 +103,3 @@ function NGon() {
       }
    }
 }
-NGon.prototype = new Sketch;
-addSketchType("NGon");
-

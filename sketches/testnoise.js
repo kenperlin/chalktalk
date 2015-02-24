@@ -1,4 +1,4 @@
-function TestNoise() {
+function() {
    this.label = 'testNoise';
    var noise = new Noise();
 /*
@@ -27,6 +27,3 @@ function TestNoise() {
       });
    }
 }
-TestNoise.prototype = new Sketch;
-addSketchType('TestNoise');
-

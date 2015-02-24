@@ -1,4 +1,4 @@
-function Command() {
+function() {
    this.label = 'dict';
    this.render = function() {
       switch (this.labels[this.selection]) {
@@ -13,5 +13,3 @@ function Command() {
       }
    }
 }
-Command.prototype = new Sketch;
-addSketchType("Command");

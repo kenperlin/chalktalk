@@ -1,4 +1,4 @@
-function C2S() {
+function() {
 
    this.label = "c2s";
 
@@ -12,6 +12,3 @@ function C2S() {
       return new THREE.Mesh(globeGeometry(80,40), this.shaderMaterial());
    }
 }
-C2S.prototype = new Sketch;
-addSketchType("C2S");
-

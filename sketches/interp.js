@@ -1,4 +1,4 @@
-function Interp() {
+function() {
    this.label = 'interp';
    var S = [[-1,-1],[0,1],[1,-1]];
    var n = 3, xy0 = newVec(), xy1 = newVec(), p = newVec(-100,-100,0);
@@ -103,6 +103,3 @@ function Interp() {
       mClosedCurve(S);
    }
 }
-Interp.prototype = new Sketch;
-addSketchType('Interp');
-

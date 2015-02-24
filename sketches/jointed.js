@@ -1,3 +1,5 @@
+function() {
+
 /*
    Problem -- right now we can't specify forces properly after object is rotated,
    because distance along pixel ray is not specified accurately.
@@ -11,7 +13,6 @@
    DONE To do -- change rendering to use THREE.js ball and stick model.
 */
 
-function Jointed() {
    function nv(x,y,z) { return new THREE.Vector3(x,y,z); }
    var adjustDistance = function(A, B, d, e, isAdjustingA, isAdjustingB) {
       var x = B.x - A.x;
@@ -421,6 +422,3 @@ function Jointed() {
       return jointed;
    }
 }
-Jointed.prototype = new Sketch;
-addSketchType('Jointed');
-

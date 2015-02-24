@@ -1,4 +1,4 @@
-function Tentacle1() {
+function() {
    this.label = 'tentacle1';
    this.render = function(elapsed) {
       this.duringSketch(function() {
@@ -21,5 +21,3 @@ function Tentacle1() {
       return mesh;
    }
 }
-Tentacle1.prototype = new Sketch;
-addSketchType('Tentacle1');

@@ -1,4 +1,4 @@
-function Thermometer() {
+function() {
    var cursor = newVec();
    this.label = "thermomet";
    this.onPress = function(point) { cursor.copy(point); }
@@ -14,5 +14,3 @@ function Thermometer() {
       });
    }
 }
-Thermometer.prototype = new Sketch;
-addSketchType("Thermometer");

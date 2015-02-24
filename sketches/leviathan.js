@@ -1,5 +1,4 @@
-
-function Leviathan() {
+function() {
    this.label = 'leviathan';
    this.velocity = 0;
 
@@ -330,6 +329,3 @@ function Leviathan() {
       return mesh;
    }
 }
-Leviathan.prototype = new Sketch;
-addSketchType("Leviathan");
-

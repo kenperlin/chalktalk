@@ -1,4 +1,4 @@
-function S2C() {
+function() {
    this.label = "s2c";
 
    this.render = function() {
@@ -10,6 +10,3 @@ function S2C() {
       return new THREE.Mesh(cubeGeometry(), this.shaderMaterial());
    }
 }
-S2C.prototype = new Sketch;
-addSketchType("S2C");
-

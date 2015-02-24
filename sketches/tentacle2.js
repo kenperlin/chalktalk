@@ -1,5 +1,4 @@
-
-function Tentacle2() {
+function() {
    this.label = 'tentacle2';
 
    this.render = function() {
@@ -31,6 +30,3 @@ function Tentacle2() {
       return mesh;
    }
 }
-Tentacle2.prototype = new Sketch;
-addSketchType('Tentacle2');
-

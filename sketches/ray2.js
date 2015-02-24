@@ -1,4 +1,4 @@
-function Ray2() {
+function() {
    this.label = 'ray2';
    var a = [-1,0,0], b = [0,0,0], c = [1,0,0];
    this.onDown = function(point) { c[0] = point.x; }
@@ -22,5 +22,3 @@ function Ray2() {
       });
    }
 }
-Ray2.prototype = new Sketch;
-addSketchType('Ray2');

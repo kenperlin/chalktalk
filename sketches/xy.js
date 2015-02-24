@@ -1,4 +1,4 @@
-function XY() {
+function() {
    this.label = "xy";
    this.mxy = [-1,-1];
    this.mouseDown = function(x,y) {
@@ -26,6 +26,3 @@ function XY() {
       this.outValue[0] = [ (this.mxy[0] + 1) / 2, (this.mxy[1] + 1) / 2 ];
    }
 }
-XY.prototype = new Sketch;
-addSketchType("XY");
-

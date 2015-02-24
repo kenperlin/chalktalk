@@ -1,4 +1,4 @@
-function Tactonic() {
+function() {
    this.label = "tactonic";
 
    this.render = function() {
@@ -23,7 +23,3 @@ function Tactonic() {
       return new THREE.Mesh(planeGeometry(), this.shaderMaterial());
    }
 }
-Tactonic.prototype = new Sketch;
-addSketchType("Tactonic");
-
-

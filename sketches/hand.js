@@ -1,4 +1,4 @@
-function Hand() {
+function() {
    this.label = 'hand';
    var handShape = makeSpline([
       [-.65,-1.2],[-.66,-.95],[-.7 , -.8 ],[-.92,-.4 ],[-.98, .0 ],
@@ -19,5 +19,3 @@ function Hand() {
       mCurve(handShape);
    }
 }
-Hand.prototype = new Sketch;
-addSketchType("Hand");

@@ -677,29 +677,49 @@
 
    var sketchScript = {};
 
+   function giveNameToSketchCode(filename, text) {
+      var i = text.indexOf('(');
+      if (text.substring(0, i).trim() === 'function') {
+         var name = filename;
+         var j = filename.indexOf('.');
+         name = name.substring(0, j) + '_sketch';
+
+         text = 'function ' + name +
+         text.substring(i, text.length) +
+         name + '.prototype = new Sketch;\n' +
+         'addSketchType(\'' + name + '\');\n';
+      }
+      return text;
+   }
+
    function importSketch(filename) {
       var sketchRequest = new XMLHttpRequest();
       sketchRequest.open("GET", "sketches/" + filename);
       sketchRequest.filename = filename;
       sketchRequest.onloadend = function() {
 
+         var text = this.responseText;
+
+         // GIVE A NAME TO THE SKETCH CLASS, IF NECESSARY.
+
+         text = giveNameToSketchCode(filename, text);
+
          // IF THERE IS A SYNTAX ERROR, REPORT IT.
 
-         var error = findSyntaxError(this.responseText);
+         var error = findSyntaxError(text);
          if (error.length > 0)
             console.log("In sketches/" + this.filename + " at line " + error[0] + ": " + error[1]);
 
          // OTHERWISE LOAD THE NEW SKETCH TYPE.
 
          else {
-            var script = this.responseText;
-            eval(script);
+            eval(text);
             forceSetPageAtTime = time + 0.5;
 
-            var i = script.indexOf("function "), j = script.indexOf("(");
+            var i = text.indexOf("function "), j = text.indexOf("(");
             if (i >= 0 && j > i) {
-               var type = script.substring(i + 9, j).trim();
-               sketchScript[type] = script;
+               var type = text.substring(i + 9, j).trim();
+               sketchScript[type] = this.responseText;
             }
          }
       }
@@ -2121,7 +2141,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          document.body.style.cursor =
             (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
-	    sketchPage.hideCursor !== undefined ||
+            sketchPage.hideCursor !== undefined ||
             isExpertMode && (pieMenuIsActive || isSketchInProgress())
                                                 ? 'none'
             : bgClickCount == 1                 ? 'cell'
@@ -2252,7 +2272,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
                   if (sk(I) instanceof NumericSketch ||
-		      sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
+        	      sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
                      var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
@@ -3279,7 +3299,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          if (this.inValue[1] !== undefined) this.setUniform("y", this.inValue[1]);
          if (this.inValue[2] !== undefined) this.setUniform("z", this.inValue[2]);
 
-	 this.setUniform('uTime', time);
+         this.setUniform('uTime', time);
 
          if (isDef(this.mesh.update))
             this.mesh.update(elapsed);
@@ -3571,7 +3591,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
             S.setUniform('mx', x);
             S.setUniform('my', y);
 
-	    S.setUniform('uCursor', [x, y, S.mousePressed ? 1 : 0]);
+            S.setUniform('uCursor', [x, y, S.mousePressed ? 1 : 0]);
          }
 
          // TELL THE MATERIAL ABOUT ALPHA AND THE FADEAWAY BEFORE THE SKETCH IS DELETED.

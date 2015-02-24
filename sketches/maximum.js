@@ -1,4 +1,4 @@
-function Maximum() {
+function() {
    this.label = 'maximum';
    var eps = 0.01;
 
@@ -47,5 +47,3 @@ function Maximum() {
       });
    }
 }
-Maximum.prototype = new Sketch;
-addSketchType('Maximum');

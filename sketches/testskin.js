@@ -1,5 +1,4 @@
-
-function TestSkin() {
+function() {
    this.label = 'testskin';
    this.render = function() {
       this.duringSketch(function() {
@@ -38,5 +37,3 @@ function TestSkin() {
       return mesh;
    }
 }
-TestSkin.prototype = new Sketch;
-addSketchType('TestSkin');

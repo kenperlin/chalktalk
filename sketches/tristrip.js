@@ -1,4 +1,4 @@
-function Tristrip() {
+function() {
    this.label = 'tristrip';
    this.mode = 0;
    this.onClick = function() { this.mode++; }
@@ -24,5 +24,3 @@ function Tristrip() {
       });
    }
 }
-Tristrip.prototype = new Sketch;
-addSketchType('Tristrip');

@@ -1,4 +1,4 @@
-function Mistmat() {
+function() {
    this.label = "mistmat";
    this.isRolled = false;
 
@@ -71,7 +71,3 @@ function Mistmat() {
 
    this.createMesh = function() { return new THREE.Mesh(); }
 }
-Mistmat.prototype = new Sketch;
-addSketchType("Mistmat");
-
-

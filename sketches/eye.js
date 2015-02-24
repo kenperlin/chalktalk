@@ -1,4 +1,4 @@
-function Eye() {
+function() {
    this.label = "eye";
    this.render = function(elapsed) {
 
@@ -40,5 +40,3 @@ function Eye() {
       this.extendBounds([[-1, -.8], [1, .8]]);
    }
 }
-Eye.prototype = new Sketch;
-addSketchType("Eye");

@@ -1,13 +1,11 @@
-
-var spike_wander = false;
-
-function Spiky() {
+function() {
+   window.spike_wander = false;
    this.labels = 'spiky1 spiky2'.split(' ');
    this.noise = new Noise();
 
    this.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy)) {
-      case 0: spike_wander = true; break;
+      case 0: window.spike_wander = true; break;
       }
    }
 
@@ -107,7 +105,7 @@ function Spiky() {
 
       this.afterSketch(function() {
          var body = this.mesh.children[0];
-	 if (spike_wander) {
+	 if (window.spike_wander) {
 	    var s = elapsed / this.scale();
 	    var freq = this.selection == 0 ? 2 : 1;
 
@@ -147,8 +145,3 @@ function Spiky() {
       return mesh;
    }
 }
-Spiky.prototype = new Sketch;
-addSketchType('Spiky');
-
-
-

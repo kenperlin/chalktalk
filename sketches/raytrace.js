@@ -1,4 +1,4 @@
-function Raytrace() {
+function() {
    this.label = 'raytrace';
    this.render = function() {
       this.duringSketch(function() {
@@ -191,6 +191,3 @@ this.fragmentShaders = [
       return new THREE.Mesh(planeGeometry(), this.shaderMaterial());
    }
 }
-Raytrace.prototype = new Sketch;
-addSketchType('Raytrace');
-

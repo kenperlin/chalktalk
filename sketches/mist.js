@@ -1,4 +1,4 @@
-function Mist() {
+function() {
    this.label = 'mist';
 
    function createPipe(path) {
@@ -70,7 +70,3 @@ function Mist() {
       });
    }
 }
-Mist.prototype = new Sketch;
-addSketchType('Mist');
-
-

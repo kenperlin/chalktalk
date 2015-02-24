@@ -1,4 +1,4 @@
-function Coord() {
+function() {
    this.label = "coord";
    this.is3D = true;
    var planes = [[1,0,0,1],[-1,0,0,1],[0,1,0,1],[0,-1,0,1],[0,0,1,1],[0,0,-1,1]];
@@ -70,5 +70,3 @@ function Coord() {
       });
    }
 }
-Coord.prototype = new Sketch;
-addSketchType("Coord");

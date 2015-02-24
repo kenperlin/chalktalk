@@ -1,5 +1,4 @@
-function CenterOfMass()
-{
+function() {
   this.label = "centermass";
 
   this.onClick = function() {};
@@ -65,5 +64,3 @@ function CenterOfMass()
       return totalPos;
     }
 }
-CenterOfMass.prototype = new Sketch;
-addSketchType("CenterOfMass");

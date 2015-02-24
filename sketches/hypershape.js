@@ -1,4 +1,4 @@
-function Hypershape() {
+function() {
    this.labels = ['pentatope', 'hypercube', 'aerochoron', 'octaplex'];
    this.is3D = true;
 
@@ -250,6 +250,3 @@ function Hypershape() {
       return mesh;
    }
 }
-Hypershape.prototype = new Sketch;
-addSketchType('Hypershape');
-

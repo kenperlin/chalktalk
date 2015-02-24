@@ -1,4 +1,4 @@
-function Chair() {
+function() {
    this.label = "chair";
    this.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy)) {
@@ -13,6 +13,3 @@ function Chair() {
       this.setOutPortValue(value);
    }
 }
-Chair.prototype = new Sketch;
-addSketchType("Chair");
-

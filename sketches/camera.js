@@ -1,4 +1,4 @@
-function Camera() {
+function() {
    this.label = 'camera';
    this.onIntersect = function(obj) { xDiff = obj.cx() - this.cx(); }
    var xDiff = -1;
@@ -8,5 +8,3 @@ function Camera() {
       this.setOutPortValue(xDiff < 0 ? 0 : 1);
    }
 }
-Camera.prototype = new Sketch;
-addSketchType("Camera");

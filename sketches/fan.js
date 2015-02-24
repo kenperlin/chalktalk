@@ -1,4 +1,4 @@
-function Fan() {
+function() {
    this.label = "fan";
    this.defaultTurnRate = 0;
    this.onSwipe = function(dx, dy) {
@@ -50,6 +50,3 @@ function Fan() {
       m.restore();
    }
 }
-Fan.prototype = new Sketch;
-addSketchType("Fan");
-

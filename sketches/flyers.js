@@ -1,4 +1,4 @@
-function Flyers() {
+function() {
    this.label = 'flyers';
 
    var nf = 50;
@@ -190,6 +190,3 @@ function Flyers() {
 
    var colorVec = newVec();
 }
-Flyers.prototype = new Sketch;
-addSketchType('Flyers');
-
