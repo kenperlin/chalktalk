@@ -31,6 +31,7 @@
    var isShowingScribbleGlyphs = false;
    var isTelegraphKeyPressed = false;
    var isTextMode = false;
+   var isTouchDevice = false;
    var margin = 50;
    var meshOpacityOverVideo = 0.7;
    var scribbleScale = margin;
@@ -42,8 +43,8 @@
 
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
-   function width () { return isDef(_g) ? _g.canvas.width  : screen.width ; }
-   function height() { return isDef(_g) ? _g.canvas.height : screen.height; }
+   function width () { return isTouchDevice ? 2560 : isDef(_g) ? _g.canvas.width  : screen.width ; }
+   function height() { return isTouchDevice ? 1440 : isDef(_g) ? _g.canvas.height : screen.height; }
 
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
@@ -100,10 +101,29 @@
       handle.mouseY = 1000;
       handle.mousePressed = false;
 
-      document.addEventListener("touchstart"  , function(e) {e.preventDefault(); debugMessage = "touchstart " ; canvas.onmousedown(e); }, false);
-      document.addEventListener("touchmove"   , function(e) {e.preventDefault(); debugMessage = "touchmove "  ; canvas.onmousemove(e); }, false);
-      document.addEventListener("touchend"    , function(e) {e.preventDefault(); debugMessage = "touchend "   ; canvas.onmouseup  (e); }, false);
-      document.addEventListener("touchcancel" , function(e) {e.preventDefault(); debugMessage = "touchcancel "; canvas.onmouseup  (e); }, false);
+      function touchResponse(e, message) {
+         e.preventDefault();
+	 debugMessage = message;
+	 var wasTouchDevice = isTouchDevice;
+	 isTouchDevice = true;
+	 if (! wasTouchDevice) {
+            events_canvas.width = width();
+            events_canvas.height = height();
+            scene_div.width = width();
+            scene_div.height = height();
+            sketch_canvas.width = width();
+            sketch_canvas.height = height();
+            slide.width = width();
+            slide.height = height();
+            video_canvas.width = width();
+            video_canvas.height = height();
+         }
+      }
+
+      document.addEventListener("touchstart" , function(e) { touchResponse(e, "touchstart" ); canvas.onmousedown(e); }, false);
+      document.addEventListener("touchmove"  , function(e) { touchResponse(e, "touchmove"  ); canvas.onmousemove(e); }, false);
+      document.addEventListener("touchend"   , function(e) { touchResponse(e, "touchend"   ); canvas.onmouseup  (e); }, false);
+      document.addEventListener("touchcancel", function(e) { touchResponse(e, "touchcancel"); canvas.onmouseup  (e); }, false);
 
       canvas.onkeydown = function(event) {
          var handle = getHandle(this);

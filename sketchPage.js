@@ -392,7 +392,7 @@
          if (bgClickCount == 1)
             return;
 
-         if (paletteColorId >= 0) {
+         if (! isTouchDevice && paletteColorId >= 0) {
             var index = findPaletteColorIndex(x, y);
             if (index >= 0)
                paletteColorId = index;
@@ -1117,7 +1117,8 @@
 
          // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
-         paletteColorId = findPaletteColorIndex(x, y);
+         if (! isTouchDevice)
+            paletteColorId = findPaletteColorIndex(x, y);
       },
 
       keyDown : function(key) {
