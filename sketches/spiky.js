@@ -123,7 +123,7 @@ function() {
 	    b.copy(a).multiplyScalar(1.8);
             spike.placeStick(a, b);
          }
-	 if (window.isFog !== undefined)
+	 if (isFog)
 	    this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
       });
    }

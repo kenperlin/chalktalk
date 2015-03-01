@@ -1401,6 +1401,11 @@
          case 'e':
             toggleCodeWidget();
             break;
+         case 'F':
+	    isFog = ! isFog;
+	    backgroundColor = isFog ? 'rgb(24,43,62)' : 'black';
+            background.style.backgroundColor = backgroundColor;
+	    break;
          case 'f':
 	    if (isk())
 	       this.bringToFront(sk());

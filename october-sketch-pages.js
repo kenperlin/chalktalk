@@ -754,6 +754,7 @@ var ken_video = {
 
 var sketchPages = [
    blankPage(), // (4) clay_tablet,abacus,scroll,book,telegraph,tv,rocket, ... (17) pendulum,oscillator,moth/candle,somewhere/rainbow
+   page1,
    title_page, // (1)
    gertie, // (2)
    compose_perform, // (2.5)

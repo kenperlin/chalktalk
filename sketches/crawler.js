@@ -96,7 +96,7 @@ function() {
 
 	 body.position.x += this.velocity * elapsed;
 
-         if (window.isFog !== undefined)
+         if (isFog)
 	    this.setUniform('uFoggy', exp(-this.scale() * .1));
       });
    }

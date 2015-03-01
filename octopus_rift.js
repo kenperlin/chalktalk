@@ -13,6 +13,95 @@ function blankPage() {
    }
 }
 
+var magnet = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=120></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/magnet.png width=800></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+var optitrack = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=120></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/optitrack.jpg width=800></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+
+var theta = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=150></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/phd_students.jpg width=1280></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+
+var tactonic1 = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=120></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/tactonic2.jpg width=900></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+
+var valvevr = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=150></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/valvevr.jpg width=800></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+
+var heart = {
+   availableSketches: sketchTypes,
+   pan: 0,
+   innerHTML: "\
+      <table width=1280>\
+      <tr height=150></tr>\
+      <tr>\
+         <center>\
+         <th><img src=imgs/heart.png width=800></th>\
+         </center>\
+         </tr>\
+      </table>\
+   ",
+};
+
 var or_background = {
    availableSketches: sketchTypes,
    pan: 0,
@@ -87,6 +176,12 @@ var video_page_template = {
 
 var sketchPages = [
    blankPage(),
+   magnet,
+   optitrack,
+   theta,
+   tactonic1,
+   valvevr,
+   heart,
    or_background,
-   or_background_down,
+   blankPage(),
 ];

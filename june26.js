@@ -273,8 +273,8 @@ var planetFragmentShader = [
 ,'      float y = vPosition.y;'
 ,'      float dz = sqrt(1.-x*x-y*y);                      /* DEPTH  */'
 ,'      float s = .3*x + .3*y + .9*dz; s *= s; s *= s;    /* LIGHT  */'
-,'      float cR = cos(.2*time), sR = sin(.2*time);       /* MOTION */'
-,'      float cV = cos(.1*time), sV = sin(.1*time);'
+,'      float cR = cos(.2*uTime), sR = sin(.2*uTime);     /* MOTION */'
+,'      float cV = cos(.1*uTime), sV = sin(.1*uTime);'
 ,'      vec3 P = vec3(cR*x+sR*dz+cV,y,-sR*x+cR*dz+sV);'
 ,'      float g = turbulence(P);                          /* CLOUDS */'
 ,'      float d = 1. - 1.2 * (x*x + y*y);                 /* EDGE   */'
@@ -328,7 +328,7 @@ registerGlyph("marble()",[
 function marble() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, marbleFragmentShader);
    sketch.code = [
-      ["stripe", ".5 + .5 * sin(x)"],
+      ["stripe", ".5 + .5 * sin(x)        "],
       ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
       ["noise", ".5 + .5 * noise(x,y,z))"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
@@ -350,7 +350,7 @@ var coronaFragmentShader = ["\
          if (selectedIndex == 2.)\n\
             r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\n\
          else if (selectedIndex == 3.) {\n\
-            float ti = time*.3;\n\
+            float ti = uTime*.3;\n\
             float t = mod(ti, 1.);\n\
             float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\n\
             float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));\n\
@@ -380,7 +380,7 @@ function corona() {
       ["radial", "r = radius(x,y)"],
       ["color grad", "grad(r)"],
       ["turbulence", "grad(r + turbulence(P))"],
-      ["animate", "grad(r + turbulence(P(time)))"],
+      ["animate", "grad(r + turbulence(P(uTime)))"],
    ];
    sketch.selectedIndex = 3;
 }
@@ -391,7 +391,7 @@ void main(void) {\n\
    vec3 p = vPosition;\n\
    float nx = .5 * noise(.1*p);\n\
    float ny = .5 * noise(.1*p + vec3(100., 0., 0.));\n\
-   float s = .25*p.z+turbulence(vec3(p.x+nx,p.y+ny,p.z+.3*time));\n\
+   float s = .25*p.z+turbulence(vec3(p.x+nx,p.y+ny,p.z+.3*uTime));\n\
    float ss = s * s;\n\
    vec3 color = mix(vec3(.35,0.,0.),\n\
                     s * vec3(1.,ss,ss*ss), min(1.,2.*vNormal.z));\n\
@@ -462,10 +462,10 @@ function sliced() {
    var sketch = addPlaneShaderSketch(defaultVertexShader, slicedFragmentShader);
    sketch.code = [
       ["noise", ".5 + .5 * noise(x,y,z))"],
-      ["stripe", ".5 + .5 * sin(x)"],
+      ["stripe", ".5 + .5 * sin(x)      "],
       ["pinstripe", "pstripe(x) = pow(.5 + .5 * sin(x), 0.1)"],
       ["add noise", "pstripe(x + noise(x,y,z))"],
-      ["fractal", "fractal(x,y,z))"],
+      ["fractal", "fractal(x,y,z))     "],
       ["add fractal", "pstripe(x + fractal(x,y,z))"],
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
    ];

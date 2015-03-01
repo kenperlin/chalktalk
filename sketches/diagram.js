@@ -112,10 +112,17 @@ function Diagram() {
          if (this.isInValue("n2"))
             this.n2 = this.getInFloat("n2");
 
+         var mouseX = -100, mouseY = -100;
+
+         if (isNumeric(this.xlo) && sketchPage.isPressed) {
+            mouseX = this.x - (this.xlo + this.xhi) / 2;
+            mouseY = this.y - (this.ylo + this.yhi) / 2;
+         }
+
          if (this.firstTime === undefined) {
             this.firstTime = true;
-            this.mouseX = -w/4;
-            this.mouseY = -w/4;
+            //this.mouseX = -w/4;
+            //this.mouseY = -w/4;
             this.n1 = 1.0;
             this.n2 = 1.5;
          }
@@ -133,8 +140,10 @@ function Diagram() {
             }
          });
 
-         x1 = this.mouseX;
-         y1 = this.mouseY;
+         //x1 = this.mouseX;
+         //y1 = this.mouseY;
+         x1 = mouseX;
+         y1 = mouseY;
          r1 = sqrt(x1*x1+y1*y1);
 
          var n1 = y1 < 0 ? this.n1 : this.n2;
@@ -167,7 +176,8 @@ function Diagram() {
 
          color(defaultPenColor);
          line(-w/2,0,w/2,0);
-         drawCurve([ [x1,y1], [0,0], [x2,y2] ]);
+         drawCurve([ [x1,y1], [0,0] ]);
+	 drawCurve([ [0,0], [x2,y2] ]);
 
          this.afterSketch(function() {
             arrow(0,0, x2,y2);

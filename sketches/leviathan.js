@@ -312,7 +312,7 @@ function() {
 
          body.position.x += this.velocity * elapsed;
 
-         if (window.isFog !== undefined) {
+         if (isFog) {
             var foggy = exp(-this.scale() * .07);
             this._eyeMaterial .setUniform('uFoggy', foggy);
             this._bodyMaterial.setUniform('uFoggy', foggy);

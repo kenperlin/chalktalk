@@ -772,6 +772,8 @@ ArbRevolveHandle.prototype = new Sketch;
 var boringSlicedFragmentShader = ["\
     uniform float spinAngle;\
     void main(void) {\
+      float dx = vPosition.x;\
+      float dy = vPosition.y;\
       float rr = dx*dx + dy*dy;\
       float dz = rr >= 1. ? 0. : sqrt(1. - rr);\
       float dzdx = -1.3;\
@@ -845,7 +847,7 @@ function bSliced() {
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
     sketch.code = [
-      ["sphere", "(X,Y,Z)"],
+      ["sphere", "(X,Y,Z)              "],
       ["stripes", "mod ( floor(X) , 2 )"],
       ["checker", "mod(floor(X)+floor(Y)+floor(Z), 2 )"],
       ["dots", "0.5 + 0.5 * sin(X)*sin(Y)*sin(Z)"],

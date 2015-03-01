@@ -1,18 +1,5 @@
 
 function Noise() {
-   var set3 = function(a, b, c, dst) {
-      dst[0] = a;
-      dst[1] = b;
-      dst[2] = c;
-      return dst;
-   }
-   var set4 = function(a, b, c, d, dst) {
-      dst[0] = a;
-      dst[1] = b;
-      dst[2] = c;
-      dst[3] = d;
-      return dst;
-   }
    var abs = function(x, dst) {
       for (var i = 0 ; i < x.length ; i++)
          dst[i] = Math.abs(x[i]);
@@ -44,6 +31,16 @@ function Noise() {
          dst[i] = x[i] - Math.floor(x[i]);
       return dst;
    };
+   var gt0 = function(x, dst) {
+      for (var i = 0 ; i < x.length ; i++)
+         dst[i] = x[i] > 0 ? 1 : 0;
+      return dst;
+   };
+   var lt0 = function(x, dst) {
+      for (var i = 0 ; i < x.length ; i++)
+         dst[i] = x[i] < 0 ? 1 : 0;
+      return dst;
+   };
    var mix = function(x, y, t, dst) {
       if (! Array.isArray(x))
          return x + (y - x) * t;
@@ -68,8 +65,8 @@ function Noise() {
    };
    var permute = function(x, dst) {
       for (var i = 0 ; i < x.length ; i++)
-         tmp[i] = (x[i] * 34.0 + 1.0) * x[i];
-      mod289(tmp, dst);
+         tmp0[i] = (x[i] * 34.0 + 1.0) * x[i];
+      mod289(tmp0, dst);
       return dst;
    };
    var scale = function(x, s, dst) {
@@ -77,16 +74,19 @@ function Noise() {
          dst[i] = x[i] * s;
       return dst;
    };
-   var gt0 = function(x, dst) {
-      for (var i = 0 ; i < x.length ; i++)
-         dst[i] = x[i] > 0 ? 1 : 0;
+   var set3 = function(a, b, c, dst) {
+      dst[0] = a;
+      dst[1] = b;
+      dst[2] = c;
       return dst;
-   };
-   var lt0 = function(x, dst) {
-      for (var i = 0 ; i < x.length ; i++)
-         dst[i] = x[i] < 0 ? 1 : 0;
+   }
+   var set4 = function(a, b, c, d, dst) {
+      dst[0] = a;
+      dst[1] = b;
+      dst[2] = c;
+      dst[3] = d;
       return dst;
-   };
+   }
    var subtract = function(x, y, dst) {
       for (var i = 0 ; i < x.length ; i++)
          dst[i] = x[i] - y[i];
@@ -97,51 +97,52 @@ function Noise() {
          dst[i] = 1.79284291400159 - 0.85373472095314 * x[i];
       return dst;
    };
-   var i0   = [0,0,0];
-   var i1   = [0,0,0];
-   var f0   = [0,0,0];
-   var f1   = [0,0,0];
-   var f    = [0,0,0];
-   var t    = [0,0,0];
-   var tmp  = [0,0,0,0];
-   var tmp1 = [0,0,0,0];
-   var tmp2 = [0,0,0,0];
-   var ix   = [0,0,0,0];
-   var iy   = [0,0,0,0];
-   var iz0  = [0,0,0,0];
-   var iz1  = [0,0,0,0];
-   var ixy  = [0,0,0,0];
-   var ixy0 = [0,0,0,0];
-   var ixy1 = [0,0,0,0];
-   var gx0  = [0,0,0,0];
-   var gy0  = [0,0,0,0];
-   var gx1  = [0,0,0,0];
-   var gy1  = [0,0,0,0];
-   var gz0  = [0,0,0,0];
-   var gz1  = [0,0,0,0];
-   var sz0  = [0,0,0,0];
-   var sz1  = [0,0,0,0];
-   var g0   = [0,0,0];
-   var g1   = [0,0,0];
-   var g2   = [0,0,0];
-   var g3   = [0,0,0];
-   var g4   = [0,0,0];
-   var g5   = [0,0,0];
-   var g6   = [0,0,0];
-   var g7   = [0,0,0];
-   var norm0= [0,0,0,0];
-   var norm1= [0,0,0,0];
-   var nz0  = [0,0,0,0];
-   var nz1  = [0,0,0,0];
-   var nz   = [0,0,0,0];
-   var HALF = [.5,.5,.5,.5];
-   var ONE  = [1,1,1];
+
+   var HALF4 = [.5,.5,.5,.5];
+   var ONE3  = [1,1,1];
+   var f     = [0,0,0];
+   var f0    = [0,0,0];
+   var f1    = [0,0,0];
+   var g0    = [0,0,0];
+   var g1    = [0,0,0];
+   var g2    = [0,0,0];
+   var g3    = [0,0,0];
+   var g4    = [0,0,0];
+   var g5    = [0,0,0];
+   var g6    = [0,0,0];
+   var g7    = [0,0,0];
+   var gx0   = [0,0,0,0];
+   var gy0   = [0,0,0,0];
+   var gx1   = [0,0,0,0];
+   var gy1   = [0,0,0,0];
+   var gz0   = [0,0,0,0];
+   var gz1   = [0,0,0,0];
+   var i0    = [0,0,0];
+   var i1    = [0,0,0];
+   var ix    = [0,0,0,0];
+   var ixy   = [0,0,0,0];
+   var ixy0  = [0,0,0,0];
+   var ixy1  = [0,0,0,0];
+   var iy    = [0,0,0,0];
+   var iz0   = [0,0,0,0];
+   var iz1   = [0,0,0,0];
+   var norm0 = [0,0,0,0];
+   var norm1 = [0,0,0,0];
+   var nz    = [0,0,0,0];
+   var nz0   = [0,0,0,0];
+   var nz1   = [0,0,0,0];
+   var tmp0  = [0,0,0,0];
+   var tmp1  = [0,0,0,0];
+   var tmp2  = [0,0,0,0];
+   var sz0   = [0,0,0,0];
+   var sz1   = [0,0,0,0];
+   var t3    = [0,0,0];
 
    this.noise = function(P) {
-      mod289(floor(P, t), i0);
-      mod289(add(i0, ONE, t), i1);
+      mod289(floor(P, t3), i0);
+      mod289(add(i0, ONE3, t3), i1);
       fract(P, f0);
-      subtract(f0, ONE, f1);
+      subtract(f0, ONE3, f1);
       fade(f0, f);
 
       set4(i0[0], i1[0], i0[0], i1[0], ix);
@@ -154,20 +155,20 @@ function Noise() {
       permute(add(ixy, iz1, tmp1), ixy1);
 
       scale(ixy0, 1 / 7, gx0);
-      subtract(fract(scale(floor(gx0, tmp1), 1 / 7, tmp2), tmp), HALF, gy0);
+      subtract(fract(scale(floor(gx0, tmp1), 1 / 7, tmp2), tmp0), HALF4, gy0);
       scale(ixy1, 1 / 7, gx1);
-      subtract(fract(scale(floor(gx1, tmp1), 1 / 7, tmp2), tmp), HALF, gy1);
+      subtract(fract(scale(floor(gx1, tmp1), 1 / 7, tmp2), tmp0), HALF4, gy1);
       fract(gx0, gx0);
       fract(gx1, gx1);
-      subtract(subtract(HALF, abs(gx0, tmp1), tmp2), abs(gy0, tmp), gz0);
+      subtract(subtract(HALF4, abs(gx0, tmp1), tmp2), abs(gy0, tmp0), gz0);
       gt0(gz0, sz0);
-      subtract(subtract(HALF, abs(gx1, tmp1), tmp2), abs(gy1, tmp), gz1);
+      subtract(subtract(HALF4, abs(gx1, tmp1), tmp2), abs(gy1, tmp0), gz1);
       gt0(gz1, sz1);
 
-      subtract(gx0, multiply(sz0, subtract(lt0(gx0, tmp1), HALF, tmp2), tmp), gx0);
-      subtract(gy0, multiply(sz0, subtract(lt0(gy0, tmp1), HALF, tmp2), tmp), gy0);
-      subtract(gx1, multiply(sz1, subtract(lt0(gx1, tmp1), HALF, tmp2), tmp), gx1);
-      subtract(gy1, multiply(sz1, subtract(lt0(gy1, tmp1), HALF, tmp2), tmp), gy1);
+      subtract(gx0, multiply(sz0, subtract(lt0(gx0, tmp1), HALF4, tmp2), tmp0), gx0);
+      subtract(gy0, multiply(sz0, subtract(lt0(gy0, tmp1), HALF4, tmp2), tmp0), gy0);
+      subtract(gx1, multiply(sz1, subtract(lt0(gx1, tmp1), HALF4, tmp2), tmp0), gx1);
+      subtract(gy1, multiply(sz1, subtract(lt0(gy1, tmp1), HALF4, tmp2), tmp0), gy1);
 
       set3(gx0[0],gy0[0],gz0[0], g0);
       set3(gx0[1],gy0[1],gz0[1], g1);
@@ -178,17 +179,17 @@ function Noise() {
       set3(gx1[2],gy1[2],gz1[2], g6);
       set3(gx1[3],gy1[3],gz1[3], g7);
 
-      taylorInvSqrt(set4(dot(g0,g0), dot(g2,g2), dot(g1,g1), dot(g3,g3), tmp), norm0);
-      taylorInvSqrt(set4(dot(g4,g4), dot(g6,g6), dot(g5,g5), dot(g7,g7), tmp), norm1);
+      taylorInvSqrt(set4(dot(g0,g0), dot(g1,g1), dot(g2,g2), dot(g3,g3), tmp0), norm0);
+      taylorInvSqrt(set4(dot(g4,g4), dot(g5,g5), dot(g6,g6), dot(g7,g7), tmp0), norm1);
 
       multiplyScalar(g0, norm0[0]);
-      multiplyScalar(g2, norm0[1]);
-      multiplyScalar(g1, norm0[2]);
+      multiplyScalar(g1, norm0[1]);
+      multiplyScalar(g2, norm0[2]);
       multiplyScalar(g3, norm0[3]);
 
       multiplyScalar(g4, norm1[0]);
-      multiplyScalar(g6, norm1[1]);
-      multiplyScalar(g5, norm1[2]);
+      multiplyScalar(g5, norm1[1]);
+      multiplyScalar(g6, norm1[2]);
       multiplyScalar(g7, norm1[3]);
 
       mix(set4(g0[0] * f0[0] + g0[1] * f0[1] + g0[2] * f0[2],

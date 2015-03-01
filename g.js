@@ -1,6 +1,4 @@
 
-   //isFog = true;
-
    // Do not load any sketches whose labels are in ignoredSketches.
 
    var ignoredSketches = [];
@@ -11,7 +9,7 @@
    var backgroundColor = 'black';
    //backgroundColor = 'rgb(0,255,0)';
 
-   if (window.isFog !== undefined)
+   if (isFog)
       backgroundColor = 'rgb(24,43,62)';
    //backgroundColor = 'rgb(24,43,62)';
 
@@ -25,6 +23,7 @@
    var isAltPressed = false;
    var isBottomGesture = false;
    var isExpertMode = true;
+   var isFog = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
@@ -2889,7 +2888,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          }
       }
 
-      if (window.isFog) {
+      if (isFog) {
          var motionNoise = new Noise();
          var orw = width() + 1000;
          for (var i = 0 ; i < 10 ; i++) {

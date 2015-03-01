@@ -247,8 +247,8 @@ function Octopus() {
          // MODIFY ALL MATERIALS FOR FOG DISTANCE.
 
 
-         if (window.isFog !== undefined || isRushingCamera) {
-	    var foggy = exp(-this.scale() * .1);
+         if (isFog || isRushingCamera) {
+	    var foggy = exp(-this.scale() * .5);
             this._nodeMaterial.setUniform('uFoggy', foggy);
             this._linkMaterial.setUniform('uFoggy', foggy);
          }

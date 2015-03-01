@@ -97,10 +97,10 @@ function() {
 	       if (wing3 !== undefined)
 	          wing3.rotation.y = -.2 * cos(t) * sgn;
 
-               if (window.isFog !== undefined)
+               if (isFog)
                   wing1.material.setUniform('uFoggy', foggy);
             }
-            if (window.isFog !== undefined)
+            if (isFog)
                body.material.setUniform('uFoggy', foggy);
          } 
       });
