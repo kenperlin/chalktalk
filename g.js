@@ -46,6 +46,10 @@
    function width () { return isTouchDevice ? 2560 : isDef(_g) ? _g.canvas.width  : screen.width ; }
    function height() { return isTouchDevice ? 1440 : isDef(_g) ? _g.canvas.height : screen.height; }
 
+   // HOW SMALL IS A TINY STROKE BEFORE WE COUNT IT AS A CLICK?
+
+   function clickSize() { return width() / 40; }
+
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
@@ -1727,7 +1731,7 @@ console.log(harry.fred);
 
       // ELSE IF LINE STARTS AT CLICK, ENTER SCRIBBLE-TEXT MODE.
 
-      else if (len(x - bgClickX, y - bgClickY) < clickSize) {
+      else if (len(x - bgClickX, y - bgClickY) < clickSize()) {
 /*
          bgs = new BgScribble(x, y);
          bgsText = "";
@@ -1807,7 +1811,7 @@ console.log(harry.fred);
 
       // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
 
-      if (len(x - x1, y - y1) < clickSize) {
+      if (len(x - x1, y - y1) < clickSize()) {
          bgGesture(n1);
          return;
       }

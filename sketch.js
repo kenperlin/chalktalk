@@ -1340,7 +1340,7 @@
 
          // CLICK
 
-         if (len(xhi - xlo, yhi - ylo) <= clickSize) {
+         if (len(xhi - xlo, yhi - ylo) <= clickSize()) {
 
             // SKETCH WAS JUST BYPRODUCT OF A CLICK.  DELETE IT.
 

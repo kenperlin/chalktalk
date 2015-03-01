@@ -375,7 +375,7 @@
             return;
          }
 
-         if (isSketchDragActionEnabled && this.travel > clickSize) {
+         if (isSketchDragActionEnabled && this.travel > clickSize()) {
             if (needToStartSketchDragAction) {
                startSketchDragAction(this.xDown, this.yDown);
                needToStartSketchDragAction = false;
@@ -501,7 +501,7 @@
             y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
                sk().travel += len(x - sk().x, y - sk().y);
-               if (sk().travel > clickSize)
+               if (sk().travel > clickSize())
                   sk().isClick = false;
                sk().x = x;
                sk().y = y;
@@ -549,13 +549,13 @@
             return;
          }
 
-         if (isSketchDragActionEnabled && this.travel > clickSize) {
+         if (isSketchDragActionEnabled && this.travel > clickSize()) {
             endSketchDragAction(x, y);
             isSketchDragActionEnabled = false;
          }
 
          if (isBgActionEnabled) {
-            if (this.travel <= clickSize) {
+            if (this.travel <= clickSize()) {
                bgActionEnd(x, y);
                bgClickCount = 0;
             }
@@ -596,7 +596,7 @@
 
          if (! isVerticalPan) {
             if (isBottomGesture) {
-               if (abs(_g.panX - this.panXDown) <= clickSize && y < height() - 100)
+               if (abs(_g.panX - this.panXDown) <= clickSize() && y < height() - 100)
                   this.clear();
                isBottomGesture = false;
                return;
@@ -614,7 +614,7 @@
          }
          else {
             if (isRightGesture) {
-               if (abs(_g.panY - this.panYDown) <= clickSize && x < width() - 100)
+               if (abs(_g.panY - this.panYDown) <= clickSize() && x < width() - 100)
                   this.clear();
                isRightGesture = false;
                return;
@@ -640,7 +640,7 @@
             return;
          }
 
-         if (this.travel > clickSize)
+         if (this.travel > clickSize())
             this.isClick = false;
 
          if (pieMenuIsActive) {
@@ -990,7 +990,7 @@
       mouseMove : function(x, y) {
 
          if (this.setPageInfo !== undefined) {
-            if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize)
+            if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize())
                delete this.setPageInfo;
          }
 
@@ -1802,7 +1802,7 @@
                   var dx = X[n-1] - X[i];
                   var dy = Y[n-1] - Y[i];
                   var d = len(dx, dy);
-                  if (d > clickSize) {
+                  if (d > clickSize()) {
                      d *= 50 / width();
                      _g.moveTo(X[n-1] - (dx+dy) / d, Y[n-1] - (dy-dx) / d);
                      _g.lineTo(X[n-1], Y[n-1]);
@@ -2497,7 +2497,6 @@
 
 // GLOBAL VARIABLES PRIMARILY RELATED TO SKETCH PAGES.
 
-var clickSize = 30;
 var codeSketch = null;
 var groupPath = [];
 var groupSketches = {};
