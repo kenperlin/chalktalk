@@ -1491,7 +1491,7 @@ console.log(harry.fred);
             addSketch(s);
             s.init(this.name, sketchPage.x, sketchPage.y);
             s.textCursor = s.text.length;
-            setTextMode(true);
+            //setTextMode(true);
          }
 
          // DEFAULT: CREATE A TEXT OBJECT.

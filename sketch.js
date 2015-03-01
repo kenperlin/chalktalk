@@ -1217,6 +1217,7 @@
       }
 
       this.mouseUp = function(x, y) {
+
          if (this.isGroup()) {
             sketchPage.toggleGroup();
             return;
