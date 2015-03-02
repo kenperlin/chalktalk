@@ -113,6 +113,11 @@
 	 if (! wasTouchDevice) {
             events_canvas.width = width();
             events_canvas.height = height();
+
+	    renderer.setSize(width(), height());
+            renderer.camera.aspect = width() / height();
+            renderer.camera.updateProjectionMatrix();
+
             scene_div.width = width();
             scene_div.height = height();
             sketch_canvas.width = width();
@@ -922,7 +927,7 @@ console.log(harry.fred);
 
       function nameToGlyph(name) {
          var scribble = new Scribble(name);
-         var glyph = new Glyph(name, [scribble]);
+         var glyph = new SketchGlyph(name, [scribble]);
          glyph.scribbleLength = computeCurveLength(scribble);
          return glyph;
       }
@@ -1354,7 +1359,7 @@ console.log(harry.fred);
       if (strokes.length == 0 || strokes[0].length < 2)
          return null;
 
-      strokesGlyph = new Glyph("", strokes);
+      strokesGlyph = new SketchGlyph("", strokes);
 
       if (isCreatingGlyphData)
          console.log(strokesGlyph.toString());
@@ -1429,7 +1434,7 @@ console.log(harry.fred);
             for (var i = 0 ; i < strokes[n].length ; i++)
                strokes[n][i][1] *= -1;
 
-      var glyph = new Glyph(name, strokes);
+      var glyph = new SketchGlyph(name, strokes);
       glyph.indexName = indexName;
 
       for (var i = 0 ; i < glyphs.length ; i++)
@@ -1441,8 +1446,8 @@ console.log(harry.fred);
       glyphs.push(glyph);
       return glyph.indexName;
    }
-
-   function Glyph(name, src) {
+/*
+   function SketchGlyph(name, src) {
 
       this.src = src;
 
@@ -1591,7 +1596,7 @@ console.log(harry.fred);
          }
       }
    }
-
+*/
    var isCreatingGlyphData = false;
 
    function shift(textChar) {
