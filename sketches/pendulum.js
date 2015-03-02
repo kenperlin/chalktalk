@@ -2,10 +2,12 @@ function() {
    this.label = "pendulum";
 
    this.computeStatistics = function() {
-      var b = traceComputeBounds(this.sketchTrace);
-      this.hubWidth = 10 * (b[0][2] - b[0][0]) / this.size;
-      this.radius = 5 * (b[2][2] - b[2][0] + b[2][3] - b[2][1]) / 2 / this.size;
-      this.ht = 8.5 * ((b[2][1]+b[2][3])/2 - b[1][1]) / this.size;
+      var a = computeCurveBounds(this.sketchTrace[0]);
+      var b = computeCurveBounds(this.sketchTrace[1]);
+      var c = computeCurveBounds(this.sketchTrace[2]);
+      this.hubWidth = 10 * (a[2] - a[0]) / this.size;
+      this.radius = 5 * (c[2] - c[0] + c[3] - c[1]) / 2 / this.size;
+      this.ht = 8.5 * ((c[1]+c[3])/2 - b[1]) / this.size;
    }
 
    this.hubWidth = 1;
