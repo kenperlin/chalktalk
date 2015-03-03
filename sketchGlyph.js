@@ -70,7 +70,7 @@
          else if (isNumeric(parseInt(this.name))) {
             var s = new NumericSketch();
             addSketch(s);
-            s.init(this.name, sketchPage.x, sketchPage.y);
+            s.initNumeric(this.name, sketchPage.x, sketchPage.y);
             s.textCursor = s.text.length;
             //setTextMode(true);
          }

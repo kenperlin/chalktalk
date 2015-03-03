@@ -202,8 +202,8 @@ function Octopus() {
 
       this.duringSketch(function() {
           mCurve(makeSpline([[.4,-.1],[ .5, .7],[   0, 1],[ -.5, .7],[-.4,-.1]]));
-	  mCurve(makeSpline([[-.25,0],[-.3,-.5],[-.50,-1]], 6));
-	  mCurve(makeSpline([[ .25,0],[ .3,-.5],[ .75,-1]], 6));
+	  mCurve(makeSpline([[-.25,0],[-.3,-.5],[-.50,-1]]));
+	  mCurve(makeSpline([[ .25,0],[ .3,-.5],[ .75,-1]]));
       });
 
       // AFTER SKETCH IS DONE, DO FANCIER PROCESSING AND RENDERING.

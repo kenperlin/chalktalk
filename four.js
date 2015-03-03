@@ -104,6 +104,18 @@
       geom.computeFaceNormals(); 
       return geom;
    } 
+   function triangleStripGeometry(n) {
+      var geom = new THREE.Geometry();
+      var r = 1 / n;
+      for (var i = 0 ; i <= 2 * n ; i++) {
+         var vertex = newVec((2 * i - n) * r, i % 2 == 0 ? -r/2 : r/2, 0);
+         geom.vertices.push(vertex);
+      }
+      for (var i = 0 ; i < n ; i++) {
+         geom.faces.push(new THREE.Face3(2 * i    , 2 * i + 1, 2 * i + 2));
+         geom.faces.push(new THREE.Face3(2 * i + 1, 2 * i + 2, 2 * i + 3));
+      }
+   }
 
    function newVec(x, y, z) {
       if (x === undefined) x = y = z = 0;
@@ -530,7 +542,7 @@ function isValidShader(type, string) {
 
 function addUniforms(material, string) {
 
-   // PARSE THE FRAGMENT SHADER CODE TO FIND CUSTOM UNIFORMS:
+   // PARSE THE SHADER CODE TO FIND CUSTOM UNIFORMS:
 
    var typeInfo = "float f 0 vec2 v2 0 vec3 v3 0 vec4 v4 0".split(' ');
    var declarations = string.substring(0, string.indexOf("void main")).split(";");
@@ -550,6 +562,8 @@ function addUniforms(material, string) {
                   var val = typeInfo[n+2];
                   if (j >= 0) {
                      key += 'v';
+		     if (key == 'fv')
+		        key = 'fv1';
                      val = '[]';
                   }
                   material.uniforms[name] = { type: key, value: val };

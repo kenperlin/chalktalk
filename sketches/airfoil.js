@@ -1,13 +1,15 @@
-function Airfoil() {
+function() {
    this.label = "airfoil";
+   this.counting = 100; // Because of a weird timing bug at initialization.
 
    this.render = function(elapsed) {
       this.duringSketch(function() {
          mCurve( [[-1,0],[-.8,.2],[1,0]] );
          mCurve( [[-1,0],[1,0]] );
       });
+
       this.afterSketch(function() {
-         if (this.mesh != null && this.airfoil === undefined) {
+         if (this.mesh != null && this.airfoil === undefined && this.counting-- <= 0) {
 	    var airfoil = this.airfoil = this.mesh.addNode();
             airfoil.addCylinder(16).getMatrix().rotateZ(PI/2).rotateX(-PI/2).scale(.1,12,1);
             var shape = airfoil.children[0].geometry;
@@ -24,12 +26,8 @@ function Airfoil() {
 	 }
       });
    }
-
    this.createMesh = function() {
       return new THREE.Mesh();
    }
 }
-Airfoil.prototype = new Sketch;
-addSketchType("Airfoil");
-
 

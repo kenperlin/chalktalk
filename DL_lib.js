@@ -167,7 +167,7 @@ function lineIntersectionCheck(array){
 
 }
 
-function distance(pt1x,pt1y,pt2x,pt2y){
+function _distance(pt1x,pt1y,pt2x,pt2y){
   var dx = Math.abs(pt1x-pt2x);
   var dy = Math.abs(pt1y-pt2y);
   return Math.sqrt(dx*dx + dy*dy);
@@ -179,14 +179,14 @@ function findMinMax(array, index, amount){
   var distances = [];
   if(amount>0){
     for(var i = index ; i < array.length-1 ; i++){
-      var dist = distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
+      var dist = _distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
       if(i<index+10 && dist<2)
       distances.push(dist);
     }
   }
   else{
     for(var i = index ; i >0 ; i--){
-      var dist = distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
+      var dist = _distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
       if(i<index+10 && dist<2)
       distances.push(dist);
     }
@@ -203,7 +203,7 @@ function findMinMax(array, index, amount){
 function softPush(array, index, amount){
 
   for(var i = index ; i < array.length-1 ; i++){
-    var dist = distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
+    var dist = _distance(array[index][0],array[index][2],array[i+1][0],array[i+1][2]);
     var dropoff = (index-i)*.1;
    
     var minMax = findMinMax(array,index,10);
@@ -219,7 +219,7 @@ function softPush(array, index, amount){
 
 
   for(var i = index-1 ; i > 0 ; i--){
-    var dist = distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
+    var dist = _distance(array[index][0],array[index][2],array[i-1][0],array[i-1][2]);
     var dropoff = (index-i)*.1;
     
     var minMax = findMinMax(array,index,10);
@@ -1292,7 +1292,7 @@ THREE.depthNoiseShader = {
 		"void main() {",
 
 			//vignette
-			"float dist = distance( vUv, vec2( 0.5 ) );",
+			"float dist = _distance( vUv, vec2( 0.5 ) );",
 			"vec2 offset = vec2( ((1.+sin(vUv.x*10.))/30.));",
 
 			//setup depth
@@ -1484,7 +1484,7 @@ THREE.testShader = {
 		"void main() {",
 
 			// "vec4 color = texture2D( tDiffuse, vUv );",
-			"float dist = distance( vUv, vec2( 0.5 ) );",
+			"float dist = _distance( vUv, vec2( 0.5 ) );",
 			// "gl_FragColor = color;",
 
 			"vec2 offset = vec2( ((1.+sin(vUv.x*10.))/30.));",

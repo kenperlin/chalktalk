@@ -1660,7 +1660,7 @@
    StrokesSketch.prototype = new SimpleSketch;
 
    function NumericSketch() {
-      this.init = function(str, x, y) {
+      this.initNumeric = function(str, x, y) {
          this.sp0 = [[0,0]];
          this.sp = [[0,0,0]];
          this.value = str;

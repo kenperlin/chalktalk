@@ -251,7 +251,12 @@
    function ceil(t) { return Math.ceil(t); }
    function cos(t) { return Math.cos(t); }
    function cotan(t) { return Math.cotan(t); }
-   function distance(a, b) { return len(a[0] - b[0], a[1] - b[1]); }
+   function distance(a, b) {
+      var dd = 0;
+      for (var i = min(a.length, b.length) - 1 ; i >= 0 ; i--)
+         dd += (a[i] - b[i]) * (a[i] - b[i]);
+      return sqrt(dd);
+   }
    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
    function dot4(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]; }
    function exp(t) { return Math.exp(t); }
@@ -272,10 +277,15 @@
             return false;
       return true;
    }
-   function len(x, y) {
-      if (y === undefined)
+   function len(x, y, z) {
+      if (z !== undefined)
+         return sqrt(x * x + y * y + z * z);
+      if (y !== undefined)
+         return sqrt(x * x + y * y);
+      if (x.length == 3)
+         return sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+      else
          return sqrt(x[0] * x[0] + x[1] * x[1]);
-      return sqrt(x * x + y * y);
    }
    function lerp(t,a,b) { return a + t * (b - a); }
    function log(a, b) { return Math.log(a, b); }
@@ -1032,7 +1042,11 @@
 
    // CREATE A SPLINE GUIDED BY A PATH OF KEY POINTS.
 
-   function makeSpline(keys, N) {
+   function splineSize(keys) {
+      return (keys.length - 1) * 10 + 1;
+   }
+
+   function makeSpline(keys, dst) {
       function x(k) { return keys[k][0]; }
       function y(k) { return keys[k][1]; }
       function l(k) { return L[k]; }
@@ -1042,15 +1056,17 @@
               +  b * (-2 * ttt + 3 * tt        )
               + db * (     ttt -     tt        );
       }
-      if (N === undefined)
-         N = (keys.length - 1) * 4;
+
+      var N = 10;
       var nk = keys.length;
 
       var L = [];
       for (var n = 0 ; n < nk-1 ; n++)
          L.push(len(x(n+1) - x(n), y(n+1) - y(n)));
 
-      var spline = [];
+      var ns = 0;
+      var spline = dst === undefined ? [] : dst;
+
       for (var n = 0 ; n < nk-1 ; n++) {
 
          var dx0 = n > 0 ? (l(n) * (x(n) - x(n-1)) + l(n-1) * (x(n+1) - x(n))) / (l(n-1) + l(n))
@@ -1065,11 +1081,11 @@
 
          for (var i = 0 ; i < N ; i++) {
             var t = i / N, tt = t * t, ttt = t * tt;
-            spline.push([ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
-                          hermite(y(n), dy0*.9, y(n+1), dy1*.9) ]);
+            spline[ns++] = [ hermite(x(n), dx0*.9, x(n+1), dx1*.9),
+                             hermite(y(n), dy0*.9, y(n+1), dy1*.9) ];
          }
       }
-      spline.push([ x(nk-1), y(nk-1) ]);
+      spline[ns] = [ x(nk-1), y(nk-1) ];
       return spline;
    }
 
@@ -1198,15 +1214,14 @@
 
    // Resample a curve to equal geometric spacing.
 
-   function resampleCurve(src, count) {
+   function resampleCurve(src, count, _dst) {
       if (count === undefined) count = 100;
 
       var D = [];
       for (var i = 0 ; i < src.length ; i++)
-         D.push(i == 0 ? 0 : D[i-1] + len(src[i][0]-src[i-1][0],
-                                          src[i][1]-src[i-1][1]));
-      var dst = [];
-      dst.push([src[0][0], src[0][1]]);
+         D.push(i == 0 ? 0 : D[i-1] + distance(src[i], src[i-1]));
+      var dst = _dst === undefined ? [] : _dst;
+      dst[0] = cloneArray(src[0]);
       var i = 1;
       var sum = D[src.length-1];
       for (var j = 1 ; j < count ; j++) {
@@ -1214,14 +1229,14 @@
          while (D[i] < d && i < src.length-1)
             i++;
          var f = (d - D[i-1]) / (D[i] - D[i-1]);
-         dst.push(mix(src[i-1], src[i], f));
+         dst[j] = mix(src[i-1], src[i], f);
       }
 
       // ACCOUNT FOR THE SOURCE CURVE BEING A CLOSED LOOP.
 
       if ( src[0][0] == src[src.length-1][0] &&
            src[0][1] == src[src.length-1][1] )
-         dst.push([ src[0][0], src[0][1] ]);
+         dst[count] = [ src[0][0], src[0][1] ];
 
       return dst;
    }

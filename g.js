@@ -703,8 +703,7 @@
          var j = filename.indexOf('.');
          name = name.substring(0, j) + '_sketch';
 
-         text = 'function ' + name +
-         text.substring(i, text.length) +
+         text = name + ' = function() {\nthis.init = ' + text + '}\n' +
          name + '.prototype = new Sketch;\n' +
          'addSketchType(\'' + name + '\');\n';
       }
@@ -1995,7 +1994,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 // THE CALL TO ttTick IS COMMENTED OUT SO CHALKTALK WILL WORK OVER THE WEB.
 // IF YOU WANT TO USE THE PRESSURE IMAGING SENSOR, UNCOMMENT THIS LINE.
 
-      // ttTick();     // HANDLE THE TACTONIC SENSOR, IF ANY.
+      ttTick();     // HANDLE THE TACTONIC SENSOR, IF ANY.
 
 
       // TURN OFF ALL DOCUMENT SCROLLING.
@@ -3008,6 +3007,9 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
    }
 
    function addSketch(sketch) {
+      if (sketch.init !== undefined)
+         sketch.init();
+
       if (sketch.labels.length == 0)
          sketch.labels.push(sketch.label);
       sketchPage.add(sketch);
