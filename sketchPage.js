@@ -579,6 +579,8 @@
                   sk().setColorId(paletteColorId);
                   if (sk() instanceof GeometrySketch)
                      setMeshMaterialToRGB(sk().mesh, paletteRGB[sk().colorId]);
+                  else if (sk()._gl !== undefined)
+		     sk().renderStrokeSetColor();
                }
                this.paletteColorDragXY = null;
             }

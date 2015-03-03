@@ -1929,7 +1929,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    var visible_sp = null;
 
-   var ttForce = newZeroArray(1024);
+   var ttForce = newArray(1024);
 
    function ttTick() {
       if (tt !== undefined && tt.myState === undefined)
@@ -3002,6 +3002,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
    }
 
    function addSketch(sketch) {
+      sketch.drawing = new DRAWING.Drawing();
+
       if (sketch.init !== undefined)
          sketch.init();
 

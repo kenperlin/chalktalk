@@ -331,7 +331,13 @@
    function mCurve(c) {
       var cc = [];
       for (var n = 0 ; n < c.length ; n++)
-         if (c[n] instanceof THREE.Vector3) {
+         if (c[n] instanceof THREE.Vector2) {
+	    _mCurveXYZ[0] = c[n].x;
+	    _mCurveXYZ[1] = c[n].y;
+	    _mCurveXYZ[2] = 0;
+            cc.push(m.transform(_mCurveXYZ));
+         }
+         else if (c[n] instanceof THREE.Vector3) {
 	    _mCurveXYZ[0] = c[n].x;
 	    _mCurveXYZ[1] = c[n].y;
 	    _mCurveXYZ[2] = c[n].z;

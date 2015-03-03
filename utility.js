@@ -589,6 +589,19 @@
       return i;
    }
 
+   function newArray(n, k) {
+      k = k === undefined ? 1 : k;
+      var dst = [];
+      for (var i = 0 ; i < n ; i++)
+         switch (k) {
+         case 1: dst.push(0); break;
+         case 2: dst.push([0,0]); break;
+         case 3: dst.push([0,0,0]); break;
+         case 4: dst.push([0,0,0,1]); break;
+	 }
+      return dst;
+   }
+
    function reverse(arr) {
       var dst = [];
       for (var i = arr.length - 1 ; i >= 0 ; i--)
@@ -605,14 +618,6 @@
       var f = (n-1) * t - i;
       return mix(arr[i], arr[i+1], f);
    }
-
-   function newZeroArray(size) {
-      var dst = [];
-      for (var i = 0 ; i < size ; i++)
-         dst.push(0);
-      return dst;
-   }
-
 
 // IMAGE PROCESSING.
 
@@ -646,7 +651,7 @@
 
    function imageEnlarge(src, dst) {
       if (this.tmp === undefined)
-         this.tmp = newZeroArray(dst.length);
+         this.tmp = newArray(dst.length);
 
       function index(i,j,w) { return max(0,min(w-1,i)) + w * max(0,min(w-1,j)); }
 

@@ -52,11 +52,10 @@ function() {
 
          var out = [];
 
-         if (this.inValues.length == 16)
-
+         if (this.inValues.length == 16) {
             for (var i = 0 ; i < 16 ; i++)
                out.push(roundedString(this.inValues[i]));
-
+         }
          else {
             var sub = ["x","y","z"];
             switch (this.mode) {
@@ -122,7 +121,14 @@ function() {
             mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }
 
-         this.setOutPortValue(this.inValues.length > 0 ? out : this.identityMatrix);
+	 for (var i = 0 ; i < 16 ; i++) {
+	    var value = parseFloat(out[i]);
+	    this.matrixValues[i] = isNumeric(value) ? value : out[i];
+         }
+
+         this.setOutPortValue(this.inValues.length > 0 ? this.matrixValues : this.identityMatrix);
       });
    }
+
+   this.matrixValues = newArray(16);
 }

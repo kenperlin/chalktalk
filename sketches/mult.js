@@ -7,7 +7,8 @@ function mult(x,y) {
       return dst;
    }
    function v_v(a, b) {
-      return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+      var value = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+      return value;
    }
    function mXm(x, y) {
       var dst = [];
@@ -59,10 +60,8 @@ function Mult() {
    this.render = function() {
       mLine( [-1, 1], [ 1, -1] );
       mLine( [ 1, 1], [-1, -1] );
-
-      if (isDef(this.in[0]) && isDef(this.in[1])) {
+      if (isDef(this.in[0]) && isDef(this.in[1]))
          this.outValue[0] = mult(this.inValue[0], this.inValue[1]);
-      }
    }
 }
 Mult.prototype = new Sketch;

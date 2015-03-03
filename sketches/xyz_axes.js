@@ -1,12 +1,12 @@
 function() {
    this.label = 'axes';
    this.is3D = true;
+
+   this.drawing.add(new DRAWING.Curve([[-1,0],[1,0]]));
+   this.drawing.add(new DRAWING.Curve([[0,-1],[0,1]]));
+
    var tmp = newVec();
    this.render = function() {
-      this.duringSketch(function() {
-         mCurve([[-1,0],[1,0]]);
-         mCurve([[0,-1],[0,1]]);
-      });
       this.afterSketch(function() {
 
          var e = pointToPixelMatrix.elements;

@@ -693,6 +693,8 @@
                                       min(1, this.afterSketchTransition + 2 * elapsed);
          _g.save();
          m.save();
+	 if (this.glyphTransition < 1)
+            this.drawing.update();
          this.render(elapsed);
          m.restore();
          _g.restore();
@@ -1020,7 +1022,7 @@
                if (this.fragmentShader === undefined)
                   this.fragmentShader = this.fragmentShaders[0];
             }
-            else
+            else if (codeSelector.selectedIndex >= 0)
                this.fragmentShader = this.fragmentShaders[codeSelector.selectedIndex];
 
             if (this.meshBounds == undefined)
@@ -1114,7 +1116,74 @@
             this.extendBounds(this.meshBounds);
          }
       },
-   };
+
+      //---------------- HANDLE STROKES DRAWN WITH WEBGL -------------------
+
+      renderStrokeEnable : function() {
+         this.vertexShader = [
+         ,'uniform vec2  uData[256];'
+         ,'uniform float uNpts;'
+         ,'uniform float uThickness;'
+         ,'vec3 place(float f) {'
+         ,'   float t = max(0., min(.999, f)) * (uNpts - 1.);'
+         ,'   int n = int(t);'
+         ,'   return vec3(mix(uData[n], uData[n+1], t - float(n)), 0.);'
+         ,'}'
+         ,'void main() {'
+         ,'   float t = position.y + .505;'
+         ,'   vec3 p = place(t);'
+         ,'   vec3 d = p - place(t - .01);'
+         ,'   p += normalize(vec3(d.y, -d.x, 0.)) * position.x * uThickness;'
+         ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.);'
+         ,'}'
+         ].join('\n');
+
+         this.fragmentShader = [
+         ,'uniform vec3 uColor;'
+         ,'void main() {'
+         ,'   gl_FragColor = vec4(uColor, alpha);'
+         ,'}'
+         ].join('\n');
+
+         this.createMesh = function() {
+            var geometry = new THREE.CylinderGeometry(.5, .5, 1, 3, 256);
+            return new THREE.Mesh(geometry, this.shaderMaterial());
+         }
+      },
+      renderStrokeSetColor : function() {
+         var rgb = paletteRGB[this.colorId];
+	 this.setUniform('uColor', [rgb[0]/255,rgb[1]/255,rgb[2]/255]);
+      },
+      renderStroke : function(curve) {
+         if (this._gl === undefined) {
+            this._renderStrokeData = new Float32Array(16); 
+	    this.renderStrokeSetColor();
+            this._gl = renderer.context;
+            this._glProgram = this.mesh.material.program;
+            this._uData      = this._gl.getUniformLocation(this._glProgram, 'uData');
+            this._uNpts      = this._gl.getUniformLocation(this._glProgram, 'uNpts');
+            this._uThickness = this._gl.getUniformLocation(this._glProgram, 'uThickness');
+         }
+
+	 if (this._renderStrokeData.length < 2 * curve.length)
+            this._renderStrokeData = new Float32Array(2 * curve.length); 
+
+         var data = this._renderStrokeData;
+         for (var i = 0 ; i < curve.length ; i++) {
+            data[2*i  ] = curve[i][0];
+            data[2*i+1] = curve[i][1];
+         }
+
+         var thickness = isNumeric(this.xlo) ? 10 / (this.xhi - this.xlo) : 1 / 15;
+
+         this._gl.useProgram(this._glProgram);
+         this._gl.uniform2fv(this._uData     , data);
+         this._gl.uniform1f (this._uNpts     , curve.length);
+         this._gl.uniform1f (this._uThickness, thickness);
+      },
+
+      //--------------------------------------------------------------------
+   }
 
    function Sketch2D() {
       this.width = 400;

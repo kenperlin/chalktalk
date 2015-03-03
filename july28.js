@@ -91,7 +91,7 @@ function ttgrid() {
    sketch.enableFragmentShaderEditing();
    sketch.update = function() {
       if (this.forceImage === undefined)
-         this.forceImage = newZeroArray(64 * 64);
+         this.forceImage = newArray(64 * 64);
       imageEnlarge(ttForce, this.forceImage);
       var geometry = this.mesh.geometry;
       geometry.verticesNeedUpdate = true;
