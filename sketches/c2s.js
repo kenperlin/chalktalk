@@ -1,5 +1,4 @@
 function() {
-
    this.label = "c2s";
 
    this.render = function() {

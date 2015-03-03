@@ -14,8 +14,8 @@ function() {
    this.createMesh = function() {
       var material = new THREE.MeshPhongMaterial({
          ambient  : 0,
-         emissive : 0x333333, //0x330000,
-	 color    : 0x666666, //0x660000,
+         emissive : 0x333333,
+	 color    : 0x666666,
 	 specular : 0x121212,
 	 shininess: 70,
       });

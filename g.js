@@ -696,16 +696,12 @@
 
    var sketchScript = {};
 
-   function giveNameToSketchCode(filename, text) {
+   function addTypeNameToSketchCode(text, typeName) {
       var i = text.indexOf('(');
       if (text.substring(0, i).trim() === 'function') {
-         var name = filename;
-         var j = filename.indexOf('.');
-         name = name.substring(0, j) + '_sketch';
-
-         text = name + ' = function() {\nthis.init = ' + text + '}\n' +
-         name + '.prototype = new Sketch;\n' +
-         'addSketchType(\'' + name + '\');\n';
+         text = typeName + ' = function() {\nthis.init = ' + text + '}\n' +
+         typeName + '.prototype = new Sketch;\n' +
+         'addSketchType(\'' + typeName + '\');\n';
       }
       return text;
    }
@@ -720,7 +716,11 @@
 
          // GIVE A NAME TO THE SKETCH CLASS, IF NECESSARY.
 
-         text = giveNameToSketchCode(filename, text);
+         var typeName = filename;
+         var j = typeName.indexOf('.');
+         typeName = typeName.substring(0, j) + '_sketch';
+
+         text = addTypeNameToSketchCode(text, typeName);
 
          // IF THERE IS A SYNTAX ERROR, REPORT IT.
 
@@ -733,12 +733,7 @@
          else {
             eval(text);
             forceSetPageAtTime = time + 0.5;
-
-            var i = text.indexOf("function "), j = text.indexOf("(");
-            if (i >= 0 && j > i) {
-               var type = text.substring(i + 9, j).trim();
-               sketchScript[type] = this.responseText;
-            }
+            sketchScript[typeName] = this.responseText;
          }
       }
       sketchRequest.send();
