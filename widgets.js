@@ -696,8 +696,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
              var i = text.indexOf('{');
              var j = text.lastIndexOf('}');
-	     codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
-	     codeSketch._temporaryFunction();
+	     try {
+	        codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
+	        codeSketch._temporaryFunction();
+             } catch (e) {
+	        console.log(e);
+	     }
 	  }
           else if (code() != null) {
              var index = codeSelector.selectedIndex;

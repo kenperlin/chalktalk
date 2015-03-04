@@ -695,7 +695,11 @@
          m.save();
 	 if (this.glyphTransition < 1)
             this.drawing.update();
-         this.render(elapsed);
+	 try {
+            this.render(elapsed);
+         } catch(e) {
+	    console.log(e);
+	 }
          m.restore();
          _g.restore();
          if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
