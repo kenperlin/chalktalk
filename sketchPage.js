@@ -1524,15 +1524,21 @@
             videoLayer.toggleControls();
             break;
          case 'Z':
-            if (isk() && isDef(sk().typeName)) {
-               if (! isDef(sk().isShowingScript)) {
-                  sk().isShowingScript = true;
-                  codeSketch = sk();
-               }
-               toggleCodeWidget();
-            }
+	    this.toggleShowScript();
             break;
          }
+      },
+
+      toggleShowScript : function() {
+         if (isk() && isDef(sk().typeName)) {
+            if (! isDef(sk().isShowingScript)) {
+               sk().isShowingScript = true;
+               codeSketch = sk();
+            }
+            toggleCodeWidget();
+	    return true;
+         }
+	 return false;
       },
 
       toggleLinedBackground : function() {

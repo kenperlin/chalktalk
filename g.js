@@ -1874,8 +1874,10 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          sketchAction = "rotating";     // S -- ROTATE
          break;
       case 7:
-         sketchAction = "undrawing";    // SE -- "UNDRAW" A SIMPLE SKETCH
-         sketchPage.tUndraw = 0;
+         if (! sketchPage.toggleShowScript()) { // SE -- TOGGLE CODE SCRIPT IF THERE IS ONE.
+            sketchAction = "undrawing";         //       ELSE "UNDRAW" A SIMPLE SKETCH.
+            sketchPage.tUndraw = 0;
+         }
          break;
       }
 
