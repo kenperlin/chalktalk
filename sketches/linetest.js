@@ -1,8 +1,8 @@
 function() {
    this.label = 'linetest';
-   this.keys = [[-1,-1],[0,1],[0,-1],[1,1]];
+   this.keys = [[-1,-1,0],[0,1,0],[0,-1,0],[1,1,0]];
    this.spline = newArray(splineSize(this.keys), 2);
-   this.renderStrokeEnable();
+   this.renderStrokeInit();
 
    this.drawing.add(
       new DRAWING.Curve(
@@ -18,6 +18,12 @@ function() {
          this.keys[3][0] = .2 * sin(PI * time * 2) + 1;
 
 	 makeSpline(this.keys, this.spline);
+
+	 var i0 = floor(this.spline.length/3);
+	 var i1 = floor(this.spline.length/3*2);
+	 for (var i = 0 ; i < this.spline.length ; i++)
+	    this.spline[i][2] = i >= i0 && i < i1 ? 0 : 1;
+
 	 this.renderStroke(this.spline);
       });
    }
