@@ -8,7 +8,7 @@
 
    function drawHelpMenu() {
       if (isk()) {
-         var clickOp = 'delete,unparse,move,copy,scale,cmd,rotate,undraw'.split(',');
+         var clickOp = 'delete,unparse,move,copy,scale,cmd,rotate,undraw/see code'.split(',');
          var dragOp = ',,path,copies,link,,arrow,group,'.split(',');
 	 var cx = (sk().xlo + sk().xhi) / 2;
 	 var cy = (sk().ylo + sk().yhi) / 2;
@@ -840,7 +840,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var w = isCodeScript() ? 640 : min(10 * cols + 10, width() * 0.75);
+      var columnWidth = isCodeScript() ? 8 : 10;
+      var w = min(columnWidth * (cols + 1), width() * 0.75);
 
       if (rows > 3)
          rows += 0.3;
