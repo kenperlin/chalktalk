@@ -292,7 +292,7 @@
    function max(a,b,c) { return c===undefined ? Math.max(a,b) : Math.max(a,Math.max(b,c)); }
    function min(a,b,c) { return c===undefined ? Math.min(a,b) : Math.min(a,Math.min(b,c)); }
    function mix(a, b, t) {
-      if (isNumeric(a))
+      if (! Array.isArray(a))
          return a + (b - a) * t;
 
       var dst = [];
@@ -418,21 +418,42 @@
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
-   var ALT     = '\u22C0' ;
-   var C_PHI   = '\u03A6' ;
-   var C_THETA = '\u0398' ;
-   var COMMAND = '\u2318' ;
-   var CONTROL = '\u2201' ;
-   var D_ARROW = '\u2193' ;
-   var L_ARROW = '\u2190' ;
-   var PAGE_UP = 'PAGE_UP';
-   var PAGE_DN = 'PAGE_DN';
-   var R_ARROW = '\u2192' ;
-   var S_PHI   = '\u03C6' ;
-   var S_THETA = '\u03B8' ;
-   var U_ARROW = '\u2191' ;
+   var ALT       = '\u22C0' ;
+   var C_PHI     = '\u03A6' ;
+   var C_THETA   = '\u0398' ;
+   var COMMAND   = '\u2318' ;
+   var CONTROL   = '\u2201' ;
+   var D_ARROW   = '\u2193' ;
+   var EXP_2     = '\u00b2' ;
+   var L_ARROW   = '\u2190' ;
+   var PAGE_UP   = 'PAGE_UP';
+   var PAGE_DN   = 'PAGE_DN';
+   var R_ARROW   = '\u2192' ;
+   var S_ALPHA   = '\u03b1' ;
+   var S_BETA    = '\u03b2' ;
+   var S_GAMMA   = '\u03b3' ;
+   var S_DELTA   = '\u03b4' ;
+   var S_EPSILON = '\u03b5' ;
+   var S_PI      = '\u03c0' ;
+   var S_PHI     = '\u03C6' ;
+   var S_THETA   = '\u03B8' ;
+   var U_ARROW   = '\u2191' ;
 
    function charCodeToString(key) {
+      console.log(key + " " + isControlPressed + " " + isAltPressed + " " + isCommandPressed);
+      if (isControlPressed) {
+         switch (key) {
+	 case 50: return EXP_2;   // SUPERSCRIPT 2
+	 case 65: return S_ALPHA;
+	 case 66: return S_BETA;
+	 case 68: return S_DELTA;
+	 case 69: return S_EPSILON;
+	 case 70: return S_PHI;
+	 case 71: return S_GAMMA;
+	 case 80: return S_PI;
+	 case 84: return S_THETA;
+	 }
+      }
       if (isShiftPressed)
          switch (key) {
          case 48: return ')'; // SHIFT 1
@@ -574,6 +595,11 @@
          else
             dst[i] = src[i];
       return dst;
+   }
+
+   function copyArray(src, dst) {
+      for (var i = 0 ; i < src.length ; i++)
+         dst[i] = src[i];
    }
 
    function firstUndefinedArrayIndex(arr) {

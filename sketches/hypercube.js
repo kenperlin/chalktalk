@@ -4,7 +4,7 @@ function Hypercube() {
 
    var trackball = new Trackball(4);
 
-   var T0 = newVec();
+   var T0 = newVec3();
    this.onPress = function(T1) {
       T0.copy(T1);
    }
@@ -20,7 +20,7 @@ function Hypercube() {
 
    var P = [];
    for (var n = 0 ; n < 16 ; n++)
-       P.push(newVec());
+       P.push(newVec3());
 
    var tmp = [0,0,0,0];
    function project(a, b) {

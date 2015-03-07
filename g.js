@@ -3005,7 +3005,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    function addSketch(sketch) {
       sketch.drawing = new DRAWING.Drawing();
-
       if (sketch.init !== undefined)
          sketch.init();
 

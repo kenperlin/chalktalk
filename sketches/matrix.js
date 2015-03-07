@@ -10,6 +10,7 @@ function() {
    this.mxy = [0,0];
    this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
    this.label = "matrix";
+   this.showText = true;
    this.vals = [
        [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
        [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    "A","B","C", 1],
@@ -100,14 +101,15 @@ function() {
             }
          }
 
-         for (var col = 0 ; col < 4 ; col++)
-         for (var row = 0 ; row < 4 ; row++) {
-            var x = (col - 1.5) / 2;
-            var y = (1.5 - row) / 2;
-            var val = out[row + 4 * col];
-            textHeight((this.xhi - this.xlo) / 9 / pow(("" + val).length, 0.4));
-            mText(val, [x, y], .5, .5);
-         }
+         if (this.showText)
+            for (var col = 0 ; col < 4 ; col++)
+            for (var row = 0 ; row < 4 ; row++) {
+               var x = (col - 1.5) / 2;
+               var y = (1.5 - row) / 2;
+               var val = out[row + 4 * col];
+               textHeight((this.xhi - this.xlo) / 9 / pow(("" + val).length, 0.4));
+               mText(val, [x, y], .5, .5);
+            }
 
          if (this.row >= 0) {
             color(scrimColor(.33));

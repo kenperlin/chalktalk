@@ -142,10 +142,14 @@
 	 return [1,0,0,x/rr, 0,1,0,y/rr, 0,0,1,z/rr, 0,0,0,1];
       };
       this._d = function(a,b) {
-	 return a[0]*b[0] +
-	        a[1]*b[1] +
-		(b.length<3 ? 0 : a[2]*b[2]) +
-		(b.length<4 ? a[3] : a[3]*b[3]);
+         if (b instanceof THREE.Vector2) return a[0] * b.x + a[1] * b.y + a[3];
+         if (b instanceof THREE.Vector3) return a[0] * b.x + a[1] * b.y + a[2] * b.z + a[3];
+         if (b instanceof THREE.Vector4) return a[0] * b.x + a[1] * b.y + a[2] * b.z + a[3] * b.w;
+
+	 return a[0] * b[0] +
+	        a[1] * b[1] +
+		( b.length < 3 ? 0    : a[2] * b[2] ) +
+		( b.length < 4 ? a[3] : a[3] * b[3] ) ;
       };
       this._x = function(m) {
          return [m[0],m[1],m[2],m[3]];
@@ -293,6 +297,7 @@
       mat.translate(-width()*x,-height()*(1-y),0);
    }
    function mDot(a,r) {
+     if (r === undefined) r = 0.1;
       _g.save();
       lineWidth(norm(m.transform([r,0,0,0])));
       mLine(a,[a[0]+.001,a[1],def(a[2])]);

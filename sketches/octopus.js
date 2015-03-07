@@ -24,11 +24,11 @@ function OctopusResponder() {
       }
    );
 
-   this.dVec = newVec();
-   this.vVec = newVec();
-   this.wVec = newVec();
-   this.xVec = newVec();
-   this.yVec = newVec();
+   this.dVec = newVec3();
+   this.vVec = newVec3();
+   this.wVec = newVec3();
+   this.xVec = newVec3();
+   this.yVec = newVec3();
 
    this.simulate = function() {
       var nodes = this.graph.nodes;
@@ -116,7 +116,7 @@ function Octopus() {
 
       this.graph.addNode(  0,.5, 0);
 
-      var v = newVec();
+      var v = newVec3();
       v.set(1, 0, 1).normalize().multiplyScalar(0.55);
       this.graph.addNode(-v.x, .5+v.y, v.z);
       this.graph.addNode( v.x, .5+v.y, v.z);
@@ -230,7 +230,7 @@ function Octopus() {
 	 // GRADUALLY RECENTER THE OCTOPUS TO ITS LOCAL ORIGIN.
 
          if (this._recenter_point === undefined)
-            this._recenter_point = newVec(0,1,0);
+            this._recenter_point = newVec3(0,1,0);
 	 var dp = this.recenter3DSketch(nodes[0].p, this._recenter_point);
          for (var n = 0 ; n < nodes.length ; n++) 
             nodes[n].p.sub(dp);
@@ -255,8 +255,8 @@ function Octopus() {
       });
    }
 
-   this._p = newVec();
-   this._q = newVec();
+   this._p = newVec3();
+   this._q = newVec3();
    this.xyzw = new THREE.Vector4();
 
    this.createMesh = function() {

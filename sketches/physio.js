@@ -4,7 +4,7 @@ function() {
    this.computerRect = new Rectangle(.55, -.15, .4, .3);
    this.storageRect = new Rectangle(-.35,-.7,.7,.3);
    this.analysisRect = new Rectangle(.5,-.7,.5,.3);
-   var mouse = newVec();
+   var mouse = newVec3();
 
    this.mouseMove = function(x, y) {
       mouse.set(this.unadjustX(x), this.unadjustY(y), 0).applyMatrix4(pixelToPointMatrix);

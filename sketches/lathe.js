@@ -15,7 +15,7 @@ function() {
       this.profile = [];
       var stroke = this.sketchTrace[3];
       for (var i = 0 ; i < stroke.length ; i++)
-         this.profile.push( newVec( (stroke[i][0]-axisX) / axisR, 0, -(stroke[i][1]-axisY) / axisR ) );
+         this.profile.push( newVec3( (stroke[i][0]-axisX) / axisR, 0, -(stroke[i][1]-axisY) / axisR ) );
    }
 
    this.render = function() {
@@ -50,11 +50,11 @@ function() {
       if (isTorus)
          points.push(P[0]);
       else
-         points.push(newVec(0,0,P[P.length-1].z));
+         points.push(newVec3(0,0,P[P.length-1].z));
       for (var i = P.length-1 ; i >= 0 ; i--)
          points.push(P[i]);
       if (! isTorus)
-         points.push(newVec(0,0,P[0].z));
+         points.push(newVec3(0,0,P[0].z));
 
       var material = this.shaderMaterial();
       var lathe = new THREE.Mesh(new THREE.LatheGeometry(points, 32), material);

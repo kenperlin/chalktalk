@@ -7,21 +7,21 @@ function() {
 
    var a = [];
    for (var i = 0 ; i < n ; i++)
-      a.push(newVec());
+      a.push(newVec3());
 
    var b = [];
    for (var i = 0 ; i < n ; i++)
-      b.push(newVec());
+      b.push(newVec3());
 
    var c = [];
    for (var i = 0 ; i < n ; i++)
-      c.push(newVec());
+      c.push(newVec3());
 
    var d = [];
    for (var i = 0 ; i < n ; i++)
-      d.push(newVec());
+      d.push(newVec3());
 
-   var e = [newVec(), newVec()];
+   var e = [newVec3(), newVec3()];
 
    var eyeFragmentShader = [
    ,'uniform float uFoggy;'
