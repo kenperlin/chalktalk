@@ -1409,6 +1409,7 @@
                break;
             case "deleting":
                deleteSketch(sk(I));
+               //sk(I).fadeAway = 1;
                break;
             }
          }

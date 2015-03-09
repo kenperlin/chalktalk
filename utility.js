@@ -212,6 +212,20 @@
    }
 
 
+// CONVERT A FRACTIONAL VALUE BETWEEN 0.0 AND 1.0 TO HEAT MAP RGB.
+
+   function fractionToRGB(fraction, rgb) {
+      var t = 5 * fraction;
+      switch (floor(t)) {
+      case 0 : return [ 0     , 0     , t     ];
+      case 1 : return [ 0     , t - 1 , 1     ];
+      case 2 : return [ 0     , 1     , 3 - t ];
+      case 3 : return [ t - 3 , 1     , 0     ];
+      default: return [ 1     , 5 - t , 0     ];
+      }
+   }
+
+
 // PHYSICS.
 
    // Physics objects must inherit from "Clonable" for cloning to work properly.
@@ -425,13 +439,14 @@
    var CONTROL   = '\u2201' ;
    var D_ARROW   = '\u2193' ;
    var EXP_2     = '\u00b2' ;
+   var G_OR_EQ   = '\u2265' ;
    var L_ARROW   = '\u2190' ;
+   var L_OR_EQ   = '\u2264' ;
    var PAGE_UP   = 'PAGE_UP';
    var PAGE_DN   = 'PAGE_DN';
    var R_ARROW   = '\u2192' ;
    var S_ALPHA   = '\u03b1' ;
    var S_BETA    = '\u03b2' ;
-   var S_GAMMA   = '\u03b3' ;
    var S_DELTA   = '\u03b4' ;
    var S_EPSILON = '\u03b5' ;
    var S_PI      = '\u03c0' ;
@@ -440,7 +455,6 @@
    var U_ARROW   = '\u2191' ;
 
    function charCodeToString(key) {
-      console.log(key + " " + isControlPressed + " " + isAltPressed + " " + isCommandPressed);
       if (isControlPressed) {
          switch (key) {
 	 case 50: return EXP_2;   // SUPERSCRIPT 2
@@ -449,7 +463,8 @@
 	 case 68: return S_DELTA;
 	 case 69: return S_EPSILON;
 	 case 70: return S_PHI;
-	 case 71: return S_GAMMA;
+	 case 71: return G_OR_EQ;
+	 case 76: return L_OR_EQ;
 	 case 80: return S_PI;
 	 case 84: return S_THETA;
 	 }
@@ -597,6 +612,19 @@
       return dst;
    }
 
+   function compressData(src) {
+      var dst = [];
+      for (i = 0 ; i < src.length ; i++)
+         if (src[i] > 0)
+            dst.push(src[i]);
+         else {
+            if (dst.length == 0 || dst[dst.length-1] > 0)
+               dst.push(0);
+            dst[dst.length-1]--;
+         }
+      return dst;
+   }
+
    function copyArray(src, dst) {
       for (var i = 0 ; i < src.length ; i++)
          dst[i] = src[i];
@@ -643,6 +671,20 @@
       var i = floor((n-1) * t);
       var f = (n-1) * t - i;
       return mix(arr[i], arr[i+1], f);
+   }
+
+   function uncompressData(src, len) {
+      var dst = [];
+      for (i = 0 ; i < src.length ; i++)
+         if (src[i] > 0)
+            dst.push(src[i]);
+         else
+            for (var n = 0 ; n < -src[i] ; n++)
+               dst.push(0);
+      if (len !== undefined)
+         while (dst.length < len)
+            dst.push(0);
+      return dst;
    }
 
 // IMAGE PROCESSING.
