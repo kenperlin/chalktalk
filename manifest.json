@@ -1,0 +1,7 @@
+{
+  "short_name": "Chalktalk",
+  "name": "Chalktalk",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "landscape"
+}
