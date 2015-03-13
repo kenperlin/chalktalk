@@ -1,7 +1,7 @@
 function() {
    this.label = 'interp';
    var S = [[-1,-1],[0,1],[1,-1]];
-   var n = 3, xy0 = newVec(), xy1 = newVec(), p = newVec(-100,-100,0);
+   var n = 3, xy0 = newVec3(), xy1 = newVec3(), p = newVec3(-100,-100,0);
    this.onPress = function(point) {
       xy0.copy(point).applyMatrix4(pointToPixelMatrix);
       for (n = 0 ; n < 3 ; n++) {

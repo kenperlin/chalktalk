@@ -134,22 +134,22 @@ function() {
             wing1.add(wing2);
             body.add(wing1);
 
-            wing1.addQuadrangle(newVec(        0, .25),
-                                newVec(sgn *  .3, .5 ),
-                                newVec(sgn *  .3,-.25),
-                                newVec(sgn * .03,  0 ));
+            wing1.addQuadrangle(newVec3(        0, .25),
+                                newVec3(sgn *  .3, .5 ),
+                                newVec3(sgn *  .3,-.25),
+                                newVec3(sgn * .03,  0 ));
             wing1.position.x = 0.05 * sgn;
 
-            wing2.addQuadrangle(newVec(       0, .5 ),
-                                newVec(sgn * .6, .3 ),
-                                newVec(sgn * .6, .0 ),
-                                newVec(       0,-.25));
+            wing2.addQuadrangle(newVec3(       0, .5 ),
+                                newVec3(sgn * .6, .3 ),
+                                newVec3(sgn * .6, .0 ),
+                                newVec3(       0,-.25));
             wing2.position.x = 0.3 * sgn;
 
-            wing3.addQuadrangle(newVec(       0, .3 ),
-                                newVec(sgn * .4, .1 ),
-                                newVec(sgn * .2, .0 ),
-                                newVec(       0, .0 ));
+            wing3.addQuadrangle(newVec3(       0, .3 ),
+                                newVec3(sgn * .4, .1 ),
+                                newVec3(sgn * .2, .0 ),
+                                newVec3(       0, .0 ));
             wing3.position.x = 0.6 * sgn;
          }
 
@@ -188,5 +188,5 @@ function() {
       return mesh;
    }
 
-   var colorVec = newVec();
+   var colorVec = newVec3();
 }

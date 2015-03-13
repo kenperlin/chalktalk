@@ -5,7 +5,7 @@ function() {
    var trackball = new Trackball(4);
    var mode = 0;
 
-   var T0 = newVec();
+   var T0 = newVec3();
    this.onCmdClick = function() {
       mode++;
    }
@@ -64,7 +64,7 @@ function() {
 
    var P = [];
    for (var n = 0 ; n < 24 ; n++)
-       P.push(newVec());
+       P.push(newVec3());
 
    var tmp = [0,0,0,0];
    function project(a, b) {

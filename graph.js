@@ -2,7 +2,7 @@
 function isNotNull(arg) { return arg !== undefined && arg != null; }
 
 function GraphNode(x, y, z, type) {
-   this.p = newVec(x, y, z);
+   this.p = newVec3(x, y, z);
    this.type = type;
 }
 
@@ -37,7 +37,7 @@ function Graph() {
 }
 
 Graph.prototype = {
-   tmp: newVec(0,0,0),
+   tmp: newVec3(),
 
    clone: function() {
       var graph = new Graph();
@@ -318,9 +318,9 @@ GraphResponder.prototype = {
 }
 
 function VisibleGraph() {
-   this.p = newVec(0,0,0);
-   this.q = newVec(0,0,0);
-   this.pix = newVec(0,0,0);
+   this.p = newVec3();
+   this.q = newVec3();
+   this.pix = newVec3();
    this.travel = 0;
    this.pixelSize = 1;
 }
@@ -349,7 +349,7 @@ VisibleGraph.prototype.findNodeAtPixel = function(pix) {
          d *= node.r * 10;
 
       if (node.pix === undefined)
-         node.pix = newVec(0,0,0);
+         node.pix = newVec3();
       node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
 
       var dx = pix.x - node.pix.x;

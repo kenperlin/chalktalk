@@ -693,7 +693,7 @@
                                       min(1, this.afterSketchTransition + 2 * elapsed);
          _g.save();
          m.save();
-	 if (this.glyphTransition < 1)
+	 if (this.glyphTransition < 1 && this.drawing !== undefined)
             this.drawing.update();
 	 try {
             this.render(elapsed);
@@ -756,8 +756,8 @@
       },
       recenter3DSketch : function(p, q) {
          if (this._recenter_p === undefined) {
-            this._recenter_p = newVec();
-            this._recenter_q = newVec(); 
+            this._recenter_p = newVec3();
+            this._recenter_q = newVec3(); 
             this._recenter_r = newVec4();
          }
          var _p = this._recenter_p,
@@ -1409,6 +1409,7 @@
                break;
             case "deleting":
                deleteSketch(sk(I));
+               //sk(I).fadeAway = 1;
                break;
             }
          }

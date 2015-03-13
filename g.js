@@ -1965,6 +1965,20 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    var tick = function(g) {
 
+      // FETCH PRESSURE DATA RECORDED FROM TT SENSOR.
+
+      if (window.ttdata === undefined) {
+          server.get("state/ttdata", function(val) {
+	                                ttdata = JSON.parse(val);
+	                             });
+      }
+      if (window.ttdata !== undefined) {
+	  var len = ttdata.rows * ttdata.cols;
+	  if (ttdata.data[0].length < len)
+	     for (var frame = 0 ; frame < ttdata.data.length ; frame++)
+	        ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
+      }
+
 //server.get("state/foobar", function(val) { console.log(val); });
 
       if (window.forceSetPageAtTime !== undefined && forceSetPageAtTime < time) {
@@ -3005,7 +3019,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    function addSketch(sketch) {
       sketch.drawing = new DRAWING.Drawing();
-
       if (sketch.init !== undefined)
          sketch.init();
 

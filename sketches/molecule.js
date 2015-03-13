@@ -5,7 +5,7 @@ function MoleculeResponder() {
       function() {
          var node = this.graph.nodes[this.I];
          if (node.d === undefined)
-            node.d = newVec(0,0,0);
+            node.d = newVec3();
          node.d.copy(this.graph.p).sub(node.p);
       },
       function() {                                             // Drag on a node to move it.
@@ -152,7 +152,7 @@ function Molecule() {
          for (var j = 0 ; j < nodes.length ; j++) {
             var node = nodes[j];
             if (node.pix === undefined)
-               node.pix = newVec(0,0,0);
+               node.pix = newVec3();
             node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             if (j == R.J)

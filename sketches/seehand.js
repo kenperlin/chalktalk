@@ -8,7 +8,7 @@ function() {
 			       [0.15,-.1],[0.19,.18],[0.18,.48],[.25,.54],[0.32,.5],[0.37,0],
 			       [0.29,-.5],[.14,-.9],[.10,-1.2],
 			      ]);
-   var hand0 = newVec(), hand = newVec(-2,0,0);
+   var hand0 = newVec3(), hand = newVec3(-2,0,0);
    this.onPress = function(point) { hand0.copy(point); }
    this.onDrag  = function(point) { hand.sub(hand0).add(point); hand0.copy(point); }
    this.render = function() {

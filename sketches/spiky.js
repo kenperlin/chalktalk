@@ -58,8 +58,8 @@ function() {
 
    var V = [], T = [];
 
-   var a = newVec();
-   var b = newVec();
+   var a = newVec3();
+   var b = newVec3();
 
    this.render = function(elapsed) {
 
@@ -69,9 +69,9 @@ function() {
 	 case 'spiky1':
 
 	    if (V.length == 0) {
-               V = [newVec(-1,0,0), newVec(1,0,0),
-                    newVec(0,-1,0), newVec(0,1,0),
-                    newVec(0,0,-1), newVec(0,0,1)];
+               V = [newVec3(-1,0,0), newVec3(1,0,0),
+                    newVec3(0,-1,0), newVec3(0,1,0),
+                    newVec3(0,0,-1), newVec3(0,0,1)];
 
                for (var i = 0 ; i <= 1 ; i++)
                for (var j = 2 ; j <= 3 ; j++)
@@ -86,7 +86,7 @@ function() {
 
 	    if (V.length == 0) {
                for (var i = 0 ; i < P.length ; i++)
-                  V.push(newVec(P[i][0]*.6,P[i][1]*.6,P[i][2]*.6));
+                  V.push(newVec3(P[i][0]*.6,P[i][1]*.6,P[i][2]*.6));
 
                T = [ [0, 11, 5],  [0,  5,  1],  [ 0,  1,  7],  [ 0, 7, 10],  [0, 10, 11],
                      [1,  5, 9],  [5, 11,  4],  [11, 10,  2],  [10, 7,  6],  [7,  1,  8],

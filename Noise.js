@@ -145,8 +145,8 @@ function Noise() {
       subtract(f0, ONE3, f1);
       fade(f0, f);
 
-      set4(i0[0], i1[0], i0[0], i1[0], ix);
-      set4(i0[1], i0[1], i1[1], i1[1], iy);
+      set4(i0[0], i1[0], i0[0], i1[0], ix );
+      set4(i0[1], i0[1], i1[1], i1[1], iy );
       set4(i0[2], i0[2], i0[2], i0[2], iz0);
       set4(i1[2], i1[2], i1[2], i1[2], iz1);
 
@@ -155,14 +155,14 @@ function Noise() {
       permute(add(ixy, iz1, tmp1), ixy1);
 
       scale(ixy0, 1 / 7, gx0);
-      subtract(fract(scale(floor(gx0, tmp1), 1 / 7, tmp2), tmp0), HALF4, gy0);
       scale(ixy1, 1 / 7, gx1);
+      subtract(fract(scale(floor(gx0, tmp1), 1 / 7, tmp2), tmp0), HALF4, gy0);
       subtract(fract(scale(floor(gx1, tmp1), 1 / 7, tmp2), tmp0), HALF4, gy1);
       fract(gx0, gx0);
       fract(gx1, gx1);
       subtract(subtract(HALF4, abs(gx0, tmp1), tmp2), abs(gy0, tmp0), gz0);
-      gt0(gz0, sz0);
       subtract(subtract(HALF4, abs(gx1, tmp1), tmp2), abs(gy1, tmp0), gz1);
+      gt0(gz0, sz0);
       gt0(gz1, sz1);
 
       subtract(gx0, multiply(sz0, subtract(lt0(gx0, tmp1), HALF4, tmp2), tmp0), gx0);

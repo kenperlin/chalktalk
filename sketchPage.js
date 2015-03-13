@@ -167,7 +167,7 @@
       skCallback : function(action, x, y) {
          if (isk() && sk()[action] !== undefined) {
             if (sk()._cursorPoint === undefined)
-               sk()._cursorPoint = newVec();
+               sk()._cursorPoint = newVec3();
             sk()._cursorPoint.set(x,y,0).applyMatrix4(pixelToPointMatrix);
             sk()[action](sk()._cursorPoint);
          }
@@ -1152,6 +1152,15 @@
 
          if (isTextMode) {
             switch (letter) {
+            case 'alt':
+               isAltPressed = true;
+	       break;
+            case 'command':
+               isCommandPressed = true;
+	       break;
+            case 'control':
+               isControlPressed = true;
+	       break;
             case 'cap':
                isShiftPressed = true;
                break;
@@ -1269,24 +1278,31 @@
          // Special handling for when in text mode.
 
          if (isTextMode) {
-            if (this.isPortValueTextMode !== undefined) {
-               var val = "" + outSketch.defaultValue[outPort];
-               if (letter == 'del') {
-                  if (val.length > 0) {
-                     val = val.substring(0, val.length-1);
-                     if (isNumeric(val))
-                        val = parseFloat(val);
+	    switch (letter) {
+	    case 'alt':
+	    case 'command':
+	    case 'control':
+	      break;
+            default:
+               if (this.isPortValueTextMode !== undefined) {
+                  var val = "" + outSketch.defaultValue[outPort];
+                  if (letter == 'del') {
+                     if (val.length > 0) {
+                        val = val.substring(0, val.length-1);
+                        if (isNumeric(val))
+                           val = parseFloat(val);
+                     }
                   }
+                  else if (isNumeric(val) && isNumeric(letter))
+                     val = parseFloat(val) + parseFloat(letter);
+                  else
+                     val += letter;
+                  outSketch.defaultValue[outPort] = isNumeric(val) ? val : val.length == 0 ? 0 : val;
                }
-               else if (isNumeric(val) && isNumeric(letter))
-                  val = parseFloat(val) + parseFloat(letter);
                else
-                  val += letter;
-               outSketch.defaultValue[outPort] = isNumeric(val) ? val : val.length == 0 ? 0 : val;
-            }
-            else
-               this.handleTextChar(letter);
-            return;
+                  this.handleTextChar(letter);
+               return;
+	    }
          }
 
          for (var i = 0 ; i < sketchTypes.length ; i++)

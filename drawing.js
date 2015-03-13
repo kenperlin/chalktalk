@@ -34,6 +34,20 @@ DRAWING.Curve.prototype = {
    },
 }
 
+DRAWING.Line = function(arg1, arg2) {
+   this.arg1 = arg1;
+   this.arg2 = arg2;
+}
+
+DRAWING.Line.prototype = {
+   constructor : DRAWING.Line,
+
+   update : function() {
+      mLine(DRAWING.evalArg(this.arg1),
+            DRAWING.evalArg(this.arg2));
+   },
+}
+
 DRAWING.SplinePath = function(arg) {
    this.arg = arg;
    this.splinePoints = [];

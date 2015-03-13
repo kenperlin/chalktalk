@@ -108,7 +108,7 @@
       var geom = new THREE.Geometry();
       var r = 1 / n;
       for (var i = 0 ; i <= 2 * n ; i++) {
-         var vertex = newVec((2 * i - n) * r, i % 2 == 0 ? -r/2 : r/2, 0);
+         var vertex = newVec3((2 * i - n) * r, i % 2 == 0 ? -r/2 : r/2, 0);
          geom.vertices.push(vertex);
       }
       for (var i = 0 ; i < n ; i++) {
@@ -117,7 +117,12 @@
       }
    }
 
-   function newVec(x, y, z) {
+   function newVec2(x, y) {
+      if (x === undefined) x = y = 0;
+      if (y === undefined) y = 0;
+      return new THREE.Vector2(x, y);
+   }
+   function newVec3(x, y, z) {
       if (x === undefined) x = y = z = 0;
       if (y === undefined) y = z = 0;
       if (z === undefined) z = 0;
@@ -601,7 +606,7 @@ function shaderMaterial(vertexShaderString, fragmentShaderString) {
    for (var i = 0 ; i < u.length ; i++)
       material.uniforms[u[i]] = { type: "f", value: (u[i]=="alpha" || u[i]=="uAlpha" ? 1 : 0) };
 
-   material.uniforms.uCursor = { type: "v3", value: newVec() };
+   material.uniforms.uCursor = { type: "v3", value: newVec3() };
 
    addUniforms(material, fragmentShaderString);
    material.fragmentShader = formFragmentShader(fragmentShaderString);

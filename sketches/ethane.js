@@ -4,7 +4,7 @@ function EthaneResponder() {
       function() {                                             // Drag on a node to move it.
          var node = this.graph.nodes[this.I];
          if (node.d === undefined)
-            node.d = newVec(0,0,0);
+            node.d = newVec3();
          var p = this.graph.p;
          node.d.set(p.x - node.p.x, p.y - node.p.y, p.z - node.p.z);
       },
@@ -108,7 +108,7 @@ function Ethane() {
          for (var j = 0 ; j < nodes.length ; j++) {
             var node = nodes[j];
             if (node.pix === undefined)
-               node.pix = newVec(0,0,0);
+               node.pix = newVec3();
             node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             if (j == R.J)

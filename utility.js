@@ -212,6 +212,20 @@
    }
 
 
+// CONVERT A FRACTIONAL VALUE BETWEEN 0.0 AND 1.0 TO HEAT MAP RGB.
+
+   function fractionToRGB(fraction, rgb) {
+      var t = 5 * fraction;
+      switch (floor(t)) {
+      case 0 : return [ 0     , 0     , t     ];
+      case 1 : return [ 0     , t - 1 , 1     ];
+      case 2 : return [ 0     , 1     , 3 - t ];
+      case 3 : return [ t - 3 , 1     , 0     ];
+      default: return [ 1     , 5 - t , 0     ];
+      }
+   }
+
+
 // PHYSICS.
 
    // Physics objects must inherit from "Clonable" for cloning to work properly.
@@ -292,7 +306,7 @@
    function max(a,b,c) { return c===undefined ? Math.max(a,b) : Math.max(a,Math.max(b,c)); }
    function min(a,b,c) { return c===undefined ? Math.min(a,b) : Math.min(a,Math.min(b,c)); }
    function mix(a, b, t) {
-      if (isNumeric(a))
+      if (! Array.isArray(a))
          return a + (b - a) * t;
 
       var dst = [];
@@ -418,21 +432,43 @@
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
-   var ALT     = '\u22C0' ;
-   var C_PHI   = '\u03A6' ;
-   var C_THETA = '\u0398' ;
-   var COMMAND = '\u2318' ;
-   var CONTROL = '\u2201' ;
-   var D_ARROW = '\u2193' ;
-   var L_ARROW = '\u2190' ;
-   var PAGE_UP = 'PAGE_UP';
-   var PAGE_DN = 'PAGE_DN';
-   var R_ARROW = '\u2192' ;
-   var S_PHI   = '\u03C6' ;
-   var S_THETA = '\u03B8' ;
-   var U_ARROW = '\u2191' ;
+   var ALT       = '\u22C0' ;
+   var C_PHI     = '\u03A6' ;
+   var C_THETA   = '\u0398' ;
+   var COMMAND   = '\u2318' ;
+   var CONTROL   = '\u2201' ;
+   var D_ARROW   = '\u2193' ;
+   var EXP_2     = '\u00b2' ;
+   var G_OR_EQ   = '\u2265' ;
+   var L_ARROW   = '\u2190' ;
+   var L_OR_EQ   = '\u2264' ;
+   var PAGE_UP   = 'PAGE_UP';
+   var PAGE_DN   = 'PAGE_DN';
+   var R_ARROW   = '\u2192' ;
+   var S_ALPHA   = '\u03b1' ;
+   var S_BETA    = '\u03b2' ;
+   var S_DELTA   = '\u03b4' ;
+   var S_EPSILON = '\u03b5' ;
+   var S_PI      = '\u03c0' ;
+   var S_PHI     = '\u03C6' ;
+   var S_THETA   = '\u03B8' ;
+   var U_ARROW   = '\u2191' ;
 
    function charCodeToString(key) {
+      if (isControlPressed) {
+         switch (key) {
+	 case 50: return EXP_2;   // SUPERSCRIPT 2
+	 case 65: return S_ALPHA;
+	 case 66: return S_BETA;
+	 case 68: return S_DELTA;
+	 case 69: return S_EPSILON;
+	 case 70: return S_PHI;
+	 case 71: return G_OR_EQ;
+	 case 76: return L_OR_EQ;
+	 case 80: return S_PI;
+	 case 84: return S_THETA;
+	 }
+      }
       if (isShiftPressed)
          switch (key) {
          case 48: return ')'; // SHIFT 1
@@ -576,6 +612,24 @@
       return dst;
    }
 
+   function compressData(src) {
+      var dst = [];
+      for (i = 0 ; i < src.length ; i++)
+         if (src[i] > 0)
+            dst.push(src[i]);
+         else {
+            if (dst.length == 0 || dst[dst.length-1] > 0)
+               dst.push(0);
+            dst[dst.length-1]--;
+         }
+      return dst;
+   }
+
+   function copyArray(src, dst) {
+      for (var i = 0 ; i < src.length ; i++)
+         dst[i] = src[i];
+   }
+
    function firstUndefinedArrayIndex(arr) {
       var n = 0;
       while (n < arr.length && isDef(arr[n]) && arr[n] != null)
@@ -617,6 +671,20 @@
       var i = floor((n-1) * t);
       var f = (n-1) * t - i;
       return mix(arr[i], arr[i+1], f);
+   }
+
+   function uncompressData(src, len) {
+      var dst = [];
+      for (i = 0 ; i < src.length ; i++)
+         if (src[i] > 0)
+            dst.push(src[i]);
+         else
+            for (var n = 0 ; n < -src[i] ; n++)
+               dst.push(0);
+      if (len !== undefined)
+         while (dst.length < len)
+            dst.push(0);
+      return dst;
    }
 
 // IMAGE PROCESSING.
