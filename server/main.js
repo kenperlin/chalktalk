@@ -95,6 +95,7 @@ app.route("/appcache").get(function(req, res) {
 
       res.writeHead(200, { "ContentType": "text/cache-manifest" });
       res.write("CACHE MANIFEST\n");
+      files.sort();
       files.forEach(function(file) {
          if ((file.endsWith("html") || file.endsWith("js") || file.endsWith("json"))
                && !file.contains("server") && !file.contains(".git") && !file.contains("swp")) {
