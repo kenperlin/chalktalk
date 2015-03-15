@@ -679,6 +679,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
    function innerCode(src) {
    }
 
+   keyCount = 0;
+
    var codeElement,
        codeSelector,
        codeTextArea,
@@ -687,34 +689,59 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           codeTextArea.value = codeSelector.value;
           updateF();
        },
-       updateF = function() {
-          var text = codeTextArea.value;
+       updateF = function(evt) {
+
           if (isCodeScript()) {
 
-             // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
-             // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
+             // IF EDITING JAVASCRIPT SOURCE, UNDEFINED VARIABLES CAUSE PROBLEMS,
+	     // SO WE MAKE THE USER IT THE ` KEY AS A TRIGGER TO REPARSE.
 
-             var i = text.indexOf('{');
-             var j = text.lastIndexOf('}');
-             try {
-                codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
-                codeSketch._temporaryFunction();
-             } catch (e) {
-                console.log(e);
+             var s = codeTextArea.value;
+             var i = codeTextArea.selectionStart - 1;
+             if (s.charAt(i) == '`') {
+
+                // FIRST REMOVE ` CHAR FROM TEXT, THEN RESTORE CURSOR POSITION.
+
+	        codeTextArea.value = s.substring(0, i) + s.substring(i + 1, s.length);
+                codeTextArea.selectionStart =
+                codeTextArea.selectionEnd = i;
+
+                // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
+                // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
+
+		var text = codeTextArea.value;
+                var i = text.indexOf('{');
+                var j = text.lastIndexOf('}');
+                try {
+                   codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
+                   codeSketch._temporaryFunction();
+                } catch (e) { console.log(e); }
              }
           }
+
           else if (code() != null) {
-             var index = codeSelector.selectedIndex;
-             code()[index][1] = text;
-             codeSketch.selectedIndex = index;
-             if (code()[index][2] !== undefined) {
-                try {
-                   codeSketch._temporaryFunction = code()[index][2];
-                   codeSketch._temporaryFunction();
-                } catch(e) { console.log(e); }
+	     var text = codeTextArea.value;
+
+             // WHEN EVALUATING EXPRESSIONS, UNEVALUATED FUNCTIONS CANNOT BE PROPERLY PARSED,
+             // SO DON'T ALLOW EVAL OF USER-CODED EXPRESSIONS IF SUCH FUNCTIONS ARE PRESENT.
+
+	     if (isParsableCode(text)) {
+
+                var index = codeSelector.selectedIndex;
+                code()[index][1] = text;
+                codeSketch.selectedIndex = index;
+                if (code()[index][2] !== undefined) {
+
+                   // EVALUATE EXPRESSION WITHIN THE SCOPE OF THE SKETCH.
+
+                   try {
+                      codeSketch._temporaryFunction = code()[index][2];
+                      codeSketch._temporaryFunction();
+                   } catch(e) { console.log(e); }
+                }
+                else
+                   codeSketch.evalCode(text);
              }
-             else
-                codeSketch.evalCode(text);
           }
        };
 

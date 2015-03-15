@@ -17,20 +17,33 @@
    }
 
    // CODE SHOULD NOT BE PARSED IF IT CONTAINS UNEVALUATED FUNCTIONS,
-   // BECAUSE RUNNING eval() WOULD FAIL WITHOUT TRIGGERING AN EXCEPTION.
+   // BECAUSE RUNNING eval() WOULD THEN FAIL WITHOUT TRIGGERING AN EXCEPTION.
 
    function isParsableCode( code ) {
       function isAlpha(c) { return c >= 'a' && c <= 'z'; }
+
+      // REMOVE EVERYTHING BUT SPACE-SEPARATED VARIABLE NAMES AND '(' CHARACTERS.
+
       var str = code.replace(/[^a-zA-Z_(]/g,' ').replace(/ +/g,' ').replace(/ \(/g,'(');
+
       for (var i = 0 ; i < str.length ; i++)
-	 if (isAlpha(str.charAt(i)))
-	    for (var j = i + 1 ; j < str.length ; j++)
-	       if (! isAlpha(str.charAt(j))) {
-                  if ( typeof eval(str.substring(i, j)) === 'function' && str.charAt(j) != '(' )
-	             return false;
-                  i = j;
-	          break;
-               }
+         if (isAlpha(str.charAt(i))) {
+
+            // IF WE FIND A FUNCTION NAME NOT FOLLOWED BY A '(', THEN THIS CODE IS UNPARSABLE.
+
+            var j = i + 1;
+            for ( ; j < str.length && isAlpha(str.charAt(j)) ; j++)
+               ;
+
+            try {
+               if ( typeof eval(str.substring(i, j)) === 'function' && str.charAt(j) != '(' )
+                  return false;
+            }
+            catch(e) { }
+
+            i = j;
+         }
+
       return true;
    }
 
@@ -83,17 +96,15 @@
 
       if (nDigits !== undefined && nd > 0) {
          var i = str.indexOf(".");
-	 if (i < 0) {
-	    str += ".";
-	    i = str.length - 1;
+         if (i < 0) {
+            str += ".";
+            i = str.length - 1;
          }
          while (str.length - i < nd + 1)
-	    str += "0";
+            str += "0";
       }
 
       str = (v < 0 ? "-" : "") + str;
-
-console.log("roundedString: " + str);
 
       return str;
    }
@@ -495,19 +506,19 @@ console.log("roundedString: " + str);
    function charCodeToString(key) {
       if (isControlPressed) {
          switch (key) {
-	 case 50: return EXP_2;   // SUPERSCRIPT 2
-	 case 51: return EXP_3;   // SUPERSCRIPT 3
-	 case 52: return EXP_4;   // SUPERSCRIPT 4
-	 case 65: return S_ALPHA;
-	 case 66: return S_BETA;
-	 case 68: return S_DELTA;
-	 case 69: return S_EPSILON;
-	 case 70: return S_PHI;
-	 case 71: return G_OR_EQ;
-	 case 76: return L_OR_EQ;
-	 case 80: return S_PI;
-	 case 84: return S_THETA;
-	 }
+         case 50: return EXP_2;   // SUPERSCRIPT 2
+         case 51: return EXP_3;   // SUPERSCRIPT 3
+         case 52: return EXP_4;   // SUPERSCRIPT 4
+         case 65: return S_ALPHA;
+         case 66: return S_BETA;
+         case 68: return S_DELTA;
+         case 69: return S_EPSILON;
+         case 70: return S_PHI;
+         case 71: return G_OR_EQ;
+         case 76: return L_OR_EQ;
+         case 80: return S_PI;
+         case 84: return S_THETA;
+         }
       }
       if (isShiftPressed)
          switch (key) {
@@ -692,7 +703,7 @@ console.log("roundedString: " + str);
          case 2: dst.push([0,0]); break;
          case 3: dst.push([0,0,0]); break;
          case 4: dst.push([0,0,0,1]); break;
-	 }
+         }
       return dst;
    }
 
@@ -732,15 +743,15 @@ console.log("roundedString: " + str);
    function findConnectedComponents(src, nc, dst, f0) {
       function findConnectedComponent(i, n) {
          if (src[i] < f0)
-	    return;
+            return;
 
          dst[i] = n;
          var c = i % nc;
          var r = i / nc;
-	 if (c > 0    && dst[i - 1 ] == 0) findConnectedComponent(i - 1 , n);
-	 if (c < nc-1 && dst[i + 1 ] == 0) findConnectedComponent(i + 1 , n);
-	 if (r > 0    && dst[i - nc] == 0) findConnectedComponent(i - nc, n);
-	 if (r < nr-1 && dst[i + nc] == 0) findConnectedComponent(i + nc, n);
+         if (c > 0    && dst[i - 1 ] == 0) findConnectedComponent(i - 1 , n);
+         if (c < nc-1 && dst[i + 1 ] == 0) findConnectedComponent(i + 1 , n);
+         if (r > 0    && dst[i - nc] == 0) findConnectedComponent(i - nc, n);
+         if (r < nr-1 && dst[i + nc] == 0) findConnectedComponent(i + nc, n);
       }
 
       if (f0 === undefined)
@@ -754,7 +765,7 @@ console.log("roundedString: " + str);
       var n = 0;
       for (var i = 0 ; i < src.length ; i++)
          if (src[i] >= f0 && dst[i] == 0)
-	    findConnectedComponent(i, ++n);
+            findConnectedComponent(i, ++n);
    }
 
    function imageEnlarge(src, dst) {
@@ -847,12 +858,12 @@ console.log("roundedString: " + str);
       if (isAdjustingA) {
          A[0] -= t * x;
          A[1] -= t * y;
-	 if (is3D) A[2] -= t * z;
+         if (is3D) A[2] -= t * z;
       }
       if (isAdjustingB) {
          B[0] += t * x;
          B[1] += t * y;
-	 if (is3D) B[2] += t * z;
+         if (is3D) B[2] += t * z;
       }
    }
 
@@ -1206,9 +1217,9 @@ console.log("roundedString: " + str);
 
    function computeCurvature(A, M, B) {
       if (M === undefined) {
-	 M = A[floor(A.length / 2)];
-	 B = A[A.length - 1];
-	 A = A[0];
+         M = A[floor(A.length / 2)];
+         B = A[A.length - 1];
+         A = A[0];
       }
       var dx = B[0] - A[0];
       var dy = B[1] - A[1];
@@ -1235,7 +1246,7 @@ console.log("roundedString: " + str);
       var dst = [], p = null;
       for (var i = 0 ; i < curve.length - 1 ; i++)
          if ((p = lineIntersectLine(curve[i], curve[i+1], a, b)) != null)
-	    dst.push(p);
+            dst.push(p);
       return dst;
    }
 
