@@ -80,7 +80,6 @@ function() {
             // Capture input
 
             var val = this.inValues[0];
-	    console.log(val);
 	    if (typeof val == 'function')
 	       val = val(time);
             recordValue(val);
