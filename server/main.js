@@ -2,12 +2,8 @@ var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
 var fs = require("fs");
-//var git = require("nodegit");
 var path = require("path");
 var readline = require("readline-sync");
-
-//var gitUser = readline.question("github username: ");
-//var gitPass = readline.question("github password for " + gitUser + ":", {noEchoBack: true});
 
 var app = express();
 var port = process.argv[2] || 11235;
@@ -29,7 +25,7 @@ app.route("/upload").post(function(req, res, next) {
       var filename = fields.sketchName;
       var suffix = ".js";
       if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
-         filename += suffix; 
+         filename += suffix;
 
       fs.writeFile(form.uploadDir + "/" + filename, fields.sketchContent, function(err) {
          if (err) {
@@ -53,7 +49,7 @@ app.route("/set").post(function(req, res, next) {
 
       var suffix = ".json";
       if (key.indexOf(suffix, key.length - suffix.length) == -1)
-         key += suffix; 
+         key += suffix;
 
       fs.writeFile(key, fields.value, function(err) {
          if (err) {
@@ -67,61 +63,6 @@ app.route("/set").post(function(req, res, next) {
    });
 });
 
-/*
-// open git repo
-var repository;
-git.Repo.open(".git", function(err, repo) {
-   if (err) throw err;
-   repository = repo;
-});
-*/
-
-// handle commit requests
-app.route("/commit").post(function(req, res, next) {
-   var form = formidable.IncomingForm();
-
-   form.parse(req, function(err, fields, files) {
-      res.writeHead(200, {"content-type": "text/plain"});
-      res.write("received commit request");
-
-      var filename = fields.sketchName;
-      var suffix = ".js";
-      if (filename.indexOf(suffix, filename.length - suffix.length) == -1)
-         filename += suffix; 
-/*
-      // I know this is confusing but I'll fix it 
-      repository.openIndex(function(err, index) {
-         if (err) throw err;
-         index.read(function(err) {
-            if (err) throw err;   
-            index.addByPath("sketches/" + filename, function(err) {
-               if (err) throw err;
-               index.write(function(err) {
-                  if (err) throw err;
-                  index.writeTree(function(err, oid) {
-                     if (err) throw err;
-                     git.Reference.oidForName(repository, 'HEAD', function(err, head) {
-                        if (err) throw err; 
-                        repository.getCommit(head, function(err, parent) {
-                           if (err) throw err;
-                           var author = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
-                           var committer = git.Signature.now("Evan Moore", "2emoore4@gmail.com");
-
-                           repository.createCommit('HEAD', author, committer, 'new sketch from web editor', oid, [parent], function(err, commitId) {
-                              console.log("New commit: " + commitId.sha());
-                           });
-                        });
-                     });
-                  });
-               });
-            });
-         });
-
-      });
-*/
-   });
-});
-
 // handle request for list of available sketches
 app.route("/ls_sketches").get(function(req, res) {
    fs.readdir("./sketches/", function(err, files) {
@@ -129,15 +70,73 @@ app.route("/ls_sketches").get(function(req, res) {
          res.writeHead(500, { "Content-Type": "text/plain" });
          res.write(err);
          console.log("error listing the sketch directory" + err);
-      } else {
-         res.writeHead(200, { "Content-Type": "text/plain" });
-         for (var i = 0; i < files.length; i++) {
-            res.write(files[i] + "\n");
-         }
-      } 
+         res.end();
+         return;
+      }
+
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      for (var i = 0; i < files.length; i++) {
+         res.write(files[i] + "\n");
+      }
       res.end();
    });
 });
+
+// handle request for appcache file -- needs a special Content-Type
+app.route("/appcache").get(function(req, res) {
+   recursive_ls("./", function(err, files) {
+      if (err) {
+         res.writeHead(500, { "ContentType": "text/plain" });
+         res.write(err);
+         res.end();
+         console.log("error while building appcache manifest");
+         return;
+      }
+
+      res.writeHead(200, { "ContentType": "text/cache-manifest" });
+      res.write("CACHE MANIFEST\n");
+      files.sort();
+      files.forEach(function(file) {
+         if ((file.endsWith("html") || file.endsWith("js") || file.endsWith("json"))
+               && !file.contains("server") && !file.contains(".git") && !file.contains("swp")) {
+            res.write(file + "\n");
+         }
+      });
+      res.end();
+   });
+});
+
+var recursive_ls = function(dir, callback) {
+   var cwd = process.cwd() + "/";
+   var results = [];
+   fs.readdir(dir, function(err, list) {
+      if (err) return callback(err);
+      var pending = list.length;
+      if (!pending) return callback(null, results);
+      list.forEach(function(file) {
+         file = path.resolve(dir, file);
+         fs.stat(file, function(err, stat) {
+            if (stat && stat.isDirectory()) {
+               recursive_ls(file, function(err, res) {
+                  results = results.concat(res);
+                  if (!--pending) callback(null, results);
+               });
+            } else {
+               results.push(file.replace(cwd, ""));
+               if (!--pending) callback(null, results);
+            }
+         });
+      });
+   });
+};
+
+String.prototype.endsWith = function(suffix) {
+   return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+
+String.prototype.contains = function(substr) {
+   return this.indexOf(substr) > -1;
+};
 
 var server = app.listen(parseInt(port, 10), function() {
    console.log("Listening on port %d", server.address().port);
