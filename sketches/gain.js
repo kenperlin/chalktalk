@@ -7,20 +7,23 @@ function() {
       mLine([-1,1],[-1,-1]);
       this.afterSketch(function() {
 
-         var inValue = this.inValue;
-         var _value = this._value;
+         var srcInput = this.inValue[0];
+         var srcGain  = this.inValue[1] !== undefined ? this.inValue[1] : this._value;
 
          var func = function() {
-            var input = inValue[0];
-            var gain = _value;
+            var input = srcInput;
+            var gain  = srcGain;
 
 return function(t) {
-   return gain * valueOf(input, t);
+   return valueOf(gain, t) * valueOf(input, t);
 };
          };
 
          this.setOutPortValue(func());
-         mNumberText(this._value, [-.3, 0], .2);
+	 if (this.inValue[1] === undefined)
+            mLabel(this._value, [-.3, 0], .2);
+         else
+	    mCurve(curveForSignal);
       });
    }
 }

@@ -440,6 +440,10 @@
       return dst;
    }
 
+// USEFUL PRE-BUILT CURVES.
+
+   var curveForSignal = makeSpline([[-.6,-.1],[-.4,.1],[-.2,-.1],[0,.1]]);
+
 // CHARACTER CONSTANTS AND CONVERSIONS.
 
    var ALT       = '\u22C0' ;

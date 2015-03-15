@@ -370,7 +370,7 @@
       var R = r === undefined ? len(A[0]-B[0], A[1]-B[1]) / 10 : norm(m.transform([r,0,0,0]));
       arrow(A[0],A[1], B[0],B[1], R);
    };
-   function mNumberText(str, xy, size) {
+   function mLabel(str, xy, size) {
       if (xy === undefined) xy = [0,0];
       if (size === undefined) size = 1;
       var scale = sk().mScale() * size;

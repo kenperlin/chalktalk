@@ -40,7 +40,7 @@ function() {
       this.afterSketch(function() {
          if (this._value === undefined)
             this._value = this.labels[this.selection];
-         mNumberText(this._value);
+         mLabel(this._value);
 	 this.setOutPortValue(this._value);
       });
    }
