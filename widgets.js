@@ -10,23 +10,23 @@
       if (isk()) {
          var clickOp = 'delete,unparse,move,copy,scale,cmd,rotate,undraw/see code'.split(',');
          var dragOp = ',,path,copies,link,,arrow,group,'.split(',');
-	 var cx = (sk().xlo + sk().xhi) / 2;
-	 var cy = (sk().ylo + sk().yhi) / 2;
-	 var rx = (sk().xhi - sk().xlo) / 2 + 60;
-	 var ry = (sk().yhi - sk().ylo) / 2 + 40;
-	 for (var i = 0 ; i < 8 ; i++) {
-	    var c = cos(TAU * i / 8);
-	    var s = sin(TAU * i / 8);
+         var cx = (sk().xlo + sk().xhi) / 2;
+         var cy = (sk().ylo + sk().yhi) / 2;
+         var rx = (sk().xhi - sk().xlo) / 2 + 60;
+         var ry = (sk().yhi - sk().ylo) / 2 + 40;
+         for (var i = 0 ; i < 8 ; i++) {
+            var c = cos(TAU * i / 8);
+            var s = sin(TAU * i / 8);
             var t = pow (pow(c, 4) + pow(s, 4) , 1/4);
-	    var x = cx + rx * c / t;
-	    var y = cy - ry * s / t;
-	    if (dragOp[i].length > 0) {
+            var x = cx + rx * c / t;
+            var y = cy - ry * s / t;
+            if (dragOp[i].length > 0) {
                text(clickOp[i], x, y, .5, 1.3, 'Comic Sans MS');
                text('(' + dragOp[i] + ')', x, y, .5, -.3, 'Comic Sans MS');
             }
-	    else
+            else
                text(clickOp[i], x, y, .5, .5, 'Comic Sans MS');
-	 }
+         }
       }
    }
 
@@ -624,7 +624,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             this.object = words[i++];;
          }
 
-	 return this;
+         return this;
       }
 
       this.toString = function() {
@@ -652,7 +652,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
              case 0:
                 var words = text.split(" ");
                 nlParseData[0] = sentence.parse(words).toString();
-		nlParseData[1] = "";
+                nlParseData[1] = "";
                 break;
              case 1:
                 var clauses   = text.split(",\n");
@@ -688,30 +688,32 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           updateF();
        },
        updateF = function() {
-	  var text = codeTextArea.value;
-	  if (isCodeScript()) {
+          var text = codeTextArea.value;
+          if (isCodeScript()) {
 
-	     // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
-	     // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
+             // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
+             // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
 
              var i = text.indexOf('{');
              var j = text.lastIndexOf('}');
-	     try {
-	        codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
-	        codeSketch._temporaryFunction();
+             try {
+                codeSketch._temporaryFunction = new Function(text.substring(i + 1, j));
+                codeSketch._temporaryFunction();
              } catch (e) {
-	        console.log(e);
-	     }
-	  }
+                console.log(e);
+             }
+          }
           else if (code() != null) {
              var index = codeSelector.selectedIndex;
              code()[index][1] = text;
              codeSketch.selectedIndex = index;
-	     if (code()[index][2] !== undefined) {
-	        codeSketch._temporaryFunction = code()[index][2];
-	        codeSketch._temporaryFunction();
+             if (code()[index][2] !== undefined) {
+                try {
+                   codeSketch._temporaryFunction = code()[index][2];
+                   codeSketch._temporaryFunction();
+                } catch(e) { console.log(e); }
              }
-	     else
+             else
                 codeSketch.evalCode(text);
           }
        };
@@ -764,7 +766,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector = null;
       if (isCodeWidget) {
          var options = "";
-	 if (! isCodeScript()) {
+         if (! isCodeScript()) {
             for (var i = 0 ; i < code().length ; i++)
                options += "<option value='" + code()[i][1] + "'>"
                         + code()[i][0]
@@ -797,9 +799,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.color = codeTextFgColor();
          codeTextArea.style.font = codeIsBook() ? "17px serif" : isCodeScript() ? "15px courier" : "15px courier";
          codeTextArea.value = isCodeScript() ? codeScript() : code()[codeSelector.selectedIndex][1];
-	 if (codeIsBook()) {
+         if (codeIsBook()) {
             codeTextArea.style.width = '650px';
-	 }
+         }
          if (isCodeScript() || code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
@@ -897,26 +899,26 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var ddMin = Number.MAX_VALUE, ax=0, ay=0, bx=0, by=0;
       for (var i = 0 ; i < c.length ; i++) {
          var x0 = c[i][0];
-	 var y0 = c[i][1];
+         var y0 = c[i][1];
          var x1 = (xlo + xhi) / 2;
-	 var y1 = (ylo + yhi) / 2;
+         var y1 = (ylo + yhi) / 2;
 
-	 var tx0 = x0 > xlo ? 0 : (xlo - x0) / (x1 - x0);
-	 var ty0 = y0 > ylo ? 0 : (ylo - y0) / (y1 - y0);
-	 var tx1 = x0 < xhi ? 0 : (xhi - x0) / (x1 - x0);
-	 var ty1 = y0 < yhi ? 0 : (yhi - y0) / (y1 - y0);
-	 var t = max(tx0, max(ty0, max(tx1, ty1)));
-	 x1 = mix(x0, x1, t);
-	 y1 = mix(y0, y1, t);
+         var tx0 = x0 > xlo ? 0 : (xlo - x0) / (x1 - x0);
+         var ty0 = y0 > ylo ? 0 : (ylo - y0) / (y1 - y0);
+         var tx1 = x0 < xhi ? 0 : (xhi - x0) / (x1 - x0);
+         var ty1 = y0 < yhi ? 0 : (yhi - y0) / (y1 - y0);
+         var t = max(tx0, max(ty0, max(tx1, ty1)));
+         x1 = mix(x0, x1, t);
+         y1 = mix(y0, y1, t);
 
-	 var dd = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
-	 if (dd < ddMin) {
-	    ddMin = dd;
-	    ax = x0;
-	    ay = y0;
-	    bx = x1;
-	    by = y1;
-	 }
+         var dd = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+         if (dd < ddMin) {
+            ddMin = dd;
+            ax = x0;
+            ay = y0;
+            bx = x1;
+            by = y1;
+         }
       }
 
       ay = y + h;
@@ -929,9 +931,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          bx -= _g.panX;
          for (var i = c.length - 1 ; i >= 0 ; i--) {
             if (c[i][1] >= cy + h - 1 && len(c[i][0] - ax, c[i][1] - ay) < cr) {
-	       c[i][0] = bx;
-	       c[i][1] = by;
-	    }
+               c[i][0] = bx;
+               c[i][1] = by;
+            }
          }
       }
 

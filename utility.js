@@ -16,6 +16,24 @@
       return error;
    }
 
+   // CODE SHOULD NOT BE PARSED IF IT CONTAINS UNEVALUATED FUNCTIONS,
+   // BECAUSE RUNNING eval() WOULD FAIL WITHOUT TRIGGERING AN EXCEPTION.
+
+   function isParsableCode( code ) {
+      function isAlpha(c) { return c >= 'a' && c <= 'z'; }
+      var str = code.replace(/[^a-zA-Z_(]/g,' ').replace(/ +/g,' ').replace(/ \(/g,'(');
+      for (var i = 0 ; i < str.length ; i++)
+	 if (isAlpha(str.charAt(i)))
+	    for (var j = i + 1 ; j < str.length ; j++)
+	       if (! isAlpha(str.charAt(j))) {
+                  if ( typeof eval(str.substring(i, j)) === 'function' && str.charAt(j) != '(' )
+	             return false;
+                  i = j;
+	          break;
+               }
+      return true;
+   }
+
 
 // GET AND SET STATE DATA VIA THE PERSISTENT SERVER.
 
@@ -73,7 +91,11 @@
 	    str += "0";
       }
 
-      return (v < 0 ? "-" : "") + str;
+      str = (v < 0 ? "-" : "") + str;
+
+console.log("roundedString: " + str);
+
+      return str;
    }
 
 
@@ -442,7 +464,7 @@
 
 // USEFUL PRE-BUILT CURVES.
 
-   var curveForSignal = makeSpline([[-.6,-.1],[-.4,.1],[-.2,-.1],[0,.1]]);
+   var curveForSignal = makeSpline([[-.3,-.1],[-.1,.1],[.1,-.1],[.3,.1]]);
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 

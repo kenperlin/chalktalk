@@ -20,10 +20,12 @@ return function(t) {
          };
 
          this.setOutPortValue(func());
+	 m.translate(-.3, 0, 0);
 	 if (this.inValue[1] === undefined)
-            mLabel(this._value, [-.3, 0], .2);
-         else
+            mLabel(this._value, [0, 0], .2);
+         else {
 	    mCurve(curveForSignal);
+         }
       });
    }
 }

@@ -483,12 +483,16 @@
          if (code.indexOf('return') == -1)
             code = "return " + code;
 
-         // EVAL THE CODE, REFERRING TO THE SKETCH AS "me".
+         // EVAL THE CODE IN THE SCOPE OF THIS SKETCH.
 
          var result = null;
+
          try {
-            result = Function("me","x","y","z", code)(this, x, y, z);
-         } catch (e) { }
+            this._tmpFunction = Function("x","y","z", code);
+	    this._tmpFunction(x, y, z);
+         } catch (e) {
+	    console.log('evalCode: ' + e);
+         }
 
          // ANY ERROR RESULTS IN A RETURN VALUE OF null.
 
@@ -509,7 +513,7 @@
       },
       getInIndex : function(s) { return getIndex(this.in, s); },
       getInValue : function(j, dflt) {
-         return this.inValues[j] !== undefined ? this.inValues[j] : dflt;
+         return this.inValues[j] !== undefined ? valueOf(this.inValues[j], time) : dflt;
       },
       getInValueOf : function(name) {
          var j = getIndex(this.portName, name);
@@ -968,6 +972,18 @@
       },
       useNumberMouseHandler : function() {
 
+         this._roundValue = function() {
+            var val = parseFloat(this._value);
+	    if (this._increment < 0.5)
+	       val += (val >= 0 ? 0.1 : -0.1) * this._increment;
+
+            var places = 0;
+	    for (var p = this._increment ; p < 0.5 ; p *= 10)
+	       places++;
+
+            this._value = roundedString(val, places);
+	 }
+
          this.mouseDown = function(x, y) {
             if (this._value === undefined)
                this._value = 0;
@@ -988,8 +1004,7 @@
                   this._value = "" + (parseFloat(this._value) + incr);
                else
                   this._value = "" + (parseFloat(this._value) - incr);
-               if (this._value.length > 10)
-                  this._value = roundedString(this._value);
+               this._roundValue();
                this._yChange = 0;
             }
 
@@ -1005,14 +1020,13 @@
                if (x > this.xDown) {
                   this._value = "" + (parseFloat(this._value) / 10);
                   this._increment /= 10;
-                  if (this._increment >= 1)
-                     this._value = "" + floor(parseFloat(this._value));
                }
                else {
                   this._value = "" + (parseFloat(this._value) * 10);
-                  this._increment *= 10;
+		  if (this._increment < 0.5)
+                     this._increment *= 10;
                }
-               this._value = roundedString(this._value);
+	       this._roundValue();
             }
          }
 

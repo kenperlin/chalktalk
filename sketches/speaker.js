@@ -2,12 +2,12 @@
 function() {
    this.label = 'speaker';
    this.render = function() {
-      mDrawOval([-1,-1],[1,1],32,PI/2,PI/2-TAU);
-      var a = .16;
-      var b = .5;
-      m.translate(-.1,0,0);
-      mCurve([[b,b],[b,-b],[-a,-a],[-b,-a],[-b,a],[-a,a],[b,b]]);
+      var a = .3;
+      mCurve([[-1,a],[-a,a],[1,1],[1,-1],[-a,-a],[-1,-a]]);
+      mLine([-1,a],[-1,-a]);
       this.afterSketch(function() {
+         if (typeof this.inValue[0] == 'function')
+	    setAudioSignal(this.inValue[0]);
       });
    }
 }
