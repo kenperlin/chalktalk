@@ -79,7 +79,11 @@ function() {
 
             // Capture input
 
-            recordValue(this.inValues[0]);
+            var val = this.inValues[0];
+	    console.log(val);
+	    if (typeof val == 'function')
+	       val = val(time);
+            recordValue(val);
          }
       }
 

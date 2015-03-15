@@ -33,6 +33,8 @@ SketchLink.prototype = {
       var aR = a.hasPortBounds(i) ? a.portBounds[i] : [a.xlo,a.ylo,a.xhi,a.yhi];
       var bR = b.hasPortBounds(j) ? b.portBounds[j] : [b.xlo,b.ylo,b.xhi,b.yhi];
 
+console.log(b.hasPortBounds(j) + ' ' + bR);
+
       // ONLY RECOMPUTE LINK SHAPE WHEN NECESSARY.
 
       var status = [ax,ay,bx,by,s, aR[0],aR[1],aR[2],aR[3], bR[0],bR[1],bR[2],bR[3]];

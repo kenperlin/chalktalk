@@ -2,6 +2,8 @@ function() {
    this.label = "coord";
    this.is3D = true;
    var planes = [[1,0,0,1],[-1,0,0,1],[0,1,0,1],[0,-1,0,1],[0,0,1,1],[0,0,-1,1]];
+   this.isNegZ = false;
+   this.onCmdClick = function() { this.isNegZ = ! this.isNegZ; }
    function clipEdgeToUnitCube(edge) {
       for (var n = 0 ; n < planes.length ; n++)
          if ((edge = clipLineToPlane(edge, planes[n])).length < 2)
@@ -38,15 +40,26 @@ function() {
 	 for (var i = -r ; i <= r ; i += 2 * r)
 	    C.push([i,j,k,1]);
 
+         if (this.isNegZ)
+	    for (var i = 0 ; i < C.length ; i++) {
+	       C[i][0] *= .2;
+	       C[i][1] *= .2;
+	       C[i][2] *= .2;
+	       C[i][2] -= .2;
+            }
+
          // IF THERE IS AN INPUT MATRIX, THEN TRANSFORM CUBE.
          
          if (this.inValues.length == 16) {
 	    var M = this.inValues;
-	    for (var n = 0 ; n < C.length ; n++)
+	    for (var n = 0 ; n < C.length ; n++) {
 	       C[n] = [ max(-1,min(1, dot4(C[n], [M[0], M[4], M[ 8], M[12]]))),
 	                max(-1,min(1, dot4(C[n], [M[1], M[5], M[ 9], M[13]]))),
 	                max(-1,min(1, dot4(C[n], [M[2], M[6], M[10], M[14]]))),
-			1 ];
+	                max(-1,min(1, dot4(C[n], [M[3], M[7], M[11], M[15]]))) ];
+	       for (var i = 0 ; i < 4 ; i++)
+	          C[n][i] /= C[n][3];
+	    }
 	 }
 
 	 // CLIP EDGES OF CUBE TO BOUNDING VOLUME.

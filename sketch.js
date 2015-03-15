@@ -350,7 +350,10 @@
          var fontSize = floor(24 * this.scale());
 
          if (this instanceof SimpleSketch && this.isNullText()) {
-            var val = this.inValue[0];
+            val = this.inValue[0];
+            if (typeof val === 'function')
+               val = val(time);
+
             if (isDef(val)) {
 
                context.save();
@@ -654,6 +657,8 @@
                p = [ this.transformX2D(p[0],p[1]), this.transformY2D(p[0],p[1]) ];
                return this.adjustXY(p);
             }
+            else if (this instanceof SimpleSketch)
+               return [this.cx(), this.cy()];
             else {
                m.save();
                this.standardView();
@@ -693,13 +698,13 @@
                                       min(1, this.afterSketchTransition + 2 * elapsed);
          _g.save();
          m.save();
-	 if (this.glyphTransition < 1 && this.drawing !== undefined)
+         if (this.glyphTransition < 1 && this.drawing !== undefined)
             this.drawing.update();
-	 try {
+         //try {
             this.render(elapsed);
-         } catch(e) {
-	    console.log(e);
-	 }
+         //} catch(e) {
+            //console.log(e);
+         //}
          m.restore();
          _g.restore();
          if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
@@ -961,6 +966,57 @@
                                                    this.fragmentShader = codeTextArea.value);
          }
       },
+      useNumberMouseHandler : function() {
+
+         this.mouseDown = function(x, y) {
+            if (this._value === undefined)
+               this._value = 0;
+            if (this._increment === undefined)
+               this._increment = 1;
+            this._yChange = 0;
+            this._xPrev = x;
+            this._yPrev = y;
+            this._xTravel = 0;
+            this._yTravel = 0;
+         }
+
+         this.mouseDrag = function(x, y) {
+            this._yChange += y - this._yPrev;
+            if (abs(this._yChange) > 30) {
+               var incr = min(1, this._increment);
+               if (this._yChange < 0)
+                  this._value = "" + (parseFloat(this._value) + incr);
+               else
+                  this._value = "" + (parseFloat(this._value) - incr);
+               if (this._value.length > 10)
+                  this._value = roundedString(this._value);
+               this._yChange = 0;
+            }
+
+            this._xPrev = x;
+            this._yPrev = y;
+
+            this._xTravel = max(this._xTravel, abs(x - this.xDown));
+            this._yTravel = max(this._yTravel, abs(y - this.yDown));
+         }
+
+         this.mouseUp = function(x, y) {
+            if (! this.isClick && this._xTravel > this._yTravel) {
+               if (x > this.xDown) {
+                  this._value = "" + (parseFloat(this._value) / 10);
+                  this._increment /= 10;
+                  if (this._increment >= 1)
+                     this._value = "" + floor(parseFloat(this._value));
+               }
+               else {
+                  this._value = "" + (parseFloat(this._value) * 10);
+                  this._increment *= 10;
+               }
+               this._value = roundedString(this._value);
+            }
+         }
+
+      },
       _updateMesh : function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {
             if (this.vertexShader === undefined)
@@ -1072,7 +1128,7 @@
 
             if (alpha < 1) {
                function setAlpha(mesh) {
-	          if (mesh.material !== undefined) {
+                  if (mesh.material !== undefined) {
                      mesh.material.transparent = true;
                      mesh.material.opacity = alpha;
                      mesh.material.setUniform('alpha', alpha);
@@ -1152,26 +1208,26 @@
          this.createMesh = function() {
             var mesh = new THREE.Mesh(new THREE.Geometry(), this.shaderMaterial());
             var geometry = new THREE.CylinderGeometry(.5, .5, 1, 3, 256);
-	    var cylinder = new THREE.Mesh(geometry, mesh.material);
-	    mesh.add(cylinder);
-	    return mesh;
+            var cylinder = new THREE.Mesh(geometry, mesh.material);
+            mesh.add(cylinder);
+            return mesh;
          }
       },
       renderStrokeSetColor : function() {
          var rgb = paletteRGB[this.colorId];
-	 this.setUniform('uColor', [rgb[0]/255,rgb[1]/255,rgb[2]/255]);
+         this.setUniform('uColor', [rgb[0]/255,rgb[1]/255,rgb[2]/255]);
       },
       renderStroke : function(curve) {
          if (this._gl === undefined) {
             this._renderStrokeData = new Float32Array(16); 
-	    this.renderStrokeSetColor();
+            this.renderStrokeSetColor();
             this._gl = renderer.context;
             this._glProgram = this.mesh.material.program;
             this._uData      = this._gl.getUniformLocation(this._glProgram, 'uData');
             this._uNpts      = this._gl.getUniformLocation(this._glProgram, 'uNpts');
          }
 
-	 if (this._renderStrokeData.length < 3 * curve.length)
+         if (this._renderStrokeData.length < 3 * curve.length)
             this._renderStrokeData = new Float32Array(3 * curve.length); 
 
          var thickness = isNumeric(this.xlo) ? 10 / (this.xhi - this.xlo) : 1 / 15;
@@ -1831,3 +1887,4 @@
       }
    }
    NumericSketch.prototype = new SimpleSketch;
+

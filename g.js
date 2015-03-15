@@ -1178,11 +1178,13 @@ console.log(harry.fred);
    function findOutSketchAndPort() {
       outSketch = isHover() ? sk() : null;
       outPort = -1;
+/*
       if (outSketch != null) {
          outPort = findOutPortAtCursor(outSketch);
          inSketch = null;
          inPort = -1;
       }
+*/
    }
 
    function findInSketchAndPort() {
@@ -1207,9 +1209,25 @@ console.log(harry.fred);
    var outPort = -1, inPort = -1;
 
    function findNearestInPort(sketch) {
+      var inPort = -1;
+      if (sketch != null) {
+
+         var inPortCount = 0;
+	 for (var i = 0 ; i < sketch.portName.length ; i++)
+	    if (sketch.portName[i] !== 'out')
+	       inPortCount++;
+
+         if (inPortCount > 0)
+            inPort = findNearestPortAtCursor(sketch, sketch.in, true);
+         else
+            inPort = firstUndefinedArrayIndex(sketch.in);
+      }
+      return inPort;
+/*
       return sketch == null ? -1 :
              sketch.portName.length > 0 ? findNearestPortAtCursor(sketch, sketch.in, true)
                                         : firstUndefinedArrayIndex(sketch.in);
+*/
    }
 
    function findNearestOutPort(sketch) {
@@ -1798,6 +1816,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          else if (sk() == outSketch && ! sk().isMouseOver) {
             inSketch = sketchPage.createTextSketch("   ");
+	    sketchPage.add(inSketch);
             inPort = 0;
          }
          else
@@ -2140,7 +2159,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                   // PORTS EXTEND THE BOUNDING BOX OF A SKETCH.
 
                   for (var i = 0 ; i < sk(I).portName.length ; i++) {
-                     if (! sk(I).hasPortBounds(i))
+                     if (! sk(I).hasPortBounds(i) ||
+		           sk(I) instanceof SimpleSketch && sk(I).text.length > 0)
                         continue;
                      xlo = min(xlo, sk(I).portBounds[i][0]);
                      ylo = min(ylo, sk(I).portBounds[i][1]);

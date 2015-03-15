@@ -764,11 +764,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector = null;
       if (isCodeWidget) {
          var options = "";
-	 if (! isCodeScript())
+	 if (! isCodeScript()) {
             for (var i = 0 ; i < code().length ; i++)
                options += "<option value='" + code()[i][1] + "'>"
                         + code()[i][0]
                         + "</option>";
+         }
 
          codeElement.innerHTML =
             "<select id=code_selector onchange='setCodeAreaText()'>"

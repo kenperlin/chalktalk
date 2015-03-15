@@ -1625,6 +1625,8 @@
 
          else if (outSketch != null && isMouseOverBackground) {
             inSketch = this.createTextSketch("   ");
+            inSketch = new numeric_sketch();
+
             inPort = 0;
             this.createLink();
          }

@@ -18,6 +18,7 @@ function() {
        ["A",0  ,"C",0,   0  ,1  ,0  ,0,    "B",0  ,"A",0,    0  ,0  ,0  , 1],
        ["A","B",0  ,0,   "C","A",0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
        ["A",0  ,0  ,0,   0  ,"B",0  ,0,    0  ,0  ,"C",0,    0  ,0  ,0  , 1],
+       [1  ,0  ,0  ,"A", 0  ,1  ,0  ,"B",  0  ,0  ,1  ,"C",  0  ,0  ,0  , 1],
    ];
    this.mode = 0;
    this.onClick = function() {
@@ -65,6 +66,7 @@ function() {
             case 3:
             case 4: sub = ["cos","sin","-sin"]; break;
             case 5: sub = ["sx","sy","sz"]; break;
+            case 6: sub = ["px","py","pz"]; break;
             }
 
             if (this.inValues.length > 0) {
@@ -75,6 +77,7 @@ function() {
                switch (this.mode) {
                case 1:
                case 5:
+               case 6:
                   sub[0] = x;
                   sub[1] = y;
                   sub[2] = z;

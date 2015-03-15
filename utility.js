@@ -81,7 +81,9 @@
 
    var audioNode = null, audioIndex = 0;
 
-   var setAudioSignal= function(f) {
+   var signalBuffer = newArray(1024);
+
+   var setAudioSignal = function(f) {
       if (audioNode == null) {
          audioContext = 'AudioContext' in window ? new AudioContext() :
                         'webkitAudioContext' in window ? new webkitAudioContext() : null;
@@ -421,6 +423,14 @@
    function square_wave(t) { return 2 * floor(2*t % 2) - 1; }
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
+   function valueOf(src, u, v) {
+      if (typeof src !== 'function')
+         return src;
+      else if (v === undefined)
+         return src(u);
+      else
+         return src(u, v);
+   }
    function valuesToQuadratic(src, dst) {
       if (dst === undefined)
          dst = [0,0,0];
@@ -439,6 +449,8 @@
    var CONTROL   = '\u2201' ;
    var D_ARROW   = '\u2193' ;
    var EXP_2     = '\u00b2' ;
+   var EXP_3     = '\u00b3' ;
+   var EXP_4     = '\u2074' ;
    var G_OR_EQ   = '\u2265' ;
    var L_ARROW   = '\u2190' ;
    var L_OR_EQ   = '\u2264' ;
@@ -458,6 +470,8 @@
       if (isControlPressed) {
          switch (key) {
 	 case 50: return EXP_2;   // SUPERSCRIPT 2
+	 case 51: return EXP_3;   // SUPERSCRIPT 3
+	 case 52: return EXP_4;   // SUPERSCRIPT 4
 	 case 65: return S_ALPHA;
 	 case 66: return S_BETA;
 	 case 68: return S_DELTA;

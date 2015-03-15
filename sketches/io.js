@@ -1,5 +1,5 @@
 function() {
-   window.__audio__volume__ = 1;
+   _audio_volume = 1;
    this.label = "audio";
    this.code = [
       ["sin", "sin(2 * PI * x * time)"],
@@ -14,7 +14,6 @@ function() {
    this.savedX = "";
    this.savedY = "";
    this.savedZ = "";
-   this.audioShape = null;
 
    this.cleanup = function() {
       setAudioSignal(function(t) { return 0; });
@@ -26,7 +25,7 @@ function() {
 
       m.scale(this.size / 400);
 
-      window.__audio__volume__ = pow(Math.min(1.0, this.computePixelSize()), 2);
+      _audio_volume = pow(Math.min(1.0, this.computePixelSize()), 3);
 
       mCurve([[1,1],[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       if ( this.code[cs][1] != this.savedCode ||
@@ -57,25 +56,30 @@ function() {
 
          // IF IT IS, SEND THE FUNCTION TO THE OUTPUT.
 
-         this.audioShape = null;
          if (! isError) {
             var i = code.indexOf("return ");
             if (i < 0)
                code = "return " + code;
 
-            code = "return window.__audio__volume__ * (function(time) { " + code + " }(time))";
+            window.audioFunction0 = window.audioFunction1;
+            window.audioFunction1 = new Function("time", var_xyz + code);
 
-            var audioFunction = new Function("time", var_xyz + code);
+	    audioFunction = function(time) {
+	       var f1 = audioFunction1(time);
+	       var t = sCurve(min(1, (audioIndex - audioIndex0) / 1024));
+	       return _audio_volume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
+            }
+
+	    window.audioIndex0 = audioIndex;
             setAudioSignal(audioFunction);
 
             this.audioShape = [];
-
             for (var t = 0 ; t <= 1 ; t += .01)
-               this.audioShape.push([2*t-1, audioFunction(t/100)/TAU]);
+               this.audioShape.push([2*t-1, audioFunction1(t/100)/TAU]);
          }
       }
       this.afterSketch(function() {
-         if (this.audioShape != null) {
+         if (this.audioShape !== undefined) {
             lineWidth(1);
             mCurve(this.audioShape);
          }

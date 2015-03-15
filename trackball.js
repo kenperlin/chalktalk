@@ -1,5 +1,6 @@
 
 function Trackball(size) {
+/*
    function newMat(n) {
       var mat = [];
       for (var i = 0 ; i < n ; i++) {
@@ -9,13 +10,12 @@ function Trackball(size) {
       }
       return mat;
    }
-
+*/
    this.size = size;
-   this.mat = newMat(size);
-   this.rot = newMat(size);
-   this.tmp = newMat(size);
-   this.err = newMat(size);
-
+   this.mat = this._newMat();
+   this.rot = this._newMat();
+   this.tmp = this._newMat();
+   this.err = this._newMat();
    this.identity();
 }
 
@@ -121,6 +121,16 @@ Trackball.prototype = {
       for (var k = 0 ; k < this.size ; k++)
          t += a[k] * b[k];
       return t;
+   },
+
+   _newMat : function() {
+      var mat = [];
+      for (var i = 0 ; i < this.size ; i++) {
+         mat.push([]);
+         for (var j = 0 ; j < this.size ; j++)
+	    mat[i].push(0);
+      }
+      return mat;
    },
 
    _normalize : function(a) {

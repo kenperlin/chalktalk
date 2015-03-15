@@ -23,20 +23,6 @@ function() {
       return sum / wgt;
    }
 
-   function delay(x,y) {
-      if (sk().lpd === undefined)
-         sk().lpd = [];
-      var buf = sk().lpd;
-
-      buf.push(x);
-
-      var n = max(2, floor(100 * y));
-      while (buf.length > n)
-         buf.splice(0, 1);
-
-      return buf[0];
-   }
-
    function makeCurve(f) {
       var curve = [];
       for (var t = -1 ; t <= 1 ; t += .03)
@@ -47,9 +33,7 @@ function() {
    this.code = [
       ["blur" , "blur(x, y)"],
       ["cos"  , "cos(x * exp(y))"],
-      ["delay", "delay(x, y)"],
       ["floor", "floor(x-.5)"],
-      ["gain" , "x * exp(y)"],
       ["pow2" , "pow(2, x)"],
       ["saw"  , "x-floor(x)"],
       ["sin"  , "sin(x * exp(y))"],
@@ -59,9 +43,7 @@ function() {
    var curves = [
       /* blur  */ makeCurve(function(x) { return [x, x<0?1:1-x]; }), 
       /* cos   */ makeCurve(function(x) { return [x, cos(PI * x) / PI]; }), 
-      /* delay */ makeCurve(function(x) { return [(x<-.5?0:x<.5?x+.5:1),(x<-.5?x+1:x<.5?.5:1-x)]; }), 
       /* floor */ makeCurve(function(x) { return [x, (floor(x)+.5)]; }), 
-      /* gain  */ makeCurve(function(x) { return [(x<0?x+1:1-x), x/2]; }), 
       /* pow2  */ makeCurve(function(x) { return [x, exp(x - 1)]; }), 
       /* saw   */ makeCurve(function(x) { return [x, x - floor(x)]; }), 
       /* sin   */ makeCurve(function(x) { return [x, sin(PI * x) / PI]; }), 

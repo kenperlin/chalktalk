@@ -1,34 +1,31 @@
 function() {
    this.label = 'perspective';
-   this.is3D = true;
-   var keys = [[0,1,0],[-.5,.7,0],[-.7,0,0],[-.5,-.3,0],[0,-.5,0],[.5,0,0]];
-   this.mode = 0;
-   this.onCmdClick = function() { this.mode++; }
+   this.point = newVec3();
+   this.dy = 0;
+   this.onPress = function(point) { this.point.copy(point); }
+   this.onDrag = function(point) {
+      this.dy = max(-1,this.dy - (point.y - this.point.y));
+      this.point.copy(point);
+   }
    this.render = function() {
+      var f = 1 / min(.999, max(.001, this.dy));
+      m.perspective(0, f, 0);
+      this.afterSketch(function() {
+         if (time - this.startTime > 1) {
+            lineWidth(.5 * min(1, time - this.startTime - 1));
+            color('cyan');
+            for (var x = -1 ; x <= 1 ; x += .2)
+               mLine([x,-1],[x,1]);
+            for (var y = -1 ; y <= 1 ; y += .2)
+               mLine([-1,y],[1,y]);
+         }
+         mText(roundedString(-f), [0, -.5], .5, .5);
+      });
+      lineWidth(1);
       mLine([-1,0],[1,0]);
       mLine([0,-1],[0,1]);
-      m.translate(0,0,.5);
-      mCurve(makeSpline(keys));
-      this.afterSketch(function() {
-         _g.save();
-         lineWidth(.5);
-	 color(scrimColor(.2));
-         mFillCurve(makeOval(-1.1,-1.1,2.2,2.2));
-         _g.restore();
-      });
-      switch (this.mode) {
-      case 3:
-         color('red');
-         mArrow([0,0,-.5], [.75,0,-.5]);
-      case 2:
-         color(defaultPenColor);
-	 lineWidth(.5);
-         for (var i = 0 ; i < keys.length ; i++) {
-	    mDot(keys[i]);
-	    mArrow([0,0,-.5], mix([0,0,-.5], keys[i], 1.5));
-         }
-      case 1:
-	 mDot(keys[keys.length-1]);
-      }
+      lineWidth(2);
+      mClosedCurve([[-.25,.75],[.25,.75],[.25,1.25],[-.25,1.25]]);
    }
+   this.startTime = time;
 }

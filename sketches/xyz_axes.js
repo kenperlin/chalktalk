@@ -62,24 +62,53 @@ function() {
          }
 
 	 switch (this.mode) {
+	 case 4:
+	 case 3:
+	 case 2:
 	 case 1:
-	    color(otherColor);
-	    lineWidth(2);
-	    m.translate(this.pos.x,this.pos.y,this.pos.z);
-	    m.rotateX(this.rot.x);
-	    m.rotateY(this.rot.y);
-	    m.rotateZ(this.rot.z);
-	    mArrow([0,0,0], [1,0,0]);
-	    mArrow([0,0,0], [0,1,0]);
-	    mArrow([0,0,0], [0,0,1]);
-	    mDot([0,0,0],.25);
-	    color(backgroundColor);
-	    mDot([0,0,0],.23);
-	    color(otherColor);
-	    mText('x', [1.1,0,0],.5,.5);
-	    mText('y', [0,1.1,0],.5,.5);
-	    mText('z', [0,0,1.1],.5,.5);
-	    mText('t', [0,0,0]  ,.5,.5);
+	    m.save();
+	       color(otherColor);
+	       lineWidth(this.mode == 1 ? 2 : 1);
+	       m.translate(this.pos.x,this.pos.y,this.pos.z);
+	       m.rotateX(this.rot.x);
+	       m.rotateY(this.rot.y);
+	       m.rotateZ(this.rot.z);
+	       mArrow([0,0,0], [1,0,0]);
+	       mArrow([0,0,0], [0,1,0]);
+	       mArrow([0,0,0], [0,0,1]);
+	       mDot([0,0,0],.25);
+	       color(backgroundColor);
+	       mDot([0,0,0],.23);
+	       color(otherColor);
+	       mText('x', [1.1,0,0],.5,.5);
+	       mText('y', [0,1.1,0],.5,.5);
+	       mText('z', [0,0,1.1],.5,.5);
+	       mText('t', [0,0,0]  ,.5,.5);
+            m.restore();
+	 }
+
+	 switch (this.mode) {
+	 case 4:
+	 case 3:
+	 case 2:
+	    m.save();
+	       lineWidth(4);
+	       m.translate(this.pos.x,this.pos.y,this.pos.z);
+	       color('green');
+	       if (this.mode < 4)
+	          mArrow([0,0,0],[0,1,0]);
+	       m.rotateX(this.rot.x);
+	       m.rotateY(this.rot.y);
+	       m.rotateZ(this.rot.z);
+	       if (this.mode == 4)
+	          mArrow([0,0,0],[0,1,0]);
+	       color('blue');
+	       mArrow([0,0,0],[0,0,-1]);
+	       if (this.mode >= 3) {
+	          color('red');
+	          mArrow([0,0,0],[1,0,0]);
+               }
+	    m.restore();
 	 }
       });
    }

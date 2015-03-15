@@ -5,8 +5,8 @@
       this._mS[0] = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
       this._m = function(arg) {
          if (! (arg === undefined))
-	    this._mS[this._to] = arg;
-	 return this._mS[this._to];
+            this._mS[this._to] = arg;
+         return this._mS[this._to];
       };
       this.aimX = function(mat) {
          var A = this._m();
@@ -46,46 +46,46 @@
       };
       this.normalMatrix = function(m) {
          var a = m[0]*m[0] + m[1]*m[1] + m[ 2]*m[ 2],
-	     b = m[4]*m[4] + m[5]*m[5] + m[ 6]*m[ 6],
-	     c = m[8]*m[8] + m[9]*m[9] + m[10]*m[10];
-	 return [m[0]/a,m[1]/a,m[ 2]/a,0,
-	         m[4]/b,m[5]/b,m[ 6]/b,0,
-		 m[8]/c,m[9]/c,m[10]/c,0,
-		 0,0,0,1];
+             b = m[4]*m[4] + m[5]*m[5] + m[ 6]*m[ 6],
+             c = m[8]*m[8] + m[9]*m[9] + m[10]*m[10];
+         return [m[0]/a,m[1]/a,m[ 2]/a,0,
+                 m[4]/b,m[5]/b,m[ 6]/b,0,
+                 m[8]/c,m[9]/c,m[10]/c,0,
+                 0,0,0,1];
       };
       this.normalize = function(v) {
          var x = v[0],y = v[1],z = v[2],r = Math.sqrt(x*x + y*y + z*z);
-	 v[0] /= r;
-	 v[1] /= r;
-	 v[2] /= r;
+         v[0] /= r;
+         v[1] /= r;
+         v[2] /= r;
       };
       this.perspective = function(x,y,z) {
          this._xf(this._pe(x,y,z));
-	 return this;
+         return this;
       };
       this.restore = function() {
          --this._to;
       };
       this.rotateX = function(a) {
          this._xf(this._rX(a));
-	 return this;
+         return this;
       };
       this.rotateY = function(a) {
          this._xf(this._rY(a));
-	 return this;
+         return this;
       };
       this.rotateZ = function(a) {
          this._xf(this._rZ(a));
-	 return this;
+         return this;
       };
       this.save = function() {
          this._mS[this._to+1] = this._mS[this._to++];
       };
       this.scale = function(x,y,z) {
          if (y === undefined)
-	    z=y=x;
-	 this._xf(this._sc(x,y,z));
-	 return this;
+            z=y=x;
+         this._xf(this._sc(x,y,z));
+         return this;
       };
       this.setOrientation = function(X, Y, Z) {
          this.normalize(X);
@@ -95,23 +95,23 @@
          v[0] = X[0]; v[1] = X[1]; v[ 2] = X[2];
          v[4] = Y[0]; v[5] = Y[1]; v[ 6] = Y[2];
          v[8] = Z[0]; v[9] = Z[1]; v[10] = Z[2];
-	 return this;
+         return this;
       }
       this.toString = function() {
          var str = "";
-	 for (var i = 0 ; i < 16 ; i++)
-	    str += (i==0 ? "[" : ",") + roundedString(this._m()[i]);
+         for (var i = 0 ; i < 16 ; i++)
+            str += (i==0 ? "[" : ",") + roundedString(this._m()[i]);
          return str + "]";
       }
       this.translate = function(x,y,z) {
          this._xf(this._tr(x,y,z));
-	 return this;
+         return this;
       };
       this.transpose = function(m) {
          return [m[0],m[4],m[ 8],m[12],
-	         m[1],m[5],m[ 9],m[13],
-		 m[2],m[6],m[10],m[14],
-		 m[3],m[7],m[11],m[15]];
+                 m[1],m[5],m[ 9],m[13],
+                 m[2],m[6],m[10],m[14],
+                 m[3],m[7],m[11],m[15]];
       };
       this._xf = function(m) {
          return this._m(this._mm(m,this._m()));
@@ -124,32 +124,32 @@
       };
       this._rX = function(a) {
          var c = Math.cos(a),s = Math.sin(a);
-	 return [1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1];
+         return [1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1];
       };
       this._rY = function(a) {
          var c = Math.cos(a),s = Math.sin(a);
-	 return [c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];
+         return [c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];
       };
       this._rZ = function(a) {
          var c = Math.cos(a),s = Math.sin(a);
-	 return [c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1];
+         return [c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1];
       };
       this._sc = function(x,y,z) {
          return [x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1];
       };
       this._pe = function(x,y,z) {
          var rr = x*x + y*y + z*z;
-	 return [1,0,0,x/rr, 0,1,0,y/rr, 0,0,1,z/rr, 0,0,0,1];
+         return [1,0,0,x/rr, 0,1,0,y/rr, 0,0,1,z/rr, 0,0,0,1];
       };
       this._d = function(a,b) {
          if (b instanceof THREE.Vector2) return a[0] * b.x + a[1] * b.y + a[3];
          if (b instanceof THREE.Vector3) return a[0] * b.x + a[1] * b.y + a[2] * b.z + a[3];
          if (b instanceof THREE.Vector4) return a[0] * b.x + a[1] * b.y + a[2] * b.z + a[3] * b.w;
 
-	 return a[0] * b[0] +
-	        a[1] * b[1] +
-		( b.length < 3 ? 0    : a[2] * b[2] ) +
-		( b.length < 4 ? a[3] : a[3] * b[3] ) ;
+         return a[0] * b[0] +
+                a[1] * b[1] +
+                ( b.length < 3 ? 0    : a[2] * b[2] ) +
+                ( b.length < 4 ? a[3] : a[3] * b[3] ) ;
       };
       this._x = function(m) {
          return [m[0],m[1],m[2],m[3]];
@@ -170,9 +170,9 @@
          var X = this._x(t), Y = this._y(t), Z = this._z(t), W = this._w(t);
 
          return [this._d(x, X), this._d(x, Y), this._d(x, Z), this._d(x, W),
-	         this._d(y, X), this._d(y, Y), this._d(y, Z), this._d(y, W),
-		 this._d(z, X), this._d(z, Y), this._d(z, Z), this._d(z, W),
-		 this._d(w, X), this._d(w, Y), this._d(w, Z), this._d(w, W)];
+                 this._d(y, X), this._d(y, Y), this._d(y, Z), this._d(y, W),
+                 this._d(z, X), this._d(z, Y), this._d(z, Z), this._d(z, W),
+                 this._d(w, X), this._d(w, Y), this._d(w, Z), this._d(w, W)];
       };
       this._mv = function(m,v) {
          var M = this._m();
@@ -184,12 +184,12 @@
       };
       this.transform = function(v) {
          if (v[0] instanceof Array) {
-	    var dst = [];
-	    for (var n = 0 ; n < v.length ; n++)
-	       dst.push(this.transform(v[n]));
+            var dst = [];
+            for (var n = 0 ; n < v.length ; n++)
+               dst.push(this.transform(v[n]));
             return dst;
-	 }
-	 else
+         }
+         else
             return this._mv(this._m(),v);
       }
    };
@@ -228,7 +228,7 @@
       var p = [];
       for (var i = 0 ; i < 20 ; i++) {
          var t =  i * TAU / 20 + PI;
-	 p.push([cos(t), sin(t), 0]);
+         p.push([cos(t), sin(t), 0]);
       }
       renderFunction(p);
    }
@@ -238,9 +238,9 @@
       for (var i = 0 ; i < 20 ; i++) {
          var t0 =  i    * TAU / 20 + PI;
          var t1 = (i+1) * TAU / 20 + PI;
-	 var s0 = sin(t0), c0 = cos(t0);
-	 var s1 = sin(t1), c1 = cos(t1);
-	 renderFunction([[c0,s0,1],[c0,s0,-1],[c1,s1,-1],[c1,s1,1]]);
+         var s0 = sin(t0), c0 = cos(t0);
+         var s1 = sin(t1), c1 = cos(t1);
+         renderFunction([[c0,s0,1],[c0,s0,-1],[c1,s1,-1],[c1,s1,1]]);
       }
    }
    function unitCubeCorners() {
@@ -337,18 +337,18 @@
       var cc = [];
       for (var n = 0 ; n < c.length ; n++)
          if (c[n] instanceof THREE.Vector2) {
-	    _mCurveXYZ[0] = c[n].x;
-	    _mCurveXYZ[1] = c[n].y;
-	    _mCurveXYZ[2] = 0;
+            _mCurveXYZ[0] = c[n].x;
+            _mCurveXYZ[1] = c[n].y;
+            _mCurveXYZ[2] = 0;
             cc.push(m.transform(_mCurveXYZ));
          }
          else if (c[n] instanceof THREE.Vector3) {
-	    _mCurveXYZ[0] = c[n].x;
-	    _mCurveXYZ[1] = c[n].y;
-	    _mCurveXYZ[2] = c[n].z;
+            _mCurveXYZ[0] = c[n].x;
+            _mCurveXYZ[1] = c[n].y;
+            _mCurveXYZ[2] = c[n].z;
             cc.push(m.transform(_mCurveXYZ));
          }
-	 else
+         else
             cc.push(m.transform(c[n]));
       drawCurve(cc);
    };
@@ -370,6 +370,16 @@
       var R = r === undefined ? len(A[0]-B[0], A[1]-B[1]) / 10 : norm(m.transform([r,0,0,0]));
       arrow(A[0],A[1], B[0],B[1], R);
    };
+   function mNumberText(str, xy, size) {
+      if (xy === undefined) xy = [0,0];
+      if (size === undefined) size = 1;
+      var scale = sk().mScale() * size;
+      textHeight(2 * scale);
+      mText(str, xy, .5,.5);
+      var tw = textWidth(str);
+      var x = xy[0], y = xy[1];
+      sk().extendBounds([ [x-tw/2/scale,y-size],[x+tw/2/scale,y+size]]);
+   };
    function mText(str,p,ax,ay){
       var P = m.transform(p);
       text(str,P[0],P[1],ax,ay);
@@ -386,14 +396,16 @@
    function mFillRect(a, b) {
       mFillCurve([a, [b[0], a[1]], b, [a[0], b[1]], a]);
    };
-   function mDrawOval(a, b, n) {
-      if (n === undefined) n = 32;
+   function mDrawOval(a, b, n, theta0, theta1) {
+      if (n      === undefined) n = 32;
+      if (theta0 === undefined) theta0 = 0;
+      if (theta1 === undefined) theta1 = TAU;
       var cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2;
       var rx = (b[0] - a[0]) / 2, ry = (b[1] - a[1]) / 2;
       var curve = [];
       for (var i = 0 ; i < n ; i++) {
-         var theta = TAU * i / n;
-	 curve.push([cx + rx * cos(theta), cy + ry * sin(theta)]);
+         var theta = mix(theta0, theta1, i / n);
+         curve.push([cx + rx * cos(theta), cy + ry * sin(theta)]);
       }
       mClosedCurve(curve);
    }
