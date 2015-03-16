@@ -352,7 +352,7 @@
          if (this instanceof SimpleSketch && this.isNullText()) {
             val = this.inValue[0];
             if (typeof val === 'function')
-               val = val(time);
+               try { val = val(time); } catch(e) { val = 0; }
 
             if (isDef(val)) {
 

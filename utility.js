@@ -460,9 +460,9 @@
       if (typeof src !== 'function')
          return src;
       else if (v === undefined)
-         return src(u);
+         try { return src(u); } catch(e) { return 0; }
       else
-         return src(u, v);
+         try { return src(u, v); } catch(e) { return 0; }
    }
    function valuesToQuadratic(src, dst) {
       if (dst === undefined)
