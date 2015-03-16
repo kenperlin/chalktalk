@@ -47,17 +47,7 @@ function() {
 
    this.render = function(elapsed) {
       var sc = this.size / 400;
-/*
-      this.afterSketch(function() {
-         if (this.portLocation.length == 0) {
-            this.addPort("S",  .25 * sc * this.hubWidth, sc);
-            this.addPort("H", -.25 * sc * this.hubWidth, sc);
-         }
-      });
 
-      if (this.isInValue("H"))
-         this.ht = this.getInFloat("H");
-*/
       this.spring.setMass(this.ht / this.ht0);
       this.spring.setForce(this.force);
       this.force *= 0.9;

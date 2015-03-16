@@ -1445,6 +1445,20 @@
 	    if (isk() && sk() instanceof SimpleSketch)
 	       sk().joinNextStroke = true;
             break;
+         case 'J':
+	    server.set("state/sketchpage", this.sketches);
+            break;
+         case 'K':
+	    server.get("state/sketchpage", function(val) {
+	       var sketches = JSON.parse(val);
+	       for (var i = 0 ; i < sketches.length ; i++) {
+	          var sketch = sketches[i];
+	          sg(sketch.typeName, sketch.selection);
+	          for (var prop in sketch)
+	             sk()[prop] = sketch[prop];
+               }
+	    });
+            break;
          case 'k':
             if (isk() && sk() instanceof GeometrySketch) {
                var type = sk().glyph.indexName;

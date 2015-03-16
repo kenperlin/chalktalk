@@ -489,7 +489,7 @@
 
          try {
             this._tmpFunction = Function("x","y","z", code);
-	    this._tmpFunction(x, y, z);
+	    result = this._tmpFunction(x, y, z);
          } catch (e) {
 	    console.log('evalCode: ' + e);
          }
