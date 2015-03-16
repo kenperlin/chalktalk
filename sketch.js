@@ -349,42 +349,36 @@
 
          var fontSize = floor(24 * this.scale());
 
-         if (this instanceof SimpleSketch && this.isNullText()) {
-            val = this.inValue[0];
-            if (typeof val === 'function')
-               try { val = val(time); } catch(e) { val = 0; }
+         if (this instanceof SimpleSketch && this.isNullText() && isDef(this.inValue[0])) {
+            var val = valueOf(this.inValue[0], time);
+            context.save();
+               context.strokeStyle = backgroundColor;
+               context.fillStyle = dataColor;
+               context.font = fontSize + 'pt Comic Sans MS';
+               var str = val;
+               if (isNumeric(val)) {
+                  str = roundedString(val);
 
-            if (isDef(val)) {
+                  // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
 
-               context.save();
-                  context.strokeStyle = backgroundColor;
-                  context.fillStyle = dataColor;
-                  context.font = fontSize + 'pt Comic Sans MS';
-                  var str = val;
-                  if (isNumeric(val)) {
-                     str = roundedString(val);
-
-                     // JUSTIFY THE NUMBER CONSISTENTLY (WHETHER INT OR FLOAT)
-
-                     var i = str.indexOf('.');
-                     if (i >= 0)
-                        this.isFloat = true;
-                     if (this.isFloat && i < 0) {
-                        str += ".00";
-                        i = str.indexOf('.');
-                     }
+                  var i = str.indexOf('.');
+                  if (i >= 0)
+                     this.isFloat = true;
+                  if (this.isFloat && i < 0) {
+                     str += ".00";
+                     i = str.indexOf('.');
                   }
-                  else if (Array.isArray(val)) {
-                     str = "";
-                     for (var i = 0 ; i < val.length ; i++)
-                        str += roundedString(val[i]) + (i < val.length-1 ? "," : "");
-                  }
-                  var dx = this.isFloat ? textWidth(str.substring(0, i))
-                                        : textWidth(str) / 2;
+               }
+               else if (Array.isArray(val)) {
+                  str = "";
+                  for (var i = 0 ; i < val.length ; i++)
+                     str += roundedString(val[i]) + (i < val.length-1 ? "," : "");
+               }
+               var dx = this.isFloat ? textWidth(str.substring(0, i))
+                                     : textWidth(str) / 2;
 
-                  context.fillText(str, this.cx() - dx, this.cy() + .5 * fontSize);
-               context.restore();
-            }
+               context.fillText(str, this.cx() - dx, this.cy() + .5 * fontSize);
+            context.restore();
             return;
          }
 
@@ -489,9 +483,9 @@
 
          try {
             this._tmpFunction = Function("x","y","z", code);
-	    result = this._tmpFunction(x, y, z);
+            result = this._tmpFunction(x, y, z);
          } catch (e) {
-	    console.log('evalCode: ' + e);
+            console.log('evalCode: ' + e);
          }
 
          // ANY ERROR RESULTS IN A RETURN VALUE OF null.
@@ -974,15 +968,15 @@
 
          this._roundValue = function() {
             var val = parseFloat(this._value);
-	    if (this._increment < 0.5)
-	       val += (val >= 0 ? 0.1 : -0.1) * this._increment;
+            if (this._increment < 0.5)
+               val += (val >= 0 ? 0.1 : -0.1) * this._increment;
 
             var places = 0;
-	    for (var p = this._increment ; p < 0.5 ; p *= 10)
-	       places++;
+            for (var p = this._increment ; p < 0.5 ; p *= 10)
+               places++;
 
             this._value = roundedString(val, places);
-	 }
+         }
 
          this.mouseDown = function(x, y) {
             if (this._value === undefined)
@@ -1023,10 +1017,10 @@
                }
                else {
                   this._value = "" + (parseFloat(this._value) * 10);
-		  if (this._increment < 0.5)
+                  if (this._increment < 0.5)
                      this._increment *= 10;
                }
-	       this._roundValue();
+               this._roundValue();
             }
          }
 
