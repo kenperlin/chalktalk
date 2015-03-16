@@ -285,7 +285,7 @@ function Octopus() {
 	       v.z = sin(PI * v.z);
 	    }
          }
-         geometry.computeCentroids();
+         //geometry.computeCentroids();
          geometry.computeVertexNormals();
 	 node.g.up.copy(nodes[1].p).sub(node.p)
 	           .add(nodes[2].p).sub(node.p); // AIM HEAD Y AXIS MID-WAY BETWEEN EYES.

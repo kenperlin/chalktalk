@@ -457,12 +457,15 @@
    function sqrt(t) { return Math.sqrt(t); }
    function tan(t) { return Math.tan(t); }
    function valueOf(src, u, v) {
+      return defaultOrValueOf(0, src, u, v);
+   }
+   function defaultOrValueOf(defaultValue, src, u, v) {
       if (typeof src !== 'function')
          return src;
       else if (v === undefined)
-         try { return src(u); } catch(e) { return 0; }
+         try { return src(u); } catch(e) { return defaultValue; }
       else
-         try { return src(u, v); } catch(e) { return 0; }
+         try { return src(u, v); } catch(e) { return defaultValue; }
    }
    function valuesToQuadratic(src, dst) {
       if (dst === undefined)

@@ -29,7 +29,7 @@ function() {
                   var v = vertices[i];
 	          v.x = v.x < 0 ? 0 : v.x - .6 * (v.z + 1) * (v.z - 1);
                }
-               shape.computeCentroids();
+               //shape.computeCentroids();
                shape.computeVertexNormals();
                head.setMaterial(new THREE.MeshPhongMaterial());
                head.material.color = head.material.emissive = new THREE.Color(0x404040);
