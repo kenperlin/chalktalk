@@ -1214,7 +1214,9 @@
          ].join('\n');
 
          this.createMesh = function() {
-            var mesh = new THREE.Mesh(new THREE.Geometry(), this.shaderMaterial());
+            var material = this.shaderMaterial();
+	    console.log(material);
+            var mesh = new THREE.Mesh(new THREE.Geometry(), material);
             var geometry = new THREE.CylinderGeometry(.5, .5, 1, 3, 256);
             var cylinder = new THREE.Mesh(geometry, mesh.material);
             mesh.add(cylinder);
@@ -1230,7 +1232,7 @@
             this._renderStrokeData = new Float32Array(16); 
             this.renderStrokeSetColor();
             this._gl = renderer.context;
-            this._glProgram = this.mesh.material.program;
+            this._glProgram = this.mesh.material.program.program;
             this._uData      = this._gl.getUniformLocation(this._glProgram, 'uData');
             this._uNpts      = this._gl.getUniformLocation(this._glProgram, 'uNpts');
          }
