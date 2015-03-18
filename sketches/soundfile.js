@@ -9,13 +9,12 @@ function() {
   this.tToSample = function(time) {
     var index = Math.round( (time * this.soundBuffer.sampleRate ) % this.soundBuffer.length );
     var sample = this.soundBufferChannelData[index];
-    console.log(sample);
     return sample;
   };
 
   this.createCodeFunction = function() {
     if (self.soundBuffer) {
-      var codeText = 'console.log(window.soundfile.tToSample(t)); return ( tToSample(t) )';
+      var codeText = 'return ( window.soundfile.tToSample(t) )';
       this.codeFunction = new Function('t', codeText);
     } else {
       this.codeFunction = new Function('t', 'return t');
