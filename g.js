@@ -107,14 +107,14 @@
 
       function touchResponse(e, message) {
          e.preventDefault();
-    debugMessage = message;
-    var wasTouchDevice = isTouchDevice;
-    isTouchDevice = true;
-    if (! wasTouchDevice) {
+         debugMessage = message;
+         var wasTouchDevice = isTouchDevice;
+         isTouchDevice = true;
+         if (! wasTouchDevice) {
             events_canvas.width = width();
             events_canvas.height = height();
 
-       renderer.setSize(width(), height());
+            renderer.setSize(width(), height());
             renderer.camera.aspect = width() / height();
             renderer.camera.updateProjectionMatrix();
 
@@ -1214,9 +1214,9 @@ console.log(harry.fred);
       if (sketch != null) {
 
          var inPortCount = 0;
-    for (var i = 0 ; i < sketch.portName.length ; i++)
-       if (sketch.portName[i] !== 'out')
-          inPortCount++;
+      for (var i = 0 ; i < sketch.portName.length ; i++)
+         if (sketch.portName[i] !== 'out')
+            inPortCount++;
 
          if (inPortCount > 0)
             inPort = findNearestPortAtCursor(sketch, sketch.in, true);
@@ -1817,7 +1817,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          else if (sk() == outSketch && ! sk().isMouseOver) {
             inSketch = sketchPage.createTextSketch("   ");
-       sketchPage.add(inSketch);
+            sketchPage.add(inSketch);
             inPort = 0;
          }
          else
@@ -1988,15 +1988,15 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       // FETCH PRESSURE DATA RECORDED FROM TT SENSOR.
 
       if (window.ttdata === undefined) {
-          server.get("state/ttdata", function(val) {
-                                   ttdata = JSON.parse(val);
-                                });
+         server.get("state/ttdata", function(val) {
+            ttdata = JSON.parse(val);
+         });
       }
       if (window.ttdata !== undefined) {
-     var len = ttdata.rows * ttdata.cols;
-     if (ttdata.data[0].length < len)
-        for (var frame = 0 ; frame < ttdata.data.length ; frame++)
-           ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
+         var len = ttdata.rows * ttdata.cols;
+         if (ttdata.data[0].length < len)
+            for (var frame = 0 ; frame < ttdata.data.length ; frame++)
+               ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
       }
 
 //server.get("state/foobar", function(val) { console.log(val); });
@@ -2161,7 +2161,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
                   for (var i = 0 ; i < sk(I).portName.length ; i++) {
                      if (! sk(I).hasPortBounds(i) ||
-                 sk(I) instanceof SimpleSketch && sk(I).text.length > 0)
+                        sk(I) instanceof SimpleSketch && sk(I).text.length > 0)
                         continue;
                      xlo = min(xlo, sk(I).portBounds[i][0]);
                      ylo = min(ylo, sk(I).portBounds[i][1]);
@@ -2172,7 +2172,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
                   if (sk(I) instanceof NumericSketch ||
-               sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
+                     sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
                      var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
