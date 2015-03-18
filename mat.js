@@ -44,6 +44,14 @@
          this._m(this._id());
          return this;
       };
+      this._invert_tmp = newArray(16);
+      this.invert = function() {
+         var src = this._m();
+         var tmp = this._invert_tmp;
+         simpleInvert(src, tmp);
+         for (var i = 0 ; i < 15 ; i++)
+	    src[i] = tmp[i];
+      };
       this.normalMatrix = function(m) {
          var a = m[0]*m[0] + m[1]*m[1] + m[ 2]*m[ 2],
              b = m[4]*m[4] + m[5]*m[5] + m[ 6]*m[ 6],

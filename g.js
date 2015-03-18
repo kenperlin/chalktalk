@@ -1178,13 +1178,12 @@ console.log(harry.fred);
    function findOutSketchAndPort() {
       outSketch = isHover() ? sk() : null;
       outPort = -1;
-/*
+
       if (outSketch != null) {
          outPort = findOutPortAtCursor(outSketch);
          inSketch = null;
          inPort = -1;
       }
-*/
    }
 
    function findInSketchAndPort() {
@@ -1264,11 +1263,12 @@ console.log(harry.fred);
       if (sketch instanceof NumericSketch ||
           sketch instanceof SimpleSketch &&
                  (! sketch.isNullText() || isDef(sketch.inValue[0])))
-         return sketch.isMouseOver ? 0 : -1;
+         return -1;
+
       var x = This().mouseX;
       var y = This().mouseY;
       for (var i = 0 ; i < sketch.portName.length ; i++)
-         if (sketch.outValue[i] !== undefined) {
+         if (sketch.defaultValue[i] !== undefined && sketch.outValue[i] !== undefined) {
             var xy = sketch.portXY(i);
             if ( x >= xy[0] - portHeight/2 && x < xy[0] + portHeight/2 &&
                  y >= xy[1] - portHeight/2 && y < xy[1] + portHeight/2 )
