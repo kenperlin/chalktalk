@@ -3737,4 +3737,3 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
 var glyphs = [];
 loadGlyphArray(numericGlyphData);
-
