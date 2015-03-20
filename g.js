@@ -1178,9 +1178,8 @@ console.log(harry.fred);
    function findOutSketchAndPort() {
       outSketch = isHover() ? sk() : null;
       outPort = -1;
-
-      if (outSketch != null) {
-         outPort = findOutPortAtCursor(outSketch);
+      if (outSketch != null && (outPort = findOutPortAtCursor(outSketch)) != -1) {
+console.log("aha");
          inSketch = null;
          inPort = -1;
       }

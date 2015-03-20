@@ -694,17 +694,23 @@
       renderWrapper : function(elapsed) {
          this.afterSketchTransition = this.glyphTransition < 1 ? 0 :
                                       min(1, this.afterSketchTransition + 2 * elapsed);
+
          _g.save();
          m.save();
+
          if (this.glyphTransition < 1 && this.drawing !== undefined)
             this.drawing.update();
-         //try {
+
+         if (window.isCatchingRenderExceptions !== undefined)
+            try {
+               this.render(elapsed);
+            } catch(e) { console.log(e); }
+	 else
             this.render(elapsed);
-         //} catch(e) {
-            //console.log(e);
-         //}
+
          m.restore();
          _g.restore();
+
          if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
             this._updateMesh();
          }

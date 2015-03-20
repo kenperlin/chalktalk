@@ -379,6 +379,8 @@
       arrow(A[0],A[1], B[0],B[1], R);
    };
    function mLabel(str, xy, size) {
+      var saveTextHeight = _g.textHeight;
+
       if (xy === undefined) xy = [0,0];
       if (size === undefined) size = 1;
       var scale = sk().mScale() * size;
@@ -387,6 +389,8 @@
       var tw = textWidth(str);
       var x = xy[0], y = xy[1];
       sk().extendBounds([ [x-tw/2/scale,y-size],[x+tw/2/scale,y+size]]);
+
+      _g.textHeight = saveTextHeight;
    };
    function mText(str,p,ax,ay){
       var P = m.transform(p);
