@@ -33,6 +33,7 @@
       this.defaultValueIncr = [];
       this.drawFirstLine = false;
       this.fadeAway = 0;
+      this.sketchTexts = [];
       this.sketchTrace = null;
       this.trace = [];
       this.glyphTransition = 0;
@@ -354,7 +355,7 @@
             context.save();
                context.strokeStyle = backgroundColor;
                context.fillStyle = dataColor;
-               context.font = fontSize + 'pt Comic Sans MS';
+               context.font = fontSize + 'pt ' + defaultFont;
                var str = val;
                if (isNumeric(val)) {
                   str = roundedString(val);
@@ -388,8 +389,7 @@
 
          var fontHeight = this.isParsed() ? floor(0.7 * fontSize) : fontSize;
 
-         context.font = fontHeight + 'pt ' + (this.isParsed() ? 'Consolas'
-                                                              : 'Comic Sans MS');
+         context.font = fontHeight + 'pt ' + (this.isParsed() ? 'Consolas' : defaultFont);
 
          var isCursor = isTextMode && context == _g && this == sk(sketchPage.trueIndex);
          if (! isCursor && this.text.length == 0) {
@@ -696,6 +696,7 @@
                                       min(1, this.afterSketchTransition + 2 * elapsed);
 
          _g.save();
+
          m.save();
 
          if (this.glyphTransition < 1 && this.drawing !== undefined)
@@ -709,6 +710,14 @@
             this.render(elapsed);
 
          m.restore();
+
+         if (this.sketchTexts.length > 0) {
+            m.save();
+	    for (var n = 0 ; n < this.sketchTexts.length ; n++)
+	       this.sketchTexts[n].update(this);
+            m.restore();
+         }
+
          _g.restore();
 
          if (this.isMakingGlyph === undefined && this.createMesh !== undefined) {
@@ -809,6 +818,33 @@
       selectionWeight : function(i) {
          return sCurve(this.selectionWeights[i]);
       },
+      setSketchText : function(index, value, position, scale) {
+         this.sketchTexts[index] = new SketchText(value, position, scale);
+      },
+      sketchTextsMouseDown : function(x, y) {
+	 this.sketchTextAtMouse = undefined;
+         var p = m.transform([x,y,0]);
+         for (var n = this.sketchTexts.length - 1 ; n >= 0 ; n--) {
+	    var sketchText = this.sketchTexts[n];
+	    if (sketchText.contains(p) && sketchText.mouseDown(x, y)) {
+	       this.sketchTextAtMouse = sketchText;
+	       return true;
+            }
+         }
+         return false;
+      },
+      sketchTextsMouseDrag : function(x, y) {
+         if (this.sketchTextAtMouse === undefined)
+            return false;
+	 this.sketchTextAtMouse.mouseDrag(x, y);
+	 return true;
+      },
+      sketchTextsMouseUp : function(x, y) {
+         if (this.sketchTextAtMouse === undefined)
+            return false;
+	 this.sketchTextAtMouse.mouseUp(x, y);
+	 return true;
+      },
       updateSelectionWeights : function(delta) {
          if (this.labels.length == 0)
             return;
@@ -853,7 +889,7 @@
          this.textHeight = this.textStrs.length * 1.3 * 24;
 
          this.textWidth = 0;
-         _g.font = '24pt Comic Sans MS';
+         _g.font = '24pt ' + defaultFont;
          for (var n = 0 ; n < this.textStrs.length ; n++)
             this.textWidth = max(this.textWidth, textWidth(this.textStrs[n]));
 
@@ -969,67 +1005,6 @@
                this.mesh.material = shaderMaterial(this.vertexShader === undefined ? defaultVertexShader : this.vertexShader,
                                                    this.fragmentShader = codeTextArea.value);
          }
-      },
-      useNumberMouseHandler : function() {
-
-         this._roundValue = function() {
-            var val = parseFloat(this._value);
-            if (this._increment < 0.5)
-               val += (val >= 0 ? 0.1 : -0.1) * this._increment;
-
-            var places = 0;
-            for (var p = this._increment ; p < 0.5 ; p *= 10)
-               places++;
-
-            this._value = roundedString(val, places);
-         }
-
-         this.mouseDown = function(x, y) {
-            if (this._value === undefined)
-               this._value = 0;
-            if (this._increment === undefined)
-               this._increment = 1;
-            this._yChange = 0;
-            this._xPrev = x;
-            this._yPrev = y;
-            this._xTravel = 0;
-            this._yTravel = 0;
-         }
-
-         this.mouseDrag = function(x, y) {
-            this._yChange += y - this._yPrev;
-            if (abs(this._yChange) > 30) {
-               var incr = min(1, this._increment);
-               if (this._yChange < 0)
-                  this._value = "" + (parseFloat(this._value) + incr);
-               else
-                  this._value = "" + (parseFloat(this._value) - incr);
-               this._roundValue();
-               this._yChange = 0;
-            }
-
-            this._xPrev = x;
-            this._yPrev = y;
-
-            this._xTravel = max(this._xTravel, abs(x - this.xDown));
-            this._yTravel = max(this._yTravel, abs(y - this.yDown));
-         }
-
-         this.mouseUp = function(x, y) {
-            if (! this.isClick && this._xTravel > this._yTravel) {
-               if (x > this.xDown) {
-                  this._value = "" + (parseFloat(this._value) / 10);
-                  this._increment /= 10;
-               }
-               else {
-                  this._value = "" + (parseFloat(this._value) * 10);
-                  if (this._increment < 0.5)
-                     this._increment *= 10;
-               }
-               this._roundValue();
-            }
-         }
-
       },
       _updateMesh : function() {
          if (this.createMesh !== undefined && this.mesh === undefined) {

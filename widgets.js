@@ -21,11 +21,11 @@
             var x = cx + rx * c / t;
             var y = cy - ry * s / t;
             if (dragOp[i].length > 0) {
-               text(clickOp[i], x, y, .5, 1.3, 'Comic Sans MS');
-               text('(' + dragOp[i] + ')', x, y, .5, -.3, 'Comic Sans MS');
+               text(clickOp[i], x, y, .5, 1.3, defaultFont);
+               text('(' + dragOp[i] + ')', x, y, .5, -.3, defaultFont);
             }
             else
-               text(clickOp[i], x, y, .5, .5, 'Comic Sans MS');
+               text(clickOp[i], x, y, .5, .5, defaultFont);
          }
       }
    }

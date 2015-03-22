@@ -1,8 +1,6 @@
 function() {
    this.labels = '0 1 2 3 4 5 6 7 8 9'.split(' ');
 
-   this.useNumberMouseHandler();
-
    this.render = function() {
       this.duringSketch(function() {
          switch (this.selection) {
@@ -38,10 +36,9 @@ function() {
          }
       });
       this.afterSketch(function() {
-         if (this._value === undefined)
-            this._value = this.labels[this.selection];
-         mLabel(this._value);
-	 this.setOutPortValue(this._value);
+         if (this.sketchTexts.length == 0)
+            this.setSketchText(0, '' + this.selection, [0,0], 1);
+	 this.setOutPortValue(this.sketchTexts[0].value);
       });
    }
 }

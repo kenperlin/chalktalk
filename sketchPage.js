@@ -320,7 +320,8 @@
 
                m.save();
                computeStandardViewInverse();
-               sk().mouseDown(x, y);
+	       if (! sk().sketchTextsMouseDown(x, y))
+                  sk().mouseDown(x, y);
                this.skCallback('onPress', x, y);
                m.restore();
 
@@ -510,7 +511,8 @@
 
                m.save();
                computeStandardViewInverse();
-               sk().mouseDrag(x, y);
+	       if (! sk().sketchTextsMouseDrag(x, y))
+                  sk().mouseDrag(x, y);
                this.skCallback('onDrag', x, y);
                m.restore();
 
@@ -803,7 +805,8 @@
 
             m.save();
             computeStandardViewInverse();
-            sk().mouseUp(x, y);
+	    if (! sk().sketchTextsMouseUp(x, y))
+               sk().mouseUp(x, y);
             this.skCallback('onRelease', x, y);
             m.restore();
 

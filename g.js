@@ -16,6 +16,7 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
+   var defaultFont = 'Comic Sans MS';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;
@@ -3038,6 +3039,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    function addSketch(sketch) {
       sketch.drawing = new DRAWING.Drawing();
+      sketch.sketchTexts = [];
+
       if (sketch.init !== undefined)
          sketch.init();
 
@@ -3046,19 +3049,19 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       sketchPage.add(sketch);
       sk().arrows = [];
       sk().id = globalSketchId++;
-      sk().setColorId(sketchPage.colorId);
-      sk().sketchState = 'start';
       sk().children = [];
-      sk().in = [];
-      sk().out = [];
-      sk().inValue = [];
-      sk().motionPath = [];
-      sk().outValue = [];
       sk().defaultValue = [];
+      sk().in = [];
+      sk().inValue = [];
+      sk().isDrawingEnabled = false;
+      sk().motionPath = [];
+      sk().out = [];
+      sk().outValue = [];
       sk().portBounds = [];
       sk().portLocation = [];
+      sk().sketchState = 'start';
       sk().zoom = sketchPage.zoom;
-      sk().isDrawingEnabled = false;
+      sk().setColorId(sketchPage.colorId);
       if (sk() instanceof Sketch2D) {
          sk().x2D = This().mouseX;
          sk().y2D = This().mouseY;

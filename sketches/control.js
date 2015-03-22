@@ -3,6 +3,8 @@ function() {
 
    this.disableClickToLink = true;
 
+   this.lo = 0;
+   this.hi = 1;
    this.flip = 1;
 
    this.computeStatistics = function() {
@@ -29,63 +31,34 @@ function() {
    }
 
    this.render = function(elapsed) {
-
+      var s = this.selection;
       var sc = this.size / 180;
-
-      this.afterSketch(function() {
-         if (this.portLocation.length == 0) {
-            switch (this.selection) {
-            case 0:
-               this.addPort("lo", -.62 * sc, 0);
-               this.addPort("hi",  .62 * sc, 0);
-               break;
-            case 1:
-               this.addPort("lo", 0, -.62 * sc);
-               this.addPort("hi", 0,  .62 * sc);
-               break;
-            }
-            this.setDefaultValue("lo", 0);
-            this.setDefaultValue("hi", 1);
-         }
-      });
-
-      var t = this.t;
-      if (this.isInValue("t"))
-         t = max(0, min(1, this.getInFloat("t")));
-
-      this.lo = this.isInValue("lo") ? this.getInFloat("lo") : this.getDefaultValue("lo");
-      this.hi = this.isInValue("hi") ? this.getInFloat("hi") : this.getDefaultValue("hi");
-      var value = lerp(t, this.lo, this.hi);
-
-      this.setOutValue("lo", this.lo);
-      this.setOutValue("hi", this.hi);
-      this.setOutPortValue(value);
-
       m.scale(sc);
 
-      var x = t - .5;
+      this.afterSketch(function() {
+         if (this.sketchTexts.length == 0) {
+            var x = s == 0 ? .6 * sc : 0;
+            var y = s == 1 ? .6 * sc : 0;
+	    this.setSketchText(0, '0', [-x,-y], .05 * sc);
+	    this.setSketchText(1, '1', [ x, y], .05 * sc);
+         }
+         this.lo = parseFloat(this.sketchTexts[0].value);
+         this.hi = parseFloat(this.sketchTexts[1].value);
+         this.setOutPortValue(lerp(this.t, this.lo, this.hi));
+      });
+
+      var x = this.t - .5;
       switch (this.selection) {
       case 0:
-         mLine([-.5,0],[.5,0]);
-         mLine([x,-.15*this.flip],[x,.15*this.flip]);
+         mLine([-.5, 0], [.5, 0]);
+         mLine([x, -.15 * this.flip], [x, .15 * this.flip]);
          break;
       case 1:
-         mLine([0,-.5*this.flip],[0,.5*this.flip]);
-         mLine([-.15,x],[.15,x]);
+         mLine([0, -.5 * this.flip], [0, .5 * this.flip]);
+         mLine([-.15, x], [.15, x]);
          break;
       }
       this.afterSketch(function() {
-         textHeight(16);
-         switch (this.selection) {
-         case 0:
-            this.drawValue(this.lo, m.transform([-.6, 0]), 1, .5);
-            this.drawValue(this.hi, m.transform([ .6, 0]), 0, .5);
-            break;
-         case 1:
-            this.drawValue(this.lo, m.transform([0, -.6]), .5, 0);
-            this.drawValue(this.hi, m.transform([0,  .6]), .5, 1);
-            break;
-         }
 
          // WHEN BOUNDS ARE INTEGER VALUES, DRAW INTERMEDIATE TICK MARKS.
 
@@ -94,15 +67,11 @@ function() {
             while (n < (this.hi - this.lo) / 50)
                n *= 10;
             for (var i = this.lo + n ; i < this.hi ; i += n) {
-               var tw = i % (10 * n) == 0 ? 0.04 : 0.02;
+               var tw = i % (10 * n) == 0 ? 0.055 : i % (5 * n) == 0 ? .035 : 0.015;
                var t = (i - this.lo) / (this.hi - this.lo) - .5;
                switch (this.selection) {
-               case 0:
-                  mLine([t,-tw],[t,tw]);
-                  break;
-               case 1:
-                  mLine([-tw,t],[tw,t]);
-                  break;
+               case 0: mLine([t, -tw], [t, tw]); break;
+               case 1: mLine([-tw, t], [tw, t]); break;
                }
             }
          }

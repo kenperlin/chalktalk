@@ -234,8 +234,7 @@
          alignX = 0;
       if (! isDef(alignY))
          alignY = 1;
-      //_g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Calibri');
-      _g.font = th + 'pt ' + (isDef(font) ? font : isDrawingSketch2D ? 'Comic Sans MS' : 'Helvetica');
+      _g.font = th + 'pt ' + (isDef(font) ? font : defaultFont);
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 
