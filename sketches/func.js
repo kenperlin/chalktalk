@@ -58,13 +58,6 @@ function() {
       this.elapsed = elapsed;
       var sc = this.size / 400;
 
-      if (this.nPorts == 0) {
-         this.addPort("x"  , -sc,   0);
-         this.addPort("y1" ,   0, -sc);
-         this.addPort("y2" ,   0,  sc);
-         this.addPort("out",  sc,   0);
-      }
-
       var s = this.selection;
       if (isDef(this.selectedIndex))
          this.selection = this.selectedIndex;
@@ -73,8 +66,8 @@ function() {
 
       m.scale(sc);
 
-      var x = this.isInValue("x") ? this.getInFloat("x") : time;
-      var y = this.getInFloat("y1") + this.getInFloat("y2");
+      var x = this.getInValue(0, time);
+      var y = this.getInValue(1, 0);
       var result = null;
       try {
          eval("result = (" + this.code[s][1] + ")");

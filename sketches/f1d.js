@@ -14,11 +14,6 @@ function() {
       return result;
    }
    this.render = function(elapsed) {
-      if (this.nPorts == 0) {
-         this.addPort("t", -1, 0);
-         this.addPort("f",  1, 0);
-      }
-
       lineWidth(1);
       mCurve([[-1,0],[1,0]]);
       mCurve([[0,-1],[0,1]]);
@@ -31,10 +26,10 @@ function() {
       mCurve(C);
 
       this.afterSketch(function() {
-         var t = this.isInValue("t") ? this.getInFloat("t") : 0;
+         var t = this.getInValue(0, 0);
          var y = this._f(t);
          if (y != null) {
-            this.setOutValue("f", y);
+            this.setOutPortValue(y);
             color(scrimColor(0.5));
             var tt = max(-1, min(1, t));
             var yy = max(-1, min(1, y));

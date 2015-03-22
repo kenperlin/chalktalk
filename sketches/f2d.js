@@ -14,11 +14,6 @@ function() {
       return result;
    }
    this.render = function(elapsed) {
-      if (this.nPorts == 0) {
-         this.addPort("x", -1, 0);
-         this.addPort("f",  1, 0);
-      }
-
       lineWidth(1);
       mCurve([[-1,0],[1,0]]);
       mCurve([[0,-1],[0,1]]);
@@ -34,7 +29,7 @@ function() {
          if (this.styleTransition > .5)
             this.aa += 3 * elapsed;
 
-         var e = 1/30;
+         var e = 1/20;
          _g.globalAlpha = min(this.aa, 1);
 
          for (var x = -1 ; x <= 1.001 ; x += e)
@@ -53,11 +48,11 @@ function() {
             mCurve([ [x,y,z0], [x+e,y,z1] ]);
          }
 
-         var x = this.isInValue("x") ? this.getInFloat("x") : 0;
-         var y = this.isInValue("y") ? this.getInFloat("y") : 0;
+         var x = this.getInValue(0, 0);
+         var y = this.getInValue(1, 0);
          var z = this._f(x,y);
          if (z != null) {
-            this.setOutValue("f", z);
+            this.setOutPortValue(z);
          }
       });
    }

@@ -34,7 +34,6 @@ function() {
 
       this.afterSketch(function() {
          if (this.portLocation.length == 0) {
-            //this.addPort("t", 0, 0);
             switch (this.selection) {
             case 0:
                this.addPort("lo", -.62 * sc, 0);

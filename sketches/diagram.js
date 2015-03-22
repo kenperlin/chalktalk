@@ -96,35 +96,14 @@ function Diagram() {
       switch (this.labels[this.selection]) {
 
       case "refract":
-
-         if (sel != this.sel) {
-            this.sel = sel;
-            this.clearPorts();
-            this.addPort("n1", w/30 - w/2, -w/30);
-            this.addPort("n2", w/30 - w/2,  w/30);
-            this.addPort(S_THETA + "1", w/2 - w/30, -w/30);
-            this.addPort(S_THETA + "2", w/2 - w/30,  w/30);
-         }
-
-         if (this.isInValue("n1"))
-            this.n1 = this.getInFloat("n1");
-
-         if (this.isInValue("n2"))
-            this.n2 = this.getInFloat("n2");
+         this.n1 = this.getInValue(0, 1.0);
+         this.n2 = this.getInValue(1, 1.5);
 
          var mouseX = -100, mouseY = -100;
 
-         if (isNumeric(this.xlo) && sketchPage.isPressed) {
+         if (isNumeric(this.xlo) && isk() && sk() == this && isHover() && sketchPage.isPressed) {
             mouseX = this.x - (this.xlo + this.xhi) / 2;
             mouseY = this.y - (this.ylo + this.yhi) / 2;
-         }
-
-         if (this.firstTime === undefined) {
-            this.firstTime = true;
-            //this.mouseX = -w/4;
-            //this.mouseY = -w/4;
-            this.n1 = 1.0;
-            this.n2 = 1.5;
          }
 
          var x0 = 0, y0 = 0, x1, y1, r1, x2, y2, r2;
@@ -140,8 +119,6 @@ function Diagram() {
             }
          });
 
-         //x1 = this.mouseX;
-         //y1 = this.mouseY;
          x1 = mouseX;
          y1 = mouseY;
          r1 = sqrt(x1*x1+y1*y1);
@@ -171,8 +148,7 @@ function Diagram() {
             r2 = sqrt(x2*x2+y2*y2);
          }
 
-         this.setOutValue(S_THETA + "1", asin(s1));
-         this.setOutValue(S_THETA + "2", asin(s2 < 1 ? s2 : s1));
+         this.setOutPortValue(asin(s2 < 1 ? s2 : s1));
 
          color(defaultPenColor);
          line(-w/2,0,w/2,0);
