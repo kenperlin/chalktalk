@@ -39,11 +39,19 @@ XMLScene.prototype = {
       s += '<client'
                + ' id="'   + this.name + '"'
 	       + ' time="' + (new Date()).getTime() + '"'
-	       + '>\n';
+	       + '>\n'
+	       + '<balls>\n';
+      var anyLinks = false;
       for (var i = 0 ; i < this.objs.length ; i++) {
          var obj = this.objs[i];
-         s += '<' + obj[0] + ' id="' + i + '" ';
-	 var f = this.fields[obj[0]];
+	 var type = obj[0];
+	 if (! anyLinks && type == 'link') {
+	    s += '</balls>\n';
+	    s += '<links>\n';
+	    anyLinks = true;
+	 }
+         s += '<' + type + ' id="' + i + '" ';
+	 var f = this.fields[type];
 	 for (var j = 0 ; j < f.length ; j++) {
 	    var key = f[j];
 	    var val = obj[1 + j];
@@ -53,7 +61,8 @@ XMLScene.prototype = {
          }
          s += '/>\n';
       }
-      s += '</client>\n';
+      s += '</links>\n'
+         + '</client>\n';
       return s;
    },
 }
