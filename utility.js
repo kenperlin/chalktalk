@@ -88,10 +88,10 @@
    function isDef(v) { return ! (v === undefined); }
    function isNumeric(v) { return ! isNaN(v); }
    function roundedString(v, nDigits) {
-      var nd = nDigits === undefined ? 2 : nDigits;
+      var nd = nDigits === undefined ? 2 : abs(nDigits);
       if (typeof(v) == 'string')
          v = parseFloat(v);
-      var p = nd<=0 ? 1 : nd==1 ? 10 : nd==2 ? 100 : 1000;
+      var p = nd<=0 ? 1 : nd==1 ? 10 : nd==2 ? 100 : nd==3 ? 1000 : nd==4 ? 10000 : 100000;
       var str = "" + (floor(p * abs(v) + 0.5) / p);
 
       if (nDigits !== undefined && nd > 0) {
@@ -100,8 +100,9 @@
             str += ".";
             i = str.length - 1;
          }
-         while (str.length - i < nd + 1)
-            str += "0";
+	 if (nDigits > 0)
+            while (str.length - i < nd + 1)
+               str += "0";
       }
 
       str = (v < 0 ? "-" : "") + str;
@@ -510,9 +511,11 @@
       return dst;
    }
 
+
 // USEFUL PRE-BUILT CURVES.
 
    var curveForSignal = makeSpline([[-.3,-.1],[-.1,.1],[.1,-.1],[.3,.1]]);
+
 
 // CHARACTER CONSTANTS AND CONVERSIONS.
 

@@ -1529,6 +1529,27 @@
          case 'x':
             isExpertMode = ! isExpertMode;
             break;
+         case 'X':
+	    if (isk() && sk().graph instanceof VisibleGraph) {
+	       var xmlScene = new XMLScene("graph");
+	       var nodes = sk().graph.nodes;
+	       var links = sk().graph.links;
+	       var n = nodes.length;
+	       for (var i = 0 ; i < n ; i++)
+	          xmlScene.setBall(i, nodes[i].p, nodes[i].r);
+	       for (var i = 0 ; i < links.length ; i++)
+	          xmlScene.setLink(n + i, links[i].i, links[i].j, links[i].w);
+	       console.log(xmlScene.toString());
+            }
+/*
+	    var p0 = newVec3(-1,-1,-1);
+	    var p1 = newVec3( 1, 1, 1);
+	    xmlScene.setBall(0, p0, .1);
+	    xmlScene.setBall(1, p1, .1);
+	    xmlScene.setLink(2,  0, 1);
+	    console.log(xmlScene.toString());
+*/
+	    break;
          case 'y':
             isShowingScribbleGlyphs = ! isShowingScribbleGlyphs;
             break;
