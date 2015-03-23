@@ -51,6 +51,11 @@
 
    function clickSize() { return width() / 40; }
 
+   // SCALE FONT SIZE WITH SCREEN HEIGHT.
+
+   function sfs(size) { return size * height() / 700; }
+   function sfpx(size) { return floor(sfs(size)) + 'px'; }
+
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.
 
    //function height() { return 640; }
@@ -1984,6 +1989,8 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    var tick = function(g) {
 
+console.log(height());
+
       // FETCH PRESSURE DATA RECORDED FROM TT SENSOR.
 
       if (window.ttdata === undefined) {
@@ -2154,18 +2161,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                      xhi = max(xhi, sk(I).sp[i][0]);
                      ylo = min(ylo, sk(I).sp[i][1]);
                      yhi = max(yhi, sk(I).sp[i][1]);
-                  }
-
-                  // PORTS EXTEND THE BOUNDING BOX OF A SKETCH.
-
-                  for (var i = 0 ; i < sk(I).portName.length ; i++) {
-                     if (! sk(I).hasPortBounds(i) ||
-		           sk(I) instanceof SimpleSketch && sk(I).text.length > 0)
-                        continue;
-                     xlo = min(xlo, sk(I).portBounds[i][0]);
-                     ylo = min(ylo, sk(I).portBounds[i][1]);
-                     xhi = max(xhi, sk(I).portBounds[i][2]);
-                     yhi = max(yhi, sk(I).portBounds[i][3]);
                   }
 
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.

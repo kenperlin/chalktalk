@@ -605,7 +605,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          this.article = null;
          this.object = null;
 
-         if (i === undefined) i = 0;
+         i = def(i, 0);
          this.subject = words[i++];
          this.predicate = words[i++];
          this.preposition = null;
@@ -814,7 +814,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.color = codeSelectorFgColor();
-         codeSelector.style.font="18px courier";
+         codeSelector.style.font = sfpx(18) + ' courier';
          codeSelector.style.visibility = ! isCodeScript() && code().length > 1 ? "visible" : "hidden";
          if (isDef(codeSketch.selectedIndex))
             codeSelector.selectedIndex = codeSketch.selectedIndex;
@@ -824,10 +824,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = codeIsBook() ? "17px serif" : isCodeScript() ? "15px courier" : "15px courier";
+         codeTextArea.style.font = codeIsBook() ? sfpx(17) + ' serif' : sfpx(15) + ' courier';
          codeTextArea.value = isCodeScript() ? codeScript() : code()[codeSelector.selectedIndex][1];
          if (codeIsBook()) {
-            codeTextArea.style.width = '650px';
+            codeTextArea.style.width = sfpx(650);
          }
          if (isCodeScript() || code().length < 2) {
             codeTextArea.style.position = "absolute";
@@ -848,7 +848,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       xhi += _g.panX;
 
       var x = (xlo + xhi) / 2;
-      var y = 10;
+      var y = sfs(10);
 
       // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
@@ -859,14 +859,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       for (var i = 0 ; i < lines.length ; i++)
          cols = max(cols, lines[i].length);
 
-      if (isCodeScript())
+      /*if (isCodeScript())
          cols = 100;
-      else if (text.length > 0)
+      else */ if (text.length > 0)
          for (var i = 0 ; i < text.length ; i++)
-            cols = max(cols, text[i][0].length + 3);
+            cols = max(cols, text[i][0].length);
 
       codeTextArea.rows = rows;
-      codeTextArea.cols = cols;
+      codeTextArea.cols = cols + 3;
 
       codeTextArea.style.color = codeTextFgColor();
 
@@ -874,15 +874,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var columnWidth = isCodeScript() ? 8 : 10;
+      var columnWidth = sfs(10);
       var w = min(columnWidth * (cols + 1), width() * 0.75);
 
       if (rows > 3)
-         rows += 0.3;
+         rows += sfs(0.3);
       if (! isCodeScript() && text.length > 1)
-         rows += 1.2;
+         rows += sfs(1.2);
 
-      var h = isCodeScript() ? floor(15.2 * rows) : floor(15.2 * rows);
+      var h = floor(sfs(15.2) * rows);
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
@@ -905,8 +905,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       //////////////////////////////////////////////////////////////////////////////////////
 
-      codeElement.style.left = x - w/2 + 10;
-      codeElement.style.top = y + 5;
+      codeElement.style.left = x - w/2 + sfs(10);
+      codeElement.style.top = y + sfs(5);
 
       if (codeIsBook())
          return;
@@ -980,7 +980,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function debugDot(x, y, color) {
       _g.save();
-      _g.fillStyle = color === undefined ? 'red' : color;
+      _g.fillStyle = def(color, 'red');
       _g.beginPath();
       _g.moveTo(x-3,y-3);
       _g.lineTo(x+3,y-3);

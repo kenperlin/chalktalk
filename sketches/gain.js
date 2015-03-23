@@ -8,7 +8,7 @@ function() {
       this.afterSketch(function() {
 
          var srcInput = this.inValue[0];
-         var srcGain  = this.inValue[1] !== undefined ? this.inValue[1] : this.sketchTexts[0].value;
+         var srcGain  = def(this.inValue[1], this.sketchTexts[0].value);
 
          var func = function() {
             var input = srcInput;
@@ -21,7 +21,7 @@ return function(t) {
 
          this.setOutPortValue(func());
 
-         if (! (this.sketchTexts[0].isVisible = this.inValue[1] === undefined)) {
+         if (!(this.sketchTexts[0].isVisible = this.inValue[1]===undefined)) {
 	    m.translate(-.3, 0, 0);
 	    mCurve(curveForSignal);
          }

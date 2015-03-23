@@ -1223,7 +1223,7 @@
          L.push(len(x(n+1) - x(n), y(n+1) - y(n)));
 
       var ns = 0;
-      var spline = dst === undefined ? [] : dst;
+      var spline = def(dst, []);
 
       for (var n = 0 ; n < nk-1 ; n++) {
 
@@ -1378,7 +1378,7 @@
       var D = [];
       for (var i = 0 ; i < src.length ; i++)
          D.push(i == 0 ? 0 : D[i-1] + distance(src[i], src[i-1]));
-      var dst = _dst === undefined ? [] : _dst;
+      var dst = def(_dst, []);
       dst[0] = cloneArray(src[0]);
       var i = 1;
       var sum = D[src.length-1];

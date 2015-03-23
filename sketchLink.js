@@ -4,7 +4,7 @@ function SketchLink(a, i, b, j, s) {
    this.i = i;
    this.b = b;
    this.j = j;
-   this.s = s === undefined ? 0 : s;
+   this.s = def(s, 0);
 
    if (i >= a.out.length || a.out[i] === undefined)
       a.out[i] = [];

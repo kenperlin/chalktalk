@@ -15,15 +15,15 @@
 function SketchText(value, position, scale) {
    this.bounds = [[0,0],[0,0]];
    this.isVisible = true;
-   this.position  = position !== undefined ? position : [0,0];
-   this.scale     = scale    !== undefined ? scale    : 1;
+   this.position  = def(position, [0,0]);
+   this.scale     = def(scale, 1);
    this.setValue(value);
 }
 
 SketchText.prototype = {
 
    setValue : function(value) {
-      this.value = value === undefined ? '' : value;
+      this.value = def(value, '');
 
       // If value is a number with trailing decimal digits, compute corresponding increment.
 
