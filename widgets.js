@@ -814,7 +814,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeSelector.style.backgroundColor = codeSelectorBgColor();
          codeSelector.style.borderColor = codeTextFgColor();
          codeSelector.style.color = codeSelectorFgColor();
-         codeSelector.style.font = sfpx(18) + ' courier';
          codeSelector.style.visibility = ! isCodeScript() && code().length > 1 ? "visible" : "hidden";
          if (isDef(codeSketch.selectedIndex))
             codeSelector.selectedIndex = codeSketch.selectedIndex;
@@ -824,7 +823,6 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          codeTextArea.style.backgroundColor = codeTextBgColor();
          codeTextArea.style.borderColor = backgroundColor;
          codeTextArea.style.color = codeTextFgColor();
-         codeTextArea.style.font = codeIsBook() ? sfpx(17) + ' serif' : sfpx(15) + ' courier';
          codeTextArea.value = isCodeScript() ? codeScript() : code()[codeSelector.selectedIndex][1];
          if (codeIsBook()) {
             codeTextArea.style.width = sfpx(650);
@@ -844,18 +842,25 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function drawCodeWidget(text, xlo, ylo, xhi, yhi, isChanged) {
 
+      codeSelector.style.font = sfpx(18) + ' courier';
+      codeTextArea.style.font = codeIsBook() ? sfpx(17) + ' serif' : sfpx(15) + ' courier';
+
       xlo += _g.panX;
       xhi += _g.panX;
+
+      // COMPUTE THE POSITION OF THE SPEECH BUBBLE.
 
       var x = (xlo + xhi) / 2;
       var y = sfs(10);
 
       // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
-      var rows = codeTextArea.value.replace(/./g,'').length;
+      var text = codeTextArea.value;
+
+      var rows = text.replace(/./g,'').length;
 
       var cols = 10;
-      var lines = codeTextArea.value.split('\n');
+      var lines = text.split('\n');
       for (var i = 0 ; i < lines.length ; i++)
          cols = max(cols, lines[i].length);
 
@@ -865,7 +870,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       rows = min(rows, floor(height() / sfs(16)));
 
-      codeTextArea.rows = rows;
+      codeTextArea.rows = max(2, rows);
       codeTextArea.cols = cols;
 
       codeTextArea.style.color = codeTextFgColor();
@@ -882,7 +887,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       if (! isCodeScript() && text.length > 1)
          rows += sfs(1.2);
 
-      var h = floor(sfs(15.2) * rows);
+      var h = floor(sfs(15.2) * (rows<2 ? 2 : rows));
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
@@ -906,17 +911,17 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       //////////////////////////////////////////////////////////////////////////////////////
 
       codeElement.style.left = x - w/2 + sfs(10);
-      codeElement.style.top = y + sfs(5);
+      codeElement.style.top = y + sfs(rows == 0 ? 10 : 5);
 
       if (codeIsBook())
          return;
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
-      var cr = width() / 70;
+      var cr = sfs(width() / 70) * (rows < 2 ? 0.66 : rows < 3 ? 0.8 : 1);
 
       var cx = x - _g.panX - w/2;
-      var cy = y - _g.panY + sfs(4);
+      var cy = y - _g.panY + sfs(rows < 2 ? 0 : 4);
       var c = createRoundRect(cx, cy, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.

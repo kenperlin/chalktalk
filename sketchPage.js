@@ -1322,6 +1322,12 @@
          case '#':
             this.toggleLinedBackground();
             break;
+         case 'smaller':
+	    _font_scale_factor /= 1.1;
+	    break;
+         case 'larger':
+	    _font_scale_factor *= 1.1;
+	    break;
          case PAGE_UP:
             break;
          case PAGE_DN:

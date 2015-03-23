@@ -53,7 +53,9 @@
 
    // SCALE FONT SIZE WITH SCREEN HEIGHT.
 
-   function sfs(size) { return size * height() / 700; }
+   var _font_scale_factor = 700;
+
+   function sfs(size) { return size * height() / _font_scale_factor; }
    function sfpx(size) { return floor(sfs(size)) + 'px'; }
 
    // SOMETIMES WE NEED TO SET A CUSTOM HEIGHT TO MAKE THINGS WORK WITH A PARTICULAR PROJECTOR.

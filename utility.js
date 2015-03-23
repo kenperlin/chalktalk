@@ -540,18 +540,20 @@
    function charCodeToString(key) {
       if (isControlPressed) {
          switch (key) {
-         case 50: return EXP_2;   // SUPERSCRIPT 2
-         case 51: return EXP_3;   // SUPERSCRIPT 3
-         case 52: return EXP_4;   // SUPERSCRIPT 4
-         case 65: return S_ALPHA;
-         case 66: return S_BETA;
-         case 68: return S_DELTA;
-         case 69: return S_EPSILON;
-         case 70: return S_PHI;
-         case 71: return G_OR_EQ;
-         case 76: return L_OR_EQ;
-         case 80: return S_PI;
-         case 84: return S_THETA;
+         case  50: return EXP_2;   // SUPERSCRIPT 2
+         case  51: return EXP_3;   // SUPERSCRIPT 3
+         case  52: return EXP_4;   // SUPERSCRIPT 4
+         case  65: return S_ALPHA;
+         case  66: return S_BETA;
+         case  68: return S_DELTA;
+         case  69: return S_EPSILON;
+         case  70: return S_PHI;
+         case  71: return G_OR_EQ;
+         case  76: return L_OR_EQ;
+         case  80: return S_PI;
+         case  84: return S_THETA;
+         case 189: return 'larger';
+         case 187: return 'smaller';
          }
       }
       if (isShiftPressed)
@@ -587,7 +589,6 @@
       case  17: return 'control';
       case  18: return 'alt';
       case  27: return 'esc';
-      case  32: return 'spc';
       case  32: return 'spc';
       case  33: return PAGE_UP;
       case  34: return PAGE_DN;
