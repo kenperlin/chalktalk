@@ -2794,6 +2794,26 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          }
       }
 
+      // OUTPUT XML FOR SELECTED GRAPH SKETCH, IF ANY.
+
+      if (window.xmlSketch !== undefined) {
+         var nodes = xmlSketch.graph.nodes;
+         var links = xmlSketch.graph.links;
+	 if (window.xmlNodes === undefined || xmlNodes != nodes.length
+	                                   || xmlLinks != links.length) {
+            xmlNodes = nodes.length;
+            xmlLinks = links.length;
+            xmlScene = new XMLScene("graph");
+         }
+         for (var i = 0 ; i < nodes.length ; i++)
+            xmlScene.setBall(i, nodes[i].p, nodes[i].r);
+         for (var i = 0 ; i < links.length ; i++)
+            xmlScene.setLink(nodes.length + i, links[i].i, links[i].j, links[i].w);
+
+         console.log(xmlScene.toString());
+      }
+
+
       if (window.debugMessage !== undefined) {
          annotateStart();
          _g.fillStyle = _g.strokeStyle = 'cyan';

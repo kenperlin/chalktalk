@@ -1530,7 +1530,11 @@
             isExpertMode = ! isExpertMode;
             break;
          case 'X':
-	    if (isk() && sk().graph instanceof VisibleGraph) {
+	    if (window.xmlSketch !== undefined)
+	       window.xmlSketch = undefined;
+	    else if (isk() && sk().graph instanceof VisibleGraph) {
+	       window.xmlSketch = sk();
+/*
 	       var xmlScene = new XMLScene("graph");
 	       var nodes = sk().graph.nodes;
 	       var links = sk().graph.links;
@@ -1540,6 +1544,7 @@
 	       for (var i = 0 ; i < links.length ; i++)
 	          xmlScene.setLink(n + i, links[i].i, links[i].j, links[i].w);
 	       console.log(xmlScene.toString());
+*/
             }
 /*
 	    var p0 = newVec3(-1,-1,-1);
