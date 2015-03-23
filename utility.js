@@ -129,7 +129,10 @@
          audioNode.onaudioprocess = function(event) {
             var output = event.outputBuffer;
             var signal = output.getChannelData(0);
-            if (f instanceof Array)
+            if (f === undefined)
+               for (var i = 0 ; i < output.length ; i++)
+                  signal[i] = 0;
+            else if (f instanceof Array)
                for (var i = 0 ; i < output.length ; i++)
                   signal[i] = f[audioIndex++ % f.length];
             else

@@ -9,7 +9,8 @@ function() {
          var func = function() {
             var inputs = [];
             for (var i = 0 ; i < inValue.length ; i++)
-               inputs.push(inValue[i]);
+	       if (inValue[i] !== undefined)
+                  inputs.push(inValue[i]);
 
 return function(t) {
    var sum = 0;

@@ -3,7 +3,7 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-        g mLine([0,-.75],[0,1]);
+         mLine([0,-.75],[0,1]);
          mCurve(makeOval(-.25,-1,.5,.5,32,TAU/4,-3*TAU/4));
       });
       this.afterSketch(function() {

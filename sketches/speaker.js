@@ -8,6 +8,8 @@ function() {
       this.afterSketch(function() {
          if (typeof this.inValue[0] == 'function')
             setAudioSignal(this.inValue[0]);
+         else
+            setAudioSignal();
       });
    }
 }
