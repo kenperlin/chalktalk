@@ -694,7 +694,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           if (isCodeScript()) {
 
              // IF EDITING JAVASCRIPT SOURCE, UNDEFINED VARIABLES CAUSE PROBLEMS,
-	     // SO WE MAKE THE USER IT THE ` KEY AS A TRIGGER TO REPARSE.
+             // SO WE MAKE THE USER IT THE ` KEY AS A TRIGGER TO REPARSE.
 
              var s = codeTextArea.value;
              var i = codeTextArea.selectionStart - 1;
@@ -702,14 +702,14 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
                 // FIRST REMOVE ` CHAR FROM TEXT, THEN RESTORE CURSOR POSITION.
 
-	        codeTextArea.value = s.substring(0, i) + s.substring(i + 1, s.length);
+                codeTextArea.value = s.substring(0, i) + s.substring(i + 1, s.length);
                 codeTextArea.selectionStart =
                 codeTextArea.selectionEnd = i;
 
                 // EVAL THE PART OF SKETCH SCRIPT WITHIN { ... }, INSIDE CONTEXT OF codeSketch.
                 // THIS WILL REDEFINE THE SKETCH METHODS ONLY FOR THIS ONE INSTANCE.
 
-		var text = codeTextArea.value;
+                var text = codeTextArea.value;
                 var i = text.indexOf('{');
                 var j = text.lastIndexOf('}');
                 try {
@@ -720,12 +720,12 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           }
 
           else if (code() != null) {
-	     var text = codeTextArea.value;
+             var text = codeTextArea.value;
 
              // WHEN EVALUATING EXPRESSIONS, UNEVALUATED FUNCTIONS CANNOT BE PROPERLY PARSED,
              // SO DON'T ALLOW EVAL OF USER-CODED EXPRESSIONS IF SUCH FUNCTIONS ARE PRESENT.
 
-	     if (isParsableCode(text)) {
+             if (isParsableCode(text)) {
 
                 var index = codeSelector.selectedIndex;
                 code()[index][1] = text;
@@ -806,7 +806,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           + "</select>"
           + "<br>"
           + "<textArea rows=8 cols=24 id=code_text resize='none'"
-          + " style=';outline-width:0;border-style:none;resize:none'"
+          + " style=';outline-width:0;border-style:none;resize:none;overflow:scroll'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
 
@@ -852,21 +852,21 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       // COMPUTE THE SIZE OF THE SPEECH BUBBLE.
 
-      var rows = codeTextArea.value.replace(/./g,'').length + 2;
+      var rows = codeTextArea.value.replace(/./g,'').length;
 
       var cols = 10;
       var lines = codeTextArea.value.split('\n');
       for (var i = 0 ; i < lines.length ; i++)
          cols = max(cols, lines[i].length);
 
-      /*if (isCodeScript())
-         cols = 100;
-      else */ if (text.length > 0)
+      if (text.length > 0)
          for (var i = 0 ; i < text.length ; i++)
             cols = max(cols, text[i][0].length);
 
+      rows = min(rows, floor(height() / sfs(16)));
+
       codeTextArea.rows = rows;
-      codeTextArea.cols = cols + 3;
+      codeTextArea.cols = cols;
 
       codeTextArea.style.color = codeTextFgColor();
 
@@ -874,8 +874,8 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       codeSelector.style.borderColor = codeTextFgColor();
       codeSelector.style.color = codeSelectorFgColor();
 
-      var columnWidth = sfs(10);
-      var w = min(columnWidth * (cols + 1), width() * 0.75);
+      var columnWidth = sfs(9);
+      var w = min(columnWidth * (cols + 4), width() * 0.75);
 
       if (rows > 3)
          rows += sfs(0.3);
@@ -916,7 +916,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var cr = width() / 70;
 
       var cx = x - _g.panX - w/2;
-      var cy = y - _g.panY;
+      var cy = y - _g.panY + sfs(4);
       var c = createRoundRect(cx, cy, w, h, cr);
 
       // ADD THE "TAIL" OF THE SPEECH BUBBLE THAT POINTS TO THE SKETCH.

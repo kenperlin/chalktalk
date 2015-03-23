@@ -1989,8 +1989,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
    var tick = function(g) {
 
-console.log(height());
-
       // FETCH PRESSURE DATA RECORDED FROM TT SENSOR.
 
       if (window.ttdata === undefined) {

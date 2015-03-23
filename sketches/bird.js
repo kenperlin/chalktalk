@@ -127,7 +127,8 @@ function() {
          m.translate(neckX,neckY,0);
          var rotz = lookUp;
          if (sketchPage.x !== undefined && isNumeric(this.cx()))
-            rotz = lerp(this.gaze, rotz, atan2(this.cy() - sketchPage.y, sketchPage.x - this.cx()));
+            rotz = lerp(this.gaze, rotz, -atan2(sketchPage.y - this.cy(),
+	                                        sketchPage.x - this.cx()));
          m.rotateZ(rotz);
          m.rotateY(lookSide);
          mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
