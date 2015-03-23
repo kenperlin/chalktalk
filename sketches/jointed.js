@@ -239,20 +239,20 @@ function() {
    this.mouseUp = function(x,y) {
       if (I_ == -1) {
          if (travel >= .1) {
-	    J = this.findJoint([x,y]);
-	    if (I != -1)
+            J = this.findJoint([x,y]);
+            if (I != -1)
                this.onRelease();
             else
                this.onReleaseB();
          }
-	 else {
-	    if (I != -1) {
+         else {
+            if (I != -1) {
                I_ = I;
-	       this.onClick();
+               this.onClick();
             }
-	    else
-	       this.onClickB();
-	 }
+            else
+               this.onClickB();
+         }
       }
       else {
          if (travel >= .1)

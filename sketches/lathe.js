@@ -25,10 +25,10 @@ function() {
          mLine([0,-1],[1,-1]);
          mLine([.5,1],[.5,-1]);
 
-	 // MORPH TO THE PROFILE THAT THE USER DREW, NOT TO THE GLYPH VERSION.
+         // MORPH TO THE PROFILE THAT THE USER DREW, NOT TO THE GLYPH VERSION.
 
-	 if (this.xyz.length == 3)
-	    this.trace[3] = this.sketchTrace[3];
+         if (this.xyz.length == 3)
+            this.trace[3] = this.sketchTrace[3];
       });
    }
 

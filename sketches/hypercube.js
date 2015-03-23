@@ -46,17 +46,17 @@ function Hypercube() {
       }
       this.afterSketch(function() {
          var n = 0;
-	 for ( ; n < 16 ; n++) {
-	    var p = P[n];
-	    project(C[n], p);
-	    this.mesh.children[n].position.copy(p);
-	    this.mesh.children[n].scale.set(.1,.1,.1);
-	    this.extendBounds([[p.x,p.y,p.z]]);
+         for ( ; n < 16 ; n++) {
+            var p = P[n];
+            project(C[n], p);
+            this.mesh.children[n].position.copy(p);
+            this.mesh.children[n].scale.set(.1,.1,.1);
+            this.extendBounds([[p.x,p.y,p.z]]);
          }
-	 for (var axis = 0 ; axis < 4 ; axis++)
-	    for (var i = 0 ; i < 8 ; i++) {
-	       var j = edges[axis][i];
-	       this.placeEdge(n++, P[j], P[j + (1<<axis)]);
+         for (var axis = 0 ; axis < 4 ; axis++)
+            for (var i = 0 ; i < 8 ; i++) {
+               var j = edges[axis][i];
+               this.placeEdge(n++, P[j], P[j + (1<<axis)]);
             }
       });
    }
@@ -72,8 +72,8 @@ function Hypercube() {
       mesh.setMaterial(materials[0]);
       for (var i = 0 ; i < 32 ; i++) {
          var edge = new THREE.Mesh();
-	 edge.addOpenCylinder(8).rotation.x = Math.PI / 2;
-	 edge.setMaterial(materials[1 + floor(i/8)]);
+         edge.addOpenCylinder(8).rotation.x = Math.PI / 2;
+         edge.setMaterial(materials[1 + floor(i/8)]);
          mesh.add(edge);
       }
       return mesh;

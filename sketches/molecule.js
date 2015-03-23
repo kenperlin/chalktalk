@@ -63,7 +63,7 @@ function Molecule() {
          this.graph.addLink(0, 1);
          this.graph.addLink(0, 2);
 
-	 break;
+         break;
 
       case 'ethane':
 
@@ -88,7 +88,7 @@ function Molecule() {
          this.graph.addLink(1, 6, 0.5);
          this.graph.addLink(1, 7, 0.5);
 
-	 break;
+         break;
       }
 
       this.graph.linkCount = this.graph.links.length;
@@ -108,7 +108,7 @@ function Molecule() {
 
       if (this.isCopy !== undefined) {
          root.add(this.mesh = this.createMesh());
-	 this.isCopy = undefined;
+         this.isCopy = undefined;
       }
 
       this.code = null;
@@ -120,11 +120,11 @@ function Molecule() {
 
       for (var i = 0 ; i < nodes.length ; i++) {
          var node = nodes[i];
-	 switch (node.type) {
-	 case 'C': node.r = 0.3; break;
-	 case 'O': node.r = 0.3; break;
-	 case 'H': node.r = 0.2; break;
-	 }
+         switch (node.type) {
+         case 'C': node.r = 0.3; break;
+         case 'O': node.r = 0.3; break;
+         case 'H': node.r = 0.2; break;
+         }
       }
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.

@@ -19,14 +19,14 @@ function() {
       this.afterSketch(function() {
          var du = 1 / this.nu;
          var dv = 1 / this.nv;
-	 for (var u = 0 ; u < .999 ; u += du)
-	 for (var v = 0 ; v < .999 ; v += dv) {
+         for (var u = 0 ; u < .999 ; u += du)
+         for (var v = 0 ; v < .999 ; v += dv) {
             this.uv2xyz(u   , v   , loop[0]);
             this.uv2xyz(u+du, v   , loop[1]);
             this.uv2xyz(u+du, v+dv, loop[2]);
             this.uv2xyz(u   , v+dv, loop[3]);
-	    mClosedCurve(loop);
-	 }
+            mClosedCurve(loop);
+         }
       });
    }
    var loop = [newVec3(),newVec3(),newVec3(),newVec3()];

@@ -28,10 +28,10 @@ function() {
       var material = new THREE.MeshPhongMaterial({
          ambient :new THREE.Color(0,0,0),
          emissive:new THREE.Color(.2,0,0),
-	 color   :new THREE.Color(.4,0,0),
-	 specular:new THREE.Color(.07,.07,.07),
-	 shininess:70,
-	 skinning:true
+         color   :new THREE.Color(.4,0,0),
+         specular:new THREE.Color(.07,.07,.07),
+         shininess:70,
+         skinning:true
       });
       var mesh = new THREE.SkinnedMesh(geometry, material, false);
       return mesh;

@@ -7,7 +7,7 @@ function() {
       mLine([1,1],[1,-1]);
       this.afterSketch(function() {
          if (typeof this.inValue[0] == 'function')
-	    setAudioSignal(this.inValue[0]);
+            setAudioSignal(this.inValue[0]);
       });
    }
 }

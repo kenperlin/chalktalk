@@ -66,9 +66,9 @@ function() {
       this.duringSketch(function() {
          switch (this.labels[this.selection]) {
 
-	 case 'spiky1':
+         case 'spiky1':
 
-	    if (V.length == 0) {
+            if (V.length == 0) {
                V = [newVec3(-1,0,0), newVec3(1,0,0),
                     newVec3(0,-1,0), newVec3(0,1,0),
                     newVec3(0,0,-1), newVec3(0,0,1)];
@@ -77,14 +77,14 @@ function() {
                for (var j = 2 ; j <= 3 ; j++)
                for (var k = 4 ; k <= 5 ; k++)
                   T.push([i,j,k]);
-	    }
+            }
             mCurve([[0,-1],[ 1,0],[0, 1]]);
             mCurve([[0, 1],[-1,0],[0,-1]]);
             break;
 
-	 case 'spiky2':
+         case 'spiky2':
 
-	    if (V.length == 0) {
+            if (V.length == 0) {
                for (var i = 0 ; i < P.length ; i++)
                   V.push(newVec3(P[i][0]*.6,P[i][1]*.6,P[i][2]*.6));
 
@@ -92,7 +92,7 @@ function() {
                      [1,  5, 9],  [5, 11,  4],  [11, 10,  2],  [10, 7,  6],  [7,  1,  8],
                      [3,  9, 4],  [3,  4,  2],  [ 3,  2,  6],  [ 3, 6,  8],  [3,  8,  9],
                      [4,  9, 5],  [2,  4, 11],  [ 6,  2, 10],  [ 8, 6,  7],  [9,  8,  1], ];
-	    }
+            }
             mCurve([[.5,-1],[1,0],[.5,1]]);
             mCurve([[.5,1],[-.5,1],[-1,0]]);
             mCurve([[-1,0],[-.5,-1],[.5,-1]]);
@@ -105,26 +105,26 @@ function() {
 
       this.afterSketch(function() {
          var body = this.mesh.children[0];
-	 if (window.spike_wander) {
-	    var s = elapsed / this.scale();
-	    var freq = this.selection == 0 ? 2 : 1;
+         if (window.spike_wander) {
+            var s = elapsed / this.scale();
+            var freq = this.selection == 0 ? 2 : 1;
 
-	    body.position.x += 2 * s;
-	    body.position.y += 4 * s * noise2(freq * time, this.id);
-	    body.position.z += 4 * s * noise2(freq * time, this.id + 10);
+            body.position.x += 2 * s;
+            body.position.y += 4 * s * noise2(freq * time, this.id);
+            body.position.z += 4 * s * noise2(freq * time, this.id + 10);
 
-	    body.rotation.y += 4 * s * freq * noise2(freq * time, this.id + 30);
-	    body.rotation.x +=     s * freq * noise2(freq * time, this.id + 40);
+            body.rotation.y += 4 * s * freq * noise2(freq * time, this.id + 30);
+            body.rotation.x +=     s * freq * noise2(freq * time, this.id + 40);
          }
          for (var i = 0 ; i < V.length ; i++) {
             var spike = body.children[T.length + i];
-	    var v = V[i];
-	    a.copy(v).multiplyScalar(.8 * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
-	    b.copy(a).multiplyScalar(1.8);
+            var v = V[i];
+            a.copy(v).multiplyScalar(.8 * (1 - .2 * this.noise.noise([v.x, v.y, v.z + 1.5 * time])));
+            b.copy(a).multiplyScalar(1.8);
             spike.placeStick(a, b);
          }
-	 if (isFog)
-	    this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
+         if (isFog)
+            this.setUniform('uFoggy', exp(-this.scale() * (this.selection == 0 ? 2 : 1)));
       });
    }
 

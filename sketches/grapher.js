@@ -80,8 +80,8 @@ function() {
             // Capture input
 
             var val = this.inValues[0];
-	    if (typeof val == 'function')
-	       val = val(time);
+            if (typeof val == 'function')
+               val = val(time);
             recordValue(val);
          }
       }

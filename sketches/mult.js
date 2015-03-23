@@ -49,7 +49,7 @@ function mult(x,y) {
    else {
       dst = max(x.length, y.length)  < 16 ? v_v(pad(x), pad(y))
           : min(x.length, y.length) == 16 ? mXm(x, y)
-	  : x.length                == 16 ? mXv(x, pad(y))
+          : x.length                == 16 ? mXv(x, pad(y))
                                           : vXm(pad(x), y);
    }
    return dst;

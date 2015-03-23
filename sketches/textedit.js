@@ -6,7 +6,7 @@ function() {
       mClosedCurve([[.3,1],[.7,.6],[.3,.6]]);
       this.afterSketch(function() {
          if (this.inValue[0] !== undefined)
-	    this.code[0][1] = this.inValue[0];
+            this.code[0][1] = this.inValue[0];
       });
    }
 }

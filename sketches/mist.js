@@ -7,8 +7,8 @@ function() {
          var p0 = path[i-1];
          var p1 = path[i];
          curve = curve.concat( p0[0] == p1[0] || p0[1] == p1[1]
-	                       ? [p0, p1]
-	                       : createRoundCorner(p0, p1, path[i-2][0] != p0[0] ? 0 : 1) );
+                               ? [p0, p1]
+                               : createRoundCorner(p0, p1, path[i-2][0] != p0[0] ? 0 : 1) );
       }
       return curve;
    }

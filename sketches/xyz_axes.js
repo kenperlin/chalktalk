@@ -29,87 +29,87 @@ function() {
       var otherColor = backgroundColor == 'black' ? 'cyan' : 'rgb(0,128,200)';
       this.afterSketch(function() {
          var e = pointToPixelMatrix.elements;
-	 var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
+         var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
         
-	 textHeight(this.mScale(.1));
-	 mText("x=-1",[-1.2,0,0],.5,.5);
-	 mText("x= 1",[ 1.2,0,0],.5,.5);
-	 mText("y=-1",[0,-1.1,0],.5,.5);
-	 mText("y= 1",[0, 1.1,0],.5,.5);
-	 if (showZ) {
-	    mText("z=-1",[0,0,-1.1],.5,.5);
-	    mText("z= 1",[0,0, 1.1],.5,.5);
+         textHeight(this.mScale(.1));
+         mText("x=-1",[-1.2,0,0],.5,.5);
+         mText("x= 1",[ 1.2,0,0],.5,.5);
+         mText("y=-1",[0,-1.1,0],.5,.5);
+         mText("y= 1",[0, 1.1,0],.5,.5);
+         if (showZ) {
+            mText("z=-1",[0,0,-1.1],.5,.5);
+            mText("z= 1",[0,0, 1.1],.5,.5);
          }
-	 lineWidth(1);
+         lineWidth(1);
          mArrow([-1,0],[1,0], .1);
          mArrow([0,-1],[0,1], .1);
-	 if (showZ)
+         if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
          if (this.inValues.length >= 3) {
-	    var V = this.inValues, x = V[0], y = V[1], z = V[2];
-	    lineWidth(0.5);
-	    mLine([x,0,0],[x,y,0]);
-	    mLine([0,y,0],[x,y,0]);
-	    mLine([x,0,0],[x,0,z]);
-	    mLine([0,0,z],[x,0,z]);
-	    mLine([0,y,0],[0,y,z]);
-	    mLine([0,0,z],[0,y,z]);
-	    mLine([0,y,z], V);
-	    mLine([x,0,z], V);
-	    mLine([x,y,0], V);
-	    mDot(V, 0.2);
+            var V = this.inValues, x = V[0], y = V[1], z = V[2];
+            lineWidth(0.5);
+            mLine([x,0,0],[x,y,0]);
+            mLine([0,y,0],[x,y,0]);
+            mLine([x,0,0],[x,0,z]);
+            mLine([0,0,z],[x,0,z]);
+            mLine([0,y,0],[0,y,z]);
+            mLine([0,0,z],[0,y,z]);
+            mLine([0,y,z], V);
+            mLine([x,0,z], V);
+            mLine([x,y,0], V);
+            mDot(V, 0.2);
          }
 
-	 switch (this.mode) {
-	 case 4:
-	 case 3:
-	 case 2:
-	 case 1:
-	    m.save();
-	       color(otherColor);
-	       lineWidth(this.mode == 1 ? 2 : 1);
-	       m.translate(this.pos.x,this.pos.y,this.pos.z);
-	       m.rotateX(this.rot.x);
-	       m.rotateY(this.rot.y);
-	       m.rotateZ(this.rot.z);
-	       mArrow([0,0,0], [1,0,0]);
-	       mArrow([0,0,0], [0,1,0]);
-	       mArrow([0,0,0], [0,0,1]);
-	       mDot([0,0,0],.25);
-	       color(backgroundColor);
-	       mDot([0,0,0],.23);
-	       color(otherColor);
-	       mText('x', [1.1,0,0],.5,.5);
-	       mText('y', [0,1.1,0],.5,.5);
-	       mText('z', [0,0,1.1],.5,.5);
-	       mText('t', [0,0,0]  ,.5,.5);
+         switch (this.mode) {
+         case 4:
+         case 3:
+         case 2:
+         case 1:
+            m.save();
+               color(otherColor);
+               lineWidth(this.mode == 1 ? 2 : 1);
+               m.translate(this.pos.x,this.pos.y,this.pos.z);
+               m.rotateX(this.rot.x);
+               m.rotateY(this.rot.y);
+               m.rotateZ(this.rot.z);
+               mArrow([0,0,0], [1,0,0]);
+               mArrow([0,0,0], [0,1,0]);
+               mArrow([0,0,0], [0,0,1]);
+               mDot([0,0,0],.25);
+               color(backgroundColor);
+               mDot([0,0,0],.23);
+               color(otherColor);
+               mText('x', [1.1,0,0],.5,.5);
+               mText('y', [0,1.1,0],.5,.5);
+               mText('z', [0,0,1.1],.5,.5);
+               mText('t', [0,0,0]  ,.5,.5);
             m.restore();
-	 }
+         }
 
-	 switch (this.mode) {
-	 case 4:
-	 case 3:
-	 case 2:
-	    m.save();
-	       lineWidth(4);
-	       m.translate(this.pos.x,this.pos.y,this.pos.z);
-	       color('green');
-	       if (this.mode < 4)
-	          mArrow([0,0,0],[0,1,0]);
-	       m.rotateX(this.rot.x);
-	       m.rotateY(this.rot.y);
-	       m.rotateZ(this.rot.z);
-	       if (this.mode == 4)
-	          mArrow([0,0,0],[0,1,0]);
-	       color('blue');
-	       mArrow([0,0,0],[0,0,-1]);
-	       if (this.mode >= 3) {
-	          color('red');
-	          mArrow([0,0,0],[1,0,0]);
+         switch (this.mode) {
+         case 4:
+         case 3:
+         case 2:
+            m.save();
+               lineWidth(4);
+               m.translate(this.pos.x,this.pos.y,this.pos.z);
+               color('green');
+               if (this.mode < 4)
+                  mArrow([0,0,0],[0,1,0]);
+               m.rotateX(this.rot.x);
+               m.rotateY(this.rot.y);
+               m.rotateZ(this.rot.z);
+               if (this.mode == 4)
+                  mArrow([0,0,0],[0,1,0]);
+               color('blue');
+               mArrow([0,0,0],[0,0,-1]);
+               if (this.mode >= 3) {
+                  color('red');
+                  mArrow([0,0,0],[1,0,0]);
                }
-	    m.restore();
-	 }
+            m.restore();
+         }
       });
    }
 }

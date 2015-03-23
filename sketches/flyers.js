@@ -64,38 +64,38 @@ function() {
          mCurve([[0,0],[ .5,.5],[ 1,0]]);
       });
       this.afterSketch(function() {
-	 for (var n = 0 ; n < nf ; n++) {
+         for (var n = 0 ; n < nf ; n++) {
 
-	    var t = .7 * TAU * time + 100. * noise2(.1 * n, 100.1 * n);
+            var t = .7 * TAU * time + 100. * noise2(.1 * n, 100.1 * n);
 
             var bird = this.mesh.children[n];
-	    var body = bird.children[0];
+            var body = bird.children[0];
 
 /*
-	    bird.position.x = 20 * noise(100. * n, .1 * time, 10.5);
-	    bird.position.y = 20 * noise(100. * n, .1 * time, 20.5);
-	    bird.position.z = 20 * noise(100. * n, .1 * time, 30.5);
+            bird.position.x = 20 * noise(100. * n, .1 * time, 10.5);
+            bird.position.y = 20 * noise(100. * n, .1 * time, 20.5);
+            bird.position.z = 20 * noise(100. * n, .1 * time, 30.5);
 */
-	    bird.rotation.z += elapsed;
+            bird.rotation.z += elapsed;
 
-	    var perspective = 33 / (33 + bird.position.y - bird.position.z);
-	    //perspective = 1;
+            var perspective = 33 / (33 + bird.position.y - bird.position.z);
+            //perspective = 1;
 
-	    body.position.z += .05 * sin(t);
-	    body.scale.x = body.scale.y = body.scale.z = perspective;
+            body.position.z += .05 * sin(t);
+            body.scale.x = body.scale.y = body.scale.z = perspective;
 
-	    var foggy = exp(-this.scale() * perspective * .5);
+            var foggy = exp(-this.scale() * perspective * .5);
 
-	    for (var i = 0 ; i < 2 ; i++) {
-	       var sgn = i == 0 ? -1 : 1;
+            for (var i = 0 ; i < 2 ; i++) {
+               var sgn = i == 0 ? -1 : 1;
                var wing1 = body.children[i];
                var wing2 = wing1.children[0];
-	       wing1.rotation.y = .2 * cos(t) * sgn;
-	       wing2.rotation.y = .4 * sin(t) * sgn;
+               wing1.rotation.y = .2 * cos(t) * sgn;
+               wing2.rotation.y = .4 * sin(t) * sgn;
 
-	       var wing3 = wing2.children[0];
-	       if (wing3 !== undefined)
-	          wing3.rotation.y = -.2 * cos(t) * sgn;
+               var wing3 = wing2.children[0];
+               if (wing3 !== undefined)
+                  wing3.rotation.y = -.2 * cos(t) * sgn;
 
                if (isFog)
                   wing1.material.setUniform('uFoggy', foggy);
@@ -113,16 +113,16 @@ function() {
 
          var bird = new THREE.Mesh();
          var body = new THREE.Mesh();
-	 bird.add(body);
+         bird.add(body);
          mesh.add(bird);
 
-	 bird.position.x = 20 * noise(100. * n, .1 * time, 10.5);
-	 bird.position.y = 20 * noise(100. * n, .1 * time, 20.5);
-	 bird.position.z = 20 * noise(100. * n, .1 * time, 30.5);
+         bird.position.x = 20 * noise(100. * n, .1 * time, 10.5);
+         bird.position.y = 20 * noise(100. * n, .1 * time, 20.5);
+         bird.position.z = 20 * noise(100. * n, .1 * time, 30.5);
 
-	 bird.rotation.z = mix(0, TAU, n/nf);
+         bird.rotation.z = mix(0, TAU, n/nf);
 
-	 body.position.x = 8;
+         body.position.x = 8;
 
          for (var i = 0 ; i < 2 ; i++) {
             var sgn = i == 0 ? -1 : 1;
@@ -175,10 +175,10 @@ function() {
          body.setMaterial(this.shaderMaterial());
 
          function sr() { return sCurve(random()); }
-	 colorVec.set(sr(), sr(), sr()).normalize();
-	 body.material.setUniform('uR', colorVec.x);
-	 body.material.setUniform('uG', colorVec.y);
-	 body.material.setUniform('uB', colorVec.z);
+         colorVec.set(sr(), sr(), sr()).normalize();
+         body.material.setUniform('uR', colorVec.x);
+         body.material.setUniform('uG', colorVec.y);
+         body.material.setUniform('uB', colorVec.z);
 
          this.fragmentShader = wingFragmentShader;
          for (var i = 0 ; i < 2 ; i++)

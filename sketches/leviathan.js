@@ -135,113 +135,113 @@ function() {
          var body = this.mesh.children[0];
          if (body.children.length == 0) {
             for (var i = 0 ; i < n ; i++) {
-	       var node = new THREE.Mesh(globeGeometry(32,16), this.getBodyMaterial());
-	       body.add(node);
+               var node = new THREE.Mesh(globeGeometry(32,16), this.getBodyMaterial());
+               body.add(node);
             }
             for (var i = 0 ; i < n-1 ; i++) {
-	       var t0 = i / (n - 1);
-	       var t1 = (i+1) / (n - 1);
-	       var s0 = mix(.01, .15, t0);
-	       var s1 = mix(.01, .15, t1);
-	       var tube = new THREE.Mesh(new THREE.CylinderGeometry(s1, s0, 2, 24, 1, true), this.getBodyMaterial());
-	       tube.rotation.x = Math.PI / 2;
-	       var link = new THREE.Mesh();
-	       link.add(tube);
-	       body.add(link);
-	    }
+               var t0 = i / (n - 1);
+               var t1 = (i+1) / (n - 1);
+               var s0 = mix(.01, .15, t0);
+               var s1 = mix(.01, .15, t1);
+               var tube = new THREE.Mesh(new THREE.CylinderGeometry(s1, s0, 2, 24, 1, true), this.getBodyMaterial());
+               tube.rotation.x = Math.PI / 2;
+               var link = new THREE.Mesh();
+               link.add(tube);
+               body.add(link);
+            }
             for (var i = 0 ; i < n ; i++) {
-	       var t = i / (n - 1);
-	       var s = mix(.007, .07, t);
-	       for (var j = 0 ; j < 3 ; j++) {
-	          var tube = new THREE.Mesh(new THREE.CylinderGeometry(0, s, 2, 16, 1, true), this.getTentacleMaterial());
-	          tube.rotation.x = Math.PI / 2;
-	          var spike = new THREE.Mesh();
-	          spike.add(tube);
-	          body.add(spike);
-	       }
-	    }
+               var t = i / (n - 1);
+               var s = mix(.007, .07, t);
+               for (var j = 0 ; j < 3 ; j++) {
+                  var tube = new THREE.Mesh(new THREE.CylinderGeometry(0, s, 2, 16, 1, true), this.getTentacleMaterial());
+                  tube.rotation.x = Math.PI / 2;
+                  var spike = new THREE.Mesh();
+                  spike.add(tube);
+                  body.add(spike);
+               }
+            }
 
             var tentacles = new THREE.Mesh();
             body.add(tentacles);
-	    for (var k = 0 ; k < 3 ; k++)
-	       tentacles.add(new THREE.Mesh());
+            for (var k = 0 ; k < 3 ; k++)
+               tentacles.add(new THREE.Mesh());
 
-	    for (var k = 0 ; k < 3 ; k++) {
-	       var tentacle = tentacles.children[k];
+            for (var k = 0 ; k < 3 ; k++) {
+               var tentacle = tentacles.children[k];
 
-	       var firstNode = new THREE.Mesh();
-	       tentacle.add(firstNode);
+               var firstNode = new THREE.Mesh();
+               tentacle.add(firstNode);
 
-	       var node = firstNode;
-	       for (var i = 0 ; i < nt ; i++) {
-	          var blob = new THREE.Mesh(globeGeometry(32,16), this.getTentacleMaterial());
-	          node.add(blob);
+               var node = firstNode;
+               for (var i = 0 ; i < nt ; i++) {
+                  var blob = new THREE.Mesh(globeGeometry(32,16), this.getTentacleMaterial());
+                  node.add(blob);
 
-	          var child = new THREE.Mesh();
-	          node.add(child);
-		  node = child;
-	       }
-	    }
+                  var child = new THREE.Mesh();
+                  node.add(child);
+                  node = child;
+               }
+            }
 
             var leftEye  = new THREE.Mesh(globeGeometry(32,16), this.getEyeMaterial())
             var rightEye = new THREE.Mesh(globeGeometry(32,16), this.getEyeMaterial())
 
-	    body.add(leftEye );
-	    body.add(rightEye);
+            body.add(leftEye );
+            body.add(rightEye);
          }
          for (var i = 0 ; i < n ; i++) {
-	    var t = i / (n - 1);
-	    var s = mix(.01, .15, t);
-	    var theta = TAU * t + time;
-	    a[i].set(mix(-1,1,t), .1 * sin(theta), .1 * cos(theta));
+            var t = i / (n - 1);
+            var s = mix(.01, .15, t);
+            var theta = TAU * t + time;
+            a[i].set(mix(-1,1,t), .1 * sin(theta), .1 * cos(theta));
 
-	    var phi = .2 * cos(theta);
+            var phi = .2 * cos(theta);
 
-	    if (i == 1) s = .02;
-	    if (i == 0) s = .03;
+            if (i == 1) s = .02;
+            if (i == 0) s = .03;
 
-	    b[i].copy(a[i]);
-	    b[i].x += -2 * s * sin(phi);
-	    b[i].y +=  2 * s * cos(phi);
-	    b[i].z +=  s;
+            b[i].copy(a[i]);
+            b[i].x += -2 * s * sin(phi);
+            b[i].y +=  2 * s * cos(phi);
+            b[i].z +=  s;
 
-	    c[i].copy(a[i]);
-	    c[i].x +=  2 * s * sin(phi);
-	    c[i].y += -2 * s * cos(phi);
-	    c[i].z +=  s;
+            c[i].copy(a[i]);
+            c[i].x +=  2 * s * sin(phi);
+            c[i].y += -2 * s * cos(phi);
+            c[i].z +=  s;
 
-	    d[i].copy(a[i]);
-	    d[i].z -= 2 * s;
+            d[i].copy(a[i]);
+            d[i].z -= 2 * s;
 
-	    if (i <= 1) {
-	       b[i].x -= 2*s;
-	       c[i].x -= 2*s;
-	       d[i].x -= 2*s;
-	    }
+            if (i <= 1) {
+               b[i].x -= 2*s;
+               c[i].x -= 2*s;
+               d[i].x -= 2*s;
+            }
 
-	    if (i == n-1) {
-	       var phi0 = phi - PI / 16;
-	       var phi1 = phi + PI / 16;
+            if (i == n-1) {
+               var phi0 = phi - PI / 16;
+               var phi1 = phi + PI / 16;
 
-	       e[0].copy(a[i]);
-	       e[0].x += s * cos(phi0);
-	       e[0].y += s * sin(phi0);
+               e[0].copy(a[i]);
+               e[0].x += s * cos(phi0);
+               e[0].y += s * sin(phi0);
 
-	       e[1].copy(a[i]);
-	       e[1].x += s * cos(phi1);
-	       e[1].y += s * sin(phi1);
-	    }
+               e[1].copy(a[i]);
+               e[1].x += s * cos(phi1);
+               e[1].y += s * sin(phi1);
+            }
          }
 
-	 this.myExtendBounds = function(a) {
-	    var p = [0,0,0];
-	    for (var i = 0 ; i < a.length ; i++) {
-	       p[0] = a[i].x + body.position.x;
-	       p[1] = a[i].y;
-	       p[2] = a[i].z;
-	       this.extendBounds([p]);
-	    }
-	 }
+         this.myExtendBounds = function(a) {
+            var p = [0,0,0];
+            for (var i = 0 ; i < a.length ; i++) {
+               p[0] = a[i].x + body.position.x;
+               p[1] = a[i].y;
+               p[2] = a[i].z;
+               this.extendBounds([p]);
+            }
+         }
 
          this.myExtendBounds(a);
          this.myExtendBounds(b);
@@ -251,64 +251,64 @@ function() {
          this.extendBounds([[2.2,0,0]]);
 
          for (var i = 0 ; i < n ; i++) {
-	    var t = i / (n - 1);
-	    var s = mix(.01, .15, t);
-	    var theta = TAU * t + time;
-	    var phi = .2 * cos(theta);
+            var t = i / (n - 1);
+            var s = mix(.01, .15, t);
+            var theta = TAU * t + time;
+            var phi = .2 * cos(theta);
 
-	    var node = body.children[i];
-	    node.position.copy(a[i]);
-	    node.rotation.z = phi;
-	    node.scale.set(s, s, s * .95);
+            var node = body.children[i];
+            node.position.copy(a[i]);
+            node.rotation.z = phi;
+            node.scale.set(s, s, s * .95);
 
-	    if (i == n-1) {
-	       var head = node;
-	       var tentacles = body.children[body.children.length - 3];
-	       tentacles.position.copy(head.position);
-	       tentacles.rotation.copy(head.rotation);
-	       for (var k = 0 ; k < 3 ; k++) {
-	          var tentacle = tentacles.children[k];
+            if (i == n-1) {
+               var head = node;
+               var tentacles = body.children[body.children.length - 3];
+               tentacles.position.copy(head.position);
+               tentacles.rotation.copy(head.rotation);
+               for (var k = 0 ; k < 3 ; k++) {
+                  var tentacle = tentacles.children[k];
 
-		  tentacle.rotation.x = TAU * k / 3;
-		  tentacle.rotation.y = .5;
-		  tentacle.scale.set(1.1,1.1,1.1);
+                  tentacle.rotation.x = TAU * k / 3;
+                  tentacle.rotation.y = .5;
+                  tentacle.scale.set(1.1,1.1,1.1);
 
-		  var firstNode = tentacle.children[0];
-		  firstNode.position.x = .1;
-		  firstNode.rotation.y = -.2;
+                  var firstNode = tentacle.children[0];
+                  firstNode.position.x = .1;
+                  firstNode.rotation.y = -.2;
 
-	          var node = firstNode;
-	          for (var j = 0 ; j < nt ; j++) {
-	             var t = j / (nt - 1);
-		     var s = mix(.05, .01, t);
-		     var blob = node.children[0];
-	             blob.scale.set(s, s, s);
-	             node = node.children[1];
-	             node.position.x = s;
-	             node.rotation.x =      noise(10 * k, .2 * time, 4 * TAU * t);
-	             node.rotation.z = .5 * noise(10 * k, .2 * time, 4 * TAU * t + 10);
-	          }
-	       }
-	    }
+                  var node = firstNode;
+                  for (var j = 0 ; j < nt ; j++) {
+                     var t = j / (nt - 1);
+                     var s = mix(.05, .01, t);
+                     var blob = node.children[0];
+                     blob.scale.set(s, s, s);
+                     node = node.children[1];
+                     node.position.x = s;
+                     node.rotation.x =      noise(10 * k, .2 * time, 4 * TAU * t);
+                     node.rotation.z = .5 * noise(10 * k, .2 * time, 4 * TAU * t + 10);
+                  }
+               }
+            }
          }
 
          for (var i = 0 ; i < n-1 ; i++)
-	    body.children[n + i].placeStick(a[i], a[i+1]);
+            body.children[n + i].placeStick(a[i], a[i+1]);
 
          for (var i = 0 ; i < n ; i++) {
-	    body.children[n + n-1 + 3 * i    ].placeStick(a[i], b[i]);
-	    body.children[n + n-1 + 3 * i + 1].placeStick(a[i], c[i]);
-	    body.children[n + n-1 + 3 * i + 2].placeStick(a[i], d[i]);
+            body.children[n + n-1 + 3 * i    ].placeStick(a[i], b[i]);
+            body.children[n + n-1 + 3 * i + 1].placeStick(a[i], c[i]);
+            body.children[n + n-1 + 3 * i + 2].placeStick(a[i], d[i]);
          }
 
-	 var leftEye  = body.children[body.children.length - 2];
-	 var rightEye = body.children[body.children.length - 1];
+         var leftEye  = body.children[body.children.length - 2];
+         var rightEye = body.children[body.children.length - 1];
 
-	 leftEye .position.copy(e[0]);
-	 rightEye.position.copy(e[1]);
+         leftEye .position.copy(e[0]);
+         rightEye.position.copy(e[1]);
 
-	 leftEye .scale.set(.007,.007,.007);
-	 rightEye.scale.set(.007,.007,.007);
+         leftEye .scale.set(.007,.007,.007);
+         rightEye.scale.set(.007,.007,.007);
 
          body.position.x += this.velocity * elapsed;
 

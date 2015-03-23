@@ -153,7 +153,7 @@ function Diagram() {
          color(defaultPenColor);
          line(-w/2,0,w/2,0);
          drawCurve([ [x1,y1], [0,0] ]);
-	 drawCurve([ [0,0], [x2,y2] ]);
+         drawCurve([ [0,0], [x2,y2] ]);
 
          this.afterSketch(function() {
             arrow(0,0, x2,y2);

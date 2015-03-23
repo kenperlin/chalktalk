@@ -58,7 +58,7 @@ function() {
       this.fragmentShader = myFragmentShader;
 
       this.afterSketch(function() {
-	 var body = this.mesh.children[0];
+         var body = this.mesh.children[0];
          if (body.children.length == 0) {
             for (var i = 0 ; i < n ; i++) {
 
@@ -66,8 +66,8 @@ function() {
                var leg1 = new THREE.Mesh(globeGeometry( 4, 2));
                var leg2 = new THREE.Mesh(globeGeometry( 4, 2));
 
-	       var t = i / (n - 1);
-	       var s = mix(.6, 3, sCurve(t));
+               var t = i / (n - 1);
+               var s = mix(.6, 3, sCurve(t));
                blob.scale.set(mix(2,s*1.3,t)/n, s*1.3/n, s*.3/n);
                leg1.position.set(0, .03*s, 0);
                leg2.position.set(0,-.03*s, 0);
@@ -78,26 +78,26 @@ function() {
 
                var segment = new THREE.Mesh();
                segment.add(blob);
-	       segment.add(leg1);
-	       segment.add(leg2);
+               segment.add(leg1);
+               segment.add(leg2);
 
                body.add(segment);
             }
             this.mesh.setMaterial(this.getMaterial());
          }
          for (var i = 0 ; i < n ; i++) {
-	    var t = i / (n - 1);
-	    var s = mix(.6, 3, sCurve(t));
-	    var segment = body.children[i];
-	    var theta = 10. * t + 10 * time;
+            var t = i / (n - 1);
+            var s = mix(.6, 3, sCurve(t));
+            var segment = body.children[i];
+            var theta = 10. * t + 10 * time;
             segment.position.set(2*t - 1, .03 * sin(theta), s*.3/n);
-	    segment.rotation.z = .1 * cos(theta);
+            segment.rotation.z = .1 * cos(theta);
          }
 
-	 body.position.x += this.velocity * elapsed;
+         body.position.x += this.velocity * elapsed;
 
          if (isFog)
-	    this.setUniform('uFoggy', exp(-this.scale() * .1));
+            this.setUniform('uFoggy', exp(-this.scale() * .1));
       });
    }
 

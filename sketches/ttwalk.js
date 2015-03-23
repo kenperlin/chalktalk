@@ -6,8 +6,8 @@ function() {
          if (src[i] > 0)
             dst.push(src[i]);
          else
-	    for (var n = 0 ; n < -src[i] ; n++)
-	       dst.push(0);
+            for (var n = 0 ; n < -src[i] ; n++)
+               dst.push(0);
       return dst;
    }
 
@@ -15,7 +15,7 @@ function() {
       switch (pieMenuIndex(dx, dy)) {
       case 0:
          this.isShowingTrail = this.isShowingTrail === undefined ? true : undefined;
-	 break;
+         break;
       case 1:
          this.walkIndex = (this.walkIndex + 1) % tt_walks.length;
          this.setWalk(this.walkIndex);
@@ -78,28 +78,28 @@ function() {
          var pressureData = this.frameData[this.getFrame(time / 2)];
 
          var iMax = 0, pMax = 0;
-	 for (var i = 0 ; i < pressureData.length ; i++)
-	    if (pressureData[i] > pMax) {
-	       iMax = i;
-	       pMax = pressureData[i];
-	    }
-	 var colMax = iMax % this.nCols;
-	 var rowMax = floor(iMax / this.nCols);
+         for (var i = 0 ; i < pressureData.length ; i++)
+            if (pressureData[i] > pMax) {
+               iMax = i;
+               pMax = pressureData[i];
+            }
+         var colMax = iMax % this.nCols;
+         var rowMax = floor(iMax / this.nCols);
 
-	 colMax = max(1, min(this.nCols - 2, colMax));
-	 rowMax = max(1, min(this.nRows - 2, rowMax));
+         colMax = max(1, min(this.nCols - 2, colMax));
+         rowMax = max(1, min(this.nRows - 2, rowMax));
 
          var i = this.nCols * rowMax + colMax;
 
-	 valuesToQuadratic([ pressureData[i - 1],
-	                     pressureData[i    ],
-	                     pressureData[i + 1] ], Q);
-	 colMax -= Q[1] / Q[0] / 2;
+         valuesToQuadratic([ pressureData[i - 1],
+                             pressureData[i    ],
+                             pressureData[i + 1] ], Q);
+         colMax -= Q[1] / Q[0] / 2;
 
-	 valuesToQuadratic([ pressureData[i - this.nCols],
-	                     pressureData[i             ],
-	                     pressureData[i + this.nCols] ], Q);
-	 rowMax -= Q[1] / Q[0] / 2;
+         valuesToQuadratic([ pressureData[i - this.nCols],
+                             pressureData[i             ],
+                             pressureData[i + this.nCols] ], Q);
+         rowMax -= Q[1] / Q[0] / 2;
 
          var index = 0;
          for (var row = 0 ; row < this.nRows ; row++) {
@@ -128,15 +128,15 @@ function() {
          var f = (time % duration) / duration;
          mFillRect([lerp(f, -1, .98), -h2w], [lerp(f, -.98, 1), -h2w-.01]);
 
-	 var x = this.colToX(colMax);
-	 var y = this.rowToY(rowMax);
+         var x = this.colToX(colMax);
+         var y = this.rowToY(rowMax);
          color('red');
-	 var radius = 1 / this.nCols;
-	 mDrawOval([x - radius,y - radius], [x + radius,y + radius]);
-	 if (this.isShowingTrail !== undefined) {
-	    this.trail.push([x,y]);
-	    lineWidth(0.5);
-	    mCurve(this.trail);
+         var radius = 1 / this.nCols;
+         mDrawOval([x - radius,y - radius], [x + radius,y + radius]);
+         if (this.isShowingTrail !== undefined) {
+            this.trail.push([x,y]);
+            lineWidth(0.5);
+            mCurve(this.trail);
          }
       });
    }

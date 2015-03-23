@@ -153,10 +153,10 @@ function Net() {
       this.afterSketch(function() {
 
          while (graph.removedNodes.length > 0) 
-	    mesh.remove(graph.removedNodes.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD NODES.
+            mesh.remove(graph.removedNodes.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD NODES.
 
          while (graph.removedLinks.length > 0) 
-	    mesh.remove(graph.removedLinks.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD LINKS.
+            mesh.remove(graph.removedLinks.pop().g);         // REMOVE GEOMETRY FOR ANY DEAD LINKS.
 
          graph.update();
 

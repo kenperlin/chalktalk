@@ -10,9 +10,9 @@ function() {
       });
       this.afterSketch(function() {
          textHeight(this.mScale(0.1));
-	 mArrow(a, b);
-	 lineWidth(1);
-	 mLine(b,c);
+         mArrow(a, b);
+         lineWidth(1);
+         mLine(b,c);
 /*
          mText("V", a, 0, 2);
          mText("W", b, 0, 2);

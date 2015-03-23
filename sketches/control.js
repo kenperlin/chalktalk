@@ -39,8 +39,8 @@ function() {
          if (this.sketchTexts.length == 0) {
             var x = s == 0 ? .6 * sc : 0;
             var y = s == 1 ? .6 * sc : 0;
-	    this.setSketchText(0, '0', [-x,-y], .05 * sc);
-	    this.setSketchText(1, '1', [ x, y], .05 * sc);
+            this.setSketchText(0, '0', [-x,-y], .05 * sc);
+            this.setSketchText(1, '1', [ x, y], .05 * sc);
          }
          this.lo = parseFloat(this.sketchTexts[0].value);
          this.hi = parseFloat(this.sketchTexts[1].value);

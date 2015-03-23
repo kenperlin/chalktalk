@@ -64,13 +64,13 @@ function() {
             window.audioFunction0 = window.audioFunction1;
             window.audioFunction1 = new Function("time", var_xyz + code);
 
-	    audioFunction = function(time) {
-	       var f1 = audioFunction1(time);
-	       var t = sCurve(min(1, (audioIndex - audioIndex0) / 1024));
-	       return _audio_volume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
+            audioFunction = function(time) {
+               var f1 = audioFunction1(time);
+               var t = sCurve(min(1, (audioIndex - audioIndex0) / 1024));
+               return _audio_volume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
             }
 
-	    window.audioIndex0 = audioIndex;
+            window.audioIndex0 = audioIndex;
             setAudioSignal(audioFunction);
 
             this.audioShape = [];

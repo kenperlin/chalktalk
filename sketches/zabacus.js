@@ -64,7 +64,7 @@ function() {
             }
          }
 
-	 if (this.mesh !== undefined)
+         if (this.mesh !== undefined)
             for (var i = 0 ; i < this.stones.children.length ; i++) {
                var n = i % 5;
                var d = this.digits[floor(i/5)];

@@ -11,16 +11,16 @@ function() {
    this.render = function() {
       for (var i = 0 ; i < 3 ; i++)
          if (this.inValues.length > i)
-	    P[i] = this.inValues[i];
+            P[i] = this.inValues[i];
 
       valuesToQuadratic(P, A);
 
       mLine([-1.5, 0], [1.5, 0]);
 
       this.afterSketch(function() {
-	 for (var x = -1 ; x <= 1 ; x++) {
-	    color('gray');
-	    mLine([x, -1], [x, 0]);
+         for (var x = -1 ; x <= 1 ; x++) {
+            color('gray');
+            mLine([x, -1], [x, 0]);
          }
       });
 
@@ -34,16 +34,16 @@ function() {
       this.afterSketch(function() {
          lineWidth(4);
 
-	 color('cyan');
-	 for (var x = -1 ; x <= 1 ; x++)
-	    mArrow([x,0], [x,func(x)], 0.1);
+         color('cyan');
+         for (var x = -1 ; x <= 1 ; x++)
+            mArrow([x,0], [x,func(x)], 0.1);
 
 // Show where derivative is zero:  2 * A0 * t + A1 = 0   -->   t = A1 / (-2 * A0)
 
          var t = A[1] / (-2 * A[0]);
-	 var y = func(t);
+         var y = func(t);
          color('red');
-	 mArrow([t, y + .5], [t, y], 0.1);
+         mArrow([t, y + .5], [t, y], 0.1);
       });
    }
 }

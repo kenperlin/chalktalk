@@ -21,8 +21,8 @@ function EthaneResponder() {
       if (i != j) {
          var a = nodes[i].p;
          var b = nodes[j].p;
-	 var d = a.distanceTo(b);
-	 this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
+         var d = a.distanceTo(b);
+         this.graph.adjustDistance(a, b, d + 0.5, 0.2 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
       }
    }
 }
@@ -178,7 +178,7 @@ function Ethane() {
 
    this.renderNode = function(node) {
       if (node.g === undefined)
-	 mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
+         mesh.add(node.g = this.graph.newNodeMesh(node.r < 0.25 ? this.hydrogenMaterial : this.carbonMaterial));
       var r = sCurve(Math.min(1, time - this.createTime)) * node.r;
       node.g.scale.set(r,r,r);
       node.g.position.copy(node.p);

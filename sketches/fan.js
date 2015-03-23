@@ -20,10 +20,10 @@ function() {
          _g.save();
          lineWidth(this.mScale(0.02));
          var smear = min(PI/4, this.turnRate);
-	 for (var i = 0 ; i < 3 ; i++) {
-	    var radius = 1 - .075 * i;
-	    var ds = i == 0 ? 0 : i == 1 ? 0.14 : 0.22;
-	    if (smear > 0) ds = -0.5 * ds;
+         for (var i = 0 ; i < 3 ; i++) {
+            var radius = 1 - .075 * i;
+            var ds = i == 0 ? 0 : i == 1 ? 0.14 : 0.22;
+            if (smear > 0) ds = -0.5 * ds;
             color(scrimColor(.25 - i * .05));
             mCurve(arc(0, 0, radius,      ds,      smear + ds, 5));
             mCurve(arc(0, 0, radius, PI + ds, PI + smear + ds, 5));
@@ -42,12 +42,12 @@ function() {
       this.afterSketch(function() {
          this.drawBlades();
          m.rotateZ(PI/2);
-	 this.drawBlades();
-	 this.turnRate = mix(this.turnRate, isDef(this.inValues[0])
-	                     ? this.inValues[0]
-			     : this.defaultTurnRate, 3 * elapsed);
+         this.drawBlades();
+         this.turnRate = mix(this.turnRate, isDef(this.inValues[0])
+                             ? this.inValues[0]
+                             : this.defaultTurnRate, 3 * elapsed);
          this.angle -= 4 * this.turnRate * elapsed;
-	 this.extendBounds(arc(0, 0, 1, 0, TAU, 20));
+         this.extendBounds(arc(0, 0, 1, 0, TAU, 20));
       });
       m.restore();
    }

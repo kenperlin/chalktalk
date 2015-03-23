@@ -26,10 +26,10 @@ function() {
       this.afterSketch(function() {
          var s = this.selection;
          if (this.code[s][1] != this.savedCode) {
-	    this.savedCode = this.code[s][1];
-	    this.createCodeFunction();
-	 }
-	 this.setOutPortValue(this.codeFunction);
+            this.savedCode = this.code[s][1];
+            this.createCodeFunction();
+         }
+         this.setOutPortValue(this.codeFunction);
       });
    }
 }

@@ -15,22 +15,22 @@ function() {
       var ul = .25;
       for ( ; ul > -.25 ; ul -= 0.01)
          if (curveIntersectLine(upper, [x,y-2], [x-.5*cos(ul*TAU), y+.5*sin(ul*TAU)]).length == 0)
-	    break;
+            break;
 
       var ur = .25;
       for ( ; ur > -.25 ; ur -= 0.01)
          if (curveIntersectLine(upper, [x,y-2], [x+.5*cos(ur*TAU), y+.5*sin(ur*TAU)]).length == 0)
-	    break;
+            break;
 
       var ll = .25;
       for ( ; ll > -.25 ; ll -= 0.01)
          if (curveIntersectLine(lower, [x,y+2], [x-.5*cos(ll*TAU), y-.5*sin(ll*TAU)]).length == 0)
-	    break;
+            break;
 
       var lr = .25;
       for ( ; lr > -.25 ; lr -= 0.01)
          if (curveIntersectLine(lower, [x,y+2], [x+.5*cos(lr*TAU), y-.5*sin(lr*TAU)]).length == 0)
-	    break;
+            break;
 
       mCurve(upper);
       mCurve(lower);

@@ -126,9 +126,9 @@ function() {
             mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }
 
-	 for (var i = 0 ; i < 16 ; i++) {
-	    var value = parseFloat(out[i]);
-	    this.matrixValues[i] = isNumeric(value) ? value : out[i];
+         for (var i = 0 ; i < 16 ; i++) {
+            var value = parseFloat(out[i]);
+            this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
 
          this.setOutPortValue(this.inValues.length > 0 ? this.matrixValues : this.identityMatrix);

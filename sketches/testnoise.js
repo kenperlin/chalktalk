@@ -9,8 +9,8 @@ function() {
       this.afterSketch(function() {
          var C = [];
          for (var x = -1 ; x <= 1 ; x += .01) {
-	    var y = .1 * noise.noise([10*x,time,.5]);
-	    C.push([x, y]);
+            var y = .1 * noise.noise([10*x,time,.5]);
+            C.push([x, y]);
          }
          mCurve(C);
       });

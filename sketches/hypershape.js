@@ -101,16 +101,16 @@ function() {
             mClosedCurve([[-.85,-.85], [.85,-.85], [.85,.85], [-.85,.85]]);
             mCurve([[-.85,.85], [.85,-.85]]);
             mCurve([[.85,.85], [-.85,-.85]]);
-	    this.extendBounds([[-1,-1],[1,1]]);
+            this.extendBounds([[-1,-1],[1,1]]);
          }
-	 this.afterSketch(function() {
+         this.afterSketch(function() {
             var n = 0;
-	    for ( ; n < S.length ; n++)
-	       this.placeVertex(n, S[n]);
-	    for (var i = 0   ; i < 4 ; i++)
-	    for (var j = i+1 ; j < 5 ; j++)
-	       this.placeEdge(n++, P[i], P[j]);
-	 });
+            for ( ; n < S.length ; n++)
+               this.placeVertex(n, S[n]);
+            for (var i = 0   ; i < 4 ; i++)
+            for (var j = i+1 ; j < 5 ; j++)
+               this.placeEdge(n++, P[i], P[j]);
+         });
          break;
 
       case 'hypercube':
@@ -136,14 +136,14 @@ function() {
             mLine([0,1],[0,-1]);
             mLine([-1,0],[1,0]);
          }
-	 this.afterSketch(function() {
+         this.afterSketch(function() {
             for (var n = 0 ; n < 8 ; n++)
                this.placeVertex(n, A[n]);
-	    for (var i = 0   ; i < 4 ; i++)
-	    for (var j = i+1 ; j < 4 ; j++)
-	    for (var k = 0   ; k < 4 ; k++)
-	       this.placeEdge(n++, P[2*i + _bit(k,0)], P[2*j + _bit(k,1)]);
-	 });
+            for (var i = 0   ; i < 4 ; i++)
+            for (var j = i+1 ; j < 4 ; j++)
+            for (var k = 0   ; k < 4 ; k++)
+               this.placeEdge(n++, P[2*i + _bit(k,0)], P[2*j + _bit(k,1)]);
+         });
          break;
 
       case 'octaplex':
@@ -151,41 +151,41 @@ function() {
             mClosedCurve([[-1, -1],[1, -1],[1, 1],[-1, 1]]);
             mClosedCurve([[0,-1],[1,0],[0,1],[-1,0]]);
          }
-	 this.afterSketch(function() {
-	    function edgeColor(a, b) {
-	       var x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2], w = a[3] - b[3];
-	       var dd = x * x + y * y + z * z + w * w;
-	       if (! (dd > 1.99 && dd < 2.01))
-	          return -1;
+         this.afterSketch(function() {
+            function edgeColor(a, b) {
+               var x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2], w = a[3] - b[3];
+               var dd = x * x + y * y + z * z + w * w;
+               if (! (dd > 1.99 && dd < 2.01))
+                  return -1;
                switch (mode % 3) {
-	       case 0:
-	          return 0;
-	       case 1:
+               case 0:
+                  return 0;
+               case 1:
                   if (a[0] != 0 && x == 0) return 1;
                   if (a[1] != 0 && y == 0) return 2;
                   if (a[2] != 0 && z == 0) return 3;
                   if (a[3] != 0 && w == 0) return 4;
-		  break;
+                  break;
                case 2:
-	          for (var i = 0 ; i < 4 ; i++)
-	             if (a[i] == 0 && b[i] == 0)
-		        return i + 1;
-		  break;
-	       }
-	    }
-
-            for (var n = 0 ; n < V.length ; n++)
-	       this.placeVertex(n, V[n]);
-
-	    for (var i = 0   ; i < 23 ; i++)
-	    for (var j = i+1 ; j < 24 ; j++) {
-	       var k = edgeColor(V[i], V[j]);
-	       if (k >= 0) {
-		  this.mesh.children[n].setMaterial(materials[k]);
-	          this.placeEdge(n++, P[i], P[j]);
+                  for (var i = 0 ; i < 4 ; i++)
+                     if (a[i] == 0 && b[i] == 0)
+                        return i + 1;
+                  break;
                }
             }
-	 });
+
+            for (var n = 0 ; n < V.length ; n++)
+               this.placeVertex(n, V[n]);
+
+            for (var i = 0   ; i < 23 ; i++)
+            for (var j = i+1 ; j < 24 ; j++) {
+               var k = edgeColor(V[i], V[j]);
+               if (k >= 0) {
+                  this.mesh.children[n].setMaterial(materials[k]);
+                  this.placeEdge(n++, P[i], P[j]);
+               }
+            }
+         });
          break;
       }
    }
@@ -211,7 +211,7 @@ function() {
    this.createMesh = function() {
       var R = [1,2,0,0,2,2],
           G = [1,0,1,0,2,0],
-	  B = [1,0,0,2,0,2];
+          B = [1,0,0,2,0,2];
       for (var i = 0 ; i < R.length ; i++)
          materials.push(this.shaderMaterial(R[i], G[i], B[i]));
 
@@ -222,28 +222,28 @@ function() {
          for (var i = 0 ; i < 5 ; i++)
             mesh.add(this.createVertex(materials[i+1]));
          for (var i = 0 ; i < 10 ; i++)
-	    mesh.add(this.createEdge(materials[0], .035));
+            mesh.add(this.createEdge(materials[0], .035));
          break;
 
       case 'hypercube':
          for (var i = 0 ; i < 16 ; i++)
             mesh.add(this.createVertex(materials[0]));
          for (var i = 0 ; i < 32 ; i++)
-	    mesh.add(this.createEdge(materials[1 + floor(i/8)], .05));
+            mesh.add(this.createEdge(materials[1 + floor(i/8)], .05));
          break;
 
       case 'aerochoron':
          for (var i = 0 ; i < 8 ; i++)
-	    mesh.add(this.createVertex(materials[1 + floor(i/2)]));
+            mesh.add(this.createVertex(materials[1 + floor(i/2)]));
          for (var i = 0 ; i < 24 ; i++)
-	    mesh.add(this.createEdge(materials[0], .03));
+            mesh.add(this.createEdge(materials[0], .03));
          break;
 
       case 'octaplex':
          for (var i = 0 ; i < 24 ; i++)
-	    mesh.add(this.createVertex(materials[0]));
+            mesh.add(this.createVertex(materials[0]));
          for (var i = 0 ; i < 96 ; i++)
-	    mesh.add(this.createEdge(materials[0], .02));
+            mesh.add(this.createEdge(materials[0], .02));
          break;
       }
 

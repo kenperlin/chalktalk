@@ -22,8 +22,8 @@ return function(t) {
          this.setOutPortValue(func());
 
          if (!(this.sketchTexts[0].isVisible = this.inValue[1]===undefined)) {
-	    m.translate(-.3, 0, 0);
-	    mCurve(curveForSignal);
+            m.translate(-.3, 0, 0);
+            mCurve(curveForSignal);
          }
       });
    }
