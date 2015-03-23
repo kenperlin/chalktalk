@@ -115,14 +115,14 @@
 
       function touchResponse(e, message) {
          e.preventDefault();
-	 debugMessage = message;
-	 var wasTouchDevice = isTouchDevice;
-	 isTouchDevice = true;
-	 if (! wasTouchDevice) {
+         debugMessage = message;
+         var wasTouchDevice = isTouchDevice;
+         isTouchDevice = true;
+         if (! wasTouchDevice) {
             events_canvas.width = width();
             events_canvas.height = height();
 
-	    renderer.setSize(width(), height());
+            renderer.setSize(width(), height());
             renderer.camera.aspect = width() / height();
             renderer.camera.updateProjectionMatrix();
 
@@ -810,6 +810,7 @@ console.log(harry.fred);
       + " <div id='code'"
       + "    style='z-index:1;position:absolute;left:0;top:0;'>"
       + " </div>"
+      + " <input id='soundfileinput' type='file' style='visibility:hidden' /> </input>"
       // + " <div id='dat-gui' style='z-index:10;position:absolute;'></div>"
       ;
       var bodyElement = document.getElementsByTagName('body')[0];
@@ -1219,9 +1220,9 @@ console.log("aha");
       if (sketch != null) {
 
          var inPortCount = 0;
-	 for (var i = 0 ; i < sketch.portName.length ; i++)
-	    if (sketch.portName[i] !== 'out')
-	       inPortCount++;
+      for (var i = 0 ; i < sketch.portName.length ; i++)
+         if (sketch.portName[i] !== 'out')
+            inPortCount++;
 
          if (inPortCount > 0)
             inPort = findNearestPortAtCursor(sketch, sketch.in, true);
@@ -1823,7 +1824,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
          else if (sk() == outSketch && ! sk().isMouseOver) {
             inSketch = sketchPage.createTextSketch("   ");
-	    sketchPage.add(inSketch);
+            sketchPage.add(inSketch);
             inPort = 0;
          }
          else
@@ -1994,15 +1995,15 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       // FETCH PRESSURE DATA RECORDED FROM TT SENSOR.
 
       if (window.ttdata === undefined) {
-          server.get("state/ttdata", function(val) {
-	                                ttdata = JSON.parse(val);
-	                             });
+         server.get("state/ttdata", function(val) {
+            ttdata = JSON.parse(val);
+         });
       }
       if (window.ttdata !== undefined) {
-	  var len = ttdata.rows * ttdata.cols;
-	  if (ttdata.data[0].length < len)
-	     for (var frame = 0 ; frame < ttdata.data.length ; frame++)
-	        ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
+         var len = ttdata.rows * ttdata.cols;
+         if (ttdata.data[0].length < len)
+            for (var frame = 0 ; frame < ttdata.data.length ; frame++)
+               ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
       }
 
 //server.get("state/foobar", function(val) { console.log(val); });
@@ -2166,7 +2167,7 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                   // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
                   if (sk(I) instanceof NumericSketch ||
-        	      sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
+                     sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
                      var rx = sk(I).scale() * sk(I).textWidth / 2;
                      var ry = sk(I).scale() * sk(I).textHeight / 2;
                      var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
@@ -3733,4 +3734,3 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
 
 var glyphs = [];
 loadGlyphArray(numericGlyphData);
-
