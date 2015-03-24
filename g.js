@@ -2799,16 +2799,21 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       if (window.xmlSketch !== undefined) {
          var nodes = xmlSketch.graph.nodes;
          var links = xmlSketch.graph.links;
-	 if (window.xmlNodes === undefined || xmlNodes != nodes.length
-	                                   || xmlLinks != links.length) {
-            xmlNodes = nodes.length;
-            xmlLinks = links.length;
+
+         var nNodes = def(xmlSketch.nNodesToRender, nodes.length);
+         var nLinks = def(xmlSketch.nLinksToRender, links.length);
+
+	 if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
             xmlScene = new XMLScene("graph");
+            xmlNodes = nNodes;
+            xmlLinks = nLinks;
          }
+
          for (var i = 0 ; i < nodes.length ; i++)
             xmlScene.setBall(i, nodes[i].p, nodes[i].r);
-         for (var i = 0 ; i < links.length ; i++)
-            xmlScene.setLink(nodes.length + i, links[i].i, links[i].j, links[i].w);
+
+         for (var i = 0 ; i < nLinks ; i++)
+            xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
 
          console.log(xmlScene.toString());
       }

@@ -918,7 +918,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       // CREATE THE ROUNDED SPEECH BUBBLE SHAPE.
 
-      var cr = sfs(width() / 70) * (rows < 2 ? 0.66 : rows < 3 ? 0.8 : 1);
+      var cr = width() / 70 * (rows < 2 ? 0.66 : rows < 3 ? 0.8 : 1);
 
       var cx = x - _g.panX - w/2;
       var cy = y - _g.panY + sfs(rows < 2 ? 0 : 4);
