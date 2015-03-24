@@ -61,7 +61,7 @@ SketchLink.prototype = {
             var cy = (ay + by) / 2 + (bx - ax) * s;
             color(defaultPenColor);
             textHeight(12);
-            utext(roundedString(a.outValue[i]), cx, cy, .5, .5);
+            utext(roundedString(b.inValue[j]), cx, cy, .5, .5);
 	 }
 
          else if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
