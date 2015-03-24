@@ -1,106 +1,104 @@
 function() {
-  var self = this;
-  this.label = 'soundfile';
-  window.soundfile = this;
+   var self = this;
+   this.label = 'soundfile';
+   window.soundfile = this;
 
-  this.soundBuffer = null;
-  this.soundBufferChannelData = null;
+   this.soundBuffer = null;
+   this.soundBufferChannelData = null;
 
-  this.tToSample = function(time) {
-    var index = Math.round( (time * this.soundBuffer.sampleRate ) % this.soundBuffer.length );
-    var sample = this.soundBufferChannelData[index];
-    return sample;
-  };
+   this.tToSample = function(time) {
+      var index = Math.round( (time * this.soundBuffer.sampleRate ) % this.soundBuffer.length );
+      var sample = this.soundBufferChannelData[index];
+      return sample;
+   };
 
-  this.createCodeFunction = function() {
-    if (self.soundBuffer) {
-      var codeText = 'return ( window.soundfile.tToSample(t) )';
-      this.codeFunction = new Function('t', codeText);
-    } else {
-      this.codeFunction = new Function('t', 'return t');
-    }
-  };
-
-  this.render = function(elapsed) {
-    mCurve([[-1,1],[-0.25,0,],[-1,-1]]);
-    mDrawOval([-1, -1], [1, 1]);
-    this.input = document.getElementById('soundfileinput');
-    this.createCodeFunction();
-    this.setOutPortValue( self.codeFunction );
-
-    this.afterSketch(function() {
-      mCurve([[-1,1],[-.25,0,],[-1,-1]]);
-      mDrawOval([-1, -1], [1, 1]);
-    });
-
-    this.mouseDown = function(e) {
-      var self = this;
-      if (this.soundBuffer === null) {
-        this.input.click();
-        this.input.addEventListener('change', handleFileSelect, false);
+   this.createCodeFunction = function() {
+      if (self.soundBuffer) {
+         var codeText = 'return ( window.soundfile.tToSample(t) )';
+         this.codeFunction = new Function('t', codeText);
+      } else {
+         this.codeFunction = new Function('t', 'return t');
       }
-    };
+   };
 
+   this.render = function(elapsed) {
 
-    // Handle File Selection and asynchronous audio buffer decoding -->
+      // Draw a clockwise circle, then inscribe a right-facing arrow head.
 
-    var handleFileSelect = function(e) {
-      var file = e.target.files[0];
-      if (file && file.type && file.type.indexOf('audio') === -1) {
-        console.log('Error: not a valid audio file');
-        return;
-      }
+      mDrawOval([-1, -1], [1, 1], 32, PI/2, PI/2 - TAU);
+      mCurve([[-.3, .5], [.5, 0], [-.3, -.5]]);
 
-      self.reader = new FileReader();
-      self.reader.addEventListener('load', self.loadSoundSuccess);
-      self.reader.addEventListener('error', self.loadSoundError);
-      self.reader.readAsArrayBuffer(file);
+      this.input = document.getElementById('soundfileinput');
+      this.createCodeFunction();
+      this.setOutPortValue( self.codeFunction );
 
-      this.removeEventListener('change', handleFileSelect);
-    };
+      this.onClick = function(e) {
+         var self = this;
+         this.input.click();
+         this.input.addEventListener('change', handleFileSelect, false);
+      };
 
-    this.loadSoundSuccess = function(s) {
-      var arrayBuffer = s.target.result;
-      self.decodeArrayBuffer(arrayBuffer);
+      // Handle File Selection and asynchronous audio buffer decoding:
 
-      // remove event listeners and clear the FileReader
-      try{
-        self.reader.removeEventListener('load', self.loadSoundSuccess);
-        self.reader.removeEventListener('error', self.loadSoundError);
-        self.reader = undefined;
-      } catch(e){};
-    };
+      var handleFileSelect = function(e) {
+         var file = e.target.files[0];
+         if (file && file.type && file.type.indexOf('audio') === -1) {
+            console.log('Error: not a valid audio file');
+            return;
+         }
 
-    this.loadSoundError = function(e) {
-      console.log('Error decoding audio: ' + e.message);
+         self.reader = new FileReader();
+         self.reader.addEventListener('load', self.loadSoundSuccess);
+         self.reader.addEventListener('error', self.loadSoundError);
+         self.reader.readAsArrayBuffer(file);
 
-      // remove event listeners and clear the FileReader
-      try{
-        self.reader.removeEventListener('load', self.loadSoundSuccess);
-        self.reader.removeEventListener('error', self.loadSoundError);
-        self.reader = undefined;
-      } catch(e){};
-    };
+         this.removeEventListener('change', handleFileSelect);
+      };
 
-    this.decodeArrayBuffer = function(arrayBuffer) {
-      audioContext.decodeAudioData(arrayBuffer,
-        function(audioBuffer) {
-          self.soundBuffer = audioBuffer;
+      this.loadSoundSuccess = function(s) {
+         var arrayBuffer = s.target.result;
+         self.decodeArrayBuffer(arrayBuffer);
 
-          // get first channel data (assume it's mono)
-          self.soundBufferChannelData = audioBuffer.getChannelData(0);
+         // Remove event listeners and clear the FileReader.
 
-          self.createCodeFunction();
-          self.setOutPortValue( self.codeFunction );
+         try{
+            self.reader.removeEventListener('load', self.loadSoundSuccess);
+            self.reader.removeEventListener('error', self.loadSoundError);
+            self.reader = undefined;
+         } catch(e){};
+      };
 
-          console.log('Success loading audio buffer');
-          console.log(self);
-        },
-        function(error) {
-          console.log('Error decoding audio: ' + error.message);
-        }
-      );
-    };
+      this.loadSoundError = function(e) {
+         console.log('Error decoding audio: ' + e.message);
 
-  }
+         // Remove event listeners and clear the FileReader.
+
+         try{
+            self.reader.removeEventListener('load', self.loadSoundSuccess);
+            self.reader.removeEventListener('error', self.loadSoundError);
+            self.reader = undefined;
+         } catch(e){};
+      };
+
+      this.decodeArrayBuffer = function(arrayBuffer) {
+         audioContext.decodeAudioData(arrayBuffer,
+            function(audioBuffer) {
+               self.soundBuffer = audioBuffer;
+
+               // Get first channel data (assume it's mono).
+
+               self.soundBufferChannelData = audioBuffer.getChannelData(0);
+
+               self.createCodeFunction();
+               self.setOutPortValue( self.codeFunction );
+
+               console.log('Success loading audio buffer');
+               console.log(self);
+            },
+            function(error) {
+               console.log('Error decoding audio: ' + error.message);
+            }
+         );
+      };
+   }
 }
