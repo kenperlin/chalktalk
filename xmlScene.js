@@ -7,8 +7,8 @@ function XMLScene(name) {
    this.clear();
 
    this.fields = {};
-   this.fields.ball = 'x y z r'.split(' ');
-   this.fields.link = 'a b ra rb'.split(' ');
+   this.fields.BALL = 'x y z r'.split(' ');
+   this.fields.LINK = 'a b ra rb'.split(' ');
 }
 
 XMLScene.prototype = {
@@ -18,7 +18,7 @@ XMLScene.prototype = {
 
    setBall : function(id, p, r) {
       if (this.objs[id] === undefined)
-         this.objs[id] = ['ball'];
+         this.objs[id] = ['BALL'];
       this.objs[id][1] = p.x;
       this.objs[id][2] = p.y;
       this.objs[id][3] = p.z;
@@ -27,7 +27,7 @@ XMLScene.prototype = {
 
    setLink : function(id, a, b, w) {
       if (this.objs[id] === undefined)
-         this.objs[id] = ['link'];
+         this.objs[id] = ['LINK'];
       this.objs[id][1] = a;
       this.objs[id][2] = b;
       this.objs[id][3] = w * this.objs[a][4];
@@ -36,18 +36,18 @@ XMLScene.prototype = {
 
    toString : function() {
       var s = '';
-      s += '<client'
+      s += '<CLIENT'
                + ' id="'   + this.name + '"'
 	       + ' time="' + (new Date()).getTime() + '"'
 	       + '>\n'
-	       + '<balls>\n';
+	       + '<BALLS>\n';
       var anyLinks = false;
       for (var i = 0 ; i < this.objs.length ; i++) {
          var obj = this.objs[i];
 	 var type = obj[0];
-	 if (! anyLinks && type == 'link') {
-	    s += '</balls>\n';
-	    s += '<links>\n';
+	 if (! anyLinks && type == 'LINK') {
+	    s += '</BALLS>\n';
+	    s += '<LINKS>\n';
 	    anyLinks = true;
 	 }
          s += '<' + type + ' id="' + i + '" ';
@@ -61,8 +61,8 @@ XMLScene.prototype = {
          }
          s += '/>\n';
       }
-      s += '</links>\n'
-         + '</client>\n';
+      s += '</LINKS>\n'
+         + '</CLIENT>\n';
       return s;
    },
 }
