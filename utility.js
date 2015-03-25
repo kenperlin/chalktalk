@@ -495,7 +495,9 @@
       return defaultOrValueOf(0, src, u, v);
    }
    function defaultOrValueOf(defaultValue, src, u, v) {
-      if (typeof src !== 'function')
+      if (src === undefined)
+         return defaultValue;
+      else if (typeof src !== 'function')
          return src;
       else if (v === undefined)
          try { return src(u); } catch(e) { return defaultValue; }

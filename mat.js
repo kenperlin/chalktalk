@@ -378,9 +378,9 @@
       var R = r === undefined ? len(A[0]-B[0], A[1]-B[1]) / 10 : norm(m.transform([r,0,0,0]));
       arrow(A[0],A[1], B[0],B[1], R);
    };
-   function mText(str,p,ax,ay){
+   function mText(str,p,ax,ay) {
       var P = m.transform(p);
-      text(str,P[0],P[1],ax,ay);
+      text(str, P[0],P[1], ax,ay);
    };
    function mDrawRect(a, b) {
       mClosedCurve([a, [b[0], a[1]], b, [a[0], b[1]]]);

@@ -32,29 +32,28 @@ SketchText.prototype = {
          var i = this.value.indexOf('.');
          if (i >= 0)
             while (++i < this.value.length)
-	       this.increment /= 10;
+               this.increment /= 10;
       }
    },
 
    contains : function(p) {
       return this.isVisible && p[0] >= this.bounds[0][0]
-	                    && p[0] <  this.bounds[1][0]
+                            && p[0] <  this.bounds[1][0]
                             && p[1] >= this.bounds[0][1]
-	                    && p[1] <  this.bounds[1][1];
+                            && p[1] <  this.bounds[1][1];
    },
 
    mouseDown : function(x, y) {
-
       if (isNaN(this.value))
          return false;
 
+      this._gesture = 'NONE';
+      this._xChange = 0;
       this._yChange = 0;
       this._xDown = x;
       this._yDown = y;
       this._xPrev = x;
       this._yPrev = y;
-      this._xTravel = 0;
-      this._yTravel = 0;
 
       return true;
    },
@@ -63,22 +62,60 @@ SketchText.prototype = {
       if (isNaN(this.value))
          return false;
 
+      this._xChange += x - this._xPrev;
       this._yChange += y - this._yPrev;
-      if (abs(this._yChange) > 30) {
-         var incr = min(1, this.increment);
+
+      // IF FIRST SIGNIFICANT MOVEMENT IS HORIZONTAL, THEN LABEL THIS GESTURE AS A HORIZONTAL SWIPE.
+
+      if (this._gesture == 'NONE' && abs(this._xChange) > sfs(30) && abs(this._xChange) > 2 * abs(this._yChange))
+         this._gesture = 'HORIZONTAL SWIPE';
+
+      // IF NOT A HORIZONTAL SWIPE, RESPOND TO SIGNIFICANT CHANGES IN CURSOR Y.
+
+      if (this._gesture != 'HORIZONTAL SWIPE' && abs(this._yChange) > sfs(30)) {
+
+         // SWEEP VERTICALLY NEAR LEFT TO CHANGE MOST SIGNIFICANT DIGIT.
+         // SWEEP VERTICALLY ANYWHERE ELSE TO CHANGE LEAST SIGNIFICANT DIGIT.
+
+         if (this._gesture == 'NONE') {
+            this._gesture = 'VERTICAL DRAG';
+
+            _g.font = this.font;
+
+            var xDown = m.transform([this._xDown, this._yDown])[0];
+            var xLeft = this.position[0] - 0.5 * textWidth(this.value) / this.sketchScale;
+            var isAfterDecimalPoint = false;
+            var digit = 0;
+            for ( ; digit < this.value.length - 1 ; digit++) {
+               var dx = textWidth(this.value.substring(0, digit + 1)) / this.sketchScale;
+               if (xLeft + dx > xDown)
+                  break;
+               if (this.value.substring(digit, digit+1) == '.')
+                  isAfterDecimalPoint = true;
+            }
+            if (isAfterDecimalPoint)
+               digit--;
+
+            this._incr = 1;
+            var n = abs(this.value);
+            while ((n = floor(n / 10)) != 0)
+               this._incr *= 10;
+            for (var i = 0 ; i < digit ; i++)
+               this._incr /= 10;
+         }
+
          if (this._yChange < 0)
-            this.value = "" + (parseFloat(this.value) + incr);
+            this.value = "" + (parseFloat(this.value) + this._incr);
          else
-            this.value = "" + (parseFloat(this.value) - incr);
+            this.value = "" + (parseFloat(this.value) - this._incr);
          this.roundValue();
+
+         this._xChange = 0;
          this._yChange = 0;
       }
 
       this._xPrev = x;
       this._yPrev = y;
-
-      this._xTravel = max(this._xTravel, abs(x - this._xDown));
-      this._yTravel = max(this._yTravel, abs(y - this._yDown));
 
       return true;
    },
@@ -87,10 +124,11 @@ SketchText.prototype = {
       if (isNaN(this.value))
          return false;
 
-      if (! this.isClick && this._xTravel > this._yTravel) {
-         if (x > this._xDown) {
+      if (this._gesture == 'HORIZONTAL SWIPE') {
+         if (x < this._xDown) {
             this.value = "" + (parseFloat(this.value) / 10);
-            this.increment /= 10;
+            if (this.value != floor(this.value))
+               this.increment /= 10;
          }
          else {
             this.value = "" + (parseFloat(this.value) * 10);
@@ -121,12 +159,16 @@ SketchText.prototype = {
 
       var saveTextHeight = _g.textHeight;
 
-      var scale = sketch.mScale();
-      textHeight(2 * scale * this.scale);
-      _g.font = _g.textHeight + 'pt ' + defaultFont;
+      this.sketchScale = sketch.mScale();
+      this.textHeight = 2 * this.scale * this.sketchScale;
+      this.font = this.textHeight + 'pt ' + defaultFont;
+
+      _g.textHeight = this.textHeight;
+      _g.font = this.font;
+
       var x = this.position[0];
       var y = this.position[1];
-      var tw = textWidth(this.value) / scale;
+      var tw = textWidth(this.value) / this.sketchScale;
       this.bounds = [ [x - tw / 2, y - this.scale],
                       [x + tw / 2, y + this.scale] ];
       sketch.extendBounds(this.bounds);

@@ -493,6 +493,11 @@
          return result;
       },
       setTextCursor : function(x, y) { this.textCursorXY = [x, y]; },
+      getAlpha : function() {
+         return max(0, this.glyphTransition) *
+		       (this.fadeAway == 0 ? 1 : this.fadeAway) *
+		       (isDef(this.alpha) ? this.alpha : 1);
+      },
       getDefaultFloat : function(name) {
          return parseFloat(this.getDefaultValue(name));
       },
@@ -712,10 +717,15 @@
          m.restore();
 
          if (this.sketchTexts.length > 0) {
-            m.save();
-	    for (var n = 0 ; n < this.sketchTexts.length ; n++)
-	       this.sketchTexts[n].update(this);
-            m.restore();
+            var isg = this.sketchTrace != null && this.glyphTransition >= 0.5;
+            if (isg || this.sketchProgress == 1) {
+               _g.globalAlpha = (isg ? 2 * this.glyphTransition - 1
+                                     : this.styleTransition) * this.fade();
+               m.save();
+	       for (var n = 0 ; n < this.sketchTexts.length ; n++)
+	          this.sketchTexts[n].update(this);
+               m.restore();
+            }
          }
 
          _g.restore();
@@ -1109,9 +1119,7 @@
 
             // SET OPACITY.
 
-            var alpha = max(0, this.glyphTransition) *
-                        (this.fadeAway == 0 ? 1 : this.fadeAway) *
-                        (isDef(this.alpha) ? this.alpha : 1);
+            var alpha = this.getAlpha();
 
             // MAKE SURE TO SET THE OPACITY OF ALL THIS MESH'S CHILDREN, RECURSIVELY.
 
