@@ -12,7 +12,7 @@ function() {
 
    this.mode = 0;
    this.onCmdClick = function() {
-      this.mode = (this.mode + 1) % 2;
+      this.mode = (this.mode + 1) % 3;
    }
    this.onPress = function(pt) {
       this.N = -1;
@@ -45,9 +45,6 @@ function() {
       mCurve(this.P);
       lineWidth(2);
       this.afterSketch(function() {
-         for (var i = 0 ; i < this.P.length ; i++)
-            mDot([this.P[i].x,this.P[i].y], .15);
-
          var C = [];
 	 var eps = 0.01;
 	 var ax = this.P[0].x, bx = this.P[1].x, cx = this.P[2].x;
@@ -64,16 +61,15 @@ function() {
 	 mText('B', [bx,by], 2, .5);
 	 mText('C', [cx,cy], 2, .5);
 
-	 if (this.N == -1) {
+	 if (this.N == -1 || this.mode == 2) {
 	    var T = this.T;
-
 
 	    var A = [mix(ax,bx,T), mix(ay,by,T)];
 	    var B = [mix(bx,cx,T), mix(by,cy,T)];
 
 	    lineWidth(4);
 
-	    color('cyan');
+	    color(backgroundColor == 'black' ? 'cyan' : 'blue');
 	    mCurve([A, B]);
             mDot(A, .15);
             mDot(B, .15);
@@ -81,9 +77,13 @@ function() {
             if (this.mode == 0)
 	       return;
 
-	    color('yellow');
+	    color(backgroundColor == 'black' ? 'yellow' : 'red');
             mDot(mix(A,B,T), .15);
 	 }
+
+         color(defaultPenColor);
+         for (var i = 0 ; i < this.P.length ; i++)
+            mDot([this.P[i].x,this.P[i].y], .15);
       });
    }
    this.T = 0.5;
