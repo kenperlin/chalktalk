@@ -892,6 +892,13 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var h = floor(sfs(15.2) * (rows<2 ? 2 : rows));
 
+      // IF CODE SELECTOR IS VISIBLE, MAKE THE SPEECH BUBBLE TALLER.
+
+      // STILL TO DO: MAKE THIS WORK PROPERLY AS FONT SIZE CHANGES. -KP
+
+      if (codeSelector.style.visibility == 'visible')
+         h += sfs(15);
+
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 
       var x1 = (ylo > h
