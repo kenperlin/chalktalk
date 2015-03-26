@@ -2348,41 +2348,32 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          // EVALUATE AND PROPAGATE EXPRESSIONS AND LINKS BETWEEN PORTS.
 
          for (var I = 0 ; I < nsk() ; I++) {
-            var S = sk(I);
 
-            // IF NO TEXT: JUST PASS INPUT TO OUTPUT.
-/*
-            if (S.isNullText()) {
-               if (S instanceof SimpleSketch) {
-                  if (isDef(S.out[0]))
-                     S.outValue[0] = S.inValue[0];
+            // IF SKETCH HAS ANY OUT LINKS:
+
+	    if (sk(I).out.length > 0) {
+
+               var S = sk(I);
+
+               // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
+
+               if (! S.isNullText()) {
+                  S.evalResult = S.evalCode(S.text);
+                  if (S.evalResult != null && isDef(S.out[0]))
+                     S.outValue[0] = S.evalResult;
                }
-               else
-                 for (var i = 0 ; i < S.in.length ; i++)
-                    if (isDef(S.in[i]))
-                       S.outValue[i] = S.inValue[i];
-            }
 
-            // IF SKETCH HAS TEXT: EVALUATE IT.  IF THERE IS ANY RESULT, PASS IT TO OUTPUT.
+               // PROPAGATE VALUES ALONG LINKS.
 
-            else {
-*/
-            if (! S.isNullText()) {
-               S.evalResult = S.evalCode(S.text);
-               if (S.evalResult != null && isDef(S.out[0]))
-                  S.outValue[0] = S.evalResult;
-            }
-
-            // VALUES PROPAGATE ALONG LINKS.
-
-            for (var i = 0 ; i < S.out.length ; i++)
-               if (isDef(S.out[i])) {
-                  var outValue = isDef(S.outValue[i]) ? S.outValue[i] : "0";
-                  for (var k = 0 ; k < S.out[i].length ; k++) {
-                     var link = S.out[i][k];
-                     link.b.inValue[link.j] = outValue;
+               for (var i = 0 ; i < S.out.length ; i++)
+                  if (isDef(S.out[i])) {
+                     var outValue = isDef(S.outValue[i]) ? S.outValue[i] : "0";
+                     for (var k = 0 ; k < S.out[i].length ; k++) {
+                        var link = S.out[i][k];
+                        link.b.inValue[link.j] = outValue;
+                     }
                   }
-               }
+            }
          }
 
          // UPDATE FLATTENED ARRAYS OF SKETCH INPUT VALUES.
@@ -3018,7 +3009,17 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          return;
       }
 
+
       addSketch(s.clone());
+
+      s.portLocation = cloneArray(s.portLocation);
+
+      if (s.code != null)
+         sk().code = cloneArray(s.code);
+
+      if (sk().initCopy !== undefined)
+         sk().initCopy();
+
       if (sk().createMesh !== undefined)
          sk().mesh = undefined;
       sk().sketchProgress = 1;

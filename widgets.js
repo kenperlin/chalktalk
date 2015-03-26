@@ -689,7 +689,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
           codeTextArea.value = codeSelector.value;
           updateF();
        },
-       updateF = function(evt) {
+       updateF = function(forgetCall) {
+
+          if (! forgetCall)
+             window._is_after_updateF = true;
 
           if (isCodeScript()) {
 
@@ -836,7 +839,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
             setTextMode(true);
          };
 
-         updateF();
+         updateF(true);
       }
    }
 

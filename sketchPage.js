@@ -176,6 +176,12 @@
       // HANDLE MOUSE DOWN FOR THE SKETCH PAGE.
 
       mouseDown : function(x, y) {
+
+         if (window._is_after_updateF) {
+            isTextMode = false;
+            return;
+         }
+
          this.mx = x;
          this.my = y;
 
@@ -348,6 +354,11 @@
       // HANDLE MOUSE DRAG FOR THE SKETCH PAGE.
 
       mouseDrag : function(x, y) {
+
+         if (window._is_after_updateF) {
+            return;
+         }
+
          this.mx = x;
          this.my = y;
 
@@ -524,6 +535,11 @@
 
       mouseUp : function(x, y) {
 
+         if (window._is_after_updateF) {
+            window._is_after_updateF = undefined;
+            return;
+         }
+
          if (this.setPageInfo !== undefined) {
             setPage(this.setPageInfo.page);
             delete this.setPageInfo;
@@ -686,10 +702,20 @@
                toggleTextMode();
 
             else if (! isShorthandMode) {
+
                var glyph = findGlyph(strokes, glyphs);
                strokes = [];
-               if (glyph != null && ! isCreatingGlyphData)
-                  this.handleDrawnTextChar(glyph.name);
+
+	       if (glyph != null && ! isCreatingGlyphData) {
+
+	          // If a number sketch was found, treat it as a digit character.
+
+	          var name = glyph.name;
+	          if (glyph.name.indexOf('number_sketch') >= 0)
+		     name = name.replace(/[^0-9]/g,'');
+
+                  this.handleDrawnTextChar(name);
+               }
             }
 
             strokes = [];

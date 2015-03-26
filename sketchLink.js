@@ -28,7 +28,9 @@ SketchLink.prototype = {
       var s = this.s;
 
       var A = a.portXY(i), ax = A[0], ay = A[1];
+window.debugging = true;
       var B = b.portXY(j), bx = B[0], by = B[1];
+window.debugging = undefined;
 
       var aR = a.hasPortBounds(i) ? a.portBounds[i] : [a.xlo,a.ylo,a.xhi,a.yhi];
       var bR = b.hasPortBounds(j) ? b.portBounds[j] : [b.xlo,b.ylo,b.xhi,b.yhi];
