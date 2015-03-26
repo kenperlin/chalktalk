@@ -16,7 +16,7 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   var defaultFont = 'Comic Sans MS';
+   var defaultFont = 'Arial';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;
