@@ -16,7 +16,8 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   var defaultFont = 'Arial';
+   //var defaultFont = 'Arial';
+   var defaultFont = 'hand2-Medium';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;

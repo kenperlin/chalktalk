@@ -20,7 +20,7 @@ function() {
          curve.push([2*t-1, this.func(C, t)]);
       color('red');
       mCurve(curve);
-      color('cyan');
+      color(backgroundColor == 'black' ? 'cyan' : 'blue');
       this.afterSketch(function() {
          textHeight(this.mScale(.15));
 	 mText('t'+EXP_3, [1.1, .9], 0,.5);

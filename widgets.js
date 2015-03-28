@@ -830,6 +830,7 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          if (codeIsBook()) {
             codeTextArea.style.width = sfpx(650);
          }
+
          if (isCodeScript() || code().length < 2) {
             codeTextArea.style.position = "absolute";
             codeTextArea.style.top = 0;
@@ -845,8 +846,10 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
    function drawCodeWidget(text, xlo, ylo, xhi, yhi, isChanged) {
 
+      var fontHeight = codeIsBook() ? 17 : 15;
+
       codeSelector.style.font = sfpx(18) + ' courier';
-      codeTextArea.style.font = codeIsBook() ? sfpx(17) + ' serif' : sfpx(15) + ' courier';
+      codeTextArea.style.font = sfpx(fontHeight) + (codeIsBook() ? ' serif' : ' courier');
 
       xlo += _g.panX;
       xhi += _g.panX;
@@ -862,6 +865,9 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
 
       var rows = text.replace(/./g,'').length;
 
+      if (text.charAt(text.length-1) != '\n')
+         rows++;
+
       var cols = 10;
       var lines = text.split('\n');
       for (var i = 0 ; i < lines.length ; i++)
@@ -871,9 +877,11 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
          for (var i = 0 ; i < text.length ; i++)
             cols = max(cols, text[i][0].length);
 
-      rows = min(rows, floor(height() / sfs(16)));
+      rows = max(0.5, rows);
 
-      codeTextArea.rows = max(2, rows);
+      rows = min(rows, 0.9 * height() / sfs(fontHeight));
+
+      codeTextArea.rows = max(1, rows);
       codeTextArea.cols = cols;
 
       codeTextArea.style.color = codeTextFgColor();
@@ -885,19 +893,15 @@ FOR WHEN WE HAVE DRAW_PATH SHORTCUT:
       var columnWidth = sfs(9);
       var w = min(columnWidth * (cols + 4), width() * 0.75);
 
-      if (rows > 3)
-         rows += sfs(0.3);
-      if (! isCodeScript() && text.length > 1)
-         rows += sfs(1.2);
+      if (text.length > 1)
+         rows += isCodeScript() ? 0.5 : 0.8;
 
-      var h = floor(sfs(15.2) * (rows<2 ? 2 : rows));
+      var h = sfs(fontHeight * rows);
 
       // IF CODE SELECTOR IS VISIBLE, MAKE THE SPEECH BUBBLE TALLER.
 
-      // STILL TO DO: MAKE THIS WORK PROPERLY AS FONT SIZE CHANGES. -KP
-
       if (codeSelector.style.visibility == 'visible')
-         h += sfs(15);
+         h += sfs(fontHeight);
 
       ///////////// ANIMATE THE CODE BUBBLE TO AVOID THE SKETCH IF NECESSARY. //////////////
 

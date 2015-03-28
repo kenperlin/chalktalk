@@ -1,6 +1,5 @@
 function() {
    this.label = 'signal';
-   //this.code = [['', 'sin(TAU*t)/TAU', function() { } ]];
    this.code = [['', 'sin(TAU*t)/TAU', function() { } ]];
    this.initCopy = function() {
       this.createCodeFunction();
@@ -31,23 +30,25 @@ function() {
       }
    }
    this.render = function() {
+      lineWidth(1);
       mLine([-1,0],[1,0]);
+      lineWidth(2);
       var C = [];
       for (var t = 0 ; t <= 1 ; t += .01)
          C.push([2*t-1, 2*this.evalCodeFunction(t)]);
       mCurve(C);
       this.afterSketch(function() {
-         if (typeof this.inValue[0] !== 'function') {
+         if (typeof this.inValue[0] !== 'function' && this == sk() && isHover()) {
 	    var scale = 0.15;
 	    textHeight(this.mScale(scale));
             color(backgroundColor);
 	    for (var i = 0 ; i < 32 ; i++) {
 	       var theta = TAU * i / 32;
                mText(this.code[this.selection][1], [ scale / 7 * cos(theta),
-	                                             scale / 7 * sin(theta) - scale ], .5,.5);
+	                                             scale / 7 * sin(theta) ], .5,.5);
             }
             color(defaultPenColor);
-            mText(this.code[this.selection][1], [0,-scale], .5,.5);
+            mText(this.code[this.selection][1], [0, 0], .5,.5);
          }
          var s = this.selection;
          if ( this.code[s][1] != this.savedCode ||
