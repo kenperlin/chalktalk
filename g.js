@@ -7,16 +7,13 @@
 
    var PMA = 8; // PIE MENU NUMBER OF ANGLES
    var backgroundColor = 'black';
-   //backgroundColor = 'rgb(0,255,0)';
 
    if (isFog)
       backgroundColor = 'rgb(24,43,62)';
-   //backgroundColor = 'rgb(24,43,62)';
 
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   //var defaultFont = 'Arial';
    var defaultFont = 'hand2-Medium';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
@@ -1482,55 +1479,40 @@ console.log("aha");
       glyphs.push(glyph);
    }
 
+   var bgAction_dir1;
+   var bgAction_dir2;
+   var bgAction_sketch;
+   var bgAction_xDown;
+   var bgAction_yDown;
+
    function bgActionDown(x, y) {
+      var x0 = bgClickX;
+      var y0 = bgClickY;
 
-      // CLICK DOWN ON BACKGROUND SAME PLACE AS INITIAL CLICK.
+      bgAction_dir1 = -1;
+      if (len(x0 - x, y0 - y) >= clickSize())
+          bgAction_dir1 = pieMenuIndex(x0 - x, y0 - y, 8);
 
-      if (len(x - bgClickX, y - bgClickY) < clickSize()) {
-         console.log("bg mouse down after bg click in same place");
-      }
-
-      else {
-         var dir = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-	 console.log("bg mouse down after bg click in direction " + dir);
-         switch(dir) {
-         case 1:
-            sketchPage.isGlyphable = ! sketchPage.isGlyphable;
-            break;
-         }
-      }
+      bgAction_dir2 = -1;
+      bgAction_sketch = undefined;
+      bgAction_xDown = x;
+      bgAction_yDown = y;
    }
 
    function bgActionDrag(x, y) {
+      bgDragGesture(x, y);
    }
 
    function bgActionUp(x, y) {
 
-      var x0 = bgClickX;
-      var y0 = bgClickY;
-      var x1 = sketchPage.xDown;
-      var y1 = sketchPage.yDown;
+      // IF CLICK/DRAG, FIND DRAG DIRECTION, AND SEE IF USER HAS DRAGGED INTO A SKETCH.
 
-      // FIND DIRECTION FROM FIRST BG CLICK TO SECOND BG MOUSE DOWN (-1 MEANS NO TRAVEL):
-
-      var n1 = -1;
-      if (len(x0 - x1, y0 - y1) >= clickSize())
-          n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
-
-      // JUST TWO CLICKS:
-
-      if (len(x - x1, y - y1) < clickSize()) {
-	 console.log("bg click after bg click in direction " + n1);
-         bgGesture(n1, -1);
-         return;
+      if (len(bgAction_xDown - x, bgAction_yDown - y) >= clickSize()) {
+         bgAction_dir2 = pieMenuIndex(bgAction_xDown - x, bgAction_yDown - y, 8);
+         bgAction_sketch = sketchPage.sketchesAt(x, y)[0];
       }
 
-      // ELSE, SEE WHETHER USER HAS DRAGGED FROM BG INTO A SKETCH.
-
-      var sketches = sketchPage.sketchesAt(x, y);
-      var sketch = sketches.length == 0 ? undefined : sketches[0];
-
-      bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8), sketch);
+      bgUpGesture();
    }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1538,22 +1520,44 @@ console.log("aha");
    function directionsToPage(n1, n2) { return 8 * n1 + n2; }
    function pageToDirections(page) { return [ floor(page / 8), page % 8 ]; }
 
-   // THIS NEEDS TO BE BUILT OUT INTO A FLEXIBLE PROGRAMMER DEFINED MAPPING.
+   function bgDragGesture(x, y) {
+      switch (bgAction_dir1) {
+      case 4:
+         _font_scale_factor *= 1 + 0.01 * (y - bgAction_yDown);
+         _font_scale_factor = min(900, _font_scale_factor);
+	 bgAction_yDown = y;
+         break;
+      }
+   }
 
-   function bgGesture(n1, n2, s) {
-console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
-      if (n2 === undefined) {
-         switch (n1) {
-         case 2: setPage(pageIndex - 1); break;
-         case 6: setPage(pageIndex + 1); break;
-         }
+   function bgUpGesture() {
+
+      switch (bgAction_dir1) {
+      case -1:
+         switch (bgAction_dir2) {
+	 case 2:
+	    console.log("next page");
+	    break;
+	 case 6:
+	    console.log("previous page");
+	    break;
+	 }
+	 break;
+      case 5:
+         switch (bgAction_dir2) {
+	 case 4:
+	    toggleTextMode();
+	    break;
+	 }
+         break;
+      case 2:
+         switch (bgAction_dir2) {
+	 case 4:
+	    isShowingGlyphs = ! isShowingGlyphs;
+	    break;
+	 }
+	 break;
       }
-      else if (s === undefined) {
-         sketchPage.setPageInfo = { x: sketchPage.x, y: sketchPage.y, page: directionsToPage(n1, n2) };
-         bgClickCount = 0;
-      }
-      else
-         console.log("BG SWIPE TO SKETCH " + n1 + " " + n2 + " [" + s.glyphName + "]");
    }
 
    function startSketchDragAction(x, y) {
