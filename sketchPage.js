@@ -573,13 +573,9 @@
          }
 
          if (isBgActionEnabled) {
-            if (this.travel <= clickSize()) {
-               bgActionEnd(x, y);
-               bgClickCount = 0;
-            }
-            else {
-               bgActionUp(x, y);
-            }
+            bgActionUp(x, y);
+            bgClickCount = 0;
+	    isBgActionEnabled = false;
             return;
          }
 
@@ -1558,32 +1554,9 @@
          case 'X':
 	    if (window.xmlSketch !== undefined)
 	       window.xmlSketch = undefined;
-	    else if (isk() && sk().graph instanceof VisibleGraph) {
+	    else if (isk() && sk().graph instanceof VisibleGraph)
 	       window.xmlSketch = sk();
-/*
-	       var xmlScene = new XMLScene("graph");
-	       var nodes = sk().graph.nodes;
-	       var links = sk().graph.links;
-	       var n = nodes.length;
-	       for (var i = 0 ; i < n ; i++)
-	          xmlScene.setBall(i, nodes[i].p, nodes[i].r);
-	       for (var i = 0 ; i < links.length ; i++)
-	          xmlScene.setLink(n + i, links[i].i, links[i].j, links[i].w);
-	       console.log(xmlScene.toString());
-*/
-            }
-/*
-	    var p0 = newVec3(-1,-1,-1);
-	    var p1 = newVec3( 1, 1, 1);
-	    xmlScene.setBall(0, p0, .1);
-	    xmlScene.setBall(1, p1, .1);
-	    xmlScene.setLink(2,  0, 1);
-	    console.log(xmlScene.toString());
-*/
 	    break;
-         case 'y':
-            isShowingScribbleGlyphs = ! isShowingScribbleGlyphs;
-            break;
          case 'z':
             break;
          case '/':
@@ -2227,13 +2200,6 @@
          }
 */
          annotateStart();
-
-         // SHOW THE OPTION OF WHETHER TO USE PULLDOWN OR PIE MENU
-
-         color(overlayClearColor());
-         textHeight(12);
-         text("Using", dx + w - 40, h - 30, .5, 1);
-         text((menuType==0 ? "PullDown" : "Pie Menu"), dx + w - 40, h - 10, .5, 1);
 
          // DRAW THE COLOR PALETTE
 

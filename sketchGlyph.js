@@ -21,21 +21,12 @@
          if (this.data.length != other.data.length)
             return 1000000;
          var score = 0;
-         for (var n = 0 ; n < this.data.length ; n++) {
+         for (var n = 0 ; n < this.data.length ; n++)
             for (var i = 0 ; i < this.data[n].length ; i++) {
                var dx = this.data[n][i][0] - other.data[n][i][0];
                var dy = this.data[n][i][1] - other.data[n][i][1];
                score += dx * dx + dy * dy;
             }
-
-            // IF GLYPHS ARE SCRIBBLES, THEY NEED TO BE OF SIMILAR LENGTH.
-
-            if ( this.scribbleLength  !== undefined && this.scribbleLength  > 0 &&
-                 other.scribbleLength !== undefined && other.scribbleLength > 0 ) {
-               var ratio = other.scribbleLength / this.scribbleLength;
-               score *= max(ratio, 1 / ratio);
-            }
-         }
          return score;
       }
 

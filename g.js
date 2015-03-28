@@ -30,13 +30,11 @@
    var isShowing2DMeshEdges = false;
    var isShowingMeshEdges = false;
    var isShowingPresenterView = false;
-   var isShowingScribbleGlyphs = false;
    var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var isTouchDevice = false;
    var margin = 50;
    var meshOpacityOverVideo = 0.7;
-   var scribbleScale = margin;
    var sketchPadding = 10;
    var sketchTypes = [];
    var sketchAction = null;
@@ -918,26 +916,6 @@ console.log(harry.fred);
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
 
-      // LOAD ALL THE SCRIBBLE GLYPHS.
-
-      function nameToGlyph(name) {
-         var scribble = new Scribble(name);
-         var glyph = new SketchGlyph(name, [scribble]);
-         glyph.scribbleLength = computeCurveLength(scribble);
-         return glyph;
-      }
-
-      for (var n = 0 ; n < glyphs.length ; n++) {
-         var name = glyphs[n].indexName;
-         scribbleGlyphs.push(nameToGlyph(name));
-      }
-
-      for (var n = 0 ; n < scribbleNames.length ; n++) {
-         var name = scribbleNames[n];
-         if (glyphIndex(scribbleGlyphs, name) == -1)
-            addGlyph(scribbleGlyphs, nameToGlyph(name));
-      }
-
       // LOAD ALL THE SKETCHES FROM THE SERVER'S SKETCHES FOLDER.
 
       loadSketches();
@@ -1031,7 +1009,6 @@ console.log(harry.fred);
       ['v'  , "toggle video layer"],
       ['w'  , "toggle whiteboard"],
       ['x'  , "toggle expert mode"],
-      ['y'  , "toggle scribble glyphs"],
       ['z'  , "zoom"],
       ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
@@ -1393,10 +1370,6 @@ console.log("aha");
       var bestMatch = 0;
       var bestScore = 10000000;
       for (var i = 0 ; i < glyphs.length ; i++) {
-
-         if (glyphs[i].scribbleLength !== undefined && strokesGlyph.scribbleLength === undefined)
-            strokesGlyph.scribbleLength = computeCurveLength(strokes[0]) / scribbleScale;
-
          var score = strokesGlyph.compare(glyphs[i]);
          if (score < bestScore) {
             bestScore = score;
@@ -1493,70 +1466,6 @@ console.log("aha");
    var sketchDragActionXY = [0,0];
    var sketchDragActionSize = [0,0];
 
-/////////////////////// HANDLE BACKGROUND SCRIBBLES /////////////////////////
-
-   //var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z now is the time for all good men to come aid of their party C D N P".split(' ');
-   var scribbleNames = "a b c d e f g h i j k l m n o p q r s t u v w x y z C D N P".split(' ');
-   var scribbleGlyphs = [];
-
-//        3stu4
-//   5vCw6     1_r_2
-//
-// 7xDy8         mnopq
-//
-//   9zab0     jhilk
-//        cdefg
-
-   function Scribble(str) {
-      var charIndex = "9zab0 cdefg jhilk mnopq 1ArB2 3stu4 5vCw6 7xDy8";
-      var charDir   = "55555 66666 77777 00000 11111 22222 33333 44444";
-      var charShape = "<(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)> <(|)>";
-      var s = [[0,0]];
-      for (var i = 0 ; i < str.length ; i++) {
-         var ch = str.substring(i, i+1);
-         var n = charIndex.indexOf(ch);
-         var dir = -charDir.substring(n, n+1);
-         var shape = charShape.substring(n, n+1);
-         var C = cos(TAU * dir / 8);
-         var S = sin(TAU * dir / 8);
-         function xf(pts, xy) {
-            for (var k = 0 ; k < pts.length ; k++) {
-               var x = pts[k][0], y = pts[k][1];
-               pts[k][0] = xy[0] + C * x - S * y;
-               pts[k][1] = xy[1] + S * x + C * y;
-            }
-            return pts;
-         }
-         function arced(c) {
-            var p = [];
-            for (var k = 1 ; k <= 10 ; k++) {
-               var t = k / 10;
-               p.push([t, c * t * (1 - t) * 1.3]);
-            }
-            return p;
-         }
-         function curly(c) {
-            var p = [];
-            for (var k = 1 ; k <= 10 ; k++) {
-               var t = k / 10;
-               var x = t + sin(TAU * t) / 2.5;
-               var y = c * (1 - cos(TAU * t)) / 4;
-               p.push([x, y]);
-            }
-            return p;
-         }
-         var ep = s[s.length - 1];
-         switch (shape) {
-         case "<": s = s.concat(xf(curly( 1), ep)); break;
-         case "(": s = s.concat(xf(arced( 1), ep)); break;
-         case "|": s = s.concat(xf(arced( 0), ep)); break;
-         case ")": s = s.concat(xf(arced(-1), ep)); break;
-         case ">": s = s.concat(xf(curly(-1), ep)); break;
-         }
-      }
-      return s;
-   }
-
    function glyphIndex(glyphs, name) {
       for (var i = 0 ; i < glyphs.length ; i++)
          if (glyphs[i].indexName == name)
@@ -1573,57 +1482,18 @@ console.log("aha");
       glyphs.push(glyph);
    }
 
-   function scribbleColor() {
-      return backgroundColor == 'white' ? 'rgb(  0, 112, 128)'
-                                        : 'rgb(128, 224, 255)';
-   }
-
-   function BgScribble(x, y) {
-      this.path = [[x,y]];
-      this.index = 0;
-      this.draw = function() {
-         color(scribbleColor());
-
-         lineWidth(1);
-         var r = margin / 5;
-         drawOval(this.path[0][0] - r, this.path[0][1] - r, 2 * r, 2 * r);
-
-         lineWidth(0.5);
-         drawCurve(this.path);
-      }
-      this.drag = function(x, y) {
-         this.path.push([x, y]);
-      }
-      this.interpret = function() {
-         var glyph = findGlyph([this.path], scribbleGlyphs);
-         scribbleScale = mix(scribbleScale, computeCurveLength(this.path) / glyph.pathLength, 0.1);
-         return glyph == null ? "" : glyph.name;
-      }
-   }
-   var bgs, bgsText = "", bgsTextUndo = [];
-   var isBgsDelete = false, isBgsShift = false, isBgsNumeric = false;
-
    function bgActionDown(x, y) {
 
-      // IF ALREADY IN SCRIBBLE-TEXT MODE, START NEXT WORD.
+      // CLICK DOWN ON BACKGROUND SAME PLACE AS INITIAL CLICK.
 
-      if (bgs !== undefined)
-         bgs.path[0] = [x, y];
-
-      // ELSE IF LINE STARTS AT CLICK, ENTER SCRIBBLE-TEXT MODE.
-
-      else if (len(x - bgClickX, y - bgClickY) < clickSize()) {
-/*
-         bgs = new BgScribble(x, y);
-         bgsText = "";
-         bgsTextUndo = [];
-         sketchPage.beginTextSketch();
-*/
+      if (len(x - bgClickX, y - bgClickY) < clickSize()) {
+         console.log("bg mouse down after bg click in same place");
       }
 
       else {
-         var bgCommand = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
-         switch(bgCommand) {
+         var dir = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
+	 console.log("bg mouse down after bg click in direction " + dir);
+         switch(dir) {
          case 1:
             sketchPage.isGlyphable = ! sketchPage.isGlyphable;
             break;
@@ -1632,95 +1502,35 @@ console.log("aha");
    }
 
    function bgActionDrag(x, y) {
-
-      // ADD NEXT POINT TO SCRIBBLE-TEXT STROKE.
-
-      if (bgs !== undefined)
-         bgs.drag(x, y);
    }
 
    function bgActionUp(x, y) {
-
-      // HANDLE A SCRIBBLE-TEXT STROKE.
-
-      if (bgs !== undefined) {
-         var str = bgs.interpret();
-         switch (str) {
-         case "C":
-            isBgsShift = true;
-            break;
-         case "D":
-            if (bgsTextUndo.length > 0) {
-               bgsText = bgsTextUndo.splice(bgsTextUndo.length - 1, 1)[0];
-               sk().setText(bgsText);
-               sk().textCursor = bgsText.length;
-            }
-            break;
-         default:
-            bgsTextUndo.push(bgsText);
-            if (bgsText.length > 0 && str.length > 1)
-               bgsText += " ";
-            if (isBgsShift) {
-               str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
-               isBgsShift = false;
-            }
-
-            if (bgsText.length == 0)
-               for (var n = 0 ; n < glyphs.length ; n++)
-                  if (str == glyphs[n].indexName) {
-                     sk().setText(str);
-                     convertTextSketchToGlyphSketch(sk(), bgClickX, bgClickY);
-                     bgActionEnd();
-                     return;
-                  }
-
-            bgsText += str;
-            sk().setText(bgsText);
-            sk().textCursor = bgsText.length;
-            break;
-         }
-         bgs = new BgScribble(x, y);
-         return;
-      }
 
       var x0 = bgClickX;
       var y0 = bgClickY;
       var x1 = sketchPage.xDown;
       var y1 = sketchPage.yDown;
 
-      var n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
+      // FIND DIRECTION FROM FIRST BG CLICK TO SECOND BG MOUSE DOWN (-1 MEANS NO TRAVEL):
 
-      // n1 = POSITION OF THE FIRST CLICK WRT THE SECOND CLICK.
+      var n1 = -1;
+      if (len(x0 - x1, y0 - y1) >= clickSize())
+          n1 = pieMenuIndex(x0 - x1, y0 - y1, 8);
+
+      // JUST TWO CLICKS:
 
       if (len(x - x1, y - y1) < clickSize()) {
-         bgGesture(n1);
+	 console.log("bg click after bg click in direction " + n1);
+         bgGesture(n1, -1);
          return;
       }
 
+      // ELSE, SEE WHETHER USER HAS DRAGGED FROM BG INTO A SKETCH.
+
       var sketches = sketchPage.sketchesAt(x, y);
-      if (sketches.length == 0)
+      var sketch = sketches.length == 0 ? undefined : sketches[0];
 
-         // POSITION OF START OF SWIPE WRT END OF SWIPE.
-
-         bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8));
-
-      else {
-
-         // POSITION OF START OF SWIPE WRT CENTER OF THE SKETCH.
-
-         var s = sketches[0];
-         bgGesture(n1, pieMenuIndex(x1 - s.cx(), y1 - s.cy(), 8), s);
-      }
-   }
-
-   function bgActionEnd(x, y) {
-
-      // EXIT SCRIBBLE-TEXT MODE.
-
-      bgs = undefined;
-      bgsText = "";
-      bgsTextUndo = [];
-      setTextMode(false);
+      bgGesture(n1, pieMenuIndex(x1 - x, y1 - y, 8), sketch);
    }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2021,8 +1831,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
                ttdata.data[frame] = uncompressData(ttdata.data[frame], len);
       }
 
-//server.get("state/foobar", function(val) { console.log(val); });
-
       if (window.forceSetPageAtTime !== undefined && forceSetPageAtTime < time) {
          forceSetPageAtTime = undefined;
          setPage(pageIndex);
@@ -2043,9 +1851,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
       pyM = -344 * w / 1440;
       pyB =  h / 2;
 
-
-// THE CALL TO ttTick IS COMMENTED OUT SO CHALKTALK WILL WORK OVER THE WEB.
-// IF YOU WANT TO USE THE PRESSURE IMAGING SENSOR, UNCOMMENT THIS LINE.
 
       ttTick();     // HANDLE THE TACTONIC SENSOR, IF ANY.
 
@@ -2329,9 +2134,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
             else if (isSketchInProgress())
                drawCrosshair(cursorX, cursorY);
          }
-
-         if (isShowingScribbleGlyphs && bgs !== undefined && bgs != null)
-            bgs.draw();
 
          if (isAudiencePopup()) {
 
@@ -2730,109 +2532,50 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
          else if (!isAltPressed && ! isCommandPressed)
             isAltKeyCopySketchEnabled = true;
 
-      // GLOW AT OUTPUT PORT (NOT CURRENTLY BEING USED -KP)
-/*
-         if (outPort >= 0) {
-            color(scrimColor(.05));
-            for (var n = 0 ; n < 10 ; n++) {
-               var r = 30 - 3 * n;
-               fillOval(This().mouseX - r, This().mouseY - r, 2 * r, 2 * r);
+         if (isFog) {
+            var motionNoise = new Noise();
+            var orw = width() + 1000;
+            for (var i = 0 ; i < 10 ; i++) {
+               var x = 500 * (motionNoise.noise([  .5, .1 * time, 10 * i + .5]) - 1);
+               var y = 500 * (motionNoise.noise([10.5, .1 * time, 10 * i + .5]) - 1);
+               _g.drawImage(OR_imageObj, x, y, orw, orw);
             }
          }
-*/
-      }
 
-      if (isShowingScribbleGlyphs) {
-         var ncols = 25;
-         var cw = w / ncols;
+         // OUTPUT XML FOR SELECTED GRAPH SKETCH, IF ANY.
 
-         color(scribbleColor());
-         lineWidth(cw / 70);
+         if (window.xmlSketch !== undefined) {
+            var nodes = xmlSketch.graph.nodes;
+            var links = xmlSketch.graph.links;
 
-         var fs = floor(0.2 * w / ncols);
-         _g.font = (2*fs) + "px Arial";
-         _g.fillText(bgsText, 7, 28);
+            var nNodes = def(xmlSketch.nNodesToRender, nodes.length);
+            var nLinks = def(xmlSketch.nLinksToRender, links.length);
 
-         _g.font = fs + "px Arial";
-         for (var ns = 0 ; ns < scribbleGlyphs.length ; ns++) {
-            function xfx(x) { return x0 + x / 2; }
-            function xfy(y) { return y0 + y / 2; }
-            var col = ns % ncols;
-            var row = floor(ns / ncols);
-            var x0 = (col + 0.3) * cw;
-            var y0 = (row + 0.8) * cw * 1.5;
-            var s = scribbleGlyphs[ns].data;
-
-            var x = xfx(s[0][0][0] * cw / 70);
-            var y = xfy(s[0][0][1] * cw / 70);
-            var dr = 3 * cw / 70;
-            _g.beginPath();
-            _g.moveTo(x - dr, y - dr);
-            _g.lineTo(x + dr, y - dr);
-            _g.lineTo(x + dr, y + dr);
-            _g.lineTo(x - dr, y + dr);
-            _g.fill();
-
-            _g.fillText(scribbleGlyphs[ns].name, x0, y0 - 10);
-
-            for (var n = 0 ; n < s.length ; n++) {
-               _g.beginPath();
-               for (var i = 0 ; i < s[n].length ; i++) {
-                  var x = xfx(s[n][i][0] * cw / 70);
-                  var y = xfy(s[n][i][1] * cw / 70);
-                  if (i == 0)
-                     _g.moveTo(x, y);
-                  else
-                     _g.lineTo(x, y);
-               }
-               _g.stroke();
+	    if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
+               xmlScene = new XMLScene("graph");
+               xmlNodes = nNodes;
+               xmlLinks = nLinks;
             }
-         }
-      }
 
-      if (isFog) {
-         var motionNoise = new Noise();
-         var orw = width() + 1000;
-         for (var i = 0 ; i < 10 ; i++) {
-            var x = 500 * (motionNoise.noise([  .5, .1 * time, 10 * i + .5]) - 1);
-            var y = 500 * (motionNoise.noise([10.5, .1 * time, 10 * i + .5]) - 1);
-            _g.drawImage(OR_imageObj, x, y, orw, orw);
-         }
-      }
+            for (var i = 0 ; i < nodes.length ; i++)
+               xmlScene.setBall(i, nodes[i].p, nodes[i].r);
 
-      // OUTPUT XML FOR SELECTED GRAPH SKETCH, IF ANY.
+            for (var i = 0 ; i < nLinks ; i++)
+               xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
 
-      if (window.xmlSketch !== undefined) {
-         var nodes = xmlSketch.graph.nodes;
-         var links = xmlSketch.graph.links;
-
-         var nNodes = def(xmlSketch.nNodesToRender, nodes.length);
-         var nLinks = def(xmlSketch.nLinksToRender, links.length);
-
-	 if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
-            xmlScene = new XMLScene("graph");
-            xmlNodes = nNodes;
-            xmlLinks = nLinks;
+            console.log(xmlScene.toString());
          }
 
-         for (var i = 0 ; i < nodes.length ; i++)
-            xmlScene.setBall(i, nodes[i].p, nodes[i].r);
+	 // DISPLAY DEBUG MESSAGE ON SCREEN, IF ONE IS DEFINED.
 
-         for (var i = 0 ; i < nLinks ; i++)
-            xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
-
-         console.log(xmlScene.toString());
-      }
-
-
-      if (window.debugMessage !== undefined) {
-         annotateStart();
-         _g.fillStyle = _g.strokeStyle = 'cyan';
-         textHeight(50);
-         text(debugMessage, w/2, h/2);
-         annotateEnd();
-         console.log(debugMessage);
-         debugMessage = undefined;
+         if (window.debugMessage !== undefined) {
+            annotateStart();
+            _g.fillStyle = _g.strokeStyle = 'cyan';
+            textHeight(50);
+            text(debugMessage, w/2, h/2);
+            annotateEnd();
+            debugMessage = undefined;
+         }
       }
    }
 
