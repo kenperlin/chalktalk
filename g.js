@@ -947,6 +947,20 @@ console.log(harry.fred);
       OR_imageObj = new Image();
       OR_imageObj.src = "imgs/smoke_0.png";
 
+
+//----- FROM SAM CLARKE (http://samclarke.com), TEST WHETHER A FONT IS AVAILABLE.
+
+(function(c){var b,d,e,f,g,h=c.body,a=c.createElement("div");a.innerHTML='<span style="'+["position:absolute","width:auto","font-size:128px","left:-99999px"].join(" !important;")+'">'+Array(100).join("wi")+"</span>";a=a.firstChild;b=function(b){a.style.fontFamily=b;h.appendChild(a);g=a.clientWidth;h.removeChild(a);return g};d=b("monospace");e=b("serif");f=b("sans-serif");window.isFontAvailable=function(a){return d!==b(a+",monospace")||f!==b(a+",sans-serif")||e!==b(a+",serif")}})(document);
+
+      // If custom font is not loaded, fall back to using Arial font.
+
+      if (! isFontAvailable(defaultFont))
+         defaultFont = 'Arial';
+
+//-------------------------------------------------------------------------------
+
+
+
       setInterval( function() { tick(g); }, 1000 / 60);
    }
 

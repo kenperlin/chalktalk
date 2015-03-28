@@ -1,4 +1,8 @@
 
+/*
+   Link from sketch a, port i to sketch b, port j, with curvature s.
+*/
+
 function SketchLink(a, i, b, j, s) {
    this.a = a;
    this.i = i;
@@ -6,9 +10,13 @@ function SketchLink(a, i, b, j, s) {
    this.j = j;
    this.s = def(s, 0);
 
+   // If a has no out links on port i, set this to be its out link.
+
    if (i >= a.out.length || a.out[i] === undefined)
       a.out[i] = [];
    a.out[i].push(this);
+
+   // Set this to be the in link for sketch b, port j.
 
    b.in[j] = this;
 }
@@ -27,10 +35,12 @@ SketchLink.prototype = {
       var j = this.j;
       var s = this.s;
 
+      // Get the locations of the start and end points for the link.
+
       var A = a.portXY(i), ax = A[0], ay = A[1];
-window.debugging = true;
       var B = b.portXY(j), bx = B[0], by = B[1];
-window.debugging = undefined;
+
+      // Clip against bounds of the two sketches.
 
       var aR = a.hasPortBounds(i) ? a.portBounds[i] : [a.xlo,a.ylo,a.xhi,a.yhi];
       var bR = b.hasPortBounds(j) ? b.portBounds[j] : [b.xlo,b.ylo,b.xhi,b.yhi];
@@ -48,9 +58,14 @@ window.debugging = undefined;
          this.C = clipCurveAgainstRect(this.C, [b.xlo,b.ylo,b.xhi,b.yhi]);
       }
 
+      // Draw the link:
+
       if (isVisible) {
          lineWidth(dataLineWidth);
          color(dataColor);
+
+	 // as a curved line with an arrow at the end.
+
          var C = this.C;
          for (var n = 0 ; n < C.length-1 ; n++)
             if (n < C.length-2)
@@ -58,15 +73,24 @@ window.debugging = undefined;
             else
                arrow(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
 
+         // When in verbose mode, show the numeric value currently traversing the link:
+
          if (! isExpertMode) {
-            var cx = (ax + bx) / 2 + (ay - by) * s;
-            var cy = (ay + by) / 2 + (bx - ax) * s;
-            color(defaultPenColor);
-            textHeight(12);
-            utext(roundedString(b.inValue[j]), cx, cy, .5, .5);
+
+	    // if any.
+
+	    if (! isNan(b.inValue[j])) {
+               var cx = (ax + bx) / 2 + (ay - by) * s;
+               var cy = (ay + by) / 2 + (bx - ax) * s;
+               color(defaultPenColor);
+               textHeight(12);
+               utext(roundedString(b.inValue[j]), cx, cy, .5, .5);
+	    }
 	 }
 
-         else if (b.portName.length == 0 && (! b.isNullText() || b.code != null)) {
+	 // Else label the link as 'x','y' or 'z'.
+
+         else {
             var cx = (ax + bx) / 2 + (ay - by) * s;
             var cy = (ay + by) / 2 + (bx - ax) * s;
             color(backgroundColor);
@@ -74,8 +98,6 @@ window.debugging = undefined;
             color(dataColor);
             textHeight(16);
             utext(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
-            lineWidth(1);
-            drawOval(cx - 13, cy - 13, 26, 26);
          }
       }
    },
