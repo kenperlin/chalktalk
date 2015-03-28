@@ -2590,10 +2590,6 @@ console.log("bgGesture(" + n1 + "," + n2 + "," + s + ")");
              ( isShowingGlyphs || isDef(This().overlay) );
    }
 
-   var timelineH = 80;
-   var isShowingTimeline = false;
-   var isDraggingTimeline = false;
-
    function fillPath(sp, i0, i1, context) {
       if (context === undefined)
          context = _g;

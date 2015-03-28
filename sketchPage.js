@@ -281,12 +281,6 @@
             return;
          }
 
-         if (isShowingTimeline) {
-            isDraggingTimeline = true;
-            console.log("timeline down");
-            return;
-         }
-
          // BEFORE PROCEEDING, FINISH ANY UNFINISHED SKETCH.
 
          finishDrawingUnfinishedSketch();
@@ -481,11 +475,6 @@
             if (isShorthandMode)
                interpretShorthand();
 
-            return;
-         }
-
-         if (isDraggingTimeline) {
-            console.log("timeline drag");
             return;
          }
 
@@ -715,12 +704,6 @@
             }
 
             strokes = [];
-            return;
-         }
-
-         if (isDraggingTimeline) {
-            isDraggingTimeline = false;
-            console.log("timeline up");
             return;
          }
 
@@ -2175,30 +2158,11 @@
          var w = width(), h = height();
          var dx = -_g.panX;
 
-         isShowingTimeline = isDraggingTimeline ||
-                             ! isExpertMode
-                          && isDef(This().overlay)
-                          && ! pullDownIsActive
-                          && letterPressed == '\0'
-                          && This().mouseX < w - 80
-                          && This().mouseY >= h - timelineH;
-
          // SHOW THE GLYPH DICTIONARY
 
          if (isShowingGlyphs)
             this.showGlyphs();
 
-         // SHOW THE TIMELINE
-/*
-         if (isShowingTimeline) {
-            annotateStart();
-            color('blue');
-            lineWidth(2);
-            drawRect(1, h-1 - timelineH, w-2, timelineH);
-            annotateEnd();
-            return;
-         }
-*/
          annotateStart();
 
          // DRAW THE COLOR PALETTE
