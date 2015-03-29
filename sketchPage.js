@@ -50,7 +50,7 @@
       this.altCmdState = 0;
       this.fadeAway = 1;
       this.glyphT = 0;
-      this.glyphsPerCol = 10;
+      this.glyphsPerCol = 12;
       this.iDragged = 0;
       this.isCreatingGroup = false;
       this.isDraggingGlyph = false;
@@ -268,14 +268,6 @@
          if (isTextMode) {
             strokes = [[[x,y]]];
             strokesStartTime = time;
-/*
-            isShorthandMode = true;
-            isShorthandTimeout = false;
-*/
-            // FOR THIS VERSION WE ARE DISABLING SHORTHAND MODE.
-
-            isShorthandMode = false;
-            isShorthandTimeout = true;
 
             iOut = 0;
             return;
@@ -466,15 +458,7 @@
          }
 
          if (isTextMode) {
-            if ( ! isShorthandTimeout &&
-                 len(x - strokes[0][0][0], y - strokes[0][0][1]) >= shRadius )
-               isShorthandMode = false;
-
             strokes[0].push([x, y]);
-
-            if (isShorthandMode)
-               interpretShorthand();
-
             return;
          }
 
@@ -657,10 +641,9 @@
 
          if (isTextMode) {
 
-            var stroke = strokes[0];
-            if (! isShorthandTimeout &&
-                len(stroke[stroke.length-1][0] - stroke[0][0],
-                    stroke[stroke.length-1][1] - stroke[0][1]) < shRadius) {
+	    // HANDLE CLICK IN TEXT MODE.
+
+            if (this.isClick) {
 
                // CLICK ON STROKE SETS THE TEXT CURSOR.
 
@@ -671,29 +654,15 @@
 
                else
                   toggleTextMode();
-
-               strokes = [];
-               return;
             }
 
-            // CLICKING ON THE INDEX NAME OF A GLYPH INSTANTIATES A GLYPH SKETCH OF THAT TYPE+LABEL.
-
-            if (this.isClick && isHover()) {
-               convertTextSketchToGlyphSketch(sk(), x, y);
-               return;
-            }
-
-            if (this.isClick)
-               toggleTextMode();
-
-            else if (! isShorthandMode) {
+            else {
 
                var glyph = findGlyph(strokes, glyphs);
-               strokes = [];
 
 	       if (glyph != null && ! isCreatingGlyphData) {
 
-	          // If a number sketch was found, treat it as a digit character.
+	          // IF A NUMBER SKETCH WAS FOUND, TREAT IT AS A DIGIT CHARACTER.
 
 	          var name = glyph.name;
 	          if (glyph.name.indexOf('number_sketch') >= 0)
@@ -1951,12 +1920,6 @@
                drawGroupPath(groupPath);
             if (this.isShowingPalette())
                drawPalette();
-            if (isTextMode && isShorthandMode) {
-               color(defaultPenColor);
-               lineWidth(1);
-               drawOval(This().mousePressedAtX - 4,
-                        This().mousePressedAtY - 4, 8, 8);
-            }
          }
 
          if (isSpacePressed)
@@ -1989,57 +1952,6 @@
                      this.paletteColorDragXY[1] - 12, 24, 24);
          }
 
-// PLACE TO PUT DIAGNOSTIC MESSAGES FOR DEBUGGING
-/*
-         var msg = height() + " " + _g.canvas.height;
-         _g.save();
-         _g.font = '20pt Calibri';
-         _g.fillStyle = defaultPenColor;
-         _g.fillText(msg, 70, 30);
-         _g.restore();
-*/
-      },
-
-      showShorthand : function() {
-         var x0 = This().mousePressedAtX;
-         var y0 = This().mousePressedAtY;
-         _g.lineWidth = 1;
-         var r = shRadius;
-         textHeight(12);
-         color('rgba(0,32,128,.4)');
-         drawOval(x0 - r, y0 - r, 2 * r, 2 * r);
-
-         for (var n = 0 ; n < 8 ; n++) {
-            var angle = TAU * n / 8;
-            var x = cos(angle), y = -sin(angle);
-
-            color('rgba(0,32,128,.4)');
-            line(x0 + r * x    , y0 + r * y,
-                 x0 + r * x * 3, y0 + r * y * 3);
-
-            color('rgba(0,32,128,.7)');
-            var ch = lookupChar(n, 2);
-
-            var cx = r * x * 3.6;
-            var cy = r * y * 3.6;
-
-            color('rgba(0,32,128,.5)');
-            text(shift(ch), x0+cx, y0+cy, .5, .5);
-
-            text(shift(lookupChar(n, 0)),
-                 x0 + cx*.5 - r*.65 * y,
-                 y0 + cy*.5 + r*.65 * x, .5, .5);
-            text(shift(lookupChar(n, 4)),
-                 x0 + cx*.5 + r*.65 * y,
-                 y0 + cy*.5 - r*.65 * x, .5, .5);
-
-            text(shift(lookupChar(n, 1)),
-                 x0 + cx - r*.65 * x - r*.60 * y,
-                 y0 + cy - r*.65 * y + r*.60 * x, .5, .5);
-            text(shift(lookupChar(n, 3)),
-                 x0 + cx - r*.65 * x + r*.60 * y,
-                 y0 + cy - r*.65 * y - r*.60 * x, .5, .5);
-         }
       },
 
       glyphBounds : function(i) {
@@ -2068,7 +1980,7 @@
          color(bgScrimColor(.5));
          fillRect(-_g.panX - 100, 0, width() + 200 - _g.panY, height());
 
-         _g.font = '7pt Arial';
+         _g.font = floor(7 * height() / 800) + ' Arial';
 
          this.glyphT = this.isDraggingGlyph
                      ? this.iDragged + 0.99
@@ -2178,7 +2090,7 @@
          // LIGHTLY OUTLINE ALL SKETCHES
 
          _g.save();
-         lineWidth(.25);
+         lineWidth(.5);
          for (var i = 0 ; i < nsk() ; i++)
             sk(i).drawBounds();
          _g.restore();
@@ -2230,8 +2142,11 @@
             fillRect(sk().xlo, sk().ylo, sk().xhi-sk().xlo, sk().yhi-sk().ylo);
 
             if (isHover()) {
+	       _g.save();
                color(sk().isGroup() ? 'rgba(255,1,0,.6)' : 'rgba(0,64,255,.4)');
+	       lineWidth(4);
                sk().drawBounds();
+	       _g.restore();
             }
 
             if (! isHover() && ! isTextMode
@@ -2276,14 +2191,11 @@
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
                var y = y0 + j * 16;
-               utext(hotKeyMenu[j][0], dx + 8, y, 0, 0);
-               utext(hotKeyMenu[j][1], dx +38, y, 0, 0);
+               utext(hotKeyMenu[j][0], dx + 8, y, 0, 0, 'Arial');
+               utext(hotKeyMenu[j][1], dx +38, y, 0, 0, 'Arial');
                if (hotKeyMenu[j][0] == letterPressed)
                   drawRect(dx + 3, y - 3, 30, 20);
             }
-
-            if (letterPressed != '\0')
-               text(letterPressed + " key pressed", dx + 5, 60, 0, 1);
          }
 
          // SHOW LINKS BETWEEN SKETCHES.
@@ -2343,41 +2255,6 @@
                   break;
                }
          }
-
-/*
-         // SHOW PORTS IN SKETCHES.
-
-         var saveFont = _g.font;
-         _g.font = '12pt Calibri';
-         for (var I = 0 ; I < nsk() ; I++)
-            if (sk(I).parent == null)
-               for (var i = 0 ; i < sk(I).portName.length ; i++)
-                  if (isDef(sk(I).portName[i])) {
-                     var str = sk(I).portName[i];
-                     var A = sk(I).portXY(i);
-                     lineWidth(1);
-                     sk(I).duringSketch(function() {
-                        color(portColor);
-                        fillRect(A[0] - 5, A[1] - 5, 10, 10);
-                     });
-                     sk(I).afterSketch(function() {
-                        var tw = max(portHeight, textWidth(str) + 10);
-                        this.portBounds[i] = [A[0] - tw/2, A[1] - portHeight/2,
-                                              A[0] + tw/2, A[1] + portHeight/2];
-                        var B = this.portBounds[i];
-                        if (this == sk() && isHover() || linkAtCursor != null) {
-                           color(this==outSketch && i==outPort ? portHighlightColor
-                                                               : portBgColor);
-                           fillRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
-                           color(portColor);
-                           utext(str, A[0], A[1], .5, .55);
-                        }
-                        color(this==inSketch && i==inPort ? 'red' : portColor);
-                        drawRect(B[0], B[1], B[2]-B[0], B[3]-B[1]);
-                     });
-                  }
-         _g.font = saveFont;
-*/
 
          // IF IN PULLDOWN MODE, SHOW THE PULLDOWN MENU.
 
@@ -2465,22 +2342,16 @@
                                          : strokesGlyph == null ? []
                                          : strokesGlyph.data[0];
 
-            var isShowingShorthand = isShorthandMode && isShorthandTimeout;
-
             if (isDef(ts) && ts.length > 0) {
-               _g.lineWidth = isShowingShorthand ? 2 : 4;
+               _g.lineWidth = 4;
                _g.beginPath();
-               var i0 = isShowingShorthand ? iOut : 0;
-               if (ts.length > i0) {
-                  _g.moveTo(ts[i0][0], ts[i0][1]);
-                  for (var i = i0 + 1 ; i < ts.length ; i++)
+               if (ts.length > 0) {
+                  _g.moveTo(ts[0][0], ts[0][1]);
+                  for (var i = 1 ; i < ts.length ; i++)
                      _g.lineTo(ts[i][0], ts[i][1]);
                   _g.stroke();
                }
             }
-
-         if (isShowingShorthand)
-            this.showShorthand();
          }
       },
 
@@ -2545,8 +2416,6 @@ var isPanning = false;
 var isRightGesture = false;
 var isRightHover = false;
 var isShiftPressed = false;
-var isShorthandMode = false;
-var isShorthandTimeout = false;
 var isShowingGlyphs = false;
 var isSketchDragActionEnabled = false;
 var isSpacePressed = false;

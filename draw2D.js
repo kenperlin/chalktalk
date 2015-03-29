@@ -53,6 +53,39 @@
       _g.strokeStyle = _g.fillStyle = _rgb_to_string(red, grn, blu);
    }
 
+   function drawTextCursor(x, y, dy, context) {
+      y += 0.35 * dy;
+
+      context.save();
+
+      context.lineWidth = .07 * dy;
+      context.strokeStyle = defaultPenColor;
+      context.beginPath();
+
+      var x0 = x - dy * 4/16;
+      var x1 = x + dy * 4/16;
+
+      var y0 = y - dy * 19/16;
+      var y1 = y - dy * 18/16;
+      var y2 = y + dy *  3/16;
+      var y3 = y + dy *  4/16;
+
+      context.moveTo(x, y1);
+      context.lineTo(x, y2);
+
+      context.moveTo(x0, y0);
+      context.lineTo(x , y1);
+      context.lineTo(x1, y0);
+
+      context.moveTo(x0, y3);
+      context.lineTo(x , y2);
+      context.lineTo(x1, y3);
+
+      context.stroke();
+
+      context.restore();
+   }
+
    function fill(red, grn, blu) {
       if (red === undefined)
          return _g.fillStyle;
@@ -150,13 +183,13 @@
       var xy = [];
       for (var i = 0 ; i < n ; i++) {
          var theta = angle0 + (angle1 - angle0) * i / (n-1);
-	 var c = Math.cos(theta);
-	 var s = Math.sin(theta);
-	 if (power !== undefined) {
-	    var t = pow(pow(abs(c), power) + pow(abs(s), power), 1/power);
-	    c /= t;
-	    s /= t;
-	 }
+         var c = Math.cos(theta);
+         var s = Math.sin(theta);
+         if (power !== undefined) {
+            var t = pow(pow(abs(c), power) + pow(abs(s), power), 1/power);
+            c /= t;
+            s /= t;
+         }
          xy.push([x + w/2 + w/2 * c, y + h/2 + h/2 * s]);
       }
       return xy;

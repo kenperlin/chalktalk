@@ -304,38 +304,6 @@
          if (this.parent == null)
             drawRect(this.xlo, this.ylo, this.xhi - this.xlo, this.yhi - this.ylo);
       },
-      drawCursor : function(x, y, dy, context) {
-         y += 0.35 * dy;
-
-         context.save();
-
-         context.lineWidth = .07 * dy;
-         context.strokeStyle = defaultPenColor;
-         context.beginPath();
-
-         var x0 = x - dy * 4/16;
-         var x1 = x + dy * 4/16;
-
-         var y0 = y - dy * 19/16;
-         var y1 = y - dy * 18/16;
-         var y2 = y + dy *  3/16;
-         var y3 = y + dy *  4/16;
-
-         context.moveTo(x, y1);
-         context.lineTo(x, y2);
-
-         context.moveTo(x0, y0);
-         context.lineTo(x , y1);
-         context.lineTo(x1, y0);
-
-         context.moveTo(x0, y3);
-         context.lineTo(x , y2);
-         context.lineTo(x1, y3);
-
-         context.stroke();
-
-         context.restore();
-      },
       drawLabel : function(label, xy, ax, ay, scale) {
          var P = this.adjustXY(xy);
          utext(label, P[0], P[1], ax, ay);
@@ -410,7 +378,7 @@
          }
 
          if (this.text.length == 0) {
-            this.drawCursor(x1, y1, fontHeight, context);
+            drawTextCursor(x1, y1, fontHeight, context);
             context.restore();
             return;
          }
@@ -447,7 +415,7 @@
             if (isCursor) {
                if (this.textCursor >= j && this.textCursor <= j + str.length) {
                   var cx = tx + textWidth(str.substring(0,this.textCursor - j));
-                  this.drawCursor(cx, y, fontHeight, context);
+                  drawTextCursor(cx, y, fontHeight, context);
                }
                j += str.length;
             }

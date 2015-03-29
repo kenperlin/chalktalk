@@ -1356,6 +1356,7 @@ console.log("aha");
    var strokesGlyph = null;
 
    function findGlyph(strokes, glyphs) {
+
       if (strokes.length == 0 || strokes[0].length < 2)
          return null;
 
@@ -1367,12 +1368,27 @@ console.log("aha");
       var bestMatch = 0;
       var bestScore = 10000000;
       for (var i = 0 ; i < glyphs.length ; i++) {
+
+         // IN TEXT MODE, ONLY TRY TO RECOGNIZE TEXT CHARACTERS.
+
+         if (isTextMode) {
+            var name = glyphs[i].name;
+            if (name.length > 1 && name.indexOf('number_sketch') < 0
+	                        && name != 'cap'
+	                        && name != 'del'
+	                        && name != 'ret'
+	                        && name != 'spc' )
+               continue;
+         }
+
          var score = strokesGlyph.compare(glyphs[i]);
+
          if (score < bestScore) {
             bestScore = score;
             bestMatch = i;
          }
       }
+
       return glyphs[bestMatch];
    }
 
