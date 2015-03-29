@@ -198,7 +198,7 @@
       }
       this.value = function(i) {
          if (i === undefined) i = 0;
-         return sCurve(this.weights[i]);
+         return isNaN(this.weights[i]) ? 0 : sCurve(this.weights[i]);
       }
       this.state = function(n) {
          if (n !== undefined) {

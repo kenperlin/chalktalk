@@ -4,6 +4,7 @@
 
 function XMLScene(name) {
    this.name = name;
+   this.modification_version = 0;
    this.clear();
 
    this.fields = {};
@@ -35,12 +36,7 @@ XMLScene.prototype = {
    },
 
    toString : function() {
-      var s = '';
-      s += '<Client'
-               + ' id="'   + this.name + '"'
-	       + ' time="' + (new Date()).getTime() + '"'
-	       + '>\n'
-	       + '<Balls>\n';
+      var s = '<Balls>\n';
       var anyLinks = false;
       for (var i = 0 ; i < this.objs.length ; i++) {
          var obj = this.objs[i];
@@ -56,14 +52,24 @@ XMLScene.prototype = {
 	    var key = f[j];
 	    var val = obj[1 + j];
 	    if (key != 'a' && key != 'b')
-	       val = roundedString(val, -4);
+	       val = roundedString(val, -3);
             s += key + '="' + val + '" ';
          }
          s += '/>\n';
       }
       s += '</Links>\n'
-         + '</Client>\n';
-      return s;
+
+      if (s != this.s) {
+         this.s = s;
+         this.modification_version++;
+      }
+
+      return '<Update'
+           + ' id="' + this.name + '"'
+	   + ' modification_version="' + this.modification_version + '"'
+	   + '>'
+	   + s
+           + '</Update>\n';
    },
 }
 
