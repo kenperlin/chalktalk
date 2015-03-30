@@ -1164,6 +1164,10 @@
          case 'p':
             isPanning = true;
             break;
+         default:
+	    if (isk())
+	      sk().keyDown(letter);
+            break;
          }
       },
 
@@ -1542,6 +1546,10 @@
          case 'Z':
 	    this.toggleShowScript();
             break;
+         default:
+	    if (isk())
+	       sk().keyUp(letter);
+	    break;
          }
       },
 

@@ -10,7 +10,7 @@ function() {
             return this.R.clickType == 'none';
          }
       }
-   
+
       var _p = newVec3();
 
       this.simulate = function() {
@@ -94,6 +94,15 @@ function() {
    this.label = 'stickman';
    this.is3D = true;
 
+   this.keyUp = function(letter) {
+      switch (letter) {
+      case '0': this.graph.choice.state(0); break;
+      case '1': this.graph.choice.state(1); break;
+      case '2': this.graph.choice.state(2); break;
+      case '3': this.graph.choice.state(3); break;
+      }
+   }
+   
    this.graph = new VisibleGraph();
    this.graph.choice = new Choice();
    this.graph.setResponder(new MyResponder());
