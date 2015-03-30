@@ -79,13 +79,15 @@ function() {
          }
       );
       this.doB(            // Swipe on stickman's background to set a motion state.
-         function(p) {
+         function() {
 	    this.p.copy(this.graph.p);
+	    this.isDragGesture = false;
 	 },
 	 undefined,
-         function(p) {
-	    this.graph.choice.state(pieMenuIndex(this.graph.p.x - this.p.x,
-	                                         this.p.y - this.graph.p.y));
+         function() {
+	    if (this.p.distanceTo(this.graph.p) > 0.1)
+	       this.graph.choice.state(pieMenuIndex(this.graph.p.x - this.p.x,
+	                                            this.p.y - this.graph.p.y));
 	 }
       );
    }
@@ -115,23 +117,23 @@ function() {
 
    // STICKMAN'S JOINTS.
 
-   this.graph.addNode(  0,  1 , 0   ); //  CHEST
-   this.graph.addNode(  0, .65, 0   ); //  BELLY
-   this.graph.addNode(  0, .3 , 0   ); //  PELVIS
+   this.graph.addNode(  0,  1 , 0   );  //  CHEST
+   this.graph.addNode(  0, .65, 0   );  //  BELLY
+   this.graph.addNode(  0, .3 , 0   );  //  PELVIS
 
-   this.graph.addNode(-.2,-.35, 0.2 ); //  R_KNEE
-   this.graph.addNode(-.4, -1 , 0   ); //  R_ANKLE
+   this.graph.addNode(-.2,-.35, 0.2 );  //  R_KNEE
+   this.graph.addNode(-.4, -1 , 0   );  //  R_ANKLE
 
-   this.graph.addNode( .2,-.35, 0.2 ); //  L_KNEE
-   this.graph.addNode( .4, -1 , 0   ); //  L_ANKLE
+   this.graph.addNode( .2,-.35, 0.2 );  //  L_KNEE
+   this.graph.addNode( .4, -1 , 0   );  //  L_ANKLE
 
-   this.graph.addNode(  0,1.4 , 0, 1); //  HEAD
+   this.graph.addNode(  0,1.4 , 0, 1);  //  HEAD
 
-   this.graph.addNode(-.2, .6 ,-0.2 ); //  R_ELBOW
-   this.graph.addNode(-.4, .2 , 0   ); //  R_WRIST
+   this.graph.addNode(-.2, .6 ,-0.2 );  //  R_ELBOW
+   this.graph.addNode(-.4, .2 , 0   );  //  R_WRIST
 
-   this.graph.addNode( .2, .6 ,-0.2 ); //  L_ELBOW
-   this.graph.addNode( .4, .2 , 0   ); //  L_WRIST
+   this.graph.addNode( .2, .6 ,-0.2 );  //  L_ELBOW
+   this.graph.addNode( .4, .2 , 0   );  //  L_WRIST
 
    // STICKMAN'S LIMBS.
 
