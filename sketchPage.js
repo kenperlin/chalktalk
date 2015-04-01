@@ -200,10 +200,6 @@
          this.panXDown = _g.panX;
          this.panYDown = _g.panY;
 
-         if (isOnScreenKeyboard() && onScreenKeyboard.mouseDown(x,y)) {
-            return;
-         }
-
          if (this.hintTrace !== undefined) {
             this.hintTrace.push([[x,y]]);
             return;
@@ -367,10 +363,6 @@
          this.y = y;
 
          if (this.isDraggingGlyph) {
-            return;
-         }
-
-         if (isOnScreenKeyboard() && onScreenKeyboard.mouseDrag(x,y)) {
             return;
          }
 
@@ -582,15 +574,6 @@
                this.paletteColorDragXY = null;
             }
             return;
-         }
-
-         if (isOnScreenKeyboard() && !onScreenKeyboard.dismissClick(x,y) && onScreenKeyboard.mouseUp(x,y)) {
-            if (!onScreenKeyboard.keyClick(x,y)) {
-                return;
-            } else {
-                this.handleTextChar(onScreenKeyboard.key);
-                return;
-            }
          }
 
          if (! isVerticalPan) {
@@ -961,10 +944,6 @@
          if (isFakeMouseDown) {
             this.mouseDrag(x, y);
             return;
-         }
-
-         if (isOnScreenKeyboard()) {
-            onScreenKeyboard.mouseMove(x, y);
          }
 
          // IF IN SKETCH-ACTION MODE, MOVING MOUSE DOES THE SKETCH ACTION.
@@ -1923,9 +1902,6 @@
                            codeElement.codeSketch != codeSketch);
             codeElement.codeSketch = codeSketch;
          }
-
-         if (isOnScreenKeyboard())
-            onScreenKeyboard.render();
 
          if (this.paletteColorDragXY != null) {
             color(palette[paletteColorId]);

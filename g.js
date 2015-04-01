@@ -1875,9 +1875,6 @@ console.log("aha");
             :                                     'crosshair'
             ;
 
-         onScreenKeyboard.x = w / 2;
-         onScreenKeyboard.y = h * 3 / 4;
-
          var prevTime = time;
          time = ((new Date()).getTime() - _startTime) / 1000.0;
          This().elapsed = time - prevTime;
