@@ -56,6 +56,13 @@ SketchLink.prototype = {
 
          this.C = clipCurveAgainstRect(this.C, [a.xlo,a.ylo,a.xhi,a.yhi]);
          this.C = clipCurveAgainstRect(this.C, [b.xlo,b.ylo,b.xhi,b.yhi]);
+	 this.C = resampleCurve(this.C, 20);
+
+         // Text label will appear in center of curve.
+
+         var n = this.C.length;
+         var i = floor(n / 2);
+	 this.c = getPointOnCurve(this.C, 0.5);
       }
 
       // Draw the link:
@@ -80,24 +87,20 @@ SketchLink.prototype = {
 	    // if any.
 
 	    if (! isNan(b.inValue[j])) {
-               var cx = (ax + bx) / 2 + (ay - by) * s;
-               var cy = (ay + by) / 2 + (bx - ax) * s;
                color(defaultPenColor);
                textHeight(12);
-               utext(roundedString(b.inValue[j]), cx, cy, .5, .5);
+               utext(roundedString(b.inValue[j]), this.c[0], this.c[1], .5, .5);
 	    }
 	 }
 
 	 // Else label the link as 'x','y' or 'z'.
 
          else {
-            var cx = (ax + bx) / 2 + (ay - by) * s;
-            var cy = (ay + by) / 2 + (bx - ax) * s;
             color(backgroundColor);
-            fillOval(cx - 13, cy - 13, 26, 26);
+            fillOval(this.c[0] - 13, this.c[1] - 13, 26, 26);
             color(dataColor);
             textHeight(16);
-            utext(j==0 ? "x" : j==1 ? "y" : "z", cx, cy - (j==1?3:1), .5, .6, 'Arial');
+            utext("xyzXYZ".substring(j, j+1), this.c[0], this.c[1] - (j==1?3:1), .5, .6, 'Arial');
          }
       }
    },
