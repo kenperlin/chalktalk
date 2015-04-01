@@ -53,11 +53,11 @@ function() {
          this.tweak(HEAD   , 0, .02, 0, .9);
 	 this.tweak(L_ELBOW, 0, 0, -.01);
 	 this.tweak(L_KNEE , 0, 0, .02);
-	 this.tweak(L_WRIST, .01, -.01 - .05 * dy, .01);
+	 this.tweak(L_WRIST, .01, -.015 - .05 * dy, .01);
 	 this.tweak(PELVIS , .05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
 	 this.tweak(R_ELBOW, 0, 0, -.01);
 	 this.tweak(R_KNEE , 0, 0, .02);
-	 this.tweak(R_WRIST, -.01, -.01 + .05 * dy, .01);
+	 this.tweak(R_WRIST, -.01 - V1 * (.01 + .01 * sine), -.015 + .05 * dy + V1 * .035, .01);
       }
    
       this.defaultNodeRadius = 0.05;
@@ -106,6 +106,7 @@ function() {
 
    this.graph.clear();
 
+   //             0     1     2      3       4      5       6     7      8       9       10      11
    var names = 'CHEST BELLY PELVIS R_KNEE R_ANKLE L_KNEE L_ANKLE HEAD R_ELBOW R_WRIST L_ELBOW L_WRIST'.split(' ');
    for (var i = 0 ; i < names.length ; i++)
       window[names[i]] = i;
@@ -157,14 +158,12 @@ function() {
 
    // INVISIBLE RESTORATIVE FORCE LINKS.
 
-   this.graph.addLink( 0,  2, 0.3);
-   this.graph.addLink( 1,  8, 0.1);
-   this.graph.addLink( 1, 10, 0.1);
-   this.graph.addLink( 8, 10, 0.1);
-   this.graph.addLink( 7,  8, 0.1);
-   this.graph.addLink( 7, 10, 0.1);
-   this.graph.addLink( 9, 11, 0.03);
-   this.graph.addLink( 3,  5, 0.1);
+   this.graph.addLink(CHEST,  PELVIS,  0.3);
+   this.graph.addLink(BELLY,  R_ELBOW, 0.1);
+   this.graph.addLink(BELLY,  L_ELBOW, 0.1);
+   this.graph.addLink(HEAD,   R_ELBOW, 0.1);
+   this.graph.addLink(HEAD,   L_ELBOW, 0.1);
+   this.graph.addLink(R_KNEE,  L_KNEE, 0.1);
 
    this.graph.computeLengths();
 
@@ -215,7 +214,7 @@ function() {
          for (var l = 0 ; l < this.nLinksToRender ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
 
-         if (this == sk() && isCodeWidget) {
+         if (this == sk() && isCodeWidget && ! isCodeScript()) {
             switch (this.code[codeSelector.selectedIndex][0]) {
 	    case 'lift'  : this.setOutPortValue(R.r_lift  ); break;
 	    case 'travel': this.setOutPortValue(R.r_travel); break;
