@@ -254,7 +254,7 @@
           + "</select>"
           + "<br>"
           + "<textArea rows=8 cols=24 id=code_text resize='none'"
-          + " style=';outline-width:0;border-style:solid;resize:none;overflow:scroll'"
+          + " style=';outline-width:0;border-style:none;resize:none;overflow:scroll'"
           + " onkeyup='updateF()'>"
           + "</textArea>";
 
