@@ -1865,12 +1865,11 @@ console.log("aha");
          document.body.style.cursor =
             (isVideoPlaying && ! isBottomGesture && ! isRightHover) ||
             sketchPage.hideCursor !== undefined ||
-            isExpertMode && (pieMenuIsActive || isSketchInProgress())
-                                                ? 'none'
-            : bgClickCount == 1                 ? 'cell'
-            : isRightHover && ! isBottomGesture ? 'pointer'
-            : isBottomGesture                   ? '-webkit-grabbing'
-            : isBottomHover                     ? '-webkit-grab'
+            isExpertMode && isSketchInProgress() ? 'none'
+            : bgClickCount == 1                  ? 'cell'
+            : isRightHover && ! isBottomGesture  ? 'pointer'
+            : isBottomGesture                    ? '-webkit-grabbing'
+            : isBottomHover                      ? '-webkit-grab'
          // : (videoLayer != undefined) && videoLayer.isShowing() ? 'none'
             :                                     'crosshair'
             ;
@@ -1878,8 +1877,6 @@ console.log("aha");
          var prevTime = time;
          time = ((new Date()).getTime() - _startTime) / 1000.0;
          This().elapsed = time - prevTime;
-
-         pieMenuUpdate(This().mouseX, This().mouseY);
 
          _g = g;
 
@@ -2115,9 +2112,7 @@ console.log("aha");
          }
 
          if (isExpertMode) {
-            if (pieMenuIsActive)
-               drawCrosshair(pieMenuX, pieMenuY);
-            else if (isSketchInProgress())
+            if (isSketchInProgress())
                drawCrosshair(cursorX, cursorY);
          }
 

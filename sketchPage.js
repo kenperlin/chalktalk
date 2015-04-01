@@ -257,11 +257,6 @@
             return;
          }
 
-         if (pieMenuIsActive) {
-            pieMenuStroke = [[x,y]];
-            return;
-         }
-
          if (isTextMode) {
             strokes = [[[x,y]]];
             strokesStartTime = time;
@@ -450,11 +445,6 @@
             return;
          }
 
-         if (pieMenuIsActive) {
-            pieMenuStroke.push([x, y]);
-            return;
-         }
-
          if (isTextMode) {
             strokes[0].push([x, y]);
             return;
@@ -624,11 +614,6 @@
 
          if (this.travel > clickSize())
             this.isClick = false;
-
-         if (pieMenuIsActive) {
-            pieMenuEnd();
-            return;
-         }
 
          // SPECIAL HANDLING FOR TEXT MODE.
 
@@ -2219,11 +2204,6 @@
             _g.font = 'bold 40pt Calibri';
             _g.fillText(msg, (w - textWidth(msg)) / 2, h - margin);
          }
-
-         if (pieMenuIsActive && pieMenuCursorWeight == 0)
-            pieMenuDraw();
-
-         pieMenuOverlay();
 
          annotateEnd();
       },
