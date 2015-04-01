@@ -152,7 +152,6 @@
          this.sketches.push(sketch);
          this.index = this.sketches.length - 1;
          sketch.index = this.index;
-         pullDownLabels = sketchActionLabels.concat(sketch.labels);
       },
 
       getSketchesByLabel : function(label) {
@@ -177,6 +176,8 @@
 
       mouseDown : function(x, y) {
 
+         this.isFocusOnSketch = false;
+
          if (window._is_after_updateF) {
             isTextMode = false;
             return;
@@ -190,7 +191,7 @@
 
          this.isPressed = true;
          this.isClick = true;
-         this.isPossibleClickOverBackground = ! isHover();
+         this.isMouseDownOverBackground = ! isHover();
          this.travel = 0;
          this.xDown = x;
          this.yDown = y;
@@ -291,15 +292,20 @@
          if (this.isCreatingGroup)
             return;
 
+         // IN EVERY CASE, EITHER MOUSE DOWN OVER AN EXISTING SKETCH, OR CREATE A NEW SKETCH.
+
+         this.isFocusOnSketch = true;
+         this.isStartingToDrawSimpleSketch = false;
+
          // SEND MOUSE DOWN/DRAG COMMANDS TO AN EXISTING SKETCH.
 
-         this.isFocusOnSketch = false;
+         this.isFocusOnGlyphSketch = false;
 
          if (isk() && sk().isMouseOver) {
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
-               this.isFocusOnSketch = ! (sk() instanceof SimpleSketch) || sk().isGroup();
+               this.isFocusOnGlyphSketch = ! (sk() instanceof SimpleSketch) || sk().isGroup();
                sk().isPressed = true;
                sk().isClick = true;
                sk().travel = 0;
@@ -309,20 +315,21 @@
                sk().y = y;
             }
             if (outPort == -1 || sk() instanceof NumericSketch) {
-
                m.save();
                computeStandardViewInverse();
-	       if (! sk().sketchTextsMouseDown(x, y))
+	       if (! sk().sketchTextsMouseDown(x, y)) {
                   sk().mouseDown(x, y);
-               this.skCallback('onPress', x, y);
+                  this.skCallback('onPress', x, y);
+               }
                m.restore();
-
             }
          }
 
          // START TO DRAW A NEW SIMPLE SKETCH.
 
          else {
+	    this.isStartingToDrawSimpleSketch = true;
+
             addSketch(new SimpleSketch());
             sk().sketchProgress = 1;
             sk().sketchState = 'finished';
@@ -333,7 +340,6 @@
             computeStandardViewInverse();
             sk().mouseDown(x, y);
             m.restore();
-
          }
       },
 
@@ -481,7 +487,9 @@
          if (this.isCreatingGroup)
             return;
 
-         if (isk()) {
+         // SEND DRAG EVENT TO THE SKETCH THAT HAS FOCUS, IF ANY.
+
+         if (isk() && this.isFocusOnSketch) {
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
             if (sk().sketchProgress == 1) {
@@ -495,9 +503,10 @@
 
                m.save();
                computeStandardViewInverse();
-	       if (! sk().sketchTextsMouseDrag(x, y))
+	       if (! sk().sketchTextsMouseDrag(x, y)) {
                   sk().mouseDrag(x, y);
-               this.skCallback('onDrag', x, y);
+                  this.skCallback('onDrag', x, y);
+               }
                m.restore();
 
             }
@@ -542,6 +551,7 @@
 
          if (isSketchDragActionEnabled && this.travel > clickSize()) {
             endSketchDragAction(x, y);
+            bgClickCount = 0;
             isSketchDragActionEnabled = false;
          }
 
@@ -720,22 +730,16 @@
             return;
          }
 
-         // NON-EXPERT MODE: CLICK ON A SKETCH TO BRING UP ITS PULLDOWN MENU.
+         // CLICKING ON A SKETCH.
 
-         if (/**** ! isExpertMode ****/ false) {
-            if (this.isClick && this.isFocusOnSketch) {
-               if (! doSketchClickAction(x, y)) {
-                  sk().isPressed = false;
-                  pullDownLabels = sketchActionLabels.concat(sk().labels);
-                  pullDownStart(this.x, this.y);
-               }
-               return;
-            }
-         }
+         if (this.isClick && isHover()) {
 
-         // EXPERT MODE: CLICKING ON A SKETCH.
+	    // CLICK ON A GROUP TO UNGROUP IT.
 
-         else if (this.isClick && isHover()) {
+            if (bgClickCount == 0 && sk().isGroup()) {
+	       this.toggleGroup();
+	       return;
+	    }
 
             // CLICK ON A CODE SKETCH TO BRING UP ITS CODE.
 
@@ -753,23 +757,15 @@
                return;
          }
 
-         // IN ALL OTHER CASES, IGNORE PREVIOUS CLICK ON THE BACKGROUND.
+	 // IF WE JUST CLICKED, THEN WE ARE NOT REALLY STARTING TO DRAW A SIMPLE SKETCH.
 
-         else if (bgClickCount == 1) {
-            bgClickCount = 0;
-            return;
-         }
+	 if (this.isStartingToDrawSimpleSketch && this.isClick)
+	    this.isFocusOnSketch = false;
 
-         // CLICK ON A GROUP TO UNGROUP IT.
+         // SEND UP EVENT TO THE SKETCH THAT HAS FOCUS, IF ANY.
 
-         if (isHover() && sk().isGroup()) {
-            this.toggleGroup();
-            return;
-         }
+         if (isk() && this.isFocusOnSketch) {
 
-         // SEND UP EVENT TO THE SKETCH AT THE MOUSE.
-
-         if (isk()) {
             x = sk().unadjustX(x);
             y = sk().unadjustY(y);
 
@@ -777,23 +773,16 @@
                sk().isPressed = false;
             sk().isDrawingEnabled = true;
 
-            m.save();
-            computeStandardViewInverse();
-	    if (! sk().sketchTextsMouseUp(x, y))
-               sk().mouseUp(x, y);
-            this.skCallback('onRelease', x, y);
-            m.restore();
-
-            // BEGINNING OF IMPLEMENTATION OF SENTENCE LOGIC IN DRAWING LANGUAGE.
-/*
-            var sketches = sk().otherSketchesAt(x,y);
-            if (sketches.length > 0) {
-               console.log("SUBJECT = " + sk().indexName);
-               console.log("PREDICATE = " + sketches[0].indexName);
-               if (sketches.length > 1)
-                  console.log("OBJECT = " + sketches[1].indexName);
+            if (outPort == -1 || sk() instanceof NumericSketch) {
+               m.save();
+               computeStandardViewInverse();
+	       if (! sk().sketchTextsMouseUp(x, y)) {
+                  sk().mouseUp(x, y);
+                  this.skCallback('onRelease', x, y);
+               }
+               m.restore();
             }
-*/
+
             if (this.isClick && isHover() && isDef(sk().onClick)) {
                m.save();
                computeStandardViewInverse();
@@ -813,32 +802,13 @@
             }
          }
 
-         // CLICK OVER BACKGROUND
+         // DETECT A CLICK OVER BACKGROUND
 
-         if (this.isClick && this.isPossibleClickOverBackground) {
-
-            // EXPERT MODE: TWO CLICKS AT THE SAME PLACE TO BRING UP THE PIE MENU.
-
-            if (/**** isExpertMode || menuType == 1 ****/ true) {
-               switch (++bgClickCount) {
-               case 1:
-                  bgClickX = x;
-                  bgClickY = y;
-                  break;
-               case 2:
-                  if (len(x - bgClickX, y - bgClickY) < 20)
-                     pieMenuStart(x, y);
-                  bgClickCount = 0;
-                  break;
-               }
-            }
-
-            // NOT IN EXPERT MODE: BRING UP THE PAGE PULL DOWN MENU.
-
-            else {
-               pullDownLabels = pagePullDownLabels;
-               pullDownStart(this.x, this.y);
-            }
+         if (this.isClick && this.isMouseDownOverBackground) {
+	    deleteSketch(sk());
+	    bgClickCount++;
+            bgClickX = x;
+            bgClickY = y;
          }
       },
 
@@ -1416,6 +1386,9 @@
 	    if (isk())
 	       this.bringToFront(sk());
             break;
+         case 'T':
+	    defaultFont = defaultFont == 'Arial' ? 'hand2-Medium' : 'Arial';
+	    break;
          case 'g':
             this.toggleGroup();
             break;
@@ -2263,11 +2236,6 @@
                   break;
                }
          }
-
-         // IF IN PULLDOWN MODE, SHOW THE PULLDOWN MENU.
-
-         if (pullDownIsActive)
-            pullDownDraw();
 
          if (isAudiencePopup() && ! isShowingGlyphs) {
             color('rgba(0,32,128,.2)');

@@ -14,7 +14,7 @@ function() {
 	    var freq = this.sketchTexts[0].value;
 
 	    var curve = [];
-	    var eps = 0.03;
+	    var eps = 0.01;
 	    var T = floor(time * freq);
 	    for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
 	       curve.push([2 * t - 1, max(-1,min(1,func((T + t) / freq)))]);

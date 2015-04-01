@@ -13,56 +13,51 @@ function() {
 
       var _p = newVec3();
 
+      this.tweak = function(part, x, y, z, sx, sy, sz) {
+         if (part == this.I || part == this.J)
+	    return;
+         var p = nodes[part].p;
+         p.x += x;
+         p.y += y;
+         p.z += z;
+	 if (sx !== undefined) p.x *= sx;
+	 if (sy !== undefined) p.y *= sy;
+	 if (sz !== undefined) p.z *= sz;
+      }
+
       this.simulate = function() {
+         var nodes = this.graph.nodes;
+
          var V0 = this.graph.choice.value(0);
          var V1 = this.graph.choice.value(1);
          var V2 = this.graph.choice.value(2);
          var V3 = this.graph.choice.value(3);
 
-         var nodes = this.graph.nodes;
+         var freq = 1.5;
+	 var sine = sin(freq * TAU * time);
 
-	 var t = time;
+	 function step(t) { return abs(((t) % 1) - .5) - .3; }
 
-	 var signal = sin(3 * PI * t);
+	 this.l_travel = V3 * step(freq * time);
+         this.l_lift   = V3 * max(0,-.3 * sine);
+	 this.r_travel = V3 * step(freq * time + .5);
+         this.r_lift   = V3 * max(0, .3 * sine);
 
-	 var fwd = (1.5 * t) % 1.0;
+         nodes[R_ANKLE].p.set(-.4, -1 + this.r_lift, this.r_travel);
+         nodes[L_ANKLE].p.set( .4, -1 + this.l_lift, this.l_travel);
 
-         nodes[HEAD].p.x *= 0.9;
-	 nodes[HEAD].p.y += .02;
+	 var dy = nodes[L_ANKLE].p.y - nodes[R_ANKLE].p.y;
 
-         nodes[R_ANKLE].p.set(-.4, -1 + V3 * max(0, .3 * signal), V3 * (abs( ((1.5 * t + .5)%1) - .5) - .3));
-         nodes[L_ANKLE].p.set( .4, -1 + V3 * max(0,-.3 * signal), V3 * (abs( ((1.5 * t     )%1) - .5) - .3));
-	 nodes[PELVIS].p.x += 0.05 * V2 * signal;
-	 nodes[PELVIS].p.x -= 0.05 * V3 * signal;
-
-	 nodes[CHEST].p.z += .015;
-	 nodes[BELLY].p.z -= .01;
-	 nodes[PELVIS].p.z -= .03;
-
-	 nodes[CHEST].p.y += .03;
-	 nodes[BELLY].p.y += .03;
-	 nodes[PELVIS].p.y += .03;
-
-	 nodes[CHEST].p.z *= .9;
-	 nodes[BELLY].p.z *= .9;
-	 nodes[PELVIS].p.z *= .9;
-
-	 nodes[R_KNEE].p.z += .02;
-	 nodes[L_KNEE].p.z += .02;
-
-	 nodes[R_ELBOW].p.z -= .01;
-	 nodes[L_ELBOW].p.z -= .01;
-
-	 nodes[R_WRIST].p.x -= .01;
-	 nodes[L_WRIST].p.x += .01;
-	 nodes[R_WRIST].p.z += .01;
-	 nodes[L_WRIST].p.z += .01;
-	 nodes[R_WRIST].p.y -= .01;
-	 nodes[L_WRIST].p.y -= .01;
-
-	 var dy = nodes[6].p.y - nodes[4].p.y;
-	 nodes[ 9].p.y += .05 * dy;
-	 nodes[11].p.y -= .05 * dy;
+	 this.tweak(BELLY  , 0, .03, -.01, 1, 1, .9);
+	 this.tweak(CHEST  , 0, .03, .015, 1, 1, .9);
+         this.tweak(HEAD   , 0, .02, 0, .9);
+	 this.tweak(L_ELBOW, 0, 0, -.01);
+	 this.tweak(L_KNEE , 0, 0, .02);
+	 this.tweak(L_WRIST, .01, -.01 - .05 * dy, .01);
+	 this.tweak(PELVIS , .05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
+	 this.tweak(R_ELBOW, 0, 0, -.01);
+	 this.tweak(R_KNEE , 0, 0, .02);
+	 this.tweak(R_WRIST, -.01, -.01 + .05 * dy, .01);
       }
    
       this.defaultNodeRadius = 0.05;
@@ -183,7 +178,7 @@ function() {
    this.render = function(elapsed) {
       this.graph.choice.update(elapsed);
 
-      this.code = null;
+      this.code = [["signals",""],["lift",""],["travel",""]];
       var graph = this.graph;
       graph.pixelSize = this.computePixelSize();
       var nodes = graph.nodes;
@@ -219,6 +214,13 @@ function() {
 
          for (var l = 0 ; l < this.nLinksToRender ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
+
+         if (this == sk() && isCodeWidget) {
+            switch (this.code[codeSelector.selectedIndex][0]) {
+	    case 'lift'  : this.setOutPortValue(R.r_lift  ); break;
+	    case 'travel': this.setOutPortValue(R.r_travel); break;
+            }
+         }
       });
    }
 

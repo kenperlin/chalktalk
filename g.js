@@ -205,9 +205,6 @@
          if (sketchAction != null)
             return;
 
-         if (pullDownIsActive)
-            return;
-
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
@@ -228,11 +225,7 @@
 
       canvas.oncontextmenu = function(event) {
          setTextMode(false);
-         try {
-            if (isMouseOverBackground)
-               pullDownLabels = pagePullDownLabels;
-            pullDownStart(handle.mouseX, handle.mouseY);
-         } catch (e) {}
+console.log("right click -- not yet used");
          return false;
       };
 
@@ -295,13 +288,6 @@
          handle.mouseY = event.clientY - r.top;
          handle.mousePressed = false;
 
-         // UPDATE PULLDOWN MENU SELECTION ACTION.
-
-         if (pullDownIsActive) {
-            pullDownUpdate();
-            return;
-         }
-
          if (isDef(handle.mouseUp))
             handle.mouseUp(handle.mouseX, handle.mouseY);
 
@@ -337,9 +323,6 @@
 
          //end Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
-
-         if (pullDownIsActive)
-            return;
 
          // MOUSE IS BEING DRAGGED.
 
@@ -990,6 +973,7 @@ console.log(harry.fred);
       ['d'  , "show/hide data"],
       ['e'  , "edit code"],
       ['f'  , "bring sketch to front"],
+      ['F'  , "toggle default font"],
       ['g'  , "group/ungroup"],
       ['h'  , "draw hint lines"],
       ['i'  , "insert text"],
@@ -1287,11 +1271,8 @@ console.log("aha");
 /////////////////////////////////////////////////////////////////////
 
    function finishDrawingUnfinishedSketch() {
-      if (! pullDownIsActive && isk()
-                           && ! isHover()
-                           && sk().sketchState != 'finished') {
+      if (isk() && ! isHover() && sk().sketchState != 'finished')
          finishSketch();
-      }
    }
 
    function finishSketch(sketch) {
@@ -1374,10 +1355,10 @@ console.log("aha");
          if (isTextMode) {
             var name = glyphs[i].name;
             if (name.length > 1 && name.indexOf('number_sketch') < 0
-	                        && name != 'cap'
-	                        && name != 'del'
-	                        && name != 'ret'
-	                        && name != 'spc' )
+                                && name != 'cap'
+                                && name != 'del'
+                                && name != 'ret'
+                                && name != 'spc' )
                continue;
          }
 
@@ -1534,7 +1515,7 @@ console.log("aha");
       case 4:
          _font_scale_factor *= 1 + 0.01 * (y - bgAction_yDown);
          _font_scale_factor = min(900, _font_scale_factor);
-	 bgAction_yDown = y;
+         bgAction_yDown = y;
          break;
       }
    }
@@ -1544,28 +1525,28 @@ console.log("aha");
       switch (bgAction_dir1) {
       case -1:
          switch (bgAction_dir2) {
-	 case 2:
+         case 2:
             setPage(pageIndex + 1);
-	    break;
-	 case 6:
+            break;
+         case 6:
             setPage(pageIndex - 1);
-	    break;
-	 }
-	 break;
+            break;
+         }
+         break;
       case 5:
          switch (bgAction_dir2) {
-	 case 4:
-	    toggleTextMode();
-	    break;
-	 }
+         case 4:
+            toggleTextMode();
+            break;
+         }
          break;
       case 2:
          switch (bgAction_dir2) {
-	 case 4:
-	    isShowingGlyphs = ! isShowingGlyphs;
-	    break;
-	 }
-	 break;
+         case 4:
+            isShowingGlyphs = ! isShowingGlyphs;
+            break;
+         }
+         break;
       }
    }
 
@@ -1603,6 +1584,10 @@ console.log("aha");
       case 6:
          sk().arrowBegin(x, y);
          break;
+      case 7:
+         sketchPage.isCreatingGroup = true;
+         sketchPage.groupDragPath(x, y);
+         break;
       }
    }
 
@@ -1637,7 +1622,6 @@ console.log("aha");
          sk().arrowDrag(x, y);
          break;
       case 7:
-         sketchPage.isCreatingGroup = true;
          sketchPage.groupDragPath(x, y);
          break;
       }
@@ -1981,65 +1965,62 @@ console.log("aha");
 
          // COMPUTE SKETCH BOUNDING BOXES.
 
-         if (! pullDownIsActive) {
-            isMouseOverBackground = true;
-            for (var I = 0 ; I < nsk() ; I++) {
-               if (! sk(I).isGroup() && sk(I).parent == null) {
+         isMouseOverBackground = true;
+         for (var I = 0 ; I < nsk() ; I++) {
+            if (! sk(I).isGroup() && sk(I).parent == null) {
 
-                  var xlo = 10000;
-                  var ylo = 10000;
-                  var xhi = -10000;
-                  var yhi = -10000;
-                  for (var i = 1 ; i < sk(I).sp.length ; i++) {
-                     xlo = min(xlo, sk(I).sp[i][0]);
-                     xhi = max(xhi, sk(I).sp[i][0]);
-                     ylo = min(ylo, sk(I).sp[i][1]);
-                     yhi = max(yhi, sk(I).sp[i][1]);
-                  }
-
-                  // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
-
-                  if (sk(I) instanceof NumericSketch ||
-                     sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
-                     var rx = sk(I).scale() * sk(I).textWidth / 2;
-                     var ry = sk(I).scale() * sk(I).textHeight / 2;
-                     var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
-                     var y1 = mix(sk(I).ty(), sk(I).textY, sk(I).scale());
-                     xlo = min(xlo, x1 - rx);
-                     ylo = min(ylo, y1 - ry);
-                     xhi = max(xhi, x1 + rx);
-                     yhi = max(yhi, y1 + ry);
-                  }
-                  else if (sk(I).sp.length <= 1) {
-                     xlo = xhi = sk(I).cx();
-                     ylo = yhi = sk(I).cy();
-                  }
-
-                  sk(I).xlo = xlo - sketchPadding;
-                  sk(I).ylo = ylo - sketchPadding;
-                  sk(I).xhi = xhi + sketchPadding;
-                  sk(I).yhi = yhi + sketchPadding;
+               var xlo = 10000;
+               var ylo = 10000;
+               var xhi = -10000;
+               var yhi = -10000;
+               for (var i = 1 ; i < sk(I).sp.length ; i++) {
+                  xlo = min(xlo, sk(I).sp[i][0]);
+                  xhi = max(xhi, sk(I).sp[i][0]);
+                  ylo = min(ylo, sk(I).sp[i][1]);
+                  yhi = max(yhi, sk(I).sp[i][1]);
                }
 
-               sk(I).isMouseOver = sk(I).parent == null &&
-                                   This().mouseX >= sk(I).xlo &&
-                                   This().mouseX <  sk(I).xhi &&
-                                   This().mouseY >= sk(I).ylo &&
-                                   This().mouseY <  sk(I).yhi ;
+               // TEXT EXTENDS THE BOUNDING BOX OF A SKETCH.
 
-               // IF MOUSE IS OVER ANY SKETCH, THEN IT IS NOT OVER BACKGROUND.
+               if (sk(I) instanceof NumericSketch ||
+                  sk(I) instanceof SimpleSketch && sk(I).text.length > 0) {
+                  var rx = sk(I).scale() * sk(I).textWidth / 2;
+                  var ry = sk(I).scale() * sk(I).textHeight / 2;
+                  var x1 = mix(sk(I).tx(), sk(I).textX, sk(I).scale());
+                  var y1 = mix(sk(I).ty(), sk(I).textY, sk(I).scale());
+                  xlo = min(xlo, x1 - rx);
+                  ylo = min(ylo, y1 - ry);
+                  xhi = max(xhi, x1 + rx);
+                  yhi = max(yhi, y1 + ry);
+               }
+               else if (sk(I).sp.length <= 1) {
+                  xlo = xhi = sk(I).cx();
+                  ylo = yhi = sk(I).cy();
+               }
 
-               if (sk(I).isMouseOver)
-                  isMouseOverBackground = false;
+               sk(I).xlo = xlo - sketchPadding;
+               sk(I).ylo = ylo - sketchPadding;
+               sk(I).xhi = xhi + sketchPadding;
+               sk(I).yhi = yhi + sketchPadding;
             }
+
+            sk(I).isMouseOver = sk(I).parent == null &&
+                                This().mouseX >= sk(I).xlo &&
+                                This().mouseX <  sk(I).xhi &&
+                                This().mouseY >= sk(I).ylo &&
+                                This().mouseY <  sk(I).yhi ;
+
+            // IF MOUSE IS OVER ANY SKETCH, THEN IT IS NOT OVER BACKGROUND.
+
+            if (sk(I).isMouseOver)
+               isMouseOverBackground = false;
          }
 
          // SELECT FRONTMOST SKETCH AT THE CURSOR.
 
-         if (! pullDownIsActive && isFinishedDrawing()
-                                && letterPressed == '\0'
-                                && (! sketchPage.isPressed || sketchPage.paletteColorDragXY != null)
-                                && sketchAction == null)
+         if (isFinishedDrawing() && letterPressed == '\0'
+                                 && (! sketchPage.isPressed || sketchPage.paletteColorDragXY != null)
+                                 && sketchAction == null)
             tryToSelectSketchAtCursor();
 
          // DRAW ARROWS.
@@ -2151,9 +2132,7 @@ console.log("aha");
 
             // DRAW A CURSOR WHERE AUDIENCE SHOULD SEE IT.
 
-            if (pullDownIsActive)
-               drawCrosshair(pullDownX, pullDownY);
-            else if (isSketchInProgress())
+            if (isSketchInProgress())
                drawCrosshair(cursorX, cursorY);
             else
                drawCrosshair(This().mouseX, This().mouseY);
@@ -2176,7 +2155,7 @@ console.log("aha");
 
             // IF SKETCH HAS ANY OUT LINKS:
 
-	    if (sk(I).out.length > 0) {
+            if (sk(I).out.length > 0) {
 
                var S = sk(I);
 
@@ -2501,7 +2480,7 @@ console.log("aha");
             var nNodes = def(xmlSketch.nNodesToRender, nodes.length);
             var nLinks = def(xmlSketch.nLinksToRender, links.length);
 
-	    if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
+            if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
                xmlScene = new XMLScene("graph");
                xmlNodes = nNodes;
                xmlLinks = nLinks;
@@ -2516,7 +2495,7 @@ console.log("aha");
             console.log(xmlScene.toString());
          }
 
-	 // DISPLAY DEBUG MESSAGE ON SCREEN, IF ONE IS DEFINED.
+         // DISPLAY DEBUG MESSAGE ON SCREEN, IF ONE IS DEFINED.
 
          if (window.debugMessage !== undefined) {
             annotateStart();
@@ -2657,8 +2636,6 @@ console.log("aha");
       if (n == sketchPage.index)
          return;
       sketchPage.index = n;
-      if (n >= 0)
-         pullDownLabels = sketchActionLabels.concat(sk().labels);
    }
 
    function copySketch(s) {
@@ -3334,9 +3311,6 @@ console.log("aha");
       // SET SKETCH TYPES FOR THIS PAGE.
 
       sketchTypes = sketchPages[pageIndex].availableSketches;
-      pagePullDownLabels = pageActionLabels.concat(sketchTypes);
-      pullDownLabels = pagePullDownLabels;
-
       sketchTypeLabels = [];
 
       for (var n = 0 ; n < sketchTypes.length ; n++)
