@@ -205,10 +205,14 @@
             return;
          }
 
+         linkAtMouseDown = null;
          isSketchDragActionEnabled = false;
          isBgActionEnabled = false;
          if (bgClickCount == 1) {
-            if (isSketchDragActionEnabled = isHover()) {
+	    if (linkAtCursor != null) {
+	       linkAtMouseDown = linkAtCursor;
+	    }
+            else if (isSketchDragActionEnabled = isHover()) {
                needToStartSketchDragAction = true;
             }
             else {
@@ -366,6 +370,9 @@
             return;
          }
 
+	 if (linkAtMouseDown != null)
+	    return;
+
          if (isSketchDragActionEnabled && this.travel > clickSize()) {
             if (needToStartSketchDragAction) {
                startSketchDragAction(this.xDown, this.yDown);
@@ -512,9 +519,22 @@
 
          this.isPressed = false;
 
-         if (this.hintTrace !== undefined) {
+         if (this.hintTrace !== undefined)
             return;
-         }
+
+         if (linkAtMouseDown != null) {
+	    var dx = x - this.xDown;
+	    var dy = y - this.yDown;
+	    if (len(dx, dy) > clickSize()) {
+	       switch (pieMenuIndex(dx, dy)) {
+	       case 0 : linkAtMouseDown.displayMode = 2; break;
+	       case 1 : linkAtMouseDown.displayMode = 1; break;
+	       default: linkAtMouseDown.displayMode = 0; break;
+	       }
+	    }
+	    bgClickCount = 0;
+	    return;
+	 }
 
          if (this.portValueDragMode !== undefined) {
             if (this.portValueDragMode == "portValueDragX") {
@@ -2354,6 +2374,7 @@ var isSpacePressed = false;
 var isTogglingMenuType = false;
 var isVerticalPan = false;
 var isVideoBackground = false;
+var linkAtMouseDown = null;
 var menuType = 0;
 var needToStartSketchDragAction = false;
 var paletteColorId = 0;

@@ -48,16 +48,16 @@ function() {
 
 	 var dy = nodes[L_ANKLE].p.y - nodes[R_ANKLE].p.y;
 
-	 this.tweak(BELLY  , 0, .03, -.01, 1, 1, .9);
-	 this.tweak(CHEST  , 0, .03, .015, 1, 1, .9);
+	 this.tweak(BELLY  , 0, .03,-.01, 1, 1, .9);
+	 this.tweak(CHEST  , 0, .03, .05, 1, 1, .9);
          this.tweak(HEAD   , 0, .02, 0, .9);
-	 this.tweak(L_ELBOW, 0, 0, -.01);
+	 this.tweak(L_ELBOW,-0.005, 0, -.015);
 	 this.tweak(L_KNEE , 0, 0, .02);
-	 this.tweak(L_WRIST, .01, -.015 - .05 * dy, .01);
-	 this.tweak(PELVIS , .05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
-	 this.tweak(R_ELBOW, 0, 0, -.01);
+	 this.tweak(L_WRIST, 0.01, -.015 - .05 * dy, .01);
+	 this.tweak(PELVIS , 0.05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
+	 this.tweak(R_ELBOW, 0.005, 0, -.015);
 	 this.tweak(R_KNEE , 0, 0, .02);
-	 this.tweak(R_WRIST, -.01 - V1 * (.01 + .01 * sine), -.015 + .05 * dy + V1 * .035, .01);
+	 this.tweak(R_WRIST,-.01 - V1 * (.01 + .01 * sine), -.015 + .05 * dy + V1 * .035, .01 + V1 * .01);
       }
    
       this.defaultNodeRadius = 0.05;
@@ -158,12 +158,13 @@ function() {
 
    // INVISIBLE RESTORATIVE FORCE LINKS.
 
-   this.graph.addLink(CHEST,  PELVIS,  0.3);
-   this.graph.addLink(BELLY,  R_ELBOW, 0.1);
-   this.graph.addLink(BELLY,  L_ELBOW, 0.1);
-   this.graph.addLink(HEAD,   R_ELBOW, 0.1);
-   this.graph.addLink(HEAD,   L_ELBOW, 0.1);
-   this.graph.addLink(R_KNEE,  L_KNEE, 0.1);
+   this.graph.addLink(CHEST,   PELVIS,  0.3);
+   this.graph.addLink(BELLY,   R_ELBOW, 0.1);
+   this.graph.addLink(BELLY,   L_ELBOW, 0.1);
+   this.graph.addLink(HEAD,    R_ELBOW, 0.1);
+   this.graph.addLink(HEAD,    L_ELBOW, 0.1);
+   this.graph.addLink(R_ELBOW, L_ELBOW, 0.05);
+   this.graph.addLink(R_KNEE,  L_KNEE,  0.1);
 
    this.graph.computeLengths();
 

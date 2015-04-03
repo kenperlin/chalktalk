@@ -264,7 +264,7 @@ console.log("right click -- not yet used");
                   var s = linkAtCursor.s;
                   linkAtCursor.removeFromInSketch();
                   linkAtCursor.removeFromOutSketch();
-                  new SketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0, s / 2);
+                  new SkketchLink(linkAtCursor.a, linkAtCursor.i, sk(), 0, s / 2);
                   var i = sk().outPortIndex(true);
                   new SketchLink(sk(), i, linkAtCursor.b, linkAtCursor.j, s / 2);
                }

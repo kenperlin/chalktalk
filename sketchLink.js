@@ -9,6 +9,7 @@ function SketchLink(a, i, b, j, s) {
    this.b = b;
    this.j = j;
    this.s = def(s, 0);
+   this.displayMode = 0;
 
    // If a has no out links on port i, set this to be its out link.
 
@@ -80,28 +81,49 @@ SketchLink.prototype = {
             else
                arrow(C[n][0], C[n][1], C[n+1][0], C[n+1][1]);
 
-         // When in verbose mode, show the numeric value currently traversing the link:
+         switch (this.displayMode) {
 
-         if (! isExpertMode) {
+         case 2: // Show time-varying numeric value for the link:
 
-	    // if any.
+	    if (this.valueBuffer === undefined)
+	       this.valueBuffer = [];
+            if (b.inValue[j] !== undefined)
+	       this.valueBuffer.push(valueOf(b.inValue[j], time));
 
-	    if (! isNan(b.inValue[j])) {
-               color(defaultPenColor);
-               textHeight(12);
-               utext(roundedString(b.inValue[j]), this.c[0], this.c[1], .5, .5);
+            if (this.valueBuffer.length > 0) {
+	       var curve = [];
+	       var scale = height() / 20;
+	       for (var i = 0 ; i < this.valueBuffer.length ; i++)
+	          curve.push([this.c[0] + this.valueBuffer.length - i,
+	                      this.c[1] - scale * this.valueBuffer[i]]);
+               _g.save();
+	       lineWidth(1);
+	       color(liveDataColor);
+	       drawCurve(curve);
+               _g.restore();
+            }
+	    break;
+
+         case 1: // Show the numeric value currently traversing the link:
+
+            if (b.inValue[j] !== undefined) {
+               color(liveDataColor);
+               textHeight(sfs(12));
+               utext(roundedString(valueOf(b.inValue[j], time)), this.c[0], this.c[1], .5, .5);
 	    }
-	 }
+	    break;
 
-	 // Else label the link as 'x','y' or 'z'.
+	 case 0: // Label the link as 'x','y' or 'z'.
 
-         else {
+	    var ts = sfs(10);
             color(backgroundColor);
-            fillOval(this.c[0] - 13, this.c[1] - 13, 26, 26);
+            fillOval(this.c[0] - ts, this.c[1] - ts, 2*ts, 2*ts);
             color(dataColor);
-            textHeight(16);
+            textHeight(ts*16/13);
             utext("xyzXYZ".substring(j, j+1), this.c[0], this.c[1] - (j==1?3:1), .5, .6, 'Arial');
-         }
+	    break;
+
+	 }
       }
    },
 
