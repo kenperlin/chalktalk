@@ -1537,6 +1537,8 @@ console.log("aha");
          switch (bgAction_dir2) {
          case 4:
             toggleTextMode();
+            sk().textX = sk().tX = bgAction_xDown;
+	    sk().textY = sk().tY = bgAction_yDown;
             break;
          }
          break;
