@@ -1,9 +1,9 @@
 /*
-   A SketchText is a kind of object that appears as visible one-line text inside a Chalktalk Sketch.
+   A SketchText is a kind of object that appears as visible text inside a Chalktalk Sketch.
 
    Every Sketch has a (possibly empty) array of SketchText objects.  Each SketchText has a
    current text string, an x,y location (in the local [-1,+1]x[-1,+1] coordinate of the sketch),
-   and a specified size (where 2.0 would be the entire height of the sketch).
+   and a specified size (where 2.0 would span the entire height of the sketch, from -1.0 to +1.0).
 
    If the text has a numeric value, then dragging with the mouse, starting within the bounding box
    of the displayed text, will change its numeric (and therefore displayed) value as follows:
@@ -74,8 +74,7 @@ SketchText.prototype = {
 
       if (this._gesture != 'HORIZONTAL SWIPE' && abs(this._yChange) > sfs(30)) {
 
-         // SWEEP VERTICALLY NEAR LEFT TO CHANGE MOST SIGNIFICANT DIGIT.
-         // SWEEP VERTICALLY ANYWHERE ELSE TO CHANGE LEAST SIGNIFICANT DIGIT.
+         // DRAG UP/DOWN ON A DIGIT TO INCREMENT/DECREMENT ITS VALUE.
 
          if (this._gesture == 'NONE') {
             this._gesture = 'VERTICAL DRAG';

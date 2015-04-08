@@ -2,6 +2,8 @@ function() {
    this.labels = ['pentatope', 'hypercube', 'aerochoron', 'octaplex'];
    this.is3D = true;
 
+   this.graph = new Graph();
+
    var trackball = new Trackball(4);
    var mode = 0;
 
@@ -79,10 +81,20 @@ function() {
       vertex.position.copy(P[n]);
       vertex.scale.set(.1,.1,.1);
       this.extendBounds([[P[n].x,P[n].y,P[n].z]]);
+
+      if (this.graph.nodes[n] !== undefined) {
+         this.graph.nodes[n].p.copy(P[n]);
+         this.graph.nodes[n].r = 0.1;
+      }
    }
 
    this.placeEdge = function(n, a, b) {
-      this.mesh.children[n].placeStick(a, b);
+      this.mesh.children[n].placeStick(P[a], P[b]);
+
+      if (this.graph.links[n] !== undefined) {
+         this.graph.links[n].i = a;
+         this.graph.links[n].j = b;
+      }
    }
 
    // EDGES OF HYPERCUBE.  EACH EDGE VALUE j = e[axis][i] CONNECTS VERTEX j TO VERTEX j + (1<<axis)
@@ -109,7 +121,7 @@ function() {
                this.placeVertex(n, S[n]);
             for (var i = 0   ; i < 4 ; i++)
             for (var j = i+1 ; j < 5 ; j++)
-               this.placeEdge(n++, P[i], P[j]);
+               this.placeEdge(n++, i, j);
          });
          break;
 
@@ -125,7 +137,7 @@ function() {
             for (var axis = 0 ; axis < 4 ; axis++)
                for (var i = 0 ; i < 8 ; i++) {
                   var j = edges[axis][i];
-                  this.placeEdge(n++, P[j], P[j + (1<<axis)]);
+                  this.placeEdge(n++, j, j + (1<<axis));
                }
          });
          break;
@@ -142,7 +154,7 @@ function() {
             for (var i = 0   ; i < 4 ; i++)
             for (var j = i+1 ; j < 4 ; j++)
             for (var k = 0   ; k < 4 ; k++)
-               this.placeEdge(n++, P[2*i + _bit(k,0)], P[2*j + _bit(k,1)]);
+               this.placeEdge(n++, 2*i + _bit(k,0), 2*j + _bit(k,1));
          });
          break;
 
@@ -182,7 +194,7 @@ function() {
                var k = edgeColor(V[i], V[j]);
                if (k >= 0) {
                   this.mesh.children[n].setMaterial(materials[k]);
-                  this.placeEdge(n++, P[i], P[j]);
+                  this.placeEdge(n++, i, j);
                }
             }
          });
@@ -191,6 +203,7 @@ function() {
    }
 
    this.createVertex = function(material) {
+      this.graph.addNode();
       var vertex = new THREE.Mesh();
       vertex.addGlobe(16, 8);
       vertex.scale.set(.001,.001,.001);
@@ -198,6 +211,7 @@ function() {
    }
 
    this.createEdge = function(material, radius) {
+      this.graph.addLink(0,0,1);
       var edge = new THREE.Mesh();
       edge.radius = radius;
       var tube = edge.addOpenCylinder(8);

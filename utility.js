@@ -193,21 +193,22 @@
 // CHOICE SELECTION WITH CONTINUOUS TRANSITION WEIGHTS.
 
    function Choice() {
-      this.flip = function() {
-         this.set(1 - this.stateValue);
-      }
-      this.value = function(i) {
+      this.weights = [];
+      this.setState(0);
+   }
+   Choice.prototype = {
+      getValue : function(i) {
          if (i === undefined) i = 0;
          return isNaN(this.weights[i]) ? 0 : sCurve(this.weights[i]);
-      }
-      this.state = function(n) {
-         if (n !== undefined) {
-            this.stateValue = n;
-            this.update();
-         }
+      },
+      getState : function(n) {
          return this.stateValue;
-      }
-      this.update = function(delta) {
+      },
+      setState : function(n) {
+         this.stateValue = n;
+         this.update();
+      },
+      update : function(delta) {
          if (delta === undefined)
             delta = 0;
 
@@ -219,9 +220,7 @@
                i == this.stateValue ? min(1, this.weights[i] + 2 * delta)
                                     : max(0, this.weights[i] - delta);
       }
-      this.weights = [];
-      this.state(0);
-   }
+   };
 
 
 // ENCODE A FRACTIONAL AMOUNT AS A PRINTABLE CHARACTER (HAS ABOUT 2 SIG. DIGITS PRECISION).

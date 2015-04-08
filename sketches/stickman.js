@@ -28,10 +28,10 @@ function() {
       this.simulate = function() {
          var nodes = this.graph.nodes;
 
-         var V0 = this.graph.choice.value(0);
-         var V1 = this.graph.choice.value(1);
-         var V2 = this.graph.choice.value(2);
-         var V3 = this.graph.choice.value(3);
+         var V0 = this.graph.choice.getValue(0);
+         var V1 = this.graph.choice.getValue(1);
+         var V2 = this.graph.choice.getValue(2);
+         var V3 = this.graph.choice.getValue(3);
 
          var freq = 1.5;
 	 var sine = sin(freq * TAU * time);
@@ -81,8 +81,8 @@ function() {
 	 undefined,
          function() {
 	    if (this.p.distanceTo(this.graph.p) > 0.1)
-	       this.graph.choice.state(pieMenuIndex(this.graph.p.x - this.p.x,
-	                                            this.p.y - this.graph.p.y));
+	       this.graph.choice.setState(pieMenuIndex(this.graph.p.x - this.p.x,
+	                                               this.p.y - this.graph.p.y));
 	 }
       );
    }
@@ -93,10 +93,10 @@ function() {
 
    this.keyUp = function(letter) {
       switch (letter) {
-      case '0': this.graph.choice.state(0); break;
-      case '1': this.graph.choice.state(1); break;
-      case '2': this.graph.choice.state(2); break;
-      case '3': this.graph.choice.state(3); break;
+      case '0': this.graph.choice.setState(0); break;
+      case '1': this.graph.choice.setState(1); break;
+      case '2': this.graph.choice.setState(2); break;
+      case '3': this.graph.choice.setState(3); break;
       }
    }
    

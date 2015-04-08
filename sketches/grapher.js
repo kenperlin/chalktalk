@@ -13,7 +13,7 @@ function() {
       sinceLastMeasurement = 1000;
       values = [];
 
-      switch (that.choice.state()) {
+      switch (that.choice.getState()) {
       case 0:       // AUTO RANGE
          minval = null;
          maxval = null;
@@ -39,7 +39,7 @@ function() {
 
          values.push(v);
 
-         if (that.choice.state() == 0) {        // AUTO RANGE
+         if (that.choice.getState() == 0) {        // AUTO RANGE
             // update min/max
             if (values.length == 1 || minval === null || maxval === null) {
                minval = v;
@@ -58,9 +58,9 @@ function() {
 
       mLine([-1,1],[-1,-1]);
 
-      if (this.s != this.choice.state())
+      if (this.s != this.choice.getState())
           resetValues();
-      this.s = this.choice.state();
+      this.s = this.choice.getState();
 
       // Record measurement
 
@@ -88,7 +88,7 @@ function() {
 
       // zero line (if one is in range)
 
-      if (this.choice.state() == 2) {
+      if (this.choice.getState() == 2) {
 
          // LOGIC RANGE, draw the baseline below 0
 

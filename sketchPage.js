@@ -1467,7 +1467,7 @@
          case 'X':
 	    if (window.xmlSketch !== undefined)
 	       window.xmlSketch = undefined;
-	    else if (isk() && sk().graph instanceof VisibleGraph)
+	    else if (isk() && sk().graph !== undefined)
 	       window.xmlSketch = sk();
 	    break;
          case 'z':

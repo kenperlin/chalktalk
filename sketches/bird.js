@@ -12,7 +12,7 @@ function() {
    this.onSwipe = function(dx, dy) {
       switch (pieMenuIndex(dx, dy, 8)) {
       case 0:
-         this.choice.state(2);
+         this.choice.setState(2);
          this.isGaze = false;
          break;
       case 1:
@@ -22,7 +22,7 @@ function() {
          this.isTall = true;
          break;
       case 4:
-         this.choice.state(1);
+         this.choice.setState(1);
          break;
       case 6:
          this.isTall = false;
@@ -39,8 +39,8 @@ function() {
       this.gaze = this.isGaze ? min(1, this.gaze + 2 * elapsed)
                               : max(0, this.gaze - elapsed);
 
-      var idle = this.choice.value(1);
-      var walk = this.choice.value(2);
+      var idle = this.choice.getValue(1);
+      var walk = this.choice.getValue(2);
 
       // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
 
@@ -60,7 +60,7 @@ function() {
 
       // T CONTROLS WALK, IS ZERO UNTIL SKETCH IS FINISHED.
 
-      var state = this.choice.state();
+      var state = this.choice.getState();
 
       this.afterSketch(function() {
          switch (state) {

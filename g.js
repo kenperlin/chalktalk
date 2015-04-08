@@ -38,6 +38,12 @@
    var sketchTypesToAdd = [];
    var videoBrightness = 1;
 
+   // CATCH WAND EVENTS.
+
+   function moveWand(x, y, z, qx, qy, qz, qw) {
+      console.log(x + ' ' + y + ' ' + z + ' ' + qx + ' ' + qy + ' ' + qz + ' ' + qw);
+   }
+
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
 
    function width () { return isTouchDevice ? 2560 : isDef(_g) ? _g.canvas.width  : screen.width ; }
