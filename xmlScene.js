@@ -67,6 +67,7 @@ XMLScene.prototype = {
       return '<Update'
            + ' id="' + this.name + '"'
 	   + ' modification_version="' + this.modification_version + '"'
+	   + ' time="' + (new Date().getTime()) + '"'
 	   + '>'
 	   + s
            + '</Update>\n';
