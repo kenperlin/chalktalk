@@ -1261,7 +1261,6 @@
 	    _font_scale_factor *= 1.1;
 	    break;
          case PAGE_UP:
-            break;
          case PAGE_DN:
             var handle = window[_g.canvas.id];
             if (! isFakeMouseDown) {
