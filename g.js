@@ -40,8 +40,35 @@
 
    // CATCH WAND EVENTS.
 
+   var wand = {x:0, y:0, z:0, qx:0, qy:0, qz:0, qw:0};
+   var isWand = false;
+
    function moveWand(x, y, z, qx, qy, qz, qw) {
-      console.log(x + ' ' + y + ' ' + z + ' ' + qx + ' ' + qy + ' ' + qz + ' ' + qw);
+      isWand = true;
+      wand.x = x;
+      wand.y = y;
+      wand.z = z;
+      wand.qx = qx;
+      wand.qy = qy;
+      wand.qz = qz;
+      wand.qw = qw;
+
+      if (isk()) {
+         if (sk()._cursorPoint === undefined)
+	    sk()._cursorPoint = newVec3();
+	 sk()._cursorPoint.set(wand.x, wand.y, wand.z);
+
+         if (isFakeMouseDown) {
+	    if (sk().onDrag !== undefined) {
+	       sk().onDrag(sk()._cursorPoint);
+            }
+         }
+         else {
+	    if (sk().onMove !== undefined) {
+	       sk().onMove(sk()._cursorPoint);
+            }
+         }
+      }
    }
 
    // SET WIDTH AND HEIGHT OF SKETCHPAGE TO MATCH THE WIDTH AND HEIGHT OF THE COMPUTER SCREEN.
@@ -113,6 +140,7 @@
       var handle = getHandle(canvas);
       handle.mouseX = 1000;
       handle.mouseY = 1000;
+      handle.mouseZ = 0;
       handle.mousePressed = false;
 
       function touchResponse(e, message) {
@@ -215,16 +243,19 @@
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = clientY(event) - r.top;
+         handle.mouseZ = 0;
          handle.mousePressedAtX = handle.mouseX;
          handle.mousePressedAtY = handle.mouseY;
+         handle.mousePressedAtZ = handle.mouseZ;
          handle.mousePressedAtTime = time;
          handle.mousePressed = true;
 
          if (isDef(handle.mouseDown))
-            handle.mouseDown(handle.mouseX, handle.mouseY);
+            handle.mouseDown(handle.mouseX, handle.mouseY, handle.mouseZ);
 
          _g.lastX = event.clientX;
          _g.lastY = event.clientY;
+         _g.lastZ = event.clientZ;
       };
 
       // MAKE SURE BROWSER CATCHES RIGHT CLICK.
@@ -240,6 +271,7 @@ console.log("right click -- not yet used");
       canvas.onmouseup = function(event) {
          event.clientX = mouseMoveClientX;
          event.clientY = mouseMoveClientY;
+         event.clientZ = 0;
 
          // RESPOND ONLY TO LEFT MOUSE UP, NOT TO RIGHT MOUSE UP.
 
@@ -292,10 +324,11 @@ console.log("right click -- not yet used");
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = event.clientY - r.top;
+         handle.mouseZ = 0;
          handle.mousePressed = false;
 
          if (isDef(handle.mouseUp))
-            handle.mouseUp(handle.mouseX, handle.mouseY);
+            handle.mouseUp(handle.mouseX, handle.mouseY, handle.mouseZ);
 
          _g.lastX = event.clientX;
       }
@@ -309,22 +342,22 @@ console.log("right click -- not yet used");
 
          mouseMoveClientX = event.clientX;
          mouseMoveClientY = event.clientY;
+         mouseMoveClientZ = event.clientZ;
 
          var handle = getHandle(this);
          var r = event.target.getBoundingClientRect();
          handle.mouseX = clientX(event) - r.left;
          handle.mouseY = clientY(event) - r.top;
+         handle.mouseZ = 0;
 
 
          //start Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
 
          if (handle.mousePressed) {
-            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
-            // console.log(globalStrokes.strokes);
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY,handle.mouseZ);
          }
          else{
-            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY);
-            // console.log(globalStrokes.strokes);
+            globalStrokes.filler(handle.mousePressed,handle.mouseX,handle.mouseY,handle.mouseZ);
          }
 
          //end Lobser\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_//\\_
@@ -342,14 +375,14 @@ console.log("right click -- not yet used");
                    handle.mouseIsDragging = true;
 
                 if (handle.mouseIsDragging)
-                   handle.mouseDrag(handle.mouseX, handle.mouseY);
+                   handle.mouseDrag(handle.mouseX, handle.mouseY, handle.mouseZ);
             }
          }
 
          // MOUSE IS BEING MOVED WITHOUT BUTTONS PRESSED.
 
          else if (isDef(handle.mouseMove))
-            handle.mouseMove(handle.mouseX, handle.mouseY);
+            handle.mouseMove(handle.mouseX, handle.mouseY, handle.mouseZ);
 
          // WHILE PSEUDO-SKETCHING: ADVANCE SKETCH AT SAME RATE AS MOUSE MOVEMENT.
 
@@ -357,10 +390,12 @@ console.log("right click -- not yet used");
                                                         && sk().sketchProgress < 1) {
             var dx = handle.mouseX - sk().advanceX;
             var dy = handle.mouseY - sk().advanceY;
-            var t = sqrt(dx*dx + dy*dy) / sk().sketchLength;
+            var dz = handle.mouseZ - sk().advanceZ;
+            var t = sqrt(dx*dx + dy*dy + dz*dz) / sk().sketchLength;
             sk().sketchProgress = min(1, sk().sketchProgress + t);
             sk().advanceX = handle.mouseX;
             sk().advanceY = handle.mouseY;
+            sk().advanceZ = handle.mouseZ;
          }
 
          // HANDLE PANNING OF THE ENTIRE SKETCH PAGE.
@@ -371,6 +406,7 @@ console.log("right click -- not yet used");
          }
          _g.lastX = event.clientX;
          _g.lastY = event.clientY;
+         _g.lastZ = event.clientZ;
       }
    }
 
@@ -822,12 +858,12 @@ console.log(harry.fred);
          setPage(0);
       }
 
-      events_canvas.keyDown   = function(key)  { e2s(); sketchPage.keyDown(key); }
-      events_canvas.keyUp     = function(key)  { e2s(); sketchPage.keyUp(key); }
-      events_canvas.mouseDown = function(x, y) { e2s(); sketchPage.mouseDown(x, y); }
-      events_canvas.mouseDrag = function(x, y) { e2s(); sketchPage.mouseDrag(x, y); }
-      events_canvas.mouseMove = function(x, y) { e2s(); sketchPage.mouseMove(x, y); }
-      events_canvas.mouseUp   = function(x, y) { e2s(); sketchPage.mouseUp(x, y); }
+      events_canvas.keyDown   = function(key)     { e2s(); sketchPage.keyDown(key); }
+      events_canvas.keyUp     = function(key)     { e2s(); sketchPage.keyUp(key); }
+      events_canvas.mouseDown = function(x, y, z) { e2s(); sketchPage.mouseDown(x, y, z); }
+      events_canvas.mouseDrag = function(x, y, z) { e2s(); sketchPage.mouseDrag(x, y, z); }
+      events_canvas.mouseMove = function(x, y, z) { e2s(); sketchPage.mouseMove(x, y, z); }
+      events_canvas.mouseUp   = function(x, y, z) { e2s(); sketchPage.mouseUp(x, y, z); }
 
       fourStart();
 
@@ -855,8 +891,10 @@ console.log(harry.fred);
    function e2s() {
       sketch_canvas.mouseX = events_canvas.mouseX;
       sketch_canvas.mouseY = events_canvas.mouseY;
+      sketch_canvas.mouseZ = events_canvas.mouseZ;
       sketch_canvas.mousePressedAtX = events_canvas.mousePressedAtX;
       sketch_canvas.mousePressedAtY = events_canvas.mousePressedAtY;
+      sketch_canvas.mousePressedAtZ = events_canvas.mousePressedAtZ;
       sketch_canvas.mousePressedAtTime = events_canvas.mousePressedAtTime;
       sketch_canvas.mousePressed = events_canvas.mousePressed;
    }
@@ -1074,6 +1112,7 @@ console.log(harry.fred);
       var bounds = computeGlyphSketchBounds();
       This().mouseX = (bounds[0] + bounds[2]) / 2;
       This().mouseY = (bounds[1] + bounds[3]) / 2;
+      This().mouseZ = 0;
 
       eval("addSketch(new " + type + "())");
 
@@ -1942,12 +1981,14 @@ console.log("aha");
                sk().tY = This().mouseY - height()/2;
                sk().xStart = cursorX = sk().advanceX = This().mouseX;
                sk().yStart = cursorY = sk().advanceY = This().mouseY;
+               sk().zStart = cursorZ = sk().advanceZ = This().mouseZ;
                sk().sketchState = 'in progress';
             }
 
             if (sk().sketchState == 'in progress' && sk().isDrawingEnabled && sk().sketchProgress == 0) {
                sk().advanceX = This().mouseX;
                sk().advanceY = This().mouseY;
+               sk().advanceZ = This().mouseZ;
             }
          }
 

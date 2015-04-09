@@ -163,18 +163,21 @@
       },
 
 
-      skCallback : function(action, x, y) {
+      skCallback : function(action, x, y, z) {
          if (isk() && sk()[action] !== undefined) {
             if (sk()._cursorPoint === undefined)
                sk()._cursorPoint = newVec3();
-            sk()._cursorPoint.set(x,y,0).applyMatrix4(pixelToPointMatrix);
+            if (x === undefined)
+	       sk()._cursorPoint.set(wand.x,wand.y,wand.z);
+            else
+               sk()._cursorPoint.set(x,y,z).applyMatrix4(pixelToPointMatrix);
             sk()[action](sk()._cursorPoint);
          }
       },
 
       // HANDLE MOUSE DOWN FOR THE SKETCH PAGE.
 
-      mouseDown : function(x, y) {
+      mouseDown : function(x, y, z) {
 
          this.isFocusOnSketch = false;
 
@@ -195,8 +198,10 @@
          this.travel = 0;
          this.xDown = x;
          this.yDown = y;
+         this.zDown = z;
          this.x = x;
          this.y = y;
+         this.z = z;
          this.panXDown = _g.panX;
          this.panYDown = _g.panY;
 
@@ -313,8 +318,8 @@
                m.save();
                computeStandardViewInverse();
 	       if (! sk().sketchTextsMouseDown(x, y)) {
-                  sk().mouseDown(x, y);
-                  this.skCallback('onPress', x, y);
+                  sk().mouseDown(x, y, z);
+                  this.skCallback('onPress', x, y, z);
                }
                m.restore();
             }
@@ -333,14 +338,14 @@
 
             m.save();
             computeStandardViewInverse();
-            sk().mouseDown(x, y);
+            sk().mouseDown(x, y, z);
             m.restore();
          }
       },
 
       // HANDLE MOUSE DRAG FOR THE SKETCH PAGE.
 
-      mouseDrag : function(x, y) {
+      mouseDrag : function(x, y, z) {
 
          if (window._is_after_updateF) {
             return;
@@ -493,8 +498,8 @@
                m.save();
                computeStandardViewInverse();
 	       if (! sk().sketchTextsMouseDrag(x, y)) {
-                  sk().mouseDrag(x, y);
-                  this.skCallback('onDrag', x, y);
+                  sk().mouseDrag(x, y, z);
+                  this.skCallback('onDrag', x, y, z);
                }
                m.restore();
 
@@ -504,7 +509,7 @@
 
       // HANDLE MOUSE UP FOR THE SKETCH PAGE.
 
-      mouseUp : function(x, y) {
+      mouseUp : function(x, y, z) {
 
          if (window._is_after_updateF) {
             window._is_after_updateF = undefined;
@@ -765,8 +770,8 @@
                m.save();
                computeStandardViewInverse();
 	       if (! sk().sketchTextsMouseUp(x, y)) {
-                  sk().mouseUp(x, y);
-                  this.skCallback('onRelease', x, y);
+                  sk().mouseUp(x, y, z);
+                  this.skCallback('onRelease', x, y, z);
                }
                m.restore();
             }
@@ -774,7 +779,7 @@
             if (this.isClick && isHover() && isDef(sk().onClick)) {
                m.save();
                computeStandardViewInverse();
-               this.skCallback('onClick', x, y);
+               this.skCallback('onClick', x, y, 0);
                m.restore();
                return;
             }
@@ -884,8 +889,8 @@
          if (isk()) {
             m.save();
             computeStandardViewInverse();
-            sk().mouseMove(x, y);
-            this.skCallback('onMove', x, y);
+            sk().mouseMove(x, y, z);
+            this.skCallback('onMove', x, y, z);
             m.restore();
          }
          groupPath.push([x,y]);
@@ -924,7 +929,7 @@
 
       // HANDLE MOUSE MOVE FOR THE SKETCH PAGE.
 
-      mouseMove : function(x, y) {
+      mouseMove : function(x, y, z) {
 
          if (this.setPageInfo !== undefined) {
             if (len(x - this.setPageInfo.x, y - this.setPageInfo.y) > clickSize())
@@ -947,7 +952,7 @@
          }
 
          if (isFakeMouseDown) {
-            this.mouseDrag(x, y);
+            this.mouseDrag(x, y, z);
             return;
          }
 
@@ -1038,7 +1043,7 @@
 
                m.save();
                computeStandardViewInverse();
-               sk().mouseMove(x, y);
+               sk().mouseMove(x, y, z);
                m.restore();
 
             }
@@ -1047,6 +1052,7 @@
 
          this.mx = x;
          this.my = y;
+         this.mz = z;
 
          // WHEN MOUSE MOVES OVER THE COLOR PALETTE, SET THE PALETTE COLOR.
 
@@ -1263,14 +1269,26 @@
          case PAGE_UP:
          case PAGE_DN:
             var handle = window[_g.canvas.id];
+	    if (isWand) {
+	       if (window._wandPixel === undefined)
+	          _wandPixel = newVec3();
+               _wandPixel.set(wand.x, wand.y, wand.z).applyMatrix4(pointToPixelMatrix);
+	       mouseMoveEvent.clientX = _wandPixel.x;
+	       mouseMoveEvent.clientY = _wandPixel.y;
+	       mouseMoveEvent.clientZ = _wandPixel.z;
+	    }
             if (! isFakeMouseDown) {
                handle.mouseX = mouseMoveEvent.clientX;
                handle.mouseY = mouseMoveEvent.clientY;
+               handle.mouseZ = mouseMoveEvent.clientZ;
+
                handle.mousePressedAtX = handle.mouseX;
                handle.mousePressedAtY = handle.mouseY;
+               handle.mousePressedAtZ = handle.mouseZ;
+
                handle.mousePressedAtTime = time;
                handle.mousePressed = true;
-               handle.mouseDown(handle.mouseX, handle.mouseY);
+               handle.mouseDown(handle.mouseX, handle.mouseY, handle.mouseZ);
             }
             else {
                if (sketchAction != null) {
@@ -1281,8 +1299,10 @@
                else {
                   handle.mouseX = mouseMoveEvent.clientX;
                   handle.mouseY = mouseMoveEvent.clientY;
+                  handle.mouseZ = mouseMoveEvent.clientZ;
+
                   handle.mousePressed = false;
-                  handle.mouseUp(handle.mouseX, handle.mouseY);
+                  handle.mouseUp(handle.mouseX, handle.mouseY, handle.mouseZ);
                }
             }
             isFakeMouseDown = ! isFakeMouseDown;
