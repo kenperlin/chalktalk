@@ -129,6 +129,7 @@ function() {
       this.duringSketch(function() {
          mLine([-1,0], [1, .2]);
          mLine([-1,0], [1,-.2]);
+         mLine([ 1,0], [2,  0]);
       });
 
       this.afterSketch(function() {
