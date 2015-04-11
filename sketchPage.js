@@ -58,6 +58,7 @@
       this.isGlyphable = true;
       this.isOnPanStrip = false;
       this.keyPressed = -1;
+      this.nnSelected = -1;
       this.paletteColorDragXY = null;
       this.scaleRate = 0;
       this.sketches = [];
@@ -1105,6 +1106,11 @@
             return;
          }
 
+	 if (isShowingGlyphs && key >= 48 && key <= 48 + 9) {
+	    this.nnSelected = key - 48;
+	    return;
+	 }
+
          switch (letter) {
          case 'alt':
             isAltPressed = true;
@@ -1215,6 +1221,11 @@
             isCommandPressed = false;
             return;
          }
+
+	 if (isShowingGlyphs && key >= 48 && key <= 48 + 9) {
+	    this.nnSelected = -1;
+	    return;
+	 }
 
          // Special handling for when in text mode.
 
@@ -1988,6 +1999,7 @@
 
       showGlyph : function(i, cx, cy) {
          var glyph = glyphs[i];
+         var nn = glyph.data.length;
          var b = this.glyphBounds(i);
          var gX = b[0], gY = b[1], gW = b[2]-b[0], gH = b[3]-b[1];
          if (isDef(cx)) {
@@ -2031,12 +2043,10 @@
 
          y += height() / 45 * 10 / this.glyphsPerCol;
 
-         var selected = t >= i && t < i+1;
+         var selected = t >= i && t < i+1 || nn == this.nnSelected;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
          _g.fillStyle = selected ? defaultPenColor : this.glyphColor();
          _g.lineWidth = selected ? 2 : 1;
-
-         var nn = glyph.data.length;
 
          var sc = height() / 2000 * 10 / this.glyphsPerCol;
          for (var n = 0 ; n < nn ; n++) {
