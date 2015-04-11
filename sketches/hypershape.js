@@ -165,10 +165,10 @@ function() {
 	       if (alt) {
 	          function notZero(a, b) { return (A[I][a]!=0 || A[J][a]!=0) && (A[I][b]!=0 || A[J][b]!=0); }
 	          if      (notZero(0,1)) c = 1;
-	          else if (notZero(0,2)) c = 2;
-	          else if (notZero(1,2)) c = 3;
-	          else if (notZero(0,3)) c = 4;
-	          else if (notZero(1,3)) c = 5;
+	          else if (notZero(1,2)) c = 2;
+	          else if (notZero(0,2)) c = 3;
+	          else if (notZero(1,3)) c = 4;
+	          else if (notZero(0,3)) c = 5;
 	          else if (notZero(2,3)) c = 6;
 	       }
                this.mesh.children[n].setMaterial(materials[c]);
