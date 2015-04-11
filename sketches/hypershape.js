@@ -113,7 +113,6 @@ function() {
             mClosedCurve([[-.85,-.85], [.85,-.85], [.85,.85], [-.85,.85]]);
             mCurve([[-.85,.85], [.85,-.85]]);
             mCurve([[.85,.85], [-.85,-.85]]);
-            this.extendBounds([[-1,-1],[1,1]]);
          }
          this.afterSketch(function() {
             var n = 0;
@@ -139,6 +138,8 @@ function() {
                   var j = edges[axis][i];
                   this.placeEdge(n++, j, j + (1<<axis));
                }
+            if (mode %2 != 0) {
+	    }
          });
          break;
 
@@ -149,12 +150,30 @@ function() {
             mLine([-1,0],[1,0]);
          }
          this.afterSketch(function() {
-            for (var n = 0 ; n < 8 ; n++)
+	    var alt = mode % 2 != 0;
+	    var n = 0;
+            for ( ; n < 8 ; n++) {
                this.placeVertex(n, A[n]);
-            for (var i = 0   ; i < 4 ; i++)
+               this.mesh.children[n].setMaterial(materials[alt ? 0 : 1 + floor(n/2)]);
+            }
+            for (var i = 0   ; i < 3 ; i++)
             for (var j = i+1 ; j < 4 ; j++)
-            for (var k = 0   ; k < 4 ; k++)
-               this.placeEdge(n++, 2*i + _bit(k,0), 2*j + _bit(k,1));
+            for (var k = 0   ; k < 4 ; k++) {
+               var I = 2 * i + _bit(k, 0);
+	       var J = 2 * j + _bit(k, 1);
+	       var c = 0;
+	       if (alt) {
+	          function notZero(a, b) { return (A[I][a]!=0 || A[J][a]!=0) && (A[I][b]!=0 || A[J][b]!=0); }
+	          if      (notZero(0,1)) c = 1;
+	          else if (notZero(0,2)) c = 2;
+	          else if (notZero(1,2)) c = 3;
+	          else if (notZero(0,3)) c = 4;
+	          else if (notZero(1,3)) c = 5;
+	          else if (notZero(2,3)) c = 6;
+	       }
+               this.mesh.children[n].setMaterial(materials[c]);
+               this.placeEdge(n++, I, J);
+            }
          });
          break;
 
@@ -223,9 +242,9 @@ function() {
    var materials = [];
 
    this.createMesh = function() {
-      var R = [1,2,0,0,2,2],
-          G = [1,0,1,0,2,0],
-          B = [1,0,0,2,0,2];
+      var R = [1,2,0,0,2,2,0],
+          G = [1,0,1,0,2,0,2],
+          B = [1,0,0,2,0,2,2];
       for (var i = 0 ; i < R.length ; i++)
          materials.push(this.shaderMaterial(R[i], G[i], B[i]));
 

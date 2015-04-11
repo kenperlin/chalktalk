@@ -1266,6 +1266,7 @@
          case 'larger':
 	    _font_scale_factor *= 1.1;
 	    break;
+         case 'P':
          case PAGE_UP:
          case PAGE_DN:
             var handle = window[_g.canvas.id];
@@ -1288,7 +1289,8 @@
 
                handle.mousePressedAtTime = time;
                handle.mousePressed = true;
-               handle.mouseDown(handle.mouseX, handle.mouseY, handle.mouseZ);
+	       if (isDef(handle.mouseDown))
+                  handle.mouseDown(handle.mouseX, handle.mouseY, handle.mouseZ);
             }
             else {
                if (sketchAction != null) {
@@ -1302,7 +1304,8 @@
                   handle.mouseZ = mouseMoveEvent.clientZ;
 
                   handle.mousePressed = false;
-                  handle.mouseUp(handle.mouseX, handle.mouseY, handle.mouseZ);
+	          if (isDef(handle.mouseUp))
+                     handle.mouseUp(handle.mouseX, handle.mouseY, handle.mouseZ);
                }
             }
             isFakeMouseDown = ! isFakeMouseDown;
@@ -1480,6 +1483,12 @@
          case 'w':
             this.isWhiteboard = ! this.isWhiteboard;
             break;
+         case 'W':
+	    if (this.wandEmulation === undefined)
+	       this.wandEmulation = newVec3();
+            else
+	       this.wandEmulation = undefined;
+	    break;
          case 'x':
             isExpertMode = ! isExpertMode;
             break;

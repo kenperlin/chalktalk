@@ -1907,6 +1907,15 @@ console.log("aha");
 
       if (isDef(window[g.name].animate)) {
 
+         if (sketchPage.wandEmulation) {
+	    var _p = sketchPage.wandEmulation;
+	    _p.x += 0.03 * noise((time + 100) / 3);
+	    _p.y += 0.03 * noise((time + 200) / 3);
+	    _p.z += 0.03 * noise((time + 300) / 3);
+	    moveWand(_p.x, _p.y, _p.z, 0, 0, 0, 1);
+         }
+
+
          // SET THE CURSOR STYLE.
 
          document.body.style.cursor =
