@@ -6,7 +6,7 @@ function() {
       xy0.copy(point).applyMatrix4(pointToPixelMatrix);
       for (n = 0 ; n < 3 ; n++) {
          xy1.set(S[n][0], S[n][1], 0).applyMatrix4(pointToPixelMatrix);
-         if (xy1.distanceTo(xy0) < clickSize) {
+         if (xy1.distanceTo(xy0) < clickSize()) {
             S[n][0] = point.x;
             S[n][1] = point.y;
             return;
@@ -100,6 +100,8 @@ function() {
          annotateEnd();
 
       });
-      mClosedCurve(S);
+      mLine(S[1],S[0]);
+      mLine(S[1],S[2]);
+      mLine(S[0],S[2]);
    }
 }

@@ -1,5 +1,5 @@
 function Diagram() {
-   this.labels = "square rectangle circle flap refract circles".split(' ');
+   this.labels = "rectangle circle flap refract circles".split(' ');
 
    this.raySegment = function(vx, vy, wx, wy, p0, p1) {
       var a = p0[1] - p1[1];
@@ -82,7 +82,6 @@ function Diagram() {
 
       if (this.mousePressed)
          switch (this.labels[this.selection]) {
-         case 'square':
          case 'rectangle':
          case 'circle':
          case 'triangle':
@@ -410,12 +409,6 @@ function Diagram() {
             }
          });
 
-         break;
-
-      case "square":
-         var xx = w/2 * this.sx;
-         var yy = h/2 * this.sy;
-         drawClosedCurve([ [xx,-yy], [xx,yy], [-xx,yy], [-xx,-yy] ]);
          break;
 
       case "rectangle":

@@ -14,7 +14,8 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   var defaultFont = 'hand2-Medium';
+   //var defaultFont = 'hand2-Medium';
+   var defaultFont = 'cMar1';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;
@@ -956,8 +957,10 @@ console.log(harry.fred);
 
       // If custom font is not loaded, fall back to using Arial font.
 
-      if (! isFontAvailable(defaultFont))
+      if (! isFontAvailable(defaultFont)) {
+         console.log('default font ' + defaultFont + ' is not available');
          defaultFont = 'Arial';
+      }
 
 //-------------------------------------------------------------------------------
 

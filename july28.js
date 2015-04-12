@@ -38,7 +38,7 @@ function pixels() {
    sketch.enableFragmentShaderEditing();
    sketch.mouseDrag = function() { }
 }
-registerGlyph("pixels()",[ [ [-1,1],[1,1],[1,-1],[-1,-1]], ]);
+registerGlyph("pixels()", [ [[-1,1],[1,1]] , [[1,1],[1,-1]] , [[1,-1],[-1,-1]] ]);
 
 var raysFragmentShader = [
 ,'   float raySphere(vec3 V, vec3 W, vec4 S) {'
@@ -72,7 +72,7 @@ function rays() {
    sketch.enableFragmentShaderEditing();
    sketch.mouseDrag = function() { }
 }
-registerGlyph("rays()",[ [ [1,1],[-1,1],[-1,-1],[1,-1]], ]);
+registerGlyph("rays()", [ [[1,1],[-1,1]] , [[-1,1],[-1,-1]] , [[-1,-1],[1,-1]] ]);
 
 
 var ttgridFragmentShader = [
@@ -107,6 +107,6 @@ function ttgrid() {
       geometry.computeVertexNormals();
    }
 }
-registerGlyph("ttgrid()",[ [ [-1,1],[-1,-1],[1,-1],[1,1]], ]);
+registerGlyph("ttgrid()", [ [[-1,1],[-1,-1]] , [[-1,-1],[1,-1]] , [[1,-1],[1,1]] ]);
 
 

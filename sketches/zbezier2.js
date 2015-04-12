@@ -42,7 +42,8 @@ function() {
    }
    this.render = function() {
       lineWidth(1);
-      mCurve(this.P);
+      mLine(this.P[0], this.P[1]);
+      mCurve(this.P.slice(1));
       lineWidth(2);
       this.afterSketch(function() {
          var C = [];

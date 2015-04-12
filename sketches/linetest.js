@@ -3,13 +3,17 @@ function() {
    this.keys = [[-1,-1,0],[0,1,0],[0,-1,0],[1,1,0]];
    this.spline = newArray(splineSize(this.keys), 2);
    this.renderStrokeInit();
-
+/*
    this.drawing.add(
       new DRAWING.Curve(
          new DRAWING.SplinePath(
             this.keys)));
-
+*/
    this.render = function() {
+      this.duringSketch(function() {
+         for (var i = 0 ; i < this.keys.length - 1 ; i++)
+	    mLine(this.keys[i], this.keys[i+1]);
+      });
       this.afterSketch(function() {
          this.keys[0][1] = .9 * sin(PI * time);
          this.keys[1][0] = .2 * cos(PI * time * 2);

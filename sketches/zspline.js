@@ -36,9 +36,13 @@ function() {
       this.N = -1;
    }
    this.render = function() {
-      mCurve(makeSpline(this.P));
+      this.duringSketch(function() {
+         for (var i = 0 ; i < this.P.length - 1 ; i++)
+	    mLine(this.P[i], this.P[i+1]);
+      });
 
       this.afterSketch(function() {
+         mCurve(makeSpline(this.P));
          for (var n = 0 ; n < this.P.length ; n++)
             mDot(this.P[n], .15);
       });

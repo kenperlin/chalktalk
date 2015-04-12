@@ -3,7 +3,10 @@ function() {
    this.mode = 0;
    this.onClick = function() { this.mode++; }
    this.render = function() {
-      mClosedCurve([[-1,-1],[-1,1],[1,1],[1,-1]]);
+      mLine([-1,-1],[-1, 1]);
+      mLine([-1, 1],[ 1, 1]);
+      mLine([ 1, 1],[ 1,-1]);
+      mLine([ 1,-1],[-1,-1]);
       this.afterSketch(function() {
          textHeight(this.mScale(.13));
          if (this.mode >= 3) {

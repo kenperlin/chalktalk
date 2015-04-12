@@ -2,7 +2,9 @@ function() {
    this.label = 'cdgfont';
    this.render = function() {
       this.duringSketch(function() {
-         mCurve([[1,-1],[-1,-1],[-1,1],[1,1]]);
+         mLine([ 1,-1],[-1,-1]);
+         mLine([-1,-1],[-1, 1]);
+         mLine([-1, 1],[ 1, 1]);
       });
       this.afterSketch(function() {
          mFillCurve(makeOval(-1.0, 0.1,.9,.9));

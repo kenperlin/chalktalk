@@ -27,7 +27,8 @@ function() {
 
       _audio_volume = pow(Math.min(1.0, this.computePixelSize()), 3);
 
-      mCurve([[1,1],[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
+      mLine([1,1],[1,-1]);
+      mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       if ( this.code[cs][1] != this.savedCode ||
            isDef(this.in[0]) && this.inValue[0] != this.savedX ||
            isDef(this.in[1]) && this.inValue[1] != this.savedY ||

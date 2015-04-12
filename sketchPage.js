@@ -58,7 +58,7 @@
       this.isGlyphable = true;
       this.isOnPanStrip = false;
       this.keyPressed = -1;
-      this.nnSelected = -1;
+      this.nnSelected = 0;
       this.paletteColorDragXY = null;
       this.scaleRate = 0;
       this.sketches = [];
@@ -1107,7 +1107,7 @@
          }
 
 	 if (isShowingGlyphs && key >= 48 && key <= 48 + 9) {
-	    this.nnSelected = key - 48;
+	    this.nnSelected |= 1 << key - 48;
 	    return;
 	 }
 
@@ -1223,7 +1223,7 @@
          }
 
 	 if (isShowingGlyphs && key >= 48 && key <= 48 + 9) {
-	    this.nnSelected = -1;
+	    this.nnSelected ^= 1 << key - 48;
 	    return;
 	 }
 
@@ -2043,7 +2043,7 @@
 
          y += height() / 45 * 10 / this.glyphsPerCol;
 
-         var selected = t >= i && t < i+1 || nn == this.nnSelected;
+         var selected = t >= i && t < i+1 || (this.nnSelected & 1 << nn) != 0;
          _g.strokeStyle = selected ? defaultPenColor : this.glyphColor();
          _g.fillStyle = selected ? defaultPenColor : this.glyphColor();
          _g.lineWidth = selected ? 2 : 1;
