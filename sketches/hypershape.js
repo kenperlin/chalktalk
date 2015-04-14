@@ -88,13 +88,10 @@ function() {
       }
    }
 
-   this.placeEdge = function(n, a, b) {
+   this.placeEdge = function(n, ln, a, b) {
       this.mesh.children[n].placeStick(P[a], P[b]);
-
-      if (this.graph.links[n] !== undefined) {
-         this.graph.links[n].i = a;
-         this.graph.links[n].j = b;
-      }
+      this.graph.links[ln].i = a;
+      this.graph.links[ln].j = b;
    }
 
    // EDGES OF HYPERCUBE.  EACH EDGE VALUE j = e[axis][i] CONNECTS VERTEX j TO VERTEX j + (1<<axis)
@@ -119,8 +116,10 @@ function() {
             for ( ; n < S.length ; n++)
                this.placeVertex(n, S[n]);
             for (var i = 0   ; i < 4 ; i++)
-            for (var j = i+1 ; j < 5 ; j++)
-               this.placeEdge(n++, i, j);
+            for (var j = i+1 ; j < 5 ; j++) {
+               this.placeEdge(n, n - S.length, i, j);
+	       n++;
+            }
          });
          break;
 
@@ -136,7 +135,8 @@ function() {
             for (var axis = 0 ; axis < 4 ; axis++)
                for (var i = 0 ; i < 8 ; i++) {
                   var j = edges[axis][i];
-                  this.placeEdge(n++, j, j + (1<<axis));
+                  this.placeEdge(n, n - C.length, j, j + (1<<axis));
+		  n++;
                }
             if (mode %2 != 0) {
 	    }
@@ -172,7 +172,8 @@ function() {
 	          else if (notZero(2,3)) c = 6;
 	       }
                this.mesh.children[n].setMaterial(materials[c]);
-               this.placeEdge(n++, I, J);
+               this.placeEdge(n, n - A.length, I, J);
+	       n++;
             }
          });
          break;
@@ -213,7 +214,8 @@ function() {
                var k = edgeColor(V[i], V[j]);
                if (k >= 0) {
                   this.mesh.children[n].setMaterial(materials[k]);
-                  this.placeEdge(n++, i, j);
+                  this.placeEdge(n, n - V.length, i, j);
+		  n++;
                }
             }
          });
