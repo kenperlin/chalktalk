@@ -39,6 +39,16 @@
    var sketchTypesToAdd = [];
    var videoBrightness = 1;
 
+   // CATCH AVATAR EVENTS.
+
+   // HEAD, L_HAND, R_HAND, L_FOOT, R_FOOT
+
+   var avatar = null;
+
+   function moveAvatar(parts) {
+      cloneArray(parts, avatar);
+   }
+
    // CATCH WAND EVENTS.
 
    var wand = {x:0, y:0, z:0, qx:0, qy:0, qz:0, qw:0};

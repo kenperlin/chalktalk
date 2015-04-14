@@ -695,11 +695,12 @@
       return str;
    }
 
-   function cloneArray(src) {
-      var dst = [];
+   function cloneArray(src, dst) {
+      if (dst === undefined)
+         dst = [];
       for (var i = 0 ; i < src.length ; i++)
          if (src[i] instanceof Array)
-            dst[i] = cloneArray(src[i]);
+            dst[i] = cloneArray(src[i], dst[i]);
          else
             dst[i] = src[i];
       return dst;
