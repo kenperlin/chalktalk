@@ -1227,6 +1227,19 @@
 	    return;
 	 }
 
+	 // USE DIGIT KEY TO SIMULATE SWIPE.
+
+	 if (isk() && isHover() && key >= 48 && key <= 48 + 9) {
+	    if (sk().onSwipe !== undefined) {
+	       var r = 2 * clickSize();
+	       var theta = TAU * (key - 48) / 8;
+               var dx =  r * cos(theta);
+               var dy = -r * sin(theta);
+	       sk().onSwipe(dx, dy);
+	       return;
+	    }
+	 }
+
          // Special handling for when in text mode.
 
          if (isTextMode) {

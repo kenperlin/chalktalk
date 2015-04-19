@@ -944,16 +944,16 @@ console.log(harry.fred);
       g.name = name;
       sketchPage.clear();
 
+      // LOAD ALL THE SKETCHES FROM THE SERVER'S SKETCHES FOLDER.
+
+      loadSketches();
+
       _g = g;
       _g.clearRect(0, 0, _g.canvas.width, _g.canvas.height);
       This().setup();
 
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
       pixelsPerUnit = 5.8635 * height() / cameraFOV;
-
-      // LOAD ALL THE SKETCHES FROM THE SERVER'S SKETCHES FOLDER.
-
-      loadSketches();
 
 //server.set("state/foobar", "1234");
 
