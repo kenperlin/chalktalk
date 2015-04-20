@@ -789,7 +789,10 @@
 
                m.save();
                computeStandardViewInverse();
-               sk().onSwipe(x - this.xDown, y - this.yDown);
+	       var dx = x - this.xDown;
+	       var dy = y - this.yDown;
+               sk().onSwipe(dx, dy);
+	       console.log(roundedString(8 * atan2(-dy, dx) / TAU));
                m.restore();
 
                return;
@@ -1937,6 +1940,20 @@
                drawGroupPath(groupPath);
             if (this.isShowingPalette())
                drawPalette();
+         }
+
+	 if (! isExpertMode && bgClickCount == 1) {
+	    _g.save();
+	    _g.strokeStyle = 'red';
+	    _g.beginPath();
+	    _g.moveTo(bgClickX - 10, bgClickY - 10);
+	    _g.lineTo(bgClickX + 10, bgClickY + 10);
+	    _g.stroke();
+	    _g.beginPath();
+	    _g.moveTo(bgClickX + 10, bgClickY - 10);
+	    _g.lineTo(bgClickX - 10, bgClickY + 10);
+	    _g.stroke();
+	    _g.restore();
          }
 
          if (isSpacePressed)

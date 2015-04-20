@@ -2544,7 +2544,7 @@ console.log("aha");
             var nLinks = def(xmlSketch.nLinksToRender, links.length);
 
             if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
-               xmlScene = new XMLScene("graph");
+               xmlScene = new XMLScene(xmlSketch.id);
                xmlNodes = nNodes;
                xmlLinks = nLinks;
             }
@@ -3500,4 +3500,4 @@ console.log("aha");
    }
 
 var glyphs = [];
-loadGlyphArray(numericGlyphData);
+
