@@ -992,6 +992,7 @@ console.log(harry.fred);
       case 'red'    : R = 1.0; G = 0.0; B = 0.0; break;
       case 'orange' : R = 1.0; G = 0.5; B = 0.0; break;
       case 'green'  : R = 0.0; G = 0.6; B = 0.0; break;
+      case 'cyan'   : R = 0.0; G = 0.8; B = 1.0; break;
       case 'blue'   : R = 0.0; G = 0.0; B = 1.0; break;
       case 'magenta': R = 1.0; G = 0.0; B = 1.0; break;
       default       : R = 0.5; G = 0.2; B = 0.1; break;
@@ -1736,6 +1737,33 @@ console.log("aha");
       sketchDragMode = -1;
    }
 
+   var sketchClickActionNames = [
+      'delete',
+      'lock',
+      'translate',
+      'copy',
+      'scale',
+      'cmd',
+      'rotate',
+      'undraw',
+   ];
+
+   function sketchClickActionName(dir, sketch) {
+      var name = sketchClickActionNames[dir];
+      if (sketch !== undefined)
+         switch (dir) {
+	 case 1:
+	    if (! isSimpleSketch(sketch))
+	       name = 'undraw';
+            break;
+	 case 5:
+	    if (isSimpleSketch(sketch))
+	       name = 'text mode';
+	    break;
+	 }
+      return name;
+   }
+
    function doSketchClickAction(x, y) {
 
       if (bgClickCount != 1 || ! isHover())
@@ -1745,7 +1773,7 @@ console.log("aha");
 
       bgClickCount = 0;
 
-      var index = pieMenuIndex(bgClickX - x, bgClickY - y, 8);
+      var index = pieMenuIndex(bgClickX - This().mouseX, bgClickY - This().mouseY, 8);
       switch (index) {
       case 0:
          sk().fadeAway = 1;             // E -- FADE TO DELETE
@@ -1763,7 +1791,11 @@ console.log("aha");
          sketchAction = "translating";  // N -- TRANSLATE
          break;
       case 3:
+         var tX = sk().tX;
+         var tY = sk().tY;
          copySketch(sk());              // NW -- CLONE
+         sk().tX = tX;
+         sk().tY = tY;
          sketchAction = "translating";
          break;
       case 4:
@@ -2536,27 +2568,32 @@ console.log("aha");
 
          // OUTPUT XML FOR SELECTED GRAPH SKETCH, IF ANY.
 
-         if (window.xmlSketch !== undefined) {
-            var nodes = xmlSketch.graph.nodes;
-            var links = xmlSketch.graph.links;
+         for (var I = 0 ; I < nsk() ; I++)
+	    if (sk(I).isXML) {
+               var S = sk(I);
+	       if (S.graph !== undefined) {
+                  var nodes = S.graph.nodes;
+                  var links = S.graph.links;
 
-            var nNodes = def(xmlSketch.nNodesToRender, nodes.length);
-            var nLinks = def(xmlSketch.nLinksToRender, links.length);
+                  var nNodes = def(S.nNodesToRender, nodes.length);
+                  var nLinks = def(S.nLinksToRender, links.length);
 
-            if (window.xmlNodes === undefined || xmlNodes != nNodes || xmlLinks != nLinks) {
-               xmlScene = new XMLScene(xmlSketch.id);
-               xmlNodes = nNodes;
-               xmlLinks = nLinks;
+                  if (S.xmlNodes === undefined || S.xmlNodes != nNodes ||
+		                                          S.xmlLinks != nLinks) {
+                     S.xmlScene = new XMLScene(S.id, 'graph');
+                     S.xmlNodes = nNodes;
+                     S.xmlLinks = nLinks;
+                  }
+
+                  for (var i = 0 ; i < nodes.length ; i++)
+                     S.xmlScene.setBall(i, nodes[i].p, nodes[i].r);
+
+                  for (var i = 0 ; i < nLinks ; i++)
+                     S.xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
+
+                  console.log(S.xmlScene.toString());
+               }
             }
-
-            for (var i = 0 ; i < nodes.length ; i++)
-               xmlScene.setBall(i, nodes[i].p, nodes[i].r);
-
-            for (var i = 0 ; i < nLinks ; i++)
-               xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
-
-            console.log(xmlScene.toString());
-         }
 
          // DISPLAY DEBUG MESSAGE ON SCREEN, IF ONE IS DEFINED.
 

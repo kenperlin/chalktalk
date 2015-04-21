@@ -1520,10 +1520,8 @@
             isExpertMode = ! isExpertMode;
             break;
          case 'X':
-	    if (window.xmlSketch !== undefined)
-	       window.xmlSketch = undefined;
-	    else if (isk() && sk().graph !== undefined)
-	       window.xmlSketch = sk();
+	    if (isk())
+	       sk().isXML = sk().isXML === undefined ? true : undefined;
 	    break;
          case 'z':
             break;
@@ -1903,6 +1901,7 @@
                delete sk(I).shapeInfo;
                break;
             }
+
          if (shapeInfo != null) {
 
             glyphSketch = null;
@@ -1942,18 +1941,21 @@
                drawPalette();
          }
 
+	 // SHOW HINT AFTER CLICK ON BACKGROUND
+
 	 if (! isExpertMode && bgClickCount == 1) {
-	    _g.save();
-	    _g.strokeStyle = 'red';
-	    _g.beginPath();
-	    _g.moveTo(bgClickX - 10, bgClickY - 10);
-	    _g.lineTo(bgClickX + 10, bgClickY + 10);
-	    _g.stroke();
-	    _g.beginPath();
-	    _g.moveTo(bgClickX + 10, bgClickY - 10);
-	    _g.lineTo(bgClickX - 10, bgClickY + 10);
-	    _g.stroke();
-	    _g.restore();
+	    function bigDot(x,y) { line(x - 1, y - 1, x, y); }
+	    annotateStart();
+	    color(overlayColor);
+	    var d = 20;
+	    lineWidth(d);
+	    bigDot(bgClickX, bgClickY);
+	    if (isHover()) {
+	       _g.font = d + 'pt Arial';
+	       var dir = pieMenuIndex(bgClickX - This().mouseX, bgClickY - This().mouseY, 8);
+	       _g.fillText(sketchClickActionName(dir, sk()), bgClickX + d, bgClickY + d/2);
+	    }
+	    annotateEnd();
          }
 
          if (isSpacePressed)

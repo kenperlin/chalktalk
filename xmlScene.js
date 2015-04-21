@@ -2,8 +2,9 @@
    Convenience routines to handle conversion between geometry and its xml description.
 */
 
-function XMLScene(name) {
+function XMLScene(name, type) {
    this.name = name;
+   this.type = type;
    this.modification_version = 0;
    this.clear();
 
@@ -66,6 +67,7 @@ XMLScene.prototype = {
 
       return '<Update'
            + ' id="' + this.name + '"'
+           + ' type="' + (this.type === undefined ? 'null' : this.type) + '"'
 	   + ' modification_version="' + this.modification_version + '"'
 	   + ' time="' + (new Date().getTime()) + '"'
 	   + '>'
