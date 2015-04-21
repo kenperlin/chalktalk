@@ -71,9 +71,37 @@
          }
          getRequest.send();
       }
+
+      this.save = function(savename) {
+         var filename = "saves/";
+         if(isDef(savename))
+            filename += savename;
+         else
+            filename += new Date();
+
+         // NEED TO STRIP DOWN sketchBook.sketchPages BEFORE SAVING
+         this.set(filename, JSON.stringify(sketchBook.sketchPages));
+      }
+
+      this.restore = function(savename) {
+         this.get("saves/" + savename, function(content) {
+            // RESTORE sketchBook.sketchPages here
+            console.log(content);
+         });
+      }
+
+      var restorename = getURLParameter("restore");
+      if (restorename != null && confirm("Restore file: " + restorename + "?"))
+         this.restore(restorename);
    }
 
    var server = new Server();
+
+   function getURLParameter(name) {
+      return decodeURIComponent(
+            (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)')
+                  .exec(location.search)||[,""])[1].replace(/\+/g, '%20')) || null;
+   }
 
 
 // TYPES AND FORMAT CONVERSIONS.
@@ -988,7 +1016,7 @@
             curve[i][1] += t * dya;
          }
       }
-      else 
+      else
          for (var i = i0 + 1 ; i <= n-1 ; i++) {
             var t = (i-1) / (n-2);
             curve[i][0] += t * dxb;

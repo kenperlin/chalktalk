@@ -82,6 +82,27 @@ app.route("/ls_sketches").get(function(req, res) {
    });
 });
 
+// handle request for list of available sketches
+app.route("/ls_saves").get(function(req, res) {
+   fs.readdir("./saves/", function(err, files) {
+      if (err) {
+         res.writeHead(500, { "Content-Type": "text/plain" });
+         res.write(err);
+         console.log("error listing the sketch directory" + err);
+         res.end();
+         return;
+      }
+
+      res.writeHead(200, { "Content-Type": "text/html" });
+      for (var i = 0; i < files.length; i++) {
+         var savename = files[i].replace(".json", "");
+         var url = "index.html?restore=" + savename;
+         res.write("<a href='" + url + "'>" + savename + "</a><br>");
+      }
+      res.end();
+   });
+});
+
 // handle request for appcache file -- needs a special Content-Type
 app.route("/appcache").get(function(req, res) {
    recursive_ls("./", function(err, files) {
