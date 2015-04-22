@@ -14,7 +14,6 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   //var defaultFont = 'hand2-Medium';
    var defaultFont = 'cMar1';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
@@ -23,6 +22,7 @@
    var isAltPressed = false;
    var isBottomGesture = false;
    var isExpertMode = true;
+   var isFinishedLoadingSketches = false;
    var isFog = false;
    var isMouseOverBackground = true;
    var isShowing2DMeshEdges = false;
@@ -1923,6 +1923,7 @@ console.log("aha");
       if (window.forceSetPageAtTime !== undefined && forceSetPageAtTime < time) {
          forceSetPageAtTime = undefined;
          setPage(pageIndex);
+	 isFinishedLoadingSketches = true;
       }
 
       var w = width(), h = height();
@@ -3408,16 +3409,19 @@ console.log("aha");
          audiencePopup.document.getElementById('slide').innerHTML =
             document.getElementById(pageName).innerHTML;
 
-      // SET SKETCH TYPES FOR THIS PAGE.
+      // SET SKETCH TYPES FOR THIS PAGE, IF THIS IS THE FIRST TIME.
 
-      sketchTypes = sketchPages[pageIndex].availableSketches;
-      sketchTypeLabels = [];
+      if (! isFinishedLoadingSketches) {
 
-      for (var n = 0 ; n < sketchTypes.length ; n++)
-         registerSketch(sketchTypes[n]);
+         sketchTypes = sketchPages[pageIndex].availableSketches;
+         sketchTypeLabels = [];
 
-      for (var i = 0 ; i < sketchTypesToAdd.length ; i++)
-         registerSketch(sketchTypesToAdd[i]);
+         for (var n = 0 ; n < sketchTypes.length ; n++)
+            registerSketch(sketchTypes[n]);
+
+         for (var i = 0 ; i < sketchTypesToAdd.length ; i++)
+            registerSketch(sketchTypesToAdd[i]);
+      }
 
       // SWAP IN THE 3D RENDERED SCENE FOR THIS PAGE.
 

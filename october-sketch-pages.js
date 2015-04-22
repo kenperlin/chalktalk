@@ -1,6 +1,6 @@
 var sketchTypes = (
 //"Ball Teleg Lens Grid Hammer Lattice Motion "
-  "Lens Grid Lattice Motion "
+  "Grid Lattice Motion "
 + "Noises MothAndCandle OldCamera Radio "
 + "Scroll Spike Typewriter Tablet Telegraph Television Book1"
 ).split(' ');
