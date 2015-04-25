@@ -271,3 +271,7 @@
       _g.fillText(message, x - alignX * textWidth(message), y + (1-alignY) * th);
    }
 
+   function uvColor(u, v) {
+      return 'rgb(' + floor(255 * u) + ',' + floor(255 * v) + ',0)';
+   }
+

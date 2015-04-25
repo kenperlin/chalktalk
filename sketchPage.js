@@ -2129,7 +2129,7 @@
 
          _g.save();
          _g.font = '30pt Helvetica';
-         _g.fillStyle = overlayScrim;
+         _g.fillStyle = overlayColor;
          _g.fillText("PAGE " + sketchBook.page, dx + 60, 40);
          _g.restore();
 
