@@ -31,8 +31,8 @@
    }
 
    function drawCurve(c) {
-      if (isXMLStrokes)
-         writeCurveAsXML(c);
+      if (xmlWriteEnabled)
+         xmlWriteCurve(c);
       startCurve(c);
       _g.stroke();
    }

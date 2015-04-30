@@ -210,12 +210,15 @@
       },
       extendBounds : function(points) {
          this.afterSketch(function() {
-	    isXMLStrokesSuppressed = true;
+	    var save_xmlWriteEnabled = xmlWriteEnabled;
+	    xmlWriteEnabled = false;
+
             var saveStrokeStyle = _g.strokeStyle;
             color('rgba(0,0,0,.01)');
             mCurve(points);
             _g.strokeStyle = saveStrokeStyle;
-	    isXMLStrokesSuppressed = false;
+
+	    xmlWriteEnabled = save_xmlWriteEnabled;
          });
       },
       clearPorts : function() {
@@ -1601,18 +1604,18 @@
 
             // IF IN XML-STROKES MODE, WRITE THE STROKES OF THIS SKETCH.
 
-	    if (isXMLStrokes) {
+	    if (xmlWriteEnabled) {
                var curve = [];
 	       for (var i = 1 ; i < n ; i++) {
 	          if (sp[i][2] == 0) {
 		     if (curve.length > 0)
-		        writeCurveAsXML(curve);
+		        xmlWriteCurve(curve);
 		     curve = [];
 	          }
 		  curve.push([sp[i][0], sp[i][1]]);
 	       }
 	       if (curve.length > 0)
-	          writeCurveAsXML(curve);
+	          xmlWriteCurve(curve);
 	    }
 
             // LOOP THROUGH THE sp ARRAY.

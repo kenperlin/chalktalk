@@ -110,21 +110,31 @@
       return str;
    }
 
-// XML
+// XML WRITING
 
-   function writeCurveAsXML(c) {
-      if (isXMLStrokesSuppressed)
-         return;
+   var xmlStrokeCount = 0;
 
-      var xOffset = -width() / 2;
+   function xmlWriteStartFrame() {
+      console.log('<Update time=' + (new Date().getTime()) + '>');
+      xmlStrokeCount = 0;
+   }
+
+   function xmlWriteEndFrame() {
+      console.log('</Update count=' + xmlStrokeCount + '>');
+   }
+
+   function xmlWriteCurve(c) {
+      var xOffset = -width () / 2;
       var yOffset = -height() / 2;
 
-      console.log('<stroke>');
+      console.log('<Stroke id=' + (xmlStrokeCount++) + '>');
+
       for (var n = 0 ; n < c.length ; n++)
          console.log( floor(c[n][0] + xOffset)
-              + ',' + floor(c[n][1] - yOffset)
+              + ',' + floor(c[n][1] + yOffset)
               + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2])) );
-      console.log('</stroke>');
+
+      console.log('</Stroke>');
    }
 
 // HANDLE PLAYING AN AUDIO SIGNAL:

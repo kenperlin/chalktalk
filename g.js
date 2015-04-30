@@ -31,8 +31,7 @@
    var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var isTouchDevice = false;
-   var isXMLStrokes = false;
-   var isXMLStrokesSuppressed = false;
+   var xmlWriteEnabled = false;
    var margin = 50;
    var meshOpacityOverVideo = 0.7;
    var sketchPadding = 10;
@@ -639,8 +638,8 @@ console.log("right click -- not yet used");
                else
                   _g.lineTo(x, y);
             }
-	    if (isXMLStrokes)
-	       writeCurveAsXML(tr[n]);
+	    if (xmlWriteEnabled)
+	       xmlWriteCurve(tr[n]);
          }
          _g.stroke();
       }

@@ -1525,7 +1525,7 @@
 	          sk().isXMLGraph = sk().isXML === undefined ? true : undefined;
             }
 	    else
-	       isXMLStrokes = ! isXMLStrokes;
+	       xmlWriteEnabled = ! xmlWriteEnabled;
 	    break;
          case 'z':
             break;
@@ -1741,6 +1741,9 @@
             annotateEnd();
          }
 
+	 if (xmlWriteEnabled)
+	    xmlWriteStartFrame();
+
          for (var I = 0 ; I < nsk() ; I++) {
 
             // DO NOT RENDER ANY GEOMETRY SKETCH THAT IS PANNED OFF THE SCREEN.
@@ -1895,6 +1898,9 @@
 
             this.index = PUSHED_sketchPage_index;
          }
+
+	 if (xmlWriteEnabled)
+	    xmlWriteEndFrame();
 
          // IF THERE IS A STROKES SKETCH, CREATE ITS CORRESPONDING SHAPE.
 
