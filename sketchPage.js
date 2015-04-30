@@ -1520,8 +1520,12 @@
             isExpertMode = ! isExpertMode;
             break;
          case 'X':
-	    if (isk())
-	       sk().isXML = sk().isXML === undefined ? true : undefined;
+	    if (isk()) {
+	       if (sk().graph !== undefined)
+	          sk().isXMLGraph = sk().isXML === undefined ? true : undefined;
+            }
+	    else
+	       isXMLStrokes = ! isXMLStrokes;
 	    break;
          case 'z':
             break;
@@ -2129,7 +2133,7 @@
 
          _g.save();
          _g.font = '30pt Helvetica';
-         _g.fillStyle = overlayScrim;
+         _g.fillStyle = overlayColor;
          _g.fillText("PAGE " + sketchBook.page, dx + 60, 40);
          _g.restore();
 
@@ -2217,12 +2221,12 @@
          // IF NOT IN TEXT INSERTION MODE, SHOW THE AVAILABLE KEYBOARD SHORTCUTS.
 
          if (! isShowingGlyphs && ! isTextMode) {
-            color(overlayClearColor());
+            color(overlayColor);
             lineWidth(1);
-            textHeight(10);
+            textHeight(9);
             var y0 = paletteY(palette.length);
             for (var j = 0 ; j < hotKeyMenu.length ; j++) {
-               var y = y0 + j * 16;
+               var y = y0 + j * 14;
                utext(hotKeyMenu[j][0], dx + 8, y, 0, 0, 'Arial');
                utext(hotKeyMenu[j][1], dx +38, y, 0, 0, 'Arial');
                if (hotKeyMenu[j][0] == letterPressed)

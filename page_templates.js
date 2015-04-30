@@ -12,12 +12,12 @@ function textPage(text, spacing) {
       availableSketches: sketchTypes, pan: 0, innerHTML: '\
          <center>\
          <table width=1280>\
-         <tr height=' + spacing + '></tr>\
+         <tr height=' + (spacing === undefined ? 100 : spacing) + '></tr>\
          <tr>\
             <td>\
                <center>\
                <font color=white size=10>\
-	       <b>' + text + '</b>\
+	       ' + text + '\
                </font>\
                </center>\
                </td>\
@@ -56,7 +56,7 @@ function imagePage(file, spacing, imageWidth, caption) {
       pan: 0,
       innerHTML: '\
          <table width=1280>\
-         <tr height=' + spacing + '></tr>\
+         <tr height=' + (spacing === undefined ? 100 : spacing) + '></tr>\
          <tr>\
             <th><img src="' + file + '" width=' + imageWidth + '></th>\
             </tr>\

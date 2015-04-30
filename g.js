@@ -31,6 +31,8 @@
    var isTelegraphKeyPressed = false;
    var isTextMode = false;
    var isTouchDevice = false;
+   var isXMLStrokes = false;
+   var isXMLStrokesSuppressed = false;
    var margin = 50;
    var meshOpacityOverVideo = 0.7;
    var sketchPadding = 10;
@@ -628,7 +630,7 @@ console.log("right click -- not yet used");
 
       function drawTrace(tr) {
          _g.beginPath();
-         for (var n = 0 ; n < tr.length ; n++)
+         for (var n = 0 ; n < tr.length ; n++) {
             for (var i = 0 ; i < tr[n].length ; i++) {
                var x = tr[n][i][0];
                var y = tr[n][i][1];
@@ -637,6 +639,9 @@ console.log("right click -- not yet used");
                else
                   _g.lineTo(x, y);
             }
+	    if (isXMLStrokes)
+	       writeCurveAsXML(tr[n]);
+         }
          _g.stroke();
       }
 
@@ -1048,6 +1053,7 @@ console.log(harry.fred);
       ['v'  , "toggle video layer"],
       ['w'  , "toggle whiteboard"],
       ['x'  , "toggle expert mode"],
+      ['X'  , "toggle xml output"],
       ['z'  , "zoom"],
       ['#'  , "toggle graph paper"],
       ['-'  , "b/w <-> w/b"],
@@ -2570,7 +2576,7 @@ console.log("aha");
          // OUTPUT XML FOR SELECTED GRAPH SKETCH, IF ANY.
 
          for (var I = 0 ; I < nsk() ; I++)
-	    if (sk(I).isXML) {
+	    if (sk(I).isXMLGraph) {
                var S = sk(I);
 	       if (S.graph !== undefined) {
                   var nodes = S.graph.nodes;
@@ -2581,18 +2587,18 @@ console.log("aha");
 
                   if (S.xmlNodes === undefined || S.xmlNodes != nNodes ||
 		                                          S.xmlLinks != nLinks) {
-                     S.xmlScene = new XMLScene(S.id, 'graph');
+                     S.xmlGraph = new XMLGraph(S.id, 'graph');
                      S.xmlNodes = nNodes;
                      S.xmlLinks = nLinks;
                   }
 
                   for (var i = 0 ; i < nodes.length ; i++)
-                     S.xmlScene.setBall(i, nodes[i].p, nodes[i].r);
+                     S.xmlGraph.setBall(i, nodes[i].p, nodes[i].r);
 
                   for (var i = 0 ; i < nLinks ; i++)
-                     S.xmlScene.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
+                     S.xmlGraph.setLink(nNodes + i, links[i].i, links[i].j, links[i].w);
 
-                  console.log(S.xmlScene.toString());
+                  console.log(S.xmlGraph.toString());
                }
             }
 

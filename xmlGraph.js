@@ -2,7 +2,7 @@
    Convenience routines to handle conversion between geometry and its xml description.
 */
 
-function XMLScene(name, type) {
+function XMLGraph(name, type) {
    this.name = name;
    this.type = type;
    this.modification_version = 0;
@@ -13,7 +13,7 @@ function XMLScene(name, type) {
    this.fields.Link = 'a b ra rb'.split(' ');
 }
 
-XMLScene.prototype = {
+XMLGraph.prototype = {
    clear : function() {
       this.objs = [];
    },

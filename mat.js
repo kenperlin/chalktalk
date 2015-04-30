@@ -314,7 +314,7 @@
    function mLine(a,b) {
       var A = m.transform(a);
       var B = m.transform(b);
-      line(A[0],A[1],B[0],B[1]);
+      drawCurve([A, B]);
    };
    function mPoint(p) {
       var P = m.transform(p);

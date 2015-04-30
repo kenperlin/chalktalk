@@ -1,10 +1,17 @@
 function() {
    this.label = 'raytrace';
+   this.mode = 0;
+   this.onCmdClick = function() { this.mode++; }
    this.render = function() {
       this.duringSketch(function() {
          mCurve([[-1, 1],[ 1, 1],[ 1,-1]]);
          mCurve([[-1, 1],[-1,-1],[ 1,-1]]);
       });
+      if (this.mode > 0) {
+         textHeight(this.mScale(0.3));
+         mText("u", [0,-1.25]);
+         mText("v", [-1.25,0]);
+      }
    }
 
 this.fragmentShaders = [
@@ -12,8 +19,8 @@ this.fragmentShaders = [
 // 1
 [''
 ,'   void main(void) {'
-,'      vec3 color = vPosition;'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'      vec3 color = vPosition * .5 + vec3(.5,.5,0.);'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 

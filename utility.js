@@ -110,6 +110,22 @@
       return str;
    }
 
+// XML
+
+   function writeCurveAsXML(c) {
+      if (isXMLStrokesSuppressed)
+         return;
+
+      var xOffset = -width() / 2;
+      var yOffset = -height() / 2;
+
+      console.log('<strokes>');
+      for (var n = 0 ; n < c.length ; n++)
+         console.log( floor(c[n][0] + xOffset)
+              + ',' + floor(c[n][1] - yOffset)
+              + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2])) );
+      console.log('</strokes>');
+   }
 
 // HANDLE PLAYING AN AUDIO SIGNAL:
 
