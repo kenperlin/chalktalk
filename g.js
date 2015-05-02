@@ -14,7 +14,7 @@
    var bgClickCount = 0;
    var bgClickX = 0;
    var bgClickY = 0;
-   var defaultFont = 'cMar1';
+   var defaultFont = 'cMar5-Bold';
    var defaultPenColor = backgroundColor == 'white' ? 'black' : 'white';
    var glyphTrace = [];
    var glyphSketch = null;

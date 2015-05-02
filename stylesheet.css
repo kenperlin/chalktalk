@@ -26,6 +26,14 @@
     
  }
 
+ @font-face {
+    font-family: 'cMar5-Bold';
+    src: url('cMar5-Bold.otf');
+    font-weight: normal;
+    font-style: normal;
+    
+ }
+
 font1 {
 	font-family: 'cMar1';
 	font-size: 25px;
@@ -51,6 +59,17 @@ font3 {
 	font-feature-settings:"calt";
 }
 
+font5 {
+	font-family: 'cMar5-Bold';
+	font-size: 25px;
+	font-variant-ligatures: contextual;
+	-moz-font-feature-settings:"calt"; 
+	-ms-font-feature-settings:"calt"; 
+	-webkit-font-feature-settings:"calt"; 
+	font-feature-settings:"calt";
+}
+
+	
 	
 	
 }

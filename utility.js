@@ -113,28 +113,38 @@
 // XML WRITING
 
    var xmlStrokeCount = 0;
+   var xmlStrokes = [];
 
    function xmlWriteStartFrame() {
-      console.log('<Update time=' + (new Date().getTime()) + '>');
-      xmlStrokeCount = 0;
-   }
-
-   function xmlWriteEndFrame() {
-      console.log('</Update count=' + xmlStrokeCount + '>');
+      xmlStrokes = [];
    }
 
    function xmlWriteCurve(c) {
+      xmlStrokes.push(c);
+   }
+
+   function xmlWriteEndFrame() {
+      console.log('<Update'
+         + ' id="strokes"'
+         + ' count="' + xmlStrokes.length + '"'
+         + ' time="' + (new Date().getTime()) + '"'
+         + '>');
+
       var xOffset = -width () / 2;
       var yOffset = -height() / 2;
+      for (var ns = 0 ; ns < xmlStrokes.length ; ns++) {
+         console.log('<Stroke id="' + ns + '">');
 
-      console.log('<Stroke id=' + (xmlStrokeCount++) + '>');
+	 var c = xmlStrokes[ns];
+         for (var n = 0 ; n < c.length ; n++)
+            console.log( floor(c[n][0] + xOffset)
+                 + ',' + floor(c[n][1] + yOffset)
+                 + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2])) );
 
-      for (var n = 0 ; n < c.length ; n++)
-         console.log( floor(c[n][0] + xOffset)
-              + ',' + floor(c[n][1] + yOffset)
-              + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2])) );
+         console.log('</Stroke>');
+      }
 
-      console.log('</Stroke>');
+      console.log('</Update>');
    }
 
 // HANDLE PLAYING AN AUDIO SIGNAL:
