@@ -124,27 +124,30 @@
    }
 
    function xmlWriteEndFrame() {
-      console.log('<Update'
-         + ' id="strokes"'
-         + ' count="' + xmlStrokes.length + '"'
-         + ' time="' + (new Date().getTime()) + '"'
-         + '>');
+      var str = '<Update'
+                + ' id="strokes"'
+                + ' count="' + xmlStrokes.length + '"'
+                + ' time="' + (new Date().getTime()) + '"'
+                + '>\n';
 
       var xOffset = -width () / 2;
       var yOffset = -height() / 2;
       for (var ns = 0 ; ns < xmlStrokes.length ; ns++) {
-         console.log('<Stroke id="' + ns + '">');
+         str += '<Stroke id="' + ns + '">\n';
 
 	 var c = xmlStrokes[ns];
          for (var n = 0 ; n < c.length ; n++)
-            console.log( floor(c[n][0] + xOffset)
-                 + ',' + floor(c[n][1] + yOffset)
-                 + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2])) );
+            str += floor(c[n][0] + xOffset) + ','
+                 + floor(c[n][1] + yOffset)
+                 + (c[n].length < 3 || c[n][2] == 0 ? '' : ',' + floor(c[n][2]))
+		 + '\n';
 
-         console.log('</Stroke>');
+         str += '</Stroke>\n';
       }
 
-      console.log('</Update>');
+      str += '</Update>';
+
+      console.log(str);
    }
 
 // HANDLE PLAYING AN AUDIO SIGNAL:
