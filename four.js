@@ -783,3 +783,104 @@ var fragmentShaderHeader = [
       return mesh;
    }
 
+// GET DATA FROM IK BODY
+
+   function IKBody(ik_data) {
+
+      // CHANGE DATA INTO A MORE CONVENIENT FORM.
+
+      this.data = [];
+      for (var frame = 0 ; frame < ik_data.length ; frame++) {
+         this.data.push([]);
+         for (var j = 0 ; j < 5 ; j++) {
+            var src = ik_data[frame];
+	    this.data[frame].push({
+	       q: new THREE.Quaternion(src[8*j+1], src[8*j+2], src[8*j+3], src[8*j+4]),
+	       p: new THREE.Vector3(src[8*j+5], src[8*j+6], src[8*j+7]),
+            });
+         }
+      }
+
+      // REMOVE SPURIOUS VALUES BY INTERPOLATED VALUES.
+
+      for (var frame = ik_data.length - 1 ; frame > 0 ; frame--)
+         for (var j = 0 ; j < 5 ; j++) {
+	    if (this.getP(frame, j).length() == 0) {
+	       for (var f = frame + 1 ; f < ik_data.length ; f++)
+	         if (this.getP(f, j).length() != 0) {
+	            this.data[frame][j].p.copy(this.getP(f, j));
+	            break;
+                 }
+            }
+         }
+
+      var eps = .1;
+      var tmp = new THREE.Vector3();
+      for (var frame = 0 ; frame < ik_data.length - 1 ; frame++)
+         for (var j = 0 ; j < 5 ; j++) {
+	    tmp.copy(this.getP(frame, j)).sub(this.getP(frame+1, j));
+	    if (tmp.length() >= eps)
+	       this.data[frame][j].p.copy(this.getP(frame+1, j));
+	 }
+
+      // MODEL THE BODY.
+
+      var body = new THREE.Mesh();
+      body.rotation.x = -PI/2;
+      body.rotation.z = -PI/2;
+      for (var j = 0 ; j < 5 ; j++) {
+	 var geometry = globeGeometry();
+         var C = ([ [.4,.4,.4], [.4,0,0], [.4,.4,0], [0,.4,0], [0,0,.4] ])[j];
+         var material = new phongMaterial().setAmbient(C[0],C[1],C[2]).setDiffuse(C[0],C[1],C[2]);
+         body.add(new THREE.Mesh(geometry, material));
+	 switch (j) {
+	 case 4:
+	    var head = body.children[j];
+	    head.position.set(0,0,.15);
+	    head.scale.set(.1,.12,.15);
+
+            for (var i = 0 ; i < 2 ; i++) {
+	       head.add(new THREE.Mesh(globeGeometry(), whiteMaterial));
+	       var eye = head.children[i];
+	       eye.position.set(-1,i==0?-.5:.5,0);
+	       eye.scale.set(.3,.3,.2);
+            }
+
+	    break;
+	 case 3:
+	 case 2:
+	    body.children[j].position.set(-.15,0,.03);
+	    body.children[j].scale.set(.15,.07,.03);
+	    break;
+	 default:
+	    body.children[j].scale.set(.05,.05,.05);
+	    break;
+         }
+      }
+
+      this.mesh = new THREE.Mesh();
+      this.mesh.add(body);
+   }
+   IKBody.prototype = {
+      nFrames : function() {
+         return this.data.length;
+      },
+      getP : function(frame, j) {
+         return this.data[frame][j].p;
+      },
+      getQ : function(frame, j) {
+         return this.data[frame][j].q;
+      },
+      render : function(time) {
+         var nf0 = floor(this.nFrames() * .4);
+         var nf1 = floor(this.nFrames() * .6);
+         var frame = nf0 + floor(240 * time) % nf1;
+         for (var j = 0 ; j < 5 ; j++) {
+	    var joint = this.mesh.children[0].children[j];
+	    if (j >= 2)
+	       joint.quaternion.copy(this.getQ(frame, j));
+	    joint.position.copy(this.getP(frame, j));
+	 }
+      },
+   };
+

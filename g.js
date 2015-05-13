@@ -983,6 +983,8 @@ console.log(harry.fred);
       setInterval( function() { tick(g); }, 1000 / 60);
    }
 
+   var ikBody;
+
    var OR_imageObj;
 
    var sketchType = 0;
@@ -1625,7 +1627,11 @@ console.log("aha");
          break;
       case 3:
          sketchDragActionXY = [x,y];
-         sketchDragActionSize = [sk().xhi - sk().xlo, sk().yhi - sk().ylo];
+         sketchDragActionSize = [1.3 * (sk().xhi - sk().xlo), 1.3 * (sk().yhi - sk().ylo)];
+	 if (sk().xyz.length >= 3) {
+	    sketchDragActionXY[0] /= sk().xyz[2];
+	    sketchDragActionXY[1] /= sk().xyz[2];
+	 }
          break;
       case 4:
          outSketch = sk();

@@ -1,6 +1,15 @@
 
 /////////////// UTILITY FUNCTIONS ///////////////////
 
+// RETURN A UNIQUE OBJECT ID.
+
+   var _objectId = 0;
+   function objectId(obj) {
+      if (obj._objectId === undefined)
+         obj._objectId = _objectId++;
+      return obj._objectId;
+   }
+
 // CHECKING FOR SYNTAX ERRORS IN JAVASCRIPT CODE.
 
    function findSyntaxError( code ) {

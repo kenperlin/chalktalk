@@ -1,14 +1,14 @@
 function() {
    this.label = 'linetest';
+   this.is3D = true;
    this.keys = [[-1,-1,0],[0,1,0],[0,-1,0],[1,1,0]];
-   this.spline = newArray(splineSize(this.keys), 2);
-   this.renderStrokeInit();
-/*
-   this.drawing.add(
-      new DRAWING.Curve(
-         new DRAWING.SplinePath(
-            this.keys)));
-*/
+   this.spline = newArray(splineSize(this.keys), 3);
+
+   this.createMesh = function() {
+      this.renderedStroke = new RenderedStroke(gl());
+      return this.renderedStroke.mesh;
+   }
+
    this.render = function() {
       this.duringSketch(function() {
          for (var i = 0 ; i < this.keys.length - 1 ; i++)
@@ -22,13 +22,11 @@ function() {
          this.keys[3][0] = .2 * sin(PI * time * 2) + 1;
 
          makeSpline(this.keys, this.spline);
+	 for (var i = 0 ; i < this.spline.length ; i++)
+	    this.spline[i][2] = 0;
 
-         var i0 = floor(this.spline.length/3);
-         var i1 = floor(this.spline.length/3*2);
-         for (var i = 0 ; i < this.spline.length ; i++)
-            this.spline[i][2] = i >= i0 && i < i1 ? 0 : 1;
-
-         this.renderStroke(this.spline);
+         var C = paletteRGB[this.colorId];
+         this.renderedStroke.render(this.spline, [C[0]/255, C[1]/255, C[2]/255, this.fade()]);
       });
    }
 }

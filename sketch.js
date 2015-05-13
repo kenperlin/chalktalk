@@ -1150,20 +1150,17 @@
 
       renderStrokeInit : function() {
          this.vertexShader = [
-         ,'uniform vec3  uData[256];'
+         ,'uniform vec3  uData[1000];'
          ,'uniform float uNpts;'
-         ,'vec3 place(float f) {'
+         ,'vec4 place(float f) {'
          ,'   float t = max(0., min(.999, f)) * (uNpts - 1.);'
          ,'   int n = int(t);'
-         ,'   return mix(uData[n], uData[n+1], t - float(n));'
+         ,'   return vec4(mix(uData[n], uData[n+1], t - float(n)), 1.);'
          ,'}'
          ,'void main() {'
-         ,'   float t = position.y + .505;'
-         ,'   vec3 p1 = place(t);'
-         ,'   vec3 p0 = place(t - .01);'
-         ,'   vec2 d = p1.xy - p0.xy;'
-         ,'   p1 += normalize(vec3(d.y, -d.x, 0.)) * position.x * p1.z;'
-         ,'   gl_Position = projectionMatrix * modelViewMatrix * vec4(p1.xy, 0., 1.);'
+         ,'   vec4 p0 = projectionMatrix * modelViewMatrix * place(position.y + .5 );'
+         ,'   vec4 p1 = projectionMatrix * modelViewMatrix * place(position.y + .51);'
+         ,'   gl_Position = p1 + normalize(vec4(p1.y-p0.y, p0.x-p1.x, 0., 0.)) * position.x * 1.5;'
          ,'}'
          ].join('\n');
 
@@ -1175,13 +1172,7 @@
          ].join('\n');
 
          this.createMesh = function() {
-            var material = this.shaderMaterial();
-	    console.log(material);
-            var mesh = new THREE.Mesh(new THREE.Geometry(), material);
-            var geometry = new THREE.CylinderGeometry(.5, .5, 1, 3, 256);
-            var cylinder = new THREE.Mesh(geometry, mesh.material);
-            mesh.add(cylinder);
-            return mesh;
+            return new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1,2,1000), this.shaderMaterial());
          }
       },
       renderStrokeSetColor : function() {
@@ -1194,25 +1185,21 @@
             this.renderStrokeSetColor();
             this._gl = renderer.context;
             this._glProgram = this.mesh.material.program.program;
-            this._uData      = this._gl.getUniformLocation(this._glProgram, 'uData');
-            this._uNpts      = this._gl.getUniformLocation(this._glProgram, 'uNpts');
+            this._uData = this._gl.getUniformLocation(this._glProgram, 'uData');
+            this._uNpts = this._gl.getUniformLocation(this._glProgram, 'uNpts');
          }
 
          if (this._renderStrokeData.length < 3 * curve.length)
             this._renderStrokeData = new Float32Array(3 * curve.length); 
 
-         var thickness = isNumeric(this.xlo) ? 10 / (this.xhi - this.xlo) : 1 / 15;
-
          var data = this._renderStrokeData;
-         for (var i = 0 ; i < curve.length ; i++) {
-            data[3*i  ] = curve[i][0];
-            data[3*i+1] = curve[i][1];
-            data[3*i+2] = thickness * (curve[i][2] === undefined ? 1 : curve[i][2]);
-         }
+         for (var i = 0 ; i < curve.length ; i++)
+	    for (var j = 0 ; j < 3 ; j++)
+               data[3 * i + j] = curve[i][j];
 
          this._gl.useProgram(this._glProgram);
-         this._gl.uniform3fv(this._uData     , data);
-         this._gl.uniform1f (this._uNpts     , curve.length);
+         this._gl.uniform3fv(this._uData, data);
+         this._gl.uniform1f (this._uNpts, curve.length);
       },
 
       //--------------------------------------------------------------------
