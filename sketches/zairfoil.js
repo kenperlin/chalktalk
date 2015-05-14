@@ -19,7 +19,6 @@ function() {
                v.x -= .6 * (v.z + 1) * (v.z - 1);
                v.x += v.z * (v.x + .5);
             }
-            //shape.computeCentroids();
             shape.computeVertexNormals();
             airfoil.setMaterial(new THREE.MeshPhongMaterial());
             airfoil.material.color = airfoil.material.emissive = new THREE.Color(0x404040);

@@ -163,7 +163,6 @@ function() {
                v.z *= r;
             }
          }
-         //bodyGeometry.computeCentroids();
          bodyGeometry.computeVertexNormals();
 
          var bodyShape = new THREE.Mesh(bodyGeometry);
