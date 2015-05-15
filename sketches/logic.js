@@ -17,8 +17,8 @@ function() {
    var logicDelay = new Delay();
 
    this.codes = [
-      '     x>0.5' ,     'min(x>0.5, y>0.5)',     'max(x>0.5, y>0.5)', '(x>0.5)!=(y>0.5)',
-      '1 - (x>0.5)', '1 - min(x>0.5, y>0.5)', '1 - max(x>0.5, y>0.5)', '(x>0.5)==(y>0.5)'
+      '     x>0.5' ,    'min(x>0.5,y>0.5)',    'max(x>0.5,y>0.5)','(x>0.5)!=(y>0.5)',
+      '1 - (x>0.5)','1 - min(x>0.5,y>0.5)','1 - max(x>0.5,y>0.5)','(x>0.5)==(y>0.5)'
    ];
 
    this.IDENT = [ [[-.5,.4],[.5,0],[-.5,-.4]], [[-.5,-.4],[-.5,.4]] ];
@@ -82,8 +82,8 @@ function() {
          mText(this.labels[this.selection], [x, .03], .5, .5);
 
          this.setOutPortValue(this.evalCode(this.code[0][1],
-                              s % 4 == 0 ? this.getDelayedValue()
-                                         : this.getInValue(0, 0), this.getInValue(1, 0)));
+                              s%4==0 ? this.getDelayedValue()
+                                     : this.getInValue(0,0), this.getInValue(1,0)));
       });
    }
 }
