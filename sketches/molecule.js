@@ -1,33 +1,33 @@
 
-function MoleculeResponder() {
+function() {
 
-   this.doI(
-      function() {
-         var node = this.graph.nodes[this.I];
-         if (node.d === undefined)
-            node.d = newVec3();
-         node.d.copy(this.graph.p).sub(node.p);
-      },
-      function() {                                             // Drag on a node to move it.
-         this.graph.nodes[this.I].p.copy(this.graph.p);
+   function MoleculeResponder() {
+   
+      this.doI(
+         function() {
+            var node = this.graph.nodes[this.I];
+            if (node.d === undefined)
+               node.d = newVec3();
+            node.d.copy(this.graph.p).sub(node.p);
+         },
+         function() {                                             // Drag on a node to move it.
+            this.graph.nodes[this.I].p.copy(this.graph.p);
+         }
+      );
+   
+      this.simulate = function() {
+         var l = this.graph.linkCount + Math.floor((this.graph.links.length - this.graph.linkCount) * random());
+         var link = this.graph.links[l];
+         var i = link.i;
+         var j = link.j;
+   
+         var a = this.graph.nodes[i].p;
+         var b = this.graph.nodes[j].p;
+         var d = a.distanceTo(b);
+         this.graph.adjustDistance(a, b, d + random(), 0.1 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
       }
-   );
-
-   this.simulate = function() {
-      var l = this.graph.linkCount + Math.floor((this.graph.links.length - this.graph.linkCount) * random());
-      var link = this.graph.links[l];
-      var i = link.i;
-      var j = link.j;
-
-      var a = this.graph.nodes[i].p;
-      var b = this.graph.nodes[j].p;
-      var d = a.distanceTo(b);
-      this.graph.adjustDistance(a, b, d + random(), 0.1 / (d * d), i != this.I && i != this.J, j != this.I && j != this.J);
    }
-}
-MoleculeResponder.prototype = new GraphResponder;
-
-function Molecule() {
+   MoleculeResponder.prototype = new GraphResponder;
 
    this.clone = function() {
       var sketch = Sketch.prototype.clone.call(this);
@@ -255,6 +255,4 @@ function Molecule() {
 //////////////////////////////////////////////////
 
 }
-Molecule.prototype = new Sketch;
-addSketchType('Molecule');
 

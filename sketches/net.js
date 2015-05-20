@@ -1,114 +1,95 @@
-/*
-   Should gradually drift toward origin (adjust translation accordingly) so rotation is always around center.
+function() {
 
-   Create nested Graphs (that is, a node can be a Graph).
+   function NetResponder() {
 
-   Translate/rotate/scale/etc a node.
-   Text for a node (eg: atomic symbol).
-   Procedural "shaders" for movement: swim, walk, symmetry, electric charge repulsion, etc.
-   Eg: ethane molecule, with repelling H atoms.
-
-   DONE Put Graph method definitions into prototype.
-   DONE Bug whereby bounding box is clearly too big -- maybe there are phantom nodes?
-   DONE findNode should pick the front-most one.
-   DONE Create a Graph base class, that knows only about node, links, and basic extensible bahavior -- not rendering.
-   DONE Nodes do not knock into each other.
-   DONE Gesture to scale a node.
-   DONE Create separate responder object.
-   DONE Change rendering to use THREE.js ball and stick model.
-*/
-
-function NetResponder() {
-
-   this.setup = function() {
-      this.graph.isUpdating = function() {
-         return this.R.clickType == 'none';
+      this.setup = function() {
+         this.graph.isUpdating = function() {
+            return this.R.clickType == 'none';
+         }
       }
+
+      this.defaultNodeRadius = 0.1;
+
+      this.doI(
+         function() {                                       // Drag on a node to move it.
+            var node = this.graph.nodes[this.I];
+            if (node.d === undefined)
+               node.d = newVec3();
+            node.d.copy(this.graph.p).sub(node.p);
+         },
+         function() {
+            this.graph.nodes[this.I].p.copy(this.graph.p);
+         }
+      );
+
+      this.doI_I(                                           // Click on a node and then
+         null,
+         function() {                                       // drag it to move it while the simulation pauses.
+            this.graph.nodes[this.I_].p.copy(this.graph.p);
+         },
+         function() {
+            this.graph.computeLengths();                   
+         },
+         function() {                                       // Double click on a node to remove it.
+            this.graph.removeNode(this.I_);
+            this.graph.computeLengths();
+         }
+      );
+
+      this.doI_J(                                           // Click on node I, then
+         null,
+         function() {                                       // drag node J while the simulation pauses.
+            this.graph.nodes[this.J].p.copy(this.graph.p);
+         },
+         function() {                                       // upon release, create a springy link.
+            this.graph.removeLink(this.graph.findLink(this.I_, this.J));
+            this.graph.addLink(this.I_, this.J, 0.03);
+            this.graph.computeLengths();
+         },
+         function() {                                       // Click node I, then click other node J.
+            var l = this.graph.findLink(this.I_, this.J);
+            if (l == -1)
+               this.graph.addLink(this.I_, this.J);         // If there was no link betw I and J, create one.
+            else
+               this.graph.removeLink(l);                    // If there was a link betw I and J, remove it.
+            this.graph.computeLengths();
+         }
+      );
+
+      this.doB_B(
+         function() {                                       // Click on bg twice to create a new node,
+            var p = this.graph.p;
+            this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
+            if (this.isCreatingNode)
+               this.newJ = this.graph.addNode(p.x, p.y, p.z);
+         },
+         function() {                                       // and optionally drag.
+            if (this.isCreatingNode)
+               this.graph.nodes[this.newJ].p.copy(this.graph.p);
+         },
+         function() {
+            this.isCreatingNode = false;
+         },
+         function() {
+            this.isCreatingNode = false;
+         }
+      );
+
+      this.doB_J(
+         function() {                                       // After clicking on the background
+            var node = this.graph.nodes[this.J];
+            node.r_at_click = node.r;
+         },
+         function() {                                       // drag on a node to do a gesture on that node.
+            var node = this.graph.nodes[this.J];
+            var a = this.clickPoint.distanceTo(node.p);
+            var b = this.clickPoint.distanceTo(this.graph.p);
+            node.r = node.r_at_click * b / a;
+         }
+      );
    }
+   NetResponder.prototype = new GraphResponder;
 
-   this.defaultNodeRadius = 0.1;
-
-   this.doI(
-      function() {                                       // Drag on a node to move it.
-         var node = this.graph.nodes[this.I];
-         if (node.d === undefined)
-            node.d = newVec3();
-         node.d.copy(this.graph.p).sub(node.p);
-      },
-      function() {
-         this.graph.nodes[this.I].p.copy(this.graph.p);
-      }
-   );
-
-   this.doI_I(                                           // Click on a node and then
-      null,
-      function() {                                       // drag it to move it while the simulation pauses.
-         this.graph.nodes[this.I_].p.copy(this.graph.p);
-      },
-      function() {
-         this.graph.computeLengths();                   
-      },
-      function() {                                       // Double click on a node to remove it.
-         this.graph.removeNode(this.I_);
-         this.graph.computeLengths();
-      }
-   );
-
-   this.doI_J(                                           // Click on node I, then
-      null,
-      function() {                                       // drag node J while the simulation pauses.
-         this.graph.nodes[this.J].p.copy(this.graph.p);
-      },
-      function() {                                       // upon release, create a springy link.
-         this.graph.removeLink(this.graph.findLink(this.I_, this.J));
-         this.graph.addLink(this.I_, this.J, 0.03);
-         this.graph.computeLengths();
-      },
-      function() {                                       // Click node I, then click other node J.
-         var l = this.graph.findLink(this.I_, this.J);
-         if (l == -1)
-            this.graph.addLink(this.I_, this.J);         // If there was no link betw I and J, create one.
-         else
-            this.graph.removeLink(l);                    // If there was a link betw I and J, remove it.
-         this.graph.computeLengths();
-      }
-   );
-
-   this.doB_B(
-      function() {                                       // Click on bg twice to create a new node,
-         var p = this.graph.p;
-         this.isCreatingNode = p.distanceTo(this.clickPoint) < this.defaultNodeRadius;
-         if (this.isCreatingNode)
-            this.newJ = this.graph.addNode(p.x, p.y, p.z);
-      },
-      function() {                                       // and optionally drag.
-         if (this.isCreatingNode)
-            this.graph.nodes[this.newJ].p.copy(this.graph.p);
-      },
-      function() {
-         this.isCreatingNode = false;
-      },
-      function() {
-         this.isCreatingNode = false;
-      }
-   );
-
-   this.doB_J(
-      function() {                                       // After clicking on the background
-         var node = this.graph.nodes[this.J];
-         node.r_at_click = node.r;
-      },
-      function() {                                       // drag on a node to do a gesture on that node.
-         var node = this.graph.nodes[this.J];
-         var a = this.clickPoint.distanceTo(node.p);
-         var b = this.clickPoint.distanceTo(this.graph.p);
-         node.r = node.r_at_click * b / a;
-      }
-   );
-}
-NetResponder.prototype = new GraphResponder;
-
-function Net() {
    this.label = 'net';
    this.is3D = true;
 
@@ -244,6 +225,4 @@ function Net() {
 //////////////////////////////////////////////////
 
 }
-Net.prototype = new Sketch;
-addSketchType('Net');
 
