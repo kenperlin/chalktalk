@@ -2,7 +2,7 @@ function() {
    this.label = 'projectuv';
    this.is3D = true;
    this.mode = 0;
-   this.onCmdClick = function() { this.mode++; }
+   this.onCmdClick = function() { this.mode = (this.mode + 1) % 3; }
    this.render = function() {
       this.duringSketch(function() {
          mClosedCurve([[-.2,1.1],[.2,.9],[.2,-.9],[-.2,-1.1]]);

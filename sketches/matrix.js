@@ -21,9 +21,9 @@ function() {
        [1  ,0  ,0  ,"A", 0  ,1  ,0  ,"B",  0  ,0  ,1  ,"C",  0  ,0  ,0  , 1],
    ];
    this.mode = 0;
-   this.onClick = function() {
-      this.mode = (this.mode + 1) % this.vals.length;
-   }
+   this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
+   this.cmdMode = 0;
+   this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
    this.mouseDown = function(x,y) { this.computeMxy(x, y); }
    this.mouseDrag = function(x,y) { this.computeMxy(x, y); }
    this.mouseUp   = function(x,y) { this.computeMxy(x, y); }
@@ -45,6 +45,13 @@ function() {
       mLine([-1,-.5],[1,-.5]);
 
       this.afterSketch(function() {
+
+         if (this.cmdMode == 1) {
+	    color(scrimColor(0.3));
+	    mFillRect([-1,-.5], [.5,1]);
+	    color(defaultPenColor);
+	 }
+
          mLine([-1, .5],[1,  .5]);
          mLine([-1,  0],[1,   0]);
          mLine([-.5, 1],[-.5,-1]);
