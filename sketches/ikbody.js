@@ -1,32 +1,29 @@
 function() {
-   var jointMaterial  = phongMaterial().setAmbient(.4,.3,.2).setDiffuse(.4,.3,.2).setSpecular(.2,.2,.2,5);
-   var tendonMaterial = phongMaterial().setAmbient(0,.4,.5).setDiffuse(0,.4,.5);
-   var boneMaterial   = phongMaterial().setAmbient(.4,.0,.0).setDiffuse(.4,.0,.0).setSpecular(.3,.3,.3,7);
-
    function adjust(p, x, y, z, q) {
       tmp.set(x,y,z).applyQuaternion(q);
       p.add(tmp);
    }
 
-   function IkbodyResponder() {
+   function IKBodyResponder() {
       var tmp = newVec3();
       this.isAdjustable = function(i) { return i >= 9; }
       this.simulate = function() {
+         for (var j = 0 ; j < 9 ; j++)
+	    this.graph.nodes[j].p.copy(this.graph.ikBody.getP(j));
 
-         var graph = this.graph;
-         var ikBody = graph.ikBody;
-         for (var j = 0 ; j < 9 ; j++) {
-	    var p = graph.nodes[j].p;
-	    p.copy(ikBody.getP(j));
-            switch (j) {
-            case IK.KNEE_L    : adjust(p,-.025,0   ,.03, ikBody.getQ(IK.ANKLE_L)); break;
-            case IK.KNEE_R    : adjust(p, .025,0.02,.03, ikBody.getQ(IK.ANKLE_R)); break;
-            case IK.ANKLE_L   : adjust(p,  0,-.05,0, ikBody.getQ(IK.ANKLE_L)); break;
-            }
-         }
+         // THE FOLLOWING LOGIC FORCES THE KNEES TO BEND FORWARD, RATHER THAN BACKWARD.
+
+         adjust(this.graph.nodes[IK.HIP_L ].p, .1, 0, 0, this.graph.ikBody.getQ(IK.NECK));
+         adjust(this.graph.nodes[IK.HIP_R ].p,-.1, 0, 0, this.graph.ikBody.getQ(IK.NECK));
+
+         adjust(this.graph.nodes[IK.KNEE_L].p, 0, 0, .02, this.graph.ikBody.getQ(IK.ANKLE_L));
+         adjust(this.graph.nodes[IK.KNEE_R].p, 0, 0, .02, this.graph.ikBody.getQ(IK.ANKLE_R));
+
+         adjust(this.graph.nodes[IK.PELVIS].p, 0, .1, -.1, this.graph.ikBody.getQ(IK.NECK));
+         adjust(this.graph.nodes[IK.BELLY].p, 0, 0, -.07, this.graph.ikBody.getQ(IK.NECK));
       }
    }
-   IkbodyResponder.prototype = new GraphResponder;
+   IKBodyResponder.prototype = new GraphResponder;
 
    this.label = "ikbody";
    this.meshBounds = [ [-.75, .1] , [.75, 1.8] ];
@@ -54,7 +51,7 @@ function() {
       this.afterSketch(function() {
          if (this.graph === undefined) {
             this.graph = new VisibleGraph();
-            this.graph.setResponder(new IkbodyResponder());
+            this.graph.setResponder(new IKBodyResponder());
             this.graph.ikBody = this.ikBody;
 
             var nodeData = this.ikBody.getNodeData();
@@ -78,9 +75,6 @@ function() {
             this.renderNode(node, j);
          }
 
-	 //nodes[IK.NECK].p.copy(nodes[IK.CHEST].p);
-	 //adjust(nodes[IK.NECK].p, 0,.1,0, this.ikBody.getQ(IK.NECK));
-
          var links = this.graph.links;
          for (var j = 0 ; j < links.length ; j++)
             this.renderLink(links[j]);
@@ -93,27 +87,24 @@ function() {
    var tmp = newVec3();
 
    this.renderNode = function(node, j) {
+      if (j === IK.NECK)
+         return;
+
       if (node.g === undefined) {
-         node.g = this.graph.newNodeMesh(jointMaterial, 0.04);
+         node.g = this.graph.newNodeMesh(this.ikBody.jointMaterial, 0.04);
          this.mesh.add(node.g);
       }
       var s = this.mode >= 1 ? 0.04 : 0;
       node.g.scale.set(s,s,s);
-      node.g.setMaterial(this.mode < 2 ? boneMaterial : jointMaterial);
-
-      switch (j) {
-      case IK.CHEST     : adjust(node.p, 0,.00,0.01, this.ikBody.getQ(IK.NECK)); break;
-      case IK.SHOULDER_L: adjust(node.p, 0,.04,0.01, this.ikBody.getQ(IK.NECK)); break;
-      case IK.SHOULDER_R: adjust(node.p, 0,.04,0.01, this.ikBody.getQ(IK.NECK)); break;
-      }
-
+      node.g.setMaterial(this.mode < 2 ? this.ikBody.boneMaterial : this.ikBody.jointMaterial);
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
       if (link.g === undefined) {
          var r = link.w * (link.w == 1 ? .02 : .01);
-         this.mesh.add(link.g = this.graph.newLinkMesh(link.w < 1 ? tendonMaterial : boneMaterial, r));
+         this.mesh.add(link.g = this.graph.newLinkMesh(link.w < 1 ? this.ikBody.tendonMaterial
+	                                                          : this.ikBody.boneMaterial, r));
       }
       var s = this.mode == 3 ? 1 : this.mode == 2 ? link.w == 1 || link.w > .2 && link.w < .9 ? 1 : 0 : 0;
       link.g.scale.set(s,s,s);
