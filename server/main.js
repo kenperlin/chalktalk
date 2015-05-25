@@ -3,7 +3,6 @@ var express = require("express");
 var formidable = require("formidable");
 var fs = require("fs");
 var path = require("path");
-var readline = require("readline-sync");
 
 var app = express();
 var port = process.argv[2] || 11235;
@@ -12,7 +11,8 @@ var port = process.argv[2] || 11235;
 app.use(express.static("./"));
 
 // handle uploaded files
-app.use(bodyParser({defer: true}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.route("/upload").post(function(req, res, next) {
    var form = formidable.IncomingForm();
    form.uploadDir = "./sketches";
