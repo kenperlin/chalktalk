@@ -1,7 +1,6 @@
 function() {
    this.label = "ikbody";
    this.meshBounds = [ [-.75, .1] , [.75, 1.8] ];
-   this.ikBody = new IKBody(ik_data);
    this.onSwipe = function(x,y) {
       switch (pieMenuIndex(x,y)) {
       case 0: this.ikBody.mode = min(4, this.ikBody.mode + 1); break;
@@ -11,7 +10,10 @@ function() {
    }
    this.freeze = false;
    this.onClick = function(x,y) { this.freeze = ! this.freeze; }
-   this.createMesh = function() { return this.ikBody.mesh; }
+   this.createMesh = function() {
+      this.ikBody = new IKBody(ik_data);
+      return this.ikBody.mesh;
+   }
    this.render = function() {
       this.duringSketch(function() {
          mLine([-.67,1.33],[.67,1.33]);
@@ -19,7 +21,7 @@ function() {
          mLine([0,1],[.33,0]);
       });
       this.afterSketch(function() {
-         this.ikBody.render(this.freeze ? 1 : time);
+         this.ikBody.render(this.freeze ? this.ikBody.startTime + 1 : time);
       });
    }
 }
