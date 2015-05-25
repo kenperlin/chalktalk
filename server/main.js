@@ -63,6 +63,10 @@ app.route("/set").post(function(req, res, next) {
    });
 });
 
+app.route("/talk").get(function(req, res) {
+   res.sendfile("index.html");
+});
+
 // handle request for list of available sketches
 app.route("/ls_sketches").get(function(req, res) {
    fs.readdir("./sketches/", function(err, files) {
@@ -141,3 +145,31 @@ String.prototype.contains = function(substr) {
 var server = app.listen(parseInt(port, 10), function() {
    console.log("Listening on port %d", server.address().port);
 });
+
+// WEBSOCKET ENDPOINT SETUP
+try {
+   var WebSocketServer = require("ws").Server;
+   var wss = new WebSocketServer({ port: 22346 });
+   var timeline = [];
+
+   wss.broadcast = function(sender, message) {
+      wss.clients.forEach(function(client) {
+         // DON'T BROADCAST MESSAGES BACK TO THE ORIGINAL SENDER
+         if (client != sender)
+            client.send(message);
+      });
+   };
+
+   wss.on("connection", function(socket) {
+      console.log("new connection");
+
+      socket.on("message", function(message) {
+         console.log("got message: " + message);
+         timeline.push(message);
+         wss.broadcast(socket, message);
+      });
+   });
+} catch (err) {
+   console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
+         + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
+}
