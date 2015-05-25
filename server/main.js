@@ -4,6 +4,7 @@ var formidable = require("formidable");
 var fs = require("fs");
 var path = require("path");
 var readline = require("readline-sync");
+var WebSocketServer = require("ws").Server;
 
 var app = express();
 var port = process.argv[2] || 11235;
@@ -61,6 +62,10 @@ app.route("/set").post(function(req, res, next) {
 
       res.end();
    });
+});
+
+app.route("/talk").get(function(req, res) {
+   res.sendfile("index.html");
 });
 
 // handle request for list of available sketches
@@ -140,4 +145,26 @@ String.prototype.contains = function(substr) {
 
 var server = app.listen(parseInt(port, 10), function() {
    console.log("Listening on port %d", server.address().port);
+});
+
+// WEBSOCKET ENDPOINT SETUP
+var wss = new WebSocketServer({ port: 22346 });
+var timeline = [];
+
+wss.broadcast = function(sender, message) {
+   wss.clients.forEach(function(client) {
+      // DON'T BROADCAST MESSAGES BACK TO THE ORIGINAL SENDER
+      if (client != sender)
+         client.send(message);
+   });
+};
+
+wss.on("connection", function(socket) {
+   console.log("new connection");
+
+   socket.on("message", function(message) {
+      console.log("got message: " + message);
+      timeline.push(message);
+      wss.broadcast(socket, message);
+   });
 });

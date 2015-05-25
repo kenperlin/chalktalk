@@ -5,6 +5,7 @@
       "body-parser": "1.5.x",
       "express": "4.7.x",
       "formidable": "1.0.x",
-      "readline-sync": "0.4.x"
+      "readline-sync": "0.4.x",
+      "ws": "0.7.x"
    }
 }
