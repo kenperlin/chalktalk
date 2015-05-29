@@ -34,7 +34,7 @@ function() {
    this.render = function(elapsed) {
       if (this.time === undefined)
          this.time = time;
-      mClosedCurve([[0,.6],[.2,-1],[-.2,-1]]);
+      mClosedCurve([[0,.6],[.2,-1],[.1,-1.04],[0,-1.05],[-.1,-1.04],[-.2,-1]]);
       m.save();
       m.translate(0,.6,0);
       m.rotateZ(this.angle);

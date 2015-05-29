@@ -19,7 +19,10 @@ function() {
          this.isGaze = ! this.isGaze;
          break;
       case 2:
-         this.isTall = true;
+         if (this.isTall && ! this.isGaze)
+	    this.isGaze = true;
+         else
+            this.isTall = true;
          break;
       case 4:
          this.choice.setState(1);
@@ -128,7 +131,7 @@ function() {
          var rotz = lookUp;
          if (sketchPage.x !== undefined && isNumeric(this.cx()))
             rotz = lerp(this.gaze, rotz, -atan2(sketchPage.y - this.cy(),
-                                                sketchPage.x - this.cx()));
+                                         max(0, sketchPage.x - this.cx())));
          m.rotateZ(rotz);
          m.rotateY(lookSide);
          mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
