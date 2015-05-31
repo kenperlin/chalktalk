@@ -10,6 +10,8 @@ function() {
       var axisY = (bounds[1] + bounds[3]) / 2;
       var axisR = (bounds[3] - bounds[1]) / 2;
 
+console.log(axisX + ' ' + axisY + ' ' + axisR);
+
       // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
 
       this.profile = [];
