@@ -112,6 +112,7 @@ function() {
             mCurve([[.85,.85], [-.85,-.85]]);
          }
          this.afterSketch(function() {
+	    if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < S.length ; n++)
                this.placeVertex(n, S[n]);
@@ -129,6 +130,7 @@ function() {
             mClosedCurve([[-.8,-.8],[.8,-.8],[.8,.8],[-.8,.8]]);
          }
          this.afterSketch(function() {
+	    if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < 16 ; n++)
                this.placeVertex(n, C[n]);
@@ -150,6 +152,7 @@ function() {
             mLine([-1,0],[1,0]);
          }
          this.afterSketch(function() {
+	    if (this.mesh === undefined) return;
 	    var alt = mode % 2 != 0;
 	    var n = 0;
             for ( ; n < 8 ; n++) {
@@ -184,6 +187,7 @@ function() {
             mClosedCurve([[0,-1],[1,0],[0,1],[-1,0]]);
          }
          this.afterSketch(function() {
+	    if (this.mesh === undefined) return;
             function edgeColor(a, b) {
                var x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2], w = a[3] - b[3];
                var dd = x * x + y * y + z * z + w * w;

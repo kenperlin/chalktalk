@@ -199,27 +199,26 @@ function() {
 
    this.createMesh = function() {
       mesh = new THREE.Mesh();
-      mesh.setMaterial(this.netMaterial());
+      this.netMaterial = this.shaderMaterial();
+      mesh.setMaterial(this.netMaterial);
       return mesh;
    }
 
    this.renderNode = function(node) {
+      if (this.mesh === undefined)
+         return;
       node.r = this.graph.R.defaultNodeRadius;
       if (node.g === undefined)
-         mesh.add(node.g = this.graph.newNodeMesh(this.netMaterial(), node.r));
+         this.mesh.add(node.g = this.graph.newNodeMesh(this.netMaterial, node.r));
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
+      if (this.mesh === undefined)
+         return;
       if (link.g === undefined)
-         mesh.add(link.g = this.graph.newLinkMesh(this.netMaterial(), 0.03 * Math.sqrt(link.w)));
+         this.mesh.add(link.g = this.graph.newLinkMesh(this.netMaterial, 0.03 * Math.sqrt(link.w)));
       link.g.placeStick(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
-   }
-
-   this.netMaterial = function() {
-      if (this._netMaterial === undefined)
-         this._netMaterial = this.shaderMaterial();
-      return this._netMaterial;
    }
 
 //////////////////////////////////////////////////
