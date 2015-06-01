@@ -210,6 +210,9 @@ function() {
             for (var c = -r ; c <= r ; c += r + r)
                this.meshBounds.push([p.x + a, p.y + b, p.z + c]);
          }
+	 if (this.meshBounds.length == 0)
+	    return;
+
          this.extendBounds(this.meshBounds);
 
          for (var l = 0 ; l < this.nLinksToRender ; l++)
@@ -230,27 +233,25 @@ function() {
 
    this.createMesh = function() {
       mesh = new THREE.Mesh();
-      mesh.setMaterial(this.myMaterial());
+      mesh.material = this.shaderMaterial();
       return mesh;
    }
 
    this.renderNode = function(node) {
+      if (this.mesh === undefined)
+         return;
       node.r = this.graph.R.defaultNodeRadius * (node.type == 1 ? 6 : 1);;
       if (node.g === undefined)
-         mesh.add(node.g = this.graph.newNodeMesh(this.myMaterial(), node.r));
+         this.mesh.add(node.g = this.graph.newNodeMesh(this.mesh.material, node.r));
       node.g.position.copy(node.p);
    }
 
    this.renderLink = function(link) {
+      if (this.mesh === undefined)
+         return;
       if (link.g === undefined)
-         mesh.add(link.g = this.graph.newLinkMesh(this.myMaterial(), this.graph.R.defaultNodeRadius * Math.sqrt(link.w)));
+         this.mesh.add(link.g = this.graph.newLinkMesh(this.mesh.material, this.graph.R.defaultNodeRadius * Math.sqrt(link.w)));
       link.g.placeStick(this.graph.nodes[link.i].p, this.graph.nodes[link.j].p);
-   }
-
-   this.myMaterial = function() {
-      if (this._myMaterial === undefined)
-         this._myMaterial = new phongMaterial().setAmbient(.5,.5,.5).setDiffuse(.5,.5,.5);
-      return this._myMaterial;
    }
 }
 

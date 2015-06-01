@@ -1,4 +1,3 @@
-
 function() {
    this.label = 'speaker';
    this.render = function() {
