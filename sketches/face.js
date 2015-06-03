@@ -54,11 +54,13 @@ function() {
       var Y = .5 * y;
       var Z = .1 * z;
 
+      this.extendBounds([[-1.1,-.8],[1.1,.6]]);
+
       m.translate(0,-3,0);
       m.rotateX(X);
       m.rotateY(Y);
       m.rotateZ(Z);
-      m.translate(0,3,0);
+      m.translate(0, 3,0);
 
       lineWidth(2);
 
@@ -90,6 +92,7 @@ function() {
                   p(-.1+O/2-S,-.5-H*.35+A*.75 + S),
                   p( .1-O/2+S,-.5-H*.35+A*.75 + S),
                   p( .2-O    ,-.5+H              )]);
+
          this.setOutPortValue([a,d,e,h,i,o,s,x,y,z]);
       });
    }
