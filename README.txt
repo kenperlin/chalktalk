@@ -7,6 +7,20 @@ Here are the instructions for getting started:
 
 	npm install
 
-(3) As usual, type:
+(3) To run Chalktalk, type in this folder:
 
 	run
+
+Here are some useful things to know:
+
+The toggle key to show/hide all the hotkey commands and also to
+show outlines around sketches is 'x'.
+
+The key to show/hide the glyphs dictionary (defined by all the *.js
+files in the sketches/ directory) is '='.
+
+To try creating your own sketch type, copy any of the *.js files in
+the sketches/ folder to a new .js file.  In your new file, change the
+value of this.label, and customize it to draw a different shape.
+
+
