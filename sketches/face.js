@@ -19,7 +19,7 @@ function() {
          mDrawOval([-1,-1],[1,1],32,PI/2,PI/2-TAU);
       });
 
-      function _noise(t) { return max(-1, min(1, 3 * noise(.2 * t))); }
+      function _noise(t) { return max(-1, min(1, 3 * noise(.8 * t))); }
 
       var a = -1, d = 0, e = -1, h = 0, i = 0, o = 0, s = -1, x = 0, y = 0, z = 0;
       this.afterSketch(function() {
