@@ -64,7 +64,8 @@ function() {
       case 2: mCurve(this.OR   [0]);
               mCurve(this.OR   [1]); break;
       case 3: mCurve(this.X    );
-              mCurve(this.OR   [0]); break;
+              mCurve(this.OR   [0]);
+              mCurve(this.OR   [1]); break;
       }
       switch (s % 4) {
       case 0: mCurve(this.IDENT[1]); break;

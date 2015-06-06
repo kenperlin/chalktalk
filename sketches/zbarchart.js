@@ -71,13 +71,15 @@ function() {
          var n  = isInput ? v.length : this.nValues;
 	 var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;
 
+	 function _v(i) { return max(-1, min(1, v[i])); }
+
 	 for (var i = 0 ; i < n ; i++) {
 	    color(i==ii ? liveDataColor : scrimColor(i % 2 == 0 ? 0.5 : 0.3));
 	    var t0 = mix(-1, 1, (i+.25) / n);
 	    var t1 = mix(-1, 1, (i+.75) / n);
             switch (this.labels[this.selection]) {
-	    case 'barcharth': mFillCurve([[-1,-t0],[v[i],-t0],[v[i],-t1],[-1,-t1]]); break;
-	    case 'barchartv': mFillCurve([[ t0,-1],[ t0,v[i]],[ t1,v[i]],[ t1,-1]]); break;
+	    case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i),-t1],[-1,-t1]]); break;
+	    case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i)],[ t1,-1]]); break;
 	    }
 	 }
 

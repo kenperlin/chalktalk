@@ -100,8 +100,8 @@ function() {
       lineWidth(2);
 
       for (var sign = -1 ; sign <= 1 ; sign += 2) {
-         var a = p(sign * .57, .22, .9), b = p(sign * .4, .22-E+I, .95), c = p(sign * .23, .22, .9);
-         var C = makeSpline(sign == -1 ? [a,b,c] : [c,b,a]);
+         var _a = p(sign * .57, .22, .9), _b = p(sign * .4, .22-E+I, .95), _c = p(sign * .23, .22, .9);
+         var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
          this.afterSketch(function() {
 	    color(backgroundColor);
 	    var n = C.length - 1;
@@ -115,8 +115,8 @@ function() {
          mCurve(C);
 
          this.afterSketch(function() {
-            var a = p(sign * .57, .22, .9), b = p(sign * .4, .22+E+I, .95), c = p(sign * .23, .22, .9);
-            var C = makeSpline(sign == -1 ? [a,b,c] : [c,b,a]);
+            var _a = p(sign * .57, .22, .9), _b = p(sign * .4, .22+E+I, .95), _c = p(sign * .23, .22, .9);
+            var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
 	    color(backgroundColor);
 	    var n = C.length - 1;
 	    mFillCurve([ [C[n][0]+.23,C[n][1]   ,C[n][2]],
