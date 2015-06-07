@@ -21,7 +21,8 @@ function() {
 
       function _noise(t) { return max(-1, min(1, 3 * noise(.8 * t))); }
 
-      var a = -1, d = 0, e = -1, h = 0, i = 0, o = 0, s = -1, u = 0, v = 0, x = 0, y = 0, z = 0;
+      var a = -1, d = 0, e = -1, h = 0, i = 0, o = 0,
+          s = -1, u = 0, v =  0, x = 0, y = 0, z = 0;
       this.afterSketch(function() {
 
          if (! this.isAnimated)
@@ -100,7 +101,9 @@ function() {
       lineWidth(2);
 
       for (var sign = -1 ; sign <= 1 ; sign += 2) {
-         var _a = p(sign * .57, .22, .9), _b = p(sign * .4, .22-E+I, .95), _c = p(sign * .23, .22, .9);
+         var _a = p(sign * .57, .22, .9),
+	     _b = p(sign * .4, .22-E+I, .95),
+	     _c = p(sign * .23, .22, .9);
          var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
          this.afterSketch(function() {
 	    color(backgroundColor);
@@ -115,7 +118,9 @@ function() {
          mCurve(C);
 
          this.afterSketch(function() {
-            var _a = p(sign * .57, .22, .9), _b = p(sign * .4, .22+E+I, .95), _c = p(sign * .23, .22, .9);
+            var _a = p(sign * .57, .22, .9),
+	        _b = p(sign * .4, .22+E+I, .95),
+		_c = p(sign * .23, .22, .9);
             var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
 	    color(backgroundColor);
 	    var n = C.length - 1;
@@ -140,8 +145,8 @@ function() {
 
          lineWidth(2);
 
-         mSpline([p(-.55, .4), p(-.4, .4+(E+I)*.4-D), p(-.25, .4-D*1.5)]);
-         mSpline([p( .55, .4), p( .4, .4+(E+I)*.4-D), p( .25, .4-D*1.5)]);
+         mSpline([p(-.55,.4), p(-.4,.4+(E+I)*.4-D), p(-.25,.4-D*1.5)]);
+         mSpline([p( .55,.4), p( .4,.4+(E+I)*.4-D), p( .25,.4-D*1.5)]);
 
          lineWidth(1);
 

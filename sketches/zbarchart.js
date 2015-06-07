@@ -24,9 +24,16 @@ function() {
    }
    this.onCmdDrag = function(p) {
       var dx = p.x - this.pDrag.x;
-      if (abs(dx) > 0.2) {
+      if (abs(dx) > 0.4) {
          this.nValues += dx > 0 ? 1 : this.nValues > 1 ? -1 : 0;
 	 this.pDrag.copy(p);
+      }
+   }
+   this.onCmdSwipe = function(dx, dy) {
+      var n = pieMenuIndex(dx, dy);
+      if (n == 3) {
+         this.isNoise = isDef(this.isNoise) ? undefined : true;
+	 console.log(this.isNoise)
       }
    }
    this.nValues = 1;
@@ -70,6 +77,10 @@ function() {
          var v  = isInput ? this.inValues : this.values;
          var n  = isInput ? v.length : this.nValues;
 	 var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;
+
+	 if (isDef(this.isNoise))
+	    for (var i = 0 ; i < n ; i++)
+	       v[i] = max(-1, min(1, 3 * noise2(time, i + i / 10)));
 
 	 function _v(i) { return max(-1, min(1, v[i])); }
 
