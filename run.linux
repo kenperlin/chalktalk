@@ -1,7 +1,9 @@
 #!/bin/sh
 killall node
-# ./start_chrome.sh
-if [ `ps -x | grep 'node server/mainx.js' | wc | cut -c-10` -lt 2 ]
-then node server/mainx.js >> node.log &
+
+if [ `ps -x | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
+then node server/main.js >> node.log &
 fi
-xdg-open 'http://localhost:8888/'
+#xdg-open 'http://localhost:11235/'
+#assuming chrome is in the path
+chromium-browser --allow-file-access-from-files 'http://localhost:11235/'
