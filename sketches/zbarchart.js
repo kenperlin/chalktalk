@@ -27,13 +27,20 @@ function() {
       if (abs(dx) > 0.4) {
          this.nValues += dx > 0 ? 1 : this.nValues > 1 ? -1 : 0;
 	 this.pDrag.copy(p);
+	 this.isChangingN = true;
       }
    }
+   this.onCmdRelease = function(p) {
+      this.isChangingN = undefined;
+   }
    this.onCmdSwipe = function(dx, dy) {
-      var n = pieMenuIndex(dx, dy);
-      if (n == 3) {
+      switch (pieMenuIndex(dx, dy)) {
+      case 1:
+         this.isLines = isDef(this.isLines) ? undefined : true;
+         break;
+      case 3:
          this.isNoise = isDef(this.isNoise) ? undefined : true;
-	 console.log(this.isNoise)
+	 break;
       }
    }
    this.nValues = 1;
@@ -78,19 +85,41 @@ function() {
          var n  = isInput ? v.length : this.nValues;
 	 var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;
 
-	 if (isDef(this.isNoise))
-	    for (var i = 0 ; i < n ; i++)
-	       v[i] = max(-1, min(1, 3 * noise2(time, i + i / 10)));
+	 if (isDef(this.isNoise)) {
+            v = this.values;
+            n = this.nValues;
+	    var freq = isInput ? this.inValues[0] : 1;
 
-	 function _v(i) { return max(-1, min(1, v[i])); }
+	    if (! isDef(this.noiseTime)) {
+	       this.noiseTime = time;
+	       this.noiseT = 0;
+            }
+	    this.noiseT += freq * (time - this.noiseTime);
+	    this.noiseTime = time;
+
+	    for (var i = 0 ; i < n ; i++)
+	       v[i] = max(-1, min(1, 3 * noise2(this.noiseT, i + i / 10)));
+         }
+
+	 function _v(i) { i=max(0,min(n-1,i)); return max(-1, min(1, isNumeric(v[i]) ? v[i] : 0)); }
 
 	 for (var i = 0 ; i < n ; i++) {
 	    color(i==ii ? liveDataColor : scrimColor(i % 2 == 0 ? 0.5 : 0.3));
-	    var t0 = mix(-1, 1, (i+.25) / n);
-	    var t1 = mix(-1, 1, (i+.75) / n);
-            switch (this.labels[this.selection]) {
-	    case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i),-t1],[-1,-t1]]); break;
-	    case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i)],[ t1,-1]]); break;
+	    if (isDef(this.isLines)) {
+	       var t0 = mix(-1, 1,        (i  ) / (n-1) );
+	       var t1 = mix(-1, 1, min(1, (i+1) / (n-1)));
+               switch (this.labels[this.selection]) {
+	       case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i+1),-t1],[-1,-t1]]); break;
+	       case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i+1)],[ t1,-1]]); break;
+	       }
+	    }
+	    else {
+	       var t0 = mix(-1, 1, (i+.25) / n);
+	       var t1 = mix(-1, 1, (i+.75) / n);
+               switch (this.labels[this.selection]) {
+	       case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i),-t1],[-1,-t1]]); break;
+	       case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i)],[ t1,-1]]); break;
+	       }
 	    }
 	 }
 
@@ -99,6 +128,12 @@ function() {
          for (var i = 0 ; i < n ; i++)
 	    this._opv[i] = v[i];
          this.setOutPortValue(this._opv);
+
+	 if (isDef(this.isChangingN)) {
+	    textHeight(this.mScale(.7));
+	    color(scrimColor(.2));
+	    mText(n, [0,0], .5, .5);
+	 }
       });
    }
 }
