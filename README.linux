@@ -4,10 +4,10 @@
 In order to run chalktalk under linux you must 
 
 1. install chrome
+ 
+2. Chrome needs to be started with the below options enabled.  run.linux will do this for you so you can just close chrome before running the run.linux command 
 
-2. change the default application for the browser to be 
-
-   google-chrome --allow-file-access-from-files
+   chromium-browser --allow-file-access-from-files
 
 or start chrome by hand with this option.  The above command has to
 point to the path for chrome for your system if it is not in the 
