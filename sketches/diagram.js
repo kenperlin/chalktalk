@@ -108,6 +108,9 @@ function Diagram() {
          var x0 = 0, y0 = 0, x1, y1, r1, x2, y2, r2;
 
          this.afterSketch(function() {
+            color('rgba(0,128,255,.001)');
+            fillRect(-w/2,-w/2,w,w);
+
             if (this.n1 < this.n2) {
                color('rgba(0,128,255,.1)');
                fillRect(-w/2,y0,w,w/2);

@@ -69,11 +69,20 @@ app.route("/talk").get(function(req, res) {
 
 // handle request for list of available sketches
 app.route("/ls_sketches").get(function(req, res) {
-   fs.readdir("./sketches/", function(err, files) {
+   readDir(res, "sketches");
+});
+
+// handle request for list of available images
+app.route("/ls_images").get(function(req, res) {
+   readDir(res, "images");
+});
+
+function readDir(res, dirName) {
+   fs.readdir("./" + dirName + "/", function(err, files) {
       if (err) {
          res.writeHead(500, { "Content-Type": "text/plain" });
          res.write(err);
-         console.log("error listing the sketch directory" + err);
+         console.log("error listing the " + dirName + " directory" + err);
          res.end();
          return;
       }
@@ -84,7 +93,7 @@ app.route("/ls_sketches").get(function(req, res) {
       }
       res.end();
    });
-});
+}
 
 // handle request for appcache file -- needs a special Content-Type
 app.route("/appcache").get(function(req, res) {

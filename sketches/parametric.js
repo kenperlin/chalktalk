@@ -5,12 +5,6 @@ function() {
    this.is3D = true;
    this.code = [["", 'return [cos(TAU*u),sin(TAU*u),2*v-1];' ]];
    this.uv2xyz = function(u,v, dst) {
-/*
-     var x = sin(TAU * u);
-     var y = 2 * v - 1;
-     var z = cos(TAU * u);
-     dst.set(x, y, z);
-*/
      var result = this._func(u,v);
      dst.set(result[0], result[1], result[2]);
    }
@@ -19,10 +13,8 @@ function() {
          this._func = new Function('u','v', this.code[0][1]);
       } catch(e) { console.log(e); }
       this.duringSketch(function() {
-         mLine([-1, 1],[-1,-1]);
-         mLine([-1, 1],[ 1, 1]);
-         mLine([-1,-1],[ 1,-1]);
-         mLine([ 1, 1],[ 1,-1]);
+         mCurve(makeOval(-1,-1,2,2,16,PI/2,-PI/2));
+         mCurve(makeOval(-1,-1,2,2,16,PI/2,3*PI/2));
       });
       this.afterSketch(function() {
          var du = 1 / this.nu;

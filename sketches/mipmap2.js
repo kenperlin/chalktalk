@@ -1,5 +1,6 @@
 function() {
    this.label = 'mipmap2';
+   this.is3D = true;
    this.mode = 0;
    this.onCmdClick = function() { this.mode++; }
    this.render = function() {
