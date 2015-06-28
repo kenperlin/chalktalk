@@ -173,7 +173,7 @@ try {
       console.log("new connection");
 
       socket.on("message", function(message) {
-         console.log("got message: " + message);
+         //console.log("got message: " + message);
          timeline.push(message);
          wss.broadcast(socket, message);
       });
