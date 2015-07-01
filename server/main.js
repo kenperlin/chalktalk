@@ -191,19 +191,43 @@ try {
    var wss = new WebSocketServer({ port: 22346 });
    var timeline = [];
 
-   wss.on("connection", function(client) {
-      client.i = 0;
-      client.on("message", function(message) {
-         console.log(message);
-         var client_n;
-         timeline.push(message);
-	 for (var n = 0 ; n < wss.clients.length ; n++) {
-	    client_n = wss.clients[n];
-	    while (client_n.i < timeline.length)
-	       client_n.send(timeline[client_n.i++]);
-         }
-      });
-   });
+   var senderWithFocus = null;
+   var isMouseDown = false;
+
+   wss.on("connection",
+      function(client) {
+         client.i = 0;
+         client.on("message",
+            function(message) {
+               var client_n;
+	       var data = message.split(',');
+	       var sender = data[0];
+	       var type = data[1];
+
+	       if (senderWithFocus == null)
+	          senderWithFocus = sender;
+
+               if (sender == senderWithFocus)
+                  switch (type) {
+	          case 'mousedown': isMouseDown = true ; break;
+	          case 'mouseup'  : isMouseDown = false; break;
+                  }
+
+	       if (! isMouseDown)
+	          senderWithFocus = sender;
+
+               if (sender == senderWithFocus)
+                  timeline.push(message);
+
+	       for (var n = 0 ; n < wss.clients.length ; n++) {
+	          client_n = wss.clients[n];
+	          while (client_n.i < timeline.length)
+	             client_n.send(timeline[client_n.i++]);
+               }
+            }
+         );
+      }
+   );
 } catch (err) {
    console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
