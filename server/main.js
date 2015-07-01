@@ -213,6 +213,16 @@ try {
 	          case 'mouseup'  : isMouseDown = false; break;
                   }
 
+               if (type == 'clear') {
+	          console.log("wss caught a clear message");
+	          timeline.length = 0;
+	          for (var n = 0 ; n < wss.clients.length ; n++) {
+	             wss.clients[n].send(sender + ',clear');
+	             wss.clients[n].i = 0;
+                  }
+		  return;
+               }
+
 	       if (! isMouseDown)
 	          senderWithFocus = sender;
 
