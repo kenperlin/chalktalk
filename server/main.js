@@ -194,6 +194,16 @@ try {
    var senderWithFocus = null;
    var isMouseDown = false;
 
+   setInterval(function() { 
+      timeline.push('server,tick');
+      for (var n = 0 ; n < wss.clients.length ; n++) {
+	 client_n = wss.clients[n];
+	 if (client_n.i !== undefined)
+	    while (client_n.i < timeline.length)
+	       client_n.send(timeline[client_n.i++]);
+      }
+   }, 30);
+
    wss.on("connection",
       function(client) {
          client.i = 0;
