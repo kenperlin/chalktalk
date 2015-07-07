@@ -202,7 +202,7 @@ try {
 	    while (client_n.i < timeline.length)
 	       client_n.send(timeline[client_n.i++]);
       }
-   }, 30);
+   }, 20);
 
    wss.on("connection",
       function(client) {
