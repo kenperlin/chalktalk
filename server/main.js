@@ -190,19 +190,26 @@ try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
    var timeline = [];
+   var nClients = -1;
 
    var senderWithFocus = null;
    var isMouseDown = false;
 
    setInterval(function() { 
-      timeline.push('server,tick');
       for (var n = 0 ; n < wss.clients.length ; n++) {
 	 client_n = wss.clients[n];
 	 if (client_n.i !== undefined)
 	    while (client_n.i < timeline.length)
 	       client_n.send(timeline[client_n.i++]);
       }
-   }, 20);
+
+      if (nClients !== wss.clients.length) {
+         nClients = wss.clients.length;
+	 var message = 'server,nClients,' + nClients;
+         for (var n = 0 ; n < wss.clients.length ; n++)
+	    wss.clients[n].send(message + ',' + n);
+      }
+   }, 30);
 
    wss.on("connection",
       function(client) {
