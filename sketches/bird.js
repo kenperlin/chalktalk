@@ -16,14 +16,17 @@ function() {
          this.isGaze = false;
          break;
       case 1:
+      case 2:
          this.isGaze = ! this.isGaze;
          break;
+/*
       case 2:
          if (this.isTall && ! this.isGaze)
 	    this.isGaze = true;
          else
             this.isTall = true;
          break;
+*/
       case 4:
          this.choice.setState(1);
          break;
