@@ -27,17 +27,12 @@ function() {
    this.mouseDown = function(x,y) { this.computeMxy(x, y); }
    this.mouseDrag = function(x,y) { this.computeMxy(x, y); }
    this.mouseUp   = function(x,y) { this.computeMxy(x, y); }
-   this.onSwipe = function(dx, dy) {
-      var col = max(0, min(3, floor((1 + this.mxy[0]) / 2 * 4)));
-      var row = max(0, min(3, floor((1 - this.mxy[1]) / 2 * 4)));
 
-      switch (pieMenuIndex(dx, dy)) {
-      case 0: this.row = row; break;
-      case 1: this.col = col; break;
-      case 2: this.row =  -1; break;
-      case 3: this.col =  -1; break;
-      }
-   }
+   this.swipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 + this.mxy[0]) / 2 * 4))); }];
+   this.swipe[2] = ['select\ncolumn', function() { this.col = max(0, min(3, floor((1 - this.mxy[1]) / 2 * 4))); }];
+   this.swipe[4] = ['no\nrow'       , function() { this.row = -1; }];
+   this.swipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
+
    this.render = function(elapsed) {
       mCurve([[1,1],[1,-1],[-1,-1]]);
       lineWidth(1);

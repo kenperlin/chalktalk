@@ -1,12 +1,10 @@
 function() {
    this.label = "fan";
    this.defaultTurnRate = 0;
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1: this.defaultTurnRate++; break;
-      case 3: this.defaultTurnRate--; break;
-      }
-   }
+
+   this.swipe[2] = ['spin\nright', function() { this.defaultTurnRate++; }];
+   this.swipe[6] = ['spin\nleft' , function() { this.defaultTurnRate--; }];
+
    this.turnRate = 0;
    this.angle = 0;
    this.blades = makeSpline([[0,0],[ .8,.2],[ 1,0],[ .8,-.1],

@@ -4,14 +4,12 @@ function() {
    this.tallTarget = 0;
    this.wiggle = 0;
    this.wiggleTarget = 0;
-   this.onSwipe = function(dx,dy) {
-      switch(pieMenuIndex(dx,dy)) {
-      case 0: this.wiggleTarget = 0; break;
-      case 1: this.tallTarget   = 1; break;
-      case 2: this.wiggleTarget = 1; break;
-      case 3: this.tallTarget   = 0; break;
-      }
-   }
+
+   this.swipe[0] = ['stop\nwiggle', function() { this.wiggleTarget = 0; }];
+   this.swipe[2] = ['become\tall' , function() { this.tallTarget   = 1; }];
+   this.swipe[4] = ['wiggle'      , function() { this.wiggleTarget = 1; }];
+   this.swipe[6] = ['become\short', function() { this.tallTarget   = 0; }];
+
    this.render = function(elapsed) {
       this.tall = this.tallTarget == 1 ? min(1, this.tall + elapsed)
                                        : max(0, this.tall - elapsed);

@@ -2,12 +2,8 @@ function() {
    this.label = "mistmat";
    this.isRolled = false;
 
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 2: this.isRolled = true; break;
-      case 0: this.isRolled = false; break;
-      }
-   }
+   this.swipe[0] = ['unroll', function() { this.isRolled = false; }];
+   this.swipe[4] = ['roll'  , function() { this.isRolled = true;  }];
 
    this.render = function(elapsed) {
       this.duringSketch(function() {

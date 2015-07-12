@@ -3,14 +3,9 @@ function() {
    this.swipeTime = 0;
    this.velocity = 0;
    this.altitude = 0;
-   this.onSwipe = function(dx,dy) {
-      var n = pieMenuIndex(dx, dy, 8);
-      switch (n) {
-      case 2:
-         this.swipeTime = time + 0.5;
-         break;
-      }
-   }
+
+   this.swipe[2] = ['BLAST OFF!', function() { this.swipeTime = time + 0.5; }];
+
    this.render = function(elapsed) {
       if (this.swipeTime != 0 && time > this.swipeTime) {
          this.velocity += 0.4 * elapsed;

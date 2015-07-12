@@ -1,22 +1,12 @@
 function() {
    this.label = "bulb";
    this.light = 0;
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 0:
-         this.setColorId((this.colorId + 1) % palette.length);
-         break;
-      case 1:
-         this.light = 1;
-         break;
-      case 2:
-         this.setColorId((this.colorId + palette.length - 1) % palette.length);
-         break;
-      case 3:
-         this.light = 0;
-         break;
-      }
-   }
+
+   this.swipe[0] = ['next\ncolor' , function() { this.setColorId((this.colorId + 1) % palette.length); }];
+   this.swipe[2] = ['turn\non'    , function() { this.light = 1; }];
+   this.swipe[4] = ['prev.\ncolor', function() { this.setColorId((this.colorId + palette.length - 1) % palette.length); }];
+   this.swipe[6] = ['turn\noff'   , function() { this.light = 0; }];
+
    this.render = function(elapsed) {
       var light = this.getInValue(0, this.light);
 

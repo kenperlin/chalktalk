@@ -1,9 +1,8 @@
 function() {
    this.label = 'fish';
-   this.onSwipe = function(dx,dy) {
-      if (pieMenuIndex(dx, dy) == 0)
-         this.swim = true;
-   }
+
+   this.swipe[0] = ['SWIM!', function() { this.swim = true; }];
+
    this.render = function() {
       var x = 0;
       if (isDef(this.swim)) {

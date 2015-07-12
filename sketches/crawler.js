@@ -4,6 +4,9 @@ function() {
    this.velocity = 0;
    var n = 20;
 
+   this.swipe[0] = ['faster', function() { this.velocity++; }];
+   this.swipe[4] = ['slower', function() { this.velocity--; }];
+   
    var myFragmentShader = [
     'uniform vec3 ambient;'
    ,'uniform float uFoggy;'
@@ -38,13 +41,6 @@ function() {
                                                 [r/  2,g/  2,b/  2, 2]);
       }
       return this._myMaterial;
-   }
-   
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 0: this.velocity++; break;
-      case 2: this.velocity--; break;
-      }
    }
 
    this.render = function(elapsed) {

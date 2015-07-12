@@ -8,22 +8,10 @@ function() {
    this.P = null;
    this.mF = new M4();
    this.mI = new M4();
-   this.onSwipe = function(dx, dy) {
-      if (this.jP != -1)
-         return;
-      switch (pieMenuIndex(dx, dy)) {
-      case 0:
-         this.fillMode = (this.fillMode + 2) % 3;
-         break;
-      case 1:
-         break;
-      case 2:
-         this.fillMode = (this.fillMode + 1) % 3;
-         break;
-      case 3:
-         break;
-      }
-   }
+
+   this.swipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 2) % 3; }];
+   this.swipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 1) % 3; }];
+
    this.mouseDown = function(x, y) {
 
       this.standardView(this.mF);

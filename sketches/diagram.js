@@ -1,5 +1,5 @@
 function Diagram() {
-   this.labels = "rectangle circle flap refract circles".split(' ');
+   this.labels = "rectangle circle refract circles".split(' ');
 
    this.raySegment = function(vx, vy, wx, wy, p0, p1) {
       var a = p0[1] - p1[1];
@@ -40,32 +40,8 @@ function Diagram() {
    this.mouseDrag = function() {}
    this.mouseUp   = function() {}
 
-   this.onSwipe = function(dx, dy) {
-      switch (this.labels[this.selection]) {
-      case "circle":
-         switch (pieMenuIndex(dx, dy, 8)) {
-         case 1:
-            this.showParts = true;
-            break;
-         case 3:
-            this.showNormal = true;
-            break;
-         }
-         break;
-      case "flap":
-         switch (pieMenuIndex(dx, dy)) {
-         case 1:
-            this.exitTime = time;
-            this.isExiting = ! this.isExiting;
-            break;
-         case 2:
-            this.wanderTime = time;
-            this.isWandering = ! this.isWandering;
-            break;
-         }
-         break;
-      }
-   }
+   this.swipe[1] = ['show\nx,y,z and r', function() { this.showParts  = true; }];
+   this.swipe[3] = ['show\nS and N'    , function() { this.showNormal = true; }];
 
    this.render = function() {
 
@@ -436,7 +412,6 @@ function Diagram() {
          if (this.showNormal !== undefined) {
             arrow(-X, -Y, -X*1.5, -Y*1.5);
             text("N", -X*1.7, -Y*1.7, .5, .5);
-            text("xyz", 0, 0, .5, .5);
             text("S", -X, -Y, -.25, -.25);
          }
          break;
@@ -445,83 +420,6 @@ function Diagram() {
          var xx = w/2 * this.sx;
          var yy = h/2 * this.sy;
          drawClosedCurve([ [0,-yy], [-xx,yy], [xx,yy] ]);
-         break;
-
-      case "flap":
-         var phase = 1;
-         if (this.phaseOffset === undefined)
-            this.phaseOffset = TAU * random();
-         else
-            phase = this.phaseOffset + 8 * time + 1;
-         if (isNaN(phase)) phase = 1;
-
-         var a =  .2+.5 * sin(phase);
-         var b = -.3-.5 * cos(phase);
-         var ca = cos(a);
-         var sa = sin(a);
-         var cb = cos(a+b);
-         var sb = sin(a+b);
-
-         var ox = 0, oy = 0;
-         if (this.isWandering) {
-            var t = time - this.wanderTime;
-            ox = w   * noise2(t/2, 10);
-            oy = w/2 * noise2(t  , 20);
-         }
-         if (this.isExiting) {
-            if (this.exitDx === undefined)
-               this.exitDx = 2 * random() - 1;
-
-            var t = time - this.exitTime;
-            ox += w/2 * t * t * this.exitDx;
-            oy -= w/2 * t;
-         }
-
-         // WHEN BIRD DISAPPEARS FROM VIEW, GET RID OF IT.
-
-         if (this.cy() < -w/8)
-            this.fadeAway = 1;
-
-         var dx1 = w/4;
-         var dy1 = 0;
-
-         var dx2 = w/4;
-         var dy2 = 0;
-
-         var x0 = 0;
-         var y0 = -w/20 * cos(phase);
-
-         var x1 = x0 + (dx1 * ca + dy1 * sa);
-         var y1 = y0 + (dy1 * ca - dx1 * sa);
-
-         var x2 = x1 + (dx2 * cb + dy2 * sb);
-         var y2 = y1 + (dy2 * cb - dx2 * sb);
-
-         drawCurve([ [ox-x0, oy+y0], [ox-x1, oy+y1] ]);
-         drawCurve([ [ox-x1, oy+y1], [ox-x2, oy+y2] ]);
-         drawCurve([ [ox+x0, oy+y0], [ox+x1, oy+y1] ]);
-         drawCurve([ [ox+x1, oy+y1], [ox+x2, oy+y2] ]);
-
-         this.afterSketch(function() {
-            var r = w/40;
-            fillPolygon([ [ox-x1, oy+y1],
-                          [ox-x2, oy+y2],
-                          [ox-x1, oy+y1+r],
-                          [ox+x0, oy+y0],
-                          [ox+x1, oy+y1+r],
-                          [ox+x2, oy+y2],
-                          [ox+x1, oy+y1],
-                          [ox+x0, oy+y0] ]);
-
-            // INCREASE THE SIZE OF THE BOUNDING BOX
-            // TO MAKE IT EASIER TO DO GESTURES ON THE BIRD.
-
-            color('rgba(0,0,0,0.01)');
-            line(ox-10, oy-50, ox+10, oy-50);
-            line(ox-10, oy+50, ox+10, oy+50);
-
-         });
-
          break;
       }
 

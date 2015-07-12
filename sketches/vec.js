@@ -49,18 +49,12 @@ function() {
       }
    }
    this.mouseUp = function(x, y) { }
-   this.onSwipe = function(dx, dy) {
-      if (this.isDraggedValue)
-         return;
-      var s = this.selection;
-      switch (pieMenuIndex(dx, dy, 8)) {
-      case 0: this.precision = min(3, this.precision + 1); break;
-      case 4: this.precision = max(0, this.precision - 1); break;
-      case 7: this.selection = s + 2; while (this.nRows() > this.value.length) this.value.push(0); break;
-      case 3: console.log(s); if (s > 1) this.selection = s - 2; break;
-      case 5: this.selection = (s & 14) + 1 - (s % 2); break;
-      }
-   }
+
+   this.swipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
+   this.swipe[3] = ['shorter\nvector', function() { if (this.selection > 1) this.selection -= 2; }];
+   this.swipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
+   this.swipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
+   this.swipe[7] = ['longer\nvector' , function() { this.selection += 2; while (this.nRows() > this.value.length) this.value.push(0); }];
 
    this.render = function(elapsed) {
       var a = 1 / this.nRows();

@@ -1,5 +1,7 @@
 function() {
 
+   this.label = 'ttwalk';
+
    function uncompressData(src) {
       var dst = [];
       for (i = 0 ; i < src.length ; i++)
@@ -11,21 +13,18 @@ function() {
       return dst;
    }
 
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 0:
-         this.isShowingTrail = this.isShowingTrail === undefined ? true : undefined;
-         break;
-      case 1:
-         this.walkIndex = (this.walkIndex + 1) % tt_walks.length;
-         this.setWalk(this.walkIndex);
-         break;
-      case 3:
-         this.walkIndex = (this.walkIndex + tt_walks.length - 1) % tt_walks.length;
-         this.setWalk(this.walkIndex);
-         break;
-      }
-   }
+   this.swipe[0] = ['toggle\ntrail', function() {
+      this.isShowingTrail = this.isShowingTrail === undefined ? true : undefined;
+   }];
+   this.swipe[2] = ['next\nwalk cycle', function() {
+      this.walkIndex = (this.walkIndex + 1) % tt_walks.length;
+      this.setWalk(this.walkIndex);
+   }];
+   this.swipe[6] = ['previous\nwalk cycle', function() {
+      this.walkIndex = (this.walkIndex + tt_walks.length - 1) % tt_walks.length;
+      this.setWalk(this.walkIndex);
+   }];
+
    this.setWalk = function(n) {
       this.trail = [];
       this.walkIndex = n;
@@ -60,8 +59,6 @@ function() {
       return this.frame;
 */
    }
-
-   this.label = 'ttwalk';
 
    this.rowToY = function(row) { return (row - this.nRows / 2) / (this.nCols / 2); }
    this.colToX = function(col) { return (col - this.nCols / 2) / (this.nCols / 2); }

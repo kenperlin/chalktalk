@@ -1,11 +1,9 @@
 function() {
    this.label = "chair";
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 3: this.isOccupied = true; break;
-      case 1: this.isOccupied = undefined; break;
-      }
-   }
+
+   this.swipe[2] = ['stand\nup', function() { this.isOccupied = undefined; }];
+   this.swipe[6] = ['sit\ndown', function() { this.isOccupied = true; }];
+
    this.render = function(elapsed) {
       var value = isDef(this.isOccupied) ? 1 : 0;
       mCurve(makeSpline([ [-.4,1], [-.32, .5        ], [-.3,0] ]).concat([[-.4,-1]]));

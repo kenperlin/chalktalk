@@ -45,19 +45,16 @@
       sketch.coffee = coffee;
 
       sketch.mouseDrag = function() { }
-      sketch.onSwipe = function(dx, dy) {
-         this.swirlMode = pieMenuIndex(dx, dy);
+
+      sketch.swipe[0] = ['swirl', function() {
+         this.swirlMode = 0;
          this.swirlStartTime = time;
-         switch (this.swirlMode) {
-         case 0:
-            this.cream = [];
-            for (var i = 0 ; i < 100 ; i++) {
-               var t = i / 100;
-               this.cream.push( [ mix(-1, 1, t) , 0 ] );
-            }
-            break;
+         this.cream = [];
+         for (var i = 0 ; i < 100 ; i++) {
+            var t = i / 100;
+            this.cream.push( [ mix(-1, 1, t) , 0 ] );
          }
-      }
+      }];
 
       sketch.update = function(elapsed) {
 
@@ -195,12 +192,15 @@
          this.dragX = x;
       }
 
-      this.onSwipe = function(dx, dy) {
-         var mode = pieMenuIndex(dx, dy);
-         if (mode == 1 || mode == 3)
-            for (var n = 0 ; n < this.freqs.length ; n++)
-               this.freqs[n] *= (mode == 1 ? 2 : 0.5);
-      }
+      this.swipe[2] = ['double freq', function() {
+         for (var n = 0 ; n < this.freqs.length ; n++)
+            this.freqs[n] *= 2;
+      }];
+
+      this.swipe[6] = ['half freq', function() {
+         for (var n = 0 ; n < this.freqs.length ; n++)
+            this.freqs[n] /= 2;
+      }];
 
       this.render = function(elapsed) {
          m.save();
@@ -443,12 +443,10 @@ function sliced() {
       this.spinRate = -1 - this.spinRate;
    }
 */
-   sketch.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1: this.spinRate = -.5 - this.spinRate; break;
-      case 3: this.spinRate =   0; break;
-      }
-   }
+
+   sketch.swipe[2] = ['less spin', function() { this.spinRate = -.5 - this.spinRate; }];
+   sketch.swipe[6] = ['more spin', function() { this.spinRate = 0; }];
+
    sketch.update = function(elapsed) {
       this.setUniform('spinAngle', this.spinAngle += elapsed * this.spinRate);
       this.setUniform('frequency', this.in.length > 0 ? this.inValue[0] : 1);
@@ -571,9 +569,11 @@ function Grid() {
    this.gridMode = -1;
    this.is3D = true;
 
-   this.onSwipe = function(dx, dy) {
-      this.gridMode = pieMenuIndex(dx, dy);
-   }
+   this.swipe[0] = ['mode = 0', function() { this.gridMode = 0; }];
+   this.swipe[2] = ['mode = 1', function() { this.gridMode = 1; }];
+   this.swipe[4] = ['mode = 2', function() { this.gridMode = 2; }];
+   this.swipe[6] = ['mode = 3', function() { this.gridMode = 3; }];
+
    this.render = function(elapsed) {
       var f = 2/3;
       m.save();
@@ -656,24 +656,17 @@ function MothAndCandle() {
 
    this.code = [ ["", ""] ];
 
-   this.onSwipe = function(dx, dy) {
-      switch (this.labels[this.selection]) {
-      case "moth":
-         switch (pieMenuIndex(dx, dy)) {
-         case 1:
-            this.isAnimating = true;
-            break;
-         case 3:
-            for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
-               var s = sketchPage.sketches[i];
-               if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
-                  s.isAnimating = true;
-            }
-            break;
-         }
-         break;
+   this.swipe[2] = ['animate', function() {
+      this.isAnimating = true;
+   }];
+
+   this.swipe[6] = ['gather moths', function() {
+      for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
+         var s = sketchPage.sketches[i];
+         if ((s instanceof MothAndCandle) && s.labels[s.selection] == "moth")
+            s.isAnimating = true;
       }
-   }
+   }];
 
    this.render = function(elapsed) {
       if (this.startTime === undefined)

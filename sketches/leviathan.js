@@ -2,6 +2,9 @@ function() {
    this.label = 'leviathan';
    this.velocity = 0;
 
+   this.swipe[0] = ['faster', function() { this.velocity += .1; }];
+   this.swipe[4] = ['slower', function() { this.velocity -= .1; }];
+
    var n = 20;
    var nt = 40;
 
@@ -116,13 +119,6 @@ function() {
                                                  .setSpecular(.17*r,.17*g,.17*b,30);
       }
       return this._linkMaterial;
-   }
-
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 0: this.velocity += .1; break;
-      case 2: this.velocity -= .1; break;
-      }
    }
 
    this.render = function(elapsed) {

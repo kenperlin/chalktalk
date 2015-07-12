@@ -2,16 +2,10 @@ function() {
    this.label = "bounce";
    this.isBouncing = false;
    this.bouncing = 0;
-   this.onSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1:
-         this.isBouncing = true;
-         break;
-      case 3:
-         this.isBouncing = false;
-         break;
-      }
-   }
+
+   this.swipe[2] = ['start\nbouncing', function() { this.isBouncing = true ; }];
+   this.swipe[6] = ['stop\nbouncing' , function() { this.isBouncing = false; }];
+
    this.render = function(elapsed) {
       this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
                                       : max(0, this.bouncing - elapsed);

@@ -1,20 +1,18 @@
 function() {
    this.label = "ikbody";
    this.meshBounds = [ [-.75, .1] , [.75, 1.8] ];
-   this.onSwipe = function(x,y) {
-      switch (pieMenuIndex(x,y)) {
-      case 0: this.ikBody.mode = min(4, this.ikBody.mode + 1); break;
-      case 1:
-         this.ikBody.nodeRadius = function() { return 0.025; };
-         this.ikBody.linkRadius = function() { return 0.025; };
-         this.ikBody.nodeMaterial = function() { return this.lineMaterial; };
-         this.ikBody.linkMaterial = function() { return this.lineMaterial; };
-         this.ikBody.rebuild();
-	 break;
-      case 2: this.ikBody.mode = max(0, this.ikBody.mode - 1); break;
-      case 3: this.ikBody.mode = 0; break;
-      }
-   }
+
+   this.swipe[0] = ['show\nmore', function() { this.ikBody.mode = min(4, this.ikBody.mode + 1); }];
+   this.swipe[2] = ['turn\nwhite', function() {
+      this.ikBody.nodeRadius = function() { return 0.025; };
+      this.ikBody.linkRadius = function() { return 0.025; };
+      this.ikBody.nodeMaterial = function() { return this.lineMaterial; };
+      this.ikBody.linkMaterial = function() { return this.lineMaterial; };
+      this.ikBody.rebuild();
+   }];
+   this.swipe[4] = ['show\nless', function() { this.ikBody.mode = max(0, this.ikBody.mode - 1); }];
+   this.swipe[6] = ['show\nleast', function() { this.ikBody.mode = 0; }];
+
    this.freeze = false;
    this.onClick = function(x,y) { this.freeze = ! this.freeze; }
    this.createMesh = function() {
