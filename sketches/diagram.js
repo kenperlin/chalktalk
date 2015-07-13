@@ -1,5 +1,5 @@
 function Diagram() {
-   this.labels = "rectangle circle refract circles".split(' ');
+   this.labels = "rectangle refract circles".split(' ');
 
    this.raySegment = function(vx, vy, wx, wy, p0, p1) {
       var a = p0[1] - p1[1];
@@ -59,7 +59,6 @@ function Diagram() {
       if (this.mousePressed)
          switch (this.labels[this.selection]) {
          case 'rectangle':
-         case 'circle':
          case 'triangle':
             this.sx *= (this.size - (this.dragX - this.x)) / this.size;
             this.sy *= (this.size + (this.dragY - this.y)) / this.size;
@@ -394,26 +393,6 @@ function Diagram() {
          var xx = w/2 * this.sx;
          var yy = h/2 * this.sy * .8;
          drawClosedCurve([ [xx,-yy], [xx,yy], [-xx,yy], [-xx,-yy] ]);
-         break;
-
-      case "circle":
-         var xx = w/2 * this.sx;
-         var yy = h/2 * this.sy;
-         var c = [];
-         for (var a = 0 ; a < TAU ; a += 0.1)
-            c.push([xx*cos(a),-yy*sin(a)]);
-         drawClosedCurve(c);
-         var X = xx * cos(PI/4), Y = yy * sin(PI/4);
-         if (this.showParts !== undefined) {
-            line(0, 0, X, -Y);
-            text("x,y,z", 0, 0, .5, -.5);
-            text("r", X/2, -Y/2, 1.3, 1.2);
-         }
-         if (this.showNormal !== undefined) {
-            arrow(-X, -Y, -X*1.5, -Y*1.5);
-            text("N", -X*1.7, -Y*1.7, .5, .5);
-            text("S", -X, -Y, -.25, -.25);
-         }
          break;
 
       case "triangle":

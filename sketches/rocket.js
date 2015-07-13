@@ -7,7 +7,7 @@ function() {
    this.swipe[2] = ['BLAST OFF!', function() { this.swipeTime = time + 0.5; }];
 
    this.render = function(elapsed) {
-      if (this.swipeTime != 0 && time > this.swipeTime) {
+      if (this.swipeTime > 0 && time > this.swipeTime) {
          this.velocity += 0.4 * elapsed;
          this.altitude += this.velocity;
       }
@@ -31,10 +31,11 @@ function() {
       // THRUSTER FLAMES
 
       this.afterSketch(function(elapsed) {
-      if (this.swipeTime != 0) {
-         mCurve([[-.20, -1.10], [-.3, -1.4 + .7*noise2(10*time, 100)], 
-                 [-.08, -1.15], [  0, -1.6 + .7*noise2(10*time, 200)], 
-                 [ .08, -1.15], [ .3, -1.4 + .7*noise2(10*time, 300)], [ .2, -1.1]]);
-      }});
+         if (this.swipeTime != 0) {
+            mCurve([[-.20, -1.10], [-.3, -1.4 + .7*noise2(10*time, 100)], 
+                    [-.08, -1.15], [  0, -1.6 + .7*noise2(10*time, 200)], 
+                    [ .08, -1.15], [ .3, -1.4 + .7*noise2(10*time, 300)], [ .2, -1.1]]);
+         }
+      });
    }
 }
