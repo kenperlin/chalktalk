@@ -2,6 +2,11 @@ function() {
    this.labels = 'barcharth barchartv'.split(' ');
    this.onCmdClick = function() { this.selection = 1 - this.selection; }
    this.isHorizontal = function() { return this.getLabel() == 'barcharth'; }
+   this.isLines = false;
+   this.isNoise = false;
+
+   // DRAG ON A BAR TO CHANGE ITS VALUE.
+
    this.onPress = function(p) {
       if (! this.isInValueAt(0)) {
          var u = this.isHorizontal() ? -p.y : p.x;
@@ -17,6 +22,9 @@ function() {
    this.onRelease = function(p) {
       this.valueIndex = -1;
    }
+
+   // CMD-DRAG HORIZONTALLY TO CHANGE THE NUMBER OF BARS.
+
    this.onCmdPress = function(p) {
       if (this.pDrag === undefined)
          this.pDrag = newVec3();
@@ -33,16 +41,13 @@ function() {
    this.onCmdRelease = function(p) {
       this.isChangingN = undefined;
    }
-   this.onCmdSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1:
-         this.isLines = isDef(this.isLines) ? undefined : true;
-         break;
-      case 3:
-         this.isNoise = isDef(this.isNoise) ? undefined : true;
-	 break;
-      }
-   }
+
+   // SWIPE UP TO TOGGLE BETW BAR CHART AND LINE CHART.
+   // SWIPE DOWN TO TOGGLE NOISE VALUES.
+
+   this.swipe[2] = ['lines\nor bars', function() { this.isLines = ! this.isLines; }];
+   this.swipe[6] = ['toggle\nnoise' , function() { this.isNoise = ! this.isNoise; }];
+
    this.nValues = 1;
    this.valueIndex = -1;
    this.values = newArray(100);
@@ -85,7 +90,7 @@ function() {
          var n  = isInput ? v.length : this.nValues;
 	 var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;
 
-	 if (isDef(this.isNoise)) {
+	 if (this.isNoise) {
             v = this.values;
             n = this.nValues;
 	    var freq = isInput ? this.inValues[0] : 1;
@@ -105,7 +110,7 @@ function() {
 
 	 for (var i = 0 ; i < n ; i++) {
 	    color(i==ii ? liveDataColor : scrimColor(i % 2 == 0 ? 0.5 : 0.3));
-	    if (isDef(this.isLines)) {
+	    if (this.isLines) {
 	       var t0 = mix(-1, 1,        (i  ) / (n-1) );
 	       var t1 = mix(-1, 1, min(1, (i+1) / (n-1)));
                switch (this.labels[this.selection]) {
