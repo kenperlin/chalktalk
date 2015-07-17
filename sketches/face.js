@@ -113,7 +113,7 @@ function() {
 	                 [C[0][0]-.23,C[0][1]-.3,C[0][2]],
 	                 [C[0][0]-.23,C[0][1]   ,C[0][2]],
 		       ].concat(C));
-	    color(palette[this.colorId]);
+	    color(palette.color[this.colorId]);
          });
          mCurve(C);
 
@@ -129,7 +129,7 @@ function() {
 	                 [C[0][0]-.23,C[0][1]+.3,C[0][2]],
 	                 [C[0][0]-.23,C[0][1]   ,C[0][2]],
 		       ].concat(C));
-	    color(palette[this.colorId]);
+	    color(palette.color[this.colorId]);
             mCurve(C);
          });
       }
