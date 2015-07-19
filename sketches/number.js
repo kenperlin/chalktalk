@@ -30,8 +30,6 @@ function() {
          case 8: mClosedCurve(makeOval(-.6, 0.1, 1.2,0.9, 16, PI/6,PI*3/2)
                 .concat(makeOval(-.6,-1.0, 1.2,1.1, 16, PI/2,-PI)));
                  break;
-         //case 9: mCurve(makeSpline([[.5,.9],[0,1],[-.5,.8],[-.7,.5],[-.6,.2],[-.2,.2],[.3,.6],[.5,.9]])
-                //.concat([[-.2,-1]]));
          case 9: mCurve(makeOval(-0.7,-0.2, 1.4,1.2, 16, 0, -TAU)
 	        .concat(makeOval(-1.8,-1.0, 2.5,1.8, 16, 0, -PI/2)));
                  break;
