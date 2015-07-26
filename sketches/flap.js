@@ -41,8 +41,8 @@ function() {
 
       // WHEN BIRD DISAPPEARS FROM VIEW, GET RID OF IT.
 
-      if (this.cy() < -width()/8)
-         this.fadeAway = 1;
+      if (! this.isOnScreen())
+         this.fade();
 
       var dx1 = .25, dy1 = 0;
       var dx2 = .25, dy2 = 0;
@@ -60,7 +60,7 @@ function() {
       mCurve([ [ox+x0, oy+y0], [ox+x1, oy+y1] ]);
       mCurve([ [ox+x1, oy+y1], [ox+x2, oy+y2] ]);
 
-      this.extendBounds([[-.5,-.26],[.5,.31]]);
+      this.extendBounds([[ox-.5,oy-.26],[ox+.5,oy+.31]]);
    }
 }
 
