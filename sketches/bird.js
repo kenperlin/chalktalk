@@ -28,10 +28,8 @@ function() {
 
       // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
 
-      if (this.xlo > width() - _g.panX) {
-         sketchToDelete = this;
-         return;
-      }
+      if (! this.isOnScreen())
+         this.fade();
 
       function walkX(t) { return 2.2 * t; }
 
