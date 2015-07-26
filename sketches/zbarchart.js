@@ -1,7 +1,7 @@
 function() {
-   this.labels = 'barcharth barchartv'.split(' ');
-   this.onCmdClick = function() { this.selection = 1 - this.selection; }
-   this.isHorizontal = function() { return this.getLabel() == 'barcharth'; }
+   this.label = 'barchart';
+   this.onCmdClick = function() { this.isVertical = ! this.isVertical; }
+   this.isVertical = false;
    this.isLines = false;
    this.isNoise = false;
 
@@ -9,13 +9,13 @@ function() {
 
    this.onPress = function(p) {
       if (! this.isInValueAt(0)) {
-         var u = this.isHorizontal() ? -p.y : p.x;
+         var u = this.isVertical ? -p.y : p.x;
          this.valueIndex = floor(this.nValues * (.5 + .499 * u));
       }
    }
    this.onDrag = function(p) {
       if (this.valueIndex >= 0) {
-         var v = this.isHorizontal() ? p.x : p.y;
+         var v = this.isVertical ? p.x : p.y;
 	 this.values[this.valueIndex] = max(-1, min(1, v));
       }
    }
@@ -68,25 +68,19 @@ function() {
       return 0;
    }
    this.render = function() {
-      switch (this.getLabel()) {
-      case 'barcharth':
+      if (this.isVertical) {
          mLine([1,1],[-1,1]);
          mLine([-1,1],[-1,-1]);
-	 break;
-      case 'barchartv':
+      }
+      else {
          mLine([-1,1],[-1,-1]);
          mLine([-1,-1],[1,-1]);
-	 break;
       }
       this.duringSketch(function() {
-         switch (this.getLabel()) {
-         case 'barcharth':
+         if (this.isVertical)
 	    mCurve([[-1,.5],[0,.5],[0,-.5],[-1,-.5]]);
-	    break;
-         case 'barchartv':
+         else
 	    mCurve([[-.5,-1],[-.5,0],[.5,0],[.5,-1]]);
-	    break;
-	 }
       });
       this.afterSketch(function() {
          var isInput = this.isInValueAt(0);
@@ -117,18 +111,18 @@ function() {
 	    if (this.isLines) {
 	       var t0 = mix(-1, 1,        (i  ) / (n-1) );
 	       var t1 = mix(-1, 1, min(1, (i+1) / (n-1)));
-               switch (this.labels[this.selection]) {
-	       case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i+1),-t1],[-1,-t1]]); break;
-	       case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i+1)],[ t1,-1]]); break;
-	       }
+	       if (this.isVertical)
+	          mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i+1),-t1],[-1,-t1]]);
+               else
+	          mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i+1)],[ t1,-1]]);
 	    }
 	    else {
 	       var t0 = mix(-1, 1, (i+.25) / n);
 	       var t1 = mix(-1, 1, (i+.75) / n);
-               switch (this.labels[this.selection]) {
-	       case 'barcharth': mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i),-t1],[-1,-t1]]); break;
-	       case 'barchartv': mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i)],[ t1,-1]]); break;
-	       }
+	       if (this.isVertical)
+	          mFillCurve([[-1,-t0],[_v(i),-t0],[_v(i),-t1],[-1,-t1]]);
+               else
+	          mFillCurve([[ t0,-1],[ t0,_v(i)],[ t1,_v(i)],[ t1,-1]]);
 	    }
 	 }
 

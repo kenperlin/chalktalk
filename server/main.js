@@ -101,6 +101,11 @@ app.route("/ls_images").get(function(req, res) {
    readDir(res, "images");
 });
 
+// handle request for list of state files
+app.route("/ls_state").get(function(req, res) {
+   readDir(res, "state");
+});
+
 function returnString(res, str) {
    res.writeHead(200, { "Content-Type": "text/plain" });
    res.write(str + "\n");
