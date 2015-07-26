@@ -1,5 +1,9 @@
 function() {
-   this.labels = 'buf and or xor not nand nor xnor'.split(' ');
+   var allLabels = 'buf and or xor not nand nor xnor'.split(' ');
+   this.labels = 'buf and or xor'.split(' ');
+   this.invert = 0;
+
+   this.swipe[0] = ['invert', function() { this.invert = 1 - this.invert; }];
 
    function Delay() {
       this.time = 0;
@@ -54,11 +58,12 @@ function() {
       logicDelay = this.logicDelay;
       m.scale(this.size / 180);
       var s = this.selection;
+      var si = s + 4 * this.invert;
 
       if (this.code == null)
-         this.code = [['', this.codes[s]]];
+         this.code = [['', this.codes[si]]];
 
-      switch (s % 4) {
+      switch (s) {
       case 0: mCurve(this.IDENT[0]); break;
       case 1: mCurve(this.AND  [0]); break;
       case 2: mCurve(this.OR   [0]);
@@ -67,24 +72,24 @@ function() {
               mCurve(this.OR   [0]);
               mCurve(this.OR   [1]); break;
       }
-      switch (s % 4) {
+      switch (s) {
       case 0: mCurve(this.IDENT[1]); break;
       case 1: mCurve(this.AND  [1]); break;
       case 2:
       case 3: mCurve(this.OR   [2]); break;
       }
-      if (s >= 4)
+      if (this.invert)
          mCurve(this.INVERT);
 
       this.afterSketch(function() {
          textHeight(this.mScale(0.25));
          color(scrimColor(0.5));
-         var x = ([-0.23,-0.05,-0.04,-0.01,-0.22,-0.04,-0.01, 0.02])[this.selection];
-         mText(this.labels[this.selection], [x, .03], .5, .5);
+         var x = ([-0.23,-0.05,-0.04,-0.01,-0.22,-0.04,-0.01, 0.02])[s];
+         mText(allLabels[si], [x, .03], .5, .5);
 
-         this.setOutPortValue(this.evalCode(this.code[0][1],
-                              s%4==0 ? this.getDelayedValue()
-                                     : this.getInValue(0,0), this.getInValue(1,0)));
+         this.setOutPortValue(this.evalCode(this.codes[si],
+                              s==0 ? this.getDelayedValue()
+                                   : this.getInValue(0,0), this.getInValue(1,0)));
       });
    }
 }

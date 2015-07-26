@@ -266,7 +266,7 @@
                 - drag circle to contour to create 3D shape.
                 - add texture (show code).
 */
-
+/*
 var marbleFragmentShader = ["\
    void main(void) {\n\
       float x = vPosition.x;\
@@ -302,7 +302,7 @@ function marble() {
       ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
    ];
 }
-
+*/
 var coronaFragmentShader = ["\
    void main(void) {\n\
       float x = vPosition.x;\
