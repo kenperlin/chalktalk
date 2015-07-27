@@ -42,6 +42,9 @@ function() {
                break;
             }
          }
+
+      if (this.jP >= 0)
+         this.suppressSwipe = true;
    }
    this.mouseDrag = function(x, y) {
       if (this.jP >= 0)
