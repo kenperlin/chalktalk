@@ -22,7 +22,7 @@ function() {
       this.jP = -1;
       for (var i = 0 ; i < this.P.length ; i++) {
          var p = this.mF.transform(this.P[i]);
-         if (len(p[0] - x, p[1] - y) <= clickSize) {
+         if (len(p[0] - x, p[1] - y) <= clickSize()) {
             this.jP = i;
             break;
          }
@@ -36,7 +36,7 @@ function() {
             var p = this.mF.transform(this.P[i]);
             var q = this.mF.transform(this.P[j]);
             var a = [ (p[0] + q[0]) / 2, (p[1] + q[1]) / 2 ];
-            if (len(a[0] - x, a[1] - y) <= clickSize) {
+            if (len(a[0] - x, a[1] - y) <= clickSize()) {
                this.P.splice(j, 0, this.mI.transform([ x, y ]));
                this.jP = j;
                break;
@@ -60,7 +60,7 @@ function() {
          var q = this.mF.transform(this.P[j]);
          var r = this.mF.transform(this.P[k]);
          var a = [ (p[0] + r[0]) / 2, (p[1] + r[1]) / 2 ];
-         if (len(a[0] - q[0], a[1] - q[1]) <= clickSize / 2)
+         if (len(a[0] - q[0], a[1] - q[1]) <= clickSize() / 2)
             this.P.splice(j, 1);
       }
    }
