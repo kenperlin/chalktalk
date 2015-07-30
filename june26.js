@@ -303,6 +303,8 @@ function marble() {
    ];
 }
 */
+
+/*
 var coronaFragmentShader = ["\
    void main(void) {\n\
       float x = vPosition.x;\
@@ -350,7 +352,7 @@ function corona() {
    ];
    sketch.selectedIndex = 3;
 }
-
+*/
 
 var flameFragmentShader = ["\
 void main(void) {\n\
