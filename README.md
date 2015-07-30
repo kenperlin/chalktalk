@@ -7,20 +7,29 @@ Here are the instructions for getting started:
 
 	npm install
 
-(3) To run Chalktalk, type in this folder:
+(3) Now get back up out of the server folder, by typing the following:
 
-	run
+        cd ..
+
+(4) Now you can run Chalktalk, by typing:
+
+	./run
 
 Here are some useful things to know:
+
+To make Chrome run full-screen (the best way to run Chalktalk), use COMMAND-SHIFT-f
+
+To draw something, just drag your mouse.
+
+To see tool tips, hold down the SPACE key.
 
 The toggle key to show/hide all the hotkey commands and also to
 show outlines around sketches is 'x'.
 
-The key to show/hide the glyphs dictionary (defined by all the *.js
-files in the sketches/ directory) is '='.
+To try creating your own sketch type, copy any of the files in
+the sketches/ folder to a new sketches/WHATEVER.js file.
 
-To try creating your own sketch type, copy any of the *.js files in
-the sketches/ folder to a new .js file.  In your new file, change the
-value of this.label, and customize it to draw a different shape.
+In your new file, change the value of this.label, and customize
+it to draw a different shape.
 
 
