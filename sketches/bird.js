@@ -26,11 +26,6 @@ function() {
       var idle = this.choice.getValue(1);
       var walk = this.choice.getValue(2);
 
-      // WHEN THE BIRD WALKS OFF THE SCREEN, DELETE IT.
-
-      if (! this.isOnScreen())
-         this.fade();
-
       function walkX(t) { return 2.2 * t; }
 
       // IF AUTO-SKETCHED, KEEP SKETCHY STYLE EVEN AFTER FINISHED DRAWING.
@@ -163,6 +158,11 @@ function() {
             this.time = time;
             break;
          }
+
+         // AFTER THE BIRD WALKS OFF THE SCREEN, DELETE IT.
+
+         if (! this.isOnScreen())
+            this.fade();
       });
    }
 }

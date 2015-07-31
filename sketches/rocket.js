@@ -7,9 +7,6 @@ function() {
    this.swipe[2] = ['BLAST OFF!', function() { this.swipeTime = time + 0.5; }];
 
    this.render = function(elapsed) {
-      if (this.yhi < 0)                                  // REMOVE WHEN GONE
-         sketchToDelete = this;
-
       if (this.swipeTime > 0 && time > this.swipeTime) { // AFTER SWIPE
          this.velocity += 0.4 * elapsed;
          this.altitude += this.velocity;                    // ACCELERATE
@@ -28,8 +25,10 @@ function() {
             mCurve([[-.20, -1.10], [-.3, -1.4 + .7*noise2(10*time, 100)], 
                     [-.08, -1.15], [  0, -1.6 + .7*noise2(10*time, 200)], 
                     [ .08, -1.15], [ .3, -1.4 + .7*noise2(10*time, 300)],
-		    [ .20, -1.10]]);
+                    [ .20, -1.10]]);
          }
+         if (! this.isOnScreen())
+            this.fade();
       });
    }
 }
