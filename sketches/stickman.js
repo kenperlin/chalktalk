@@ -173,7 +173,7 @@ function() {
    this.onDrag    = function(point) { return this.graph.onDrag   (point); }
    this.onRelease = function(point) { return this.graph.onRelease(point); }
 
-   var toDraw = [[0,2], [2,4], [2,6], [0,9], [0,11]];
+   var toDraw = [[0,2,4], [2,6], [0,9], [0,11]];
 
    this.render = function(elapsed) {
       this.graph.choice.update(elapsed);
@@ -188,9 +188,17 @@ function() {
       // DURING THE INITIAL SKETCH, DRAW A SIMPLIFIED STICK FIGURE.
 
       this.duringSketch(function() {
-         for (var i = 0 ; i < toDraw.length ; i++)
+         var c, i, j;
+         for (i = 0 ; i < toDraw.length ; i++) {
+	    c = [];
+	    for (j = 0 ; j < toDraw[i].length ; j++)
+	       c.push(nodes[toDraw[i][j]].p);
+            mCurve(c);
+	 }
+/*
             mLine(nodes[toDraw[i][0]].p,
                   nodes[toDraw[i][1]].p);
+*/
       });
 
       // AFTER SKETCH IS DONE, DO FANCIER PROCESSING AND RENDERING.

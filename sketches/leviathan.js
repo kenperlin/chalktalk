@@ -123,9 +123,11 @@ function() {
 
    this.render = function(elapsed) {
       this.duringSketch(function() {
-         mLine([-1,0], [1, .2]);
-         mLine([-1,0], [1,-.2]);
-         mLine([ 1,0], [2,  0]);
+         mLine([-1,0], [1.0, .2]);
+         mLine([-1,0], [1.0,-.2]);
+         mLine([ 1,0], [2.5, .3]);
+         mLine([ 1,0], [2.5,  0]);
+         mLine([ 1,0], [2.5,-.3]);
       });
 
       this.afterSketch(function() {

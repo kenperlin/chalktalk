@@ -8,11 +8,4 @@ var imageSequence = [
 
 var sketchPages = [
    blankPage(),
-   blankPage(),
-   blankPage(),
-   blankPage(),
-   blankPage(),
-   blankPage(),
-   blankPage(),
-   blankPage(),
 ];

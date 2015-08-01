@@ -21,10 +21,7 @@ To make Chrome run full-screen (the best way to run Chalktalk), use COMMAND-SHIF
 
 To draw something, just drag your mouse.
 
-To see tool tips, hold down the SPACE key.
-
-The toggle key to show/hide all the hotkey commands and also to
-show outlines around sketches is 'x'.
+To see the hot keys menu and tool tips, hold down the SPACE key.
 
 To try creating your own sketch type, copy any of the files in
 the sketches/ folder to a new sketches/WHATEVER.js file.
