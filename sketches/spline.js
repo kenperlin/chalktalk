@@ -15,16 +15,14 @@ function() {
 
       // FIND PROJECTION OF CURSOR ONTO SCREEN.
 
-      this.pix.copy(pt).applyMatrix4(pointToPixelMatrix);
-      this.pix.z = 0;
+      pointToPixel(pt, this.pix);
 
       // FIND PROJECTIONS OF SPLINE KEYS ONTO SCREEN.
 
       for (var n = 0 ; n < this.P.length ; n++) {
          if (this.Pix[n] === undefined)
             this.Pix[n] = newVec3();
-         this.Pix[n].copy(this.P[n]).applyMatrix4(pointToPixelMatrix);
-	 this.Pix[n].z = 0;
+         pointToPixel(this.P[n], this.Pix[n]);
       }
 
       // CHECK FOR MOUSE DOWN ON A KEY.
