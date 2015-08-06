@@ -2,7 +2,6 @@ function() {
    this.label = 'spline';
    this.is3D = true;
    this.N = -1;
-   this.Pix = [];
    this.showKeys = true;
    var r = .1;
 
@@ -15,10 +14,14 @@ function() {
 
       // FIND PROJECTION OF CURSOR ONTO SCREEN.
 
+      if (this.pix === undefined)
+         this.pix = newVec3();
       pointToPixel(pt, this.pix);
 
       // FIND PROJECTIONS OF SPLINE KEYS ONTO SCREEN.
 
+      if (this.Pix === undefined)
+         this.Pix = [];
       for (var n = 0 ; n < this.P.length ; n++) {
          if (this.Pix[n] === undefined)
             this.Pix[n] = newVec3();
@@ -37,6 +40,8 @@ function() {
 
          // CHECK FOR MOUSE DOWN HALF WAY BETWEEN TWO KEYS.
 
+         if (this.p === undefined)
+	    this.p = newVec3();
          while (++this.N < this.P.length - 1)
             if (this.p.copy(this.Pix[this.N]).lerp(this.Pix[this.N+1], 0.5).distanceTo(this.pix) <= clickSize()) {
 
@@ -78,14 +83,11 @@ function() {
 
       // THE FIRST TIME THROUGH, INITIALIZE EVERYTHING THAT DEPENDS ON THREE.JS.
 
-      if (this.P === undefined) {
+      if (this.P === undefined)
          this.P = [newVec3( .5,  1),
                    newVec3(-.5, .3),
                    newVec3( .5,-.3),
                    newVec3(-.5, -1)];
-         this.p = newVec3();
-         this.pix = newVec3();
-      }
 
       // JAGGED 'S' GLYPH ONLY APPEARS WHEN USER FIRST DRAWS THE SHAPE.
 
@@ -121,3 +123,4 @@ function() {
       });
    }
 }
+

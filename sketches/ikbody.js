@@ -14,7 +14,7 @@ function() {
    this.swipe[6] = ['show\nleast', function() { this.ikBody.mode = 0; }];
 
    this.freeze = false;
-   this.onClick = function(x,y) { this.freeze = ! this.freeze; }
+   this.onClick = [ 'freeze/unfreeze', function(x,y) { this.freeze = ! this.freeze; } ];
    this.createMesh = function() {
       this.ikBody = new IKBody(ik_data);
       return this.ikBody.mesh;

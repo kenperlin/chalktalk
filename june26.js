@@ -800,11 +800,13 @@ function MothAndCandle() {
 
          // FLAME
 
-         mCurve(createCurve([ 0.00 ,0.90],[-0.10 ,0.60], 0.08).
-         concat(createCurve([-0.10 ,0.60],[ 0.00 ,0.30],-0.31)));
+	 var dx = this.isAnimating ? 0.5 * noise(5 * time) : 0;
 
-         mCurve(createCurve([ 0.00 ,0.90],[ 0.195,0.63], 0.03).
-         concat(createCurve([ 0.195,0.63],[ 0.00 ,0.30], 0.30)));
+         mCurve(createCurve([ 0.00+dx*.4 ,0.90],[-0.10+dx*.1 ,0.60], 0.08).
+         concat(createCurve([-0.10+dx*.1 ,0.60],[ 0.00 ,0.30],-0.31)));
+
+         mCurve(createCurve([ 0.00+dx*.4 ,0.90],[ 0.195+dx*.1,0.63], 0.03).
+         concat(createCurve([ 0.195+dx*.1,0.63],[ 0.00 ,0.30], 0.30)));
 
          break;
       }

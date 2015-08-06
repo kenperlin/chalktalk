@@ -11,9 +11,9 @@ function() {
    this.onCmdClick = function() {
       mode++;
    }
-   this.onClick = function() {
-      trackball.identity();
-   }
+
+   this.onClick = [ 'remove 4D rotation', function() { trackball.identity(); } ];
+
    this.onPress = function(T1) {
       T0.copy(T1);
    }
