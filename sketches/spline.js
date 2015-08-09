@@ -3,11 +3,21 @@ function() {
    this.is3D = true;
    this.N = -1;
    this.showKeys = true;
+   this.isLoop = false;
    var r = .1;
 
    // ALLOW USER TO DECIDE WHETHER TO DISPLAY KEY POINTS.
 
    this.onCmdClick = function() { this.showKeys = ! this.showKeys; }
+
+   this.onCmdSwipe = function(dx,dy) {
+      var dir = pieMenuIndex(dx, dy, 8);
+      switch (dir) {
+      case 6:
+         this.isLoop = ! this.isLoop;
+         break;
+      }
+   }
 
    this.onPress = function(pt) {
       this.travel = 0;
@@ -44,10 +54,12 @@ function() {
 	    this.p = newVec3();
          while (++this.N < this.P.length - 1)
             if (this.p.copy(this.Pix[this.N]).lerp(this.Pix[this.N+1], 0.5).distanceTo(this.pix) <= clickSize()) {
-
-               // IF SO, INSERT A NEW KEY THERE.
-
-               this.P.splice(++this.N, 0, newVec3().copy(pt));
+               this.P.splice(++this.N, 0, newVec3().copy(pt)); // IF SO, INSERT A NEW KEY THERE.
+               return;
+            }
+         if (this.isLoop)
+            if (this.p.copy(this.Pix[this.N-1]).lerp(this.Pix[0], 0.5).distanceTo(this.pix) <= clickSize()) {
+               this.P.splice(++this.N, 0, newVec3().copy(pt)); // IF SO, INSERT A NEW KEY THERE.
                return;
             }
 
@@ -97,7 +109,11 @@ function() {
       });
 
       this.afterSketch(function() {
+         if (this.isLoop)
+	    this.P.push(this.P[0]);
          var curve = makeSpline(this.P);
+         if (this.isLoop)
+	    this.P.pop();
 
 	 // EITHER SHOW THIN CURVE WITH KEYS AS DOTS, OR SHOW JUST A THICK CURVE.
 
