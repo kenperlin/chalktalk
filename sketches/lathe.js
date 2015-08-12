@@ -59,29 +59,31 @@ function() {
 
    this.createMesh = function() {
       var P = this.profileCurve();
+      var isTorus = false;
+      var isLoop = P[0].distanceTo(P[P.length-1]) < 0.01;
+      if (isLoop)
+         P[P.length-1].copy(P[0]);
 
-      // SHOULD WE BUILD A TORUS?
-
-      var zMin = 10000, zMax = -10000;
-      for (var i = 0 ; i < P.length ; i++) {
-         zMin = min(zMin, P[i].z);
-         zMax = max(zMax, P[i].z);
+      if (! isLoop && ! this.inputIsFunction()) {
+         var zMin = 10000, zMax = -10000;
+         for (var i = 0 ; i < P.length ; i++) {
+            zMin = min(zMin, P[i].z);
+            zMax = max(zMax, P[i].z);
+         }
+         isTorus = P[0].z > zMin && P[P.length-1].z < zMax;
       }
-      var isTorus = P[0].z > zMin && P[P.length-1].z < zMax;
-
-      if (this.inputIsFunction())
-         isTorus = false;
 
       // BUILD POINTS ARRAY BACK TO FRONT, SO LATHE ISN'T EVERTED.  ADD END CAPS.
 
       var points = [];
 
-      points.push(isTorus ? P[0] : newVec3(0,0,P[P.length-1].z));
+      if (! isLoop)
+         points.push(isTorus ? P[0] : newVec3(0,0,P[P.length-1].z));
 
       for (var i = P.length-1 ; i >= 0 ; i--)
          points.push(P[i]);
 
-      if (! isTorus)
+      if (! isLoop && ! isTorus)
          points.push(newVec3(0,0,P[0].z));
 
       var material = this.shaderMaterial();

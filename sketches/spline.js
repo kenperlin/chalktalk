@@ -74,13 +74,9 @@ function() {
          }
          if (this.isLoop)
 	    this.P.pop();
-/*
-         if (this.isLoop)
-            if (this.q.copy(this.Pix[this.N-1]).lerp(this.Pix[0], 0.5).distanceTo(this.pix) <= 10) {
-               this.isNewPoint = true;
-               return;
-            }
-*/
+
+         if (! this.isLoop && this.N == this.P.length - 1)
+	    this.N = -1;
       }
    }
    this.onPress = function(pt) {
@@ -152,6 +148,7 @@ function() {
 	    if (this.isNewPoint) {
 	       color('blue');
 	       var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
+	       console.log(t);
                mDot(getPointOnCurve(splineCurve, t), 2*r);
 	    }
          }
