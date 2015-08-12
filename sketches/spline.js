@@ -2,6 +2,7 @@ function() {
    this.label = 'spline';
    this.is3D = true;
    this.N = -1;
+   this.Pix = [];
    this.showKeys = true;
    this.isLoop = false;
    var r = .1;
@@ -18,64 +19,85 @@ function() {
          break;
       }
    }
+   this._projectPoints = function(pt, unadjust) {
 
-   this.onPress = function(pt) {
-      this.travel = 0;
-
-      // FIND PROJECTION OF CURSOR ONTO SCREEN.
+      // FIND PROJECTIONS ONTO SCREEN.
 
       if (this.pix === undefined)
          this.pix = newVec3();
       pointToPixel(pt, this.pix);
+      if (unadjust) {
+         this.pix.x = this.unadjustX(this.pix.x);
+         this.pix.y = this.unadjustY(this.pix.y);
+      }
 
-      // FIND PROJECTIONS OF SPLINE KEYS ONTO SCREEN.
-
-      if (this.Pix === undefined)
-         this.Pix = [];
       for (var n = 0 ; n < this.P.length ; n++) {
          if (this.Pix[n] === undefined)
             this.Pix[n] = newVec3();
          pointToPixel(this.P[n], this.Pix[n]);
       }
+   }
+   this.onMove = function(pt) {
+
+      this._projectPoints(pt, true);
 
       // CHECK FOR MOUSE DOWN ON A KEY.
 
       this.N = this.P.length;
-      while (--this.N >= 0 && this.Pix[this.N].distanceTo(this.pix) > clickSize())
+      while (--this.N >= 0 && this.Pix[this.N].distanceTo(this.pix) > 10)
          ;
 
       // IF NOT...
 
-      if (this.isNewPoint = this.N == -1) {
+      this.isNewPoint = false;
+
+      if (this.N == -1) {
 
          // CHECK FOR MOUSE DOWN HALF WAY BETWEEN TWO KEYS.
 
-         if (this.p === undefined)
-	    this.p = newVec3();
-         while (++this.N < this.P.length - 1)
-            if (this.p.copy(this.Pix[this.N]).lerp(this.Pix[this.N+1], 0.5).distanceTo(this.pix) <= clickSize()) {
-               this.P.splice(++this.N, 0, newVec3().copy(pt)); // IF SO, INSERT A NEW KEY THERE.
-               return;
-            }
+         if (this.q === undefined)
+            this.q = newVec3();
+         if (this.qix === undefined)
+            this.qix = newVec3();
+
          if (this.isLoop)
-            if (this.p.copy(this.Pix[this.N-1]).lerp(this.Pix[0], 0.5).distanceTo(this.pix) <= clickSize()) {
-               this.P.splice(++this.N, 0, newVec3().copy(pt)); // IF SO, INSERT A NEW KEY THERE.
+	    this.P.push(this.P[0]);
+         while (++this.N < this.P.length - 1) {
+	    var t = (this.N + 0.5) / (this.P.length - 1);
+	    var p = getPointOnCurve(this.splineCurve, t);
+	    this.q.set(p[0], p[1], p[2]);
+            pointToPixel(this.q, this.qix);
+	    if (this.qix.distanceTo(this.pix) <= 10) {
+               this.isNewPoint = true;
+               break;
+	    }
+         }
+         if (this.isLoop)
+	    this.P.pop();
+/*
+         if (this.isLoop)
+            if (this.q.copy(this.Pix[this.N-1]).lerp(this.Pix[0], 0.5).distanceTo(this.pix) <= 10) {
+               this.isNewPoint = true;
                return;
             }
+*/
+      }
+   }
+   this.onPress = function(pt) {
+      this._projectPoints(pt);
 
-         // ELSE, ADD NEW KEY ONTO FIRST OR LAST KEY (WHICHEVER IS NEARER).
+      this.travel = 0;
 
-         if (this.Pix[0].distanceTo(this.pix) < this.Pix[this.P.length-1].distanceTo(this.pix)) {
-            this.N = 0;
-            this.P.unshift(newVec3().copy(pt));
-         }
-         else {
-            this.N = this.P.length;
+      if (this.isNewPoint) {
+         if (this.N < this.P.length)
+            this.P.splice(++this.N, 0, newVec3().copy(pt)); // IF SO, INSERT A NEW KEY THERE.
+         else
             this.P.push(newVec3().copy(pt));
-         }
+         this.isNewPoint = false;
       }
    }
    this.onDrag = function(pt) {
+      this._projectPoints(pt);
 
       // DRAGGING MOVES THE CURRENTLY SELECTED KEY.
 
@@ -88,8 +110,10 @@ function() {
 
       // IF THIS WAS NOT A NEWLY ADDED KEY, AND IT WAS NOT DRAGGED, THEN DELETE IT.
 
-      if (this.N >= 0 && ! this.isNewPoint && this.travel < r)
+      if (this.N >= 0 && ! this.isNewPoint && this.travel < r) {
          this.P.splice(this.N, 1);
+	 this.N = -1;
+      }
    }
    this.render = function() {
 
@@ -111,22 +135,31 @@ function() {
       this.afterSketch(function() {
          if (this.isLoop)
 	    this.P.push(this.P[0]);
-         var curve = makeSpline(this.P);
+	 this.splineCurve = makeSpline(this.P);
+	 var splineCurve = this.splineCurve;
          if (this.isLoop)
 	    this.P.pop();
 
 	 // EITHER SHOW THIN CURVE WITH KEYS AS DOTS, OR SHOW JUST A THICK CURVE.
 
          lineWidth(this.showKeys ? 2 : 4);
-         mCurve(curve);
-	 if (this.showKeys)
-            for (var n = 0 ; n < this.P.length ; n++)
+         mCurve(splineCurve);
+	 if (this.showKeys) {
+            for (var n = 0 ; n < this.P.length ; n++) {
+	       color(n == this.N && ! this.isNewPoint ? 'cyan' : defaultPenColor);
                mDot(this.P[n], 2*r);
+            }
+	    if (this.isNewPoint) {
+	       color('blue');
+	       var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
+               mDot(getPointOnCurve(splineCurve, t), 2*r);
+	    }
+         }
 
          // IF THERE WAS INPUT, THEN OUTPUT A SPECIFIC VALUE.
 
          if (this.inValues[0] !== undefined) {
-	    var p = getPointOnCurve(curve, this.inValues[0] % 1);
+	    var p = getPointOnCurve(splineCurve, this.inValues[0] % 1);
             this.setOutPortValue(p);
 	    if (! this.showKeys)
                mDot(p, 2*r);
@@ -135,7 +168,7 @@ function() {
          // IF THERE WAS NO INPUT, THEN OUTPUT A DEFINING FUNCTION.
 
 	 else
-            this.setOutPortValue(function(t) { return getPointOnCurve(curve, t % 1); });
+            this.setOutPortValue(function(t) { return getPointOnCurve(splineCurve, t % 1); });
       });
    }
 }

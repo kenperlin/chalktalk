@@ -10,8 +10,6 @@ function() {
       var axisY = (bounds[1] + bounds[3]) / 2;
       var axisR = (bounds[3] - bounds[1]) / 2;
 
-console.log(axisX + ' ' + axisY + ' ' + axisR);
-
       // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
 
       this.profile = [];
@@ -32,10 +30,35 @@ console.log(axisX + ' ' + axisY + ' ' + axisR);
          if (this.xyz.length == 3)
             this.trace[3] = this.sketchTrace[3];
       });
+      this.afterSketch(function() {
+         if (typeof this.inValue[0] == 'function') {
+	    if (this.mesh !== undefined)
+	       root.remove(this.mesh);
+            delete this.mesh;
+	    this.code = null;
+         }
+      });
+   }
+
+   this.inputIsFunction = function() {
+      return typeof this.inValue[0] == 'function';
+   }
+
+   this.profileCurve = function() {
+      if (this.inputIsFunction()) {
+         var f = this.inValue[0], P = [], p, t;
+	 for (t = 0 ; t < 1.001 ; t += 0.01) {
+	    p = f(min(t, 0.999));
+	    P.push(newVec3(1+p[0],p[2],p[1]));
+         }
+         return P;
+      }
+      else
+         return this.profile;
    }
 
    this.createMesh = function() {
-      var P = this.profile;
+      var P = this.profileCurve();
 
       // SHOULD WE BUILD A TORUS?
 
@@ -46,15 +69,18 @@ console.log(axisX + ' ' + axisY + ' ' + axisR);
       }
       var isTorus = P[0].z > zMin && P[P.length-1].z < zMax;
 
+      if (this.inputIsFunction())
+         isTorus = false;
+
       // BUILD POINTS ARRAY BACK TO FRONT, SO LATHE ISN'T EVERTED.  ADD END CAPS.
 
       var points = [];
-      if (isTorus)
-         points.push(P[0]);
-      else
-         points.push(newVec3(0,0,P[P.length-1].z));
+
+      points.push(isTorus ? P[0] : newVec3(0,0,P[P.length-1].z));
+
       for (var i = P.length-1 ; i >= 0 ; i--)
          points.push(P[i]);
+
       if (! isTorus)
          points.push(newVec3(0,0,P[0].z));
 
