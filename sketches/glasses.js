@@ -3,9 +3,11 @@ function() {
    this.is3D = true;
    this.render = function() {
       m.translate(0,0,.5);
-      mCurve(arc(-.4,  0, .3, PI    ,-PI  ));
+
+      mCurve(arc(-.4,  0, .3, PI/2  ,PI/2-TAU));
+      mCurve(arc( .4,  0, .3, PI/2  ,PI/2-TAU));
       mCurve(arc(  0,-.1, .3, PI*2/3, PI/3));
-      mCurve(arc( .4,  0, .3, PI    ,-PI  ));
+
       this.afterSketch(function() {
          for (var sign = -1 ; sign <= 1 ; sign += 2) {
 	    m.save();

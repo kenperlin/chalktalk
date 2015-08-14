@@ -1,21 +1,8 @@
 function() {
    this.label = "pendulum";
-
-   this.computeStatistics = function() {
-      var a = computeCurveBounds(this.sketchTrace[0]);
-      var b = computeCurveBounds(this.sketchTrace[1]);
-      var c = computeCurveBounds(this.sketchTrace[2]);
-      this.hubWidth = 10 * (a[2] - a[0]) / this.size;
-      this.radius = 5 * (c[2] - c[0] + c[3] - c[1]) / 2 / this.size;
-      this.ht = 8.5 * ((c[1]+c[3])/2 - b[1]) / this.size;
-   }
-
-   this.hubWidth = 1;
    this.spring = new Spring();
-   this.ht0 = 4.0;
-   this.ht = this.ht0;
-   this.radius = 1;
    this.force = 0;
+   this.stretch = 1;
 
    this.mouseDown = function(x, y) {
       this.xx = x;
@@ -32,13 +19,12 @@ function() {
          else
             return;
 
-      var sc = this.ht / height() / (this.scale()/4);
       switch (this.swingMode) {
       case 'swing':
-         this.force = sc * dx;
+         this.force = 20 * dx / height();
          break;
       case 'height':
-         this.ht += sc * dy;
+         this.stretch += 4 * dy / height();
          break;
       }
       this.xx = x;
@@ -46,35 +32,36 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var sc = this.size / 400;
 
-      this.spring.setMass(this.ht / this.ht0);
+      var hubWidth   = this.isGlyph() ? 1 :  this.B[0].width;
+      var rodHeight  = this.isGlyph() ? 4 :  this.B[2].y - this.B[1].ylo;
+      var diskRadius = this.isGlyph() ? 1 : (this.B[2].width + this.B[2].height) / 4;
+
+      this.rodHeight = rodHeight * this.stretch;
+
+      this.spring.setMass(this.rodHeight);
       this.spring.setForce(this.force);
       this.force *= 0.9;
       this.spring.update(elapsed);
 
       var N = 32;
-      m.scale(.5 * this.size / 400);
-      m.translate(0, 2-this.ht, 0);
-      this.anchor = m.transform([0,this.ht,0]);
-      mCurve([[-.5*this.hubWidth,this.ht], [.5*this.hubWidth,this.ht]]);
+      m.scale(.5 * this.size / 40);
+      m.translate(0, 2 - this.rodHeight, 0);
+      this.anchor = m.transform([0, this.rodHeight, 0]);
+      mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
       var angle = /* this.isInValue("S") ? this.getInFloat("S")
                                          : */ this.spring.getPosition();
       if (isNaN(angle)) angle = 0;
 
-      this.setOutPortValue(angle);
-
-      m.translate(0,this.ht,0);
+      m.translate(0, this.rodHeight, 0);
       m.rotateZ(angle);
-      m.translate(0,-this.ht,0);
+      m.translate(0, -this.rodHeight, 0);
 
-      mCurve([[0,this.ht], [0,this.radius]]);
-      var c = [];
-      for (var i = 0 ; i <= N ; i++) {
-         var a = TAU * i / N;
-         c.push([this.radius * sin(a), this.radius * cos(a)]);
-      }
-      mCurve(c);
+      mCurve([[0, this.rodHeight], [0,diskRadius]]);
+      mDrawOval([-diskRadius, -diskRadius], [diskRadius, diskRadius], N, PI/2, PI/2-TAU);
+
+      this.setOutPortValue(angle);
    }
+
 }

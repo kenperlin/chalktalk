@@ -5,10 +5,10 @@ function() {
 
       // GET STATISTICS ON POSITION AND SIZE OF CENTRAL AXIS (1ST STROKE).
 
-      var bounds = computeCurveBounds(this.sketchTrace[0]);
-      var axisX = (bounds[0] + bounds[2]) / 2;
-      var axisY = (bounds[1] + bounds[3]) / 2;
-      var axisR = (bounds[3] - bounds[1]) / 2;
+      var b = this.B[0];
+      var axisX = this.size * (b.xlo + b.xhi) / 2;
+      var axisY = this.size * (b.ylo + b.yhi) / 2;
+      var axisR = this.size * (b.yhi - b.ylo) / 2;
 
       // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
 
