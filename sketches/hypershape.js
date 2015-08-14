@@ -112,14 +112,14 @@ function() {
             mCurve([[.85,.85], [-.85,-.85]]);
          }
          this.afterSketch(function() {
-	    if (this.mesh === undefined) return;
+            if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < S.length ; n++)
                this.placeVertex(n, S[n]);
             for (var i = 0   ; i < 4 ; i++)
             for (var j = i+1 ; j < 5 ; j++) {
                this.placeEdge(n, n - S.length, i, j);
-	       n++;
+               n++;
             }
          });
          break;
@@ -130,7 +130,7 @@ function() {
             mClosedCurve([[-.8,-.8],[.8,-.8],[.8,.8],[-.8,.8]]);
          }
          this.afterSketch(function() {
-	    if (this.mesh === undefined) return;
+            if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < 16 ; n++)
                this.placeVertex(n, C[n]);
@@ -138,10 +138,10 @@ function() {
                for (var i = 0 ; i < 8 ; i++) {
                   var j = edges[axis][i];
                   this.placeEdge(n, n - C.length, j, j + (1<<axis));
-		  n++;
+                  n++;
                }
             if (mode %2 != 0) {
-	    }
+            }
          });
          break;
 
@@ -152,9 +152,9 @@ function() {
             mLine([-1,0],[1,0]);
          }
          this.afterSketch(function() {
-	    if (this.mesh === undefined) return;
-	    var alt = mode % 2 != 0;
-	    var n = 0;
+            if (this.mesh === undefined) return;
+            var alt = mode % 2 != 0;
+            var n = 0;
             for ( ; n < 8 ; n++) {
                this.placeVertex(n, A[n]);
                this.mesh.children[n].setMaterial(materials[alt ? 0 : 1 + floor(n/2)]);
@@ -163,20 +163,20 @@ function() {
             for (var j = i+1 ; j < 4 ; j++)
             for (var k = 0   ; k < 4 ; k++) {
                var I = 2 * i + _bit(k, 0);
-	       var J = 2 * j + _bit(k, 1);
-	       var c = 0;
-	       if (alt) {
-	          function notZero(a, b) { return (A[I][a]!=0 || A[J][a]!=0) && (A[I][b]!=0 || A[J][b]!=0); }
-	          if      (notZero(0,1)) c = 1;
-	          else if (notZero(1,2)) c = 2;
-	          else if (notZero(0,2)) c = 3;
-	          else if (notZero(1,3)) c = 4;
-	          else if (notZero(0,3)) c = 5;
-	          else if (notZero(2,3)) c = 6;
-	       }
+               var J = 2 * j + _bit(k, 1);
+               var c = 0;
+               if (alt) {
+                  function notZero(a, b) { return (A[I][a]!=0 || A[J][a]!=0) && (A[I][b]!=0 || A[J][b]!=0); }
+                  if      (notZero(0,1)) c = 1;
+                  else if (notZero(1,2)) c = 2;
+                  else if (notZero(0,2)) c = 3;
+                  else if (notZero(1,3)) c = 4;
+                  else if (notZero(0,3)) c = 5;
+                  else if (notZero(2,3)) c = 6;
+               }
                this.mesh.children[n].setMaterial(materials[c]);
                this.placeEdge(n, n - A.length, I, J);
-	       n++;
+               n++;
             }
          });
          break;
@@ -187,7 +187,7 @@ function() {
             mClosedCurve([[0,-1],[1,0],[0,1],[-1,0]]);
          }
          this.afterSketch(function() {
-	    if (this.mesh === undefined) return;
+            if (this.mesh === undefined) return;
             function edgeColor(a, b) {
                var x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2], w = a[3] - b[3];
                var dd = x * x + y * y + z * z + w * w;
@@ -219,7 +219,7 @@ function() {
                if (k >= 0) {
                   this.mesh.children[n].setMaterial(materials[k]);
                   this.placeEdge(n, n - V.length, i, j);
-		  n++;
+                  n++;
                }
             }
          });

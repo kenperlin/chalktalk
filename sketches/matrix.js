@@ -42,10 +42,10 @@ function() {
       this.afterSketch(function() {
 
          if (this.cmdMode == 1) {
-	    color(scrimColor(0.3));
-	    mFillRect([-1,-.5], [.5,1]);
-	    color(defaultPenColor);
-	 }
+            color(scrimColor(0.3));
+            mFillRect([-1,-.5], [.5,1]);
+            color(defaultPenColor);
+         }
 
          mLine([-1, .5],[1,  .5]);
          mLine([-1,  0],[1,   0]);

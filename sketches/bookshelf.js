@@ -27,51 +27,51 @@ function() {
          var row = min(NR-NH, floor((NR-NH) * (this.by + DY) / (2*DY) + .5));
 
          if (! isDef(this.isDown)) {
-	    this.bx = mix(this.bx, mix(-DX, DX, col / (NC-NW)), 0.1);
-	    this.by = mix(this.by, mix(-DY, DY, row / (NR-NH)), 0.1);
+            this.bx = mix(this.bx, mix(-DX, DX, col / (NC-NW)), 0.1);
+            this.by = mix(this.by, mix(-DY, DY, row / (NR-NH)), 0.1);
          }
 
          lineWidth(.25);
-	 for (var i = 1 ; i < NC ; i++) {
-	    var x = mix(-1, 1, i/NC);
-	    mLine([x,-.5],[x,.5]);
+         for (var i = 1 ; i < NC ; i++) {
+            var x = mix(-1, 1, i/NC);
+            mLine([x,-.5],[x,.5]);
          }
-	 for (var i = 1 ; i < NR ; i++) {
-	    var y = mix(-0.5, 0.5, i/NR);
-	    mLine([-1,y],[1,y]);
+         for (var i = 1 ; i < NR ; i++) {
+            var y = mix(-0.5, 0.5, i/NR);
+            mLine([-1,y],[1,y]);
          }
 
-	 var eps = 0.005;
+         var eps = 0.005;
          m.translate(this.bx, 0);
-	 color(backgroundColor);
+         color(backgroundColor);
          mFillRect([-.04,-.5],[.04,.5]);
-	 color(defaultPenColor);
+         color(defaultPenColor);
          lineWidth(2);
          mDrawRect([-.04,-.5],[.04,.5]);
          lineWidth(1);
          mDrawRect([-.01,-.5+.03],[.01,.5-.03]);
          m.translate(0, this.by);
-	 var xx = NW / NC;
-	 var yy = NH / NR * .5;
-	 color(backgroundColor);
+         var xx = NW / NC;
+         var yy = NH / NR * .5;
+         color(backgroundColor);
          mFillRect([-xx+eps,-yy+eps],[xx-eps,yy-eps]);
 
-	 color(defaultPenColor);
+         color(defaultPenColor);
          lineWidth(1);
-	 var dx = NW / NC;
-	 var dy = NH / NR;
-	 for (var i = 0 ; i < NW ; i++)
-	 for (var j = 0 ; j < NH ; j++) {
-	    var x0 = mix(-xx, xx, (i  )/NW) + eps;
-	    var x1 = mix(-xx, xx, (i+1)/NW) - eps;
-	    var y0 = mix(-yy, yy, (j  )/NH) + eps;
-	    var y1 = mix(-yy, yy, (j+1)/NH) - eps;
-	    mDrawRect([x0,y0],[x1,y1]);
-	    mDrawRect([mix(x0,x1,.3),mix(y0,y1,.75)],
-	              [mix(x0,x1,.7),mix(y0,y1,.77)]);
-	    mDrawRect([mix(x0,x1,.4),mix(y0,y1,.65)],
-	              [mix(x0,x1,.6),mix(y0,y1,.67)]);
-	 }
+         var dx = NW / NC;
+         var dy = NH / NR;
+         for (var i = 0 ; i < NW ; i++)
+         for (var j = 0 ; j < NH ; j++) {
+            var x0 = mix(-xx, xx, (i  )/NW) + eps;
+            var x1 = mix(-xx, xx, (i+1)/NW) - eps;
+            var y0 = mix(-yy, yy, (j  )/NH) + eps;
+            var y1 = mix(-yy, yy, (j+1)/NH) - eps;
+            mDrawRect([x0,y0],[x1,y1]);
+            mDrawRect([mix(x0,x1,.3),mix(y0,y1,.75)],
+                      [mix(x0,x1,.7),mix(y0,y1,.77)]);
+            mDrawRect([mix(x0,x1,.4),mix(y0,y1,.65)],
+                      [mix(x0,x1,.6),mix(y0,y1,.67)]);
+         }
       });
    }
 }

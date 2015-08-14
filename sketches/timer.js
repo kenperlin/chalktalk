@@ -14,20 +14,20 @@ function() {
          var s, c;
          mLine([0,0],[.6 * sin(minutesAngle), .6 * cos(minutesAngle)]);
          this.timerT += def(this.inValues[0], 1) * (time - this.timerTime);
-	 this.timerTime = time;
+         this.timerTime = time;
          this.setOutPortValue(this.timerT);
-	 for (var i = 0 ; i < 12 ; i++) {
-	    s = sin(i * TAU / 12);
-	    c = cos(i * TAU / 12);
-	    mLine([.9 * s, .9 * c], [s, c]);
+         for (var i = 0 ; i < 12 ; i++) {
+            s = sin(i * TAU / 12);
+            c = cos(i * TAU / 12);
+            mLine([.9 * s, .9 * c], [s, c]);
          }
-	 textHeight(this.mScale(0.3));
-	 color(scrimColor(0.4));
-	 var fraction = floor(10 * seconds) % 10;
-	 mText(minutes
-	       + (seconds  < 10 ? ':0' : ':') + floor(seconds)
-	       + '.' + fraction,
-	       [0,-.4], .5,.5);
+         textHeight(this.mScale(0.3));
+         color(scrimColor(0.4));
+         var fraction = floor(10 * seconds) % 10;
+         mText(minutes
+               + (seconds  < 10 ? ':0' : ':') + floor(seconds)
+               + '.' + fraction,
+               [0,-.4], .5,.5);
       });
    }
 }

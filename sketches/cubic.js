@@ -29,12 +29,12 @@ function() {
          mLine([0,-1],[0,1]);
          color(backgroundColor == 'black' ? 'cyan' : 'blue');
          textHeight(this.mScale(.15));
-	 mText('a =', [-1.15, .9], 0,.5);
-	 mText('b =', [-1.15, .3], 0,.5);
-	 mText('c =', [-1.15,-.3], 0,.5);
-	 mText('d =', [-1.15,-.9], 0,.5);
-	 color('red');
-	 mText('at' + EXP_3 + ' + bt' + EXP_2 + ' ct + d', [0,-1.2], .5, .5);
+         mText('a =', [-1.15, .9], 0,.5);
+         mText('b =', [-1.15, .3], 0,.5);
+         mText('c =', [-1.15,-.3], 0,.5);
+         mText('d =', [-1.15,-.9], 0,.5);
+         color('red');
+         mText('at' + EXP_3 + ' + bt' + EXP_2 + ' ct + d', [0,-1.2], .5, .5);
       });
    }
 }

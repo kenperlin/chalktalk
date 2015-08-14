@@ -32,10 +32,10 @@ function() {
       });
       this.afterSketch(function() {
          if (typeof this.inValue[0] == 'function') {
-	    if (this.mesh !== undefined)
-	       root.remove(this.mesh);
+            if (this.mesh !== undefined)
+               root.remove(this.mesh);
             delete this.mesh;
-	    this.code = null;
+            this.code = null;
          }
       });
    }
@@ -47,9 +47,9 @@ function() {
    this.profileCurve = function() {
       if (this.inputIsFunction()) {
          var f = this.inValue[0], P = [], p, t;
-	 for (t = 0 ; t < 1.001 ; t += 0.01) {
-	    p = f(min(t, 0.999));
-	    P.push(newVec3(1+p[0],p[2],p[1]));
+         for (t = 0 ; t < 1.001 ; t += 0.01) {
+            p = f(min(t, 0.999));
+            P.push(newVec3(1+p[0],p[2],p[1]));
          }
          return P;
       }

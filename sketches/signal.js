@@ -39,22 +39,22 @@ function() {
       mCurve(C);
       this.afterSketch(function() {
          if (typeof this.inValue[0] !== 'function' && this == sk() && isHover()) {
-	    var scale = 0.15;
-	    textHeight(this.mScale(scale));
+            var scale = 0.15;
+            textHeight(this.mScale(scale));
             color(backgroundColor);
-	    for (var i = 0 ; i < 32 ; i++) {
-	       var theta = TAU * i / 32;
+            for (var i = 0 ; i < 32 ; i++) {
+               var theta = TAU * i / 32;
                mText(this.code[this.selection][1], [ scale / 7 * cos(theta),
-	                                             scale / 7 * sin(theta) ], .5,.5);
+                                                     scale / 7 * sin(theta) ], .5,.5);
             }
             color(defaultPenColor);
             mText(this.code[this.selection][1], [0, 0], .5,.5);
          }
          var s = this.selection;
          if ( this.code[s][1] != this.savedCode ||
-	      this.inValue[0] != this.savedInValue_0 ||
-	      this.inValue[1] != this.savedInValue_1 ||
-	      this.inValue[2] != this.savedInValue_2 ) {
+              this.inValue[0] != this.savedInValue_0 ||
+              this.inValue[1] != this.savedInValue_1 ||
+              this.inValue[2] != this.savedInValue_2 ) {
             this.savedCode = this.code[s][1];
             this.savedInValue_0 = this.inValue_0;
             this.savedInValue_1 = this.inValue_1;

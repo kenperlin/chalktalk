@@ -61,22 +61,22 @@ function() {
             this.qix = newVec3();
 
          if (this.isLoop)
-	    this.P.push(this.P[0]);
+            this.P.push(this.P[0]);
          while (++this.N < this.P.length - 1) {
-	    var t = (this.N + 0.5) / (this.P.length - 1);
-	    var p = getPointOnCurve(this.splineCurve, t);
-	    this.q.set(p[0], p[1], p[2]);
+            var t = (this.N + 0.5) / (this.P.length - 1);
+            var p = getPointOnCurve(this.splineCurve, t);
+            this.q.set(p[0], p[1], p[2]);
             pointToPixel(this.q, this.qix);
-	    if (this.qix.distanceTo(this.pix) <= 10) {
+            if (this.qix.distanceTo(this.pix) <= 10) {
                this.isNewPoint = true;
                break;
-	    }
+            }
          }
          if (this.isLoop)
-	    this.P.pop();
+            this.P.pop();
 
          if (! this.isLoop && this.N == this.P.length - 1)
-	    this.N = -1;
+            this.N = -1;
       }
    }
    this.onPress = function(pt) {
@@ -108,7 +108,7 @@ function() {
 
       if (this.N >= 0 && ! this.isNewPoint && this.travel < r) {
          this.P.splice(this.N, 1);
-	 this.N = -1;
+         this.N = -1;
       }
    }
    this.render = function() {
@@ -130,41 +130,41 @@ function() {
 
       this.afterSketch(function() {
          if (this.isLoop)
-	    this.P.push(this.P[0]);
-	 this.splineCurve = makeSpline(this.P);
-	 var splineCurve = this.splineCurve;
+            this.P.push(this.P[0]);
+         this.splineCurve = makeSpline(this.P);
+         var splineCurve = this.splineCurve;
          if (this.isLoop)
-	    this.P.pop();
+            this.P.pop();
 
-	 // EITHER SHOW THIN CURVE WITH KEYS AS DOTS, OR SHOW JUST A THICK CURVE.
+         // EITHER SHOW THIN CURVE WITH KEYS AS DOTS, OR SHOW JUST A THICK CURVE.
 
          lineWidth(this.showKeys ? 2 : 4);
          mCurve(splineCurve);
-	 if (this.showKeys) {
+         if (this.showKeys) {
             for (var n = 0 ; n < this.P.length ; n++) {
-	       color(n == this.N && ! this.isNewPoint ? 'cyan' : defaultPenColor);
+               color(n == this.N && ! this.isNewPoint ? 'cyan' : defaultPenColor);
                mDot(this.P[n], 2*r);
             }
-	    if (this.isNewPoint) {
-	       color('blue');
-	       var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
-	       console.log(t);
+            if (this.isNewPoint) {
+               color('blue');
+               var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
+               console.log(t);
                mDot(getPointOnCurve(splineCurve, t), 2*r);
-	    }
+            }
          }
 
          // IF THERE WAS INPUT, THEN OUTPUT A SPECIFIC VALUE.
 
          if (this.inValues[0] !== undefined) {
-	    var p = getPointOnCurve(splineCurve, this.inValues[0] % 1);
+            var p = getPointOnCurve(splineCurve, this.inValues[0] % 1);
             this.setOutPortValue(p);
-	    if (! this.showKeys)
+            if (! this.showKeys)
                mDot(p, 2*r);
-	 }
+         }
 
          // IF THERE WAS NO INPUT, THEN OUTPUT A DEFINING FUNCTION.
 
-	 else
+         else
             this.setOutPortValue(function(t) { return getPointOnCurve(splineCurve, t % 1); });
       });
    }

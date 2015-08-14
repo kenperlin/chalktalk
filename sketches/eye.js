@@ -51,22 +51,22 @@ function() {
          var n = hiRes ? 17 : 5;
          if (b_p === undefined || floor(4*time) > floor(4*b_p_time)) {
             b_p_time = time;
-	    b_p = [];
-	    for (var i = 0 ; i < n * n ; i++) {
-	       var x = 2 * (     (i % n) + 0.5) / n - 1;
-	       var y = 2 * (floor(i / n) + 0.5) / n - 1;
-	       var rr = 1 - x * x - y * y;
-	       if (rr > 0) {
-	          x *= 1 + .4 * abs(x * y);
-	          y *= 1 + .4 * abs(x * y);
-	          b_p.push( [ min(1, irandom(3)), [0.45 * x, .35 * y, .16 * sqrt(rr)] ] );
-	       }
-	    }
-	 }
-	 textHeight(this.mScale(0.45 / n));
-	 for (var i = 0 ; i < b_p.length ; i++) {
-	    var bp = b_p[i];
-	    color(bp[0] == '0' ? 'rgb(255,92,64)' : 'rgb(128,220,255)');
+            b_p = [];
+            for (var i = 0 ; i < n * n ; i++) {
+               var x = 2 * (     (i % n) + 0.5) / n - 1;
+               var y = 2 * (floor(i / n) + 0.5) / n - 1;
+               var rr = 1 - x * x - y * y;
+               if (rr > 0) {
+                  x *= 1 + .4 * abs(x * y);
+                  y *= 1 + .4 * abs(x * y);
+                  b_p.push( [ min(1, irandom(3)), [0.45 * x, .35 * y, .16 * sqrt(rr)] ] );
+               }
+            }
+         }
+         textHeight(this.mScale(0.45 / n));
+         for (var i = 0 ; i < b_p.length ; i++) {
+            var bp = b_p[i];
+            color(bp[0] == '0' ? 'rgb(255,92,64)' : 'rgb(128,220,255)');
             mText(bp[0], bp[1], .5, .5);
          }
       }

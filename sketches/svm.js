@@ -19,19 +19,19 @@ function() {
       this.afterSketch(function() {
          for (var n = 0 ; n < D.length ; n++) {
             color(n < 12 ? 'rgb(255,128,128)' : 'rgb(128,128,255)');
-	    var x = D[n][0], y = D[n][1];
-	    if (x + y > 0)
-	       mDot(D[n], 0.08);
+            var x = D[n][0], y = D[n][1];
+            if (x + y > 0)
+               mDot(D[n], 0.08);
             else {
-	       mLine([x + .03, y - .03], [x - .03, y + .03]);
-	       mLine([x - .03, y - .03], [x + .03, y + .03]);
-	    }
+               mLine([x + .03, y - .03], [x - .03, y + .03]);
+               mLine([x - .03, y - .03], [x + .03, y + .03]);
+            }
          }
-	 color(backgroundColor);
-	 mFillRect([-.2,-.1],[.2,.1]);
-	 color(defaultPenColor);
+         color(backgroundColor);
+         mFillRect([-.2,-.1],[.2,.1]);
+         color(defaultPenColor);
          textHeight(this.mScale(.16));
-	 mText("SVM", [0, 0], .5, .5);
+         mText("SVM", [0, 0], .5, .5);
       });
    }
 }

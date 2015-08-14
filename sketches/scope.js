@@ -9,18 +9,18 @@ function() {
       this.afterSketch(function() {
          if (typeof this.inValue[0] !== 'function')
             mCurve(curveForSignal);
-	 else {
+         else {
             var func = this.inValue[0];
-	    var freq = this.sketchTexts[0].value;
+            var freq = this.sketchTexts[0].value;
 
-	    var curve = [];
-	    var eps = 0.01;
-	    var T = floor(time * freq);
-	    for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
-	       curve.push([2 * t - 1, max(-1,min(1,func((T + t) / freq)))]);
+            var curve = [];
+            var eps = 0.01;
+            var T = floor(time * freq);
+            for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
+               curve.push([2 * t - 1, max(-1,min(1,func((T + t) / freq)))]);
 
             lineWidth(0.75);
-	    mCurve(curve);
+            mCurve(curve);
          }
 
          textHeight(this.mScale(.17));

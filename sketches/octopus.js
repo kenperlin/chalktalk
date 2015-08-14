@@ -362,9 +362,9 @@ function Octopus() {
       if (this._nodeMaterial === undefined) {
          this.fragmentShader = nodeFragmentShader;
          var r = 1, g = .5, b = .25;
-	 r *= 2;
-	 g *= 2;
-	 b *= 2;
+         r *= 2;
+         g *= 2;
+         b *= 2;
          this._nodeMaterial = this.shaderMaterial([r/200,g/200,b/200],
                                                   [r/ 30,g/ 30,b/ 30],
                                                   [r/  2,g/  2,b/  2, 7]);
@@ -375,9 +375,9 @@ function Octopus() {
    this.getLinkMaterial = function() {
       if (this._linkMaterial === undefined) {
          var r = 1, g = 1, b = 1;
-	 r *= 2;
-	 g *= 2;
-	 b *= 2;
+         r *= 2;
+         g *= 2;
+         b *= 2;
          this.fragmentShader = linkFragmentShader;
          this._linkMaterial = this.shaderMaterial([r/200,g/200,b/200],
                                                   [r/ 30,g/ 30,b/ 30],

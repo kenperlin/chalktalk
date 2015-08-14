@@ -12,11 +12,11 @@ function() {
 
    this.render = function(elapsed) {
      this.duringSketch(function() {
-	 mClosedCurve([v[0],v[2],v[3],v[1]]);
+         mClosedCurve([v[0],v[2],v[3],v[1]]);
       });
       this.afterSketch(function() {
          for (var n = 0 ; n < a.length ; n++)
-	    mLine(v[a[n]], v[b[n]]);
+            mLine(v[a[n]], v[b[n]]);
       });
    }
 }

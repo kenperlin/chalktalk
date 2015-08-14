@@ -31,7 +31,7 @@ function() {
                 .concat(makeOval(-.6,-1.0, 1.2,1.1, 16, PI/2,-PI)));
                  break;
          case 9: mCurve(makeOval(-0.7,-0.2, 1.4,1.2, 16, 0, -TAU)
-	        .concat(makeOval(-1.8,-1.0, 2.5,1.8, 16, 0, -PI/2)));
+                .concat(makeOval(-1.8,-1.0, 2.5,1.8, 16, 0, -PI/2)));
                  break;
          }
       });

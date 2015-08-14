@@ -49,13 +49,13 @@ function() {
    this.drawHyperface = function(rgb, C, a,b,c,d,e,f,g,h) {
 
       function myFillFace(a,b,c,d, rgb) {
-	 for (var j = 0 ; j < 4 ; j++)
-	    S[j] = (T[a][j] + T[b][j] + T[c][j] + T[d][j]) / 4 - C[j];
+         for (var j = 0 ; j < 4 ; j++)
+            S[j] = (T[a][j] + T[b][j] + T[c][j] + T[d][j]) / 4 - C[j];
 
          var s = max(.1, min(1, (.75 + .5 * (S[0] + S[1] + S[2] + S[3]))));
-	 var R = floor(255 * rgb[0] * s);
-	 var G = floor(255 * rgb[1] * s);
-	 var B = floor(255 * rgb[2] * s);
+         var R = floor(255 * rgb[0] * s);
+         var G = floor(255 * rgb[1] * s);
+         var B = floor(255 * rgb[2] * s);
          mFillFace([P[a],P[b],P[c],P[d]], 'rgba(' + R + ',' + G + ',' + B + ',.1)');
       }
 
@@ -85,35 +85,35 @@ function() {
          mClosedCurve([[-r,-r],[-r,r],[r,r],[r,-r]]);
       });
       this.afterSketch(function() {
-	 for (var n = 0 ; n < 16 ; n++)
-	    project(C[n], T[n], P[n]);
+         for (var n = 0 ; n < 16 ; n++)
+            project(C[n], T[n], P[n]);
 
-	 for (var n = 0 ; n < 8 ; n++)
-	    project(F1[n], F2[n], this._tmp);
+         for (var n = 0 ; n < 8 ; n++)
+            project(F1[n], F2[n], this._tmp);
 
          for (var i = 0 ; i < 4 ; i++)
-	    switch (this.mode % 5) {
-	    case 4:
+            switch (this.mode % 5) {
+            case 4:
                this.drawHyperface([1,1,1], F2[6], 0,1,2,3,4,5,6,7);
                this.drawHyperface([0,0,1], F2[4], 0,1,2,3,8,9,10,11);
                this.drawHyperface([0,1,0], F2[2], 0,1,4,5,8,9,12,13);
                this.drawHyperface([1,0,0], F2[0], 0,2,4,6,8,10,12,14);
                break;
-	    case 3:
+            case 3:
                this.drawHyperface([1,1,1], F2[6], 0,1,2,3,4,5,6,7);
                this.drawHyperface([1,1,1], F2[7], 8,9,10,11,12,13,14,15);
-	    case 2:
+            case 2:
                this.drawHyperface([0,0,1], F2[4], 0,1,2,3,8,9,10,11);
                this.drawHyperface([0,0,1], F2[5], 4,5,6,7,12,13,14,15);
-	    case 1:
+            case 1:
                this.drawHyperface([0,1,0], F2[2], 0,1,4,5,8,9,12,13);
                this.drawHyperface([0,1,0], F2[3], 2,3,6,7,10,11,14,15);
-	    case 0:
+            case 0:
                this.drawHyperface([1,0,0], F2[0], 0,2,4,6,8,10,12,14);
                this.drawHyperface([1,0,0], F2[1], 1,3,5,7,9,11,13,15);
             }
 
-	this.extendBounds(P);
+        this.extendBounds(P);
       });
    }
 }

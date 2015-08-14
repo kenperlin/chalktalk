@@ -15,14 +15,14 @@ function() {
 
       this.tweak = function(part, x, y, z, sx, sy, sz) {
          if (part == this.I || part == this.J)
-	    return;
+            return;
          var p = nodes[part].p;
          p.x += x;
          p.y += y;
          p.z += z;
-	 if (sx !== undefined) p.x *= sx;
-	 if (sy !== undefined) p.y *= sy;
-	 if (sz !== undefined) p.z *= sz;
+         if (sx !== undefined) p.x *= sx;
+         if (sy !== undefined) p.y *= sy;
+         if (sz !== undefined) p.z *= sz;
       }
 
       this.simulate = function() {
@@ -34,30 +34,30 @@ function() {
          var V3 = this.graph.choice.getValue(3);
 
          var freq = 1.5;
-	 var sine = sin(freq * TAU * time);
+         var sine = sin(freq * TAU * time);
 
-	 function step(t) { return abs(((t) % 1) - .5) - .3; }
+         function step(t) { return abs(((t) % 1) - .5) - .3; }
 
-	 this.l_travel = V3 * step(freq * time);
+         this.l_travel = V3 * step(freq * time);
          this.l_lift   = V3 * max(0,-.3 * sine);
-	 this.r_travel = V3 * step(freq * time + .5);
+         this.r_travel = V3 * step(freq * time + .5);
          this.r_lift   = V3 * max(0, .3 * sine);
 
          nodes[R_ANKLE].p.set(-.4, -1 + this.r_lift, this.r_travel);
          nodes[L_ANKLE].p.set( .4, -1 + this.l_lift, this.l_travel);
 
-	 var dy = nodes[L_ANKLE].p.y - nodes[R_ANKLE].p.y;
+         var dy = nodes[L_ANKLE].p.y - nodes[R_ANKLE].p.y;
 
-	 this.tweak(BELLY  , 0, .03,-.01, 1, 1, .9);
-	 this.tweak(CHEST  , 0, .03, .05, 1, 1, .9);
+         this.tweak(BELLY  , 0, .03,-.01, 1, 1, .9);
+         this.tweak(CHEST  , 0, .03, .05, 1, 1, .9);
          this.tweak(HEAD   , 0, .02, 0, .9);
-	 this.tweak(L_ELBOW,-0.005, 0, -.015);
-	 this.tweak(L_KNEE , 0, 0, .02);
-	 this.tweak(L_WRIST, 0.01, -.015 - .05 * dy, .01);
-	 this.tweak(PELVIS , 0.05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
-	 this.tweak(R_ELBOW, 0.005, 0, -.015);
-	 this.tweak(R_KNEE , 0, 0, .02);
-	 this.tweak(R_WRIST,-.01 - V1 * (.01 + .01 * sine), -.015 + .05 * dy + V1 * .035, .01 + V1 * .01);
+         this.tweak(L_ELBOW,-0.005, 0, -.015);
+         this.tweak(L_KNEE , 0, 0, .02);
+         this.tweak(L_WRIST, 0.01, -.015 - .05 * dy, .01);
+         this.tweak(PELVIS , 0.05 * V2 * sine - .05 * V3 * sine, .03, -.03, 1, 1, .9);
+         this.tweak(R_ELBOW, 0.005, 0, -.015);
+         this.tweak(R_KNEE , 0, 0, .02);
+         this.tweak(R_WRIST,-.01 - V1 * (.01 + .01 * sine), -.015 + .05 * dy + V1 * .035, .01 + V1 * .01);
       }
    
       this.defaultNodeRadius = 0.05;
@@ -75,15 +75,15 @@ function() {
       );
       this.doB(            // Swipe on stickman's background to set a motion state.
          function() {
-	    this.p.copy(this.graph.p);
-	    this.isDragGesture = false;
-	 },
-	 undefined,
+            this.p.copy(this.graph.p);
+            this.isDragGesture = false;
+         },
+         undefined,
          function() {
-	    if (this.p.distanceTo(this.graph.p) > 0.1)
-	       this.graph.choice.setState(pieMenuIndex(this.graph.p.x - this.p.x,
-	                                               this.p.y - this.graph.p.y));
-	 }
+            if (this.p.distanceTo(this.graph.p) > 0.1)
+               this.graph.choice.setState(pieMenuIndex(this.graph.p.x - this.p.x,
+                                                       this.p.y - this.graph.p.y));
+         }
       );
    }
    MyResponder.prototype = new GraphResponder;
@@ -190,11 +190,11 @@ function() {
       this.duringSketch(function() {
          var c, i, j;
          for (i = 0 ; i < toDraw.length ; i++) {
-	    c = [];
-	    for (j = 0 ; j < toDraw[i].length ; j++)
-	       c.push(nodes[toDraw[i][j]].p);
+            c = [];
+            for (j = 0 ; j < toDraw[i].length ; j++)
+               c.push(nodes[toDraw[i][j]].p);
             mCurve(c);
-	 }
+         }
 /*
             mLine(nodes[toDraw[i][0]].p,
                   nodes[toDraw[i][1]].p);
@@ -218,8 +218,8 @@ function() {
             for (var c = -r ; c <= r ; c += r + r)
                this.meshBounds.push([p.x + a, p.y + b, p.z + c]);
          }
-	 if (this.meshBounds.length == 0)
-	    return;
+         if (this.meshBounds.length == 0)
+            return;
 
          this.extendBounds(this.meshBounds);
 
@@ -228,8 +228,8 @@ function() {
 
          if (this == sk() && isCodeWidget && ! isCodeScript()) {
             switch (this.code[codeSelector.selectedIndex][0]) {
-	    case 'lift'  : this.setOutPortValue(R.r_lift  ); break;
-	    case 'travel': this.setOutPortValue(R.r_travel); break;
+            case 'lift'  : this.setOutPortValue(R.r_lift  ); break;
+            case 'travel': this.setOutPortValue(R.r_travel); break;
             }
          }
       });

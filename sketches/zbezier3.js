@@ -5,7 +5,7 @@ function() {
        return mix( mix( mix( a, b, t), 
                         mix( b, c, t),  t), 
                    mix( mix( b, c, t), 
-		        mix( c, d, t),  t),  t);
+                        mix( c, d, t),  t),  t);
    }
 
    this.P = [newVec3(-1 , .5, 0),
@@ -22,10 +22,10 @@ function() {
       var D = 1000;
       for (var n = 0 ; n < this.P.length ; n++) {
          var d = this.P[n].distanceTo(pt);
-	 if (d < .1) {
-	    this.N = n;
-	    D = d;
-	 }
+         if (d < .1) {
+            this.N = n;
+            D = d;
+         }
       }
    }
    this.onDrag = function(pt) {
@@ -50,14 +50,14 @@ function() {
       lineWidth(2);
       this.afterSketch(function() {
          var C = [];
-	 var eps = 0.01;
-	 var ax = this.P[0].x, bx = this.P[1].x, cx = this.P[2].x, dx = this.P[3].x;
-	 var ay = this.P[0].y, by = this.P[1].y, cy = this.P[2].y, dy = this.P[3].y;
+         var eps = 0.01;
+         var ax = this.P[0].x, bx = this.P[1].x, cx = this.P[2].x, dx = this.P[3].x;
+         var ay = this.P[0].y, by = this.P[1].y, cy = this.P[2].y, dy = this.P[3].y;
 
          color('red');
          for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
-	    C.push([ _bezier3(ax,bx,cx,dx, t), _bezier3(ay,by,cy,dy, t) ]);
-	 mCurve(C);
+            C.push([ _bezier3(ax,bx,cx,dx, t), _bezier3(ay,by,cy,dy, t) ]);
+         mCurve(C);
 
          color(defaultPenColor);
          textHeight(this.mScale(.1));
@@ -66,37 +66,37 @@ function() {
          mText('C', [cx,cy], 2, .5);
          mText('D', [dx,dy], 2, .5);
 
-	 if (this.N == -1 || this.mode == 3) {
-	    var T = this.T;
+         if (this.N == -1 || this.mode == 3) {
+            var T = this.T;
 
-	    var A = [mix(ax,bx,T), mix(ay,by,T)];
-	    var B = [mix(bx,cx,T), mix(by,cy,T)];
-	    var C = [mix(cx,dx,T), mix(cy,dy,T)];
+            var A = [mix(ax,bx,T), mix(ay,by,T)];
+            var B = [mix(bx,cx,T), mix(by,cy,T)];
+            var C = [mix(cx,dx,T), mix(cy,dy,T)];
 
-	    lineWidth(4);
+            lineWidth(4);
 
-	    color(backgroundColor == 'black' ? 'cyan' : 'blue');
-	    mCurve([A, B, C]);
+            color(backgroundColor == 'black' ? 'cyan' : 'blue');
+            mCurve([A, B, C]);
             mDot(A, .15);
             mDot(B, .15);
             mDot(C, .15);
 
             if (this.mode == 0)
-	       return;
+               return;
 
-	    color(backgroundColor == 'black' ? 'yellow' : 'violet');
-	    var D = mix(A,B,T);
-	    var E = mix(B,C,T);
-	    mLine(D, E);
+            color(backgroundColor == 'black' ? 'yellow' : 'violet');
+            var D = mix(A,B,T);
+            var E = mix(B,C,T);
+            mLine(D, E);
             mDot(D, .15);
             mDot(E, .15);
 
             if (this.mode == 1)
-	       return;
+               return;
 
-	    color('red');
-	    mDot(mix(D, E, T), .15);
-	 }
+            color('red');
+            mDot(mix(D, E, T), .15);
+         }
 
          color(defaultPenColor);
          for (var n = 0 ; n < this.P.length ; n++)

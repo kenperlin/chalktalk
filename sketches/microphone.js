@@ -16,18 +16,18 @@ function() {
       if ( this.isMakingGlyph === undefined &&
            this.isMicrophone  === undefined ) {
          this.isMicrophone = true;
-	 startMicrophone(this.getData);
+         startMicrophone(this.getData);
       }
       this.afterSketch(function() {
-	 lineWidth(.5);
-	 mLine([-.5,.25],[.5,.25]);
+         lineWidth(.5);
+         mLine([-.5,.25],[.5,.25]);
          if (this.tSignal !== undefined) {
-	    lineWidth(this.mScale(.005));
+            lineWidth(this.mScale(.005));
             var n = this.tSignal.length;
             for (var i = n - 256 ; i < n ; i++)
-	       if (i >= 0) {
-	          var x = .5 - (n - i) / 256;
-	          mLine([x,0.25], [x, 0.25 + 2 * this.tSignal[i]]);
+               if (i >= 0) {
+                  var x = .5 - (n - i) / 256;
+                  mLine([x,0.25], [x, 0.25 + 2 * this.tSignal[i]]);
                }
          }
       });

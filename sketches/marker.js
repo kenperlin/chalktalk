@@ -8,8 +8,8 @@ function() {
       });
       this.afterSketch(function() {
          mFillCurve(makeOval(-.5,-.5,1,1,20,PI/2,PI/2-TAU));
-	 for (var i = 0 ; i < 8 ; i++) {
-	    var theta = TAU * i / 8;
+         for (var i = 0 ; i < 8 ; i++) {
+            var theta = TAU * i / 8;
             mArrow([0,0],[cos(theta),sin(theta)]);
          }
       });

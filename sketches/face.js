@@ -26,13 +26,13 @@ function() {
       this.afterSketch(function() {
 
          if (! this.isAnimated)
-	    this.startTime = undefined;
+            this.startTime = undefined;
 
          if (this.isAnimated) {
             if (this.startTime === undefined)
-	       this.startTime = time;
+               this.startTime = time;
 
-	    var t = time - this.startTime;
+            var t = time - this.startTime;
             a = _noise(t * 3  +  10.1);
             d = _noise(t      +  20.2);
             e = _noise(t      +  30.3);
@@ -47,20 +47,20 @@ function() {
             z = _noise(t      + 120.1);
          }
 
-	 else if (this.isInValueAt(0)) {
-	    a = def(this.inValues[ 0], a);
-	    d = def(this.inValues[ 1], d);
-	    e = def(this.inValues[ 2], e);
-	    h = def(this.inValues[ 3], h);
-	    i = def(this.inValues[ 4], i);
-	    o = def(this.inValues[ 5], o);
-	    s = def(this.inValues[ 6], s);
-	    u = def(this.inValues[ 7], u);
-	    v = def(this.inValues[ 8], v);
-	    x = def(this.inValues[ 9], x);
-	    y = def(this.inValues[10], y);
-	    z = def(this.inValues[11], z);
-	 }
+         else if (this.isInValueAt(0)) {
+            a = def(this.inValues[ 0], a);
+            d = def(this.inValues[ 1], d);
+            e = def(this.inValues[ 2], e);
+            h = def(this.inValues[ 3], h);
+            i = def(this.inValues[ 4], i);
+            o = def(this.inValues[ 5], o);
+            s = def(this.inValues[ 6], s);
+            u = def(this.inValues[ 7], u);
+            v = def(this.inValues[ 8], v);
+            x = def(this.inValues[ 9], x);
+            y = def(this.inValues[10], y);
+            z = def(this.inValues[11], z);
+         }
       });
       var A = max(0, (.5 + .5*a) * .15 - .05);       // Ah
       var D = .07 * d;                               // Dominant
@@ -85,16 +85,16 @@ function() {
 
       if (this.glyphTransition == 1)
          this.afterSketch(function() {
-	    for (var sign = -1 ; sign <= 1 ; sign += 2) {
-	       m.save();
-	       m.translate(sign * .35,.22,.6);
+            for (var sign = -1 ; sign <= 1 ; sign += 2) {
+               m.save();
+               m.translate(sign * .35,.22,.6);
                m.rotateY(V);
                m.rotateX(U-2*I);
                color('rgb(116,116,116)');
-	       mDot([0,0,.2],.4);
+               mDot([0,0,.2],.4);
                color('black');
-	       mDot([0,0,.2],.23);
-	       m.restore();
+               mDot([0,0,.2],.23);
+               m.restore();
             }
          });
 
@@ -102,34 +102,34 @@ function() {
 
       for (var sign = -1 ; sign <= 1 ; sign += 2) {
          var _a = p(sign * .57, .22, .9),
-	     _b = p(sign * .4, .22-E+I, .95),
-	     _c = p(sign * .23, .22, .9);
+             _b = p(sign * .4, .22-E+I, .95),
+             _c = p(sign * .23, .22, .9);
          var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
          this.afterSketch(function() {
-	    color(backgroundColor);
-	    var n = C.length - 1;
-	    mFillCurve([ [C[n][0]+.23,C[n][1]   ,C[n][2]],
-	                 [C[n][0]+.23,C[n][1]-.3,C[n][2]],
-	                 [C[0][0]-.23,C[0][1]-.3,C[0][2]],
-	                 [C[0][0]-.23,C[0][1]   ,C[0][2]],
-		       ].concat(C));
-	    color(palette.color[this.colorId]);
+            color(backgroundColor);
+            var n = C.length - 1;
+            mFillCurve([ [C[n][0]+.23,C[n][1]   ,C[n][2]],
+                         [C[n][0]+.23,C[n][1]-.3,C[n][2]],
+                         [C[0][0]-.23,C[0][1]-.3,C[0][2]],
+                         [C[0][0]-.23,C[0][1]   ,C[0][2]],
+                       ].concat(C));
+            color(palette.color[this.colorId]);
          });
          mCurve(C);
 
          this.afterSketch(function() {
             var _a = p(sign * .57, .22, .9),
-	        _b = p(sign * .4, .22+E+I, .95),
-		_c = p(sign * .23, .22, .9);
+                _b = p(sign * .4, .22+E+I, .95),
+                _c = p(sign * .23, .22, .9);
             var C = makeSpline(sign == -1 ? [_a,_b,_c] : [_c,_b,_a]);
-	    color(backgroundColor);
-	    var n = C.length - 1;
-	    mFillCurve([ [C[n][0]+.23,C[n][1]   ,C[n][2]],
-	                 [C[n][0]+.23,C[n][1]+.3,C[n][2]],
-	                 [C[0][0]-.23,C[0][1]+.3,C[0][2]],
-	                 [C[0][0]-.23,C[0][1]   ,C[0][2]],
-		       ].concat(C));
-	    color(palette.color[this.colorId]);
+            color(backgroundColor);
+            var n = C.length - 1;
+            mFillCurve([ [C[n][0]+.23,C[n][1]   ,C[n][2]],
+                         [C[n][0]+.23,C[n][1]+.3,C[n][2]],
+                         [C[0][0]-.23,C[0][1]+.3,C[0][2]],
+                         [C[0][0]-.23,C[0][1]   ,C[0][2]],
+                       ].concat(C));
+            color(palette.color[this.colorId]);
             mCurve(C);
          });
       }

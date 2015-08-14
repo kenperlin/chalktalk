@@ -10,11 +10,11 @@ function() {
 
       this.afterSketch(function() {
          for (var sign = -1 ; sign <= 1 ; sign += 2) {
-	    m.save();
-	    m.translate(sign * 0.62, 0.2, 0);
-	    m.rotateY(PI / 2);
-	    mCurve([[0,0]].concat(arc(1,-.2,.2,PI/2,-PI/3)));
-	    m.restore();
+            m.save();
+            m.translate(sign * 0.62, 0.2, 0);
+            m.rotateY(PI / 2);
+            mCurve([[0,0]].concat(arc(1,-.2,.2,PI/2,-PI/3)));
+            m.restore();
          }
       });
    }

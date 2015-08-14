@@ -133,7 +133,7 @@ function Diagram() {
          drawCurve([ [0,0], [x2,y2] ]);
 
          this.afterSketch(function() {
-	    textHeight(this.mScale(10));
+            textHeight(this.mScale(10));
 
             arrow(0,0, x2,y2);
             drawOval(x1-w/100,y1-w/100,w/50,w/50);
