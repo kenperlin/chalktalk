@@ -32,10 +32,9 @@ function() {
    }
 
    this.render = function(elapsed) {
-
-      var hubWidth   = this.isGlyph() ? 1 :  this.B[0].width;
-      var rodHeight  = this.isGlyph() ? 4 :  this.B[2].y - this.B[1].ylo;
-      var diskRadius = this.isGlyph() ? 1 : (this.B[2].width + this.B[2].height) / 4;
+      var hubWidth  = variable(1, S(0).width);
+      var rodHeight = variable(4, S(2).y - S(1).ylo);
+      var bobRadius = variable(1, (S(2).width + S(2).height) / 4);
 
       this.rodHeight = rodHeight * this.stretch;
 
@@ -58,8 +57,8 @@ function() {
       m.rotateZ(angle);
       m.translate(0, -this.rodHeight, 0);
 
-      mCurve([[0, this.rodHeight], [0,diskRadius]]);
-      mDrawOval([-diskRadius, -diskRadius], [diskRadius, diskRadius], N, PI/2, PI/2-TAU);
+      mCurve([[0, this.rodHeight], [0,bobRadius]]);
+      mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
 
       this.setOutPortValue(angle);
    }

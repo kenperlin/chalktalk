@@ -8,10 +8,8 @@ function() {
    this.flip = 1;
 
    this.computeStatistics = function() {
-      var c = this.sketchTrace[1-this.selection];
-      var y0 = c[0][1];
-      var y1 = c[c.length - 1][1];
-      this.flip = y0 > y1 ? 1 : -1;
+      var c = this.sketchTrace[1 - this.selection];
+      this.flip = sign(c[0][1] - c[c.length - 1][1]);
    }
 
    this.lo = 0;
