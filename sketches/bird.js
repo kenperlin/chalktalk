@@ -26,7 +26,7 @@ function() {
       var idle = this.choice.getValue(1);
       var walk = this.choice.getValue(2);
 
-      function walkX(t) { return 2.2 * t; }
+      function walkX(t) { return 2.6 * t * uLeg; }
 
       // IF AUTO-SKETCHED, KEEP SKETCHY STYLE EVEN AFTER FINISHED DRAWING.
 
@@ -73,12 +73,20 @@ function() {
 
       // BODY PROPORTIONS.
 
-      var tall = sCurve(this.tall);
-      var footY = -1.2;
-      var spineBase = footY + lerp(tall, 1.0, 1.5);
-      var spineTop = spineBase + lerp(tall, 0.8, 1.3);
-      var uLeg  =  (spineBase - footY) / lerp(tall, 1.2, 1.5);
-      var lLeg  =  0.9 * uLeg;
+      var tall      = sCurve(this.tall);
+      var footY     = -1.2;
+      var spineBase = footY + lerp(tall, 1.0, 1.5) * stretch(S(2).height / 0.2);
+      var spineTop  = spineBase + lerp(tall, 0.8, 1.3) * stretch(S(1).height / 0.15);
+      var uLeg      = (spineBase - footY) / lerp(tall, 1.2, 1.5);
+      var lLeg      = 0.9 * uLeg;
+
+      this.afterSketch(function() {
+         if (! this.isPrinted) {
+	    for (var i = 0 ; i < this._S.length ; i++)
+	       console.log(this._S[i].toString());
+	    this.isPrinted = true;
+	 }
+      });
 
       // PARAMETERS THAT CONTROL BODY LANGUAGE.
 
@@ -108,6 +116,7 @@ function() {
                                          max(0, sketchPage.x - this.cx())));
          m.rotateZ(rotz);
          m.rotateY(lookSide);
+	 m.scale(stretch(S(0).width / 0.15), stretch(S(0).height / 0.1), 1);
          mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
       m.restore();
 

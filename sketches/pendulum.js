@@ -24,7 +24,7 @@ function() {
          this.force = 20 * dx / height();
          break;
       case 'height':
-         this.stretch += 4 * dy / height();
+         this.stretch *= 1 + dy / height() / this.rodHeight;
          break;
       }
       this.xx = x;
@@ -32,9 +32,9 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var hubWidth  = variable(1, S(0).width);
-      var rodHeight = variable(4, S(2).y - S(1).ylo);
-      var bobRadius = variable(1, (S(2).width + S(2).height) / 4);
+      var hubWidth  = stretch(S(0).width);
+      var rodHeight = stretch((S(2).y - S(1).ylo) / 4) * 4;
+      var bobRadius = stretch((S(2).width + S(2).height) / 4);
 
       this.rodHeight = rodHeight * this.stretch;
 

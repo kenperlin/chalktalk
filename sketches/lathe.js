@@ -5,12 +5,13 @@ function() {
 
       // GET STATISTICS ON POSITION AND SIZE OF CENTRAL AXIS (1ST STROKE).
 
-      var b = this.B[0];
-      var axisX = this.size * (b.xlo + b.xhi) / 2;
-      var axisY = this.size * (b.ylo + b.yhi) / 2;
-      var axisR = this.size * (b.yhi - b.ylo) / 2;
+      var axisX = this.size * S(0).x;
+      var axisY = this.size * S(0).y;
+      var axisR = this.size * S(0).height / 2;
 
       // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
+
+      console.log("computing this.profile");
 
       this.profile = [];
       var stroke = this.sketchTrace[3];

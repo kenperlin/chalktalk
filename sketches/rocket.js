@@ -14,11 +14,11 @@ function() {
       m.rotateZ(-0.02 * this.altitude);                  // ANIMATE TRAJECTORY
       m.translate(0, this.altitude, 0);
 
-      mCurve(makeSpline([[-.25,-1],[-.4,0],[0,1]]));     // DRAW FUSILAGE
-      mCurve(makeSpline([[0,1],[ .4,0],[ .25,-1]]));
+      mCurve(makeSpline([[-.25,-1],[-.35,.3],[-.24,.7],[0,1]])); // FUSILAGE
+      mCurve(makeSpline([[0,1],[.24,.7],[ .35,.3],[ .25,-1]]));
 
-      mCurve([[-.4,0],[-.8,-.8],[-.35,-.8]]);            // DRAW WINGS
-      mCurve([[ .4,0],[ .8,-.8],[ .35,-.8]]);
+      mCurve([[-.34,-.1],[-.8,-.8],[-.28,-.8]]);                 // WINGS
+      mCurve([[ .34,-.1],[ .8,-.8],[ .28,-.8]]);
 
       this.afterSketch(function(elapsed) {               // THRUSTER FLAMES
          if (this.swipeTime != 0) {
