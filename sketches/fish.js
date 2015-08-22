@@ -32,7 +32,7 @@ function() {
          }
       });
 
-      var h = stretch(2.5 * S(0).height / S(0).width);
+      var h = stretch('round', 2.5 * S(0).height / S(0).width);
 
       mSpline([[-1  ,h* .3  + c  ],
                [-.45,       - c/2],

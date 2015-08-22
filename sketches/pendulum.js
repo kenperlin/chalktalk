@@ -32,9 +32,9 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var hubWidth  = stretch(S(0).width);
-      var rodHeight = stretch((S(2).y - S(1).ylo) / 4) * 4;
-      var bobRadius = stretch((S(2).width + S(2).height) / 4);
+      var hubWidth  = stretch('hub width', S(0).width);
+      var rodHeight = stretch('rod length', (S(2).y - S(1).ylo) / 4) * 4;
+      var bobRadius = stretch('bob size', (S(2).width + S(2).height) / 4);
 
       this.rodHeight = rodHeight * this.stretch;
 

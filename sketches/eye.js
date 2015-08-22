@@ -19,8 +19,10 @@ function() {
       var x    = this.gIV(2) - .5;
       var y    = this.gIV(3) - .5;
 
-      var upper = makeSpline([ [-1,0,-.19], [0, (open + lift) / 2, .02], [1,0,-.19] ]);
-      var lower = makeSpline([ [-1,0,-.19], [0,-(open - lift) / 2, .02], [1,0,-.19] ]);
+      var yUpper =  (open + lift) / 2;
+      var yLower = -(open - lift) / 2;
+      var upper = makeSpline([ [-1,0,-.19], [-.3, yUpper, .01], [.3, yUpper, .01], [1,0,-.19] ]);
+      var lower = makeSpline([ [-1,0,-.19], [-.3, yLower, .01], [.3, yLower, .01], [1,0,-.19] ]);
 
       var ul = .25;
       for ( ; ul > -.25 ; ul -= 0.01)
@@ -59,7 +61,7 @@ function() {
                if (rr > 0) {
                   x *= 1 + .4 * abs(x * y);
                   y *= 1 + .4 * abs(x * y);
-                  b_p.push( [ min(1, irandom(3)), [0.45 * x, .35 * y, .16 * sqrt(rr)] ] );
+                  b_p.push( [ min(1, irandom(3)), [0.45 * x, .4 * y, .16 * sqrt(rr)] ] );
                }
             }
          }
