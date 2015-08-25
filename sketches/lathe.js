@@ -11,8 +11,6 @@ function() {
 
       // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
 
-      console.log("computing this.profile");
-
       this.profile = [];
       var stroke = this.sketchTrace[3];
       for (var i = 0 ; i < stroke.length ; i++)

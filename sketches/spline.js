@@ -148,7 +148,6 @@ function() {
             if (this.isNewPoint) {
                color('blue');
                var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
-               console.log(t);
                mDot(getPointOnCurve(splineCurve, t), 2*r);
             }
          }

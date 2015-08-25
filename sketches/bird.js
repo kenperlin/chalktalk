@@ -79,7 +79,7 @@ function() {
       var spineTop  = spineBase + lerp(tall, 0.8, 1.3) * stretch('body length', S(1).height / 0.15);
       var uLeg      = (spineBase - footY) / lerp(tall, 1.2, 1.5);
       var lLeg      = 0.9 * uLeg;
-
+/*
       this.afterSketch(function() {
          if (! this.isPrinted) {
 	    for (var i = 0 ; i < this._S.length ; i++)
@@ -87,7 +87,7 @@ function() {
 	    this.isPrinted = true;
 	 }
       });
-
+*/
       // PARAMETERS THAT CONTROL BODY LANGUAGE.
 
       var liftFoot = 0;
