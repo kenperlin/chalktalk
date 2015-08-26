@@ -2,7 +2,7 @@ function() {
    this.label = "pendulum";
    this.spring = new Spring();
    this.force = 0;
-   this.stretch = 1;
+   this.adjustHeight = 1;
 
    this.mouseDown = function(x, y) {
       this.xx = x;
@@ -21,10 +21,10 @@ function() {
 
       switch (this.swingMode) {
       case 'swing':
-         this.force = 20 * dx / height();
+         this.force = 10 * dx / height();
          break;
       case 'height':
-         this.stretch *= 1 + dy / height() / this.rodHeight;
+         this.adjustHeight *= 1 + dy / height() / this.rodHeight;
          break;
       }
       this.xx = x;
@@ -36,9 +36,9 @@ function() {
       var rodHeight = stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
       var bobRadius = stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
 
-      this.rodHeight = rodHeight * this.stretch;
+      this.rodHeight = rodHeight * this.adjustHeight;
 
-      this.spring.setMass(this.rodHeight);
+      this.spring.setMass(this.rodHeight * bobRadius);
       this.spring.setForce(this.force);
       this.force *= 0.9;
       this.spring.update(elapsed);
