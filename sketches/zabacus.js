@@ -4,26 +4,38 @@ function() {
    this.digits = [0,0,0];
    this.digitsIndex = 0;
    this.stones = null;
+   this.animateValue = false;
 
-   this.mouseDown = function(x, y) {
-      var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
-      var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
-      this.digitsIndex = xx < -.4 ? 0 : xx < .4 ? 1 : 2;
-      this.xx = xx;
-      this.yy = yy;
+   this.swipe[0] = ['start', function() { this.animateValue = true ; }];
+   this.swipe[2] = ['incr', function() { this.incr(this.digitAtCursor(), 1); }];
+   this.swipe[4] = ['stop' , function() { this.animateValue = false; }];
+   this.swipe[6] = ['incr', function() { this.incr(this.digitAtCursor(), -1); }];
+
+   this.incr = function(n, d) {
+      this.digits[n] += d;
+      if (this.digits[n] < 0) {
+         if (n == this.digits.length - 1)
+            this.digits[n] = 0;
+         else if (n > 0) {
+            this.digits[n] = 9;
+            this.incr(n - 1, -1);
+	 }
+	 else
+            this.digits[n] = 0;
+      }
+      else if (this.digits[n] == 10) {
+         if (n == 0)
+	    this.digits[n] = 9;
+         else {
+            this.digits[n] = 0;
+            this.incr(n - 1, 1);
+         }
+      }
    }
-   this.mouseDrag = function(x, y) {
-      var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
-      var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
-      var index = this.digitsIndex;
-      var value = this.digits[index] - (yy - this.yy) / 20;
-      this.digits[index] = max(0, min(9.99, value));
-   }
-   this.mouseUp = function(x, y) {
-      var xx = (x - this.xlo + x - this.xhi) / (this.xhi - this.xlo);
-      var yy = (y - this.ylo + y - this.yhi) / (this.yhi - this.ylo);
-      if (abs(xx - this.xx) > abs(yy - this.yy))
-         this.animateAbacus = this.animateAbacus === undefined ? true : undefined;
+
+   this.digitAtCursor = function() {
+      return this._cursorPoint.x < -.29 ? 0 :
+             this._cursorPoint.x <  .29 ? 1 : 2;
    }
 
    this.render = function(elapsed) {
@@ -37,7 +49,7 @@ function() {
 
       this.afterSketch(function() {
 
-         if (this.animateAbacus !== undefined)
+         if (this.animateValue)
             this.digits[2] += 16 * elapsed;
 
          for (var index = 2 ; index >= 0 ; index--)
@@ -52,18 +64,6 @@ function() {
                   this.digits[index-1]--;
             }
 
-         if (isCodeWidget && this == codeSketch) {
-            this.oldDigits = this.newDigits;
-            this.newDigits = floor(this.digits[0]) + "" +
-                               floor(this.digits[1]) + "" +
-                               floor(this.digits[2]) ;
-            if (this.newDigits != this.oldDigits) {
-               this.code = [["", this.newDigits]];
-               toggleCodeWidget();
-               toggleCodeWidget();
-            }
-         }
-
          if (this.mesh !== undefined)
             for (var i = 0 ; i < this.stones.children.length ; i++) {
                var n = i % 5;
@@ -75,6 +75,10 @@ function() {
                    n==3 ? d % 5 >= 1 : d >= 5)
                   this.stones.children[i].getMatrix().translate(0, .1, 0);
             }
+
+         this.setOutPortValue(100 * floor(this.digits[0]) +
+	                       10 * floor(this.digits[1]) +
+			            floor(this.digits[2]));
       });
    }
 
@@ -107,11 +111,7 @@ function() {
       }
 
       abacus.setMaterial(this.shaderMaterial());
-/*
-      abacus.setMaterial(new phongMaterial().setAmbient(.2,.1,.05)
-                                            .setDiffuse(.2,.1,.05)
-                                            .setSpecular(.2,.2,.2,20));
-*/
+
       return abacus;
    }
 }
