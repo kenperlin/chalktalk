@@ -1,4 +1,5 @@
 function() {
+   this.labels = 'matrix Bezier Hermite'.split(' ');
    function rounded(x) { return floor(x * 100) / 100; }
    var c = "cos";
    var s = "sin";
@@ -9,7 +10,6 @@ function() {
    this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
    this.mxy = [0,0];
    this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
-   this.label = "matrix";
    this.showText = true;
    this.vals = [
        [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
@@ -33,11 +33,43 @@ function() {
    this.swipe[4] = ['no\nrow'       , function() { this.row = -1; }];
    this.swipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
 
-   this.render = function(elapsed) {
+   function sketchMatrix() {
       mCurve([[1,1],[1,-1],[-1,-1]]);
       lineWidth(1);
       mLine([ .5,1],[ .5,-1]);
       mLine([-1,-.5],[1,-.5]);
+   }
+
+   this.render = function(elapsed) {
+      var type = this.labels[this.selection];
+
+      switch (type) {
+      case 'matrix':
+         sketchMatrix();
+         break;
+      case 'Bezier':
+         this.duringSketch(function() {
+            mLine([-1, 1],[-1,-1]);
+            mCurve( [[-1,1],[-.5,1]].concat(makeOval(-1,0,1,1,16,PI/2,-PI/2))
+                                    .concat([[-.5,0],[-1,0]]) );
+            mCurve( [[-1,0],[-.25,0]].concat(makeOval(-.75,-1,1,1,16,PI/2,-PI/2))
+                                     .concat([[-.25,-1],[-1,-1]]) );
+         });
+         this.afterSketch(function() {
+            sketchMatrix();
+         });
+         break;
+      case 'Hermite':
+         this.duringSketch(function() {
+            mLine([-1, 1],[-1,-1]);
+            mLine([-1, 0],[ 1, 0]);
+            mLine([ 1, 1],[ 1,-1]);
+         });
+         this.afterSketch(function() {
+            sketchMatrix();
+         });
+         break;
+      }
 
       this.afterSketch(function() {
 
@@ -56,41 +88,53 @@ function() {
 
          var out = [];
 
-         if (this.inValues.length == 16) {
-            for (var i = 0 ; i < 16 ; i++)
-               out.push(roundedString(this.inValues[i]));
-         }
-         else {
-            var sub = ["x","y","z"];
-            switch (this.mode) {
-            case 1: sub = ["tx","ty","tz"]; break;
-            case 2:
-            case 3:
-            case 4: sub = ["cos","sin","-sin"]; break;
-            case 5: sub = ["sx","sy","sz"]; break;
-            case 6: sub = ["px","py","pz"]; break;
+         switch (type) {
+
+         case 'Bezier':
+            out = [ -1,3,-3,1 , 3,-6,3,0 , -3,3,0,0 , 1,0,0,0 ];
+            break;
+
+         case 'Hermite':
+            out = [ 2,-3,0,1 , -2,3,0,0 , 1,-2,1,0 , 1,-1,0,0 ];
+            break;
+
+         case 'matrix':
+            if (this.inValues.length == 16) {
+               for (var i = 0 ; i < 16 ; i++)
+                  out.push(roundedString(this.inValues[i]));
             }
-
-            if (this.inValues.length > 0) {
-               var x = rounded(this.getInValue(0, 0));
-               var y = rounded(this.getInValue(1, x));
-               var z = rounded(this.getInValue(2, y));
-
+            else {
+               var sub = ["x","y","z"];
                switch (this.mode) {
-               case 1:
-               case 5:
-               case 6:
-                  sub[0] = x;
-                  sub[1] = y;
-                  sub[2] = z;
-                  break;
+               case 1: sub = ["tx","ty","tz"]; break;
                case 2:
                case 3:
-               case 4:
-                  sub[0] = rounded(cos(x));
-                  sub[1] = rounded(sin(y));
-                  sub[2] = -sub[1];
-                  break;
+               case 4: sub = ["cos","sin","-sin"]; break;
+               case 5: sub = ["sx","sy","sz"]; break;
+               case 6: sub = ["px","py","pz"]; break;
+               }
+
+               if (this.inValues.length > 0) {
+                  var x = rounded(this.getInValue(0, 0));
+                  var y = rounded(this.getInValue(1, x));
+                  var z = rounded(this.getInValue(2, y));
+
+                  switch (this.mode) {
+                  case 1:
+                  case 5:
+                  case 6:
+                     sub[0] = x;
+                     sub[1] = y;
+                     sub[2] = z;
+                     break;
+                  case 2:
+                  case 3:
+                  case 4:
+                     sub[0] = rounded(cos(x));
+                     sub[1] = rounded(sin(y));
+                     sub[2] = -sub[1];
+                     break;
+                  }
                }
             }
 
@@ -104,6 +148,8 @@ function() {
                if (val == "C") val = sub[2];
                out.push(val);
             }
+
+            break;
          }
 
          if (this.showText)
@@ -133,7 +179,8 @@ function() {
             this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
 
-         this.setOutPortValue(this.inValues.length > 0 ? this.matrixValues : this.identityMatrix);
+         this.setOutPortValue(type != 'matrix' || this.inValues.length > 0 ? this.matrixValues
+	                                                                   : this.identityMatrix);
       });
    }
 
