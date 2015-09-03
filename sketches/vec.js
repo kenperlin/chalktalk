@@ -87,6 +87,8 @@ function() {
             mText(roundedString(val, this.precision), p, .5, .5);
             outValue.push(val);
          }
+	 if (isDef(this.inValue[0]))
+	    outValue = mult(this.inValue[0], outValue);
          this.outValue[0] = outValue;
       });
    }

@@ -40,6 +40,10 @@ function() {
       mLine([-1,-.5],[1,-.5]);
    }
 
+   function isMatrix(arg) {
+      return isDef(arg) && arg instanceof Array && arg.length == 16;
+   }
+
    this.render = function(elapsed) {
       var type = this.labels[this.selection];
 
@@ -99,7 +103,7 @@ function() {
             break;
 
          case 'matrix':
-            if (this.inValues.length == 16) {
+            if (isMatrix(this.inValue[0])) {
                for (var i = 0 ; i < 16 ; i++)
                   out.push(roundedString(this.inValues[i]));
             }
@@ -114,10 +118,18 @@ function() {
                case 6: sub = ["px","py","pz"]; break;
                }
 
-               if (this.inValues.length > 0) {
-                  var x = rounded(this.getInValue(0, 0));
-                  var y = rounded(this.getInValue(1, x));
-                  var z = rounded(this.getInValue(2, y));
+               if (isDef(this.inValue[0])) {
+                  var x = 0, y = 0, z = 0;
+		  if (this.inValue[0] instanceof Array) {
+                     x = rounded(this.inValue[0][0], 0);
+                     y = rounded(this.inValue[0][1], x);
+                     z = rounded(this.inValue[0][2], y);
+                  }
+		  else {
+		     var value = parseFloat(this.inValue[0]);
+                     if (isNumeric(value))
+                        x = y = z = rounded(value, 0);
+                  }
 
                   switch (this.mode) {
                   case 1:
@@ -179,8 +191,13 @@ function() {
             this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
 
-         this.setOutPortValue(type != 'matrix' || this.inValues.length > 0 ? this.matrixValues
-	                                                                   : this.identityMatrix);
+         var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+
+	 if (isDef(this.inValue[1])) {
+	    outValue = mult(this.inValue[1], outValue);
+	 }
+
+         this.setOutPortValue(outValue);
       });
    }
 
