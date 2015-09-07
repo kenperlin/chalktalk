@@ -6,7 +6,7 @@ function() {
    this.drawing.add(new DRAWING.Curve([[-1,0],[1,0]]));
    this.drawing.add(new DRAWING.Curve([[0,-1],[0,1]]));
 
-   this.onCmdClick = function() { this.mode++; }
+   this.onCmdClick = function() { this.mode = (this.mode + 1) % 2; }
 
    this.point = newVec3();
    this.pos = newVec3();
@@ -46,36 +46,43 @@ function() {
          if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
-         if (this.inValues.length >= 3) {
-            var V = this.inValues, x = V[0], y = V[1], z = V[2];
-            lineWidth(0.5);
-            mLine([x,0,0],[x,y,0]);
-            mLine([0,y,0],[x,y,0]);
-            mLine([x,0,0],[x,0,z]);
-            mLine([0,0,z],[x,0,z]);
-            mLine([0,y,0],[0,y,z]);
-            mLine([0,0,z],[0,y,z]);
-            mLine([0,y,z], V);
-            mLine([x,0,z], V);
-            mLine([x,y,0], V);
-            mDot(V, 0.2);
+         if (isDef(this.inValue[0])) {
+	    var inValue = this.inValue[0];
+	    switch (arrayDepth(inValue)) {
+	    case 1:
+               var V = inValue, x = V[0], y = V[1], z = V[2];
+               lineWidth(0.5);
+               mLine([x,0,0],[x,y,0]);
+               mLine([0,y,0],[x,y,0]);
+               mLine([x,0,0],[x,0,z]);
+               mLine([0,0,z],[x,0,z]);
+               mLine([0,y,0],[0,y,z]);
+               mLine([0,0,z],[0,y,z]);
+               mLine([0,y,z], V);
+               mLine([x,0,z], V);
+               mLine([x,y,0], V);
+               mDot(V, 0.2);
+	       break;
+	    case 2:
+	       for (var i = 0 ; i < inValue.length ; i++)
+                  mDot(inValue[i], 0.2);
+               var edges = inValue.edges;
+               if (edges)
+	          for (var i = 0 ; i < edges.length ; i++)
+                     mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
+	       break;
+            }
          }
 
-         switch (this.mode) {
-         case 4:
-         case 3:
-         case 2:
-         case 1:
+         if (this.mode > 0) {
             m.save();
+
                color(otherColor);
                lineWidth(this.mode == 1 ? 2 : 1);
                m.translate(this.pos.x,this.pos.y,this.pos.z);
                m.rotateX(this.rot.x);
                m.rotateY(this.rot.y);
                m.rotateZ(this.rot.z);
-               mArrow([0,0,0], [1,0,0]);
-               mArrow([0,0,0], [0,1,0]);
-               mArrow([0,0,0], [0,0,1]);
                mDot([0,0,0],.25);
                color(backgroundColor);
                mDot([0,0,0],.23);
@@ -84,30 +91,15 @@ function() {
                mText('y', [0,1.1,0],.5,.5);
                mText('z', [0,0,1.1],.5,.5);
                mText('t', [0,0,0]  ,.5,.5);
-            m.restore();
-         }
 
-         switch (this.mode) {
-         case 4:
-         case 3:
-         case 2:
-            m.save();
                lineWidth(4);
-               m.translate(this.pos.x,this.pos.y,this.pos.z);
                color('green');
-               if (this.mode < 4)
-                  mArrow([0,0,0],[0,1,0]);
-               m.rotateX(this.rot.x);
-               m.rotateY(this.rot.y);
-               m.rotateZ(this.rot.z);
-               if (this.mode == 4)
-                  mArrow([0,0,0],[0,1,0]);
+               mArrow([0,0,0],[0,1,0]);
                color('blue');
-               mArrow([0,0,0],[0,0,-1]);
-               if (this.mode >= 3) {
-                  color('red');
-                  mArrow([0,0,0],[1,0,0]);
-               }
+               mArrow([0,0,0],[0,0,1]);
+               color('red');
+               mArrow([0,0,0],[1,0,0]);
+
             m.restore();
          }
       });

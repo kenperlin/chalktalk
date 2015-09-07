@@ -40,10 +40,6 @@ function() {
       mLine([-1,-.5],[1,-.5]);
    }
 
-   function isMatrix(arg) {
-      return isDef(arg) && arg instanceof Array && arg.length == 16;
-   }
-
    this.render = function(elapsed) {
       var type = this.labels[this.selection];
 
@@ -103,7 +99,7 @@ function() {
             break;
 
          case 'matrix':
-            if (isMatrix(this.inValue[0])) {
+            if (isMatrixArray(this.inValue[0])) {
                for (var i = 0 ; i < 16 ; i++)
                   out.push(roundedString(this.inValues[i]));
             }
@@ -193,9 +189,8 @@ function() {
 
          var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
 
-	 if (isDef(this.inValue[1])) {
+	 if (isDef(this.inValue[1]))
 	    outValue = mult(this.inValue[1], outValue);
-	 }
 
          this.setOutPortValue(outValue);
       });

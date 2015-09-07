@@ -92,5 +92,13 @@ function() {
          mFillCurve(this.P);
          break;
       }
+
+      if (this.P.edges === undefined || this.P.edges.length != this.P.length) {
+         this.P.edges = [];
+         for (var i = 0 ; i < this.P.length ; i++)
+	    this.P.edges.push([i, (i + 1) % this.P.length]);
+      }
+
+      this.setOutPortValue(this.P);
    }
 }
