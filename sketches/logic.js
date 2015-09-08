@@ -86,11 +86,14 @@ function() {
          color(scrimColor(0.5));
          var x = ([-0.23,-0.05,-0.04,-0.01,-0.22,-0.04,-0.01, 0.02])[s];
          mText(allLabels[si], [x, .03], .5, .5);
-
-         this.setOutPortValue(this.evalCode(this.codes[si],
-                              s==0 ? this.getDelayedValue()
-                                   : this.getInValue(0,0), this.getInValue(1,0)));
       });
+   }
+
+   this.output = function() {
+      var s  = this.selection;
+      return this.evalCode(this.codes[s + 4 * this.invert],
+                           s==0 ? this.getDelayedValue()
+                                : this.getInValue(0, 0), this.getInValue(1, 0));
    }
 }
 

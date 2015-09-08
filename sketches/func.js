@@ -55,31 +55,27 @@ function() {
       this.labels.push(this.code[i][0]);
 
    this.render = function(elapsed) {
-      this.elapsed = elapsed;
-      var sc = this.size / 400;
-
-      var s = this.selection;
-      if (isDef(this.selectedIndex))
-         this.selection = this.selectedIndex;
-      else
-         this.selectedIndex = this.selection;
-
-      m.scale(sc);
-
-      var x = this.getInValue(0, time);
-      var y = this.getInValue(1, 0);
-      var result = null;
-      try {
-         eval("result = (" + this.code[s][1] + ")");
-      } catch (e) { console.log(e); }
-      if (result != null)
-         this.setOutPortValue(result);
-
+      m.scale(this.size / 400);
       _g.lineWidth /= 3;
       mLine([ 0,1],[0,-1]);
       mLine([-1,0],[1, 0]);
       _g.lineWidth *= 3;
+      mCurve(curves[this.selection]);
 
-      mCurve(curves[s]);
+      if (isDef(this.selectedIndex))
+         this.selection = this.selectedIndex;
+      else
+         this.selectedIndex = this.selection;
+   }
+
+   this.output = function() {
+      var x = this.getInValue(0, time);
+      var y = this.getInValue(1, 0);
+      var result = null;
+      try {
+         eval("result = (" + this.code[this.selection][1] + ")");
+      } catch (e) { console.log(e); }
+      return result;
    }
 }
+

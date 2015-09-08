@@ -186,15 +186,17 @@ function() {
             var value = parseFloat(out[i]);
             this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
-
-         var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
-
-	 if (isDef(this.inValue[1]))
-	    outValue = mult(this.inValue[1], outValue);
-
-         this.setOutPortValue(outValue);
       });
+   }
+
+   this.output = function() {
+      var type = this.labels[this.selection];
+      var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+      if (isDef(this.inValue[1]))
+         outValue = mult(this.inValue[1], outValue);
+      return outValue;
    }
 
    this.matrixValues = newArray(16);
 }
+

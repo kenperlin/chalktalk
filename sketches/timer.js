@@ -15,7 +15,6 @@ function() {
          mLine([0,0],[.6 * sin(minutesAngle), .6 * cos(minutesAngle)]);
          this.timerT += def(this.inValues[0], 1) * (time - this.timerTime);
          this.timerTime = time;
-         this.setOutPortValue(this.timerT);
          for (var i = 0 ; i < 12 ; i++) {
             s = sin(i * TAU / 12);
             c = cos(i * TAU / 12);
@@ -30,5 +29,6 @@ function() {
                [0,-.4], .5,.5);
       });
    }
+   this.output = function() { return this.timerT; }
 }
 

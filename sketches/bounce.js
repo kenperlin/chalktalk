@@ -2,6 +2,7 @@ function() {
    this.label = "bounce";
    this.isBouncing = false;
    this.bouncing = 0;
+   this.y = 0;
 
    this.swipe[2] = ['start\nbouncing', function() { this.isBouncing = true ; }];
    this.swipe[6] = ['stop\nbouncing' , function() { this.isBouncing = false; }];
@@ -19,17 +20,22 @@ function() {
       mLine([-1,0],[1,0]);
 
       var s = sin(2 * TAU * time);
-      var y = sqrt(.5 + .5 * s) * bouncing;
+
+      this.y = sqrt(.5 + .5 * s) * bouncing;
+
       var h = 1 + min(0, .4 * s * abs(s)) * bouncing;
-      var oval = makeOval(-.5,y,1,h, 32, -TAU/4, -TAU*5/4);
+      var oval = makeOval(-.5, this.y, 1, h, 32, -TAU/4, -TAU*5/4);
+
       this.afterSketch(function() {
          color(scrimColor(.25));
          mFillCurve(oval);
          color(defaultPenColor);
       });
+
       mCurve(oval);
 
       this.extendBounds([[-1, 0], [1, 2]]);
-      this.setOutPortValue(y);
    }
+
+   this.output = function() { return this.y; }
 }

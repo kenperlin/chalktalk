@@ -195,10 +195,6 @@ function() {
                c.push(nodes[toDraw[i][j]].p);
             mCurve(c);
          }
-/*
-            mLine(nodes[toDraw[i][0]].p,
-                  nodes[toDraw[i][1]].p);
-*/
       });
 
       // AFTER SKETCH IS DONE, DO FANCIER PROCESSING AND RENDERING.
@@ -225,14 +221,18 @@ function() {
 
          for (var l = 0 ; l < this.nLinksToRender ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
-
-         if (this == sk() && isCodeWidget && ! isCodeScript()) {
-            switch (this.code[codeSelector.selectedIndex][0]) {
-            case 'lift'  : this.setOutPortValue(R.r_lift  ); break;
-            case 'travel': this.setOutPortValue(R.r_travel); break;
-            }
-         }
       });
+   }
+
+   this.output = function() {
+      var value = 0;
+      if (this == sk() && isCodeWidget && ! isCodeScript()) {
+         switch (this.code[codeSelector.selectedIndex][0]) {
+         case 'lift'  : value = this.graph.R.r_lift  ; break;
+         case 'travel': value = this.graph.R.r_travel; break;
+         }
+      }
+      return value;
    }
 
    // THREE.js STUFF:

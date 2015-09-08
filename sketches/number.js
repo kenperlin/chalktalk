@@ -38,7 +38,8 @@ function() {
       this.afterSketch(function() {
          if (this.sketchTexts.length == 0)
             this.setSketchText(0, '' + this.selection, [0,0], 1);
-         this.setOutPortValue(this.sketchTexts[0].value);
       });
    }
+
+   this.output = function() { return this.sketchTexts[0].value; }
 }

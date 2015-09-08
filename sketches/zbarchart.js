@@ -126,11 +126,10 @@ function() {
             }
          }
 
-         if (this._opv === undefined || this._opv.length != n)
-            this._opv = newArray(n);
+         if (this.outputValue === undefined || this.outputValue.length != n)
+            this.outputValue = newArray(n);
          for (var i = 0 ; i < n ; i++)
-            this._opv[i] = v[i];
-         this.setOutPortValue(this._opv);
+            this.outputValue[i] = v[i];
 
          if (isDef(this.isChangingN)) {
             textHeight(this.mScale(.7));
@@ -139,4 +138,7 @@ function() {
          }
       });
    }
+
+   this.output = function() { return this.outputValue; }
 }
+

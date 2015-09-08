@@ -1,6 +1,7 @@
 function() {
    this.label = "f1d";
    this.code = [["", "t*t/2 - 1/8"]];
+   this.y = 0;
 
    this.f = function(t) {
       var result = this._f(t);
@@ -27,14 +28,15 @@ function() {
 
       this.afterSketch(function() {
          var t = this.getInValue(0, 0);
-         var y = this._f(t);
-         if (y != null) {
-            this.setOutPortValue(y);
+         this.y = this._f(t);
+         if (this.y != null) {
             color(scrimColor(0.5));
             var tt = max(-1, min(1, t));
-            var yy = max(-1, min(1, y));
+            var yy = max(-1, min(1, this.y));
             mFillCurve([ [0,0], [tt,0], [tt,yy], [0,yy] ]);
          }
       });
    }
+
+   this.output = function() { return this.y; }
 }

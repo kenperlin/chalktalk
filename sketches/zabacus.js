@@ -75,11 +75,13 @@ function() {
                    n==3 ? d % 5 >= 1 : d >= 5)
                   this.stones.children[i].getMatrix().translate(0, .1, 0);
             }
-
-         this.setOutPortValue(100 * floor(this.digits[0]) +
-	                       10 * floor(this.digits[1]) +
-			            floor(this.digits[2]));
       });
+   }
+
+   this.output = function() {
+      return 100 * floor(this.digits[0]) +
+	      10 * floor(this.digits[1]) +
+	           floor(this.digits[2]) ;
    }
 
    this.createMesh = function() {

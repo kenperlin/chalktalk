@@ -42,7 +42,6 @@ function() {
          }
          this.lo = parseFloat(this.sketchTexts[0].value);
          this.hi = parseFloat(this.sketchTexts[1].value);
-         this.setOutPortValue(lerp(this.t, this.lo, this.hi));
       });
 
       var x = this.t - .5;
@@ -75,4 +74,6 @@ function() {
          }
       });
    }
+
+   this.output = function() { return lerp(this.t, this.lo, this.hi); }
 }

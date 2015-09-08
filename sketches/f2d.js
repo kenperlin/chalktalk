@@ -48,12 +48,10 @@ function() {
             mCurve([ [x,y,z0], [x+e,y,z1] ]);
          }
 
-         var x = this.getInValue(0, 0);
-         var y = this.getInValue(1, 0);
-         var z = this._f(x,y);
-         if (z != null) {
-            this.setOutPortValue(z);
-         }
       });
+   }
+   this.output = function() {
+      return this._f(this.getInValue(0, 0),
+                     this.getInValue(1, 0));
    }
 }
