@@ -6,13 +6,25 @@ function() {
    this.label = 'rgb';
    this.rgb = [0.5, 0.5, 0.5];
    this.rgb.type = 'color';
+
    this.onPress = function(p) {
       this.i = max(0, min(2, floor(p.x + 1.5)));
       this.onDrag(p);
    }
-   this.onDrag = function(p) {
-      this.rgb[this.i] = max(0, min(1, (p.y + 1) / 2));
+   this.onCmdPress = function(p) {
+      this.i = -1;
+      this.onDrag(p);
    }
+
+   this.onDrag = function(p) {
+      var value = max(0, min(1, (p.y + 1) / 2));
+      if (this.i < 0)
+         this.rgb[0] = this.rgb[1] = this.rgb[2] = value;
+      else
+         this.rgb[this.i] = value;
+   }
+   this.onCmdDrag = this.onDrag;
+
    this.render = function() {
       this.duringSketch(function() {
          mLine([-1, 0],[ 1, 0]);
