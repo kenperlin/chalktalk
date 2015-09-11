@@ -29,7 +29,7 @@ function() {
       this.duringSketch(function() {
          mLine([-1, 0],[ 1, 0]);
       });
-      lineWidth(norm(m.transform([.05,0,0,0])));
+      mLineWidth(0.05);
       color( 'rgb(' + floor(255 * this.rgb[0]) + ',' +
                       floor(255 * this.rgb[1]) + ',' +
                       floor(255 * this.rgb[2]) + ')' );
@@ -41,7 +41,7 @@ function() {
          if (this.inValue[0] !== undefined)
 	    for (var i = 0 ; i < min(this.inValue[0].length, this.rgb.length) ; i++)
 	       this.rgb[i] = max(0, min(1, this.inValue[0][i]));
-         lineWidth(norm(m.transform([.1,0,0,0])));
+         mLineWidth(0.1);
          for (var i = 0 ; i < 3 ; i++) {
             color(colors[i]);
 	    var x = (i-1)*2/3;

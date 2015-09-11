@@ -1,5 +1,6 @@
 function() {
    this.labels = "triangle diamond pentagon hexagon".split(' ');
+   this.is3D = true;
 
    var jNext = function(j, P) { return (j + 1) % P.length; }
    var jPrev = function(j, P) { return (j - 1 + P.length) % P.length; }
