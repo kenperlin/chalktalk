@@ -21,7 +21,7 @@ function() {
             mLine([.9 * s, .9 * c], [s, c]);
          }
          textHeight(this.mScale(0.3));
-         color(scrimColor(0.4));
+         color(scrimColor(0.5, this.colorId));
          var fraction = floor(10 * seconds) % 10;
          mText(minutes
                + (seconds  < 10 ? ':0' : ':') + floor(seconds)
