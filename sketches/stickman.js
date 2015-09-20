@@ -100,7 +100,7 @@ function() {
       }
    }
    
-   this.graph = new VisibleGraph();
+   this.graph = new VisibleGraph(this);
    this.graph.choice = new Choice();
    this.graph.setResponder(new MyResponder());
 

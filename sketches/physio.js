@@ -7,7 +7,7 @@ function() {
    var mouse = newVec3();
 
    this.mouseMove = function(x, y) {
-      mouse.set(this.unadjustX(x), this.unadjustY(y), 0).applyMatrix4(pixelToPointMatrix);
+      mouse.set(this.unadjustX(x), this.unadjustY(y), 0).applyMatrix4(this.pixelToPointMatrix);
    }
 
    this.render = function() {

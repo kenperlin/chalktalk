@@ -34,7 +34,8 @@ this.fragmentShaders = [
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = vec3(1.,1.,1.);'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -53,7 +54,8 @@ this.fragmentShaders = [
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = shadeSphere(W, V + t * W, sphere);'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -71,8 +73,9 @@ this.fragmentShaders = [
 ,'      vec3 W = normalize(vec3(vPosition.x, vPosition.y, -3.5));'
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
-,'         color = shadeDiffuseSphere(V + t * W, sphere, material, lightDir, lightColor);'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'         color = shadeDiffuseSphere(V + t * W, sphere, material, lightDir, lightColor);   '
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -85,7 +88,7 @@ this.fragmentShaders = [
 ,'      vec3 color = .2 * m.rgb;'
 ,'      float diffuse = max(0., dot(normal, lightDir));'
 ,'      color += lightColor * m.rgb * diffuse;'
-,'      float specular = pow(max(0., dot(lightDir, R)), m.a) * min(1., m.a / 20.);'
+,'      float specular = pow(max(0., dot(lightDir, R)), m.a) * min(1., m.a / 20.);   '
 ,'      color += lightColor * specular;'
 ,'      return color;'
 ,'   }'
@@ -100,7 +103,8 @@ this.fragmentShaders = [
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = shadeSphere(W, V + t * W, sphere, material);'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -142,7 +146,8 @@ this.fragmentShaders = [
 ,'            color = shadeSphere(W, V + t * W, sphere[i], material[i]);'
 ,'            T = t;'
 ,'         }'
-,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -188,7 +193,9 @@ this.fragmentShaders = [
 ,'      material[1] = vec4(.00, .25, .75, 20.);'
 ,'      material[2] = vec4(.80, .00, .10, 20.);'
 ,'      vec3 W = normalize(vec3(vPosition.x, vPosition.y, -3.5));'
-,'      gl_FragColor = vec4(sqrt(rayTrace(vec3(0.,0.,0.), W)), uAlpha);'
+,'      vec3 color = rayTrace(vec3(0.,0.,0.), W);'
+,'      color = pow(color, vec3(.45,.45,.45));'
+,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
 ].join('\n'),
 

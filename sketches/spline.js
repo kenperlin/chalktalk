@@ -25,7 +25,7 @@ function() {
 
       if (this.pix === undefined)
          this.pix = newVec3();
-      pointToPixel(pt, this.pix);
+      this.pointToPixel(pt, this.pix);
       if (unadjust) {
          this.pix.x = this.unadjustX(this.pix.x);
          this.pix.y = this.unadjustY(this.pix.y);
@@ -34,7 +34,7 @@ function() {
       for (var n = 0 ; n < this.P.length ; n++) {
          if (this.Pix[n] === undefined)
             this.Pix[n] = newVec3();
-         pointToPixel(this.P[n], this.Pix[n]);
+         this.pointToPixel(this.P[n], this.Pix[n]);
       }
    }
    this.onMove = function(pt) {
@@ -66,7 +66,7 @@ function() {
             var t = (this.N + 0.5) / (this.P.length - 1);
             var p = getPointOnCurve(this.splineCurve, t);
             this.q.set(p[0], p[1], p[2]);
-            pointToPixel(this.q, this.qix);
+            this.pointToPixel(this.q, this.qix);
             if (this.qix.distanceTo(this.pix) <= 10) {
                this.isNewPoint = true;
                break;

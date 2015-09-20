@@ -28,8 +28,9 @@ function() {
    this.render = function() {
       var otherColor = backgroundColor == 'black' ? 'cyan' : 'rgb(0,128,200)';
       this.afterSketch(function() {
-         var e = pointToPixelMatrix.elements;
+         var e = this.pointToPixelMatrix.elements;
          var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
+         var i, V, x, y, z, inValue, edges;
         
          textHeight(this.mScale(.1));
          mText("x=-1",[-1.2,0,0],.5,.5);
@@ -46,11 +47,11 @@ function() {
          if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
-         if (isDef(this.inValue[0])) {
-	    var inValue = this.inValue[0];
+         if (isDef(this.inValue[0]) && this.inValue[0].length != 16) {
+	    inValue = this.inValue[0];
 	    switch (arrayDepth(inValue)) {
 	    case 1:
-               var V = inValue, x = V[0], y = V[1], z = V[2];
+               V = inValue; x = V[0]; y = V[1]; z = V[2];
                lineWidth(0.5);
                mLine([x,0,0],[x,y,0]);
                mLine([0,y,0],[x,y,0]);
@@ -64,12 +65,15 @@ function() {
                mDot(V, 0.2);
 	       break;
 	    case 2:
-	       for (var i = 0 ; i < inValue.length ; i++)
-                  mDot(inValue[i], 0.2);
-               var edges = inValue.edges;
-               if (edges)
-	          for (var i = 0 ; i < edges.length ; i++)
+	       if (inValue.color)
+	          color(inValue.color);
+	       m.scale(.5,.5,.5);
+               if (edges = inValue.edges)
+	          for (i = 0 ; i < edges.length ; i++)
                      mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
+	       else
+	          for (i = 0 ; i < inValue.length ; i++)
+                     mDot(inValue[i], 0.1);
 	       break;
             }
          }
