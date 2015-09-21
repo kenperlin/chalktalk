@@ -47,7 +47,6 @@ function() {
       var N = 32;
       m.scale(.5 * this.size / 40);
       m.translate(0, 2 - this.rodHeight, 0);
-      this.anchor = m.transform([0, this.rodHeight, 0]);
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
       this.angle = this.spring.getPosition();
