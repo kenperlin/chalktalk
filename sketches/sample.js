@@ -6,6 +6,7 @@ function() {
       mCurve(makeSpline([[.5,-1],[-.25,-.7],[-1,-.5]]));
       mCurve(makeSpline([[-1,-.5],[-.7,.25],[-.5,1]]));
       this.afterSketch(function() {
+         color(defaultPenColor);
          var eps = 0.2;
          lineWidth(0.5);
          for (var x = -1 ; x <= 1 ; x += eps)

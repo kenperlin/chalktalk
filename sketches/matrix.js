@@ -75,7 +75,7 @@ function() {
       this.afterSketch(function() {
 
          if (this.cmdMode == 1) {
-            color(scrimColor(0.3));
+            color(scrimColor(0.3, this.colorId));
             mFillRect([-1,-.5], [.5,1]);
             color(defaultPenColor);
          }
@@ -172,13 +172,13 @@ function() {
             }
 
          if (this.row >= 0) {
-            color(scrimColor(.33));
+            color(scrimColor(.33, this.colorId));
             var y = 1 - 2 * (this.row / 4);
             mFillCurve([ [-1,y], [1,y], [1,y-.5], [-1,y-.5], [-1,y] ]);
          }
 
          if (this.col >= 0) {
-            color(scrimColor(.33));
+            color(scrimColor(.33, this.colorId));
             var x = 2 * (this.col / 4) - 1;
             mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }

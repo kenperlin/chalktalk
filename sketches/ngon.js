@@ -84,7 +84,7 @@ function() {
          break;
       case 1:
          var c = _g.strokeStyle;
-         color(scrimColor(0.25));
+         color(scrimColor(0.25, this.colorId));
          mFillCurve(this.P);
          color(c);
          mClosedCurve(this.P);
