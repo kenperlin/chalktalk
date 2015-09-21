@@ -144,6 +144,7 @@ function() {
 
          var c = [];
          m.save();
+	    m.identity();
             m.translate(hipX,hipY,0);
             c.push(m.transform([0,0,0]));
             c.push(m.transform(Knee));
@@ -155,7 +156,7 @@ function() {
                c.push(m.transform([.3,0,0]));
             m.restore();
          m.restore();
-         drawCurve(c);
+         mCurve(c);
       }
 
       this.afterSketch(function() {
