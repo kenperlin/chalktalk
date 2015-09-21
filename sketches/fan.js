@@ -22,7 +22,7 @@ function() {
             var radius = 1 - .075 * i;
             var ds = i == 0 ? 0 : i == 1 ? 0.14 : 0.22;
             if (smear > 0) ds = -0.5 * ds;
-            color(scrimColor(.25 - i * .05));
+            color(scrimColor(.25 - i * .05, this.colorId));
             mCurve(arc(0, 0, radius,      ds,      smear + ds, 5));
             mCurve(arc(0, 0, radius, PI + ds, PI + smear + ds, 5));
          }

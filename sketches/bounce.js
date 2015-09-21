@@ -13,7 +13,7 @@ function() {
       var bouncing = max(0, min(1, this.getInValue(0, this.bouncing)));
 
       this.afterSketch(function() {
-         color(scrimColor(.25));
+         color(scrimColor(.25, this.colorId));
          mFillCurve([[-1,0],[1,0],[1,-.15],[-1,-.15]]);
          color(defaultPenColor);
       });
@@ -27,7 +27,7 @@ function() {
       var oval = makeOval(-.5, this.y, 1, h, 32, -TAU/4, -TAU*5/4);
 
       this.afterSketch(function() {
-         color(scrimColor(.25));
+         color(scrimColor(.25, this.colorId));
          mFillCurve(oval);
          color(defaultPenColor);
       });

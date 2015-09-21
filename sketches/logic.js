@@ -83,7 +83,7 @@ function() {
 
       this.afterSketch(function() {
          textHeight(this.mScale(0.25));
-         color(scrimColor(0.5));
+         color(scrimColor(0.5, this.colorId));
          var x = ([-0.23,-0.05,-0.04,-0.01,-0.22,-0.04,-0.01, 0.02])[s];
          mText(allLabels[si], [x, .03], .5, .5);
       });
