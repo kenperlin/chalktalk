@@ -4,6 +4,7 @@ function() {
    this.mode = 0;
    this.isNeutral = false;
    this.isAnimated = false;
+   this.state = [0,0,0,0,0,0,0,0,0,0,0,0];
    this.onCmdClick = function() { this.isAnimated = ! this.isAnimated; }
    this.onClick = function() { this.isNeutral = ! this.isNeutral; }
    this.render = function() {
@@ -167,7 +168,10 @@ function() {
                   p( .08 - O/2 + S, -.45 + A*.75 + S),
                   p( .20 - O      , -.45 + H        )]);
 
-         this.setOutPortValue([a,d,e,h,i,o,s,u,v,x,y,z]);
+         this.state = [a,d,e,h,i,o,s,u,v,x,y,z];
       });
    }
+
+   this.output = function() { return this.state; }
 }
+

@@ -50,6 +50,8 @@ function() {
       lineWidth(1);
       color(defaultPenColor);
       mCurve(C);
-      this.setOutPortValue(light);
    }
+
+   this.output = function() { return this.getInValue(0, this.light); }
 }
+

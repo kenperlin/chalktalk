@@ -2,7 +2,6 @@
 function() {
 
    function MoleculeResponder() {
-   
       this.doI(
          function() {
             var node = this.graph.nodes[this.I];
@@ -14,7 +13,6 @@ function() {
             this.graph.nodes[this.I].p.copy(this.graph.p);
          }
       );
-   
       this.simulate = function() {
          var l = this.graph.linkCount + Math.floor((this.graph.links.length - this.graph.linkCount) * random());
          var link = this.graph.links[l];
@@ -43,7 +41,7 @@ function() {
 
    this.createTime = time;
 
-   this.graph = new VisibleGraph();
+   this.graph = new VisibleGraph(this);
    this.graph.setResponder(new MoleculeResponder());
    var sq3 = Math.sqrt(3)/2;
    var hd = 0.7;
@@ -153,7 +151,7 @@ function() {
             var node = nodes[j];
             if (node.pix === undefined)
                node.pix = newVec3();
-            node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
+            node.pix.copy(node.p).applyMatrix4(this.pointToPixelMatrix);
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             if (j == R.J)
                this.drawNode(node.p, node.r);                // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.
@@ -179,8 +177,6 @@ function() {
             this.drawNode(R.clickPoint, 0.05);               // SHOW THAT A SECOND CLICK WOULD CREATE A NEW JOINT.
          for (var l = 0 ; l < this.graph.linkCount ; l++)
             this.renderLink(links[l]);                       // RENDER EACH 3D LINK.
-
-         this.setOpacity(this.fade());
       });
    }
 

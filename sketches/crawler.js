@@ -45,7 +45,7 @@ function() {
 
    this.render = function(elapsed) {
       this.duringSketch(function() {
-         mLine([-1,0], [1,0]);
+         mLine([1,0], [-1,0]);
          mLine([-.5,.5],[-.5,-.5]);
          mLine([  0,.5],[  0,-.5]);
          mLine([ .5,.5],[ .5,-.5]);

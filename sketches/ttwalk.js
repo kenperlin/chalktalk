@@ -113,7 +113,7 @@ function() {
             }
          }
 
-         color(scrimColor(.3));
+         color(scrimColor(.3, this.colorId));
          mLine([-1,-h2w], [ 1,-h2w]);
          mLine([ 1, h2w], [ 1,-h2w]);
 

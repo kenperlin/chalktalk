@@ -13,7 +13,7 @@ function() {
    };
 
    this.createCodeFunction = function() {
-      if (self.soundBuffer) {
+      if (this.soundBuffer) {
          var codeText = 'return ( window.soundfile.tToSample(t) )';
          this.codeFunction = new Function('t', codeText);
       } else {
@@ -29,6 +29,7 @@ function() {
       mCurve([[-.3, .5], [.5, 0], [-.3, -.5]]);
 
       this.input = document.getElementById('soundfileinput');
+
       this.createCodeFunction();
       this.setOutPortValue( self.codeFunction );
 
@@ -91,9 +92,6 @@ function() {
 
                self.createCodeFunction();
                self.setOutPortValue( self.codeFunction );
-
-               console.log('Success loading audio buffer');
-               console.log(self);
             },
             function(error) {
                console.log('Error decoding audio: ' + error.message);

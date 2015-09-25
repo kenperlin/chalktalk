@@ -1,5 +1,6 @@
 function() {
    this.labels = 'matrix Bezier Hermite'.split(' ');
+   this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }
    var c = "cos";
    var s = "sin";
@@ -12,14 +13,14 @@ function() {
    this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
    this.showText = true;
    this.vals = [
-       [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
-       [1  ,0  ,0  ,0,   0  ,1  ,0  ,0,    0  ,0  ,1  ,0,    "A","B","C", 1],
-       [1  ,0  ,0  ,0,   0  ,"A","B",0,    0  ,"C","A",0,    0  ,0  ,0  , 1],
-       ["A",0  ,"C",0,   0  ,1  ,0  ,0,    "B",0  ,"A",0,    0  ,0  ,0  , 1],
-       ["A","B",0  ,0,   "C","A",0  ,0,    0  ,0  ,1  ,0,    0  ,0  ,0  , 1],
-       ["A",0  ,0  ,0,   0  ,"B",0  ,0,    0  ,0  ,"C",0,    0  ,0  ,0  , 1],
-       [1  ,0  ,0  ,"A", 0  ,1  ,0  ,"B",  0  ,0  ,1  ,"C",  0  ,0  ,0  , 1],
-   ];
+       [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
+       [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,   'A','B','C', 1 ],
+       [ 1 , 0 , 0 , 0,   0 ,'A','B', 0,    0 ,'C','A', 0,    0 , 0 , 0 , 1 ],
+       ['A', 0 ,'C', 0,   0 , 1 , 0 , 0,   'B', 0 ,'A', 0,    0 , 0 , 0 , 1 ],
+       ['A','B', 0 , 0,  'C','A', 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
+       ['A', 0 , 0 , 0,   0 ,'B', 0 , 0,    0 , 0 ,'C', 0,    0 , 0 , 0 , 1 ],
+       [ 1 , 0 , 0 ,'A',  0 , 1 , 0 ,'B',   0 , 0 , 1 ,'C',   0 , 0 , 0 , 1 ],
+    ];
    this.mode = 0;
    this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
    this.cmdMode = 0;
@@ -38,10 +39,6 @@ function() {
       lineWidth(1);
       mLine([ .5,1],[ .5,-1]);
       mLine([-1,-.5],[1,-.5]);
-   }
-
-   function isMatrix(arg) {
-      return isDef(arg) && arg instanceof Array && arg.length == 16;
    }
 
    this.render = function(elapsed) {
@@ -78,7 +75,7 @@ function() {
       this.afterSketch(function() {
 
          if (this.cmdMode == 1) {
-            color(scrimColor(0.3));
+            color(scrimColor(0.3, this.colorId));
             mFillRect([-1,-.5], [.5,1]);
             color(defaultPenColor);
          }
@@ -103,7 +100,7 @@ function() {
             break;
 
          case 'matrix':
-            if (isMatrix(this.inValue[0])) {
+            if (isMatrixArray(this.inValue[0])) {
                for (var i = 0 ; i < 16 ; i++)
                   out.push(roundedString(this.inValues[i]));
             }
@@ -175,13 +172,13 @@ function() {
             }
 
          if (this.row >= 0) {
-            color(scrimColor(.33));
+            color(scrimColor(.33, this.colorId));
             var y = 1 - 2 * (this.row / 4);
             mFillCurve([ [-1,y], [1,y], [1,y-.5], [-1,y-.5], [-1,y] ]);
          }
 
          if (this.col >= 0) {
-            color(scrimColor(.33));
+            color(scrimColor(.33, this.colorId));
             var x = 2 * (this.col / 4) - 1;
             mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }
@@ -190,16 +187,17 @@ function() {
             var value = parseFloat(out[i]);
             this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
-
-         var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
-
-	 if (isDef(this.inValue[1])) {
-	    outValue = mult(this.inValue[1], outValue);
-	 }
-
-         this.setOutPortValue(outValue);
       });
+   }
+
+   this.output = function() {
+      var type = this.labels[this.selection];
+      var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+      if (isDef(this.inValue[1]))
+         outValue = mult(outValue, this.inValue[1]);
+      return outValue;
    }
 
    this.matrixValues = newArray(16);
 }
+

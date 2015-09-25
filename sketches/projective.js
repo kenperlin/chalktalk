@@ -12,7 +12,7 @@ function() {
       this.afterSketch(function() {
          _g.save();
          lineWidth(.5);
-         color(scrimColor(.2));
+         color(scrimColor(.2, this.colorId));
          mFillCurve(makeOval(-1.1,-1.1,2.2,2.2));
          _g.restore();
       });

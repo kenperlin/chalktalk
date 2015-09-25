@@ -34,7 +34,7 @@ function Ethane() {
 
    this.createTime = time;
 
-   this.graph = new VisibleGraph();
+   this.graph = new VisibleGraph(this);
    this.graph.setResponder(new EthaneResponder());
    this.graph.clear();
    var sq3 = Math.sqrt(3)/2;
@@ -109,7 +109,7 @@ function Ethane() {
             var node = nodes[j];
             if (node.pix === undefined)
                node.pix = newVec3();
-            node.pix.copy(node.p).applyMatrix4(pointToPixelMatrix);
+            node.pix.copy(node.p).applyMatrix4(this.pointToPixelMatrix);
             this.renderNode(node);                           // RENDER THE 3D NODE OBJECT.
             if (j == R.J)
                this.drawNode(node.p, node.r);                // HIGHLIGHT SECOND JOINT IN A TWO JOINT GESTURE.

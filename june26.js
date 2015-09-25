@@ -213,7 +213,7 @@
             var maxFreq = 1;
             for (var n = 0 ; n < this.freqs.length ; n++)
                maxFreq = max(maxFreq, this.freqs[n]);
-            var stepSize = 0.1 / maxFreq;
+            var stepSize = 0.03 / maxFreq;
 
             var c = [];
             for (var t = -1 ; t < 1 + stepSize ; t += stepSize) {

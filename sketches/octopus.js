@@ -93,7 +93,7 @@ function Octopus() {
    this.label = 'octopus';
    this.is3D = true;
 
-   this.graph = new VisibleGraph();
+   this.graph = new VisibleGraph(this);
    this.graph.setResponder(new OctopusResponder());
 
    var nLimbs = this.graph.nLimbs = 8;

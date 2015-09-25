@@ -15,14 +15,13 @@ function() {
          mLine([0,0],[.6 * sin(minutesAngle), .6 * cos(minutesAngle)]);
          this.timerT += def(this.inValues[0], 1) * (time - this.timerTime);
          this.timerTime = time;
-         this.setOutPortValue(this.timerT);
          for (var i = 0 ; i < 12 ; i++) {
             s = sin(i * TAU / 12);
             c = cos(i * TAU / 12);
             mLine([.9 * s, .9 * c], [s, c]);
          }
          textHeight(this.mScale(0.3));
-         color(scrimColor(0.4));
+         color(scrimColor(0.5, this.colorId));
          var fraction = floor(10 * seconds) % 10;
          mText(minutes
                + (seconds  < 10 ? ':0' : ':') + floor(seconds)
@@ -30,5 +29,6 @@ function() {
                [0,-.4], .5,.5);
       });
    }
+   this.output = function() { return this.timerT; }
 }
 

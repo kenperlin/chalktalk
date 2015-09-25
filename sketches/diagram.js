@@ -1,6 +1,8 @@
 function Diagram() {
    this.labels = "rectangle refract circles".split(' ');
 
+   this.theta = 0;
+
    this.raySegment = function(vx, vy, wx, wy, p0, p1) {
       var a = p0[1] - p1[1];
       var b = p1[0] - p0[0];
@@ -125,7 +127,7 @@ function Diagram() {
             r2 = sqrt(x2*x2+y2*y2);
          }
 
-         this.setOutPortValue(asin(s2 < 1 ? s2 : s1));
+         this.theta = asin(s2 < 1 ? s2 : s1);
 
          color(defaultPenColor);
          line(-w/2,0,w/2,0);
@@ -235,6 +237,8 @@ function Diagram() {
          this.drawText(_g);
       });
    }
+
+   this.output = function() { return this.theta; }
 }
 Diagram.prototype = new Sketch2D;
 addSketchType('Diagram');

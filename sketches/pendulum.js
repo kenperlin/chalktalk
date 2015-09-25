@@ -3,6 +3,7 @@ function() {
    this.spring = new Spring();
    this.force = 0;
    this.adjustHeight = 1;
+   this.angle = 0;
 
    this.mouseDown = function(x, y) {
       this.xx = x;
@@ -46,21 +47,19 @@ function() {
       var N = 32;
       m.scale(.5 * this.size / 40);
       m.translate(0, 2 - this.rodHeight, 0);
-      this.anchor = m.transform([0, this.rodHeight, 0]);
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
-      var angle = /* this.isInValue("S") ? this.getInFloat("S")
-                                         : */ this.spring.getPosition();
-      if (isNaN(angle)) angle = 0;
+      this.angle = this.spring.getPosition();
+      if (isNaN(this.angle)) this.angle = 0;
 
       m.translate(0, this.rodHeight, 0);
-      m.rotateZ(angle);
+      m.rotateZ(this.angle);
       m.translate(0, -this.rodHeight, 0);
 
       mCurve([[0, this.rodHeight], [0,bobRadius]]);
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
-
-      this.setOutPortValue(angle);
    }
 
+   this.output = function() { return this.angle; }
 }
+

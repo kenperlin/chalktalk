@@ -3,9 +3,9 @@ function() {
    var S = [[-1,-1],[0,1],[1,-1]];
    var n = 3, xy0 = newVec3(), xy1 = newVec3(), p = newVec3(-100,-100,0);
    this.onPress = function(point) {
-      xy0.copy(point).applyMatrix4(pointToPixelMatrix);
+      xy0.copy(point).applyMatrix4(this.pointToPixelMatrix);
       for (n = 0 ; n < 3 ; n++) {
-         xy1.set(S[n][0], S[n][1], 0).applyMatrix4(pointToPixelMatrix);
+         xy1.set(S[n][0], S[n][1], 0).applyMatrix4(this.pointToPixelMatrix);
          if (xy1.distanceTo(xy0) < clickSize()) {
             S[n][0] = point.x;
             S[n][1] = point.y;

@@ -1,5 +1,6 @@
 function() {
    this.labels = "triangle diamond pentagon hexagon".split(' ');
+   this.is3D = true;
 
    var jNext = function(j, P) { return (j + 1) % P.length; }
    var jPrev = function(j, P) { return (j - 1 + P.length) % P.length; }
@@ -69,7 +70,7 @@ function() {
    }
    this.render = function() {
       function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 - TAU * (n-1) / n); }
-      if (! isNumeric(this.xlo)) {
+      if (! isNumeric(this.xlo) || this.P == null) {
          switch (this.labels[this.selection]) {
          case 'triangle': this.P = makeNgon(3); break;
          case 'diamond' : this.P = makeNgon(4); break;
@@ -83,7 +84,7 @@ function() {
          break;
       case 1:
          var c = _g.strokeStyle;
-         color(scrimColor(0.25));
+         color(scrimColor(0.25, this.colorId));
          mFillCurve(this.P);
          color(c);
          mClosedCurve(this.P);
@@ -93,4 +94,14 @@ function() {
          break;
       }
    }
+   this.output = function() {
+      this.P.color = palette.color[this.colorId];
+      if (! this.P.edges || this.P.edges.length != this.P.length) {
+         this.P.edges = [];
+         for (var i = 0 ; i < this.P.length ; i++)
+	    this.P.edges.push([i, (i + 1) % this.P.length]);
+      }
+      return this.P;
+   }
 }
+

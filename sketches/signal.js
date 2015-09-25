@@ -50,18 +50,21 @@ function() {
             color(defaultPenColor);
             mText(this.code[this.selection][1], [0, 0], .5,.5);
          }
-         var s = this.selection;
-         if ( this.code[s][1] != this.savedCode ||
-              this.inValue[0] != this.savedInValue_0 ||
-              this.inValue[1] != this.savedInValue_1 ||
-              this.inValue[2] != this.savedInValue_2 ) {
-            this.savedCode = this.code[s][1];
-            this.savedInValue_0 = this.inValue_0;
-            this.savedInValue_1 = this.inValue_1;
-            this.savedInValue_2 = this.inValue_2;
-            this.createCodeFunction();
-         }
-         this.setOutPortValue(this.codeFunction);
       });
    }
+   this.output = function() {
+      var s = this.selection;
+      if ( this.code[s][1] != this.savedCode ||
+           this.inValue[0] != this.savedInValue_0 ||
+           this.inValue[1] != this.savedInValue_1 ||
+           this.inValue[2] != this.savedInValue_2 ) {
+         this.savedCode = this.code[s][1];
+         this.savedInValue_0 = this.inValue_0;
+         this.savedInValue_1 = this.inValue_1;
+         this.savedInValue_2 = this.inValue_2;
+         this.createCodeFunction();
+      }
+      return this.codeFunction;
+   }
 }
+

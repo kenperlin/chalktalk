@@ -30,7 +30,7 @@ function() {
             mText("W", [this.rayX/4,this.rayY/4 + .1,-1]);
          }
          else
-            mDot([this.rayX/2, this.rayY/2], .2);
+            mDot([this.rayX/2, this.rayY/2], .1);
       });
    }
 }
