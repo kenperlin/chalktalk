@@ -2,6 +2,7 @@ var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
 var fs = require("fs");
+var http = require("http");
 var path = require("path");
 
 var app = express();
@@ -80,6 +81,10 @@ app.route("/set").post(function(req, res, next) {
 });
 
 app.route("/talk").get(function(req, res) {
+   res.sendfile("index.html");
+});
+
+app.route("/listen").get(function(req, res) {
    res.sendfile("index.html");
 });
 
@@ -186,9 +191,8 @@ String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
 
-var server = app.listen(parseInt(port, 10), function() {
-   console.log("Listening on port %d", server.address().port);
-});
+// CREATE THE HTTP SERVER
+var httpserver = http.Server(app);
 
 // WEBSOCKET ENDPOINT SETUP
 try {
@@ -200,3 +204,21 @@ try {
    console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
 }
+
+// DIFFSYNC ENDPOINT SETUP
+try {
+   var io = require("socket.io")(httpserver);
+
+   var diffsync = require("diffsync");
+   var dataAdapter = new diffsync.InMemoryDataAdapter();
+
+   var diffsyncServer = new diffsync.Server(dataAdapter, io);
+} catch (err) {
+   console.log("Something went wrong during diffsync setup:\n" + err
+         + "\nIf you have not done so, please run 'npm install' from the server directory");
+}
+
+// START THE HTTP SERVER
+httpserver.listen(parseInt(port, 10), function() {
+   console.log("Listening on port %d", httpserver.address().port);
+});
