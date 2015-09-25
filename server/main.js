@@ -84,6 +84,10 @@ app.route("/talk").get(function(req, res) {
    res.sendfile("index.html");
 });
 
+app.route("/listen").get(function(req, res) {
+   res.sendfile("index.html");
+});
+
 var time = 0;
 
 // handle request for the current time
@@ -210,7 +214,8 @@ try {
 
    var diffsyncServer = new diffsync.Server(dataAdapter, io);
 } catch (err) {
-   console.log("something went wrong during diffsync setup:\n" + err);
+   console.log("Something went wrong during diffsync setup:\n" + err
+         + "\nIf you have not done so, please run 'npm install' from the server directory");
 }
 
 // START THE HTTP SERVER
