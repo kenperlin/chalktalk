@@ -1,4 +1,3 @@
-killall node 2> /dev/null # if node is not running, do not complain.
 #!/bin/sh
 if [ `ps -x | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
 then node server/main.js >> node.log &
