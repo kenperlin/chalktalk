@@ -7,10 +7,10 @@ function() {
          mLine([0,1],[0,-1]);
       });
       this.afterSketch(function() {
-         mFillCurve(makeOval(-.5,-.5,1,1,20,PI/2,PI/2-TAU));
+         mCurve(makeOval(-.5,-.5,1,1,20,PI/2,PI/2-TAU));
          for (var i = 0 ; i < 8 ; i++) {
-            var theta = TAU * i / 8;
-            mArrow([0,0],[cos(theta),sin(theta)]);
+            var theta = TAU * i / 8, c = cos(theta), s = sin(theta);
+            mArrow([c/2,s/2],[c,s]);
          }
       });
    }

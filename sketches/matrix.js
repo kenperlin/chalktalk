@@ -9,8 +9,7 @@ function() {
    this.row = -1;
    this.col = -1;
    this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-   this.mxy = [0,0];
-   this.computeMxy = function(x,y) { this.mxy = m.transform([x,y]); }
+   this.p = newVec3();
    this.showText = true;
    this.vals = [
        [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
@@ -25,12 +24,10 @@ function() {
    this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
    this.cmdMode = 0;
    this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
-   this.mouseDown = function(x,y) { this.computeMxy(x, y); }
-   this.mouseDrag = function(x,y) { this.computeMxy(x, y); }
-   this.mouseUp   = function(x,y) { this.computeMxy(x, y); }
+   this.onPress = function(p) { this.p.copy(p); }
 
-   this.swipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 + this.mxy[0]) / 2 * 4))); }];
-   this.swipe[2] = ['select\ncolumn', function() { this.col = max(0, min(3, floor((1 - this.mxy[1]) / 2 * 4))); }];
+   this.swipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 - this.p.y) / 2 * 4))); }];
+   this.swipe[2] = ['select\ncolumn', function() { this.col = max(0, min(3, floor((1 + this.p.x) / 2 * 4))); }];
    this.swipe[4] = ['no\nrow'       , function() { this.row = -1; }];
    this.swipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
 
@@ -167,7 +164,7 @@ function() {
                var x = (col - 1.5) / 2;
                var y = (1.5 - row) / 2;
                var val = out[row + 4 * col];
-               textHeight((this.xhi - this.xlo) / 9 / pow(("" + val).length, 0.4));
+               textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
                mText(val, [x, y], .5, .5);
             }
 

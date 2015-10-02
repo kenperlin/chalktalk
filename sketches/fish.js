@@ -2,11 +2,16 @@ function() {
    this.label = 'fish';
    this.swim = false;
    this.swipe[0] = ['SWIM!', function() { this.swim = true; }];
-   this.angle = 0;
+   this.angleY = 0;
+   this.angleZ = 0;
+
+   this.m0 = new M4();
 
    this.render = function() {
       var c = 0;
       this.afterSketch(function() {
+         var angle, p0, p1;
+
          if (this.swim) {
             if (this.swimTime === undefined)
                this.swimTime = time;
@@ -15,16 +20,22 @@ function() {
             if (typeof this.inValue[0] != 'function')
                m.translate(2*t,0,0);
             else {
-               var p0 = this.inValue[0]( t/4         % 1);
-               var p1 = this.inValue[0]((t/4 + .001) % 1);
+               p0 = this.inValue[0]( t/4         % 1);
+               p1 = this.inValue[0]((t/4 + .001) % 1);
                m.translate(2 * p0[0], 2 * p0[1], 2 * p0[2]);
 
-               var angle = atan2(p0[0] - p1[0], p1[1] - p0[1]);
-               while (angle - this.angle >  PI) angle -= TAU;
-               while (angle - this.angle < -PI) angle += TAU;
-
-               this.angle = mix(this.angle, angle, .1);
-               m.rotateZ(PI/2 + this.angle);
+               angle = atan2(p0[0] - p1[0], p1[1] - p0[1]);
+               while (angle - this.angleZ >  PI) angle -= TAU;
+               while (angle - this.angleZ < -PI) angle += TAU;
+               this.angleZ = mix(this.angleZ, angle, .1);
+               m.rotateZ(PI/2 + this.angleZ);
+/*
+               angle = atan2(p1[2] - p0[2], p0[1] - p1[1]);
+               while (angle - this.angleY >  PI) angle -= TAU;
+               while (angle - this.angleY < -PI) angle += TAU;
+               this.angleY = mix(this.angleY, angle, .1);
+               m.rotateY(this.angleY);
+*/
             }
             m.translate(1,0,0);
             m.rotateZ(-c/2);

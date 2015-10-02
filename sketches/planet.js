@@ -55,7 +55,22 @@ function() {
    ,'   }'
    ].join('\n'),
 
-   ];
+   [
+   ,'float turb(vec3 P) {'
+   ,'   float f = 0., s = 1.;'
+   ,'   for (int i = 0 ; i < 7 ; i++) {'
+   ,'      f += abs(noise(s * P)) / s;'
+   ,'      s *= 2.;'
+   ,'      P = vec3(.866 * P.x + .5 * P.z, P.y + 100., -.5 * P.x + .866 * P.z);'
+   ,'   }'
+   ,'   return f;'
+   ,'}'
+   ,'   void main(void) {'
+   ,'      gl_FragColor = vec4(1., 1., 1., 1.) * turb(vPosition);'
+   ,'   }'
+   ].join('\n'),
+
+   ]
 
    this.createMesh = function() {
       return new THREE.Mesh(planeGeometry(), this.shaderMaterial());

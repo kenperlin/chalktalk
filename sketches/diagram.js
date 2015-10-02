@@ -135,7 +135,7 @@ function Diagram() {
          drawCurve([ [0,0], [x2,y2] ]);
 
          this.afterSketch(function() {
-            textHeight(this.mScale(10));
+            textHeight(this.mScale(15));
 
             arrow(0,0, x2,y2);
             drawOval(x1-w/100,y1-w/100,w/50,w/50);
@@ -144,10 +144,10 @@ function Diagram() {
             fillOval(x1-w/100,y1-w/100,w/50,w/50);
 
             color('rgb(160,160,160)');
-            text("n1 = " + roundedString(this.n1), w/60 - w/2, -w/30, 0, 0.5);
+            text("n1 = " + roundedString(this.n1), w/60 - w/2, -w/20, 0, 0.5);
 
             color('rgb(128,152,255)');
-            text("n2 = " + roundedString(this.n2), w/60 - w/2,  w/30, 0, 0.5);
+            text("n2 = " + roundedString(this.n2), w/60 - w/2,  w/20, 0, 0.5);
 
             line(0,-h/4,0,h/4);
 

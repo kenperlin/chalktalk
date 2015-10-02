@@ -48,6 +48,8 @@ function() {
          lineWidth(.5);
          mLine([this.lx,this.ly], [this.ex,this.ey]);
 
+	 textHeight(this.mScale(0.1));
+
          if (this.showNormal) {
             mText("N", [0, 1 * 1.1]);
             lineWidth(4);
