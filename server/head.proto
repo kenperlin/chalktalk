@@ -1,0 +1,12 @@
+package Chalktalk;
+
+message Head {
+   message V3 {
+      optional float x = 1;
+      optional float y = 2;
+      optional float z = 3;
+   }
+
+   optional V3 translation = 2;
+   optional V3 rotation = 3;
+}
