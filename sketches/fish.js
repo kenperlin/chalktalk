@@ -29,13 +29,6 @@ function() {
                while (angle - this.angleZ < -PI) angle += TAU;
                this.angleZ = mix(this.angleZ, angle, .1);
                m.rotateZ(PI/2 + this.angleZ);
-/*
-               angle = atan2(p1[2] - p0[2], p0[1] - p1[1]);
-               while (angle - this.angleY >  PI) angle -= TAU;
-               while (angle - this.angleY < -PI) angle += TAU;
-               this.angleY = mix(this.angleY, angle, .1);
-               m.rotateY(this.angleY);
-*/
             }
             m.translate(1,0,0);
             m.rotateZ(-c/2);
