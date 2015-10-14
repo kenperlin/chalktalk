@@ -9,8 +9,13 @@ function() {
    this.row = -1;
    this.col = -1;
    this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+   this.xyztLabel = [
+      'x\u2080 y\u2080 z\u2080 t\u2080'.split(' '),
+      'x\u2081 y\u2081 z\u2081 t\u2081'.split(' '),
+      'x\u2082 y\u2082 z\u2082 t\u2082'.split(' '),
+      'x\u2083 y\u2083 z\u2083 t\u2083'.split(' '),
+   ];
    this.p = newVec3();
-   this.showText = true;
    this.vals = [
        [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
        [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,   'A','B','C', 1 ],
@@ -21,9 +26,19 @@ function() {
        [ 1 , 0 , 0 ,'A',  0 , 1 , 0 ,'B',   0 , 0 , 1 ,'C',   0 , 0 , 0 , 1 ],
     ];
    this.mode = 0;
+   this.is_xyzt = false;
    this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
    this.cmdMode = 0;
    this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
+   this.onCmdSwipe = function(dx,dy) {
+      var dir = pieMenuIndex(dx, dy, 8);
+      switch (dir) {
+      case 2:
+      case 6:
+         this.is_xyzt = ! this.is_xyzt;
+         break;
+      }
+   }
    this.onPress = function(p) { this.p.copy(p); }
 
    this.swipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 - this.p.y) / 2 * 4))); }];
@@ -70,6 +85,7 @@ function() {
       }
 
       this.afterSketch(function() {
+         var i, x, y, z, sub, val, vals, value, col, row, out;
 
          if (this.cmdMode == 1) {
             color(scrimColor(0.3, this.colorId));
@@ -84,7 +100,7 @@ function() {
          lineWidth(2);
          mCurve([[-1,-1],[-1,1],[1,1]]);
 
-         var out = [];
+         out = [];
 
          switch (type) {
 
@@ -102,7 +118,7 @@ function() {
                   out.push(roundedString(this.inValues[i]));
             }
             else {
-               var sub = ["x","y","z"];
+               sub = ["x","y","z"];
                switch (this.mode) {
                case 1: sub = ["tx","ty","tz"]; break;
                case 2:
@@ -113,14 +129,13 @@ function() {
                }
 
                if (isDef(this.inValue[0])) {
-                  var x = 0, y = 0, z = 0;
 		  if (this.inValue[0] instanceof Array) {
                      x = rounded(this.inValue[0][0], 0);
                      y = rounded(this.inValue[0][1], x);
                      z = rounded(this.inValue[0][2], y);
                   }
 		  else {
-		     var value = parseFloat(this.inValue[0]);
+		     value = parseFloat(this.inValue[0]);
                      if (isNumeric(value))
                         x = y = z = rounded(value, 0);
                   }
@@ -144,11 +159,11 @@ function() {
                }
             }
 
-            var vals = this.vals[this.mode];
+            vals = this.vals[this.mode];
 
-            for (var col = 0 ; col < 4 ; col++)
-            for (var row = 0 ; row < 4 ; row++) {
-               var val = "" + vals[row + 4 * col];
+            for (col = 0 ; col < 4 ; col++)
+            for (row = 0 ; row < 4 ; row++) {
+               val = "" + vals[row + 4 * col];
                if (val == "A") val = sub[0];
                if (val == "B") val = sub[1];
                if (val == "C") val = sub[2];
@@ -158,30 +173,29 @@ function() {
             break;
          }
 
-         if (this.showText)
-            for (var col = 0 ; col < 4 ; col++)
-            for (var row = 0 ; row < 4 ; row++) {
-               var x = (col - 1.5) / 2;
-               var y = (1.5 - row) / 2;
-               var val = out[row + 4 * col];
-               textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
-               mText(val, [x, y], .5, .5);
-            }
+         for (col = 0 ; col < 4 ; col++)
+         for (row = 0 ; row < 4 ; row++) {
+            x = (col - 1.5) / 2;
+            y = (1.5 - row) / 2;
+            val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
+            textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
+            mText(val, [x, y], .5, .5);
+         }
 
          if (this.row >= 0) {
             color(scrimColor(.33, this.colorId));
-            var y = 1 - 2 * (this.row / 4);
+            y = 1 - 2 * (this.row / 4);
             mFillCurve([ [-1,y], [1,y], [1,y-.5], [-1,y-.5], [-1,y] ]);
          }
 
          if (this.col >= 0) {
             color(scrimColor(.33, this.colorId));
-            var x = 2 * (this.col / 4) - 1;
+            x = 2 * (this.col / 4) - 1;
             mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }
 
-         for (var i = 0 ; i < 16 ; i++) {
-            var value = parseFloat(out[i]);
+         for (i = 0 ; i < 16 ; i++) {
+            value = parseFloat(out[i]);
             this.matrixValues[i] = isNumeric(value) ? value : out[i];
          }
       });

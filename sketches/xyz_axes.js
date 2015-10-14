@@ -87,14 +87,6 @@ function() {
                m.rotateX(this.rot.x);
                m.rotateY(this.rot.y);
                m.rotateZ(this.rot.z);
-               mDot([0,0,0],.25);
-               color(backgroundColor);
-               mDot([0,0,0],.23);
-               color(otherColor);
-               mText('x', [1.1,0,0],.5,.5);
-               mText('y', [0,1.1,0],.5,.5);
-               mText('z', [0,0,1.1],.5,.5);
-               mText('t', [0,0,0]  ,.5,.5);
 
                lineWidth(4);
                color('green');
@@ -103,6 +95,15 @@ function() {
                mArrow([0,0,0],[0,0,1]);
                color('red');
                mArrow([0,0,0],[1,0,0]);
+
+               mDot([0,0,0],.25);
+               color(backgroundColor);
+               mDot([0,0,0],.23);
+               color(otherColor);
+               mText('x\'', [1.1,0,0],.5,.5);
+               mText('y\'', [0,1.1,0],.5,.5);
+               mText('z\'', [0,0,1.1],.5,.5);
+               mText('t\'', [0,0,0]  ,.5,.5);
 
             m.restore();
          }
