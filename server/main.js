@@ -183,6 +183,8 @@ var recursive_ls = function(dir, callback) {
    });
 };
 
+function isDef(v) { return ! (v === undefined); }
+
 String.prototype.endsWith = function(suffix) {
    return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
@@ -190,6 +192,17 @@ String.prototype.endsWith = function(suffix) {
 String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
+
+// PROTOBUF SETUP -- FOR SENDING HEAD TRACKING DATA
+try {
+   var ProtoBuf = require("protobufjs")
+       builder = ProtoBuf.loadProtoFile("server/head.proto"),
+       Chalktalk = builder.build("Chalktalk"),
+       Head = Chalktalk.Head;
+} catch (err) {
+   console.log("Something went wrong during protobuf setup:\n" + err
+         + "\nIf you have not done so, please run 'npm install' from the server directory");
+}
 
 // CREATE THE HTTP SERVER
 var httpserver = http.Server(app);
@@ -199,7 +212,48 @@ try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
 
-   // The websocket server is currently unused but is still available
+   wss.on("connection", function(ws) {
+      var startTime = (new Date()).getTime();
+
+      var cameraUpdateInterval = null;
+      function toggleStereo() {
+         if (cameraUpdateInterval == null) {
+            cameraUpdateInterval = setInterval(function() {
+               var clockTime = (new Date()).getTime();
+               var time = clockTime - startTime;
+
+               var head = new Head({
+                  "translation": {
+                     "x": 0,
+                     "y": 0,
+                     "z": 0
+                  },
+                  "rotation": {
+                     "x": Math.cos((time / 1000)),
+                     "y": Math.sin(2 * (time / 1000)),
+                     "z": Math.sin((time / 1000) / 2)
+                  }
+               });
+               ws.send(head.toBuffer());
+            }, 1000 / 60);
+         } else {
+            clearInterval(cameraUpdateInterval);
+            cameraUpdateInterval = null;
+         }
+      }
+
+      ws.on("message", function(msg) {
+         console.log("got message: " + msg);
+         if (msg == "toggleStereo") {
+            toggleStereo();
+         }
+      });
+
+      ws.on("close", function() {
+         clearInterval(cameraUpdateInterval);
+         cameraUpdateInterval = null;
+      });
+   });
 } catch (err) {
    console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
