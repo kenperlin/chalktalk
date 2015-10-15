@@ -196,9 +196,8 @@ String.prototype.contains = function(substr) {
 // PROTOBUF SETUP -- FOR SENDING HEAD TRACKING DATA
 try {
    var ProtoBuf = require("protobufjs")
-       builder = ProtoBuf.loadProtoFile("server/head.proto"),
-       Chalktalk = builder.build("Chalktalk"),
-       Head = Chalktalk.Head;
+       protoBuilder = ProtoBuf.loadProtoFile("server/update_protocol.proto"),
+       updateProtoBuilders = protoBuilder.build("com.mrl.update_protocol");
 } catch (err) {
    console.log("Something went wrong during protobuf setup:\n" + err
          + "\nIf you have not done so, please run 'npm install' from the server directory");
@@ -222,19 +221,37 @@ try {
                var clockTime = (new Date()).getTime();
                var time = clockTime - startTime;
 
-               var head = new Head({
-                  "translation": {
-                     "x": 0,
-                     "y": 0,
-                     "z": 0
+               var trackedBody = new updateProtoBuilders.TrackedBody({
+                  "id": 123,
+                  "label": "abc",
+                  "trackingValid": true,
+                  "position": {
+                     "x": 50 * Math.cos((time / 1000)),
+                     "y": 50 * Math.sin(2 * (time / 1000)),
+                     "z": 50 * Math.sin((time / 1000) / 2)
                   },
                   "rotation": {
-                     "x": Math.cos((time / 1000)),
-                     "y": Math.sin(2 * (time / 1000)),
-                     "z": Math.sin((time / 1000) / 2)
+                     "x": Math.cos((time / 1000)) / 10,
+                     "y": Math.sin(2 * (time / 1000)) / 10,
+                     "z": Math.sin((time / 1000) / 2) / 10,
+                     "w": Math.sin(2 * (time / 1000)) / 10
                   }
                });
-               ws.send(head.toBuffer());
+
+               var update = new updateProtoBuilders.Update({
+                  "id": "abc",
+                  "mod_version": 123,
+                  "time": 123,
+                  "mocap": {
+                     "duringRecording": false,
+                     "trackedModelsChanged": false,
+                     "timecode": "abc",
+                     "tracked_bodies": [
+                        trackedBody
+                     ]
+                  }
+               });
+               ws.send(update.toBuffer());
             }, 1000 / 60);
          } else {
             clearInterval(cameraUpdateInterval);
@@ -259,13 +276,29 @@ try {
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
 }
 
+try {
+   var dgram = require('dgram');
+
+   var socket = dgram.createSocket({type: 'udp4', 'reuseAddr': true});
+   socket.on('message', function (message, remote) {
+      console.log(message);
+   });
+
+   socket.on("listening", function() {
+      socket.addMembership("224.1.1.1");
+   });
+
+   socket.bind(1611);
+   console.log("UDP socket is bound.");
+} catch (err) {
+   console.log("Something went wrong during socket binding:\n" + err);
+}
+
 // DIFFSYNC ENDPOINT SETUP
 try {
    var io = require("socket.io")(httpserver);
-
    var diffsync = require("diffsync");
    var dataAdapter = new diffsync.InMemoryDataAdapter();
-
    var diffsyncServer = new diffsync.Server(dataAdapter, io);
 } catch (err) {
    console.log("Something went wrong during diffsync setup:\n" + err
@@ -274,5 +307,5 @@ try {
 
 // START THE HTTP SERVER
 httpserver.listen(parseInt(port, 10), function() {
-   console.log("Listening on port %d", httpserver.address().port);
+   console.log("HTTP server listening on port %d", httpserver.address().port);
 });
