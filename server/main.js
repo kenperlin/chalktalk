@@ -210,6 +210,7 @@ var httpserver = http.Server(app);
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
+   var websockets = {};
 
    wss.on("connection", function(ws) {
       var startTime = (new Date()).getTime();
@@ -217,43 +218,46 @@ try {
       var cameraUpdateInterval = null;
       function toggleStereo() {
          if (cameraUpdateInterval == null) {
-            cameraUpdateInterval = setInterval(function() {
-               var clockTime = (new Date()).getTime();
-               var time = clockTime - startTime;
+            // SAVE THIS WEBSOCKET IN THE MAP
+            websockets[ws.address] = ws;
 
-               var trackedBody = new updateProtoBuilders.TrackedBody({
-                  "id": 123,
-                  "label": "abc",
-                  "trackingValid": true,
-                  "position": {
-                     "x": 50 * Math.cos((time / 1000)),
-                     "y": 50 * Math.sin(2 * (time / 1000)),
-                     "z": 50 * Math.sin((time / 1000) / 2)
-                  },
-                  "rotation": {
-                     "x": Math.cos((time / 1000)) / 10,
-                     "y": Math.sin(2 * (time / 1000)) / 10,
-                     "z": Math.sin((time / 1000) / 2) / 10,
-                     "w": Math.sin(2 * (time / 1000)) / 10
-                  }
-               });
-
-               var update = new updateProtoBuilders.Update({
-                  "id": "abc",
-                  "mod_version": 123,
-                  "time": 123,
-                  "mocap": {
-                     "duringRecording": false,
-                     "trackedModelsChanged": false,
-                     "timecode": "abc",
-                     "tracked_bodies": [
-                        trackedBody
-                     ]
-                  }
-               });
-               ws.send(update.toBuffer());
-            }, 1000 / 60);
+//            cameraUpdateInterval = setInterval(function() {
+//               var trackedBody = new updateProtoBuilders.TrackedBody({
+//                  "id": 123,
+//                  "label": "abc",
+//                  "trackingValid": true,
+//                  "position": {
+//                     "x": 50 * Math.cos((time / 1000)),
+//                     "y": 50 * Math.sin(2 * (time / 1000)),
+//                     "z": 50 * Math.sin((time / 1000) / 2)
+//                  },
+//                  "rotation": {
+//                     "x": Math.cos((time / 1000)) / 10,
+//                     "y": Math.sin(2 * (time / 1000)) / 10,
+//                     "z": Math.sin((time / 1000) / 2) / 10,
+//                     "w": Math.sin(2 * (time / 1000)) / 10
+//                  }
+//               });
+//
+//               var update = new updateProtoBuilders.Update({
+//                  "id": "abc",
+//                  "mod_version": 123,
+//                  "time": 123,
+//                  "mocap": {
+//                     "duringRecording": false,
+//                     "trackedModelsChanged": false,
+//                     "timecode": "abc",
+//                     "tracked_bodies": [
+//                        trackedBody
+//                     ]
+//                  }
+//               });
+//               ws.send(update.toBuffer());
+//            }, 1000 / 60);
          } else {
+            // REMOVE THIS WEBSOCKET FROM THE MAP
+            delete websockets[ws.address];
+
             clearInterval(cameraUpdateInterval);
             cameraUpdateInterval = null;
          }
@@ -267,6 +271,9 @@ try {
       });
 
       ws.on("close", function() {
+         // REMOVE THIS WEBSOCKET FROM THE MAP
+         delete websockets[ws.address];
+
          clearInterval(cameraUpdateInterval);
          cameraUpdateInterval = null;
       });
@@ -282,6 +289,9 @@ try {
    var socket = dgram.createSocket({type: 'udp4', 'reuseAddr': true});
    socket.on('message', function (message, remote) {
       console.log(message);
+      for (var socket in websockets) {
+         socket.send(message);
+      }
    });
 
    socket.on("listening", function() {
