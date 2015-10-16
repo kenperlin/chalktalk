@@ -1,0 +1,66 @@
+syntax = "proto2";
+
+package com.mrl.update_protocol;
+
+// Options
+option java_package = "com.mrl.update_protocol";
+option java_outer_classname = "UpdateProtocol";
+
+// Pos/Quat
+message Position {
+	required float x = 1;
+	required float y = 2;
+	required float z = 3;
+}
+message Rotation {
+	required float x = 1;
+	required float y = 2;
+	required float z = 3;
+	required float w = 4;
+}
+// Motive
+message DataDescription {
+	required string name = 1;
+	required int32 dd_id = 2;
+	required int32 item_id = 3;
+	required sint32 parentId = 4;
+	required sint32 parentOffsetX = 5;
+	required sint32 parentOffsetY = 6;
+	required sint32 parentOffsetZ = 7;
+}
+message LabeledMarker {
+	required int32 id = 1;
+	required double size = 2;
+	required Position position = 3;
+}
+message TrackedBody {
+	required int32 id = 1;
+	required string label = 2;
+	required bool trackingValid = 3;
+	required Position position = 4;
+	required Rotation rotation = 5;
+	optional float meanError = 6;
+	repeated LabeledMarker markers = 7;
+}
+message Mocap {
+	required bool duringRecording = 1;
+	required bool trackedModelsChanged = 2;
+	optional string timecode = 3;
+	repeated TrackedBody tracked_bodies = 4;
+}
+message Mote {
+	required string label = 1;
+	required int32 button_bits = 2;
+}
+// Update(s)
+message Update {
+	required string id = 1;
+	required int32 mod_version = 2;
+	required int32 time = 3;
+	optional Mocap mocap = 4;
+	repeated Mote motes = 5;
+}
+message Updates {
+	required int32 mod_version = 1;
+	repeated Update updates = 2;
+}

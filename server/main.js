@@ -183,6 +183,8 @@ var recursive_ls = function(dir, callback) {
    });
 };
 
+function isDef(v) { return ! (v === undefined); }
+
 String.prototype.endsWith = function(suffix) {
    return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
@@ -191,6 +193,16 @@ String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
 
+// PROTOBUF SETUP -- FOR SENDING HEAD TRACKING DATA
+try {
+   var ProtoBuf = require("protobufjs")
+       protoBuilder = ProtoBuf.loadProtoFile("server/update_protocol.proto"),
+       updateProtoBuilders = protoBuilder.build("com.mrl.update_protocol");
+} catch (err) {
+   console.log("Something went wrong during protobuf setup:\n" + err
+         + "\nIf you have not done so, please run 'npm install' from the server directory");
+}
+
 // CREATE THE HTTP SERVER
 var httpserver = http.Server(app);
 
@@ -198,20 +210,105 @@ var httpserver = http.Server(app);
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
+   var websockets = {};
 
-   // The websocket server is currently unused but is still available
+   wss.on("connection", function(ws) {
+      var startTime = (new Date()).getTime();
+
+      var cameraUpdateInterval = null;
+      function toggleStereo() {
+         if (cameraUpdateInterval == null) {
+            // SAVE THIS WEBSOCKET IN THE MAP
+            websockets[ws.address] = ws;
+
+//            cameraUpdateInterval = setInterval(function() {
+//               var trackedBody = new updateProtoBuilders.TrackedBody({
+//                  "id": 123,
+//                  "label": "abc",
+//                  "trackingValid": true,
+//                  "position": {
+//                     "x": 50 * Math.cos((time / 1000)),
+//                     "y": 50 * Math.sin(2 * (time / 1000)),
+//                     "z": 50 * Math.sin((time / 1000) / 2)
+//                  },
+//                  "rotation": {
+//                     "x": Math.cos((time / 1000)) / 10,
+//                     "y": Math.sin(2 * (time / 1000)) / 10,
+//                     "z": Math.sin((time / 1000) / 2) / 10,
+//                     "w": Math.sin(2 * (time / 1000)) / 10
+//                  }
+//               });
+//
+//               var update = new updateProtoBuilders.Update({
+//                  "id": "abc",
+//                  "mod_version": 123,
+//                  "time": 123,
+//                  "mocap": {
+//                     "duringRecording": false,
+//                     "trackedModelsChanged": false,
+//                     "timecode": "abc",
+//                     "tracked_bodies": [
+//                        trackedBody
+//                     ]
+//                  }
+//               });
+//               ws.send(update.toBuffer());
+//            }, 1000 / 60);
+         } else {
+            // REMOVE THIS WEBSOCKET FROM THE MAP
+            delete websockets[ws.address];
+
+            clearInterval(cameraUpdateInterval);
+            cameraUpdateInterval = null;
+         }
+      }
+
+      ws.on("message", function(msg) {
+         console.log("got message: " + msg);
+         if (msg == "toggleStereo") {
+            toggleStereo();
+         }
+      });
+
+      ws.on("close", function() {
+         // REMOVE THIS WEBSOCKET FROM THE MAP
+         delete websockets[ws.address];
+
+         clearInterval(cameraUpdateInterval);
+         cameraUpdateInterval = null;
+      });
+   });
 } catch (err) {
    console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
 }
 
+try {
+   var dgram = require('dgram');
+
+   var socket = dgram.createSocket({type: 'udp4', 'reuseAddr': true});
+   socket.on('message', function (message, remote) {
+      console.log(message);
+      for (var socket in websockets) {
+         socket.send(message);
+      }
+   });
+
+   socket.on("listening", function() {
+      socket.addMembership("224.1.1.1");
+   });
+
+   socket.bind(1611);
+   console.log("UDP socket is bound.");
+} catch (err) {
+   console.log("Something went wrong during socket binding:\n" + err);
+}
+
 // DIFFSYNC ENDPOINT SETUP
 try {
    var io = require("socket.io")(httpserver);
-
    var diffsync = require("diffsync");
    var dataAdapter = new diffsync.InMemoryDataAdapter();
-
    var diffsyncServer = new diffsync.Server(dataAdapter, io);
 } catch (err) {
    console.log("Something went wrong during diffsync setup:\n" + err
@@ -220,5 +317,5 @@ try {
 
 // START THE HTTP SERVER
 httpserver.listen(parseInt(port, 10), function() {
-   console.log("Listening on port %d", httpserver.address().port);
+   console.log("HTTP server listening on port %d", httpserver.address().port);
 });
