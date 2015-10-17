@@ -70,11 +70,35 @@ function() {
    ,'   }'
    ].join('\n'),
 
+   phongShader.concat(M_turbulence.concat(
+   [
+   ,'// TEST MODULAR TURBULENCE.'
+   ,'void main(void) {'
+   ,'   vec3 P = vPosition;'
+   ,'   float cx = cos(.15 * uTime), sx = sin(.15 * uTime);    // ROTATE ABOUT X'
+   ,'   float cy = cos(.1  * uTime), sy = sin(.1  * uTime);    // ROTATE ABOUT Y'
+   ,'   P = vec3(P.x                , P.y * cx + P.z * sx, P.y * sx - P.z * cx);'
+   ,'   P = vec3(P.x * cy + P.z * sy, P.y                , P.x * sy - P.z * cy);'
+   ,'   vec3 color = phongShader(normalize(vNormal));'
+   ,'   gl_FragColor = vec4(color, 1.) * M_turbulence(vec3(.5, .5, .5) + .5 * P);'
+   ,'}'
+   ,''
+   ].join('\n'))),
+
+   N_fractal.concat(
+   [
+   ,'void main(void) {'
+   ,'   vec4 f = N_fractal(.5 + .5 * vPosition);'
+   ,'   vec4 a = abs(f);'
+   ,'   float s = a.x + a.y + a.z + a.w;'
+   ,'   gl_FragColor = vec4(pow(vec3(s,s,s), vec3(.45,.45,.45)), 1.);'
+   ,'}'
+   ].join('\n')),
+
    ]
 
    this.createMesh = function() {
       return new THREE.Mesh(planeGeometry(), this.shaderMaterial());
    }
 }
-
 
