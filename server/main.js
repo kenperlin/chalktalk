@@ -287,10 +287,10 @@ try {
    var dgram = require('dgram');
 
    var socket = dgram.createSocket({type: 'udp4', 'reuseAddr': true});
-   socket.on('message', function (message, remote) {
+   socket.on("message", function (message, remote) {
       console.log(message);
-      for (var socket in websockets) {
-         socket.send(message);
+      for (var websocket in websockets) {
+         websocket.send(message);
       }
    });
 
