@@ -1,11 +1,11 @@
 function() {
    this.label = 'linetest';
    this.is3D = true;
-   this.keys = [[-1,-1,0],[0,1,0],[0,-1,0],[1,1,0]];
+   this.keys = [[-1,-1,1],[0,1,0],[0,-1,0],[1,1,1]];
    this.spline = newArray(splineSize(this.keys), 3);
 
    this.createMesh = function() {
-      this.renderedStroke = new RenderedStroke(gl());
+      this.renderedStroke = new RenderedStroke(splineSize(this.keys));
       return this.renderedStroke.mesh;
    }
 
@@ -20,13 +20,12 @@ function() {
          this.keys[2][0] = .5 * cos(PI * time);
          this.keys[2][1] = .5 * sin(PI * time) - .5;
          this.keys[3][0] = .2 * sin(PI * time * 2) + 1;
+         this.keys[3][2] =      sin(PI * time * 3);
 
          makeSpline(this.keys, this.spline);
-         for (var i = 0 ; i < this.spline.length ; i++)
-            this.spline[i][2] = 0;
 
-         var C = paletteRGB[this.colorId];
-         this.renderedStroke.render(this.spline, [C[0]/255, C[1]/255, C[2]/255, this.fade()]);
+         var C = palette.rgb[this.colorId];
+         this.renderedStroke.render(this.spline, [C[0]/255, C[1]/255, C[2]/255, this.fadeAlpha()]);
       });
    }
 }
