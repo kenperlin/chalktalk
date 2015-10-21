@@ -4,6 +4,20 @@ function() {
    this.nv = 10;
    this.is3D = true;
    this.code = [["", 'return [cos(TAU*u),sin(TAU*u),2*v-1];' ]];
+   this.mouseDrag = function(x, y) {
+      if (this.y0 === undefined)
+         this.y0 = y;
+      var i0 = floor(this.y0 / 20);
+      var i1 = floor(     y  / 20);
+      if (i1 != i0) {
+         this.nv = max(4, this.nv + (i1 < i0 ? 1 : -1));
+	 this.nu = 2 * this.nv;
+         this.y0 = y;
+      }
+   }
+   this.mouseUp = function(x, y) {
+      delete this.y0;
+   }
    this.render = function(elapsed) {
       try {
          this._func = new Function('u','v', this.code[0][1]);
