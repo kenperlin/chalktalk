@@ -25,7 +25,7 @@ this.fragmentShaders = [
 ].join('\n'),
 
 // 2
-[''
+raySphere.concat([''
 ,'   void main(void) {'
 ,'      vec3 color = vec3(0.,0.,0.);'
 ,'      vec4 sphere = vec4(0., 0., -1.4, 0.3);'
@@ -37,10 +37,10 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+].join('\n')),
 
 // 3
-[''
+raySphere.concat([''
 ,'   vec3 shadeSphere(vec3 W, vec3 P, vec4 s) {'
 ,'      vec3 normal = (P - s.xyz) / s.w;'
 ,'      vec3 color = normal;'
@@ -57,12 +57,19 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+].join('\n')),
 
 // 4
-[''
+raySphere.concat([''
 ,'   vec3 lightDir;'
 ,'   vec3 lightColor;'
+,'   vec3 shadeDiffuseSphere(vec3 P, vec4 s, vec3 m, vec3 lightDir, vec3 lightColor) {'
+,'      vec3 normal = (P - s.xyz) / s.w;'
+,'      vec3 color = .2 * m;'
+,'      float diffuse = max(0., dot(normal, lightDir));'
+,'      color += lightColor * m * diffuse;'
+,'      return color;'
+,'   }'
 ,'   void main(void) {'
 ,'      lightDir = normalize(vec3(uCursor.x,uCursor.y,1.));'
 ,'      lightColor = vec3(1.,1.,1.);'
@@ -77,10 +84,10 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+].join('\n')),
 
 // 5
-[''
+raySphere.concat([''
 ,'   vec3 lightDir, lightColor;'
 ,'   vec3 shadeSphere(vec3 W, vec3 P, vec4 s, vec4 m) {'
 ,'      vec3 normal = (P - s.xyz) / s.w;'
@@ -106,10 +113,10 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+].join('\n')),
 
 // 6
-[''
+raySphere.concat([''
 ,'   vec3 lightDir[2], lightColor[2];'
 ,'   vec4 sphere[3], material[3];'
 ,'   vec3 shadeSphere(vec3 W, vec3 P, vec4 s, vec4 m) {'
@@ -149,10 +156,11 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+,''
+].join('\n')),
 
 // 7
-[''
+raySphere.concat([''
 ,'   vec3 lightDir[2], lightColor[2];'
 ,'   vec4 sphere[3], material[3];'
 ,'   int findSphere(vec3 V, vec3 W) {'
@@ -197,7 +205,8 @@ this.fragmentShaders = [
 ,'      color = pow(color, vec3(.45,.45,.45));'
 ,'      gl_FragColor = vec4(color, uAlpha);'
 ,'   }'
-].join('\n'),
+,''
+].join('\n')),
 
 ];
 

@@ -2,7 +2,7 @@ function() {
    this.label = "ikbody";
    this.meshBounds = [ [-.75, .1] , [.75, 1.8] ];
 
-   this.swipe[0] = ['show\nmore', function() { this.ikBody.mode = min(4, this.ikBody.mode + 1); }];
+   this.onClick = ['show\nmore', function() { this.ikBody.mode = (this.ikBody.mode + 1) % 5; }];
    this.swipe[2] = ['turn\nwhite', function() {
       this.ikBody.nodeRadius = function() { return 0.025; };
       this.ikBody.linkRadius = function() { return 0.025; };
@@ -10,13 +10,10 @@ function() {
       this.ikBody.linkMaterial = function() { return this.lineMaterial; };
       this.ikBody.rebuild();
    }];
-   this.swipe[4] = ['show\nless', function() { this.ikBody.mode = max(0, this.ikBody.mode - 1); }];
-   this.swipe[6] = ['show\nleast', function() { this.ikBody.mode = 0; }];
-
-   this.freeze = false;
-   this.onClick = [ 'freeze/unfreeze', function(x,y) { this.freeze = ! this.freeze; } ];
+   this.onCmdClick = ['freeze', function() { this.freezeTime = this.freezeTime ? undefined : time; }];
    this.createMesh = function() {
       this.ikBody = new IKBody(ik_data);
+      this.ikBody.mode = 0;
       return this.ikBody.mesh;
    }
    this.render = function() {
@@ -26,7 +23,7 @@ function() {
          mLine([0,1],[.33,0]);
       });
       this.afterSketch(function() {
-         this.ikBody.render(this.freeze ? this.ikBody.startTime + 1 : time);
+         this.ikBody.render(def(this.freezeTime, time));
       });
    }
 }
