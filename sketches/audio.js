@@ -2,7 +2,7 @@ function() {
    _audio_volume = 1;
    this.label = "audio";
    this.code = [
-      ["sin", "sin(2 * PI * x * time)"],
+      ["sin", "sin(TAU*x*time)"],
       ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
       ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
       ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
@@ -30,9 +30,9 @@ function() {
       mLine([1,1],[1,-1]);
       mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       if ( this.code[cs][1] != this.savedCode ||
-           isDef(this.in[0]) && this.inValue[0] != this.savedX ||
-           isDef(this.in[1]) && this.inValue[1] != this.savedY ||
-           isDef(this.in[2]) && this.inValue[2] != this.savedZ ) {
+           isDef(this.in[0]) && this.inValues[0] != this.savedX ||
+           isDef(this.in[1]) && this.inValues[1] != this.savedY ||
+           isDef(this.in[2]) && this.inValues[2] != this.savedZ ) {
 
          var code = this.savedCode = this.code[cs][1];
 
@@ -40,9 +40,9 @@ function() {
          if (isDef(this.in[1])) this.savedY = this.inValue[1];
          if (isDef(this.in[2])) this.savedZ = this.inValue[2];
 
-         var var_xyz = "var x=(" + (isDef(this.in[0]) ? this.inValue[0] : 0) + ")," +
-                           "y=(" + (isDef(this.in[1]) ? this.inValue[1] : 0) + ")," +
-                           "z=(" + (isDef(this.in[2]) ? this.inValue[2] : 0) + ");" ;
+         var var_xyz = "var x=(" + def(this.inValues[0]) + ")," +
+                           "y=(" + def(this.inValues[1]) + ")," +
+                           "z=(" + def(this.inValues[2]) + ");" ;
 
          // MAKE SURE THE CODE IS VALID.
 
