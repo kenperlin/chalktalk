@@ -27,9 +27,11 @@ function() {
          mCurve(makeOval(-1, -1, 2, 2, 16, PI/2, PI/2 + PI));
       });
       this.afterSketch(function() {
+         var nu = floor(def(this.inValue[0], this.nu));
+         var nv = floor(def(this.inValue[1], this.nv));
          lineWidth(1);
-         var du = 1 / this.nu;
-         var dv = 1 / this.nv;
+         var du = 1 / nu;
+         var dv = 1 / nv;
          for (var u = 0 ; u < .999 ; u += du)
          for (var v = 0 ; v < .999 ; v += dv)
             mClosedCurve([this._func(u   , v   ),
