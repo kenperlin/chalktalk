@@ -102,9 +102,9 @@ function() {
                m.rotateY(V);
                m.rotateX(U-2*I);
                color('rgb(116,116,116)');
-               mDot([0,0,.2],.4);
+               mDot([0,0,-.11],.4);
                color('black');
-               mDot([0,0,.2],.23);
+               mDot([0,0,-.1],.23);
                m.restore();
             }
          });
