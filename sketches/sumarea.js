@@ -7,8 +7,8 @@ function() {
    var y0 = -.2;
    var y1 =  .6;
    this.render = function() {
-      mClosedCurve([[-1,1],[1,1],[1,-1],[-1,-1]]);
-      mClosedCurve([[x0,y1],[x1,y1],[x1,y0],[x0,y0]]);
+      mClosedCurve([[-1,-1],[-1,1],[1,1],[1,-1]]);
+      mClosedCurve([[x0,y0],[x0,y1],[x1,y1],[x1,y0]]);
       if (this.mode > 0) {
          lineWidth(1);
          mLine([-1,y0],[x0,y0]);

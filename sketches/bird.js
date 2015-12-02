@@ -79,15 +79,7 @@ function() {
       var spineTop  = spineBase + lerp(tall, 0.8, 1.3) * stretch('body length', S(1).height / 0.15);
       var uLeg      = (spineBase - footY) / lerp(tall, 1.2, 1.5);
       var lLeg      = 0.9 * uLeg;
-/*
-      this.afterSketch(function() {
-         if (! this.isPrinted) {
-	    for (var i = 0 ; i < this._S.length ; i++)
-	       console.log(this._S[i].toString());
-	    this.isPrinted = true;
-	 }
-      });
-*/
+
       // PARAMETERS THAT CONTROL BODY LANGUAGE.
 
       var liftFoot = 0;
@@ -138,9 +130,11 @@ function() {
       for (var n = 0 ; n < 2 ; n++) {
          var footLift = max(0, (n==0 ? .3 : -.3) * s2);
          var Foot = [-hipX + walkX(TFoot[n]) + .15,
-                     footY-hipY + footLift, .6];
+                     footY-hipY + footLift, 0];
          var Knee = [-1,0,0];
          ik(uLeg, lLeg, Foot, Knee);
+	 Foot[2] = (n==0 ? .3 : -.3) * lLeg;
+	 Knee[2] = Foot[2] / 2;
 
          var c = [];
          m.save();
