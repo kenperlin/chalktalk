@@ -31,9 +31,6 @@ function() {
       });
       this.afterSketch(function() {
          if (typeof this.inValue[0] == 'function') {
-
-console.log('creating new mesh');
-
             if (this.mesh !== undefined)
                root.remove(this.mesh);
             delete this.mesh;
