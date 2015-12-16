@@ -106,12 +106,11 @@ function() {
       // render line graph
 
       if (isDef(values) && values.length > 1) {
+	 var c = [];
+         for (var i = 0 ; i < values.length ; i++)
+	    c.push([i / 100 * 2 - 1, 2 * (values[i] - minval) / (maxval - minval) - 1]);
          lineWidth(1);
-         for (var i = 1 ; i < values.length ; i++) {
-            var y1 = 2 * (values[i-1] - minval) / (maxval - minval) - 1;
-            var y2 = 2 * (values[i  ] - minval) / (maxval - minval) - 1;
-            mLine([(i-1)/100*2-1, y1], [i/100*2-1, y2]);
-         }
+         mCurve(c);
       }
    };
 };
