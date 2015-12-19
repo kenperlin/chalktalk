@@ -13,7 +13,7 @@ function() {
          textHeight(this.mScale(0.07));
          _g.save();
          lineWidth(.5);
-         color(scrimColor(.2, this.colorId));
+         color(fadedColor(.2, this.colorId));
          mFillCurve(makeOval(-1.1,-1.1,2.2,2.2));
          _g.restore();
       });

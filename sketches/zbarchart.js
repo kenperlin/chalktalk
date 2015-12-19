@@ -107,7 +107,7 @@ function() {
          function _v(i) { i=max(0,min(n-1,i)); return max(-1, min(1, isNumeric(v[i]) ? v[i] : 0)); }
 
          for (var i = 0 ; i < n ; i++) {
-            color(i==ii ? liveDataColor : scrimColor(i % 2 == 0 ? 0.5 : 0.3, this.colorId));
+            color(i==ii ? liveDataColor : fadedColor(i % 2 == 0 ? 0.5 : 0.3, this.colorId));
             if (this.isLines) {
                var t0 = mix(-1, 1,        (i  ) / (n-1) );
                var t1 = mix(-1, 1, min(1, (i+1) / (n-1)));
@@ -132,9 +132,9 @@ function() {
             this.outputValue[i] = v[i];
 
          if (isDef(this.isChangingN)) {
-            textHeight(this.mScale(.7));
-            color(scrimColor(.2, this.colorId));
-            mText(n, [0,0], .5, .5);
+            textHeight(this.mScale(.2));
+            color(fadedColor(.5, this.colorId));
+            mText(n, [-1,1], -.5, 0);
          }
       });
    }

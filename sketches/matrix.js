@@ -54,6 +54,32 @@ function() {
    }
 
    this.render = function(elapsed) {
+
+      this.afterSketch(function() {
+         var x, y;
+
+         if (this.cmdMode == 1) {
+            color(fadedColor(0.15, this.colorId));
+            mFillRect([-1,-.5], [.5,1]);
+            color(defaultPenColor);
+         }
+
+         if (this.row >= 0) {
+            color(fadedColor(.33, this.colorId));
+            y = 1 - 2 * (this.row / 4);
+            mFillCurve([ [-1,y], [1,y], [1,y-.5], [-1,y-.5], [-1,y] ]);
+            color(defaultPenColor);
+         }
+
+         if (this.col >= 0) {
+            color(fadedColor(.33, this.colorId));
+            x = 2 * (this.col / 4) - 1;
+            mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
+            color(defaultPenColor);
+         }
+
+      });
+
       var type = this.labels[this.selection];
 
       switch (type) {
@@ -86,12 +112,6 @@ function() {
 
       this.afterSketch(function() {
          var i, x, y, z, sub, val, vals, value, col, row, out;
-
-         if (this.cmdMode == 1) {
-            color(scrimColor(0.3, this.colorId));
-            mFillRect([-1,-.5], [.5,1]);
-            color(defaultPenColor);
-         }
 
          mLine([-1, .5],[1,  .5]);
          mLine([-1,  0],[1,   0]);
@@ -180,18 +200,6 @@ function() {
             val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
             textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
             mText(val, [x, y], .5, .5);
-         }
-
-         if (this.row >= 0) {
-            color(scrimColor(.33, this.colorId));
-            y = 1 - 2 * (this.row / 4);
-            mFillCurve([ [-1,y], [1,y], [1,y-.5], [-1,y-.5], [-1,y] ]);
-         }
-
-         if (this.col >= 0) {
-            color(scrimColor(.33, this.colorId));
-            x = 2 * (this.col / 4) - 1;
-            mFillCurve([ [x,-1], [x,1], [x+.5,1], [x+.5,-1], [x,-1] ]);
          }
 
          for (i = 0 ; i < 16 ; i++) {

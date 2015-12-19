@@ -29,7 +29,7 @@ function() {
          color(backgroundColor);
          mFillCurve(S);
 
-         color(scrimColor(.3));
+         color(fadedColor(.3));
          annotateStart();
 
          var P = [];
@@ -89,7 +89,7 @@ function() {
          var s0 = ySlice(qy);
          var s1 = ySlice(qy + gridSize);
          if (s0.length == 2 && s1.length == 2) {
-            color(scrimColor(.2));
+            color(fadedColor(.2));
             fillCurve([[s0[0],qy],[s0[1],qy],[s1[1],qy+gridSize],[s1[0],qy+gridSize]]);
             if (s0[0] < qx + gridSize && s0[1] > qx) {
                color(defaultPenColor);

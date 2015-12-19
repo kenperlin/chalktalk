@@ -29,7 +29,7 @@ function() {
          var t = this.getInValue(0, 0);
          this.y = this.f(t);
          if (this.y != null) {
-            color(scrimColor(0.5, this.colorId));
+            color(fadedColor(0.5, this.colorId));
             var tt = max(-1, min(1, t));
             var yy = max(-1, min(1, this.y));
             mFillCurve([ [0,0], [tt,0], [tt,yy], [0,yy] ]);

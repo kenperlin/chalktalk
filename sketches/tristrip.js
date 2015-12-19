@@ -10,10 +10,10 @@ function() {
       this.afterSketch(function() {
          textHeight(this.mScale(.13));
          if (this.mode >= 3) {
-            color(scrimColor(.3, this.colorId));
+            color(fadedColor(.3, this.colorId));
             mFillCurve([[-.5,-.5],[.5,-.5],[-.5,.5]]);
             if (this.mode >= 4) {
-               color(scrimColor(.5, this.colorId));
+               color(fadedColor(.5, this.colorId));
                mFillCurve([[.5,-.5],[-.5,.5],[.5,.5]]);
             }
             color(palette.color[this.colorId]);

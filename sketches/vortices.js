@@ -20,7 +20,7 @@ function() {
       });
       this.afterSketch(function() {
          lineWidth(2);
-         color(scrimColor(0.15, this.colorId));
+         color(fadedColor(0.15, this.colorId));
          for (var i = 0 ; i < this.particles.length ; i++)
 	    this.moveParticle(this.particles[i], this.curve[i]);
       });
