@@ -212,8 +212,9 @@ function() {
    this.output = function() {
       var type = this.labels[this.selection];
       var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
-      if (isDef(this.inValue[1]))
-         outValue = mult(outValue, this.inValue[1]);
+      var i = this.labels[this.selection] == 'matrix' ? 1 : 0;
+      if (isDef(this.inValue[i]))
+         outValue = mult(outValue, this.inValue[i]);
       return outValue;
    }
 

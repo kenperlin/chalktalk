@@ -213,47 +213,47 @@ try {
    var websockets = {};
 
    wss.on("connection", function(ws) {
-      var startTime = (new Date()).getTime();
+      var startTimeMillis = (new Date()).getTime();
 
       var cameraUpdateInterval = null;
-      function toggleStereo() {
+      function toggleHMDTracking() {
          if (cameraUpdateInterval == null) {
             // SAVE THIS WEBSOCKET IN THE MAP
             websockets[ws.address] = ws;
 
-//            cameraUpdateInterval = setInterval(function() {
-//               var trackedBody = new updateProtoBuilders.TrackedBody({
-//                  "id": 123,
-//                  "label": "abc",
-//                  "trackingValid": true,
-//                  "position": {
-//                     "x": 50 * Math.cos((time / 1000)),
-//                     "y": 50 * Math.sin(2 * (time / 1000)),
-//                     "z": 50 * Math.sin((time / 1000) / 2)
-//                  },
-//                  "rotation": {
-//                     "x": Math.cos((time / 1000)) / 10,
-//                     "y": Math.sin(2 * (time / 1000)) / 10,
-//                     "z": Math.sin((time / 1000) / 2) / 10,
-//                     "w": Math.sin(2 * (time / 1000)) / 10
-//                  }
-//               });
-//
-//               var update = new updateProtoBuilders.Update({
-//                  "id": "abc",
-//                  "mod_version": 123,
-//                  "time": 123,
-//                  "mocap": {
-//                     "duringRecording": false,
-//                     "trackedModelsChanged": false,
-//                     "timecode": "abc",
-//                     "tracked_bodies": [
-//                        trackedBody
-//                     ]
-//                  }
-//               });
-//               ws.send(update.toBuffer());
-//            }, 1000 / 60);
+              cameraUpdateInterval = setInterval(function() {
+                 var time = ((new Date()).getTime() - startTimeMillis) / 1000;
+		 var t = time / 5;
+		 var px = Math.cos((t)) / 10,
+                     py = Math.sin(2 * (t)) / 10,
+                     pz = Math.sin((t) / 2) / 10;
+		 var qx = Math.cos((t)) / 2,
+		     qy = Math.sin(2 * (t)) / 2,
+                     qz = 0,//Math.sin((t) / 2) / 2,
+		     qw = Math.sqrt(1 - qx * qx - qy * qy - qz * qz);
+                 var trackedBody = new updateProtoBuilders.TrackedBody({
+                    "id": 123,
+                    "label": "ViveHMD",
+                    "trackingValid": true,
+                    "position": { "x": px, "y": py, "z": pz },
+                    "rotation": { "x": qx, "y": qy, "z": qz, "w": qw }
+                 });
+  
+                 var update = new updateProtoBuilders.Update({
+                    "id": "abc",
+                    "mod_version": 123,
+                    "time": 123,
+                    "mocap": {
+                       "duringRecording": false,
+                       "trackedModelsChanged": false,
+                       "timecode": "abc",
+                       "tracked_bodies": [
+                          trackedBody
+                       ]
+                    }
+                 });
+                 ws.send(update.toBuffer());
+              }, 1000 / 60);
          } else {
             // REMOVE THIS WEBSOCKET FROM THE MAP
             delete websockets[ws.address];
@@ -265,8 +265,8 @@ try {
 
       ws.on("message", function(msg) {
          console.log("got message: " + msg);
-         if (msg == "toggleStereo") {
-            toggleStereo();
+         if (msg == "toggleHMDTracking") {
+            toggleHMDTracking();
          }
       });
 
