@@ -40,6 +40,15 @@ app.route("/upload").post(function(req, res, next) {
    });
 });
 
+app.route("/play").post(function(req, res, next) {
+   var form = formidable.IncomingForm();
+   form.parse(req, function(err, fields, files) {
+      var exec = require('child_process').exec;
+      exec('/Applications/VLC.app/Contents/MacOS/VLC ' + fields.cmd, function (error, stdout, stderr) {
+      });
+   });
+});
+
 var values = {};
 
 app.route("/setValue").post(function(req, res, next) {
