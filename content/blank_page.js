@@ -4,7 +4,6 @@ var sketchTypes = (
 
 var imageSequence = [
   'kwalado.jpg',
-  'hex_grid.png',
 ];
 
 var sketchPages = [
