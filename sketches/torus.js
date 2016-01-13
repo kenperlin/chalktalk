@@ -7,6 +7,7 @@ function() {
          mCurve(makeOval(-1-r, -1-r, 2+2*r, 2+2*r, 20, -PI/2, 3*PI/2));
          mCurve(makeOval(-1+r, -1+r, 2-2*r, 2-2*r, 20, -PI/2, 3*PI/2));
       });
+      m.scale(1 / (1 + r));
       mTorus(80, 80, r);
    }
 }

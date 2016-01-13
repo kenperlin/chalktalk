@@ -5,9 +5,8 @@ function() {
       this.duringSketch(function() {
          mCurve([ [1,-1],[1,1],[-1,1],[-1,-1],[1,-1] ]);
       });
+      m.rotateX(PI/2);
+      mCylinder();
       this.useInputColors();
-   }
-   this.createMesh = function() {
-      return new THREE.Mesh(cylinderGeometry(32), this.shaderMaterial());
    }
 }
