@@ -735,7 +735,7 @@ function MothAndCandle() {
          m.save();
             // ALWAYS TURN TORSO TO FACE VIEW.
             m.rotateY(atan2(m._m()[2], m._m()[0]));
-            mCurve(createCurve([-0.01,-0.6],[ 0.01,-0.6], 45.0));
+            mCurve(createCurvedLine([-0.01,-0.6],[ 0.01,-0.6], 45.0));
          m.restore();
 
          // DRAW LEFT WING
@@ -747,8 +747,8 @@ function MothAndCandle() {
             m.translate(-0.06,0,0);
             if (this.isAnimating)
                m.rotateY(flap);
-            mCurve(createCurve([-0.03, 0.1],[-0.34,-0.2],-0.8).
-            concat(createCurve([-0.34,-0.2],[-0.00,-0.4],-0.5)));
+            mCurve(createCurvedLine([-0.03, 0.1],[-0.34,-0.2],-0.8).
+            concat(createCurvedLine([-0.34,-0.2],[-0.00,-0.4],-0.5)));
          m.restore();
 
          // DRAW RIGHT WING
@@ -757,16 +757,16 @@ function MothAndCandle() {
             m.translate(0.06,0,0);
             if (this.isAnimating)
                m.rotateY(-flap);
-            mCurve(createCurve([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
-            concat(createCurve([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
+            mCurve(createCurvedLine([ 0.03, 0.1],[ 0.34,-0.2], 0.8).
+            concat(createCurvedLine([ 0.34,-0.2],[ 0.00,-0.4], 0.5)));
          m.restore();
 
          // DRAW LEFT AND RIGHT ANTENNAE
 
          lineWidth(mix(2, 0.5, transition));
 
-         mCurve(createCurve([-0.03, 0.28],[-0.2, 0.8], -0.1));
-         mCurve(createCurve([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+         mCurve(createCurvedLine([-0.03, 0.28],[-0.2, 0.8], -0.1));
+         mCurve(createCurvedLine([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
 
          break;
 
@@ -791,22 +791,22 @@ function MothAndCandle() {
          // CANDLE
 
          mCurve([[-.2,-1.1],[-.2,.3]]
-                .concat(createCurve([-.2,.3],[.2,.2],-.1))
+                .concat(createCurvedLine([-.2,.3],[.2,.2],-.1))
                 .concat([[.2,.2],[.2,-1.1]]));
 
          // WICK
 
-         mCurve(createCurve([ .01, .21],[ .01, .4], .05));
+         mCurve(createCurvedLine([ .01, .21],[ .01, .4], .05));
 
          // FLAME
 
 	 var dx = this.isAnimating ? 0.5 * noise(5 * time) : 0;
 
-         mCurve(createCurve([ 0.00+dx*.4 ,0.90],[-0.10+dx*.1 ,0.60], 0.08).
-         concat(createCurve([-0.10+dx*.1 ,0.60],[ 0.00 ,0.30],-0.31)));
+         mCurve(createCurvedLine([ 0.00+dx*.4 ,0.90],[-0.10+dx*.1 ,0.60], 0.08).
+         concat(createCurvedLine([-0.10+dx*.1 ,0.60],[ 0.00 ,0.30],-0.31)));
 
-         mCurve(createCurve([ 0.00+dx*.4 ,0.90],[ 0.195+dx*.1,0.63], 0.03).
-         concat(createCurve([ 0.195+dx*.1,0.63],[ 0.00 ,0.30], 0.30)));
+         mCurve(createCurvedLine([ 0.00+dx*.4 ,0.90],[ 0.195+dx*.1,0.63], 0.03).
+         concat(createCurvedLine([ 0.195+dx*.1,0.63],[ 0.00 ,0.30], 0.30)));
 
          break;
       }
