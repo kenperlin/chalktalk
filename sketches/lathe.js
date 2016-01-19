@@ -46,7 +46,7 @@ function() {
    this.profileCurve = function() {
       if (this.inputIsFunction()) {
          var f = this.inValue[0], P = [], p, t;
-         for (t = 0 ; t < 1.001 ; t += 0.01) {
+         for (t = 0 ; t < 1.001 ; t += 0.05) {
             p = f(min(t, 0.999));
             P.push(newVec3(1+p[0],p[2],p[1]));
          }
