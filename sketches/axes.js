@@ -68,6 +68,19 @@ function() {
 	       if (inValue.color)
 	          color(inValue.color);
 	       m.scale(.5,.5,.5);
+               if (inValue && inValue.fillMode > 0) {
+	          if (inValue.fillMode == 1) {
+		     var c = _g.strokeStyle;
+		     var C = parseRGBA(c);
+		     color(fadedRGB([255*C[0],255*C[1],255*C[2]], 0.25));
+		     m.translate(0,0,-.001);
+		     mFillCurve(inValue);
+		     m.translate(0,0,.001);
+		     color(c);
+		  }
+		  else
+		     mFillCurve(inValue);
+	       }
                if (edges = inValue.edges)
 	          for (i = 0 ; i < edges.length ; i++)
                      mLine(inValue[edges[i][0]], inValue[edges[i][1]]);

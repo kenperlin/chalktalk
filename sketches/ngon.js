@@ -10,8 +10,8 @@ function() {
    this.mF = new M4();
    this.mI = new M4();
 
-   this.swipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 2) % 3; }];
-   this.swipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 1) % 3; }];
+   this.swipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 1) % 3; }];
+   this.swipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 2) % 3; }];
 
    this.mouseDown = function(x, y) {
 
@@ -96,6 +96,7 @@ function() {
    }
    this.output = function() {
       this.P.color = palette.color[this.colorId];
+      this.P.fillMode = this.fillMode;
       if (! this.P.edges || this.P.edges.length != this.P.length) {
          this.P.edges = [];
          for (var i = 0 ; i < this.P.length ; i++)
