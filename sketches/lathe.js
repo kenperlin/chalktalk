@@ -31,12 +31,25 @@ function() {
       });
       this.afterSketch(function() {
          if (typeof this.inValue[0] == 'function') {
-            if (this.mesh !== undefined)
-               root.remove(this.mesh);
-            delete this.mesh;
-            this.code = null;
+	    if (this.P_previous === undefined || ! isEqual(this.P_previous, this.P = this.profileCurve())) {
+               if (this.mesh !== undefined)
+                  root.remove(this.mesh);
+               delete this.mesh;
+               this.code = null;
+            }
          }
       });
+   }
+
+   function isEqual(A, B) {
+      if (A.length != B.length)
+         return false;
+      for (var i = 0 ; i < A.length ; i++)
+         if ( A[i][0] != B[i][0] ||
+              A[i][1] != B[i][1] ||
+              A[i][2] != B[i][2] )
+           return false;
+      return true;
    }
 
    this.inputIsFunction = function() {
@@ -57,7 +70,8 @@ function() {
    }
 
    this.createMesh = function() {
-      var P = this.profileCurve();
+      //var P = this.profileCurve();
+      var P = this.P ? this.P : this.profileCurve();
       var isTorus = false;
       var isLoop = P[0].distanceTo(P[P.length-1]) < 0.01;
       if (isLoop)
