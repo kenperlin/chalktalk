@@ -4,22 +4,46 @@ function() {
    this.isVertical = false;
    this.isLines = false;
    this.isNoise = false;
+   this.fixedIndexLo =  1000;
+   this.fixedIndexHi = -1000;
 
    // DRAG ON A BAR TO CHANGE ITS VALUE.
 
+   this._computeIndex = function(p) {
+      var u = this.isVertical ? -p.y : p.x;
+      return floor(this.nValues * (.5 + .499 * u));
+   }
+
    this.onPress = function(p) {
+      this.xDown = p.x;
+      this.yDown = p.y;
+      this.indexLo =  1000;
+      this.indexHi = -1000;
       if (! this.isInValueAt(0)) {
-         var u = this.isVertical ? -p.y : p.x;
-         this.valueIndex = floor(this.nValues * (.5 + .499 * u));
+         this.valueIndex = this._computeIndex(p);
       }
    }
    this.onDrag = function(p) {
       if (this.valueIndex >= 0) {
-         var v = this.isVertical ? p.x : p.y;
-         this.values[this.valueIndex] = max(-1, min(1, v));
+         if (! this.isVertical) {
+	    if (abs(p.y - this.yDown) > abs(p.x - this.xDown))
+               this.values[this.valueIndex] = max(-1, min(1, p.y));
+            else if (abs(p.x - this.xDown) > 0.1) {
+	       var index = this._computeIndex(p);
+	       this.indexLo = min(this.indexLo, index);
+	       this.indexHi = max(this.indexHi, index);
+	    }
+	 }
+	 else {
+            this.values[this.valueIndex] = max(-1, min(1, p.x));
+	 }
       }
    }
    this.onRelease = function(p) {
+      if (this.indexLo < this.indexHi) {
+         this.fixedIndexLo = this.indexLo;
+         this.fixedIndexHi = this.indexHi;
+      }
       this.valueIndex = -1;
    }
 
@@ -101,7 +125,10 @@ function() {
             this.noiseTime = time;
 
             for (var i = 0 ; i < n ; i++)
-               v[i] = max(-1, min(1, 3 * noise2(this.noiseT, i + i / 10)));
+	       if (i >= this.fixedIndexLo && i <= this.fixedIndexHi)
+                  v[i] = 0;
+	       else
+                  v[i] = max(-1, min(1, 3 * noise2(this.noiseT, i + i / 10)));
          }
 
          function _v(i) { i=max(0,min(n-1,i)); return max(-1, min(1, isNumeric(v[i]) ? v[i] : 0)); }

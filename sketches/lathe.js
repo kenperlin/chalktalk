@@ -100,7 +100,7 @@ function() {
          points.push(newVec3(0,0,P[0].z));
 
       var material = this.shaderMaterial();
-      var lathe = new THREE.Mesh(new THREE.LatheGeometry(points, 32), material);
+      var lathe = new THREE.Mesh(new THREE.LatheGeometry(points, 16), material);
 
       // ROTATE LATHE SO THAT ITS Z AXIS ALIGNS WITH THE GLOBAL Y AXIS.
 

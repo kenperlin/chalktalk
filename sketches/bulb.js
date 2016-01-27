@@ -38,7 +38,7 @@ function() {
          color(palette.color[this.colorId]);
          mCurve(S);
 
-         color(fadedColor(mix(.25, 1, light), this.colorId));
+         color(fadedColor(mix(.03, 1, pow(light, 3)), this.colorId));
          mFillCurve(S);
 
          lineWidth(1);

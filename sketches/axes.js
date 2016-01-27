@@ -70,7 +70,7 @@ function() {
 	       m.scale(.5,.5,.5);
                if (inValue && inValue.fillMode > 0) {
 	          if (inValue.fillMode == 1) {
-		     color(fadedRGB(parseRGBA(c = _g.strokeStyle), 0.25));
+		     color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
 		     m.translate(0,0,-.001);
 		     mFillCurve(inValue);
 		     m.translate(0,0,.001);
