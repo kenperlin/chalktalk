@@ -14,16 +14,16 @@ function() {
    }
 
    this.render = function() {
+      for (n = 0 ; n < 16 ; n++) {
+         trackball.transform(C[n], tmp);
+         for (i = 0 ; i < 3 ; i++)
+            P[n][i] = tmp[i];
+      }
       this.duringSketch(function() {
-         mClosedCurve([[ -1, -1],[ -1, 1],[ 1, 1],[ 1, -1]]);
-         mClosedCurve([[-.8,-.8],[-.8,.8],[.8,.8],[.8,-.8]]);
+	 mClosedCurve([P[4],P[6],P[7],P[5]]);
+	 mClosedCurve([P[0],P[2],P[3],P[1]]);
       });
       this.afterSketch(function() {
-         for (n = 0 ; n < 16 ; n++) {
-	    trackball.transform(C[n], tmp);
-	    for (i = 0 ; i < 3 ; i++)
-	       P[n][i] = tmp[i];
-         }
          for (n = 0 ; n < E.length ; n++)
 	    mLine(P[E[n]], P[E[n] + (1 << (n >> 3))]);
       });

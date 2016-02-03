@@ -2,17 +2,17 @@ function() {
 
    this.code = [['',[''
 ,'function Vector3() {'
-,'this.x = 0;'
-,'this.y = 0;'
-,'this.z = 0;'
+,'   this.x = 0;'
+,'   this.y = 0;'
+,'   this.z = 0;'
 ,'}'
 ,''
 ,'Vector3.prototype = {'
-,'set : function(x,y,z) {'
-,'   this.x = x;'
-,'   this.y = y;'
-,'   this.z = z;'
-,'},'
+,'   set : function(x,y,z) {'
+,'      this.x = x;'
+,'      this.y = y;'
+,'      this.z = z;'
+,'   },'
 ,'}'
 ].join('\n')]]
 
@@ -77,7 +77,7 @@ function() {
          }
       }
       this.afterSketch(function() {
-         textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (2 + this.precision));
+         textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (1 + this.precision));
          var outValue = [];
          for (var i = 0 ; i < this.nRows() ; i++) {
             var t = (i+.5) / this.nRows();
@@ -87,8 +87,8 @@ function() {
             mText(roundedString(val, this.precision), p, .5, .5);
             outValue.push(val);
          }
-	 if (isDef(this.inValue[0]))
-	    outValue = mult(this.inValue[0], outValue);
+         if (isDef(this.inValue[0]))
+            outValue = mult(this.inValue[0], outValue);
          this.outValue[0] = outValue;
       });
    }

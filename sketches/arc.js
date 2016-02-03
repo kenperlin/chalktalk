@@ -24,8 +24,8 @@ function() {
       this.afterSketch(function() {
          var c = [], n = floor(10 * max(1, abs(this.angle[1] - this.angle[0]))), i;
          for (i = 0 ; i <= n ; i++)
-	    c.push(this.pt(mix(this.angle[0], this.angle[1], i / n)));
-	 mCurve(c);
+            c.push(this.pt(mix(this.angle[0], this.angle[1], i / n)));
+         mCurve(c);
       });
    }
    this.output = function() { return this.angle[1] - this.angle[0]; }

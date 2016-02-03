@@ -13,19 +13,19 @@ function() {
       case 'larrow':
          mCurve([[H-1,H],[-1,0],[H-1,-H]]);
          mLine([-1,0],[1,0]);
-	 break;
+         break;
       case 'rarrow':
          mCurve([[1-H,H],[1,0],[1-H,-H]]);
          mLine([1,0],[-1,0]);
-	 break;
+         break;
       case 'uarrow':
          mCurve([[-H,1-H],[0,1],[H,1-H]]);
-	 mLine([0,1],[0,-1]);
-	 break;
+         mLine([0,1],[0,-1]);
+         break;
       case 'darrow':
          mCurve([[-H,H-1],[0,-1],[H,H-1]]);
-	 mLine([0,-1],[0,1]);
-	 break;
+         mLine([0,-1],[0,1]);
+         break;
       }
    }
 }

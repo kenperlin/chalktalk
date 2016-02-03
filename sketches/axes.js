@@ -48,9 +48,9 @@ function() {
             mArrow([0,0,-1],[0,0,1], .1);
 
          if (isDef(this.inValue[0]) && this.inValue[0].length != 16) {
-	    inValue = this.inValue[0];
-	    switch (arrayDepth(inValue)) {
-	    case 1:
+            inValue = this.inValue[0];
+            switch (arrayDepth(inValue)) {
+            case 1:
                V = inValue; x = V[0]; y = V[1]; z = V[2];
                lineWidth(0.5);
                mLine([x,0,0],[x,y,0]);
@@ -62,30 +62,33 @@ function() {
                mLine([0,y,z], V);
                mLine([x,0,z], V);
                mLine([x,y,0], V);
-               mDot(V, 0.2);
-	       break;
-	    case 2:
-	       if (inValue.color)
-	          color(inValue.color);
-	       m.scale(.5,.5,.5);
+               lineWidth(4);
+               mLine([x-.01,y,z], [x+.01,y,z]);
+               mLine([x,y-.01,z], [x,y+.01,z]);
+               mLine([x,y,z-.01], [x,y,z+.01]);
+               break;
+            case 2:
+               if (inValue.color)
+                  color(inValue.color);
+               m.scale(.5,.5,.5);
                if (inValue && inValue.fillMode > 0) {
-	          if (inValue.fillMode == 1) {
-		     color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
-		     m.translate(0,0,-.001);
-		     mFillCurve(inValue);
-		     m.translate(0,0,.001);
-		     color(c);
-		  }
-		  else
-		     mFillCurve(inValue);
-	       }
+                  if (inValue.fillMode == 1) {
+                     color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
+                     m.translate(0,0,-.001);
+                     mFillCurve(inValue);
+                     m.translate(0,0,.001);
+                     color(c);
+                  }
+                  else
+                     mFillCurve(inValue);
+               }
                if (edges = inValue.edges)
-	          for (i = 0 ; i < edges.length ; i++)
+                  for (i = 0 ; i < edges.length ; i++)
                      mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
-	       else
-	          for (i = 0 ; i < inValue.length ; i++)
+               else
+                  for (i = 0 ; i < inValue.length ; i++)
                      mDot(inValue[i], 0.1);
-	       break;
+               break;
             }
          }
 
