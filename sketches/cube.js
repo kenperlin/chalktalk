@@ -2,6 +2,16 @@ function() {
    this.label = 'cube';
    this.is3D = true;
 
+   this._scaleX = 1;
+   this._scaleY = 1;
+   this._p = newVec3();
+   this.onPress = function(p) { this._p.copy(p); }
+   this.onDrag = function(p) {
+      this._scaleX += p.x - this._p.x;
+      this._scaleY += p.y - this._p.y;
+      this._p.copy(p);
+   }
+
    function s(i) { return i ? 1 : -1; }
 
    var v = [];
@@ -13,7 +23,8 @@ function() {
 	       [0,4], [1,5], [2,6], [3,7] ];
 
    this.render = function(elapsed) {
-     this.duringSketch(function() {
+      m.scale(this._scaleX, this._scaleY, 1);
+      this.duringSketch(function() {
          mClosedCurve([v[0],v[2],v[3],v[1]]);
       });
       this.afterSketch(function() {
@@ -27,3 +38,4 @@ function() {
       return v;
    }
 }
+
