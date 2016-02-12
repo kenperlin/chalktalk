@@ -3,6 +3,8 @@ function() {
    this.label = 'arc';
    this.angle = [0, PI / 4];
    this.showRadii = true;
+   this.labelsMode = false;
+   this.onCmdClick = ['toggle lagels', function() { this.labelsMode = (this.labelsMode + 1) % 4; }];
    this.onClick = ['toggle radii', function() { this.showRadii = ! this.showRadii; }];
    this.pt = function(angle) { return [ cos(angle), sin(angle) ]; }
    this.onPress = function(p) {
@@ -20,6 +22,18 @@ function() {
       if (this.showRadii) {
          mLine([0,0], this.p[0]);
          mLine([0,0], this.p[1]);
+      }
+      if (this.labelsMode > 0) {
+         textHeight(this.mScale(.07));
+	 var pt0 = this.pt(this.angle[1]);
+	 var ptm = this.pt((this.angle[0] + this.angle[1]) / 2);
+	 var pt1 = this.pt(this.angle[0]);
+	 mText('A', [pt0[0] * 1.1, pt0[1] * 1.1]);
+	 mText('B', [pt1[0] * 1.1, pt1[1] * 1.1]);
+	 switch (this.labelsMode) {
+	 case 2: mText('|A| |B| cos(angle)', [ptm[0] * .2, ptm[1] * .2]); break;
+	 case 3: mText('cos(angle)', [ptm[0] * .2, ptm[1] * .2]); break;
+	 }
       }
       this.afterSketch(function() {
          var c = [], n = floor(10 * max(1, abs(this.angle[1] - this.angle[0]))), i;

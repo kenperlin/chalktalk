@@ -20,7 +20,7 @@ function() {
       mLine([0,0,-2],[this.rayX,this.rayY,2]);
 
       this.afterSketch(function() {
-         mArrow([0,0,-2],[this.rayX,this.rayY,2],.3);
+         mArrow([0,0,-2],[this.rayX,this.rayY,2],.1);
          if (this.showLabels) {
             lineWidth(0.5);
             mLine([this.rayX/2,.75],[this.rayX/2,-.75]);

@@ -13,11 +13,11 @@ function() {
          mArrow(a, b);
          lineWidth(1);
          mLine(b,c);
-/*
+
          mText("V", a, 0, 2);
          mText("W", b, 0, 2);
          mText("t", c, 0, 2);
-*/
+
          mDot(c, .1);
       });
    }

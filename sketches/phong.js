@@ -22,7 +22,7 @@ function() {
       this.duringSketch(function() {
          mLine([-1,0],[1,0]);
          mLine([0,0],[  0,  1]);
-         mLine([0,0],[-this.rx,this.ry]);
+         mLine([-this.rx,this.ry],[0,0]);
          mLine([0,0],[ this.rx,this.ry]);
       });
       this.afterSketch(function() {
