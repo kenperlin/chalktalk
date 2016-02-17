@@ -32,6 +32,7 @@
             mArrow([0,0],[-this.rx,this.ry]);
             mArrow([0,0],[ this.rx,this.ry]);
 
+            textHeight(this.mScale(0.1));
             mText("N", [0, 1 * 1.1]);
             mText("L", [-this.rx * 1.1, this.ry * 1.1]);
             mText("R", [ this.rx * 1.1, this.ry * 1.1]);
