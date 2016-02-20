@@ -88,14 +88,11 @@ function Diagram() {
             color('rgba(0,128,255,.001)');
             fillRect(-w/2,-w/2,w,w);
 
-            if (this.n1 < this.n2) {
-               color('rgba(0,128,255,.1)');
+            color(fadedColor(0.1, 7));
+            if (this.n1 < this.n2)
                fillRect(-w/2,y0,w,w/2);
-            }
-            else if (this.n1 > this.n2) {
-               color('rgba(0,128,255,.1)');
+            else if (this.n1 > this.n2)
                fillRect(-w/2,-w/2,w,w/2);
-            }
          });
 
          x1 = mouseX;
