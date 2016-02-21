@@ -1,5 +1,5 @@
 function() {
-   this.label = 'tentacle1';
+   this.label = 'tentacle';
    this.render = function(elapsed) {
       this.duringSketch(function() {
          mCurve(makeOval(-.25,-1,.5,.5,32,TAU/4,-3*TAU/4));
