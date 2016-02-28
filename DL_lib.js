@@ -436,7 +436,8 @@ THREE.SkinnedMesh.prototype.updateMatrixWorld = function () {
 
       if ( child instanceof THREE.Bone ) {
 
-        child.update( this.identityMatrix, false );
+        if (child.update)
+           child.update( this.identityMatrix, false );
 
       } else {
 

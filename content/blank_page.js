@@ -1,5 +1,5 @@
 var sketchTypes = (
-  "Grid Lattice Motion Noises MothAndCandle"
+  "Motion Noises MothAndCandle"
 ).split(' ');
 
 var imageSequence = [

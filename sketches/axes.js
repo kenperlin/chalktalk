@@ -3,9 +3,6 @@ function() {
    this.is3D = true;
    this.mode = 0;
 
-   this.drawing.add(new DRAWING.Curve([[-1,0],[1,0]]));
-   this.drawing.add(new DRAWING.Curve([[0,-1],[0,1]]));
-
    this.onCmdClick = function() { this.mode = (this.mode + 1) % 2; }
 
    this.point = newVec3();
@@ -26,6 +23,8 @@ function() {
 
    var tmp = newVec3();
    this.render = function() {
+      mLine([-1,0], [1,0]);
+      mLine([0,-1], [0,1]);
       var otherColor = backgroundColor == 'black' ? 'cyan' : 'rgb(0,128,200)';
       this.afterSketch(function() {
          var e = this.pointToPixelMatrix.elements;
