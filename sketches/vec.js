@@ -51,11 +51,13 @@ function() {
    this.mouseUp = function(x, y) { }
 
    this.swipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
-   this.swipe[3] = ['shorter\nvector', function() { if (this.selection > 1) this.selection -= 2; }];
+   this.swipe[3] = ['shorter\nvector', function() { if (! this.isDraggedValue && this.selection > 1) this.selection -= 2; }];
    this.swipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
    this.swipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
-   this.swipe[7] = ['longer\nvector' , function() { this.selection += 2; while (this.nRows() > this.value.length) this.value.push(0); }];
-
+   this.swipe[7] = ['longer\nvector' , function() { if (! this.isDraggedValue) {
+                                                       this.selection += 2;
+						       while (this.nRows() > this.value.length)
+						          this.value.push(0); }}];
    this.render = function(elapsed) {
       var a = 1 / this.nRows();
       switch (this.axis()) {

@@ -1,11 +1,12 @@
 function() {
-   this.T = 0;
    this.label = "bird";
+   this.is3D = true;
    this.isGaze = false;
    this.isTall = false;
    this.gaze = 0.0;
    this.tall = 0.0;
    this.walkT = 0;
+   this.T = 0;
 
    this.choice = new Choice();
 
@@ -134,13 +135,14 @@ function() {
          var Knee = [-1,0,0];
          ik(uLeg, lLeg, Foot, Knee);
 	 Foot[2] = (n==0 ? .3 : -.3) * lLeg;
-	 Knee[2] = Foot[2] / 2;
+	 Knee[2] = Foot[2];
 
          var c = [];
          m.save();
 	    m.identity();
             m.translate(hipX,hipY,0);
             c.push(m.transform([0,0,0]));
+            c.push(m.transform([0,0,Knee[2]]));
             c.push(m.transform(Knee));
             c.push(m.transform(Foot));
             m.save();
