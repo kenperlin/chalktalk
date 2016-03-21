@@ -3,7 +3,9 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-         mCurve(CT.lineFont[16 + this.selection][0]);
+         var curves = CT.lineFont[0][16 + this.selection];
+	 for (var i = 0 ; i < curves.length ; i++)
+            mCurve(curves[i]);
       });
       this.afterSketch(function() {
          if (this.sketchTexts.length == 0)
