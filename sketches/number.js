@@ -9,7 +9,7 @@ function() {
       });
       this.afterSketch(function() {
          if (this.sketchTexts.length == 0)
-            this.setSketchText(0, '' + this.selection, [0,0], 1.5);
+            this.setSketchText(0, '' + this.selection, [0,-.1], 1.5);
       });
    }
 

@@ -115,6 +115,16 @@ app.route("/set").post(function(req, res, next) {
    });
 });
 
+app.route("/writeFile").post(function(req, res, next) {
+   var form = formidable.IncomingForm();
+   form.parse(req, function(err, fields, files) {
+      fs.writeFile(fields.fileName, JSON.parse(fields.contents),
+         function(err) { if (err) console.log(err); }
+      );
+      res.end();
+   });
+});
+
 app.route("/talk").get(function(req, res) {
    res.sendfile("index.html");
 });
