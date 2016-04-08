@@ -37,7 +37,7 @@ function() {
 	    if (this.inValues[i] !== undefined)
 	       this.sketchTexts[i].setValue(roundedString(this.inValues[i]));
          color('red');
-         mText('at' + EXP_3 + ' + bt' + EXP_2 + ' ct + d', [0,-1.2], .5, .5);
+         mText('at' + EXP_3 + ' + bt' + EXP_2 + ' + ct + d', [0,-1.2], .5, .5);
       });
    }
 }

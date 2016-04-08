@@ -3,7 +3,7 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-         var curves = CT.lineFont[0][16 + this.selection];
+         var curves = CT.lineFont[0][48 + this.selection];
 	 for (var i = 0 ; i < curves.length ; i++)
             mCurve(curves[i]);
       });
