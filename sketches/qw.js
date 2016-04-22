@@ -1,14 +1,25 @@
 function() {
-   var P = [
+   var C = [
       "abcdefghi",
-      "z  C #  j",
+      "z  C N  j",
       "y       k",
       "x'     -l",
       "B       S",
-      "w<     >m",
+      "wL     Rm",
       "v       !",
       "u  ? P  n",
-      "t.,Rsrqpo",
+      "t.,Esrqpo",
+   ];
+   var N = [
+      "23`456~78",
+      "1  = N  9",
+      "#       ^",
+      "0+     -@",
+      "B       S",
+      "{;     _}",
+      "$       !",
+      "[  * P  ]",
+      "<.&\\|/%:>",
    ];
    var zoneToCol = [2,2,1,0,0,0,1,2];
    var zoneToRow = [1,0,0,0,1,2,2,2];
@@ -18,13 +29,13 @@ function() {
    this.zone = -2;
    this.message = '';
    this.isCap = 0;
+   this.isNum = 1;
    this.sequence = [];
    this.onEnter = function(p) { window.isWritingToTextSketch = true;  }
    this.onExit  = function(p) { window.isWritingToTextSketch = false; }
    this.onMove = function(p) {
       var radius = sqrt(p.x * p.x + p.y * p.y);
       if (radius > 1.3) {
-         console.log("AHA");
          this.sequence = [];
          this.zone = -2;
          return;
@@ -55,30 +66,31 @@ function() {
       if (this.col < 0)
          return;
       this.sequence = [];
-      var s = P[this.row].substring(this.col, this.col + 1);
+      var s = this.A()[this.row].substring(this.col, this.col + 1);
       switch (s) {
-      case '<':
-         s = L_ARROW;
-         break;
-      case '>':
-         s = R_ARROW;
-         break;
       case 'B':
          s = '\b';
          break;
       case 'C':
          this.isCap = ! this.isCap;
          return;
-      case 'R':
+      case 'E':
          s = '\n';
+         break;
+      case 'L':
+         s = L_ARROW;
+         break;
+      case 'N':
+         this.isNum = ! this.isNum;
+         return;
+      case 'R':
+         s = R_ARROW;
          break;
       case 'S':
          s = ' ';
          break;
       default:
-         if (this.isCap)
-            s = s.toUpperCase();
-         break;
+         s = this.handleShift(s);
       }
       if (currentTextSketch) {
          var SAVED_index = sketchPage.index;
@@ -86,6 +98,14 @@ function() {
          sketchPage.handleTextChar(s);
          sketchPage.index = SAVED_index;
       }
+   }
+   this.handleShift = function(s) {
+      if (this.isCap)
+         s = s.toUpperCase();
+      return s;
+   }
+   this.A = function() {
+      return this.isNum ? N : C;
    }
    this.render = function() {
       this.duringSketch(function() {
@@ -99,25 +119,24 @@ function() {
             mLine([c * innerRadius,s * innerRadius],[c * 1.05, s * 1.05]);
          }
          lineWidth(this.mScale(0.01));
-	 this.sequenceToColAndRow();
+         this.sequenceToColAndRow();
          for (var col = 0 ; col < 9 ; col++)
          for (var row = 0 ; row < 9 ; row++) {
-            var s = P[row].substring(col, col+1);
+            var s = this.A()[row].substring(col, col+1);
             var fh = .18;
             switch (s) {
-            case '<': s = '\u8592'; break;
-            case '>': s = '\u8594'; break;
-            case '#': s = 'NUM '  ; fh = .1; break;
             case 'B': s = ' DEL'  ; fh = .1; break;
             case 'C': s = ' CAP'  ; fh = .1; break;
+            case 'E': s = 'NL'    ; fh = .1; break;
+            case 'L': s = '\u8592'; break;
+            case 'N': s = 'NUM '  ; fh = .1; break;
             case 'P': s = 'ALT '  ; fh = .1; break;
-            case 'R': s = 'NL'    ; fh = .1; break;
+            case 'R': s = '\u8594'; break;
             case 'S': s = 'SPC '  ; fh = .1; break;
             }
             textHeight(this.mScale(fh));
             if (s != ' ') {
-               if (this.isCap)
-                  s = s.toUpperCase();
+               s = this.handleShift(s);
                var x = (4 * floor(col/3) + (col % 3) + 1) / 12;
                var y = (4 * floor(row/3) + (row % 3) + 1) / 12;
                x = 2 * x - 1;
@@ -137,7 +156,7 @@ function() {
                y /= r;
 
                if (col == this.col && row == this.row)
-	          mDrawOval([x - .1, y - .1], [x + .1, y + .1]);
+                  mDrawOval([x - .1, y - .1], [x + .1, y + .1]);
                mText(s, [x, y], .5, .5);
             }
          }
