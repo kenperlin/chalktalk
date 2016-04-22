@@ -3,6 +3,7 @@ function() {
    this.label = "audio";
    this.code = [
       ["sin", "sin(TAU*x*time)"],
+      ["vibrato", "t = 2*PI * x * time;\nvary = 1 + 7 / max(x, 1);\nreturn sin(t) + sin(vary * t) / 4;"],
       ["sawtooth", "x = x * time % 1.0;\nreturn x / 4;"],
       ["triangle", "x = 2 * x * time % 2;\nx = x < 1 ? x : 2 - x;\nreturn x;"],
       ["square", "x = 2 * x * time % 2;\nx = 2 * floor(x) - 1;\nreturn x / 8;"],
