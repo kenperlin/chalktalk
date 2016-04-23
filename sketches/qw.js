@@ -7,7 +7,7 @@ function() {
       "B       S",
       "wL     Rm",
       "v       !",
-      "u  ? P  n",
+      "u  ? A  n",
       "t.,Esrqpo",
    ];
    var N = [
@@ -18,7 +18,7 @@ function() {
       "B       S",
       "{;     _}",
       "$       !",
-      "[  * P  ]",
+      "[  * A  ]",
       "<.&\\|/%:>",
    ];
    var zoneToCol = [2,2,1,0,0,0,1,2];
@@ -28,14 +28,17 @@ function() {
    this.label = 'qw';
    this.zone = -2;
    this.message = '';
+   this.isAlt = 0;
    this.isCap = 0;
-   this.isNum = 1;
+   this.isNum = 0;
    this.sequence = [];
    this.onEnter = function(p) { window.isWritingToTextSketch = true;  }
    this.onExit  = function(p) { window.isWritingToTextSketch = false; }
    this.onMove = function(p) {
-      var radius = sqrt(p.x * p.x + p.y * p.y);
-      if (radius > 1.3) {
+      if (! this._span)
+         this._span = this.xhi - this.xlo;
+      var radius = sqrt(p.x * p.x + p.y * p.y) * 200 / this._span;
+      if (radius > 1) {
          this.sequence = [];
          this.zone = -2;
          return;
@@ -68,11 +71,16 @@ function() {
       this.sequence = [];
       var s = this.A()[this.row].substring(this.col, this.col + 1);
       switch (s) {
+      case ' ':
+         return;
+      case 'A':
+         this.isAlt = ! this.isAlt;
+         return;
       case 'B':
          s = '\b';
          break;
       case 'C':
-         this.isCap = ! this.isCap;
+         this.isCap = (this.isCap + 1) % 3;
          return;
       case 'E':
          s = '\n';
@@ -92,6 +100,8 @@ function() {
       default:
          s = this.handleShift(s);
       }
+      if (this.isCap == 1)
+         this.isCap = 0;
       if (currentTextSketch) {
          var SAVED_index = sketchPage.index;
          sketchPage.index = sketchPage.findIndex(currentTextSketch);
@@ -125,12 +135,12 @@ function() {
             var s = this.A()[row].substring(col, col+1);
             var fh = .18;
             switch (s) {
+            case 'A': s = 'ALT '  ; fh = .1; break;
             case 'B': s = ' DEL'  ; fh = .1; break;
             case 'C': s = ' CAP'  ; fh = .1; break;
             case 'E': s = 'NL'    ; fh = .1; break;
             case 'L': s = '\u8592'; break;
             case 'N': s = 'NUM '  ; fh = .1; break;
-            case 'P': s = 'ALT '  ; fh = .1; break;
             case 'R': s = '\u8594'; break;
             case 'S': s = 'SPC '  ; fh = .1; break;
             }
