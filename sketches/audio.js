@@ -16,7 +16,7 @@ function() {
    this.savedY = "";
    this.savedZ = "";
 
-   this.cleanup = function() {
+   this.onDelete = function() {
       setAudioSignal(function(t) { return 0; });
    }
 

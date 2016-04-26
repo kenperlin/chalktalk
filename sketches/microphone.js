@@ -3,7 +3,7 @@ function() {
    this.label = 'microphone';
    this.tSignal = [];
    this.fSignal = [];
-   this.cleanup = function() { stopMicrophone(); }
+   this.onDelete = function() { stopMicrophone(); }
    this.render = function() {
       mLine([-.5,-1],[.5,-1]);
       mLine([0,-1],[0,-.5]);
