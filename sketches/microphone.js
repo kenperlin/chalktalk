@@ -32,10 +32,14 @@ function() {
          }
       });
    }
-   this.getData = function(t) {
-      var sum = 0;
-      for (var i = 0 ; i < t.length ; i++)
-         sum += abs(t[i]);
-      that.tSignal.push(sum / t.length);
+   this.getData = function(timeData, freqData) {
+      var _max = -10000, i = 0;
+      for ( ; i < freqData.length ; i++)
+         if (freqData[i] > _max)
+            _max = freqData[i];
+      that.tSignal.push((_max + 65) / 256);
+   }
+   this.output = function() {
+      return this.tSignal[this.tSignal.length - 1];
    }
 }
