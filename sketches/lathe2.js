@@ -30,19 +30,13 @@ function() {
             this.trace[3] = this.sketchTrace[3];
       });
       m.rotateX(PI/2);
+
       var that = this;
-
-      window._latheSketchInValue0 = this.inValue[0];
-
-      var profileFunction = function(t) { return sample(that.profile, t); }
-
-      if (typeof window._latheSketchInValue0 == 'function')
-         profileFunction = new Function('t', 'var count = ' + (++that.functionCount) + ';'
-	                                   + 'var p = window._latheSketchInValue0(t);\n'
-					   + 'return [1+p[0], -p[1]];\n');
-
-      mRevolved(32, 64, profileFunction);
+      window._lsiv0 = this.inValue[0];
+      mRevolved(32, 64, typeof _lsiv0 == 'function'
+         ? new Function('t', 'var p=_lsiv0(t);return [1+p[0],-p[1]];//' + ++that._counter)
+         : function(t) { return sample(that.profile, t); });
    }
-   this.functionCount = 0;
+   this._counter = 0;
 }
 
