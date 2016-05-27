@@ -2,17 +2,11 @@ function() {
    this.label = 'lathe2';
 
    this.computeStatistics = function() {
-
-      // GET STATISTICS ON POSITION AND SIZE OF CENTRAL AXIS (1ST STROKE).
-
-      var axisX = this.size * S(0).x;
-      var axisY = this.size * S(0).y;
+      var axisX = this.size * S(0).x;                   // GET STATISTICS ON POSITION AND SIZE
+      var axisY = this.size * S(0).y;                   // OF CENTRAL AXIS (1ST STROKE).
       var axisR = this.size * S(0).height / 2;
-
-      // USE AXIS INFO TO CONVERT 4TH STROKE INTO A PROFILE.
-
-      this.profile = [];
-      var stroke = this.sketchTrace[3];
+      this.profile = [];                                // USE AXIS INFO TO CONVERT
+      var stroke = this.sketchTrace[3];                 // 4TH STROKE INTO A PROFILE.
       for (var i = 0 ; i < stroke.length ; i++)
          this.profile.push( [ (stroke[i][0]-axisX) / axisR, (stroke[i][1]-axisY) / axisR ] );
    }
@@ -23,11 +17,8 @@ function() {
          mLine([0,-1],[1,-1]);
          mLine([0,-1],[-1,-1]);
          mLine([.5,1],[.5,-1]);
-
-         // MORPH TO THE PROFILE THAT THE USER DREW, NOT TO THE GLYPH VERSION.
-
-         if (this.xyz.length == 3)
-            this.trace[3] = this.sketchTrace[3];
+         if (this.xyz.length == 3)                // MORPH TO THE PROFILE THAT THE USER DREW,
+            this.trace[3] = this.sketchTrace[3];  // RATHER THAN TO THE GLYPH VERSION.
       });
       m.rotateX(PI/2);
 
