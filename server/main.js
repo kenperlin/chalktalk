@@ -5,23 +5,14 @@ var fs = require("fs");
 var http = require("http");
 var path = require("path");
 
-/////////////////////////////////////////////////////////////////////////////////////
 
-var ttServer = require('dgram').createSocket('udp4');
-var ttData = [];
-
-ttServer.on('listening', function () {
-    var address = ttServer.address();
-    console.log('UDP Server listening on ' + address.address + ":" + address.port);
-});
-
-ttServer.on('message', function (message, remote) {
-    ttData.push(message);
-});
-
+var ttDgram = require('dgram');
+var ttServer = ttDgram.createSocket('udp4');
+ttServer.on('listening', function () { });
+ttServer.on('message', function (message, remote) { ttData.push(message); });
 ttServer.bind(9090, '127.0.0.1');
+ttData = [];
 
-/////////////////////////////////////////////////////////////////////////////////////
 
 var app = express();
 var port = process.argv[2] || 11235;
@@ -86,8 +77,10 @@ app.route("/getValue").post(function(req, res, next) {
 app.route("/getTT").post(function(req, res, next) {
    var form = formidable.IncomingForm();
    form.parse(req, function(err, fields, files) {
-      returnString(res, JSON.stringify(ttData));
-      ttData = [];
+      if (ttData.length > 0) {
+         returnString(res, ttData[0]);
+         ttData = [];
+      }
    });
 });
 
@@ -328,6 +321,7 @@ try {
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
 }
 
+/*
 try {
    var dgram = require('dgram');
 
@@ -354,6 +348,7 @@ try {
 } catch (err) {
    console.log("Something went wrong during socket binding:\n" + err);
 }
+*/
 
 // DIFFSYNC ENDPOINT SETUP
 try {

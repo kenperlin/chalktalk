@@ -168,12 +168,7 @@ function QW() {
       }
       if (this.isCap == 1)
          this.isCap = 0;
-      if (currentTextSketch) {
-         var SAVED_index = sketchPage.index;
-         sketchPage.index = sketchPage.findIndex(currentTextSketch);
-         sketchPage.handleTextChar(s);
-         sketchPage.index = SAVED_index;
-      }
+      sketchPage.handleTextSketchChar(s);
       return sa;
    }
 

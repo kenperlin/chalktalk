@@ -49,7 +49,7 @@ function() {
       m.translate(0, 2 - this.rodHeight, 0);
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
-      this.angle = this.spring.getPosition();
+      this.angle = def(this.inValues[0], this.spring.getPosition());
       if (isNaN(this.angle)) this.angle = 0;
 
       m.translate(0, this.rodHeight, 0);

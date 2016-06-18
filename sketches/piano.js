@@ -1,10 +1,13 @@
 function() {
    this.label = 'piano';
-   this.nOctaves = 1;
+   this.minOctave = 3;
+   this.maxOctave = 3;
    this.pt = newVec3(-100,0,0);
-   this.cmdSwipe[0] = ['more octaves', function() { this.nOctaves++; }];
-   this.cmdSwipe[4] = ['more octaves', function() { this.nOctaves = max(1, this.nOctaves - 1); }];
-   this.notePressed = -1;
+   this.cmdSwipe[0] = ['add left octave', function() { this.maxOctave++; }];
+   this.cmdSwipe[2] = ['seven octaves', function() { this.minOctave = 0; this.maxOctave = 6; }];
+   this.cmdSwipe[4] = ['add right octave', function() { this.minOctave = max(0, this.minOctave - 1); }];
+   this.cmdSwipe[6] = ['only one octave', function() { this.minOctave = this.maxOctave = 3; }];
+   this.notePressed = null;
    this.onPress = function(p) { this.pt.copy(p); };
    this.onDrag = function(p) { this.pt.copy(p); };
    this.onRelease = function(p) { this.pt.copy(-100,0,0); }
@@ -32,7 +35,7 @@ function() {
 	       this.notePressed = note;
             }
 	    else if (note == this.notePressed)
-	       this.notePressed = -1;
+	       this.notePressed = null;
 
 	    var z = type==0 ? 0 : type==1 ? .15 : type==2 ? -.1 : .05;
 	    color(type==3 ? 'rgb(8,8,8)' : type==2 ? 'rgb(160,160,160)' : type==1 ? 'rgb(32,32,32)' : 'white');
@@ -42,15 +45,15 @@ function() {
 	    mLine([x1,y1,z],[x1,y0,z]);
 	    mLine([x0,y0,z],[x1,y0,z]);
 	 }
-	 for (var octave = 0 ; octave < this.nOctaves ; octave++) {
+	 for (var octave = this.minOctave ; octave <= this.maxOctave ; octave++) {
             for (var k = 0 ; k < 7 ; k++) {
-	       var x = mix(-1, 1, (7 * octave + k + 1) / 8);
-	       this.drawKey(x, 0, 12 * octave + whiteNotes[k]);
+	       var x = mix(-1, 1, (7 * (octave-3) + k + 1) / 8);
+	       this.drawKey(x, 0, 12 * (octave-3) + whiteNotes[k]);
 	    }
             for (var k = 0 ; k < 5 ; k++) {
 	       var key = k + 1 + (k >= 2);
-	       var x = octave * 7 / 4 + mix(-1, 1, key / 8) + (key<3?.06*(key-1.5) : .03*(key-5));
-	       this.drawKey(x, 1, 12 * octave + blackNotes[k]);
+	       var x = (octave-3) * 7 / 4 + mix(-1, 1, key / 8) + (key<3?.06*(key-1.5) : .03*(key-5));
+	       this.drawKey(x, 1, 12 * (octave-3) + blackNotes[k]);
 	    }
 	 }
          mLine([-7/8, h],[7/8, h]);
@@ -58,7 +61,7 @@ function() {
       });
    }
    this.output = function() {
-      return this.notePressed == -1 ? 0 : 130.8 * pow(2, this.notePressed / 12);
+      return this.notePressed == null ? 0 : 261.6 * pow(2, this.notePressed / 12);
    }
 }
 
