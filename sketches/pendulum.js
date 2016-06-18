@@ -33,9 +33,9 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var hubWidth  = stretch('hub width' , 10 * S(0).width);
-      var rodHeight = stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
-      var bobRadius = stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
+      var hubWidth  = this.stretch('hub width' , 10 * S(0).width);
+      var rodHeight = this.stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
+      var bobRadius = this.stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
 
       this.rodHeight = rodHeight * this.adjustHeight;
 
