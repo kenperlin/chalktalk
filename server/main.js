@@ -251,6 +251,7 @@ try {
    var websockets = {};
 
    wss.on("connection", function(ws) {
+      websockets[ws.address] = ws;
       var startTimeMillis = (new Date()).getTime();
 
       var cameraUpdateInterval = null;
@@ -302,9 +303,18 @@ try {
       }
 
       ws.on("message", function(msg) {
-         console.log("got message: " + msg);
          if (msg == "toggleHMDTracking") {
             toggleHMDTracking();
+            return;
+         }
+
+         var obj = JSON.parse(msg);
+         if (obj.eventType !== undefined && obj.eventType.contains("mouse")) {
+            for (var address in websockets) {
+               if (websockets[address] != ws) {
+                  websockets[address].send(msg);
+               }
+            }
          }
       });
 
