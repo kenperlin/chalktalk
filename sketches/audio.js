@@ -1,6 +1,6 @@
 function() {
    _audio_volume = 1;
-   this.label = "audio";
+   this.label = "Audio";
    this.code = [
       ["sin", "sin(TAU*x*time)"],
       ["vibrato", "t = 2*PI * x * time;\nvary = 1 + 7 / max(x, 1);\nreturn sin(t) + sin(vary * t) / 4;"],

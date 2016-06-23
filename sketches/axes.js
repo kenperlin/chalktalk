@@ -1,5 +1,5 @@
 function() {
-   this.label = 'axes';
+   this.label = 'Axes';
    this.is3D = true;
    this.mode = 0;
 

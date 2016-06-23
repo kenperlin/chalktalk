@@ -1,5 +1,5 @@
 function() {
-   this.label = "midi";
+   this.label = "Midi";
 
    // Draw as a musical note.
 

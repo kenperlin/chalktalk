@@ -1,6 +1,6 @@
 
 function() {
-   this.label = 'arc';
+   this.label = 'Arc';
    this.tooltip = 'ARC OF A CIRCLE:\n\n\u2022 Click to toggle radii\n\u2022 Cmd-click to vary labeling\n\u2022 Drag on ends to vary angles';
    this.angle = [0, PI / 4];
    this.showRadii = true;

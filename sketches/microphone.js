@@ -1,6 +1,6 @@
 function() {
    var that = this;
-   this.label = 'microphone';
+   this.label = 'Microphone';
    this.tSignal = [];
    this.fSignal = [];
    this.onDelete = function() { stopMicrophone(); }

@@ -71,12 +71,12 @@ function() {
             }
 
 	 // DRAW LINE DRAWING
-
+/*
 	 color('white');
 	 lineWidth(4);
          for (var i = 0 ; i < this.lineDrawing.length ; i++)
 	    mCurve(this.lineDrawing[i]);
-
+*/
          // DISPLAY OUTLINES OF HIGH PRESSURE REGIONS.
 
 	 lineWidth(0.5);

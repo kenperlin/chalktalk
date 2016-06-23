@@ -3,7 +3,7 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-         mLine([-1,1],[1,1]);
+         mLine([1,1],[-1,1]);
          mLine([0,1],[0,-1]);
       });
 

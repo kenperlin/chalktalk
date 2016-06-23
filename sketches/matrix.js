@@ -1,5 +1,5 @@
 function() {
-   this.labels = 'matrix Bezier Hermite'.split(' ');
+   this.labels = 'Matrix bezier hermite'.split(' ');
    this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }
    var c = "cos";
@@ -83,10 +83,10 @@ function() {
       var type = this.labels[this.selection];
 
       switch (type) {
-      case 'matrix':
+      case 'Matrix':
          sketchMatrix();
          break;
-      case 'Bezier':
+      case 'bezier':
          this.duringSketch(function() {
             mLine([-1, 1],[-1,-1]);
             mCurve( [[-1,1],[-.5,1]].concat(makeOval(-1,0,1,1,16,PI/2,-PI/2))
@@ -98,7 +98,7 @@ function() {
             sketchMatrix();
          });
          break;
-      case 'Hermite':
+      case 'hermite':
          this.duringSketch(function() {
             mLine([-1, 1],[-1,-1]);
             mLine([-1, 0],[ 1, 0]);
@@ -124,15 +124,15 @@ function() {
 
          switch (type) {
 
-         case 'Bezier':
+         case 'bezier':
             out = [ -1,3,-3,1 , 3,-6,3,0 , -3,3,0,0 , 1,0,0,0 ];
             break;
 
-         case 'Hermite':
+         case 'hermite':
             out = [ 2,-3,0,1 , -2,3,0,0 , 1,-2,1,0 , 1,-1,0,0 ];
             break;
 
-         case 'matrix':
+         case 'Matrix':
             if (isMatrixArray(this.inValue[0])) {
                for (var i = 0 ; i < 16 ; i++)
                   out.push(roundedString(this.inValues[i]));
@@ -211,8 +211,8 @@ function() {
 
    this.output = function() {
       var type = this.labels[this.selection];
-      var outValue = type != 'matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
-      var i = this.labels[this.selection] == 'matrix' ? 1 : 0;
+      var outValue = type != 'Matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+      var i = this.labels[this.selection] == 'Matrix' ? 1 : 0;
       if (isDef(this.inValue[i]))
          outValue = mult(outValue, this.inValue[i]);
       return outValue;

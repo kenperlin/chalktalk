@@ -1,5 +1,5 @@
 function() {
-   this.label = "f1d";
+   this.label = "F1d";
    this.code = [["", "t\n"]];
    this.y = 0;
 

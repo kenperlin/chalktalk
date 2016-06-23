@@ -1,5 +1,5 @@
 function() {
-   this.label = "grapher";
+   this.label = "Grapher";
 
    this.choice = new Choice();
    this.s = 0;

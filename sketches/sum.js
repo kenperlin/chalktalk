@@ -32,7 +32,7 @@ function sum(x,y) {
    }
    return dst;
 }
-   this.label = "sum";
+   this.label = "Sum";
    this.code = [["","sum(x,y)"]];
    this.render = function() {
       mLine( [ 0, 1], [ 0, -1] );

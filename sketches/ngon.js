@@ -1,5 +1,5 @@
 function() {
-   this.labels = "triangle diamond pentagon hexagon".split(' ');
+   this.labels = "Polygon3 Polygon4 Polygon5 Polygon6".split(' ');
    this.is3D = true;
 
    var jNext = function(j, P) { return (j + 1) % P.length; }
@@ -72,10 +72,10 @@ function() {
       function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 - TAU * (n-1) / n); }
       if (! isNumeric(this.xlo) || this.P == null) {
          switch (this.labels[this.selection]) {
-         case 'triangle': this.P = makeNgon(3); break;
-         case 'diamond' : this.P = makeNgon(4); break;
-         case 'pentagon': this.P = makeNgon(5); break;
-         case 'hexagon' : this.P = makeNgon(6); break;
+         case 'Polygon3': this.P = makeNgon(3); break;
+         case 'Polygon4' : this.P = makeNgon(4); break;
+         case 'Polygon5': this.P = makeNgon(5); break;
+         case 'Polygon6' : this.P = makeNgon(6); break;
          }
       }
       switch (this.fillMode) {

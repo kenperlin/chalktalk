@@ -1,6 +1,6 @@
 function() {
-   var self = this;
-   this.label = 'soundfile';
+   var nelf = this;
+   this.label = 'Soundfile';
    window.soundfileSketch = this;
 
    this.soundBuffer = null;
