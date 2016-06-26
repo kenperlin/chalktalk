@@ -303,19 +303,18 @@ try {
       }
 
       ws.on("message", function(msg) {
+         var obj, address;
+
          if (msg == "toggleHMDTracking") {
             toggleHMDTracking();
             return;
          }
 
-         var obj = JSON.parse(msg);
-         if (obj.eventType !== undefined && obj.eventType.contains("mouse")) {
-            for (var address in websockets) {
-               if (websockets[address] != ws) {
+         obj = JSON.parse(msg);
+         if (obj.eventType)
+            for (address in websockets)
+               if (websockets[address] != ws)
                   websockets[address].send(msg);
-               }
-            }
-         }
       });
 
       ws.on("close", function() {
