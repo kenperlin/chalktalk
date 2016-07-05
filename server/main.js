@@ -248,17 +248,21 @@ var httpserver = http.Server(app);
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
-   var websockets = {};
+   var websockets = [];
 
    wss.on("connection", function(ws) {
-      websockets[ws.address] = ws;
+
+      for (ws.index = 0 ; websockets[ws.index] ; ws.index++)
+	 ;
+      websockets[ws.index] = ws;
+
       var startTimeMillis = (new Date()).getTime();
 
       var cameraUpdateInterval = null;
       function toggleHMDTracking() {
          if (cameraUpdateInterval == null) {
             // SAVE THIS WEBSOCKET IN THE MAP
-            websockets[ws.address] = ws;
+            websockets[ws.index] = ws;
 
               cameraUpdateInterval = setInterval(function() {
                  var time = ((new Date()).getTime() - startTimeMillis) / 1000;
@@ -295,7 +299,7 @@ try {
               }, 1000 / 60);
          } else {
             // REMOVE THIS WEBSOCKET FROM THE MAP
-            delete websockets[ws.address];
+            delete websockets[ws.index];
 
             clearInterval(cameraUpdateInterval);
             cameraUpdateInterval = null;
@@ -303,7 +307,7 @@ try {
       }
 
       ws.on("message", function(msg) {
-         var obj, address;
+         var obj, address, index;
 
          if (msg == "toggleHMDTracking") {
             toggleHMDTracking();
@@ -311,15 +315,16 @@ try {
          }
 
          obj = JSON.parse(msg);
-         if (obj.eventType)
-            for (address in websockets)
-               if (websockets[address] != ws)
-                  websockets[address].send(msg);
+
+         if (obj.eventType || obj.global || obj.code)
+            for (index = 0 ; index < websockets.length ; index++)
+               if (index != ws.index)
+                  websockets[index].send(msg);
       });
 
       ws.on("close", function() {
-         // REMOVE THIS WEBSOCKET FROM THE MAP
-         delete websockets[ws.address];
+         // REMOVE THIS WEBSOCKET
+         websockets.splice(ws.index, 1);
 
          clearInterval(cameraUpdateInterval);
          cameraUpdateInterval = null;
@@ -342,10 +347,8 @@ try {
          logged = true;
       }
 
-      for (var address in websockets) {
-         var websocket = websockets[address];
-         websockets[address].send(message);
-      }
+      for (var index = 0 ; index < websockets.length ; index++)
+         websockets[index].send(message);
    });
 
    socket.on("listening", function() {
