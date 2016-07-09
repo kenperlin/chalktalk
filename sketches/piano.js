@@ -1,4 +1,7 @@
 function() {
+/*
+   TODO:  Add chords.
+*/
    this.label = 'piano';
    this.minOctave = 3;
    this.maxOctave = 3;
@@ -60,8 +63,11 @@ function() {
          mLine([-7/8,-h],[7/8,-h]);
       });
    }
+   this.noteToPitch = function(note) {
+      return 261.6 * pow(2, note / 12);
+   }
    this.output = function() {
-      return this.notePressed == null ? 0 : 261.6 * pow(2, this.notePressed / 12);
+      return this.notePressed == null ? 0 : this.noteToPitch(this.notePressed);
    }
 }
 

@@ -2,7 +2,7 @@ function() {
    this.label = 'tracked';
 
    this.render = function() {
-      var trackId = -1, r;;
+      var trackId = -1, r, ax=0, ay=0, az=0;
 
       switch (this.colorId) {
       case 2: case 8: trackId = 0; break;
@@ -20,6 +20,9 @@ function() {
          m.rotateY((r.alpha0 - r.alpha) * Math.PI / 180            );
          m.rotateZ(          - r.beta   * Math.PI / 180            );
          m.rotateX(            r.gamma  * Math.PI / 180 + Math.PI/2);
+	 ax = r.ax;
+	 ay = r.ay;
+	 az = r.az;
       }
 
       this.duringSketch(function() {
@@ -27,10 +30,11 @@ function() {
          mCurve([ [-1,.5], [ 1, .5], [1,-.5] ]);
       });
 
+      m.translate(.1 * ay * abs(ay), -.1 * ax * abs(ax), .1 * az * abs(az));
       m.scale(1,.5,.05);
       mCube();
-      m.translate(0,0,.1);
-      m.scale(.83,.9,1);
+      m.translate(-.77,0,.1);
+      m.scale(.09,.18,1);
       mCube().color(0,0,0);
    }
 }

@@ -307,19 +307,9 @@ try {
       }
 
       ws.on("message", function(msg) {
-         var obj, address, index;
-
-         if (msg == "toggleHMDTracking") {
-            toggleHMDTracking();
-            return;
-         }
-
-         obj = JSON.parse(msg);
-
-         if (obj.eventType || obj.global || obj.code)
-            for (index = 0 ; index < websockets.length ; index++)
-               if (index != ws.index)
-                  websockets[index].send(msg);
+         for (var index = 0 ; index < websockets.length ; index++)
+            if (index != ws.index)
+               websockets[index].send(msg);
       });
 
       ws.on("close", function() {

@@ -113,25 +113,16 @@ function() {
             mCurve([[.85,.85], [-.85,-.85]]);
          }
          this.afterSketch(function() {
-	    var s = '';
 
             if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < S.length ; n++)
                this.placeVertex(n, S[n]);
 
-            if (this.isFirstTime)
-               for (n = 0 ; n < S.length ; n++)
-                  s += '   vertices[' + n + '] = new Vector4(' + S[n][0] + ',' + S[n][1] + ',' + C[n][2] + ',' + S[n][3] + ');\n';
-
             var _index = 0;
             for (var i = 0   ; i < 4 ; i++)
             for (var j = i+1 ; j < 5 ; j++) {
                this.placeEdge(n, n - S.length, i, j);
-
-	          if (this.isFirstTime)
-	             s += '   index[' + _index++ + '] = new Vector2(' + i + ',' + j + ');\n';
-
                n++;
             }
 
@@ -155,14 +146,8 @@ function() {
                for (var i = 0 ; i < 8 ; i++) {
                   var j = edges[axis][i];
                   this.placeEdge(n, n - C.length, j, j + (1<<axis));
-
-	          if (this.isFirstTime)
-	             s += '   index[' + _index++ + '] = new Vector3(' + I + ',' + J + ',' + c + ');\n';
-
                   n++;
                }
-            if (mode %2 != 0) {
-            }
          });
          break;
 
@@ -180,10 +165,6 @@ function() {
             var n = 0;
             for ( ; n < 8 ; n++) {
                this.placeVertex(n, A[n]);
-
-               if (this.isFirstTime)
-                  s += '   vertices[' + n + '] = new Vector4(' + A[n][0] + ',' + A[n][1] + ',' + A[n][2] + ',' + A[n][3] + ');\n';
-
                this.mesh.children[n].setMaterial(materials[alt ? 0 : 1 + floor(n/2)]);
             }
 
@@ -205,8 +186,6 @@ function() {
                }
                this.mesh.children[n].setMaterial(materials[c]);
                this.placeEdge(n, n - A.length, I, J);
-	       if (this.isFirstTime)
-	          s += '   index[' + _index++ + '] = new Vector3(' + I + ',' + J + ',' + c + ');\n';
                n++;
             }
 
@@ -250,10 +229,6 @@ function() {
             for (var n = 0 ; n < V.length ; n++)
                this.placeVertex(n, V[n]);
 
-            if (this.isFirstTime)
-               for (var n = 0 ; n < V.length ; n++)
-                  s += '   vertices[' + n + '] = new Vector4(' + V[n][0] + ',' + V[n][1] + ',' + V[n][2] + ',' + V[n][3] + ');\n';
-
             var _index = 0;
             for (var i = 0   ; i < 23 ; i++)
             for (var j = i+1 ; j < 24 ; j++) {
@@ -261,10 +236,6 @@ function() {
                if (k >= 0) {
                   this.mesh.children[n].setMaterial(materials[k]);
                   this.placeEdge(n, n - V.length, i, j);
-	          if (this.isFirstTime)
-	             s += '   index[' + _index++ + '] = new Vector4(' + i + ',' + j + ',' + 
-		                                                    edgeColor(V[i], V[j], 1) + ',' +
-								    edgeColor(V[i], V[j], 2) + ');\n';
                   n++;
                }
             }
