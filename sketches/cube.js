@@ -25,7 +25,8 @@ function() {
    this.render = function(elapsed) {
       m.scale(this._scaleX, this._scaleY, 1);
       this.duringSketch(function() {
-         mClosedCurve([v[0],v[2],v[3],v[1]]);
+         mCurve([v[0],v[2],v[3]]);
+         mCurve([v[3],v[1],v[0]]);
       });
       this.afterSketch(function() {
          for (var n = 0 ; n < v.edges.length ; n++)

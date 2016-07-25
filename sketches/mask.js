@@ -244,7 +244,7 @@ function() {
    this.render = function() {
 
       this.duringSketch(function() {
-         mCurve([[-1,1],[1,1],[0,-1],[-1,1]]);
+         mLines([[-1,1],[1,1],[0,-1],[-1,1]]);
       });
 
       this.afterSketch(function() {

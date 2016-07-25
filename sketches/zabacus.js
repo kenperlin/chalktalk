@@ -41,13 +41,17 @@ function() {
    this.render = function(elapsed) {
       this.duringSketch(function() {
          mCurve( [[-1,1],[1,1],[1,-1],[-1,-1],[-1,1]] );
-         mCurve( [[ -1,.5],[  1,.5]] );
-         mCurve( [[-.6, 1],[-.6,-1]] );
-         mCurve( [[  0, 1],[  0,-1]] );
-         mCurve( [[ .6, 1],[ .6,-1]] );
+         mCurve( [[-1,.5],[1,.5]] );
       });
 
       this.afterSketch(function() {
+
+         if (isDef(this.inValue[0])) {
+	    var n = max(0, min(999, floor(this.inValue[0])));
+	    this.digits[0] = floor(n / 100);
+	    this.digits[1] = floor((n % 100) / 10);
+	    this.digits[2] = floor(n % 10);
+	 }
 
          if (this.animateValue)
             this.digits[2] += 16 * elapsed;

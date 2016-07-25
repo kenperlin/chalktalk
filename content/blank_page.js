@@ -1,5 +1,5 @@
 var sketchTypes = (
-  "Motion Noises MothAndCandle"
+  "Motion Noises"
 ).split(' ');
 
 var imageSequence = [

@@ -17,7 +17,8 @@ function() {
    }
    this.render = function(elapsed) {
       this.duringSketch(function() {
-         mCurve([[1,-1],[-1,-1],[-1,1],[1,1],[1,-1]]);
+         mCurve([[1,-1],[-1,-1],[-1,1]]);
+         mCurve([[-1,1],[1,1],[1,-1]]);
       });
       this.afterSketch(function() {
          var C0 = [], C1 = [], C2 = [], C3 = [], C4 = [];

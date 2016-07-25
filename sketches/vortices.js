@@ -16,7 +16,7 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-	 mCurve(makeOval(-1,-1,2,2,20,0, -TAU));
+         mLines([[-1,0],[0,1],[0,-1],[2,1]]);
       });
       this.afterSketch(function() {
          lineWidth(2);

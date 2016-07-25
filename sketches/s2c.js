@@ -15,7 +15,8 @@ function() {
       m.scale(this._scaleX, this._scaleY, 1);
       mCube();
       this.duringSketch(function() {
-         mCurve([ [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1] ]);
+         mCurve([ [-1,-1,1],[1,-1,1],[1,1,1] ]);
+         mCurve([ [1,1,1],[-1,1,1],[-1,-1,1] ]);
       });
    }
 }

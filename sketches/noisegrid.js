@@ -1,5 +1,5 @@
 function() {
-   this.label = 'grid';
+   this.label = 'noisegrid';
    this.gridMode = -1;
    this.is3D = true;
 
@@ -12,15 +12,21 @@ function() {
       var f = 2/3;
       m.save();
          m.scale(this.size / 400);
-         if (this.gridMode != 3) {
-            mLine([-1,0], [1, 0]);
-            mLine([ 0,1], [0, -1]);
+	 this.duringSketch(function() {
             mLine([-1, f], [1, f]);
-            mLine([-1,-f], [1,-f]);
             mLine([-f,1], [-f,-1]);
+            mLine([-1,-f], [1,-f]);
             mLine([ f,1], [ f,-1]);
-         }
+	 });
          this.afterSketch(function() {
+            if (this.gridMode != 3) {
+               mLine([-1,0], [1, 0]);
+               mLine([ 0,1], [0, -1]);
+               mLine([-1, f], [1, f]);
+               mLine([-1,-f], [1,-f]);
+               mLine([-f,1], [-f,-1]);
+               mLine([ f,1], [ f,-1]);
+            }
 
             function n2(x, y) { return noise2(x, y + 10); }
 

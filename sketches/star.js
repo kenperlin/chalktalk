@@ -1,7 +1,7 @@
 
 function() {
    this.label = 'star';  
-   this.nSides = 5;
+   this.nSides = 3;
    this.swipe[2] = ['more sides', function() { this.nSides += 2; }];
    this.swipe[6] = ['fewer sides', function() { this.nSides = max(3, this.nSides - 2); }];
    this.render = function() {
@@ -10,6 +10,6 @@ function() {
          var a = n * TAU * i / this.nSides;
 	 c.push([sin(a),cos(a)]);
       }
-      mCurve(c);
+      mLines(c);
    }
 }

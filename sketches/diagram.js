@@ -1,5 +1,5 @@
 function Diagram() {
-   this.labels = "rectangle refract circles".split(' ');
+   this.labels = "refract circles".split(' ');
 
    this.theta = 0;
 
@@ -60,7 +60,6 @@ function Diagram() {
 
       if (this.mousePressed)
          switch (this.labels[this.selection]) {
-         case 'rectangle':
          case 'triangle':
             this.sx *= (this.size - (this.dragX - this.x)) / this.size;
             this.sy *= (this.size + (this.dragY - this.y)) / this.size;
@@ -215,12 +214,6 @@ function Diagram() {
             }
          });
 
-         break;
-
-      case "rectangle":
-         var xx = w/2 * this.sx;
-         var yy = h/2 * this.sy * .8;
-         drawClosedCurve([ [xx,-yy], [xx,yy], [-xx,yy], [-xx,-yy] ]);
          break;
 
       case "triangle":

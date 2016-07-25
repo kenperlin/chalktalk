@@ -30,11 +30,11 @@ function() {
          mCurve([ [-1,.5], [ 1, .5], [1,-.5] ]);
       });
 
-      m.translate(.1 * ay * abs(ay), -.1 * ax * abs(ax), .1 * az * abs(az));
+      m.translate(.05 * ay * abs(ay), -.05 * ax * abs(ax), .05 * az * abs(az));
       m.scale(1,.5,.05);
       mCube();
       m.translate(-.77,0,.1);
       m.scale(.09,.18,1);
-      mCube().color(0,0,0);
+      mCube().color(r && r.compass ? 255 : 0,0,0);
    }
 }

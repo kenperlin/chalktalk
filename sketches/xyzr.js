@@ -10,7 +10,8 @@ function() {
       var X = cos(PI/4), Y = sin(PI/4);
 
       textHeight(this.mScale(0.1));
-      mCurve(arc());
+      mCurve(arc(0, 0, 1,   PI/4, 3*PI/4, 10));
+      mCurve(arc(0, 0, 1, 3*PI/4, 9*PI/4, 30));
 
       if (this.show_xyzr) {
          mLine([0, 0], [X, Y]);

@@ -7,7 +7,8 @@ function() {
    this.qw = new QW();
    this.render = function() {
       this.duringSketch(function() {
-         mCurve([[.5,1],[-.5,-1],[-.5,1],[.5,-1]]);
+         mCurve([[.5,1],[-.5,-1],[-.5,1]]);
+         mCurve([[-.5,1],[.5,-1]]);
       });
       this.afterSketch(function() {
          var faded = backgroundColor == 'white' ? .3 : .1;
