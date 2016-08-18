@@ -171,69 +171,6 @@
       }
    }
    Motion.prototype = new Sketch;
-
-   function Noises() {
-      this.labels = "noise1D absns1D".split(' ');
-
-      this.freqs = [1];
-      this.mode = "none";
-      this.mouseX = 0;
-      this.mouseY = 0;
-      this.t0 = 0;
-
-      this.under = function(sketch) {
-         if (sketch instanceof Noises)
-            this.freqs = this.freqs.concat(sketch.freqs);
-      }
-
-      this.mouseDrag = function(x, y) {
-         if (isDef(this.dragX))
-            this.t0 -= 2 * (x - this.dragX) / (this.xhi - this.xlo);
-         this.dragX = x;
-      }
-
-      this.swipe[2] = ['double freq', function() {
-         for (var n = 0 ; n < this.freqs.length ; n++)
-            this.freqs[n] *= 2;
-      }];
-
-      this.swipe[6] = ['half freq', function() {
-         for (var n = 0 ; n < this.freqs.length ; n++)
-            this.freqs[n] /= 2;
-      }];
-
-      this.render = function(elapsed) {
-         m.save();
-            m.scale(this.size / 350);
-
-            color(140,140,140);
-            mLine([-1,0],[1,0]);
-            color(this.color);
-
-            var maxFreq = 1;
-            for (var n = 0 ; n < this.freqs.length ; n++)
-               maxFreq = max(maxFreq, this.freqs[n]);
-            var stepSize = 0.03 / maxFreq;
-
-            var c = [];
-            for (var t = -1 ; t < 1 + stepSize ; t += stepSize) {
-               if (t > 1)
-                  t = 1;
-               var signal = 0;
-               for (var n = 0 ; n < this.freqs.length ; n++) {
-                  var freq = this.freqs[n];
-                  var f = noise2((this.t0 + t) * freq, 200 * freq) / freq;
-                  signal += this.selection == 1 ? abs(f) : f;
-               }
-               c.push([t, signal]);
-            }
-            mCurve(c);
-
-         m.restore();
-      }
-   }
-   Noises.prototype = new Sketch;
-
 /*
    Things to work on:
            DONE Coffee cup:
@@ -265,93 +202,6 @@
                 - draw a circle.
                 - drag circle to contour to create 3D shape.
                 - add texture (show code).
-*/
-/*
-var marbleFragmentShader = ["\
-   void main(void) {\n\
-      float x = vPosition.x;\
-      float y = vPosition.y;\
-      float t = selectedIndex == 3. ? .7 * noise(vec3(x,y,0.)) :\n\
-                selectedIndex == 4. ? .5 * fractal(vec3(x,y,5.)) :\n\
-                selectedIndex == 5. ? .4 * (turbulence(vec3(x*1.5,y*1.5,10.))+1.8)\n\
-                                    : .0 ;\n\
-      float s = .5 + .5*cos(7.*x+6.*t);\n\
-      if (selectedIndex == 2.) \n\
-         s = .5 + noise(vec3(3.*x,3.*y,10.));\n\
-      else if (selectedIndex > 0.)\n\
-         s = pow(s, .1);\n\
-      vec3 color = vec3(s,s*s,s*s*s);\n\
-      gl_FragColor = vec4(color,alpha);\n\
-   }\n\
-"].join("\n");
-
-registerGlyph("marble()",[
-   [ [-1,1],[1,1],[1,-1],[-1,-1],[-1,1] ],    // SQUARE OUTLINE CW FROM TOP LEFT.
-   [ [-1/3,1], [-1/3,-1] ],
-   [ [ 1/3,1], [ 1/3,-1] ],
-]);
-
-function marble() {
-   var sketch = addPlaneShaderSketch(defaultVertexShader, marbleFragmentShader);
-   sketch.code = [
-      ["stripe", ".5 + .5 * sin(x)        "],
-      ["pinstripe", "pstripe(x) = pow(sin(x), 0.1)"],
-      ["noise", ".5 + .5 * noise(x,y,z))"],
-      ["add noise", "pstripe(x + noise(x,y,z))"],
-      ["add fractal", "pstripe(x + fractal(x,y,z))"],
-      ["add turbulence", "pstripe(x + turbulence(x,y,z))"],
-   ];
-}
-*/
-
-/*
-var coronaFragmentShader = ["\
-   void main(void) {\n\
-      float x = vPosition.x;\
-      float y = vPosition.y;\
-      float a = .7;\n\
-      float b = .72;\n\
-      float s = 0.;\n\
-      float r0 = sqrt(x*x + y*y);\n\
-      if (r0 > a && r0 <= 1.) {\n\
-         float r = r0;\n\
-         if (selectedIndex == 2.)\n\
-            r = min(1., r + 0.2 * turbulence(vec3(x,y,0.)));\n\
-         else if (selectedIndex == 3.) {\n\
-            float ti = uTime*.3;\n\
-            float t = mod(ti, 1.);\n\
-            float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));\n\
-            float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));\n\
-            r = min(1., r - .1 + 0.3 * mix(u0, u1, t));\n\
-         }\n\
-         s = (1. - r) / (1. - b);\n\
-      }\n\
-      if (r0 < b)\n\
-         s *= (r0 - a) / (b - a);\n\
-      vec3 color = vec3(s);\n\
-      if (selectedIndex >= 1.) {\n\
-         float ss = s * s;\n\
-         color = s*vec3(1.,ss,ss*ss);\n\
-      }\n\
-      gl_FragColor = vec4(color,alpha*s);\n\
-   }\
-"].join("\n");
-
-registerGlyph("corona()",[
-   makeOval(-.5, -.5, 1, 1, 32,PI/2,5*PI/2),              // INNER LOOP CCW FROM TOP.
-   makeOval(-1, -1, 2, 2, 32,PI/2,5*PI/2),                // OUTER LOOP CCW FROM TOP.
-]);
-
-function corona() {
-   var sketch = addPlaneShaderSketch(defaultVertexShader, coronaFragmentShader);
-   sketch.code = [
-      ["radial", "r = radius(x,y)"],
-      ["color grad", "grad(r)"],
-      ["turbulence", "grad(r + turbulence(P))"],
-      ["animate", "grad(r + turbulence(P(uTime)))"],
-   ];
-   sketch.selectedIndex = 3;
-}
 */
 
 var flameFragmentShader = ["\
@@ -440,11 +290,6 @@ function sliced() {
    sketch.mouseDrag = function(x, y) {}
    sketch.spinRate = 0;
    sketch.spinAngle = 0;
-/*
-   sketch.onClick = function() {
-      this.spinRate = -1 - this.spinRate;
-   }
-*/
 
    sketch.swipe[2] = ['less spin', function() { this.spinRate = -.5 - this.spinRate; }];
    sketch.swipe[6] = ['more spin', function() { this.spinRate = 0; }];

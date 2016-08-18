@@ -50,7 +50,7 @@ function() {
             inValue = this.inValue[0];
             switch (arrayDepth(inValue)) {
             case 1:
-               V = inValue; x = V[0]; y = V[1]; z = V[2];
+               V = inValue; x = V[0]; y = V[1]; z = def(V[2]);
                lineWidth(0.5);
                mLine([x,0,0],[x,y,0]);
                mLine([0,y,0],[x,y,0]);
@@ -65,6 +65,7 @@ function() {
                mLine([x-.01,y,z], [x+.01,y,z]);
                mLine([x,y-.01,z], [x,y+.01,z]);
                mLine([x,y,z-.01], [x,y,z+.01]);
+	       mFillDisk(V, 0.05);
                break;
             case 2:
                if (inValue.color)

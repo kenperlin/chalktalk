@@ -2,9 +2,11 @@
 function() {
 
 /*
-   TO DO:   Add translational joints.
+   TO DO:   Get joints to rotate around the correct point.
+            Add translational joints.
             Create more sensible semantics for joints.
 	    Output joints when outputting a sketch.
+	    Add stretch capability.
 */
 
    this.labels = [ 'LineUp'       , 'LineDown'    , 'LineLeft'    , 'LineRight'    ,
@@ -20,6 +22,13 @@ function() {
    this._p1 = newVec3();
    this._p2 = newVec3();
    this._p3 = newVec3();
+
+   this.under = function(sketch) {
+      if (sketch.isFreehandSketch() && sketch.text.length > 0) {
+         this.saveAs(sketch.text);
+	 sketch.fade();
+      }
+   }
 
    this.createLine = function(ax, ay, bx, by) {
       var cx = (ax + bx) / 2, cy = (ay + by) / 2;
@@ -41,21 +50,6 @@ function() {
       dst.y = this.unadjustY(dst.y);
    }
 
-   this.isAtMouse = function(x, y) {
-      this.p2p(this._p0, this._p1);
-      this._p2.x = x;
-      this._p2.y = y;
-      this.p2p(this._p2, this._p3);
-      var dx = this._p3.x - this._p1.x;
-      var dy = this._p3.y - this._p1.y;
-      return abs(dx) < 10 && abs(dy) < 10;
-   }
-
-   this._setPointAtCursor = function(i, x, y) {
-      this._pointAtCursor = [i, x, y];
-      mFillDisk([x, y], 10 / this.mScale(1));
-   }
-
    this.renderCurve = function(curve, i) {
       if (curve.type == 'joint') {
 	 mDrawDisk(curve.data, 0.2);
@@ -64,13 +58,13 @@ function() {
       else
          mDraw(curve.type, curve.bounds, curve.data);
 
-      if (isDef(i) && this._pointAtCursor == 'no match' && this.isAfterSketch()) {
-         var cx = curve.bounds[0], cy = curve.bounds[1],
-             rx = curve.bounds[2], ry = curve.bounds[3];
-         if (this.isAtMouse(cx   , cy   )) this._setPointAtCursor(i, cx   , cy   );
-         if (this.isAtMouse(cx-rx, cy-ry)) this._setPointAtCursor(i, cx-rx, cy-ry);
-         if (this.isAtMouse(cx+rx, cy+ry)) this._setPointAtCursor(i, cx+rx, cy+ry);
-      }
+      this.afterSketch(function() {
+	 if (this._pointAtCursor != 'no match') {
+            var x = this._pointAtCursor[1];
+            var y = this._pointAtCursor[2];
+            mFillDisk([x, y], 10 / this.mScale(1));
+         }
+      });
    }
 
    this.getFirstPoint = function(curve) {
@@ -120,7 +114,6 @@ function() {
       var curves = this._curves[this.selection];
       var a, b, i, d;
 
-      this._pointAtCursor = 'no match';
       for (i = 0 ; i < curves.length ; i++)
          this.renderCurve(curves[i], i);
 
@@ -154,7 +147,7 @@ function() {
          var xy = [ this._pointAtCursor[1],
                     this._pointAtCursor[2] ];
          var curves = this._curves[this.selection];
-         curves.splice(i + 1, 0, this.createJoint(xy));
+         curves.splice(i, 0, this.createJoint(xy));
       }
    }
 
@@ -170,8 +163,13 @@ function() {
    }
 
    this.onCmdClick = function(pt) {
+      this.saveAs('draw01');
+   }
+
+   this.saveAs = function(name) {
+      name = '_' + name;
+      var jointNum = 0;
       var curves = this._curves[this.selection], i, a, b, c;
-      var name = 'draw01';
       var code = 'function() {\n';
       code += "   this.label = '" + name + "';\n";
       code += '   this.render = function() {\n';
@@ -194,13 +192,18 @@ function() {
                                       roundedString(curve.data  [0]) + ',' +
                                       roundedString(curve.data  [1]) + ']);\n';
             break;
+         case 'joint': 
+	    var x = roundedString(curve.data[0]);
+	    var y = roundedString(curve.data[1]);
+	    code += '\n';
+	    code += '      m.translate([' + x + ',' + y + ',0]);\n';
+	    code += '      m.rotateZ(this.inValues[' + jointNum++ + ']);\n';
+	    code += '      m.translate([' + -x + ',' + -y + ',0]);\n';
+	    code += '\n';
+            break;
          }
       }
       code += '   }\n';
-      code += '   this.onCmdPress   = function(p) { this.editRenderPress  (p); }\n';
-      code += '   this.onCmdDrag    = function(p) { this.editRenderDrag   (p); }\n';
-      code += '   this.onCmdRelease = function(p) { this.editRenderRelease(p); }\n';
-      code += '   this.onCmdClick = function(p) { this.spliceRender(2, 0, \'m.rotateZ(this.inValue[0]);\'); }\n';
       code += '}\n';
       createSketchType(name, code);
    }
@@ -214,14 +217,63 @@ function() {
    }
 
    this.onMove = function(pt) {
-      this._p0.x = pt.x;
-      this._p0.y = pt.y;
+      var curves = this._curves[this.selection], i, curve, that = this, cx, cy, rx, ry;;
+
+      this.pointToPixel(pt, this._p0);
+      this._p0.x = this.unadjustX(this._p0.x);
+      this._p0.y = this.unadjustY(this._p0.y);
+
+      function checkForMouseAtCursor(x, y) {
+         pt.x = x;
+         pt.y = y;
+         that.pointToPixel(pt, that._p1);
+
+	 var dx = that._p1.x - that._p0.x;
+	 var dy = that._p1.y - that._p0.y;
+	 if (dx * dx + dy * dy < 10 * 10)
+	    that._pointAtCursor = [i, x, y];
+      }
+
+      this._pointAtCursor = 'no match';
+      for (i = 0 ; i < curves.length ; i++) {
+         curve = curves[i];
+         if (curve.type == 'joint')
+	    continue;
+
+         cx = curve.bounds[0];
+	 cy = curve.bounds[1],
+         rx = curve.bounds[2];
+	 ry = curve.bounds[3];
+         switch (curve.type) {
+	 case 'line':
+            checkForMouseAtCursor(cx, cy);
+            checkForMouseAtCursor(cx-rx, cy-ry);
+            checkForMouseAtCursor(cx+rx, cy+ry);
+	    break;
+	 case 'arc':
+            checkForMouseAtCursor(cx-rx, cy);
+            checkForMouseAtCursor(cx+rx, cy);
+            checkForMouseAtCursor(cx, cy-ry);
+            checkForMouseAtCursor(cx, cy+ry);
+	    break;
+         }
+      }
    }
 
    this.onPress = function(pt) {
       var curves = this._curves[this.selection], i, a, b, c;
+/*
       this._a[0] = this.match(0, pt.x);
       this._a[1] = this.match(1, pt.y);
+*/
+      this._a[0] = pt.x;
+      this._a[1] = pt.y;
+      if (this._pointAtCursor != 'no match') {
+         this._a[0] = this._pointAtCursor[1];
+         this._a[1] = this._pointAtCursor[2];
+	 console.log(this._a[0] + ' ' + this._a[1]);
+      }
+
       this._curveState = 'none';
       for (i = 0 ; i < curves.length ; i++) {
          if (curves[i].type == 'joint')
@@ -289,9 +341,11 @@ function() {
 
       switch (this._curveState) {
       case 'horizontal line':
+         C.bounds[1] = a[1];
          C.bounds[3] = 0;
          break;
       case 'vertical line':
+         C.bounds[0] = a[0];
          C.bounds[2] = 0;
          break;
       case 'horizontal arc':

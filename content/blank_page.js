@@ -1,5 +1,5 @@
 var sketchTypes = (
-  "Motion Noises"
+  "Motion"
 ).split(' ');
 
 var imageSequence = [
