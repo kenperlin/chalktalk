@@ -2,13 +2,24 @@ function() {
    this.label = 'score';
    this.downKeys = {};
    this.render = function() {
-      mCurve(buildCurve([[.15,-.5],-1,[-.09,.12],2,[.17,.15],1,[-.22,-.2],-1,[-.23,.25],.8,[.35,.4],-2,[.07,.2]]));
-      mCurve(buildCurve([[.16,.44],-1.3,[-.07,-.2],[.18,-.93],2,[-.14,-.14],3.5,[.07,.07]]));
+
+      var curve1 = buildCurve([[.15,-.5],-1,[.06,-.38],2,[.31,-.23],1,[.36,-.58],
+                                -1,[.13,-.33],.8,[.54,.07],-3,[.5,.25]]);
+
+      var curve2 = buildCurve([[.27,.25],[.4,-.78],2,[.26,-.92],3.5,[.19,-.71]]);
+
+      var curve3 = buildCurve([[-.18,-1.83],4,[-.09,-1.76],2,[.04,-1.63],.5,[-1.09,-2.48]]);
+      var curve4 = buildCurve([[.32,-1.73],4,[.36,-1.69]]);
+      var curve5 = buildCurve([[.32,-1.93],4,[.36,-1.89]]);
 			        
+      mCurve(curve1);
+      mCurve(curve2);
+
       this.afterSketch(function() {
-         mCurve(buildCurve([[-.18,-1.83],4,[.085,.075],2,[.22,.2],.5,[-1.35,-.65]]));
-         mCurve(buildCurve([[.32,-1.73],4,[.04,.04]]));
-	 mCurve(buildCurve([[.32,-1.93],4,[.04,.04]]));
+         mCurve(curve3);
+         mCurve(curve4);
+	 mCurve(curve5);
+
 	 lineWidth(this.mScale(.007));
          var i, y, key;
          for (i = 0 ; i < 5 ; i++) {
@@ -32,3 +43,4 @@ function() {
       });
    }
 }
+
