@@ -1,5 +1,5 @@
 function() {
-   this.labels = "Slidex Slidey".split(' ');
+   this.labels = "slidex slidey".split(' ');
 
    this.disableClickToLink = true;
 

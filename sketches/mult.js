@@ -2,7 +2,7 @@ function() {
    /*
       Multiply a number, vector or matrix by a number, vector or matrix.
    */
-   this.label = "Mult";
+   this.label = "mult";
    this.render = function() {
       mLine( [-1, 1], [ 1, -1] );
       mLine( [ 1, 1], [-1, -1] );

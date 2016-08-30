@@ -4,17 +4,60 @@ var formidable = require("formidable");
 var fs = require("fs");
 var http = require("http");
 var path = require("path");
-
-
-var ttDgram = require('dgram');
-var ttServer = ttDgram.createSocket('udp4');
-ttServer.on('listening', function () { });
-ttServer.on('message', function (message, remote) { ttData.push(message); });
-ttServer.bind(9090, '127.0.0.1');
-ttData = [];
-
-
+var db = require("./db.js");
+var mongoose = require('mongoose');
+var SketchSchema = require('../schemas/sketch_objs');
 var app = express();
+var session = require('express-session');
+
+// var mongoose = require('mongoose');
+// var SavedSketch;
+
+// var mongoURI = "mongodb://localhost:27017/test";
+// var MongoDB = mongoose.connect(mongoURI).connection;
+// MongoDB.on('error', function(err) { console.log(err.message); });
+// MongoDB.once('open', function() {
+//   console.log("mongodb connection open");
+
+  //creating the schema for sketches
+var sketchSchema =  mongoose.Schema({ name: String, sketchData : Array
+  });
+var SavedSketch = mongoose.model('Sketch', sketchSchema);
+// });
+
+
+var userSchema =  new mongoose.Schema({
+  username: {type: String, unique : true},
+  password: {type: String},
+  firstname: String,
+  lastname: String,
+  
+  sketches:[sketchSchema]
+});
+
+var User = mongoose.model('User', userSchema);
+
+module.exports = User;
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+var ttServer = require('dgram').createSocket('udp4');
+var ttData = [];
+
+ttServer.on('listening', function () {
+    var address = ttServer.address();
+    console.log('UDP Server listening on ' + address.address + ":" + address.port);
+});
+
+ttServer.on('message', function (message, remote) {
+    ttData.push(message);
+});
+
+ttServer.bind(9090, '127.0.0.1');
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+
 var port = process.argv[2] || 11235;
 
 // serve static files from main directory
@@ -23,6 +66,7 @@ app.use(express.static("./"));
 // handle uploaded files
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({secret:"topsecret", resave: false, saveUninitialized: true})); //secret should be stored in a DB, never in project files
 app.route("/upload").post(function(req, res, next) {
    var form = formidable.IncomingForm();
    form.uploadDir = "./sketches";
@@ -53,7 +97,7 @@ app.route("/play").post(function(req, res, next) {
    var form = formidable.IncomingForm();
    form.parse(req, function(err, fields, files) {
       var exec = require('child_process').exec;
-      exec('/Applications/VLC.app/Contents/MacOS/VLC --fullscreen --video-on-top --no-video-title-show ' + fields.cmd, function (error, stdout, stderr) {
+      exec('/Applications/VLC.app/Contents/MacOS/VLC ' + fields.cmd, function (error, stdout, stderr) {
       });
    });
 });
@@ -77,21 +121,25 @@ app.route("/getValue").post(function(req, res, next) {
 app.route("/getTT").post(function(req, res, next) {
    var form = formidable.IncomingForm();
    form.parse(req, function(err, fields, files) {
-      if (ttData.length > 0) {
-         returnString(res, ttData[0]);
-         ttData = [];
-      }
+      returnString(res, JSON.stringify(ttData));
+      ttData = [];
    });
 });
 
 app.route("/set").post(function(req, res, next) {
+  console.log('saving on server');
    var form = formidable.IncomingForm();
+
+   console.log(form);
+   console.log('the type of the request received is', (typeof req));
+
    form.parse(req, function(err, fields, files) {
       res.writeHead(200, {"content-type": "text/plain"});
       res.write('received upload:\n\n');
 
       var key = fields.key;
-
+});
+            
       var suffix = ".json";
       if (key.indexOf(suffix, key.length - suffix.length) == -1)
          key += suffix;
@@ -106,16 +154,153 @@ app.route("/set").post(function(req, res, next) {
 
       res.end();
    });
+
+
+
+// app.route("/addSketch").post(function(req, res, next) {
+//   console.log('saving on server');
+//    var form = formidable.IncomingForm();
+
+//    console.log(form);
+//    console.log('the type of the request received is', (typeof req));
+
+//   form.parse(req, function(err, fields, files) {
+//       res.writeHead(200, {"content-type": "text/plain"});
+//       res.write('received upload:\n\n');
+//     var name = fields.name;
+//     var newSketch = new SavedSketch();
+//       newSketch.name = name;
+//       newSketch.sketchData =  fields.value;
+//       newSketch.save(function(err,savedObject){
+//         if(err){
+//                console.log(err);
+//                res.status(500).json({status:'failure'})
+//             }
+//             else{
+//               console.log("ID: " + fields.value.id + " strokeData:" + fields.value.strokes);
+//                res.json({status: 'success'});
+//             } 
+//       });
+
+//          res.end();
+//   });
+//   });
+
+
+
+app.route("/addSketch/:username").put(function(req, res, next) {
+  var user_name = req.params.username;
+  User.findOne({username:user_name},function(err,foundObject){
+    if(err){
+      console.log("error");
+      res.status(500).send();
+    }
+    else{
+      if(!foundObject){
+        res.status(404).send();
+      }
+      else{
+        
+        if(req.body.strokes && req.body.sketchName){
+          
+          foundObject.sketches.push({name:req.body.sketchName, sketchData:req.body.strokes});
+          var subdoc = foundObject.sketches[0];
+          console.log(subdoc);
+          subdoc.isNew;
+        }
+        foundObject.save(function(err,updatedObject){
+          if(err){
+            console.log(err);
+            res.status(500).send();
+          }
+          else{
+            res.send(updatedObject);
+          }
+        });
+      }
+    }
+
+  });
+
+
+  console.log('saving on server');
+   var form = formidable.IncomingForm();
+
+   console.log(form);
+   console.log('the type of the request received is', (typeof req));
+
+  form.parse(req, function(err, fields, files) {
+      res.writeHead(200, {"content-type": "text/plain"});
+      res.write('received upload:\n\n');
+    var name = fields.name;
+    var newSketch = new SavedSketch();
+      newSketch.name = name;
+      newSketch.sketchData =  fields.value;
+      newSketch.save(function(err,savedObject){
+        if(err){
+               console.log(err);
+               res.status(500).json({status:'failure'})
+            }
+            else{
+              console.log("ID: " + fields.value.id + " strokeData:" + fields.value.strokes);
+               res.json({status: 'success'});
+            } 
+      });
+
+         res.end();
+  });
+  });
+
+
+app.route("/logout").get(function(req,res){
+  req.session.destroy();
+  return res.status(200).send();  
 });
 
-app.route("/writeFile").post(function(req, res, next) {
-   var form = formidable.IncomingForm();
-   form.parse(req, function(err, fields, files) {
-      fs.writeFile(fields.fileName, JSON.parse(fields.contents),
-         function(err) { if (err) console.log(err); }
-      );
-      res.end();
-   });
+app.route("/dashboard").get(function(req,res){
+  if(!req.session.user){
+    return res.status(401).send();
+  }
+
+  return res.status(200).send("Welcome to super-secret API");
+});
+
+app.route("/login").post(function(req,res){
+  var username = req.body.username; 
+  var password = req.body.password;
+
+  User.findOne({username:username, password:password}, function(err,user){
+     if(err){
+      console.log("error");
+      return res.status(500).send();
+    }
+    if(!user){
+      return res.status(400).send();
+    }
+    req.session.user = user;
+    return res.status(200).send(); 
+  })
+});
+
+app.route("/register").post(function(req,res){
+  var username = req.body.username; 
+  var password = req.body.password;
+  var firstname = req.body.firstname;
+  var lastname = req.body.lastname;
+
+  var newUser = new User();
+  newUser.username = username;
+  newUser.password = password;
+  newUser.firstname = firstname;
+  newUser.lastname = lastname;
+
+  newUser.save(function(err,savedUser){
+    if(err){
+      console.log("error");
+      return res.status(500).send();
+    }
+  return res.status(200).send();
+  });
 });
 
 app.route("/talk").get(function(req, res) {
@@ -248,21 +433,16 @@ var httpserver = http.Server(app);
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
-   var websockets = [];
+   var websockets = {};
 
    wss.on("connection", function(ws) {
-
-      for (ws.index = 0 ; websockets[ws.index] ; ws.index++)
-	 ;
-      websockets[ws.index] = ws;
-
       var startTimeMillis = (new Date()).getTime();
 
       var cameraUpdateInterval = null;
       function toggleHMDTracking() {
          if (cameraUpdateInterval == null) {
             // SAVE THIS WEBSOCKET IN THE MAP
-            websockets[ws.index] = ws;
+            websockets[ws.address] = ws;
 
               cameraUpdateInterval = setInterval(function() {
                  var time = ((new Date()).getTime() - startTimeMillis) / 1000;
@@ -281,7 +461,7 @@ try {
                     "position": { "x": px, "y": py, "z": pz },
                     "rotation": { "x": qx, "y": qy, "z": qz, "w": qw }
                  });
-  
+
                  var update = new updateProtoBuilders.Update({
                     "id": "abc",
                     "mod_version": 123,
@@ -299,7 +479,7 @@ try {
               }, 1000 / 60);
          } else {
             // REMOVE THIS WEBSOCKET FROM THE MAP
-            delete websockets[ws.index];
+            delete websockets[ws.address];
 
             clearInterval(cameraUpdateInterval);
             cameraUpdateInterval = null;
@@ -307,14 +487,15 @@ try {
       }
 
       ws.on("message", function(msg) {
-         for (var index = 0 ; index < websockets.length ; index++)
-            if (index != ws.index)
-               websockets[index].send(msg);
+         console.log("got message: " + msg);
+         if (msg == "toggleHMDTracking") {
+            toggleHMDTracking();
+         }
       });
 
       ws.on("close", function() {
-         // REMOVE THIS WEBSOCKET
-         websockets.splice(ws.index, 1);
+         // REMOVE THIS WEBSOCKET FROM THE MAP
+         delete websockets[ws.address];
 
          clearInterval(cameraUpdateInterval);
          cameraUpdateInterval = null;
@@ -325,7 +506,6 @@ try {
          + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
 }
 
-/*
 try {
    var dgram = require('dgram');
 
@@ -337,8 +517,10 @@ try {
          logged = true;
       }
 
-      for (var index = 0 ; index < websockets.length ; index++)
-         websockets[index].send(message);
+      for (var address in websockets) {
+         var websocket = websockets[address];
+         websockets[address].send(message);
+      }
    });
 
    socket.on("listening", function() {
@@ -350,7 +532,6 @@ try {
 } catch (err) {
    console.log("Something went wrong during socket binding:\n" + err);
 }
-*/
 
 // DIFFSYNC ENDPOINT SETUP
 try {
@@ -366,6 +547,5 @@ try {
 // START THE HTTP SERVER
 httpserver.listen(parseInt(port, 10), function() {
    console.log("HTTP server listening on port %d", httpserver.address().port);
+   console.log('up');
 });
-
-

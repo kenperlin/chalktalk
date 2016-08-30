@@ -1,5 +1,5 @@
 function() {
-   this.label = 'Timer';
+   this.label = 'timer';
    this.initTimer = function() { this.timerTime = time; this.timerT = 0; }
    this.onCmdClick = function() { this.initTimer(); }
    this.initTimer();

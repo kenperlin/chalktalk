@@ -1,0 +1,23 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/nodejs', '/usr/bin/npm', 'run', 'main.js' ]
+2 info using npm@2.15.8
+3 info using node@v4.4.7
+4 verbose stack Error: missing script: main.js
+4 verbose stack     at run (/usr/lib/node_modules/npm/lib/run-script.js:142:19)
+4 verbose stack     at /usr/lib/node_modules/npm/lib/run-script.js:58:5
+4 verbose stack     at /usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:356:5
+4 verbose stack     at checkBinReferences_ (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:320:45)
+4 verbose stack     at final (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:354:3)
+4 verbose stack     at then (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:124:5)
+4 verbose stack     at ReadFileContext.<anonymous> (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:295:20)
+4 verbose stack     at ReadFileContext.callback (/usr/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:78:16)
+4 verbose stack     at FSReqWrap.readFileAfterOpen [as oncomplete] (fs.js:303:13)
+5 verbose cwd /home/elijah/Desktop/chalktalk_dev/server
+6 error Linux 4.2.0-42-generic
+7 error argv "/usr/bin/nodejs" "/usr/bin/npm" "run" "main.js"
+8 error node v4.4.7
+9 error npm  v2.15.8
+10 error missing script: main.js
+11 error If you need help, you may report this error at:
+11 error     <https://github.com/npm/npm/issues>
+12 verbose exit [ 1, true ]

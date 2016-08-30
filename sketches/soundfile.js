@@ -1,7 +1,7 @@
 function() {
-   var nelf = this;
-   this.label = 'Soundfile';
-   window.soundfileSketch = this;
+   var self = this;
+   this.label = 'soundfile';
+   window.soundfile = this;
 
    this.soundBuffer = null;
    this.soundBufferChannelData = null;
@@ -14,16 +14,12 @@ function() {
 
    this.createCodeFunction = function() {
       if (this.soundBuffer) {
-         var codeText = 'return ( soundfileSketch.tToSample(t) )';
+         var codeText = 'return ( window.soundfile.tToSample(t) )';
          this.codeFunction = new Function('t', codeText);
       } else {
          this.codeFunction = new Function('t', 'return t');
       }
    };
-
-   this.input = document.createElement('input');
-   this.input.type = 'file';
-   this.input.style = 'visibility:hidden';
 
    this.render = function(elapsed) {
 
@@ -32,10 +28,13 @@ function() {
       mDrawOval([-1, -1], [1, 1], 32, PI/2, PI/2 - TAU);
       mCurve([[-.3, .5], [.5, 0], [-.3, -.5]]);
 
+      this.input = document.getElementById('soundfileinput');
+
       this.createCodeFunction();
       this.setOutPortValue( self.codeFunction );
 
       this.onClick = function(e) {
+         var self = this;
          this.input.click();
          this.input.addEventListener('change', handleFileSelect, false);
       };

@@ -76,8 +76,8 @@ function() {
 
       var tall      = sCurve(this.tall);
       var footY     = -1.2;
-      var spineBase = footY + lerp(tall, 1.0, 1.5) * this.stretch('leg length', S(2).height / 0.2);
-      var spineTop  = spineBase + lerp(tall, 0.8, 1.3) * this.stretch('body length', S(1).height / 0.15);
+      var spineBase = footY + lerp(tall, 1.0, 1.5) * stretch('leg length', S(2).height / 0.2);
+      var spineTop  = spineBase + lerp(tall, 0.8, 1.3) * stretch('body length', S(1).height / 0.15);
       var uLeg      = (spineBase - footY) / lerp(tall, 1.2, 1.5);
       var lLeg      = 0.9 * uLeg;
 
@@ -109,8 +109,8 @@ function() {
                                          max(0, sketchPage.x - this.cx())));
          m.rotateZ(rotz);
          m.rotateY(lookSide);
-	 m.scale(this.stretch('head width', S(0).width / 0.15),
-	         this.stretch('head height', S(0).height / 0.1), 1);
+	 m.scale(stretch('head width', S(0).width / 0.15),
+	         stretch('head height', S(0).height / 0.1), 1);
          mCurve([[.0,.0,0],[.8,.3,0],[.0,.6,0],[.0,.0,0]]);
       m.restore();
 

@@ -1,5 +1,6 @@
 function() {
    this.label = 'square';
+   this.guide = 'you can use a square to be hip';
    this.mode = 0;
 
    this.onClick = function() { this.mode++; }
@@ -9,6 +10,8 @@ function() {
       mLine([ 1,-1],[ 1, 1]);
       mLine([ 1, 1],[-1, 1]);
       mLine([-1, 1],[-1,-1]);
+
+      mText(this.guide, [0, 0], 1, .5);
 
       this.afterSketch(function() {
          textHeight(this.mScale(0.2));
@@ -20,7 +23,7 @@ function() {
          }
 
 	 if (this.mode > 1) {
-	    mText("0:\n1:\n2:\n3:", [-.2,0], 1, .5);
+	    mText("0:\n1\u2006:\n2:\n3:", [-.2,0], 1, .5);
 	    mText("-1\n1\n1\n-1", [.1,0], 1, .5);
 	    mText(",\n,\n,\n,", [.2,0], .5, .5);
 	    mText("-1\n-1\n1\n1", [.4,0], 1, .5);

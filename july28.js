@@ -92,7 +92,7 @@ function ttgrid() {
    sketch.update = function() {
       if (this.forceImage === undefined)
          this.forceImage = newArray(64 * 64);
-      imageEnlarge(ttForce, 64, this.forceImage);
+      imageEnlarge(ttForce, this.forceImage);
       var geometry = this.mesh.geometry;
       geometry.verticesNeedUpdate = true;
       geometry.normalsNeedUpdate = true;

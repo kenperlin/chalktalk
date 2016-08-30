@@ -3,6 +3,7 @@ var sketchTypes = (
 ).split(' ');
 
 var imageSequence = [
+  'kwalado.jpg',
 ];
 
 var sketchPages = [

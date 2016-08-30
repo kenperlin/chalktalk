@@ -14,8 +14,6 @@ function() {
              newVec3( 1 ,-.5, 0)];
 
    this.mode = 0;
-   this.isVerbose = 1;
-   this.cmdSwipe[0] = ['toggle lines', function() { this.isVerbose = ! this.isVerbose; }];
    this.onCmdClick = function() {
       this.mode = (this.mode + 1) % 4;
    }
@@ -46,11 +44,9 @@ function() {
       this.N = -2;
    }
    this.render = function() {
-      if (this.isVerbose) {
-         lineWidth(1);
-         mLine(this.P[0], this.P[1]);
-         mCurve(this.P.slice(1));
-      }
+      lineWidth(1);
+      mLine(this.P[0], this.P[1]);
+      mCurve(this.P.slice(1));
       lineWidth(2);
       this.afterSketch(function() {
          var C = [];
@@ -62,9 +58,6 @@ function() {
          for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
             C.push([ _bezier3(ax,bx,cx,dx, t), _bezier3(ay,by,cy,dy, t) ]);
          mCurve(C);
-
-	 if (! this.isVerbose)
-	    return;
 
          color(defaultPenColor);
          textHeight(this.mScale(.1));

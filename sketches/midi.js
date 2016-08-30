@@ -1,5 +1,5 @@
 function() {
-   this.label = "Midi";
+   this.label = "midi";
 
    // Draw as a musical note.
 
@@ -10,8 +10,18 @@ function() {
 
    this.output = function() {
       var out = [];
-      for (key in midi.downKeys)
+      for (key in midi.downKeys) {
          out.push(midi.frequencyFromNoteNumber(key));
+
+         // When use hits middle C, create a walking bird.
+
+	 if (! this.isBird && key == 60) {
+            addSketch(new bird_sketch());
+	    finishSketch();
+	    sk().choice.setState(2); // Start bird walking.
+	    this.isBird = true;
+	 }
+      }
       return out.length > 0 ? out : 0;
    }
 }

@@ -3,7 +3,7 @@ function() {
       Select an rgb color, and send it to the output.
    */
    var colors = ['red','green','blue'];
-   this.label = 'Rgb';
+   this.label = 'rgb';
    this.rgb = [0.5, 0.5, 0.5];
    this.rgb.type = 'color';
 

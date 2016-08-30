@@ -3,17 +3,12 @@ function() {
 
    this.render = function() {
       this.duringSketch(function() {
-         var curves = CT.lineFont[0][48 + this.selection];
-	 for (var i = 0 ; i < curves.length ; i++)
-            mCurve(curves[i]);
+         mCurve(CT.lineFont[16 + this.selection][0]);
       });
       this.afterSketch(function() {
          if (this.sketchTexts.length == 0)
-            this.setSketchText(0, '' + this.selection, [0,-.1], 1.5);
+            this.setSketchText(0, '' + this.selection, [0,0], 1.5);
       });
-
-      if (isDef(this.inValues[0]))
-         this.sketchTexts[0].setValue(roundedString(this.inValues[0]));
    }
 
    this.output = function() { return this.sketchTexts[0].value; }

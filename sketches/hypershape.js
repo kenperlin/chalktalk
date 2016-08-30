@@ -1,7 +1,6 @@
 function() {
    this.labels = ['pentatope', 'hypercube', 'aerochoron', 'octaplex'];
    this.is3D = true;
-   this.isFirstTime = true;
 
    this.graph = new Graph();
 
@@ -113,22 +112,15 @@ function() {
             mCurve([[.85,.85], [-.85,-.85]]);
          }
          this.afterSketch(function() {
-
             if (this.mesh === undefined) return;
             var n = 0;
             for ( ; n < S.length ; n++)
                this.placeVertex(n, S[n]);
-
-            var _index = 0;
             for (var i = 0   ; i < 4 ; i++)
             for (var j = i+1 ; j < 5 ; j++) {
                this.placeEdge(n, n - S.length, i, j);
                n++;
             }
-
-            if (this.isFirstTime)
-	       console.log(s);
-	    this.isFirstTime = false;
          });
          break;
 
@@ -148,6 +140,8 @@ function() {
                   this.placeEdge(n, n - C.length, j, j + (1<<axis));
                   n++;
                }
+            if (mode %2 != 0) {
+            }
          });
          break;
 
@@ -158,8 +152,6 @@ function() {
             mLine([-1,0],[1,0]);
          }
          this.afterSketch(function() {
-	    var s = '';
-
             if (this.mesh === undefined) return;
             var alt = mode % 2 != 0;
             var n = 0;
@@ -167,15 +159,13 @@ function() {
                this.placeVertex(n, A[n]);
                this.mesh.children[n].setMaterial(materials[alt ? 0 : 1 + floor(n/2)]);
             }
-
-            var _index = 0;
             for (var i = 0   ; i < 3 ; i++)
             for (var j = i+1 ; j < 4 ; j++)
             for (var k = 0   ; k < 4 ; k++) {
                var I = 2 * i + _bit(k, 0);
                var J = 2 * j + _bit(k, 1);
                var c = 0;
-               if (alt || this.isFirstTime) {
+               if (alt) {
                   function notZero(a, b) { return (A[I][a]!=0 || A[J][a]!=0) && (A[I][b]!=0 || A[J][b]!=0); }
                   if      (notZero(0,1)) c = 1;
                   else if (notZero(1,2)) c = 2;
@@ -188,10 +178,6 @@ function() {
                this.placeEdge(n, n - A.length, I, J);
                n++;
             }
-
-            if (this.isFirstTime)
-	       console.log(s);
-	    this.isFirstTime = false;
          });
          break;
 
@@ -201,15 +187,13 @@ function() {
             mClosedCurve([[0,-1],[1,0],[0,1],[-1,0]]);
          }
          this.afterSketch(function() {
-	    var s = '';
-
             if (this.mesh === undefined) return;
-            function edgeColor(a, b, mode) {
+            function edgeColor(a, b) {
                var x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2], w = a[3] - b[3];
                var dd = x * x + y * y + z * z + w * w;
                if (! (dd > 1.99 && dd < 2.01))
                   return -1;
-               switch (mode) {
+               switch (mode % 3) {
                case 0:
                   return 0;
                case 1:
@@ -229,20 +213,15 @@ function() {
             for (var n = 0 ; n < V.length ; n++)
                this.placeVertex(n, V[n]);
 
-            var _index = 0;
             for (var i = 0   ; i < 23 ; i++)
             for (var j = i+1 ; j < 24 ; j++) {
-               var k = edgeColor(V[i], V[j], mode % 3);
+               var k = edgeColor(V[i], V[j]);
                if (k >= 0) {
                   this.mesh.children[n].setMaterial(materials[k]);
                   this.placeEdge(n, n - V.length, i, j);
                   n++;
                }
             }
-
-            if (this.isFirstTime)
-	       console.log(s);
-	    this.isFirstTime = false;
          });
          break;
       }

@@ -1,5 +1,5 @@
 function() {
-   this.label = 'Spline';
+   this.label = 'spline';
    this.is3D = true;
    this.N = -1;
    this.Pix = [];

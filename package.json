@@ -1,0 +1,22 @@
+{
+  "name": "chalktalk",
+  "version": "0.0.1",
+  "description": "Chalktalk VR",
+  "main": "DL_glyphs.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenperlin/chalktalk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kenperlin/chalktalk/issues"
+  },
+  "homepage": "https://github.com/kenperlin/chalktalk#readme"
+}

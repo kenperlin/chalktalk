@@ -33,9 +33,9 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var hubWidth  = this.stretch('hub width' , 10 * S(0).width);
-      var rodHeight = this.stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
-      var bobRadius = this.stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
+      var hubWidth  = stretch('hub width' , 10 * S(0).width);
+      var rodHeight = stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
+      var bobRadius = stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
 
       this.rodHeight = rodHeight * this.adjustHeight;
 
@@ -49,7 +49,7 @@ function() {
       m.translate(0, 2 - this.rodHeight, 0);
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
-      this.angle = def(this.inValues[0], this.spring.getPosition());
+      this.angle = this.spring.getPosition();
       if (isNaN(this.angle)) this.angle = 0;
 
       m.translate(0, this.rodHeight, 0);

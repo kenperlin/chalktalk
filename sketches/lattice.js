@@ -1,5 +1,5 @@
 function() {
-   this.label = 'lattice';
+   this.labels = 'lattice';
    this.is3D = true;
    this.showLattice = false;
    this.showCube = false;
