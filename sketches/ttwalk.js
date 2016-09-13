@@ -13,14 +13,14 @@ function() {
       return dst;
    }
 
-   this.swipe[0] = ['toggle\ntrail', function() {
+   this.onSwipe[0] = ['toggle\ntrail', function() {
       this.isShowingTrail = this.isShowingTrail === undefined ? true : undefined;
    }];
-   this.swipe[2] = ['next\nwalk cycle', function() {
+   this.onSwipe[2] = ['next\nwalk cycle', function() {
       this.walkIndex = (this.walkIndex + 1) % tt_walks.length;
       this.setWalk(this.walkIndex);
    }];
-   this.swipe[6] = ['previous\nwalk cycle', function() {
+   this.onSwipe[6] = ['previous\nwalk cycle', function() {
       this.walkIndex = (this.walkIndex + tt_walks.length - 1) % tt_walks.length;
       this.setWalk(this.walkIndex);
    }];

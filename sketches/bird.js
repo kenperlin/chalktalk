@@ -10,10 +10,10 @@ function() {
 
    this.choice = new Choice();
 
-   this.swipe[0] = ['walk'        , function() { this.choice.setState(2); this.isGaze = false; }];
-   this.swipe[1] = ['toggle\ngaze', function() { this.isGaze = ! this.isGaze; }];
-   this.swipe[2] = ['toggle\ngaze', function() { this.isGaze = ! this.isGaze; }];
-   this.swipe[4] = ['come\nalive' , function() { this.choice.setState(1); }];
+   this.onSwipe[0] = ['walk'        , function() { this.choice.setState(2); this.isGaze = false; }];
+   this.onSwipe[1] = ['toggle\ngaze', function() { this.isGaze = ! this.isGaze; }];
+   this.onSwipe[2] = ['toggle\ngaze', function() { this.isGaze = ! this.isGaze; }];
+   this.onSwipe[4] = ['come\nalive' , function() { this.choice.setState(1); }];
 
    this.render = function(elapsed) {
       this.choice.update(elapsed);

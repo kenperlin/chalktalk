@@ -2,10 +2,10 @@ function() {
    this.label = "bulb";
    this.light = 0;
 
-   this.swipe[0] = ['next\ncolor' , function() { this.setColorId((this.colorId + 1) % palette.color.length); }];
-   this.swipe[2] = ['turn\non'    , function() { this.light = 1; }];
-   this.swipe[4] = ['prev.\ncolor', function() { this.setColorId((this.colorId + palette.color.length - 1) % palette.color.length); }];
-   this.swipe[6] = ['turn\noff'   , function() { this.light = 0; }];
+   this.onSwipe[0] = ['next\ncolor' , function() { this.setColorId((this.colorId + 1) % palette.color.length); }];
+   this.onSwipe[2] = ['turn\non'    , function() { this.light = 1; }];
+   this.onSwipe[4] = ['prev.\ncolor', function() { this.setColorId((this.colorId + palette.color.length - 1) % palette.color.length); }];
+   this.onSwipe[6] = ['turn\noff'   , function() { this.light = 0; }];
 
    var S = makeSpline([[-.5,-1.6],[-.55,-1],[-.7,-.7],[-.95,0],[-.7,.7],
                        [0,1],

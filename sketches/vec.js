@@ -50,11 +50,11 @@ function() {
    }
    this.mouseUp = function(x, y) { }
 
-   this.swipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
-   this.swipe[3] = ['shorter\nvector', function() { if (! this.isDraggedValue && this.selection > 1) this.selection -= 2; }];
-   this.swipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
-   this.swipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
-   this.swipe[7] = ['longer\nvector' , function() { if (! this.isDraggedValue) {
+   this.onSwipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
+   this.onSwipe[3] = ['shorter\nvector', function() { if (! this.isDraggedValue && this.selection > 1) this.selection -= 2; }];
+   this.onSwipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
+   this.onSwipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
+   this.onSwipe[7] = ['longer\nvector' , function() { if (! this.isDraggedValue) {
                                                        this.selection += 2;
 						       while (this.nRows() > this.value.length)
 						          this.value.push(0); }}];

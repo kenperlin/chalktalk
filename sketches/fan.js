@@ -2,8 +2,8 @@ function() {
    this.label = "fan";
    this.defaultTurnRate = 0;
 
-   this.swipe[2] = ['spin\nright', function() { this.defaultTurnRate++; }];
-   this.swipe[6] = ['spin\nleft' , function() { this.defaultTurnRate--; }];
+   this.onSwipe[2] = ['spin\nright', function() { this.defaultTurnRate++; }];
+   this.onSwipe[6] = ['spin\nleft' , function() { this.defaultTurnRate--; }];
 
    this.turnRate = 0;
    this.angle = 0;

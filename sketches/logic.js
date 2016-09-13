@@ -3,7 +3,7 @@ function() {
    this.labels = 'buf and or xor'.split(' ');
    this.invert = 0;
 
-   this.swipe[0] = ['invert', function() { this.invert = 1 - this.invert; }];
+   this.onSwipe[0] = ['invert', function() { this.invert = 1 - this.invert; }];
 
    function Delay() {
       this.time = 0;

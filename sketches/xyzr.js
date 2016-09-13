@@ -3,8 +3,8 @@ function() {
    this.show_xyzr = false;
    this.show_sn   = false;
 
-   this.swipe[1] = ['show\nx,y,z and r', function() { this.show_xyzr = true; }];
-   this.swipe[3] = ['show\nS and N'    , function() { this.show_sn   = true; }];
+   this.onSwipe[1] = ['show\nx,y,z and r', function() { this.show_xyzr = true; }];
+   this.onSwipe[3] = ['show\nS and N'    , function() { this.show_sn   = true; }];
 
    this.render = function() {
       var X = cos(PI/4), Y = sin(PI/4);

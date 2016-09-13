@@ -41,10 +41,10 @@ function() {
    }
    this.onPress = function(p) { this.p.copy(p); }
 
-   this.swipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 - this.p.y) / 2 * 4))); }];
-   this.swipe[2] = ['select\ncolumn', function() { this.col = max(0, min(3, floor((1 + this.p.x) / 2 * 4))); }];
-   this.swipe[4] = ['no\nrow'       , function() { this.row = -1; }];
-   this.swipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
+   this.onSwipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 - this.p.y) / 2 * 4))); }];
+   this.onSwipe[2] = ['select\ncolumn', function() { this.col = max(0, min(3, floor((1 + this.p.x) / 2 * 4))); }];
+   this.onSwipe[4] = ['no\nrow'       , function() { this.row = -1; }];
+   this.onSwipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
 
    function sketchMatrix() {
       mCurve([[1,1],[1,-1],[-1,-1]]);

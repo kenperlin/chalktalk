@@ -4,8 +4,8 @@ function() {
    this.bouncing = 0;
    this.y = 0;
 
-   this.swipe[2] = ['start\nbouncing', function() { this.isBouncing = true ; }];
-   this.swipe[6] = ['stop\nbouncing' , function() { this.isBouncing = false; }];
+   this.onSwipe[2] = ['start\nbouncing', function() { this.isBouncing = true ; }];
+   this.onSwipe[6] = ['stop\nbouncing' , function() { this.isBouncing = false; }];
 
    this.render = function(elapsed) {
       this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)

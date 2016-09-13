@@ -34,10 +34,10 @@ function() {
      this.showStateNames = ! this.showStateNames;
   }
 
-  this.swipe[0] = [ 'a == b', function() { this.state = 9; } ];
-  this.swipe[2] = [ 'true', function() { this.state = 15; } ];
-  this.swipe[4] = [ 'a != b', function() { this.state = 6; } ];
-  this.swipe[6] = [ 'false', function() { this.state = 0; } ];
+  this.onSwipe[0] = [ 'a == b', function() { this.state = 9; } ];
+  this.onSwipe[2] = [ 'true', function() { this.state = 15; } ];
+  this.onSwipe[4] = [ 'a != b', function() { this.state = 6; } ];
+  this.onSwipe[6] = [ 'false', function() { this.state = 0; } ];
 
   this.flipBit = function(i) { var b = 1 << i; this.state = this.state & ~b | (this.state & b ? 0 : 1 << i); }
 

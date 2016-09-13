@@ -20,12 +20,12 @@
 
       this.onCmdClick = function(p) { this.isAbs = ! this.isAbs; }
 
-      this.swipe[2] = ['double freq', function() {
+      this.onSwipe[2] = ['double freq', function() {
          for (var n = 0 ; n < this.freqs.length ; n++)
             this.freqs[n] *= 2;
       }];
 
-      this.swipe[6] = ['half freq', function() {
+      this.onSwipe[6] = ['half freq', function() {
          for (var n = 0 ; n < this.freqs.length ; n++)
             this.freqs[n] /= 2;
       }];

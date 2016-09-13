@@ -1,7 +1,7 @@
 function() {
    this.label = 'fish';
    this.swim = false;
-   this.swipe[0] = ['SWIM!', function() { this.swim = true; }];
+   this.onSwipe[0] = ['SWIM!', function() { this.swim = true; }];
    this.angleY = 0;
    this.angleZ = 0;
 

@@ -8,8 +8,8 @@ function() {
    window.b_p;
    window.b_p_time;
 
-   this.swipe[0] = [ 'VR'    , function() { showVR = ! showVR; b_p = undefined; } ];
-   this.swipe[2] = [ 'hi res', function() { hiRes  = ! hiRes ; b_p = undefined; } ];
+   this.onSwipe[0] = [ 'VR'    , function() { showVR = ! showVR; b_p = undefined; } ];
+   this.onSwipe[2] = [ 'hi res', function() { hiRes  = ! hiRes ; b_p = undefined; } ];
    this.render = function(elapsed) {
 
       this.gIV = function(j) { return max(0, min(1, this.getInValue(j, 0.5))); }

@@ -1,13 +1,13 @@
 function() {
    this.label = "rocket";
-   this.swipeTime = 0;
+   this.onSwipeTime = 0;
    this.velocity = 0;
    this.altitude = 0;
 
-   this.swipe[2] = ['BLAST OFF!', function() { this.swipeTime = time + 0.5; }];
+   this.onSwipe[2] = ['BLAST OFF!', function() { this.onSwipeTime = time + 0.5; }];
 
    this.render = function(elapsed) {
-      if (this.swipeTime > 0 && time > this.swipeTime) { // AFTER SWIPE
+      if (this.onSwipeTime > 0 && time > this.onSwipeTime) { // AFTER SWIPE
          this.velocity += 0.4 * elapsed;
          this.altitude += this.velocity;                    // ACCELERATE
       }
@@ -21,7 +21,7 @@ function() {
       mCurve([[ .34,-.1],[ .8,-.8],[ .28,-.8]]);
 
       this.afterSketch(function(elapsed) {               // THRUSTER FLAMES
-         if (this.swipeTime != 0) {
+         if (this.onSwipeTime != 0) {
             mCurve([[-.20, -1.10], [-.3, -1.4 + .7*noise2(10*time, 100)], 
                     [-.08, -1.15], [  0, -1.6 + .7*noise2(10*time, 200)], 
                     [ .08, -1.15], [ .3, -1.4 + .7*noise2(10*time, 300)],

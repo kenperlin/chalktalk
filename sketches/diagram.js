@@ -42,8 +42,8 @@ function Diagram() {
    this.mouseDrag = function() {}
    this.mouseUp   = function() {}
 
-   this.swipe[1] = ['show\nx,y,z and r', function() { this.showParts  = true; }];
-   this.swipe[3] = ['show\nS and N'    , function() { this.showNormal = true; }];
+   this.onSwipe[1] = ['show\nx,y,z and r', function() { this.showParts  = true; }];
+   this.onSwipe[3] = ['show\nS and N'    , function() { this.showNormal = true; }];
 
    this.render = function() {
 

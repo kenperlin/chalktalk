@@ -3,10 +3,10 @@ function() {
    this.gridMode = -1;
    this.is3D = true;
 
-   this.swipe[0] = ['mode = 0', function() { this.gridMode = 0; }];
-   this.swipe[2] = ['mode = 1', function() { this.gridMode = 1; }];
-   this.swipe[4] = ['mode = 2', function() { this.gridMode = 2; }];
-   this.swipe[6] = ['mode = 3', function() { this.gridMode = 3; }];
+   this.onSwipe[0] = ['mode = 0', function() { this.gridMode = 0; }];
+   this.onSwipe[2] = ['mode = 1', function() { this.gridMode = 1; }];
+   this.onSwipe[4] = ['mode = 2', function() { this.gridMode = 2; }];
+   this.onSwipe[6] = ['mode = 3', function() { this.gridMode = 3; }];
 
    this.render = function(elapsed) {
       var f = 2/3;

@@ -11,11 +11,11 @@ function() {
 
    this.code = [ ['', ''] ];
 
-   this.swipe[2] = ['animate', function() {
+   this.onSwipe[2] = ['animate', function() {
       this.isAnimating = true;
    }];
 
-   this.swipe[6] = ['gather moths', function() {
+   this.onSwipe[6] = ['gather moths', function() {
       for (var i = 0 ; i < sketchPage.sketches.length ; i++) {
          var s = sketchPage.sketches[i];
          if ((s instanceof MothAndCandle) && s.labels[s.selection] == 'moth')

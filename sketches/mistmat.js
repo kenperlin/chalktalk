@@ -2,8 +2,8 @@ function() {
    this.label = "mistmat";
    this.isRolled = false;
 
-   this.swipe[0] = ['unroll', function() { this.isRolled = false; }];
-   this.swipe[4] = ['roll'  , function() { this.isRolled = true;  }];
+   this.onSwipe[0] = ['unroll', function() { this.isRolled = false; }];
+   this.onSwipe[4] = ['roll'  , function() { this.isRolled = true;  }];
 
    this.render = function(elapsed) {
       this.duringSketch(function() {

@@ -3,7 +3,7 @@ function() {
    this.labels = 'spiky1 spiky2'.split(' ');
    this.noise = new Noise();
 
-   this.swipe[0] = ['wander', function() { window.spike_wander = true; }];
+   this.onSwipe[0] = ['wander', function() { window.spike_wander = true; }];
 
    var myVertexShader = [
    ,'varying vec3 vPosition;'

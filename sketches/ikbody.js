@@ -3,7 +3,7 @@ function() {
    this.meshBounds = [ [-.75, .1] , [.75, 1.8] ];
 
    this.onClick = ['show\nmore', function() { this.ikBody.mode = (this.ikBody.mode + 1) % 5; }];
-   this.swipe[2] = ['turn\nwhite', function() {
+   this.onSwipe[2] = ['turn\nwhite', function() {
       this.ikBody.nodeRadius = function() { return 0.025; };
       this.ikBody.linkRadius = function() { return 0.025; };
       this.ikBody.nodeMaterial = function() { return this.lineMaterial; };

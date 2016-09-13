@@ -6,7 +6,7 @@ function() {
 
    this.onClick = [ 'exit', function() { this.exitTime = time; this.isExiting = true; } ];
 
-   this.swipe[4] = ['wander', function() { this.wanderTime = time; this.isWandering = ! this.isWandering; }];
+   this.onSwipe[4] = ['wander', function() { this.wanderTime = time; this.isWandering = ! this.isWandering; }];
 
    this.render = function() {
 

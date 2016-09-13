@@ -2,8 +2,8 @@ function() {
    this.label = 'leviathan';
    this.velocity = 0;
 
-   this.swipe[0] = ['faster', function() { this.velocity += .1; }];
-   this.swipe[4] = ['slower', function() { this.velocity -= .1; }];
+   this.onSwipe[0] = ['faster', function() { this.velocity += .1; }];
+   this.onSwipe[4] = ['slower', function() { this.velocity -= .1; }];
 
    var n = 20;
    var nt = 40;

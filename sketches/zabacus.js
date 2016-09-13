@@ -6,10 +6,10 @@ function() {
    this.stones = null;
    this.animateValue = false;
 
-   this.swipe[0] = ['start', function() { this.animateValue = true ; }];
-   this.swipe[2] = ['incr', function() { this.incr(this.digitAtCursor(), 1); }];
-   this.swipe[4] = ['stop' , function() { this.animateValue = false; }];
-   this.swipe[6] = ['incr', function() { this.incr(this.digitAtCursor(), -1); }];
+   this.onSwipe[0] = ['start', function() { this.animateValue = true ; }];
+   this.onSwipe[2] = ['incr', function() { this.incr(this.digitAtCursor(), 1); }];
+   this.onSwipe[4] = ['stop' , function() { this.animateValue = false; }];
+   this.onSwipe[6] = ['incr', function() { this.incr(this.digitAtCursor(), -1); }];
 
    this.incr = function(n, d) {
       this.digits[n] += d;

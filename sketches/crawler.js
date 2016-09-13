@@ -4,8 +4,8 @@ function() {
    this.velocity = 0;
    var n = 20;
 
-   this.swipe[0] = ['faster', function() { this.velocity++; }];
-   this.swipe[4] = ['slower', function() { this.velocity--; }];
+   this.onSwipe[0] = ['faster', function() { this.velocity++; }];
+   this.onSwipe[4] = ['slower', function() { this.velocity--; }];
    
    var myFragmentShader = [
     'uniform vec3 ambient;'
