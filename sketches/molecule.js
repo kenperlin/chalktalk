@@ -45,7 +45,7 @@ function() {
    this.graph.setResponder(new MoleculeResponder());
    var sq3 = Math.sqrt(3)/2;
    var hd = 0.7;
-   var hx = lerp(hd, 0.5, 1);
+   var hx = lerp(hd, 0.35, 1);
 
    this.setup = function() {
       this.graph.clear();
@@ -143,7 +143,7 @@ function() {
             mesh.remove(graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
 
          if (R.clickType == 'none') {
-            //R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
+            R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
             graph.updatePositions();
          }
          color('cyan');

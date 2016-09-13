@@ -59,7 +59,7 @@ function() {
          mDraw(curve.type, curve.bounds, curve.data);
 
       this.afterSketch(function() {
-	 if (this._pointAtCursor != 'no match') {
+	 if (this._pointAtCursor) {
             var x = this._pointAtCursor[1];
             var y = this._pointAtCursor[2];
             mFillDisk([x, y], 10 / this.mScale(1));
@@ -142,7 +142,7 @@ function() {
 
    this.onCmdPress = function(p) {
       this._m0 = [ p.x, p.y ];
-      if (this._pointAtCursor != 'no match') {
+      if (this._pointAtCursor) {
          var i = this._pointAtCursor[0];
          var xy = [ this._pointAtCursor[1],
                     this._pointAtCursor[2] ];
@@ -234,7 +234,7 @@ function() {
 	    that._pointAtCursor = [i, x, y];
       }
 
-      this._pointAtCursor = 'no match';
+      delete this._pointAtCursor;
       for (i = 0 ; i < curves.length ; i++) {
          curve = curves[i];
          if (curve.type == 'joint')
@@ -268,7 +268,7 @@ function() {
 */
       this._a[0] = pt.x;
       this._a[1] = pt.y;
-      if (this._pointAtCursor != 'no match') {
+      if (this._pointAtCursor) {
          this._a[0] = this._pointAtCursor[1];
          this._a[1] = this._pointAtCursor[2];
 	 console.log(this._a[0] + ' ' + this._a[1]);
