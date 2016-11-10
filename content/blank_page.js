@@ -1,6 +1,4 @@
-var sketchTypes = (
-  "Motion"
-).split(' ');
+var sketchTypes = ""
 
 var imageSequence = [
 ];
