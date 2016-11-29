@@ -59,7 +59,8 @@ function() {
       mCurve([[0, this.rodHeight], [0,bobRadius]]);
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
    }
+   // TODO: modify inputs to use Atypical types
 
-   this.output = function() { return this.angle; }
+   this.output = function() { return new AT.Float(this.angle); }
 }
 
