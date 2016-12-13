@@ -7,9 +7,9 @@ This version of Chalktalk requires node.js to run. Go to http://nodejs.org/downl
 
 ### Installation
 
-	git clone git@github.com:kenperlin/chalktalk.git     # download chalktalk
+	git clone git@github.com:kenperlin/chalktalk.git   # download chalktalk
 	cd ./chalktalk/server
-	npm install          # install chalktalk server's dependencies
+	npm install                                        # install chalktalk server's dependencies
 	
 ### Run
 Get your terminal back into ```./chalktalk``` directory.
@@ -22,10 +22,32 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 	chromium-browser "http://localhost:11235"  # with chromium
 
 ### UI's API
-To make Chrome run full-screen (the best way to run Chalktalk), use COMMAND-SHIFT-f
 
+**Basics**
 
-### 
+- `[COMMAND-SHIFT-f]`, `[F11]` : switch to full screen (recommended)
+- `[Space bar]` : shows up short-keys
+- `[=]` : display list of objects
+- `[left click]` : toggle betwwen "drawing cursor" and "move focus cursor"
+- `[double left click]` : 
+
+**Drawing, select, code**
+
+- `[click + slide]` : handdraw line
+- `[draw multiple lines + double click]` : handdraw glyph (stroke order and directions sensitive)
+- `[]` : select object
+- `[]` : edit object's properties
+- `[]` : edit object's code
+
+**View**
+
+- `[]` : zoom in
+- `[]` : zoom out
+- `[]` : 2D directional moves to top, right, bottom, left
+- `[Shift+R]` : 3D activation/desactivation
+- `[]` : 3D directional moves to top, right, bottom, left
+
+### Usages
 To draw something, just drag your mouse.
 
 To see the hot keys menu and tool tips, hold down the SPACE key.
