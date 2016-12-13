@@ -28,8 +28,8 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 - `[COMMAND-SHIFT-f]`, `[F11]` : switch to full screen (recommended)
 - `[Space bar]` : shows up short-keys
 - `[=]` : display list of objects
-- `[left click]` : toggle betwwen "drawing cursor" and "move focus cursor"
-- `[double left click]` : 
+- `[left click]` : toggle between "drawing cursor" and "move focus cursor"
+- `[double left click]` : transform set of nearby lines into the most resembling glyph
 
 **Drawing, select, code**
 
@@ -45,7 +45,7 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 - `[]` : zoom out
 - `[]` : 2D directional moves to top, right, bottom, left
 - `[Shift+R]` : 3D activation/desactivation
-- `[]` : 3D directional moves to top, right, bottom, left
+- `[]` : 3D directional moves
 
 ### Usages
 To draw something, just drag your mouse.
