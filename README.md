@@ -14,12 +14,15 @@ This version of Chalktalk requires node.js to run. Go to http://nodejs.org/downl
 ### Run
 Get your terminal back into ```./chalktalk``` directory.
 
-	./run                # run chalk talk
+	# cd ..              
+	./run                # run chalktalk
 
 Then, open `localhost:11235` in your browser. Or via terminal :
 
 	google-chrome http://localhost:11235       # with chrome
 	chromium-browser "http://localhost:11235"  # with chromium
+
+You can now draw your objects and play around.
 
 ### UI's API
 
@@ -30,6 +33,7 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 - `[=]` : display list of objects
 - `[left click]` : toggle between "drawing cursor" ![chalktalk-draw-18px](https://cloud.githubusercontent.com/assets/1420189/21187667/16a47a16-c219-11e6-8300-4a577c3826f4.png) and "move focus cursor" ![chalktalk-move-18px](https://cloud.githubusercontent.com/assets/1420189/21187666/169d4e62-c219-11e6-842c-cea6532d8cf2.png)
 - `[double left click]` : transform set of nearby lines into the most resembling glyph
+- `...` : connect two glyph via output->input
 
 <!--
 ![chalktalk-move-24px](https://cloud.githubusercontent.com/assets/1420189/21187406/1d4fbaca-c218-11e6-82c8-400aa479cbb3.png)
