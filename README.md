@@ -44,8 +44,8 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 
 **Drawing, select, code**
 
-- ![chalktalk-draw-24px](https://cloud.githubusercontent.com/assets/1420189/21187411/1d6b43f8-c218-11e6-8537-d1f71f7c9739.png) `[click + slide]` : handdraw line
-- `[draw multiple lines + double click]` : handdraw glyph (stroke order and directions sensitive)
+- ![chalktalk-draw-24px](https://cloud.githubusercontent.com/assets/1420189/21187411/1d6b43f8-c218-11e6-8537-d1f71f7c9739.png) `+ left-click + slide` : handdraw one line
+- `draw multiple lines + double click` : handdraw glyph (stroke order and directions sensitive)
 - `[]` : select object
 - `[]` : edit object's properties
 - `[]` : edit object's code
@@ -54,7 +54,7 @@ Then, open `localhost:11235` in your browser. Or via terminal :
 
 - `[]` : zoom in
 - `[]` : zoom out
-- left-click with ![chalktalk-move-24px](https://cloud.githubusercontent.com/assets/1420189/21187406/1d4fbaca-c218-11e6-82c8-400aa479cbb3.png) : 2D directional moves to top, right, bottom, left
+- ![chalktalk-move-24px](https://cloud.githubusercontent.com/assets/1420189/21187406/1d4fbaca-c218-11e6-82c8-400aa479cbb3.png) `+ left-click` : 2D directional moves to top, right, bottom, left
 - `[Shift+R]` : 3D activation/desactivation
 - `[]` : 3D directional moves
 
