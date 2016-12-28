@@ -1,0 +1,7 @@
+# Chrome Issues?
+Sometimes, Chrome on Macbooks doesn't realize it should use the discrete card or the on-board card for WebGL. 
+If you run Chalktalk and get the "Cannot initialize WebGL Renderer" error, use a tool like gfxCardStatus or other
+to force your Macbook to use the discrete card, then kill Chrome and restart it.
+
+The issue seems to be that recent versions of Chrome don't know how to initialize WebGL properly on machines
+with multiple GPU options such as certain models of MacbookPro.
