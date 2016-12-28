@@ -31,6 +31,9 @@ var Atypical = (function () {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
+         if (typename == this.typename) {
+            return this;
+         }
          var conversionFunction = _conversions[this.typename][typename];
          if (!conversionFunction) {
             return undefined;
