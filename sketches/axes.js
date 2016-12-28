@@ -46,8 +46,8 @@ function() {
          if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
-         if (isDef(this.inValue[0]) && this.inValue[0].length != 16) {
-            inValue = this.inValue[0];
+         if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0]) && this.inValue_DEPRECATED_PORT_SYSTEM[0].length != 16) {
+            inValue = this.inValue_DEPRECATED_PORT_SYSTEM[0];
             switch (arrayDepth(inValue)) {
             case 1:
                V = inValue; x = V[0]; y = V[1]; z = def(V[2]);

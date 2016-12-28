@@ -43,8 +43,8 @@ function() {
    this.value = 0;
 
    this.getDelayedValue = function() {
-      if (time > this.timerStart + this.getInValue(1, 0)) {
-         this.value = this.getInValue(0, 0);
+      if (time > this.timerStart + this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0)) {
+         this.value = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0);
          this.timerStart = time;
       }
       return this.value;
@@ -93,7 +93,7 @@ function() {
       var s  = this.selection;
       return this.evalCode(this.codes[s + 4 * this.invert],
                            s==0 ? this.getDelayedValue()
-                                : this.getInValue(0, 0), this.getInValue(1, 0));
+                                : this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0), this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0));
    }
 }
 

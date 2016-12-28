@@ -30,7 +30,7 @@ function() {
             this.trace[3] = this.sketchTrace[3];
       });
       this.afterSketch(function() {
-         if (typeof this.inValue[0] == 'function') {
+         if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] == 'function') {
 	    if (this.P_previous === undefined || ! isEqual(this.P_previous, this.P = this.profileCurve())) {
                if (this.mesh !== undefined)
                   root.remove(this.mesh);
@@ -53,12 +53,12 @@ function() {
    }
 
    this.inputIsFunction = function() {
-      return typeof this.inValue[0] == 'function';
+      return typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] == 'function';
    }
 
    this.profileCurve = function() {
       if (this.inputIsFunction()) {
-         var f = this.inValue[0], P = [], p, t;
+         var f = this.inValue_DEPRECATED_PORT_SYSTEM[0], P = [], p, t;
          for (t = 0 ; t < 1.001 ; t += 0.05) {
             p = f(min(t, 0.999));
             P.push(newVec3(1+p[0],p[2],p[1]));

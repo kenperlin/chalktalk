@@ -10,8 +10,8 @@ function() {
 
    this.render = function() {
       for (var i = 0 ; i < 3 ; i++)
-         if (this.inValues.length > i)
-            P[i] = this.inValues[i];
+         if (this.inValues_DEPRECATED_PORT_SYSTEM.length > i)
+            P[i] = this.inValues_DEPRECATED_PORT_SYSTEM[i];
 
       valuesToQuadratic(P, A);
 

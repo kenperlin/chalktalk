@@ -38,8 +38,8 @@ function sum(x,y) {
       mLine( [ 0, 1], [ 0, -1] );
       mLine( [-1, 0], [ 1,  0] );
 
-      if (isDef(this.in[0]) && isDef(this.in[1])) {
-         this.outValue[0] = sum(this.inValue[0], this.inValue[1]);
+      if (isDef(this.in_DEPRECATED_PORT_SYSTEM[0]) && isDef(this.in_DEPRECATED_PORT_SYSTEM[1])) {
+         this.outValue[0] = sum(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.inValue_DEPRECATED_PORT_SYSTEM[1]);
       }
    }
 }

@@ -195,8 +195,8 @@ function Octopus() {
       var links = graph.links;
       graph.pixelSize = this.computePixelSize();
 
-      graph.amplitude = isDef(this.inValues[0]) ? this.inValues[0] : 1;
-      graph.frequency = isDef(this.inValues[1]) ? this.inValues[1] : 1;
+      graph.amplitude = isDef(this.inValues_DEPRECATED_PORT_SYSTEM[0]) ? this.inValues_DEPRECATED_PORT_SYSTEM[0] : 1;
+      graph.frequency = isDef(this.inValues_DEPRECATED_PORT_SYSTEM[1]) ? this.inValues_DEPRECATED_PORT_SYSTEM[1] : 1;
 
       // DURING THE INITIAL SKETCH, DRAW EACH LINK.
 

@@ -151,7 +151,7 @@ function() {
 
    this.computeFlexValue = function(n) {
       var value = 5 * jtrAmpl[n] * noise.noise([n + .5, .5, jtrFreq[n] * time * 2]) + (n==3 ? -1 : 0);
-      var t = this.inValues[n];
+      var t = this.inValues_DEPRECATED_PORT_SYSTEM[n];
       if (t !== undefined) {
          switch (n) {
          case 3: // AAH

@@ -7,10 +7,10 @@ function() {
          mCurve(curveForSignal);
       });
       this.afterSketch(function() {
-         if (typeof this.inValue[0] !== 'function')
+         if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] !== 'function')
             mCurve(curveForSignal);
          else {
-            var func = this.inValue[0];
+            var func = this.inValue_DEPRECATED_PORT_SYSTEM[0];
             var freq = this.sketchTexts[0].value;
 
             var curve = [];

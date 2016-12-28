@@ -63,8 +63,8 @@ function() {
      });
 
      this.output = function() {
-        var a = def(this.inValue[0]) ? 1 : 0;
-        var b = def(this.inValue[1]) ? 1 : 0;
+        var a = def(this.inValue_DEPRECATED_PORT_SYSTEM[0]) ? 1 : 0;
+        var b = def(this.inValue_DEPRECATED_PORT_SYSTEM[1]) ? 1 : 0;
 	return this.state & 1 << (a | b << 1) ? 1 : 0;
      }
   }

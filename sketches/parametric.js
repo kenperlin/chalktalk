@@ -27,8 +27,8 @@ function() {
          mCurve(makeOval(-1, -1, 2, 2, 16, PI/2, PI/2 + PI));
       });
       this.afterSketch(function() {
-         var nu = floor(def(this.inValue[0], this.nu));
-         var nv = floor(def(this.inValue[1], this.nv));
+         var nu = floor(def(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.nu));
+         var nv = floor(def(this.inValue_DEPRECATED_PORT_SYSTEM[1], this.nv));
          lineWidth(1);
          var du = 1 / nu;
          var dv = 1 / nv;

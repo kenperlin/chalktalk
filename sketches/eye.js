@@ -12,7 +12,7 @@ function() {
    this.onSwipe[2] = [ 'hi res', function() { hiRes  = ! hiRes ; b_p = undefined; } ];
    this.render = function(elapsed) {
 
-      this.gIV = function(j) { return max(0, min(1, this.getInValue(j, 0.5))); }
+      this.gIV = function(j) { return max(0, min(1, this.getInValue_DEPRECATED_PORT_SYSTEM(j, 0.5))); }
 
       var open = this.gIV(0) + .3;
       var lift = this.gIV(1) - .5;

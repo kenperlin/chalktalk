@@ -8,6 +8,6 @@ function() {
       });
       m.rotateX(PI/2);
       mCylinder();
-      this.useInputColors();
+      this.useInputColors_DEPRECATED_PORT_SYSTEM();
    }
 }

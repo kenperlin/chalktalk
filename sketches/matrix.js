@@ -133,9 +133,9 @@ function() {
             break;
 
          case 'Matrix':
-            if (isMatrixArray(this.inValue[0])) {
+            if (isMatrixArray(this.inValue_DEPRECATED_PORT_SYSTEM[0])) {
                for (var i = 0 ; i < 16 ; i++)
-                  out.push(roundedString(this.inValues[i]));
+                  out.push(roundedString(this.inValues_DEPRECATED_PORT_SYSTEM[i]));
             }
             else {
                sub = ["x","y","z"];
@@ -148,14 +148,14 @@ function() {
                case 6: sub = ["px","py","pz"]; break;
                }
 
-               if (isDef(this.inValue[0])) {
-		  if (this.inValue[0] instanceof Array) {
-                     x = rounded(this.inValue[0][0], 0);
-                     y = rounded(this.inValue[0][1], x);
-                     z = rounded(this.inValue[0][2], y);
+               if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0])) {
+		  if (this.inValue_DEPRECATED_PORT_SYSTEM[0] instanceof Array) {
+                     x = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][0], 0);
+                     y = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][1], x);
+                     z = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][2], y);
                   }
 		  else {
-		     value = parseFloat(this.inValue[0]);
+		     value = parseFloat(this.inValue_DEPRECATED_PORT_SYSTEM[0]);
                      if (isNumeric(value))
                         x = y = z = rounded(value, 0);
                   }
@@ -211,10 +211,10 @@ function() {
 
    this.output = function() {
       var type = this.labels[this.selection];
-      var outValue = type != 'Matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+      var outValue = type != 'Matrix' || this.inValues_DEPRECATED_PORT_SYSTEM.length > 0 ? this.matrixValues : this.identityMatrix;
       var i = this.labels[this.selection] == 'Matrix' ? 1 : 0;
-      if (isDef(this.inValue[i]))
-         outValue = mult(outValue, this.inValue[i]);
+      if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[i]))
+         outValue = mult(outValue, this.inValue_DEPRECATED_PORT_SYSTEM[i]);
       return outValue;
    }
 

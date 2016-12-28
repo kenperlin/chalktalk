@@ -154,9 +154,9 @@ function() {
 
          // IF THERE WAS INPUT, THEN OUTPUT A SPECIFIC VALUE.
 
-         if (this.inValues[0] !== undefined) {
-            var p = getPointOnCurve(splineCurve, this.inValues[0] % 1);
-            this.setOutPortValue(p);
+         if (this.inValues_DEPRECATED_PORT_SYSTEM[0] !== undefined) {
+            var p = getPointOnCurve(splineCurve, this.inValues_DEPRECATED_PORT_SYSTEM[0] % 1);
+            this.setOutPortValue_DEPRECATED_PORT_SYSTEM(p);
             if (! this.showKeys)
                mDot(p, 2*r);
          }
@@ -164,7 +164,7 @@ function() {
          // IF THERE WAS NO INPUT, THEN OUTPUT A DEFINING FUNCTION.
 
          else
-            this.setOutPortValue(function(t) { return getPointOnCurve(splineCurve, t % 1); });
+            this.setOutPortValue_DEPRECATED_PORT_SYSTEM(function(t) { return getPointOnCurve(splineCurve, t % 1); });
       });
    }
 }

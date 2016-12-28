@@ -23,7 +23,7 @@ function() {
       m.rotateX(PI/2);
 
       var that = this;
-      window._lsiv0 = this.inValue[0];
+      window._lsiv0 = this.inValue_DEPRECATED_PORT_SYSTEM[0];
       mRevolved(32, 64, typeof _lsiv0 == 'function'
          ? new Function('t', 'var p=_lsiv0(t);return [1+p[0],-p[1]];//' + ++that._counter)
          : function(t) { return sample(that.profile, t); });

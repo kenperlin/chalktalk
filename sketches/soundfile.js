@@ -33,7 +33,7 @@ function() {
       mCurve([[-.3, .5], [.5, 0], [-.3, -.5]]);
 
       this.createCodeFunction();
-      this.setOutPortValue( self.codeFunction );
+      this.setOutPortValue_DEPRECATED_PORT_SYSTEM( self.codeFunction );
 
       this.onClick = function(e) {
          this.input.click();

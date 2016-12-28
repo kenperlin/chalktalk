@@ -46,8 +46,8 @@ function() {
 
       this.afterSketch(function() {
 
-         if (isDef(this.inValue[0])) {
-	    var n = max(0, min(999, floor(this.inValue[0])));
+         if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0])) {
+	    var n = max(0, min(999, floor(this.inValue_DEPRECATED_PORT_SYSTEM[0])));
 	    this.digits[0] = floor(n / 100);
 	    this.digits[1] = floor((n % 100) / 10);
 	    this.digits[2] = floor(n % 10);

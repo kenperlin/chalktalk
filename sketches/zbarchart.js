@@ -108,14 +108,14 @@ function() {
       });
       this.afterSketch(function() {
          var isInput = this.isInValueAt(0);
-         var v  = isInput ? this.inValues : this.values;
+         var v  = isInput ? this.inValues_DEPRECATED_PORT_SYSTEM : this.values;
          var n  = isInput ? v.length : this.nValues;
          var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;
 
          if (this.isNoise) {
             v = this.values;
             n = this.nValues;
-            var freq = isInput ? this.inValues[0] : 1;
+            var freq = isInput ? this.inValues_DEPRECATED_PORT_SYSTEM[0] : 1;
 
             if (! isDef(this.noiseTime)) {
                this.noiseTime = time;

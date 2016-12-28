@@ -22,13 +22,13 @@ function() {
          mLine([0, -1], [0, 1]);
          mLine([-1, 0], [1, 0]);
 
-         if (this.inValue[0]) {
-           var center = this.getCenterOfMass(this.inValue[0]);
+         if (this.inValue_DEPRECATED_PORT_SYSTEM[0]) {
+           var center = this.getCenterOfMass(this.inValue_DEPRECATED_PORT_SYSTEM[0]);
 
            // draw center of mass
 
-           var x = center.x/(this.inValue[0].width/2)-1;
-           var y = center.y/(this.inValue[0].height/2)-1;
+           var x = center.x/(this.inValue_DEPRECATED_PORT_SYSTEM[0].width/2)-1;
+           var y = center.y/(this.inValue_DEPRECATED_PORT_SYSTEM[0].height/2)-1;
            color(255, 100, 100);
            mFillRect([x-0.03, y-0.03], [x+0.03, y+0.03]);
 

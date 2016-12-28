@@ -41,8 +41,8 @@ function() {
          this.drawBlades();
          m.rotateZ(PI/2);
          this.drawBlades();
-         this.turnRate = mix(this.turnRate, isDef(this.inValues[0])
-                             ? this.inValues[0]
+         this.turnRate = mix(this.turnRate, isDef(this.inValues_DEPRECATED_PORT_SYSTEM[0])
+                             ? this.inValues_DEPRECATED_PORT_SYSTEM[0]
                              : this.defaultTurnRate, 3 * elapsed);
          this.angle -= 4 * this.turnRate * elapsed;
          this.extendBounds(arc(0, 0, 1, 0, TAU, 20));

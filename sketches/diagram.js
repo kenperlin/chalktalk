@@ -71,8 +71,8 @@ function Diagram() {
       switch (this.labels[this.selection]) {
 
       case "refract":
-         this.n1 = this.getInValue(0, 1.0);
-         this.n2 = this.getInValue(1, 1.5);
+         this.n1 = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 1.0);
+         this.n2 = this.getInValue_DEPRECATED_PORT_SYSTEM(1, 1.5);
 
          var mouseX = -100, mouseY = -100;
 

@@ -69,8 +69,8 @@ function() {
    }
 
    this.output = function() {
-      var x = this.getInValue(0, time);
-      var y = this.getInValue(1, 0);
+      var x = this.getInValue_DEPRECATED_PORT_SYSTEM(0, time);
+      var y = this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0);
       var result = null;
       try {
          eval("result = (" + this.code[this.selection][1] + ")");

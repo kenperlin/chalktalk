@@ -26,7 +26,7 @@ function() {
       mCurve(C);
 
       this.afterSketch(function() {
-         var t = this.getInValue(0, 0);
+         var t = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0);
          this.y = this.f(t);
          if (this.y != null) {
             color(fadedColor(0.5, this.colorId));

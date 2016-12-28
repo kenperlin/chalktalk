@@ -38,9 +38,9 @@ function() {
          mLine([x, 1],[x,-1]);
       }
       this.afterSketch(function() {
-         if (this.inValue[0] !== undefined)
-	    for (var i = 0 ; i < min(this.inValue[0].length, this.rgb.length) ; i++)
-	       this.rgb[i] = max(0, min(1, this.inValue[0][i]));
+         if (this.inValue_DEPRECATED_PORT_SYSTEM[0] !== undefined)
+	    for (var i = 0 ; i < min(this.inValue_DEPRECATED_PORT_SYSTEM[0].length, this.rgb.length) ; i++)
+	       this.rgb[i] = max(0, min(1, this.inValue_DEPRECATED_PORT_SYSTEM[0][i]));
          mLineWidth(0.1);
          for (var i = 0 ; i < 3 ; i++) {
             color(colors[i]);

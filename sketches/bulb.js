@@ -28,7 +28,7 @@ function() {
    var C = makeOval(-.3,-2.5,.6,.6,10,2*PI,PI);
 
    this.render = function(elapsed) {
-      var light = this.getInValue(0, this.light);
+      var light = this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.light);
 
       this.duringSketch(function() {
          mCurve(A.concat(S.concat(B)));
@@ -52,6 +52,6 @@ function() {
       mCurve(C);
    }
 
-   this.output = function() { return this.getInValue(0, this.light); }
+   this.output = function() { return this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.light); }
 }
 

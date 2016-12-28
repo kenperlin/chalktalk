@@ -64,7 +64,7 @@ function() {
 
       // Record measurement
 
-      if (this.inValues.length > 0) {
+      if (this.inValues_DEPRECATED_PORT_SYSTEM.length > 0) {
 
          sinceLastMeasurement += elapsed
 
@@ -79,7 +79,7 @@ function() {
 
             // Capture input
 
-            var val = this.inValues[0];
+            var val = this.inValues_DEPRECATED_PORT_SYSTEM[0];
             if (typeof val == 'function')
                val = val(time);
             recordValue(val);

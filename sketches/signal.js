@@ -5,13 +5,13 @@ function() {
       this.createCodeFunction();
    }
    this.createCodeFunction = function() {
-      if (typeof this.inValue[0] === 'function')
-         this.codeFunction = this.inValue[0];
+      if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] === 'function')
+         this.codeFunction = this.inValue_DEPRECATED_PORT_SYSTEM[0];
       else {
          var codeText = this.code[this.selection][1];
-         codeText = codeText.replace(/\bx\b/g, def(this.inValue[0], 0))
-                            .replace(/\by\b/g, def(this.inValue[1], 0))
-                            .replace(/\bz\b/g, def(this.inValue[2], 0));
+         codeText = codeText.replace(/\bx\b/g, def(this.inValue_DEPRECATED_PORT_SYSTEM[0], 0))
+                            .replace(/\by\b/g, def(this.inValue_DEPRECATED_PORT_SYSTEM[1], 0))
+                            .replace(/\bz\b/g, def(this.inValue_DEPRECATED_PORT_SYSTEM[2], 0));
 
          if (codeText.indexOf('return ') < 0)
             codeText = 'return (' + codeText + ')';
@@ -38,7 +38,7 @@ function() {
          C.push([2*t-1, 2*this.evalCodeFunction(t)]);
       mCurve(C);
       this.afterSketch(function() {
-         if (typeof this.inValue[0] !== 'function' && this == sk() && isHover()) {
+         if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] !== 'function' && this == sk() && isHover()) {
             var scale = 0.15;
             textHeight(this.mScale(scale));
             color(backgroundColor);
@@ -55,9 +55,9 @@ function() {
    this.output = function() {
       var s = this.selection;
       if ( this.code[s][1] != this.savedCode ||
-           this.inValue[0] != this.savedInValue_0 ||
-           this.inValue[1] != this.savedInValue_1 ||
-           this.inValue[2] != this.savedInValue_2 ) {
+           this.inValue_DEPRECATED_PORT_SYSTEM[0] != this.savedInValue_0 ||
+           this.inValue_DEPRECATED_PORT_SYSTEM[1] != this.savedInValue_1 ||
+           this.inValue_DEPRECATED_PORT_SYSTEM[2] != this.savedInValue_2 ) {
          this.savedCode = this.code[s][1];
          this.savedInValue_0 = this.inValue_0;
          this.savedInValue_1 = this.inValue_1;

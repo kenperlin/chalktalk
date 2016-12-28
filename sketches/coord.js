@@ -50,8 +50,8 @@ function() {
 
          // IF THERE IS AN INPUT MATRIX, THEN TRANSFORM CUBE.
          
-         if (this.inValues.length == 16) {
-            var M = this.inValues;
+         if (this.inValues_DEPRECATED_PORT_SYSTEM.length == 16) {
+            var M = this.inValues_DEPRECATED_PORT_SYSTEM;
             for (var n = 0 ; n < C.length ; n++) {
                C[n] = [ max(-1,min(1, dot4(C[n], [M[0], M[4], M[ 8], M[12]]))),
                         max(-1,min(1, dot4(C[n], [M[1], M[5], M[ 9], M[13]]))),

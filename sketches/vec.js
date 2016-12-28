@@ -85,12 +85,12 @@ function() {
             var t = (i+.5) / this.nRows();
             var a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t);
             var p = this.axis() == 0 ? [a,0] : [0,a];
-            var val = this.getInValue(i, this.value[i]);
+            var val = this.getInValue_DEPRECATED_PORT_SYSTEM(i, this.value[i]);
             mText(roundedString(val, this.precision), p, .5, .5);
             outValue.push(val);
          }
-         if (isDef(this.inValue[0]))
-            outValue = mult(this.inValue[0], outValue);
+         if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0]))
+            outValue = mult(this.inValue_DEPRECATED_PORT_SYSTEM[0], outValue);
          this.outValue[0] = outValue;
       });
    }

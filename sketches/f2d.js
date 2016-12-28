@@ -51,7 +51,7 @@ function() {
       });
    }
    this.output = function() {
-      return this._f(this.getInValue(0, 0),
-                     this.getInValue(1, 0));
+      return this._f(this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0),
+                     this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0));
    }
 }

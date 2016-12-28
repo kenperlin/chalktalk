@@ -10,7 +10,7 @@ function() {
    this.render = function(elapsed) {
       this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
                                       : max(0, this.bouncing - elapsed);
-      var bouncing = max(0, min(1, this.getInValue(0, this.bouncing)));
+      var bouncing = max(0, min(1, this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.bouncing)));
 
       this.afterSketch(function() {
          color(fadedColor(.25, this.colorId));

@@ -34,8 +34,8 @@ function() {
          mText('c =', [-1.65,-.3], 0,.5);
          mText('d =', [-1.65,-.9], 0,.5);
 	 for (var i = 0 ; i < 4 ; i++)
-	    if (this.inValues[i] !== undefined)
-	       this.sketchTexts[i].setValue(roundedString(this.inValues[i]));
+	    if (this.inValues_DEPRECATED_PORT_SYSTEM[i] !== undefined)
+	       this.sketchTexts[i].setValue(roundedString(this.inValues_DEPRECATED_PORT_SYSTEM[i]));
          color('red');
          mText('at' + EXP_3 + ' + bt' + EXP_2 + ' + ct + d', [0,-1.2], .5, .5);
       });

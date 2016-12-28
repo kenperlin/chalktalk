@@ -32,18 +32,18 @@ function() {
             this.startTime = undefined;
 
          if (this.isInValueAt(0)) {
-            a = def(this.inValues[ 0], a);
-            d = def(this.inValues[ 1], d);
-            e = def(this.inValues[ 2], e);
-            h = def(this.inValues[ 3], h);
-            i = def(this.inValues[ 4], i);
-            o = def(this.inValues[ 5], o);
-            s = def(this.inValues[ 6], s);
-            u = def(this.inValues[ 7], u);
-            v = def(this.inValues[ 8], v);
-            x = def(this.inValues[ 9], x);
-            y = def(this.inValues[10], y);
-            z = def(this.inValues[11], z);
+            a = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 0], a);
+            d = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 1], d);
+            e = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 2], e);
+            h = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 3], h);
+            i = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 4], i);
+            o = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 5], o);
+            s = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 6], s);
+            u = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 7], u);
+            v = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 8], v);
+            x = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 9], x);
+            y = def(this.inValues_DEPRECATED_PORT_SYSTEM[10], y);
+            z = def(this.inValues_DEPRECATED_PORT_SYSTEM[11], z);
          }
          else if (this.isNeutral) {
             if (this.startTime === undefined)

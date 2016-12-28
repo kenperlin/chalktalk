@@ -31,19 +31,19 @@ function() {
       mLine([1,1],[1,-1]);
       mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       if ( this.code[cs][1] != this.savedCode ||
-           isDef(this.in[0]) && this.inValues[0] != this.savedX ||
-           isDef(this.in[1]) && this.inValues[1] != this.savedY ||
-           isDef(this.in[2]) && this.inValues[2] != this.savedZ ) {
+           isDef(this.in_DEPRECATED_PORT_SYSTEM[0]) && this.inValues_DEPRECATED_PORT_SYSTEM[0] != this.savedX ||
+           isDef(this.in_DEPRECATED_PORT_SYSTEM[1]) && this.inValues_DEPRECATED_PORT_SYSTEM[1] != this.savedY ||
+           isDef(this.in_DEPRECATED_PORT_SYSTEM[2]) && this.inValues_DEPRECATED_PORT_SYSTEM[2] != this.savedZ ) {
 
          var code = this.savedCode = this.code[cs][1];
 
-         if (isDef(this.in[0])) this.savedX = this.inValue[0];
-         if (isDef(this.in[1])) this.savedY = this.inValue[1];
-         if (isDef(this.in[2])) this.savedZ = this.inValue[2];
+         if (isDef(this.in_DEPRECATED_PORT_SYSTEM[0])) this.savedX = this.inValue_DEPRECATED_PORT_SYSTEM[0];
+         if (isDef(this.in_DEPRECATED_PORT_SYSTEM[1])) this.savedY = this.inValue_DEPRECATED_PORT_SYSTEM[1];
+         if (isDef(this.in_DEPRECATED_PORT_SYSTEM[2])) this.savedZ = this.inValue_DEPRECATED_PORT_SYSTEM[2];
 
-         var var_xyz = "var x=(" + def(this.inValues[0]) + ")," +
-                           "y=(" + def(this.inValues[1]) + ")," +
-                           "z=(" + def(this.inValues[2]) + ");" ;
+         var var_xyz = "var x=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[0]) + ")," +
+                           "y=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[1]) + ")," +
+                           "z=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[2]) + ");" ;
 
          // MAKE SURE THE CODE IS VALID.
 

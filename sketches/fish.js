@@ -17,11 +17,11 @@ function() {
                this.swimTime = time;
             var t = time - this.swimTime;
             c = cos(2 * TAU * t) * .1;
-            if (typeof this.inValue[0] != 'function')
+            if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] != 'function')
                m.translate(2*t,0,0);
             else {
-               p0 = this.inValue[0]( t/4         % 1);
-               p1 = this.inValue[0]((t/4 + .001) % 1);
+               p0 = this.inValue_DEPRECATED_PORT_SYSTEM[0]( t/4         % 1);
+               p1 = this.inValue_DEPRECATED_PORT_SYSTEM[0]((t/4 + .001) % 1);
                m.translate(2 * p0[0], 2 * p0[1], 2 * p0[2]);
 
                angle = atan2(p0[0] - p1[0], p1[1] - p0[1]);

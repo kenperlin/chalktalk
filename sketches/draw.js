@@ -197,7 +197,7 @@ function() {
 	    var y = roundedString(curve.data[1]);
 	    code += '\n';
 	    code += '      m.translate([' + x + ',' + y + ',0]);\n';
-	    code += '      m.rotateZ(this.inValues[' + jointNum++ + ']);\n';
+	    code += '      m.rotateZ(this.inValues_DEPRECATED_PORT_SYSTEM[' + jointNum++ + ']);\n';
 	    code += '      m.translate([' + -x + ',' + -y + ',0]);\n';
 	    code += '\n';
             break;

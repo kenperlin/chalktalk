@@ -6,7 +6,7 @@ function() {
       mLine([-.5,0],[.5,0]);
    }
    this.output = function() {
-      var inputs = this.inValue;
+      var inputs = this.inValue_DEPRECATED_PORT_SYSTEM;
       return function(t) {
          var sum = 0;
          for (var i = 0 ; i < inputs.length ; i++)
