@@ -19,7 +19,7 @@ function() {
       this.yDown = p.y;
       this.indexLo =  1000;
       this.indexHi = -1000;
-      if (! this.isInValueAt(0)) {
+      if (! this.isInValueAt_DEPRECATED_PORT_SYSTEM(0)) {
          this.valueIndex = this._computeIndex(p);
       }
    }
@@ -80,13 +80,13 @@ function() {
    this.valueIndex = -1;
    this.values = newArray(100);
    this.displayMode = function() {
-      var link = this.findInLink(0);
+      var link = this.findInLink_DEPRECATED_PORT_SYSTEM(0);
       if (isDef(link))
          return link.displayMode();
       return 0;
    }
    this.displayIndex = function() {
-      var link = this.findInLink(0);
+      var link = this.findInLink_DEPRECATED_PORT_SYSTEM(0);
       if (isDef(link))
          return link.displayIndex();
       return 0;
@@ -107,7 +107,7 @@ function() {
             mCurve([[-.5,-1],[-.5,0],[.5,0],[.5,-1]]);
       });
       this.afterSketch(function() {
-         var isInput = this.isInValueAt(0);
+         var isInput = this.isInValueAt_DEPRECATED_PORT_SYSTEM(0);
          var v  = isInput ? this.inValues_DEPRECATED_PORT_SYSTEM : this.values;
          var n  = isInput ? v.length : this.nValues;
          var ii = isInput ? this.displayMode() > 0 ? this.displayIndex() : -1 : this.valueIndex;

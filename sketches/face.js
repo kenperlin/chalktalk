@@ -31,7 +31,7 @@ function() {
          if (! this.isAnimated && ! this.isNeutral)
             this.startTime = undefined;
 
-         if (this.isInValueAt(0)) {
+         if (this.isInValueAt_DEPRECATED_PORT_SYSTEM(0)) {
             a = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 0], a);
             d = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 1], d);
             e = def(this.inValues_DEPRECATED_PORT_SYSTEM[ 2], e);
