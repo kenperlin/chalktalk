@@ -61,6 +61,6 @@ function() {
    }
    // TODO: modify inputs to use Atypical types
 
-   this.output = function() { return new AT.Float(this.angle); }
+   this.output = function() { this.angle; }
 }
 
