@@ -27,7 +27,7 @@ var Atypical = (function () {
       // typename: Name of the destination type. Must be a type name that's already been
       //           defined.
       convert: function(typename) {
-         if (!_types.hasOwnProperty(typename)) {
+         if (!AT.typeIsDefined(typename)) {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
@@ -47,7 +47,7 @@ var Atypical = (function () {
       // typename: Name of the type you want to convert to. Must be a type name that's already
       //           been defined.
       canConvert: function(typename) {
-         if (!_types.hasOwnProperty(typename)) {
+         if (!AT.typeIsDefined(typename)) {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
@@ -66,6 +66,11 @@ var Atypical = (function () {
          }
          Object.defineProperty(this, propertyName, {value: value, writeable: false});
       }
+   }
+
+   // TODO: DOC
+   AT.typeIsDefined = function(typename) {
+      return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    }
 
    // Internal function to build an Atypical type. Sets up the correct prototype, the
