@@ -61,6 +61,6 @@ function() {
    }
    // TODO: modify inputs to use Atypical types
 
-   this.output = function() { this.angle; }
+   this.output = function() { return this.angle; }
 }
 
