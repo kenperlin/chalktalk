@@ -51,6 +51,7 @@ var Atypical = (function () {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
+         if (typename == this.typename) { return true; }
          return (_conversions[this.typename][typename] !== undefined);
       },
       // Helper function for defining an immutable property on this object.
