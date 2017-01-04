@@ -361,10 +361,10 @@ var Atypical = (function () {
       return new AT.Bool(i.n);
    });
    AT.defineConversion("Float", "Bool", function(num) {
-      return new AT.Bool(num.n);
+      return new AT.Bool(Math.abs(num.n) > 0.001);
    });
    AT.defineConversion("Vector3", "Bool", function(v) {
-      let notZero = (v.x !== 0 || v.y !== 0 || v.z !== 0);
+      let notZero = (Math.abs(v.x) > 0.001 || Math.abs(v.y) > 0.001 || Math.abs(v.z) > 0.001);
       return new AT.Bool(notZero);
    });
    AT.defineConversion("Bool", "Int", function(b) {
