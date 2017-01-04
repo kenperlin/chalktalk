@@ -68,7 +68,10 @@ var Atypical = (function () {
       }
    }
 
-   // TODO: DOC
+   // Checks whether a type with the given name is already defined.
+   // 
+   // typename: The name of the type you want to check for. Must be a string, if not a string
+   //           this function returns false.
    AT.typeIsDefined = function(typename) {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    }
