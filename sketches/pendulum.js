@@ -49,7 +49,12 @@ function() {
       m.translate(0, 2 - this.rodHeight, 0);
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
-      this.angle = def(this.inValues_DEPRECATED_PORT_SYSTEM[0], this.spring.getPosition());
+      if (this.inputs.hasValue(0)) {
+         this.angle = this.inputs.value(0).n;
+      }
+      else {
+         this.angle = this.spring.getPosition();
+      }
       if (isNaN(this.angle)) this.angle = 0;
 
       m.translate(0, this.rodHeight, 0);
@@ -59,8 +64,11 @@ function() {
       mCurve([[0, this.rodHeight], [0,bobRadius]]);
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
    }
-   // TODO: modify inputs to use Atypical types
 
-   this.output = function() { return this.angle; }
+   this.defineOutput("Float", function() {
+      return new AT.Float(this.angle);
+   });
+
+   this.defineInput("Float");
 }
 
