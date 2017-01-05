@@ -424,6 +424,16 @@ var Atypical = (function () {
    AT.defineConversion("Float", "Vector3", function(r) {
       return new AT.Vector3(new AT.Float(r.n), new AT.Float(r.n), new AT.Float(r.n));
    });
+   AT.defineConversion("Vector3", "String", function(v) {
+      return new AT.String("(" + v.x.convert("String").str
+         + ", " + v.y.convert("String").str + ", " + v.z.convert("String").str + ")");
+   });
+   AT.defineConversion("String", "Vector3", function(str) {
+      let numbers = str.str.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
+         function(n) { return !isNaN(n); }
+      );
+      return new AT.Vector3(numbers[0] || 0, numbers[1] || 0, numbers[2] || 0);
+   });
 
    AT.Int = AT.defineType({
       typename: "Int",
