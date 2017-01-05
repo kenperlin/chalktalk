@@ -5,7 +5,7 @@ var Atypical = (function () {
 
    // This internal variable holds all of our types, with keys being their names and values
    // being their constructors.
-   var _types = {}
+   var _types = {};
 
    // This internal variable will hold all our conversion functions, in the following structure:
    // {
@@ -16,10 +16,10 @@ var Atypical = (function () {
    //     }
    //     ...
    // }
-   var _conversions = {}
+   var _conversions = {};
 
    // Base for all types. Contains some common functionality needed in all of them.
-   AT.Type = function() {}
+   AT.Type = function() {};
    AT.Type.prototype = {
       // Converts this object to another type, returning the converted object or undefined
       // if no conversion exists.
@@ -67,7 +67,7 @@ var Atypical = (function () {
          }
          Object.defineProperty(this, propertyName, {value: value, writeable: false});
       }
-   }
+   };
 
    // Checks whether a type with the given name is already defined.
    // 
@@ -75,7 +75,7 @@ var Atypical = (function () {
    //           this function returns false.
    AT.typeIsDefined = function(typename) {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
-   }
+   };
 
    // Internal function to build an Atypical type. Sets up the correct prototype, the
    // required functions, and so on.
@@ -146,7 +146,7 @@ var Atypical = (function () {
 
       _types[implementation.typename] = AtypicalType[implementation.typename];
       return AtypicalType[implementation.typename];
-   }
+   };
 
    // Adds a conversion function to the global list of conversion functions, enabling it to
    // be used with Atypical.Type.convert.
@@ -184,7 +184,7 @@ var Atypical = (function () {
          _conversions[sourceTypename] = {};
       }
       _conversions[sourceTypename][destinationTypename] = conversionFunction;
-   }
+   };
 
    // If you have a conversion between an intermediary type T and a destination type D (T -> D),
    // this allows you to repurpose all your conversions from any source type S -> T to conversions
@@ -233,17 +233,17 @@ var Atypical = (function () {
             }
          }
       }
-   }
+   };
 
    // Construction error. Meant to be thrown in a type's constructor if the type was instantiated
    // with incorrect arguments.
-   AT.ConstructionError = function(message) { this.init(message); }
+   AT.ConstructionError = function(message) { this.init(message); };
    AT.ConstructionError.prototype = {
       init: function(message) {
          this.name = "ConstructionError";
          this.message = (message || "Type was constructed with incorrect arguments");
       }
-   }
+   };
 
    // Type definitions start here.
 
