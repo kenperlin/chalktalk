@@ -162,21 +162,24 @@ var Atypical = (function () {
    AT.defineConversion = function(sourceTypename, destinationTypename, conversionFunction) {
       if (!( typeof sourceTypename === "string" 
          && typeof destinationTypename === "string"
-            && typeof conversionFunction === "function"))
+         && typeof conversionFunction === "function"))
       {
          console.error("Error adding type conversion, incorrect arguments.");
          return;
       }
       if (conversionFunction.length !== 1) {
-         console.error("Conversion function must be of exactly one argument.");
+         console.error("Error adding type conversion, conversion function must be of exactly "
+            + "one argument.");
          return;
       }
       if (!_types.hasOwnProperty(sourceTypename)) {
-         console.error("Source type " + sourceTypename + " not defined.");
+         console.error("Error adding type conversion, source type "
+            + sourceTypename + " not defined.");
          return;
       }
       if (!_types.hasOwnProperty(destinationTypename)) {
-         console.error("Destination type " + destinationTypename + " not defined.");
+         console.error("Error adding type conversion, destination type "
+            + destinationTypename + " not defined.");
          return;
       }
 
