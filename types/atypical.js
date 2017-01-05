@@ -450,7 +450,14 @@ var Atypical = (function () {
    AT.defineConversion("Int", "Float", function(i) {
       return new AT.Float(i.n);
    });
-   AT.defineConversionsViaIntermediary("Float", "Int");
+   AT.defineConversionsViaIntermediary(null, "Float", "Int");
+   AT.defineConversionsViaIntermediary("Int", "Float", null);
+   // Define a custom conversion to string. The float intermediary already gives us conversion
+   // from string for free, but we want our ints to print without decimal places.
+   AT.defineConversion("Int", "String", function(i) {
+      return new AT.String("" + i.n)
+   });
+   
 
    AT.Bool = AT.defineType({
       typename: "Bool",
