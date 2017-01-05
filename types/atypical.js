@@ -187,51 +187,170 @@ var Atypical = (function () {
       _conversions[sourceTypename][destinationTypename] = conversionFunction;
    };
 
-   // If you have a conversion between an intermediary type T and a destination type D (T -> D),
-   // this allows you to repurpose all your conversions from any source type S -> T to conversions
-   // from S -> D by using T as an intermediary, S -> T -> D. For example, allowing you do define
-   // all your conversions from S -> Float to conversions from S -> Int by converting first to Float
-   // and then rounding through the Float -> Int conversion.
+   // This function allows you to define a conversion between any two types S and D by using type T
+   // as an intermediary. That is, when converting S to D, you first convert S to T and then T to D.
    //
-   // intermediaryTypename: The name of the type you'd like to use as an intermediary. Must have
+   // The arguments correspond to the types as so:
+   //
+   // sourceTypename: The name of the S type as described above, that you'd like to convert from.
+   //                 Must be a type that has already been defined.
+   // intermediaryTypename: The name of the T type as described above. Must be a type that has
    //                       already been defined.
-   // destinationTypename: The name of the type you'd like to convert to. Must have already been
-   //                      defined.
+   // destinationTypename: The name of the D type as described above, that you'd like to convert to. 
+   //                      Must be a type that has already been defined.
    //
-   // Note: If you have already specified a conversion between S and D, this function will
-   // overwrite this previously-specified conversion.
-   AT.defineConversionsViaIntermediary = function(intermediaryTypename, destinationTypename) {
-      if (!( typeof destinationTypename === "string"
-         && typeof intermediaryTypename === "string"))
-      {
-         console.error("Error adding intermediary to conversion, type names must be strings.");
-         return;
+   // This function can be used one of three ways:
+   //
+   // 1. Defining all of S, T, and D. This adds a single conversion function, S -> D,
+   //    by converting S -> T -> D, and requires that conversion functions for S -> T and T -> D
+   //    already exist.
+   //
+   // 2. Defining S and T, but leaving D null. This defines a set of conversion functions S -> D
+   //    for EVERY type D that's currently defined and for which a conversion function T -> D exists.
+   //
+   // 3. Defining T and D, but leaving S null. This defines a set of conversions S -> D for EVERY
+   //    type S that's currently defined and for which a conversion S -> T exists.
+   //
+   // Note that these must be null, not undefined or any other falsy value.
+   //
+   // If you have already specified a conversion between S and D, this function will overwrite
+   // this previously-specified conversion. As such, it's best to call this before defining any
+   // special-case custom conversion functions.
+   AT.defineConversionsViaIntermediary = function(sourceTypename, intermediaryTypename,
+                                                  destinationTypename)
+   {
+      // Whole bunch of error checking, thanks Javascript.
+      if (typeof intermediaryTypename !== "string") {
+         console.error("Error defining conversion via intermediary, intermediary typename "
+            + "is not a string.");
       }
       if (!_types.hasOwnProperty(intermediaryTypename)) {
-         console.error("Intermediary type " + intermediaryTypename + " not defined.");
+         console.error("Error defining conversion via intermediary, intermediary type "
+            + intermediaryTypename + " not defined.");
          return;
       }
-      if (!_types.hasOwnProperty(destinationTypename)) {
-         console.error("Destination type " + destinationTypename + " not defined.");
+      if (intermediaryTypename === destinationTypename) {
+         console.error("Error defining conversion via intermediary, destination type and "
+            + "intermediary type are identical (" + intermediaryTypename + ")");
          return;
       }
+      if (intermediaryTypename === sourceTypename) {
+         console.error("Error defining conversion via intermediary, source type and "
+            + "intermediary type are identical (" + intermediaryTypename + ")");
+         return;
+      }
+      if (destinationTypename === null && sourceTypename === null) {
+         console.error("Error defining conversion via intermediary, source type and destination "
+            + "type cannot both be null.")
+      }
+      if (destinationTypename === sourceTypename) {
+         console.error("Error defining conversion via intermediary, source type and "
+            + "destination type are identical (" + sourceTypename + ")");
+         return;
+      }
+      
+      if (sourceTypename === null) {
+         // Define S -> T -> D for all S.
+         if (typeof destinationTypename !== "string") {
+            console.error("Error defining conversion via intermediary, destination typename must "
+               + "be a string when sourceTypename is null.");
+         }
+         if (!_types.hasOwnProperty(destinationTypename)) {
+            console.error("Error defining conversion via intermediary, destination type "
+               + destinationTypename + " not defined.");
+            return;
+         }
 
-      if (!_conversions[intermediaryTypename][destinationTypename]) {
-         console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
-            + destinationTypename + ", but no conversion between the two types exists.")
-         return;
-      }
+         let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+         if (!conversionToDestination) {
+            console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
+               + "conversions to " + destinationTypename
+               + ", but no conversion between the two types exists.");
+            return;
+         }
 
-      for (let sourceTypename in _conversions) {
-         if (_conversions[sourceTypename]
-            && _conversions[sourceTypename][intermediaryTypename]
+         for (let sourceTypename in _conversions) {
+            if (_conversions[sourceTypename][intermediaryTypename]
                && sourceTypename !== destinationTypename)
-         {
-            let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
-            let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
-            _conversions[sourceTypename][destinationTypename] = function(value) {
-               return conversionToDestination(conversionToIntermediary(value));
+            {
+               let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+               _conversions[sourceTypename][destinationTypename] = function(value) {
+                  return conversionToDestination(conversionToIntermediary(value));
+               }
             }
+         }
+      }
+      else if (destinationTypename === null) {
+         // Define S -> T -> D for all D.
+         if (typeof sourceTypename !== "string") {
+            console.error("Error defining conversion via intermediary, source typename must "
+               + "be a string when destinationTypename is null.");
+         }
+         if (!_types.hasOwnProperty(sourceTypename)) {
+            console.error("Error defining conversion via intermediary, source type "
+               + sourceTypename + " not defined.");
+            return;
+         }
+
+         let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+         if (!conversionToIntermediary) {
+            console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
+               + "conversions from " + sourceTypename
+               + ", but no conversion between the two types exists.");
+            return;
+         }
+
+         for (let destinationTypename in _conversions) {
+            if (_conversions[intermediaryTypename][destinationTypename]
+               && intermediaryTypename !== destinationTypename)
+            {
+               let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+               _conversions[sourceTypename][destinationTypename] = function(value) {
+                  return conversionToDestination(conversionToIntermediary(value));
+               }
+            }
+         }
+      }
+      else {
+         // Define S -> T -> D for specifc S and D.
+         if (typeof sourceTypename !== "string") {
+            console.error("Error defining conversion via intermediary, source typename must "
+               + "be a string or null.");
+         }
+         if (!_types.hasOwnProperty(sourceTypename)) {
+            console.error("Error defining conversion via intermediary, source type "
+               + sourceTypename + " not defined.");
+            return;
+         }
+         if (typeof destinationTypename !== "string") {
+            console.error("Error defining conversion via intermediary, destination typename must "
+               + "be a string or null.");
+         }
+         if (!_types.hasOwnProperty(destinationTypename)) {
+            console.error("Error defining conversion via intermediary, destination type "
+               + destinationTypename + " not defined.");
+            return;
+         }
+
+         let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+         if (!conversionToIntermediary) {
+            console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
+               + "conversions from " + sourceTypename + " to " + destinationTypename
+               + ", but no conversion between " + sourceTypename + " and "
+               + intermediaryTypename + " exists.");
+            return;
+         }
+
+         let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+         if (!conversionToDestination) {
+            console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
+               + "conversions from " + sourceTypename + " to " + destinationTypename
+               + ", but no conversion between " + intermediaryTypename + " and "
+               + destinationTypename + " exists.");
+            return;
+         }
+         _conversions[sourceTypename][destinationTypename] = function(value) {
+            return conversionToDestination(conversionToIntermediary(value));
          }
       }
    };
