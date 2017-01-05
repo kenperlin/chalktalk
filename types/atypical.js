@@ -145,6 +145,7 @@ var Atypical = (function () {
       AtypicalType[implementation.typename].prototype = proto;
 
       _types[implementation.typename] = AtypicalType[implementation.typename];
+      _conversions[implementation.typename] = {};
       return AtypicalType[implementation.typename];
    };
 
@@ -183,9 +184,6 @@ var Atypical = (function () {
          return;
       }
 
-      if (!_conversions[sourceTypename]) {
-         _conversions[sourceTypename] = {};
-      }
       _conversions[sourceTypename][destinationTypename] = conversionFunction;
    };
 
