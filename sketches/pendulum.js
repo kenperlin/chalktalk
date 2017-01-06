@@ -50,7 +50,7 @@ function() {
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
       if (this.inputs.hasValue(0)) {
-         this.angle = this.inputs.value(0).n;
+         this.angle = this.inputs.value(0).theta;
       }
       else {
          this.angle = this.spring.getPosition();
@@ -65,10 +65,10 @@ function() {
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
    }
 
-   this.defineOutput("Float", function() {
-      return new AT.Float(this.angle);
+   this.defineOutput("Radians", function() {
+      return new AT.Radians(this.angle);
    });
 
-   this.defineInput("Float");
+   this.defineInput("Radians");
 }
 
