@@ -63,10 +63,13 @@ function() {
       });
    }
 
-   this.output = function() {
-      var a = def(this.inValue_DEPRECATED_PORT_SYSTEM[0]) ? 1 : 0;
-      var b = def(this.inValue_DEPRECATED_PORT_SYSTEM[1]) ? 1 : 0;
-      return this.state & 1 << (a | b << 1) ? 1 : 0;
-   }
+   this.defineInput("Bool");
+   this.defineInput("Bool");
+
+   this.defineOutput("Bool", function() {
+      var a = this.inputs.hasValue(0) ? this.inputs.value(0).b : 0;
+      var b = this.inputs.hasValue(1) ? this.inputs.value(1).b : 0;
+      return new AT.Bool(this.state & 1 << (a | b << 1));
+   });
 }
 
