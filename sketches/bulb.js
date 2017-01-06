@@ -26,9 +26,13 @@ function() {
       ];
 
    var C = makeOval(-.3,-2.5,.6,.6,10,2*PI,PI);
+   
+   var lightValue = function(bulb) {
+      return bulb.inputs.hasValue(0) ? bulb.inputs.value(0).n : bulb.light;
+   }
 
    this.render = function(elapsed) {
-      var light = this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.light);
+      var light = lightValue(this);
 
       this.duringSketch(function() {
          mCurve(A.concat(S.concat(B)));
@@ -52,6 +56,9 @@ function() {
       mCurve(C);
    }
 
-   this.output = function() { return this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.light); }
+   this.defineInput("Float");
+   this.defineOutput("Float", function() {
+      return new AT.Float(lightValue(this));
+   });
 }
 
