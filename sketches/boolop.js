@@ -61,12 +61,12 @@ function() {
             mText(this.stateNames[this.state], [0,1], .5,1.3);
          }
       });
+   }
 
-      this.output = function() {
-         var a = def(this.inValue[0]) ? 1 : 0;
-         var b = def(this.inValue[1]) ? 1 : 0;
-         return this.state & 1 << (a | b << 1) ? 1 : 0;
-      }
+   this.output = function() {
+      var a = def(this.inValue[0]) ? 1 : 0;
+      var b = def(this.inValue[1]) ? 1 : 0;
+      return this.state & 1 << (a | b << 1) ? 1 : 0;
    }
 }
 
