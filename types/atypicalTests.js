@@ -229,6 +229,76 @@ window.AtypicalTests = (function() {
             });
             assert(source.convert("Destination").y === 5);
          },
+
+         // Test that intermediary conversions work even when definite conversions are defined only
+         // after the intermediary is established.
+         function() {
+            let Left = AT.defineType({
+               typename: "Left",
+               init: function(){}
+            });
+            let left = new Left();
+
+            let Middle = AT.defineType({
+               typename: "Middle",
+               init: function(){}
+            });
+            let middle = new Middle();
+
+            let Right = AT.defineType({
+               typename: "Right",
+               init: function(){}
+            });
+            let right = new Right();
+
+            AT.defineConversion("Left", "Middle", function(x) {
+               return new Middle();
+            });
+            AT.defineConversion("Middle", "Left", function(x) {
+               return new Left();
+            });
+
+            // No conversions from Left <-> Right are defined yet,
+            // nor are any Middle <-> Right conversions.
+            assert(!left.canConvert("Right"));
+            assert(!right.canConvert("Left"));
+            assert(!middle.canConvert("Right"));
+            assert(!right.canConvert("Middle"));
+
+            // Now define conversions for Left <-> Middle <-> T for any T where Middle <-> T exists.
+            AT.defineConversionsViaIntermediary("Left", "Middle", null);
+            AT.defineConversionsViaIntermediary(null, "Middle", "Left");
+
+            // This still shouldn't change anything just yet.
+            assert(!left.canConvert("Right"));
+            assert(!right.canConvert("Left"));
+            assert(!middle.canConvert("Right"));
+            assert(!right.canConvert("Middle"));
+
+            // NOW, define conversion for Middle -> Right, enabling the
+            // Left -> Middle -> Right conversion.
+            AT.defineConversion("Middle", "Right", function(x) {
+               return new Right();
+            });
+
+            // This changes some of the landscape.
+            assert(left.canConvert("Right"));
+            assert(!right.canConvert("Left"));
+            assert(middle.canConvert("Right"));
+            assert(!right.canConvert("Middle"));
+
+            // NOW, define conversion for Right -> Middle, enabling the
+            // Right -> Middle -> Right conversion.
+            AT.defineConversion("Right", "Middle", function(x) {
+               return new Right();
+            });
+
+            // And now we have all our conversions.
+            assert(left.canConvert("Right"));
+            assert(right.canConvert("Left"));
+            assert(middle.canConvert("Right"));
+            assert(right.canConvert("Middle"));
+         },
       ];
 
       var testsPassed = true;
