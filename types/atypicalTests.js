@@ -14,11 +14,21 @@ window.AtypicalTests = (function() {
          function () {
             let Test1 = AT.defineType({
                typename: "Test1",
-               init: function(){}
+               init: function(x) {
+                  this._def("thing", x);
+               },
+               dummyname: "dummyvalue",
+               getDummy: function() { return this.dummyname; }
             });
             assert(Test1);
             assert(AT.typeIsDefined("Test1"));
             assert(!AT.typeIsDefined("Test2"));
+
+            let test1 = new Test1(456);
+
+            assert(test1.dummyname === "dummyvalue");
+            assert(test1.getDummy() === "dummyvalue");
+            assert(test1.thing === 456);
          },
 
          // Test that defining duplicate tests does not work
