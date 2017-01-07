@@ -82,6 +82,52 @@ window.AtypicalTests = (function() {
             assert(!AT.canConvert("Test2", "Test1"));
             assert(!test2.canConvert("Test1"));
          },
+
+         // Test that definite conversions via intermediaries work
+         function() {
+            let Source = AT.defineType({
+               typename: "Source",
+               init: function(x) {
+                  this._def("x", x);
+               }
+            });
+            let source = new Source(5);
+
+            let Intermediary = AT.defineType({
+               typename: "Intermediary",
+               init: function(){}
+            });
+            let intermediary = new Intermediary();
+
+            let Destination = AT.defineType({
+               typename: "Destination",
+               init: function(y) {
+                  if (y === undefined) {
+                     y = 0;
+                  }
+                  this._def("y", y);
+               }
+            });
+            let destination = new Destination();
+
+            AT.defineConversion("Source", "Intermediary", function(x) {
+               return new Intermediary();
+            });
+            AT.defineConversion("Intermediary", "Destination", function(x) {
+               return new Destination();
+            });
+            AT.defineConversionsViaIntermediary("Source", "Intermediary", "Destination");
+
+            assert(AT.canConvert("Source", "Destination"));
+            assert(source.canConvert("Destination"));
+            assert(source.convert("Destination").y === 0);
+
+            // Ensure you can still override intermediary conversions if need be
+            AT.defineConversion("Source", "Destination", function(s) {
+               return new Destination(s.x);
+            });
+            assert(source.convert("Destination").y === 5);
+         },
       ];
 
       var testsPassed = true;
