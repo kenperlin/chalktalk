@@ -231,7 +231,7 @@ window.AtypicalTests = (function() {
          },
 
          // Test that intermediary conversions work even when definite conversions are defined only
-         // after the intermediary is established.
+         // after the intermediary is established. (i.e. "implicit" intermediary conversions)
          function() {
             let Left = AT.defineType({
                typename: "Left",
@@ -299,6 +299,89 @@ window.AtypicalTests = (function() {
             assert(right.canConvert("Left"));
             assert(middle.canConvert("Right"));
             assert(right.canConvert("Middle"));
+         },
+
+         // Ensure implicit intermediary conversions don't override previously-specified definite
+         // conversions.
+         function() {
+            let Left = AT.defineType({
+               typename: "Left",
+               init: function(x) {
+                  this._def("x", x ? x : "nothing left");
+               }
+            });
+            let left = new Left("leftValue");
+
+            let Middle = AT.defineType({
+               typename: "Middle",
+               init: function(){}
+            });
+            let middle = new Middle();
+
+            let Right = AT.defineType({
+               typename: "Right",
+               init: function(x) {
+                  this._def("x", x ? x : "nothing right");
+               }
+            });
+            let right = new Right("rightValue");
+
+            AT.defineConversion("Left", "Middle", function(x) {
+               return new Middle();
+            });
+            AT.defineConversion("Middle", "Left", function(x) {
+               return new Left();
+            });
+
+            // Define conversions for Left <-> Middle <-> T
+            // for any T where Middle <-> T exists.
+            AT.defineConversionsViaIntermediary("Left", "Middle", null);
+            AT.defineConversionsViaIntermediary(null, "Middle", "Left");
+
+            // But also define an explicit Left -> Right conversion.
+            AT.defineConversion("Left", "Right", function(l) {
+               return new Right(l.x);
+            });
+
+            // NOW, define conversion for Middle -> Right, enabling the
+            // Left -> Middle -> Right intermediary conversion.
+            AT.defineConversion("Middle", "Right", function(x) {
+               return new Right();
+            });
+
+            assert(left.canConvert("Right"));
+            assert(!right.canConvert("Left"));
+            assert(middle.canConvert("Right"));
+            assert(!right.canConvert("Middle"));
+
+            // BUT we should still have our custom conversion function.
+            // The implicitly created intermediary one should not have overridden it.
+            assert(left.convert("Right").x === "leftValue");
+
+            // NOW, define conversion for Right -> Middle, enabling the
+            // Right -> Middle -> Left conversion.
+            AT.defineConversion("Right", "Middle", function(x) {
+               return new Right();
+            });
+
+            // And now we have all our conversions.
+            assert(left.canConvert("Right"));
+            assert(right.canConvert("Left"));
+            assert(middle.canConvert("Right"));
+            assert(right.canConvert("Middle"));
+
+            // This should still be custom.
+            assert(left.convert("Right").x === "leftValue");
+            // But the reverse should be the intermediary conversion.
+            assert(right.convert("Left").x === "nothing left");
+            
+            // Until we define our own custom conversion for the reverse.
+            AT.defineConversion("Right", "Left", function(r) {
+               return new Left(r.x);
+            });
+
+            // And now the custom conversion should override the intermediary one.
+            assert(right.convert("Left").x === "rightValue");
          },
       ];
 
