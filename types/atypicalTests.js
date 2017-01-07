@@ -289,7 +289,7 @@ window.AtypicalTests = (function() {
             assert(!right.canConvert("Middle"));
 
             // NOW, define conversion for Right -> Middle, enabling the
-            // Right -> Middle -> Right conversion.
+            // Right -> Middle -> Left conversion.
             AT.defineConversion("Right", "Middle", function(x) {
                return new Right();
             });
