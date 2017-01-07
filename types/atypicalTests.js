@@ -1,15 +1,21 @@
 "use strict";
 
 // This file is meant for testing the Atypical type system.
-// To use it, add it to an HTML file WITHOUT adding atypical.js to it. This test will do so instead.
+// To use it, add it to an HTML file with atypical.js included in a script tag above it.
+// Then, add a call to AtypicalTests.runTests() in a script anywhere in the document. 
 window.AtypicalTests = (function() {
    var T = {}
 
+   // This function will return true if all tests passed, false if not, and will print any
+   // test failures via console.assert.
    T.runTests = function(allTestsComplete) {
       // Add any new test functions to this array.
-      // Each should be a function that takes in the type system module.
+      // Each should be a function that takes in no arguments.
+      // Each function gets a "clean" version of the Atypical type system, with only basic types
+      // defined, via the AT variable. This variable gets reset after every test.
       var tests = [
 
+         //--------------------------------------------------------------------------------
          // Test that defining types works
          function () {
             let Test1 = AT.defineType({
@@ -31,7 +37,8 @@ window.AtypicalTests = (function() {
             assert(test1.thing === 456);
          },
 
-         // Test that defining duplicate tests does not work
+         //--------------------------------------------------------------------------------
+         // Test that defining duplicate types does not work
          function () {
             let Test1 = AT.defineType({
                typename: "Test1",
@@ -50,6 +57,7 @@ window.AtypicalTests = (function() {
             assert(AT.typeIsDefined("Test1"));
          },
 
+         //--------------------------------------------------------------------------------
          // Test that basic conversions work
          function() {
             let Test1 = AT.defineType({
@@ -83,6 +91,7 @@ window.AtypicalTests = (function() {
             assert(!test2.canConvert("Test1"));
          },
 
+         //--------------------------------------------------------------------------------
          // Test that definite conversions via intermediaries work
          function() {
             let Source = AT.defineType({
@@ -132,6 +141,7 @@ window.AtypicalTests = (function() {
             assert(source.convert("Destination").y === 5);
          },
 
+         //--------------------------------------------------------------------------------
          // Test that indefinite conversions via intermediaries, to any destination, work
          function() {
             let Source = AT.defineType({
@@ -181,6 +191,7 @@ window.AtypicalTests = (function() {
             assert(source.convert("Destination").y === 5);
          },
 
+         //--------------------------------------------------------------------------------
          // Test that indefinite conversions via intermediaries, from any source, work
          function() {
             let Source = AT.defineType({
@@ -230,6 +241,7 @@ window.AtypicalTests = (function() {
             assert(source.convert("Destination").y === 5);
          },
          
+         //--------------------------------------------------------------------------------
          // TODO: should intermediary conversions override previously-defined explicit conversions?
          // Need to decide that.
          function() {
@@ -281,6 +293,7 @@ window.AtypicalTests = (function() {
             assert(source.convert("Destination").y === 0);
          },
 
+         //--------------------------------------------------------------------------------
          // Test that intermediary conversions work even when definite conversions are defined only
          // after the intermediary is established. (i.e. "implicit" intermediary conversions)
          function() {
@@ -352,6 +365,7 @@ window.AtypicalTests = (function() {
             assert(right.canConvert("Middle"));
          },
 
+         //--------------------------------------------------------------------------------
          // Ensure implicit intermediary conversions don't override previously-specified definite
          // conversions.
          function() {
@@ -435,6 +449,7 @@ window.AtypicalTests = (function() {
             assert(right.convert("Left").x === "rightValue");
          },
 
+         //--------------------------------------------------------------------------------
          // Test chained, implicit intermediary conversions
          // TODO: should you be able to go all the way down any chain that allows you to?
          function() {
