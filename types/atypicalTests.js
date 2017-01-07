@@ -9,6 +9,7 @@ window.AtypicalTests = (function() {
       // Add any new test functions to this array.
       // Each should be a function that takes in the type system module.
       var tests = [
+
          // Test that defining types works
          function () {
             let Test1 = AT.defineType({
@@ -16,7 +17,10 @@ window.AtypicalTests = (function() {
                init: function(){}
             });
             assert(Test1);
+            assert(AT.typeIsDefined("Test1"));
+            assert(!AT.typeIsDefined("Test2"));
          },
+
          // Test that defining duplicate tests does not work
          function () {
             let Test1 = AT.defineType({
@@ -24,13 +28,52 @@ window.AtypicalTests = (function() {
                init: function(){}
             });
             assert(Test1);
+            assert(AT.typeIsDefined("Test1"));
 
             disableConsoleErrors();
             let Test1Duplicate = AT.defineType({
                typename: "Test1",
                init: function(){}
             });
+            enableConsoleErrors();
             assert(!Test1Duplicate);
+            assert(AT.typeIsDefined("Test1"));
+         },
+
+         // Test that basic conversions work
+         function() {
+            let Test1 = AT.defineType({
+               typename: "Test1",
+               init: function(){}
+            });
+            assert(Test1);
+            let test1 = new Test1();
+
+            let Test2 = AT.defineType({
+               typename: "Test2",
+               init: function(){}
+            });
+            assert(Test2);
+            let test2 = new Test2();
+
+            let Test3 = AT.defineType({
+               typename: "Test3",
+               init: function(){}
+            });
+            assert(Test3);
+            let test3 = new Test3();
+
+            AT.defineConversion("Test1", "Test2", function(x){ return new Test2(); });
+
+            assert(AT.canConvert("Test1", "Test2"));
+            assert(test1.canConvert("Test2"));
+
+            assert(!AT.canConvert("Test1", "Test3"));
+            assert(!test1.canConvert("Test3"));
+
+            // Conversions are not bidirectional by default
+            assert(!AT.canConvert("Test2", "Test1"));
+            assert(!test2.canConvert("Test1"));
          },
       ];
 
