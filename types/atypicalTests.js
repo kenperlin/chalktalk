@@ -10,7 +10,7 @@ window.AtypicalTests = (function() {
       // Each should be a function that takes in the type system module.
       var tests = [
          // Test that defining types works
-         function (AT) {
+         function () {
             let Test1 = AT.defineType({
                typename: "Test1",
                init: function(){}
@@ -18,7 +18,7 @@ window.AtypicalTests = (function() {
             assert(Test1);
          },
          // Test that defining duplicate tests does not work
-         function (AT) {
+         function () {
             let Test1 = AT.defineType({
                typename: "Test1",
                init: function(){}
@@ -34,6 +34,7 @@ window.AtypicalTests = (function() {
       ];
 
       var testsPassed = true;
+      var AT = {};
 
       function assert(expression) {
          console.assert(expression);
@@ -43,7 +44,8 @@ window.AtypicalTests = (function() {
       }
 
       for (let i = 0; i < tests.length; i++) {
-         tests[i](AT._createTestingModule());
+         AT = window.AT._createTestingModule();
+         tests[i]();
       }
 
       return testsPassed;
