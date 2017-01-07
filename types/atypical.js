@@ -564,8 +564,6 @@ var Atypical = (function () {
       return new AT.Vector3(0, b.b ? 1 : 0, 0);
    });
 
-   // TODO: add string conversion for all other types
-
 
    return AT;
 }())
