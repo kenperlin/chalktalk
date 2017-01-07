@@ -47,12 +47,7 @@ var Atypical = (function () {
       // typename: Name of the type you want to convert to. Must be a type name that's already
       //           been defined.
       canConvert: function(typename) {
-         if (!AT.typeIsDefined(typename)) {
-            console.error("Type " + typename + " not defined.");
-            return undefined;
-         }
-         if (typename == this.typename) { return true; }
-         return (_conversions[this.typename][typename] !== undefined);
+         return AT.canConvert(this.typename, typename);
       },
       // Helper function for defining an immutable property on this object.
       // Meant to be used primarily in initializers, and not anywhere else.
@@ -76,6 +71,19 @@ var Atypical = (function () {
    AT.typeIsDefined = function(typename) {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    };
+
+   AT.canConvert = function(sourceTypename, destinationTypename) { // TODO: DOC
+      if (!AT.typeIsDefined(sourceTypename)) {
+         console.error("Type " + sourceTypename + " not defined.");
+         return undefined;
+      }
+      if (!AT.typeIsDefined(destinationTypename)) {
+         console.error("Type " + destinationTypename + " not defined.");
+         return undefined;
+      }
+      if (sourceTypename == destinationTypename) { return true; }
+      return (_conversions[sourceTypename][destinationTypename] !== undefined);
+   }
 
    // Internal function to build an Atypical type. Sets up the correct prototype, the
    // required functions, and so on.
