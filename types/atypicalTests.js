@@ -434,6 +434,67 @@ window.AtypicalTests = (function() {
             // And now the custom conversion should override the intermediary one.
             assert(right.convert("Left").x === "rightValue");
          },
+
+         // Test chained, implicit intermediary conversions
+         // TODO: should you be able to go all the way down any chain that allows you to?
+         function() {
+            let One = AT.defineType({
+               typename: "One",
+               init: function(x) { this._def("x", x); }
+            });
+            let one = new One(1);
+            
+            let Two = AT.defineType({
+               typename: "Two",
+               init: function(x) { this._def("x", x); }
+            });
+            let two = new Two(2);
+
+            let Three = AT.defineType({
+               typename: "Three",
+               init: function(x) { this._def("x", x); }
+            });
+            let three = new Three(3);
+
+            let Four = AT.defineType({
+               typename: "Four",
+               init: function(x) { this._def("x", x); }
+            });
+            let four = new Four(4);
+
+            // Define conversions 2 -> 3 -> 4
+            AT.defineConversion("Two", "Three", function(x){ return new Three(x.x); });
+            AT.defineConversion("Three", "Four", function(x){ return new Four(x.x); });
+
+            AT.defineConversionsViaIntermediary(null, "Three", "Four");
+
+            // You should be able to convert downwards along the 2 -> 3 -> 4 chain now
+            assert(!one.canConvert("Two")); // Still not defined
+            assert(two.convert("Three").x === 2);
+            assert(two.convert("Four").x === 2);
+            assert(three.convert("Four").x === 3);
+
+            // This shouldn't change anything immediately
+            AT.defineConversionsViaIntermediary(null, "Two", "Three");
+
+            assert(!one.canConvert("Two")); // Still not defined
+            assert(two.convert("Three").x === 2);
+            assert(two.convert("Four").x === 2);
+            assert(three.convert("Four").x === 3);
+
+            // But this should.
+            AT.defineConversion("One", "Two", function(x) { return new One(x.x); });
+            
+            // This is obvious.
+            assert(one.convert("Two").x === 1); 
+            // This should also have been defined by the intermediary conversion.
+            assert(one.convert("Three").x === 1); 
+
+            // TODO: is this correct behaviour though?
+            assert(!one.canConvert("Four")); 
+            // After all, you can convert 2 -> 3 -> 4 without problem, 1 -> 2 gives an entry point
+            // into that chain, so should this be allowed?
+         }
       ];
 
       var testsPassed = true;
