@@ -1,6 +1,7 @@
 "use strict";
 
-var Atypical = (function () {
+(function(){
+function AtypicalModuleGenerator() {
    var AT = {};
 
    // This internal variable holds all of our types, with keys being their names and values
@@ -419,6 +420,9 @@ var Atypical = (function () {
       }
    };
 
+   // TODO: DOC
+   AT._createTestingModule = AtypicalModuleGenerator;
+
    // Type definitions start here.
 
    AT.String = AT.defineType({
@@ -570,7 +574,11 @@ var Atypical = (function () {
 
 
    return AT;
-}())
+};
+
+window.Atypical = AtypicalModuleGenerator();
 
 // Convenience alias to make it easier to type.
-var AT = Atypical;
+window.AT = Atypical;
+
+})();
