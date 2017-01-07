@@ -114,6 +114,10 @@ var Atypical = (function () {
          console.error("Typename must follow Javascript identifier syntax.");
          return undefined;
       }
+      if (AT.typeIsDefined(implementation.typename)) {
+         console.error("A type with the name " + implementation.typename + " is already defined.");
+         return undefined;
+      }
 
       // For reasons I don't entirely understand, doing something like this:
       //
