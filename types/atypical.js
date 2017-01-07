@@ -18,6 +18,9 @@ var Atypical = (function () {
    // }
    var _conversions = {};
 
+   var _intermediaryConversionsToAnyDestination = {}; // TODO: DOC
+   var _intermediaryConversionsFromAnySource = {}; // TODO: DOC
+
    // Base for all types. Contains some common functionality needed in all of them.
    AT.Type = function() {};
    AT.Type.prototype = {
@@ -153,7 +156,12 @@ var Atypical = (function () {
       AtypicalType[implementation.typename].prototype = proto;
 
       _types[implementation.typename] = AtypicalType[implementation.typename];
+      
+      // Initialize conversion metadata
       _conversions[implementation.typename] = {};
+      _intermediaryConversionsFromAnySource[implementation.typename] = [];
+      _intermediaryConversionsToAnyDestination[implementation.typename] = [];
+
       return AtypicalType[implementation.typename];
    };
 
@@ -193,6 +201,31 @@ var Atypical = (function () {
       }
 
       _conversions[sourceTypename][destinationTypename] = conversionFunction;
+
+      // If either of these types are an intermediary type for conversions, update the conversion
+      // map to account for the fact that this new conversion now exists.
+      // In the following comments, call our source and destination types T and U and our newly-
+      // defined conversion T -> U.
+      
+      // Update all conversions T -> U -> V where V has set U as an intermediary from any source.
+      for (let i = 0; i < _intermediaryConversionsFromAnySource[destinationTypename].length; i++) {
+         let finalTypename = _intermediaryConversionsFromAnySource[destinationTypename][i];
+         // Don't override any conversions that have already been created
+         if (!AT.canConvert(sourceTypename, finalTypename)) {
+            AT.defineConversionsViaIntermediary(
+               sourceTypename, destinationTypename, finalTypename);
+         }
+      }
+
+      // Update all conversions V -> T -> U where V has set T as an intermediary to any destination.
+      for (let i = 0; i < _intermediaryConversionsToAnyDestination[sourceTypename].length; i++) {
+         let originalTypename = _intermediaryConversionsToAnyDestination[sourceTypename][i]; 
+         // Don't override any conversions that have already been created
+         if (!AT.canConvert(originalTypename, destinationTypename)) {
+            AT.defineConversionsViaIntermediary(
+               originalTypename, sourceTypename, destinationTypename);
+         }
+      }
    };
 
    // This function allows you to define a conversion between any two types S and D by using type T
@@ -224,6 +257,11 @@ var Atypical = (function () {
    // If you have already specified a conversion between S and D, this function will overwrite
    // this previously-specified conversion. As such, it's best to call this before defining any
    // special-case custom conversion functions.
+   //
+   // These intermediary conversions will also attempt to update to reflect any new conversions
+   // that are added. E.g. if you set a conversion S -> T -> D for all D, and then define a new
+   // type Q, and a new conversion for T -> Q, then the Atypical system will create S -> Q via
+   // S -> T -> Q unless a previous S -> Q conversion was already defined.
    AT.defineConversionsViaIntermediary = function(sourceTypename, intermediaryTypename,
                                                   destinationTypename)
    {
@@ -287,6 +325,8 @@ var Atypical = (function () {
                }
             }
          }
+
+         _intermediaryConversionsFromAnySource[intermediaryTypename].push(destinationTypename);
       }
       else if (destinationTypename === null) {
          // Define S -> T -> D for all D.
@@ -318,6 +358,8 @@ var Atypical = (function () {
                }
             }
          }
+
+         _intermediaryConversionsToAnyDestination[intermediaryTypename].push(sourceTypename);
       }
       else {
          // Define S -> T -> D for specifc S and D.
