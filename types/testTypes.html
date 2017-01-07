@@ -1,0 +1,45 @@
+<head>
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="/stylesheet.css" type="text/css" charset="utf-8" />
+
+<!-- LOADING ORDER OF SOME SCRIPTS IS IMPORTANT. CHANGE AT YOUR OWN PERIL. -KP -->
+
+<!-- Type system -->
+<script src="/types/atypical.js"></script>
+<script src="/types/additionalTypes.js"></script>
+<script src="/types/atypicalTests.js"></script>
+
+<style>
+   p {
+     font-family: "hand2-Medium";
+     font-size: 50px;
+     font-variant-ligatures: contextual;
+     -moz-font-feature-settings: "calt";
+     -ms-font-feature-settings: "calt";
+     -webkit-font-feature-settings: "calt";
+     font-feature-settings: "calt";
+   }
+   body{
+      id=body;
+      color: white;
+      background-color:black;
+      font-family: 'Arial', sans-serif;
+      margin:0;
+      padding:0;
+      text-decoration:none;
+      overflow: hidden;
+    }
+</style>
+
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<p>
+This page is used to run tests on the Atypical type system.
+</p>
+<p>
+<script>
+AtypicalTests.runTests();
+</script>
+</p>
+</body>
