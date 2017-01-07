@@ -229,6 +229,57 @@ window.AtypicalTests = (function() {
             });
             assert(source.convert("Destination").y === 5);
          },
+         
+         // TODO: should intermediary conversions override previously-defined explicit conversions?
+         // Need to decide that.
+         function() {
+            let Source = AT.defineType({
+               typename: "Source",
+               init: function(x) {
+                  this._def("x", x);
+               }
+            });
+            let source = new Source(5);
+
+            let Intermediary = AT.defineType({
+               typename: "Intermediary",
+               init: function(){}
+            });
+            let intermediary = new Intermediary();
+
+            let Destination = AT.defineType({
+               typename: "Destination",
+               init: function(y) {
+                  if (y === undefined) {
+                     y = 0;
+                  }
+                  this._def("y", y);
+               }
+            });
+            let destination = new Destination();
+
+            AT.defineConversion("Source", "Intermediary", function(x) {
+               return new Intermediary();
+            });
+            AT.defineConversion("Intermediary", "Destination", function(x) {
+               return new Destination();
+            });
+
+            assert(!AT.canConvert("Source", "Destination"));
+
+            AT.defineConversion("Source", "Destination", function(s) {
+               return new Destination(s.x);
+            });
+
+            assert(AT.canConvert("Source", "Destination"));
+            assert(source.canConvert("Destination"));
+            assert(source.convert("Destination").y === 5);
+
+            AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
+
+            // TODO: is this correct behaviour? Seems like potentially surprising behaviour.
+            assert(source.convert("Destination").y === 0);
+         },
 
          // Test that intermediary conversions work even when definite conversions are defined only
          // after the intermediary is established. (i.e. "implicit" intermediary conversions)
