@@ -265,7 +265,8 @@ window.AtypicalTests = (function() {
             assert(!middle.canConvert("Right"));
             assert(!right.canConvert("Middle"));
 
-            // Now define conversions for Left <-> Middle <-> T for any T where Middle <-> T exists.
+            // Now define conversions for Left <-> Middle <-> T
+            // for any T where Middle <-> T exists.
             AT.defineConversionsViaIntermediary("Left", "Middle", null);
             AT.defineConversionsViaIntermediary(null, "Middle", "Left");
 
