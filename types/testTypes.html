@@ -37,9 +37,16 @@
 <p>
 This page is used to run tests on the Atypical type system.
 </p>
-<p>
 <script>
-AtypicalTests.runTests();
+var testText = document.createElement("p");
+if (AtypicalTests.runTests()) {
+   testText.style.color = "0f0";
+   testText.textContent = "All tests passed.";
+}
+else {
+   testText.style.color = "f00";
+   testText.textContent = "Tests failed, see console for details.";
+}
+document.body.appendChild(testText);
 </script>
-</p>
 </body>
