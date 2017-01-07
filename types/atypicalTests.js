@@ -25,6 +25,7 @@ window.AtypicalTests = (function() {
             });
             assert(Test1);
 
+            disableConsoleErrors();
             let Test1Duplicate = AT.defineType({
                typename: "Test1",
                init: function(){}
@@ -43,9 +44,23 @@ window.AtypicalTests = (function() {
          }
       }
 
+      var defaultError = console.error;
+
+      function disableConsoleErrors() {
+         console.error = function(){};
+      }
+      function enableConsoleErrors() {
+         console.error = defaultError;
+      }
+      
+
       for (let i = 0; i < tests.length; i++) {
+         // Ensure the tests use a fresh, clean AT module with no definitions from the other tests.
          AT = window.AT._createTestingModule();
+
          tests[i]();
+
+         enableConsoleErrors(); // Just in case the previous tests forgot to re-enable them.
       }
 
       return testsPassed;
