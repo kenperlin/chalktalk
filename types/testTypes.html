@@ -31,13 +31,20 @@
 </style>
 
 <link rel="manifest" href="manifest.json">
+
 </head>
+
 <body>
 <p>
 This page is used to run tests on the Atypical type system.
 </p>
+
+<p id="testResults" style="color: #f00;">
+Tests threw an error or haven't finished running yet.
+</p>
+
 <script>
-var testText = document.createElement("p");
+var testText = document.getElementById("testResults");
 if(AtypicalTests.runTests()) {
    testText.style.color = "0f0";
    testText.textContent = "All tests passed.";
@@ -46,6 +53,5 @@ else {
    testText.style.color = "f00";
    testText.textContent = "Tests failed, see console for details.";
 }
-document.body.appendChild(testText);
 </script>
 </body>
