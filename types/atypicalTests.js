@@ -12,22 +12,17 @@ var AtypicalTests = (function() {
       }
    }
 
-   var atypicalSource = "";
-   function loadAtypical(completion) {
-      var request = new XMLHttpRequest();
-      request.open("GET", "atypical.js");
-      request.filename = "atypical.js";
-      request.onloadend = function() {
-         atypicalSource = this.responseText;
-         resetAtypical();
-         completion();
+   function reloadAtypical(completion) {
+      var originalScript = document.getElementById("atypical");
+      if (originalScript) {
+         originalScript.remove();
       }
-      request.send();
-   }
 
-   function resetAtypical() {
-      var x = eval(atypicalSource);
-      console.log(x);
+      var script = document.createElement("script");
+      script.id = "atypical";
+      script.src = "atypical.js";
+      script.onloadend = completion;
+      document.head.appendChild(script);
    }
 
    // Add any new test functions to this array.
@@ -57,17 +52,17 @@ var AtypicalTests = (function() {
       },
    ];
    
-   T.runTests = function(completion) {
-      var testsPassed = true;
-      loadAtypical(function() {
-         for (let i = 0; i < tests.length; i++) {
-            resetAtypical();
-            console.log("ATYPICAL IS: ");
-            console.error(AT);
-            tests[i]();
-         }
-
-         completion(testsPassed);
+   T.runTests = function(allTestsComplete) {
+      function runTest(i, testComplete) {
+         let passed = tests[i]();
+         reloadAtypical(function() {
+            runTest(i+1, function(nextPassed) {
+               testComplete(passed && nextPassed);
+            });
+         });
+      }
+      runTest(0, function(testsPassed) {
+         allTestsComplete(testsPassed);
       });
    }
 
