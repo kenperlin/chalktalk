@@ -56,21 +56,18 @@ window.AtypicalTests = (function() {
                typename: "Test1",
                init: function(){}
             });
-            assert(Test1);
             let test1 = new Test1();
 
             let Test2 = AT.defineType({
                typename: "Test2",
                init: function(){}
             });
-            assert(Test2);
             let test2 = new Test2();
 
             let Test3 = AT.defineType({
                typename: "Test3",
                init: function(){}
             });
-            assert(Test3);
             let test3 = new Test3();
 
             AT.defineConversion("Test1", "Test2", function(x){ return new Test2(); });
