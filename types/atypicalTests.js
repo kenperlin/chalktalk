@@ -116,7 +116,108 @@ window.AtypicalTests = (function() {
             AT.defineConversion("Intermediary", "Destination", function(x) {
                return new Destination();
             });
+
+            assert(!AT.canConvert("Source", "Destination"));
+
             AT.defineConversionsViaIntermediary("Source", "Intermediary", "Destination");
+
+            assert(AT.canConvert("Source", "Destination"));
+            assert(source.canConvert("Destination"));
+            assert(source.convert("Destination").y === 0);
+
+            // Ensure you can still override intermediary conversions if need be
+            AT.defineConversion("Source", "Destination", function(s) {
+               return new Destination(s.x);
+            });
+            assert(source.convert("Destination").y === 5);
+         },
+
+         // Test that indefinite conversions via intermediaries, to any destination, work
+         function() {
+            let Source = AT.defineType({
+               typename: "Source",
+               init: function(x) {
+                  this._def("x", x);
+               }
+            });
+            let source = new Source(5);
+
+            let Intermediary = AT.defineType({
+               typename: "Intermediary",
+               init: function(){}
+            });
+            let intermediary = new Intermediary();
+
+            let Destination = AT.defineType({
+               typename: "Destination",
+               init: function(y) {
+                  if (y === undefined) {
+                     y = 0;
+                  }
+                  this._def("y", y);
+               }
+            });
+            let destination = new Destination();
+
+            AT.defineConversion("Source", "Intermediary", function(x) {
+               return new Intermediary();
+            });
+            AT.defineConversion("Intermediary", "Destination", function(x) {
+               return new Destination();
+            });
+
+            assert(!AT.canConvert("Source", "Destination"));
+
+            AT.defineConversionsViaIntermediary("Source", "Intermediary", null);
+
+            assert(AT.canConvert("Source", "Destination"));
+            assert(source.canConvert("Destination"));
+            assert(source.convert("Destination").y === 0);
+
+            // Ensure you can still override intermediary conversions if need be
+            AT.defineConversion("Source", "Destination", function(s) {
+               return new Destination(s.x);
+            });
+            assert(source.convert("Destination").y === 5);
+         },
+
+         // Test that indefinite conversions via intermediaries, from any source, work
+         function() {
+            let Source = AT.defineType({
+               typename: "Source",
+               init: function(x) {
+                  this._def("x", x);
+               }
+            });
+            let source = new Source(5);
+
+            let Intermediary = AT.defineType({
+               typename: "Intermediary",
+               init: function(){}
+            });
+            let intermediary = new Intermediary();
+
+            let Destination = AT.defineType({
+               typename: "Destination",
+               init: function(y) {
+                  if (y === undefined) {
+                     y = 0;
+                  }
+                  this._def("y", y);
+               }
+            });
+            let destination = new Destination();
+
+            AT.defineConversion("Source", "Intermediary", function(x) {
+               return new Intermediary();
+            });
+            AT.defineConversion("Intermediary", "Destination", function(x) {
+               return new Destination();
+            });
+
+            assert(!AT.canConvert("Source", "Destination"));
+
+            AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
 
             assert(AT.canConvert("Source", "Destination"));
             assert(source.canConvert("Destination"));
