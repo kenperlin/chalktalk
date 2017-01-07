@@ -4,7 +4,7 @@ A list of +250 objects ("glyphs") with specific behaviors is available. Glyphs c
 
 ## This branch
 
-This is an experimental branch or Chalktalk geared at overhauling Chalktalk's connection/link system by requiring sketches to declare what type of data they're outputting and what type of data they're expecting as input.
+This is an experimental branch for Chalktalk aimed at overhauling Chalktalk's connection/link system, by requiring sketches to declare what type of data they're outputting and what type of data they're expecting as input.
 
 A type system called Atypical is currently being developed as a way to support this. This type system is implemented wholly in Javascript, and is focused on making it easy to define data conversions between types, so as to maximize interoperability between sketches (within reasonable limits). You can see the current implementation in the top-level `types` directory.
 
