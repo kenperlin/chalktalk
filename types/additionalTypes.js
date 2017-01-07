@@ -3,14 +3,27 @@
 (function(AT) {
    // Chalktalk-specific type defintions go in this file.
 
-   // Unknown types are meant for sketches and objects that have not been converted to use
-   // Atypical types yet. They're not convertible to or from anything and are just dumb
-   // wrappers around JS variables.
-   AT.UnknownType = AT.defineType({
-      typename: "UnknownType",
+   // This type is meant to allow a degree of interoperability for sketches that have not been
+   // converted to use Atypical types yet. It's just a dumb wrapper around a JS variable, and while
+   // other types can be converted to it, it can't be converted to any type (as it effectively
+   // erases any type information).
+   AT.Unknown = AT.defineType({
+      typename: "Unknown",
       init: function(val) {
          this._def("val", val);
       }
+   });
+   AT.defineConversion("Float", "Unknown", function(f) {
+      return new AT.Unknown(f.n);
+   });
+   AT.defineConversion("Vector3", "Unknown", function(vec) {
+      return new AT.Unknown([vec.x.n, vec.y.n, vec.z.n]);
+   });
+   AT.defineConversion("Bool", "Unknown", function(b) {
+      return new AT.Unknown(b.b);
+   });
+   AT.defineConversion("String", "Unknown", function(s) {
+      return new AT.Unknown(s.str);
    });
 
    // Type defining an angle in radians, wrapped to interval between -PI and PI,
