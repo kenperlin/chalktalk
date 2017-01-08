@@ -76,7 +76,11 @@ function AtypicalModuleGenerator() {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    };
 
-   AT.canConvert = function(sourceTypename, destinationTypename) { // TODO: DOC
+   // Checks whether you can convert from one type to another.
+   //
+   // sourceTypename: The name of the type you'd like to convert from. Must be already defined.
+   // destinationTypename: The name of the type you'd like to convert from. Must be already defined.
+   AT.canConvert = function(sourceTypename, destinationTypename) {
       if (!AT.typeIsDefined(sourceTypename)) {
          console.error("Type " + sourceTypename + " not defined.");
          return undefined;
@@ -410,6 +414,12 @@ function AtypicalModuleGenerator() {
       }
    };
 
+   // Most users can ignore this function. It's used to create a new, "fresh" version of the
+   // Atypical module with only the type definitions in this file. This is useful in unit testing
+   // Atypical, as it allows you to create a version of the module without any additional type
+   // and conversion definitions.
+   AT._createTestingModule = AtypicalModuleGenerator;
+
    // Construction error. Meant to be thrown in a type's constructor if the type was instantiated
    // with incorrect arguments.
    AT.ConstructionError = function(message) { this.init(message); };
@@ -419,9 +429,6 @@ function AtypicalModuleGenerator() {
          this.message = (message || "Type was constructed with incorrect arguments");
       }
    };
-
-   // TODO: DOC
-   AT._createTestingModule = AtypicalModuleGenerator;
 
    // Type definitions start here.
 
