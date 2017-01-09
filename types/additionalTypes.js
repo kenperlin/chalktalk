@@ -49,9 +49,10 @@
    AT.defineConversion("Float", "Radians", function(f) {
       return new AT.Radians(f.n); // Constructor takes care of wrapping
    });
-   AT.defineConversionsViaIntermediary(null, "Float", "Radians");
-   AT.defineConversionsViaIntermediary("Radians", "Float", null);
+   AT.defineConversionsViaIntermediary("String", "Float", "Radians");
    AT.defineConversion("Radians", "String", function(ang) {
-      return new AT.String(ang.theta.toFixed(2) + " rad")
+      return new AT.String(ang.theta.toFixed(2) + " rad");
    });
+   AT.defineConversionsViaIntermediary("Int", "Float", "Radians");
+   AT.defineConversionsViaIntermediary("Radians", "Float", "Int");
 })(Atypical);
