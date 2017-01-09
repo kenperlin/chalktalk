@@ -89,11 +89,15 @@ function() {
       });
    }
 
-   this.output = function() {
+   this.defineInput("Bool");
+   this.defineInput("Bool");
+
+   this.defineOutput("Bool", function() {
       var s  = this.selection;
-      return this.evalCode(this.codes[s + 4 * this.invert],
-                           s==0 ? this.getDelayedValue()
-                                : this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0), this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0));
-   }
+      return new AT.Bool(this.evalCode(this.codes[s + 4 * this.invert],
+         s==0 ? this.getDelayedValue()
+              : (this.inputs.hasValue(0) ? this.inputs.value(0).b : false),
+         (this.inputs.hasValue(1) ? this.inputs.value(1).b : false)));
+   });
 }
 
