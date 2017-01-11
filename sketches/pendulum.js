@@ -50,7 +50,13 @@ function() {
       mCurve([[-.5 * hubWidth, this.rodHeight], [.5 * hubWidth, this.rodHeight]]);
 
       if (this.inputs.hasValue(0)) {
-         this.angle = this.inputs.value(0).theta;
+         let value = this.inputs.value(0);
+         if (value instanceof AT.Radians) {
+            this.angle = value.theta;
+         }
+         else if (value instanceof AT.Unknown && isNumeric(value.val)) {
+            this.angle = value.val;
+         }
       }
       else {
          this.angle = this.spring.getPosition();
@@ -70,5 +76,7 @@ function() {
    });
 
    this.defineInput("Radians");
+   // Allow us to connect this to objects not yet migrated to the new type system.
+   this.defineAlternateInputType("Unknown");
 }
 
