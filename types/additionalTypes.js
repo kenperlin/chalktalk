@@ -55,4 +55,6 @@
    });
    AT.defineConversionsViaIntermediary("Int", "Float", "Radians");
    AT.defineConversionsViaIntermediary("Radians", "Float", "Int");
+
+   AT.defineConversionsViaIntermediary("Radians", "Float", "Unknown");
 })(Atypical);
