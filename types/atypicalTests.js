@@ -8,7 +8,7 @@ window.AtypicalTests = (function() {
 
    // This function will return true if all tests passed, false if not, and will print any
    // test failures via console.assert.
-   T.runTests = function(allTestsComplete) {
+   T.runTests = function() {
       // Add any new test functions to this array.
       // Each should be a function that takes in no arguments.
       // Each function gets a "clean" version of the Atypical type system, with only basic types
