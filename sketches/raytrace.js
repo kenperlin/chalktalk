@@ -20,7 +20,7 @@ this.fragmentShaders = [
 [''
 ,'   void main(void) {'
 ,'      vec3 color = vPosition * .5 + vec3(.5,.5,0.);'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ].join('\n'),
 
@@ -34,8 +34,7 @@ raySphere.concat([''
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = vec3(1.,1.,1.);'
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ].join('\n')),
 
@@ -54,8 +53,7 @@ raySphere.concat([''
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = shadeSphere(W, V + t * W, sphere);'
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ].join('\n')),
 
@@ -81,8 +79,7 @@ raySphere.concat([''
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = shadeDiffuseSphere(V + t * W, sphere, material, lightDir, lightColor);   '
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ].join('\n')),
 
@@ -110,8 +107,7 @@ raySphere.concat([''
 ,'      float t = raySphere(V, W, sphere);'
 ,'      if (t > 0. && t < 1000.)'
 ,'         color = shadeSphere(W, V + t * W, sphere, material);'
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ].join('\n')),
 
@@ -153,8 +149,7 @@ raySphere.concat([''
 ,'            color = shadeSphere(W, V + t * W, sphere[i], material[i]);'
 ,'            T = t;'
 ,'         }'
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ,''
 ].join('\n')),
@@ -202,8 +197,7 @@ raySphere.concat([''
 ,'      material[2] = vec4(.80, .00, .10, 20.);'
 ,'      vec3 W = normalize(vec3(vPosition.x, vPosition.y, -3.5));'
 ,'      vec3 color = rayTrace(vec3(0.,0.,0.), W);'
-,'      color = pow(color, vec3(.45,.45,.45));'
-,'      gl_FragColor = vec4(color, uAlpha);'
+,'      gl_FragColor = vec4(sqrt(color), uAlpha);'
 ,'   }'
 ,''
 ].join('\n')),
