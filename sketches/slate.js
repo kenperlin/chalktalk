@@ -49,13 +49,12 @@ function() {
 	       sum += aa - ad * ad / dd;
 	    }
 	    let lsq = (Bx - Ax) * (Bx - Ax) + (By - Ay) * (By - Ay);
-	    if ( sum < .003 * (A.length - 2) / lsq) {
+            if ( sum < .001 * (A.length - 2) * lsq)
 	       for (i = 1 ; i < A.length - 1 ; i++) {
 	          let t = i / (A.length - 1);
 		  A[i][0] = mix(Ax, Bx, t);
 		  A[i][1] = mix(Ay, By, t);
 	       }
-	    }
 	 }
       }
    }
