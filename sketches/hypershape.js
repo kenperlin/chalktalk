@@ -126,8 +126,7 @@ function() {
                n++;
             }
 
-            if (this.isFirstTime)
-	       console.log(s);
+            
 	    this.isFirstTime = false;
          });
          break;
