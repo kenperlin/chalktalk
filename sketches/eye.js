@@ -5,8 +5,8 @@ function() {
 
    window.showVR = false;
    window.hiRes = false;
-   window.b_p;
-   window.b_p_time;
+   window.b_p = undefined;
+   window.b_p_time = undefined;
 
    this.onSwipe[0] = [ 'VR'    , function() { showVR = ! showVR; b_p = undefined; } ];
    this.onSwipe[2] = [ 'hi res', function() { hiRes  = ! hiRes ; b_p = undefined; } ];

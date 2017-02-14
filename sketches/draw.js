@@ -277,11 +277,11 @@ function() {
       this._curveState = 'none';
       for (i = 0 ; i < curves.length ; i++) {
          if (curves[i].type == 'joint')
-	    continue;
+	         continue;
 
-         a = this.getFirstPoint(curves[i]);
-         b = this.getLastPoint(curves[i]);
-         c = mix(a, b, .5);
+         var a = this.getFirstPoint(curves[i]);
+         var b = this.getLastPoint(curves[i]);
+         var c = mix(a, b, .5);
 
          if (this.isNear(this._a, a))
             this.copy(this._a, a);
@@ -358,10 +358,10 @@ function() {
 
       this._curveState = 'none';
       if (C.type == 'arc') {
-         c = curves[curves.length - 1];
+         var c = curves[curves.length - 1];
          if (c.type == 'arc' && this.isNear(c.bounds, C.bounds, .2)) {
-            p0 = this.getFirstPoint(c);
-            p1 = this.getFirstPoint(C);
+            var p0 = this.getFirstPoint(c);
+            var p1 = this.getFirstPoint(C);
             if (this.isNear(p0, p1)) {
                c.data[0] -= (c.data[0] < c.data[1] ? 90 : -90);
                return;
@@ -380,10 +380,10 @@ function() {
    this.extendsArc = function(C) {
       var curves = this._curves[this.selection], c, p0, p1;
       if (C.type == 'arc') {
-         c = curves[curves.length - 1];
+         var c = curves[curves.length - 1];
          if (c.type == 'arc' && this.isNear(c.bounds, C.bounds)) {
-            p0 = this.getFirstPoint(c);
-            p1 = this.getFirstPoint(C);
+            var p0 = this.getFirstPoint(c);
+            var p1 = this.getFirstPoint(C);
             if (this.isNear(p0, p1))
                return -1;
             p0 = this.getLastPoint(c);
@@ -403,7 +403,7 @@ function() {
          if (curves[i].type == 'joint')
 	    continue;
 
-         p = this.getFirstPoint(curves[i]);
+         var p = this.getFirstPoint(curves[i]);
          if (abs(value - p[n]) < this._tolerance)
             return p[n];
 
@@ -419,8 +419,8 @@ function() {
 	    continue;
 
          if (curves[i].length == 2) {
-            p0 = this.getFirstPoint(curves[i]);
-            p1 = this.getLastPoint (curves[i]);
+            var p0 = this.getFirstPoint(curves[i]);
+            var p1 = this.getLastPoint (curves[i]);
             var midpt = (p0[n] + p1[n]) / 2;
 
             if (abs(value - midpt) < this._tolerance)

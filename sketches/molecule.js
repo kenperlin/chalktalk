@@ -137,10 +137,10 @@ function() {
       this.afterSketch(function() {
 
          while (graph.removedNodes.length > 0)
-            mesh.remove(graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES
+            this.mesh.remove(graph.removedNodes.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD NODES
 
          while (graph.removedLinks.length > 0)
-            mesh.remove(graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
+            this.mesh.remove(graph.removedLinks.pop().g);    // REMOVE GEOMETRY FOR ANY DEAD LINKS
 
          if (R.clickType == 'none') {
             R.simulate();                                    // CALL ANY USER DEFINED SIMULATION.
@@ -200,7 +200,7 @@ function() {
 ///////////////// THREE.js STUFF /////////////////
 
    this.createMesh = function() {
-      mesh = new THREE.Mesh();
+      var mesh = new THREE.Mesh();
       mesh.setMaterial(this.netMaterial());
       return mesh;
    }

@@ -1,3 +1,5 @@
+"use strict";
+
 var sketchTypes = ""
 
 var imageSequence = [

@@ -32,7 +32,6 @@ function() {
       // IF AUTO-SKETCHED, KEEP SKETCHY STYLE EVEN AFTER FINISHED DRAWING.
 
       if (this.glyphTransition == 0) {
-         noisy = 1;
          this.styleTransition = 0;
       }
 
