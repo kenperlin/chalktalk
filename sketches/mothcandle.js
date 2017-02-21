@@ -1,5 +1,7 @@
 
 function() {
+   var candleX = 0;
+   var candleY = 0;
    this.labels = 'moth candle'.split(' ');
    this.is3D = true;
    this.isAnimating = false;

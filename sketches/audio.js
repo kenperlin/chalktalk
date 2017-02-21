@@ -1,5 +1,5 @@
 function() {
-   _audio_volume = 1;
+   var _audio_volume = 1;
    this.label = "Audio";
    this.code = [
       ["sin", "sin(TAU*x*time)"],
@@ -66,7 +66,7 @@ function() {
             window.audioFunction0 = window.audioFunction1;
             window.audioFunction1 = new Function("time", var_xyz + code);
 
-            audioFunction = function(time) {
+            var audioFunction = function(time) {
                var f1 = audioFunction1(time);
                var t = sCurve(min(1, (audioIndex - audioIndex0) / 1024));
                return _audio_volume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
