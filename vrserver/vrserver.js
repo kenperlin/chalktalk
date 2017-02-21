@@ -48,14 +48,27 @@ function readCurves(data){
       }
       console.log("color:", color);
 
+//      var idx = 0;
+//      while(idx < curveSize-1){
+//        console.log(data.readInt16LE(index + (idx++)*2,true));  
+//      }
+      
+
       for( var i = 0; i < curveSize -2; i += 4){
          // position
-         var pos = {
-            x: data.readInt16LE(index,true),
-            y: data.readInt16LE(index + 2,true),
-            z: data.readInt16LE(index + 4,true),
-            w: data.readInt16LE(index + 6,true), // width
+         var info = {
+            x: data.readInt16LE(index,true) < 0 ? data.readInt16LE(index,true) + 0x10000: data.readInt16LE(index,true),
+            y: data.readInt16LE(index + 2,true)< 0 ? data.readInt16LE(index + 2,true) + 0x10000: data.readInt16LE(index + 2,true),
+            z: data.readInt16LE(index + 4,true)< 0 ? data.readInt16LE(index + 4,true) + 0x10000: data.readInt16LE(index + 4,true),
+            w: data.readInt16LE(index + 6,true)< 0 ? data.readInt16LE(index + 6,true) + 0x10000: data.readInt16LE(index + 6,true), // width
          }
+         var pos = {
+            x: info.x / 0xffff * 2 - 1,
+            y: info.y / 0xffff * 2 - 1,
+            z: info.z / 0xffff * 2 - 1,
+            w: info.w / 0xffff * 2 - 1, // width
+         }
+         console.log("info:", info);
          console.log("pos:", pos);
          index += 8;
          index4buf += 4;
