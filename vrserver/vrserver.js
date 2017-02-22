@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-
+const holojam = require('holojam-node')(['emitter']);
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
@@ -19,11 +19,16 @@ function readHeader(data){
   return ctdata01;
 }
 
+var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
+
 function readCurves(data){
 
    // start at index:8 
    var index = 8;
    var index4buf = 0;
+   var curveIntsIdx = 0;
+   var vectorIdx = 0;
+
    var curveCnt = data.readInt16LE(index);
    index += 2;
    console.log("curveCnt", curveCnt);
@@ -31,6 +36,8 @@ function readCurves(data){
    // for each curbe
    while(index4buf < curveCnt){
       var curveSize = data.readInt16LE(index);
+      curveObjs.ints[curveIntsIdx++] = (curveSize -2)/4;
+      //var curveObj = {};
       index += 2;
       console.log("cur curve size:", curveSize);
 
@@ -47,12 +54,13 @@ function readCurves(data){
          a: ba & 0x00ff,
       }
       console.log("color:", color);
-
-//      var idx = 0;
-//      while(idx < curveSize-1){
-//        console.log(data.readInt16LE(index + (idx++)*2,true));  
-//      }
       
+      curveObjs.vector4s[vectorIdx++] = {
+        x:color.r,
+        y:color.g,
+        z:color.b,
+        w:color.a,
+      };
 
       for( var i = 0; i < curveSize -2; i += 4){
          // position
@@ -68,12 +76,13 @@ function readCurves(data){
             z: info.z / 0xffff * 2 - 1,
             w: info.w / 0xffff * 2 - 1, // width
          }
-         console.log("info:", info);
          console.log("pos:", pos);
+         curveObjs.vector4s[vectorIdx++] = pos;
          index += 8;
          index4buf += 4;
       }
    }
+   console.log("curveObjs",curveObjs);
 }
 
 ws.on('message', function incoming(data, flags) {
@@ -85,3 +94,10 @@ ws.on('message', function incoming(data, flags) {
       readCurves(data);
   }
 });
+
+
+setInterval(() => {
+  // format vector4s [rgb, pos arrays, rgb, pos arrays ...]
+  // format ints [amount of first curve pos, amount of second curve pos]
+  holojam.Send(holojam.BuildUpdate('example', [curveObjs]));
+}, 256);
