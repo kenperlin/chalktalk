@@ -19,10 +19,10 @@ function readHeader(data){
   return ctdata01;
 }
 
-var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
+//var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
 
 function readCurves(data){
-
+  var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
    // start at index:8 
    var index = 8;
    var index4buf = 0;
@@ -39,7 +39,7 @@ function readCurves(data){
       curveObjs.ints[curveIntsIdx++] = (curveSize -2)/4;
       //var curveObj = {};
       index += 2;
-      console.log("cur curve size:", curveSize);
+      console.log("cur curve size:", curveSize, curveObjs.ints[curveIntsIdx-1]);
 
       // color rgba
       var rg = data.readInt16LE(index);
@@ -76,13 +76,30 @@ function readCurves(data){
             z: info.z / 0xffff * 2 - 1,
             w: info.w / 0xffff * 2 - 1, // width
          }
-         console.log("pos:", pos);
+         //console.log("pos:", pos);
          curveObjs.vector4s[vectorIdx++] = pos;
          index += 8;
          index4buf += 4;
       }
    }
-   console.log("curveObjs",curveObjs);
+   //console.log("curveObjs",curveObjs);
+   var sum = 0;
+   for (var idx = 0; idx < curveObjs.ints.length; idx++){
+      sum += curveObjs.ints[idx]+1;
+   }
+   if (curveObjs.vector4s.length != sum){
+      console.log("wrong size", sum, curveObjs.vector4s.length);
+   }
+   if (curveObjs.vector4s.length < sum){
+      console.log("out of index", sum, curveObjs.vector4s.length);
+      for (var idx = 0; idx < curveObjs.ints.length; idx++){
+        var realidx = 0;
+        console.log("\t", idx, curveObjs.ints[idx], curveObjs.vector4s[realidx]);
+        realidx += curveObjs.ints[idx] + 1;
+     }
+   }
+   //holojam.Send(holojam.BuildUpdate('example', [curveObjs]));
+   return curveObjs;
 }
 
 ws.on('message', function incoming(data, flags) {
@@ -91,13 +108,16 @@ ws.on('message', function incoming(data, flags) {
   console.log("data",data);
   var header = readHeader(data);
   if (header === "CTdata01"){
-      readCurves(data);
+      var curveFlakes = readCurves(data);
+      console.log("curveFlakes",curveFlakes);
+      holojam.Send(holojam.BuildUpdate('example', [curveFlakes]));
   }
 });
 
 
-setInterval(() => {
+/*setInterval(() => {
   // format vector4s [rgb, pos arrays, rgb, pos arrays ...]
   // format ints [amount of first curve pos, amount of second curve pos]
   holojam.Send(holojam.BuildUpdate('example', [curveObjs]));
 }, 256);
+*/
