@@ -102,14 +102,28 @@ function readCurves(data){
    return curveObjs;
 }
 
+function getTime(){
+  var d = new Date();
+  var myDate = {
+    min: d.getMinutes(),
+    sec: d.getSeconds(),
+    ms: d.getMilliseconds(),
+  }
+  return myDate;
+}
+
 ws.on('message', function incoming(data, flags) {
   // flags.binary will be set if a binary data is received.
   // flags.masked will be set if the data was masked.
   console.log("data",data);
+  // time I received displayList
+  console.log("Receive displayList", getTime());
   var header = readHeader(data);
   if (header === "CTdata01"){
       var curveFlakes = readCurves(data);
-      console.log("curveFlakes",curveFlakes);
+      //console.log("curveFlakes",curveFlakes);
+      // time I parsed displayList and send
+      console.log("Parsed displayList and send", getTime());
       holojam.Send(holojam.BuildUpdate('example', [curveFlakes]));
   }
 });
