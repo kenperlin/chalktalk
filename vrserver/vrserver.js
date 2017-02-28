@@ -19,7 +19,6 @@ function readHeader(data){
   return ctdata01;
 }
 
-//var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
 
 function readCurves(data){
   var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
@@ -132,6 +131,6 @@ ws.on('message', function incoming(data, flags) {
 /*setInterval(() => {
   // format vector4s [rgb, pos arrays, rgb, pos arrays ...]
   // format ints [amount of first curve pos, amount of second curve pos]
-  holojam.Send(holojam.BuildUpdate('example', [curveObjs]));
+  holojam.Send(holojam.BuildUpdate('ChalkTalk', [curveObjs]));
 }, 256);
 */
