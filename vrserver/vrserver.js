@@ -119,7 +119,8 @@ ws.on('message', function incoming(data, flags) {
   console.log("Receive displayList", getTime());
   var header = readHeader(data);
   if (header === "CTdata01"){
-      var curveFlakes = readCurves(data);
+      //var curveFlakes = readCurves(data);
+      var curveFlakes = {label: 'Display',bytes:data}
       console.log("curveFlakes",curveFlakes);
       // time I parsed displayList and send
       console.log("Parsed displayList and send", getTime());
