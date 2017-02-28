@@ -22,7 +22,7 @@ function readHeader(data){
 //var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
 
 function readCurves(data){
-  var curveObjs = {label: 'chalktalk',vector4s:[],ints:[]};
+  var curveObjs = {label: 'Display',vector4s:[],ints:[]};
    // start at index:8 
    var index = 8;
    var index4buf = 0;
@@ -121,10 +121,10 @@ ws.on('message', function incoming(data, flags) {
   var header = readHeader(data);
   if (header === "CTdata01"){
       var curveFlakes = readCurves(data);
-      //console.log("curveFlakes",curveFlakes);
+      console.log("curveFlakes",curveFlakes);
       // time I parsed displayList and send
       console.log("Parsed displayList and send", getTime());
-      holojam.Send(holojam.BuildUpdate('example', [curveFlakes]));
+      holojam.Send(holojam.BuildUpdate('chalktalk', [curveFlakes]));
   }
 });
 
