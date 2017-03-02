@@ -1,5 +1,5 @@
 function() {
-
+/*
    this.code = [['',[''
 ,'function Vector3() {'
 ,'   this.x = 0;'
@@ -15,7 +15,7 @@ function() {
 ,'   },'
 ,'}'
 ].join('\n')]]
-
+*/
    this.nRows = function() {
       return 2 + floor(this.selection / 2);
    }
