@@ -89,7 +89,7 @@ function AtypicalModuleGenerator() {
          console.error("Type " + destinationTypename + " not defined.");
          return undefined;
       }
-      if (sourceTypename == destinationTypename) { return true; }
+      if (sourceTypename === destinationTypename) { return true; }
       return (_conversions[sourceTypename][destinationTypename] !== undefined);
    }
 
