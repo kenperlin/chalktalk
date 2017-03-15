@@ -33,7 +33,7 @@ function() {
            mFillRect([x-0.03, y-0.03], [x+0.03, y+0.03]);
 
            // send center of mass
-           this.outValue[0] = [center.x, center.y];
+           this.outValue_DEPRECATED_PORT_SYSTEM[0] = [center.x, center.y];
          }
 
        });

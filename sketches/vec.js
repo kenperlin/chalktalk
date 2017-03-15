@@ -91,7 +91,7 @@ function() {
          }
          if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0]))
             outValue = mult(this.inValue_DEPRECATED_PORT_SYSTEM[0], outValue);
-         this.outValue[0] = outValue;
+         this.outValue_DEPRECATED_PORT_SYSTEM[0] = outValue;
       });
    }
 }

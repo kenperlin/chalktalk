@@ -39,7 +39,7 @@ function sum(x,y) {
       mLine( [-1, 0], [ 1,  0] );
 
       if (isDef(this.in_DEPRECATED_PORT_SYSTEM[0]) && isDef(this.in_DEPRECATED_PORT_SYSTEM[1])) {
-         this.outValue[0] = sum(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.inValue_DEPRECATED_PORT_SYSTEM[1]);
+         this.outValue_DEPRECATED_PORT_SYSTEM[0] = sum(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.inValue_DEPRECATED_PORT_SYSTEM[1]);
       }
    }
 }

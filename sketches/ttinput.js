@@ -87,7 +87,7 @@ function TTInput()
                            // }
                    // }
 
-                this.outValue[0] = frame;
+                this.outValue_DEPRECATED_PORT_SYSTEM[0] = frame;
            }
 }
 TTInput.prototype = new Sketch;
