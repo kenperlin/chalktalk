@@ -5,21 +5,6 @@ function() {
 
    this.onSwipe[0] = ['invert', function() { this.invert = 1 - this.invert; }];
 
-   function Delay() {
-      this.time = 0;
-      this.value = 0;
-      this.update = function(value, delayed) {
-         if (delayed === undefined)
-            return value;
-         if (time > this.time + delayed) {
-            this.value = value;
-            this.time = time;
-         }
-         return this.value;
-      }
-   }
-   var logicDelay = new Delay();
-
    this.codes = [
       '     x>0.5' ,    'min(x>0.5,y>0.5)',    'max(x>0.5,y>0.5)','(x>0.5)!=(y>0.5)',
       '1 - (x>0.5)','1 - min(x>0.5,y>0.5)','1 - max(x>0.5,y>0.5)','(x>0.5)==(y>0.5)'
@@ -50,12 +35,10 @@ function() {
       return this.value;
    }
 
-   this.logicDelay = new Delay();
 
    function xor(a, b) { return a == b ? 0 : 1; }
 
    this.render = function() {
-      logicDelay = this.logicDelay;
       m.scale(this.size / 180);
       var s = this.selection;
       var si = s + 4 * this.invert;
