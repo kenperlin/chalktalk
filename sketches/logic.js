@@ -28,13 +28,14 @@ function() {
    this.value = 0;
 
    this.getDelayedValue = function() {
-      if (time > this.timerStart + this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0)) {
-         this.value = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0);
+      // Should only be called on 'buf' or 'not' gates.
+      let delayAmount = this.inputs.hasValue(1) ? this.inputs.value(1).n : 0;
+      if (time > this.timerStart + delayAmount) {
+         this.value = this.inputs.hasValue(0) ? this.inputs.value(0).b : false;
          this.timerStart = time;
       }
       return this.value;
    }
-
 
    function xor(a, b) { return a == b ? 0 : 1; }
 
@@ -72,8 +73,23 @@ function() {
       });
    }
 
-   this.defineInput("Bool");
-   this.defineInput("Bool");
+   this.setup = function() {
+      // Set up the input ports in the setup function so that we can support different 
+      // input configurations for the different sketches.
+      // This ensures that the input port setup happens AFTER the "selection" variable is set.
+      switch (this.selection) {
+         case 0: // For buffers, allow for a propagation delay and only one boolean input.
+            this.defineInput("Bool");
+            this.defineInput("Float");
+            break;
+         case 1:
+         case 2:
+         case 3:
+            this.defineInput("Bool");
+            this.defineInput("Bool");
+            break;
+      }
+   }
 
    this.defineOutput("Bool", function() {
       var s  = this.selection;
