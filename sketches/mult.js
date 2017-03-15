@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    /*
       Multiply a number, vector or matrix by a number, vector or matrix.
    */

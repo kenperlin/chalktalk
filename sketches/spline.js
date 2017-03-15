@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Spline';
    this.is3D = true;
    this.N = -1;

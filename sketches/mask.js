@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'mask';
    this.is3D = true;
    var that = this;

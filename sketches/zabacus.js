@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "abacus";
 
    this.digits = [0,0,0];

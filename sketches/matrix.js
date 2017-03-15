@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = 'Matrix bezier hermite'.split(' ');
    this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }

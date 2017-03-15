@@ -1,5 +1,6 @@
 function TTInput()
 {
+    this.USES_DEPRECATED_PORT_SYSTEM = true;
     this.label = "ttinput";
     this.myText = "Tactonic";
 

@@ -1,6 +1,7 @@
 
 function() {
 
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
 /*
    TO DO:   Get joints to rotate around the correct point.
             Add translational joints.

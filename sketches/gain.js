@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'gain';
    this.setSketchText(0, '1', [-.3, 0], .2);
 

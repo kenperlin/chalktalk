@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "f2d";
    this.code = [["function", "(x*x + y*y)/2 - 1/8"]];
    this.is3D = true;

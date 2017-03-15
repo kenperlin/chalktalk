@@ -1,5 +1,6 @@
 
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "eye";
    this.is3D = true;
 

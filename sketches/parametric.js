@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'parametric';
    this.nu = 20;
    this.nv = 10;

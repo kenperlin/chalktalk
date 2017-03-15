@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var cursor = newVec3();
    this.label = "thermometer";
    this.onPress = function(point) { cursor.copy(point); }

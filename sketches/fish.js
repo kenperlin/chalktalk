@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'fish';
    this.swim = false;
    this.onSwipe[0] = ['SWIM!', function() { this.swim = true; }];

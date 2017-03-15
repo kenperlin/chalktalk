@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var _audio_volume = 1;
    this.label = "Audio";
    this.code = [

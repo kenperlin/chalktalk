@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'delay';
    this.setSketchText(0, '1', [0, 0], .3);
 

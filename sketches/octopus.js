@@ -90,6 +90,7 @@ function OctopusResponder() {
 OctopusResponder.prototype = new GraphResponder;
 
 function Octopus() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'octopus';
    this.is3D = true;
 

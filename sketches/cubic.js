@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'cubic';
    this.setSketchText(0, '1.0', [-1.15, .9], .07);
    this.setSketchText(1, '0.0', [-1.15, .3], .07);

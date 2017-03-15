@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'barchart';
    this.onCmdClick = function() { this.isVertical = ! this.isVertical; }
    this.isVertical = false;

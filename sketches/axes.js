@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Axes';
    this.is3D = true;
    this.mode = 0;

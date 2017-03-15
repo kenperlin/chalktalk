@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "bounce";
    this.isBouncing = false;
    this.bouncing = 0;

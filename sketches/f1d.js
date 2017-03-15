@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "F1d";
    this.isPos = false;
    this.onSwipe[5] = ['range', function() { this.isPos = ! this.isPos; }];

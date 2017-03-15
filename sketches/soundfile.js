@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var nelf = this;
    this.label = 'Soundfile';
    window.soundfileSketch = this;

@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = "Polygon3 Polygon4 Polygon5 Polygon6".split(' ');
    this.is3D = true;
 

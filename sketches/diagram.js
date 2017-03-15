@@ -1,4 +1,5 @@
 function Diagram() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = "refract circles".split(' ');
 
    this.theta = 0;

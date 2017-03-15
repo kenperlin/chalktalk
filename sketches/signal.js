@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'signal';
    this.code = [['', 'sin(TAU*t)/TAU', function() { } ]];
    this.initCopy = function() {

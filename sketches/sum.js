@@ -32,6 +32,7 @@ function sum(x,y) {
    }
    return dst;
 }
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "Sum";
    this.code = [["","sum(x,y)"]];
    this.render = function() {

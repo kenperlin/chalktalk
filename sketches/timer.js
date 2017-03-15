@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Timer';
    this.initTimer = function() { this.timerTime = time; this.timerT = 0; }
    this.onCmdClick = function() { this.initTimer(); }

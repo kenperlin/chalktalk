@@ -1,5 +1,6 @@
 
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
 
    function MyResponder() {
 

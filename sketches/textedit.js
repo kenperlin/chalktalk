@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.code = [["",""]];
    this.label = 'textedit';
    this.render = function() {

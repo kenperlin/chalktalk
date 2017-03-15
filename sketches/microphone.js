@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var that = this;
    this.label = 'Microphone';
    this.tSignal = [];

@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    /*
       Select an rgb color, and send it to the output.
    */

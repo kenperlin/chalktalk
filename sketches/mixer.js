@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'mixer';
    this.render = function() {
       mDrawOval([-1,-1],[1,1],32,PI/2,PI/2-TAU);
