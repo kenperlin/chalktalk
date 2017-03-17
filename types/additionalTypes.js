@@ -20,7 +20,7 @@
       return new AT.Unknown([vec.x.value, vec.y.value, vec.z.value]);
    });
    AT.defineConversion("Bool", "Unknown", function(b) {
-      return new AT.Unknown(b.b);
+      return new AT.Unknown(b.value);
    });
    AT.defineConversion("String", "Unknown", function(s) {
       return new AT.Unknown(s.str);

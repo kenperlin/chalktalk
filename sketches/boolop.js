@@ -67,8 +67,8 @@ function() {
    this.defineInput("Bool");
 
    this.defineOutput("Bool", function() {
-      var a = this.inputs.hasValue(0) ? this.inputs.value(0).b : 0;
-      var b = this.inputs.hasValue(1) ? this.inputs.value(1).b : 0;
+      var a = this.inputs.hasValue(0) ? this.inputs.value(0).value : 0;
+      var b = this.inputs.hasValue(1) ? this.inputs.value(1).value : 0;
       return new AT.Bool(this.state & 1 << (a | b << 1));
    });
 }

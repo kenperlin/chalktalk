@@ -538,24 +538,24 @@ function AtypicalModuleGenerator() {
 
    AT.Bool = AT.defineType({
       typename: "Bool",
-      init: function(b) {
-         this._def("b", !!b);
+      init: function(value) {
+         this._def("value", !!value);
       },
       not: function() {
-         return new AT.Bool(!this.b);
+         return new AT.Bool(!this.value);
       },
       and: function(other) {
-         return new AT.Bool(this.b && other.b);
+         return new AT.Bool(this.value && other.value);
       },
       or: function(other) {
-         return new AT.Bool(this.b || other.b);
+         return new AT.Bool(this.value || other.value);
       },
       xor: function(other) {
-         return new AT.Bool(this.b !== other.b);
+         return new AT.Bool(this.value !== other.value);
       }
    });
    AT.defineConversion("Bool", "String", function(b) {
-      return new AT.String(b.b ? "true" : "false");
+      return new AT.String(b.value ? "true" : "false");
    });
    AT.defineConversion("String", "Bool", function(str) {
       var lower = str.str.toLowerCase();
@@ -572,13 +572,13 @@ function AtypicalModuleGenerator() {
       return new AT.Bool(notZero);
    });
    AT.defineConversion("Bool", "Int", function(b) {
-      return new AT.Int(b.b ? 1 : 0);
+      return new AT.Int(b.value ? 1 : 0);
    });
    AT.defineConversion("Bool", "Float", function(b) {
-      return new AT.Float(b.b ? 1 : 0);
+      return new AT.Float(b.value ? 1 : 0);
    });
    AT.defineConversion("Bool", "Vector3", function(b) {
-      return new AT.Vector3(0, b.b ? 1 : 0, 0);
+      return new AT.Vector3(0, b.value ? 1 : 0, 0);
    });
 
 

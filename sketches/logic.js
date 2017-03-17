@@ -31,7 +31,7 @@ function() {
       // Should only be called on 'buf' or 'not' gates.
       let delayAmount = this.inputs.hasValue(1) ? this.inputs.value(1).value : 0;
       if (time > this.timerStart + delayAmount) {
-         this.value = this.inputs.hasValue(0) ? this.inputs.value(0).b : false;
+         this.value = this.inputs.hasValue(0) ? this.inputs.value(0).value : false;
          this.timerStart = time;
       }
       return this.value;
@@ -95,8 +95,8 @@ function() {
       var s  = this.selection;
       return new AT.Bool(this.evalCode(this.codes[s + 4 * this.invert],
          s==0 ? this.getDelayedValue()
-              : (this.inputs.hasValue(0) ? this.inputs.value(0).b : false),
-         (this.inputs.hasValue(1) ? this.inputs.value(1).b : false)));
+              : (this.inputs.hasValue(0) ? this.inputs.value(0).value : false),
+         (this.inputs.hasValue(1) ? this.inputs.value(1).value : false)));
    });
 }
 
