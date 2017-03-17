@@ -17,16 +17,16 @@
       }
    });
    AT.defineConversion("Float", "Unknown", function(f) {
-      return new AT.Unknown(f.value);
+      return new AT.Unknown(f.toPrimitive());
    });
    AT.defineConversion("Vector3", "Unknown", function(vec) {
       return new AT.Unknown([vec.x.value, vec.y.value, vec.z.value]);
    });
    AT.defineConversion("Bool", "Unknown", function(b) {
-      return new AT.Unknown(b.value);
+      return new AT.Unknown(b.toPrimitive());
    });
    AT.defineConversion("String", "Unknown", function(s) {
-      return new AT.Unknown(s.str);
+      return new AT.Unknown(s.toPrimitive());
    });
 
    // Type defining an angle in radians, wrapped to interval between -PI and PI,
