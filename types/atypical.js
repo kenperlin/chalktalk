@@ -87,7 +87,15 @@ function AtypicalModuleGenerator() {
    AT.isPrimitive = function(typename) {
       return (AT.typeIsDefined(typename)
          && typeof _types[typename].prototype.toPrimitive === "function");
-   }
+   };
+
+   // TODO: DOC
+   AT.typeNamed = function(typename) {
+      if (!AT.typeIsDefined(typename)) {
+         return undefined;
+      }
+      return _types[typename];
+   };
 
    // Checks whether you can convert from one type to another.
    //
@@ -104,7 +112,7 @@ function AtypicalModuleGenerator() {
       }
       if (sourceTypename === destinationTypename) { return true; }
       return (_conversions[sourceTypename][destinationTypename] !== undefined);
-   }
+   };
 
    // Internal function to build an Atypical type. Sets up the correct prototype, the
    // required functions, and so on.

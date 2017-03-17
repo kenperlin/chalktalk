@@ -7,5 +7,5 @@ function() {
       mCurve(makeSpline([ [-.4,1], [-.32, .5             ], [-.3,0] ]).concat([[-.4,-1]]));
       mCurve(makeSpline([ [-.3,0], [ .1 ,-.1 * this.state], [ .5,0] ]).concat([[ .6,-1]]));
    }
-   this.defineOutput("Bool", function() { return new AT.Bool(this.state); });
+   this.defineOutput("Bool", function() { return this.state; });
 }

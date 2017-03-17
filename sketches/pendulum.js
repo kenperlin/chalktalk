@@ -66,12 +66,10 @@ function() {
    }
 
    this.defineOutput("Radians", function() {
-      return new AT.Radians(this.angle);
+      return this.angle;
    });
 
-   this.defineInput("Radians", function(rad) {
-      return rad.theta;
-   });
+   this.defineInput("Radians");
    // Allow us to connect this to objects not yet migrated to the new type system.
    this.defineAlternateInputType("Unknown", function(unk) {
       if (isNumeric(unk.value)) {
