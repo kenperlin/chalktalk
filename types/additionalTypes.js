@@ -11,6 +11,9 @@
       typename: "Unknown",
       init: function(val) {
          this._def("val", val);
+      },
+      toPrimitive: function() {
+         return this.value;
       }
    });
    AT.defineConversion("Float", "Unknown", function(f) {
@@ -41,6 +44,9 @@
             return mod(x - low, high - low) + low;
          }
          this._def("theta", wrap(theta, -Math.PI, Math.PI));
+      },
+      toPrimitive: function() {
+         return this.theta;
       }
    });
    AT.defineConversion("Radians", "Float", function(ang) {

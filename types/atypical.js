@@ -46,6 +46,7 @@ function AtypicalModuleGenerator() {
             return conversionFunction(this);
          }
       },
+
       // Checks whether a conversion function between this object and another type exists.
       //
       // typename: Name of the type you want to convert to. Must be a type name that's already
@@ -53,6 +54,12 @@ function AtypicalModuleGenerator() {
       canConvert: function(typename) {
          return AT.canConvert(this.typename, typename);
       },
+
+      // TODO: DOC
+      isPrimitive: function() {
+         return typeof this.toPrimitive === "function";
+      },
+
       // Helper function for defining an immutable property on this object.
       // Meant to be used primarily in initializers, and not anywhere else.
       //
@@ -75,6 +82,12 @@ function AtypicalModuleGenerator() {
    AT.typeIsDefined = function(typename) {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    };
+
+   // TODO: DOC
+   AT.isPrimitive = function(typename) {
+      return (AT.typeIsDefined(typename)
+         && typeof _types[typename].prototype.toPrimitive === "function");
+   }
 
    // Checks whether you can convert from one type to another.
    //
@@ -104,6 +117,7 @@ function AtypicalModuleGenerator() {
    //                       constructor and handle all initialization logic. Should also do any
    //                       required validation of the arguments and throw a ConstructionError if
    //                       incorrect arguments are provided.
+   //                 TODO: DOC toPrimitive FUNCTION &c.
    //                 This object may also contain any other functions and elements that are
    //                 required for this type.
    AT.defineType = function(implementation) {
@@ -437,6 +451,9 @@ function AtypicalModuleGenerator() {
       init: function(s) {
          this._def("str", "" + s);
       },
+      toPrimitive: function() {
+         return this.str;
+      }
    });
 
    AT.Float = AT.defineType({
@@ -449,6 +466,9 @@ function AtypicalModuleGenerator() {
             throw new AT.ConstructionError("Float constructed with non-numerical input ("+value+")");
          }
          this._def("value", value);
+      },
+      toPrimitive: function() {
+         return this.value;
       }
    });
    AT.defineConversion("Float", "String", function(f) {
@@ -509,6 +529,9 @@ function AtypicalModuleGenerator() {
             value = value.valueOf();
          }
          this._def("value", Math.round(value));
+      },
+      toPrimitive: function() {
+         return this.value;
       }
    });
    AT.defineConversion("Float", "Int", function(num) {
@@ -540,6 +563,9 @@ function AtypicalModuleGenerator() {
       typename: "Bool",
       init: function(value) {
          this._def("value", !!value);
+      },
+      toPrimitive: function() {
+         return this.value;
       },
       not: function() {
          return new AT.Bool(!this.value);

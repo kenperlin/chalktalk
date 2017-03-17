@@ -509,6 +509,31 @@ window.AtypicalTests = (function() {
             assert(!one.canConvert("Four")); 
             // After all, you can convert 2 -> 3 -> 4 without problem, 1 -> 2 gives an entry point
             // into that chain, so should this be allowed?
+         },
+         
+         //--------------------------------------------------------------------------------
+         // Test primitive types
+         function() {
+            let Prim = AT.defineType({
+               typename: "Prim",
+               init: function(x) { this._def("x", x); },
+               toPrimitive: function() { return this.x; }
+            });
+            let prim = new Prim(6);
+
+
+            let NonPrim = AT.defineType({
+               typename: "NonPrim",
+               init: function(y) { this._def("y", y); },
+            });
+            let nonPrim = new NonPrim(17);
+
+            assert(prim.isPrimitive());
+            assert(!nonPrim.isPrimitive());
+            assert(AT.isPrimitive("Prim"));
+            assert(!AT.isPrimitive("NonPrim"));
+
+            assert(prim.toPrimitive() === 6);
          }
       ];
 
