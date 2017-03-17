@@ -14,10 +14,10 @@
       }
    });
    AT.defineConversion("Float", "Unknown", function(f) {
-      return new AT.Unknown(f.n);
+      return new AT.Unknown(f.value);
    });
    AT.defineConversion("Vector3", "Unknown", function(vec) {
-      return new AT.Unknown([vec.x.n, vec.y.n, vec.z.n]);
+      return new AT.Unknown([vec.x.value, vec.y.value, vec.z.value]);
    });
    AT.defineConversion("Bool", "Unknown", function(b) {
       return new AT.Unknown(b.b);
@@ -47,7 +47,7 @@
       return new AT.Float(ang.theta);
    });
    AT.defineConversion("Float", "Radians", function(f) {
-      return new AT.Radians(f.n); // Constructor takes care of wrapping
+      return new AT.Radians(f.value); // Constructor takes care of wrapping
    });
    AT.defineConversionsViaIntermediary("String", "Float", "Radians");
    AT.defineConversion("Radians", "String", function(ang) {

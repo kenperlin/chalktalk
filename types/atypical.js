@@ -441,18 +441,18 @@ function AtypicalModuleGenerator() {
 
    AT.Float = AT.defineType({
       typename: "Float",
-      init: function(n) {
-         if (n instanceof Number) {
-            n = n.valueOf();
+      init: function(value) {
+         if (value instanceof Number) {
+            value = value.valueOf();
          }
-         if (isNaN(n)) {
-            throw new AT.ConstructionError("Float constructed with non-numerical input ("+n+")");
+         if (isNaN(value)) {
+            throw new AT.ConstructionError("Float constructed with non-numerical input ("+value+")");
          }
-         this._def("n", n);
+         this._def("value", value);
       }
    });
    AT.defineConversion("Float", "String", function(f) {
-      return new AT.String("" + f.n.toFixed(3));
+      return new AT.String("" + f.value.toFixed(3));
    });
    AT.defineConversion("String", "Float", function(str) {
       var num = parseFloat(str.str);
@@ -480,14 +480,16 @@ function AtypicalModuleGenerator() {
          }
       },
       magnitude: function() {
-         return sqrt(this.x.n*this.x.n + this.y.n*this.y.n + this.z.n*this.z.n);
+         return sqrt(this.x.value*this.x.value
+               + this.y.value*this.y.value
+               + this.z.value*this.z.value);
       }
    });
    AT.defineConversion("Vector3", "Float", function(vec) {
       return new AT.Float(vec.magnitude());
    });
    AT.defineConversion("Float", "Vector3", function(r) {
-      return new AT.Vector3(new AT.Float(r.n), new AT.Float(r.n), new AT.Float(r.n));
+      return new AT.Vector3(new AT.Float(r.value), new AT.Float(r.value), new AT.Float(r.value));
    });
    AT.defineConversion("Vector3", "String", function(v) {
       return new AT.String("(" + v.x.convert("String").str
@@ -495,23 +497,23 @@ function AtypicalModuleGenerator() {
    });
    AT.defineConversion("String", "Vector3", function(str) {
       let numbers = str.str.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
-         function(n) { return !isNaN(n); }
+         function(value) { return !isNaN(value); }
       );
       return new AT.Vector3(numbers[0] || 0, numbers[1] || 0, numbers[2] || 0);
    });
 
    AT.Int = AT.defineType({
       typename: "Int",
-      init: function(n) {
-         if (n instanceof Number) {
-            n = n.valueOf();
+      init: function(value) {
+         if (value instanceof Number) {
+            value = value.valueOf();
          }
-         this._def("n", Math.round(n));
+         this._def("value", Math.round(value));
       }
    });
    AT.defineConversion("Float", "Int", function(num) {
       try {
-         return new AT.Int(num.n);
+         return new AT.Int(num.value);
       }
       catch (error) {
          if (error instanceof AT.ConstructionError) {
@@ -523,14 +525,14 @@ function AtypicalModuleGenerator() {
       }
    });
    AT.defineConversion("Int", "Float", function(i) {
-      return new AT.Float(i.n);
+      return new AT.Float(i.value);
    });
    AT.defineConversionsViaIntermediary(null, "Float", "Int");
    AT.defineConversionsViaIntermediary("Int", "Float", null);
    // Define a custom conversion to string. The float intermediary already gives us conversion
    // from string for free, but we want our ints to print without decimal places.
    AT.defineConversion("Int", "String", function(i) {
-      return new AT.String("" + i.n)
+      return new AT.String("" + i.value)
    });
    
 
@@ -560,10 +562,10 @@ function AtypicalModuleGenerator() {
       return new AT.Bool(lower !== "false" && lower !== "0" && lower !== "f");
    });
    AT.defineConversion("Int", "Bool", function(i) {
-      return new AT.Bool(i.n);
+      return new AT.Bool(i.value);
    });
    AT.defineConversion("Float", "Bool", function(num) {
-      return new AT.Bool(Math.abs(num.n) > 0.001);
+      return new AT.Bool(Math.abs(num.value) > 0.001);
    });
    AT.defineConversion("Vector3", "Bool", function(v) {
       let notZero = (Math.abs(v.x) > 0.001 || Math.abs(v.y) > 0.001 || Math.abs(v.z) > 0.001);

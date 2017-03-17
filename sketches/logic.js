@@ -29,7 +29,7 @@ function() {
 
    this.getDelayedValue = function() {
       // Should only be called on 'buf' or 'not' gates.
-      let delayAmount = this.inputs.hasValue(1) ? this.inputs.value(1).n : 0;
+      let delayAmount = this.inputs.hasValue(1) ? this.inputs.value(1).value : 0;
       if (time > this.timerStart + delayAmount) {
          this.value = this.inputs.hasValue(0) ? this.inputs.value(0).b : false;
          this.timerStart = time;

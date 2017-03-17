@@ -28,7 +28,7 @@ function() {
    var C = makeOval(-.3,-2.5,.6,.6,10,2*PI,PI);
    
    var lightValue = function(bulb) {
-      return bulb.inputs.hasValue(0) ? bulb.inputs.value(0).n : bulb.light;
+      return bulb.inputs.hasValue(0) ? bulb.inputs.value(0).value : bulb.light;
    }
 
    this.render = function(elapsed) {
