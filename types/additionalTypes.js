@@ -9,8 +9,8 @@
    // erases any type information).
    AT.Unknown = AT.defineType({
       typename: "Unknown",
-      init: function(val) {
-         this._def("val", val);
+      init: function(value) {
+         this._def("value", value);
       }
    });
    AT.defineConversion("Float", "Unknown", function(f) {

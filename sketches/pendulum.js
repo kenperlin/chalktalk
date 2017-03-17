@@ -74,8 +74,8 @@ function() {
    });
    // Allow us to connect this to objects not yet migrated to the new type system.
    this.defineAlternateInputType("Unknown", function(unk) {
-      if (isNumeric(unk.val)) {
-         return +(unk.val);
+      if (isNumeric(unk.value)) {
+         return +(unk.value);
       }
       else {
          return 0;
