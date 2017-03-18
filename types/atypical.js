@@ -55,7 +55,8 @@ function AtypicalModuleGenerator() {
          return AT.canConvert(this.typename, typename);
       },
 
-      // TODO: DOC
+      // Returns whether or not this object is of a primitive type. Types are considered to be
+      // primitive if they have a "toPrimitive" function in their definition.
       isPrimitive: function() {
          return typeof this.toPrimitive === "function";
       },
@@ -83,13 +84,20 @@ function AtypicalModuleGenerator() {
       return typeof(typename) === "string" && _types.hasOwnProperty(typename)
    };
 
-   // TODO: DOC
+   // Returns whether or not this type is a primitive type. Types are considered to be
+   // primitive if they have a "toPrimitive" function in their definition.
+   //
+   // typename: The name that you wish to check. Should be an Atypical type name that has already
+   //           been defined. If not, returns false.
    AT.isPrimitive = function(typename) {
       return (AT.typeIsDefined(typename)
          && typeof _types[typename].prototype.toPrimitive === "function");
    };
 
-   // TODO: DOC
+   // Returns the constructor function for the given type.
+   //
+   // typename: The name of the type you want the function for. Should be the name of an Atypical
+   //           type that has already been defined. If not, returns undefined.
    AT.typeNamed = function(typename) {
       if (!AT.typeIsDefined(typename)) {
          return undefined;
@@ -117,15 +125,25 @@ function AtypicalModuleGenerator() {
    // Internal function to build an Atypical type. Sets up the correct prototype, the
    // required functions, and so on.
    //
-   // implementation: An object containing the implementation of the required members and 
-   //                 functions for the type. These are:
+   // implementation: An object containing the implementation details of the type. 
+   //
+   //                 The following properties MUST be defined on this object:
    //                 typename: A string containing the name of the type. Must be unique and
    //                           follow Javascript identifier syntax.
    //                 init: Initialization function. Should take the same arguments as your
    //                       constructor and handle all initialization logic. Should also do any
    //                       required validation of the arguments and throw a ConstructionError if
    //                       incorrect arguments are provided.
-   //                 TODO: DOC toPrimitive FUNCTION &c.
+   //
+   //                 The following properties MAY be defined on this object:
+   //                 toPrimitive: Should be a function that returns a simple, unwrapped Javascript
+   //                              object that is equivalent to this type. (E.g. the Float type can
+   //                              simply return a Javascript float). Types that define this 
+   //                              function are considered to be "primitive types", and are given 
+   //                              some special treatment. They should have an init function of one
+   //                               argument that allows you to convert these primitive JS values
+   //                               back into Atypical objects.
+   //                 
    //                 This object may also contain any other functions and elements that are
    //                 required for this type.
    AT.defineType = function(implementation) {
