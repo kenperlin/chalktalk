@@ -58,7 +58,7 @@ function AtypicalModuleGenerator() {
       // Returns whether or not this object is of a primitive type. Types are considered to be
       // primitive if they have a "toPrimitive" function in their definition.
       isPrimitive: function() {
-         return typeof this.toPrimitive === "function";
+         return AT.isPrimitive(this.typename);
       },
 
       // Helper function for defining an immutable property on this object.
