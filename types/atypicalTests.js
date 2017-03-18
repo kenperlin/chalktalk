@@ -36,7 +36,7 @@ window.AtypicalTests = (function() {
             assert(test1.getDummy() === "dummyvalue");
             assert(test1.thing === 456);
          },
-
+        
          //--------------------------------------------------------------------------------
          // Test that defining duplicate types does not work
          function () {
@@ -55,6 +55,51 @@ window.AtypicalTests = (function() {
             enableConsoleErrors();
             assert(!Test1Duplicate);
             assert(AT.typeIsDefined("Test1"));
+         },
+        
+         //--------------------------------------------------------------------------------
+         // Test that type names are set properly
+         function () {
+            let MyCoolType = AT.defineType({
+               typename: "TestType",
+               init: function(){}
+            });
+            assert(MyCoolType);
+            assert(AT.typeIsDefined("TestType"));
+            assert(MyCoolType === AT.typeNamed("TestType"));
+            assert(MyCoolType.name === "TestType");
+         },
+        
+         //--------------------------------------------------------------------------------
+         // Test that type names have proper validation
+         function () {
+            disableConsoleErrors();
+            let Test1 = AT.defineType({
+               typename: "Test Type",
+               init: function(){}
+            });
+            let Test2 = AT.defineType({
+               typename: "Test-Type",
+               init: function(){}
+            });
+            let Test3 = AT.defineType({
+               typename: "3TestType",
+               init: function(){}
+            });
+            let Test4 = AT.defineType({
+               typename: "Test<Type",
+               init: function(){}
+            });
+            let Test5 = AT.defineType({
+               typename: "TestType    ",
+               init: function(){}
+            });
+            enableConsoleErrors();
+            assert(!Test1);
+            assert(!Test2);
+            assert(!Test3);
+            assert(!Test4);
+            assert(!Test5);
          },
 
          //--------------------------------------------------------------------------------
