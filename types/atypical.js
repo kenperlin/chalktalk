@@ -178,23 +178,30 @@ function AtypicalModuleGenerator() {
       //     AtypicalType {x: AtypicalType, y: AtypicalType, z: AtypicalType}
       //
       // So I'm making a deal with the devil and using "eval" instead. Below, we set 
-      // AtypicalType to an object of the format:
+      // AtypicalType to a function like this:
       //
-      //     { typename: constructor function }
+      //     function typename() {
+      //         this.init.apply(this, arguments);
+      //     }
       //     
       // This causes the Chrome dev tools to pick up the typename as the actual display name
       // of the type, which is much better:
       //
       //     Vector3 {x: Float, y: Float, z: Float}
       // 
+      // It also should set the .name property of the constructor to the name of the type as well,
+      // in a way that is hopefully cross-browser supported. This allows us to go from the
+      // constructor function to the name of the type easily.
+      // 
       // Restricting the typename as I did above should keep this from being used for
       // too much evil.
       // Bless me father, for I have sinned.
-      var AtypicalType = eval("(function() { return {\n" +
-         "\"" + implementation.typename + "\": function() {\n" +
+      var AtypicalType = eval("(function() {\n" +
+         "var func = function " + implementation.typename + "() {\n" +
             "this.init.apply(this, arguments);\n" +
-            "}\n" +
-            "};})()");
+         "};\n" +
+         "return func;" +
+      "})()");
 
       var proto = Object.create(AT.Type.prototype);
 
@@ -202,16 +209,16 @@ function AtypicalModuleGenerator() {
          proto[element] = implementation[element];
       }
 
-      AtypicalType[implementation.typename].prototype = proto;
+      AtypicalType.prototype = proto;
 
-      _types[implementation.typename] = AtypicalType[implementation.typename];
+      _types[implementation.typename] = AtypicalType;
       
       // Initialize conversion metadata
       _conversions[implementation.typename] = {};
       _intermediaryConversionsFromAnySource[implementation.typename] = [];
       _intermediaryConversionsToAnyDestination[implementation.typename] = [];
 
-      return AtypicalType[implementation.typename];
+      return AtypicalType;
    };
 
    // Adds a conversion function to the global list of conversion functions, enabling it to
