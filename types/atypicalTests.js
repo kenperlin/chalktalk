@@ -579,6 +579,7 @@ window.AtypicalTests = (function() {
             assert(!AT.isPrimitive("NonPrim"));
 
             assert(prim.toPrimitive() === 6);
+            assert((new Prim(prim.toPrimitive())).x === 6)
          }
       ];
 
