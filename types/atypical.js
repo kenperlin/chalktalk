@@ -22,7 +22,12 @@ function AtypicalModuleGenerator() {
    var _intermediaryConversionsToAnyDestination = {}; // TODO: DOC
    var _intermediaryConversionsFromAnySource = {}; // TODO: DOC
 
-   // TODO: DOC
+   // Utility function to get the type name from a variable when you don't know whether they're
+   // strings or constructor functions.
+   //
+   // constructorOrName: Either a function (returns its name), or a string (returns the string
+   //                    unchanged). If any other value (e.g. null) is passed in, this function
+   //                    just returns the input.
    function _typename(constructorOrName) {
       if (typeof constructorOrName === "function") {
          return constructorOrName.name;
@@ -38,8 +43,8 @@ function AtypicalModuleGenerator() {
       // Converts this object to another type, returning the converted object or undefined
       // if no conversion exists.
       //
-      // type: Name or constructor function of the destination type. Must be a type that's
-      //       already been defined. TODO: UPDATE
+      // type: Name or constructor of the destination type. Must be a type that's already been
+      //       defined.
       convert: function(type) {
          let typename = _typename(type);
          if (!AT.typeIsDefined(type)) {
@@ -254,13 +259,15 @@ function AtypicalModuleGenerator() {
    // If called multiple times with the same types, each call overrides the previous
    // conversion function.
    //
-   // sourceTypename: The name of the type you're converting from. Must be a type that's
-   //                 already been defined.
-   // destinationTypename: The name of the type you're converting to. Must be a type that's
-   //                      already been defined.
+   // sourceType: The name or constructor of the type you're converting from. Must be a type that's
+   //             already been defined.
+   // destinationType: The name or constructor of the type you're converting to. Must be a type
+   //                  that's already been defined.
    // conversionFunction: A function, taking in one argument of the source type, that returns
    //                     a value of the destination type, to be used for conversion.
-   AT.defineConversion = function(sourceTypename, destinationTypename, conversionFunction) {
+   AT.defineConversion = function(sourceType, destinationType, conversionFunction) {
+      let sourceTypename = _typename(sourceType);
+      let destinationTypename = _typename(destinationType);
       if (!( typeof sourceTypename === "string" 
          && typeof destinationTypename === "string"
          && typeof conversionFunction === "function"))
@@ -317,12 +324,12 @@ function AtypicalModuleGenerator() {
    //
    // The arguments correspond to the types as so:
    //
-   // sourceTypename: The name of the S type as described above, that you'd like to convert from.
-   //                 Must be a type that has already been defined.
-   // intermediaryTypename: The name of the T type as described above. Must be a type that has
-   //                       already been defined.
-   // destinationTypename: The name of the D type as described above, that you'd like to convert to. 
-   //                      Must be a type that has already been defined.
+   // sourceType: The name or constructor of the S type as described above, that you'd like to
+   //             convert from. Must be a type that has already been defined.
+   // intermediaryType: The name or constructor of the T type as described above. Must be a type
+   //                   that has already been defined.
+   // destinationType: The name or constructor of the D type as described above, that you'd like
+   //                  to convert to. Must be a type that has already been defined.
    //
    // This function can be used one of three ways:
    //
@@ -346,13 +353,13 @@ function AtypicalModuleGenerator() {
    // that are added. E.g. if you set a conversion S -> T -> D for all D, and then define a new
    // type Q, and a new conversion for T -> Q, then the Atypical system will create S -> Q via
    // S -> T -> Q unless a previous S -> Q conversion was already defined.
-   AT.defineConversionsViaIntermediary = function(sourceTypename, intermediaryTypename,
-                                                  destinationTypename)
-   {
+   AT.defineConversionsViaIntermediary = function(sourceType, intermediaryType, destinationType) {
+      let sourceTypename = _typename(sourceType);
+      let intermediaryTypename = _typename(intermediaryType);
+      let destinationTypename = _typename(destinationType);
       // Whole bunch of error checking, thanks Javascript.
       if (typeof intermediaryTypename !== "string") {
-         console.error("Error defining conversion via intermediary, intermediary typename "
-            + "is not a string.");
+         console.error("Error defining conversion via intermediary, invalid intermediary type.");
       }
       if (!_types.hasOwnProperty(intermediaryTypename)) {
          console.error("Error defining conversion via intermediary, intermediary type "
@@ -383,7 +390,7 @@ function AtypicalModuleGenerator() {
          // Define S -> T -> D for all S.
          if (typeof destinationTypename !== "string") {
             console.error("Error defining conversion via intermediary, destination typename must "
-               + "be a string when sourceTypename is null.");
+               + "be a string or constructor function when sourceTypename is null.");
          }
          if (!_types.hasOwnProperty(destinationTypename)) {
             console.error("Error defining conversion via intermediary, destination type "
@@ -416,7 +423,7 @@ function AtypicalModuleGenerator() {
          // Define S -> T -> D for all D.
          if (typeof sourceTypename !== "string") {
             console.error("Error defining conversion via intermediary, source typename must "
-               + "be a string when destinationTypename is null.");
+               + "be a string or constructor function when destinationTypename is null.");
          }
          if (!_types.hasOwnProperty(sourceTypename)) {
             console.error("Error defining conversion via intermediary, source type "
@@ -449,7 +456,7 @@ function AtypicalModuleGenerator() {
          // Define S -> T -> D for specifc S and D.
          if (typeof sourceTypename !== "string") {
             console.error("Error defining conversion via intermediary, source typename must "
-               + "be a string or null.");
+               + "be a string, constructor, or null.");
          }
          if (!_types.hasOwnProperty(sourceTypename)) {
             console.error("Error defining conversion via intermediary, source type "
@@ -458,7 +465,7 @@ function AtypicalModuleGenerator() {
          }
          if (typeof destinationTypename !== "string") {
             console.error("Error defining conversion via intermediary, destination typename must "
-               + "be a string or null.");
+               + "be a string, constructor, or null.");
          }
          if (!_types.hasOwnProperty(destinationTypename)) {
             console.error("Error defining conversion via intermediary, destination type "

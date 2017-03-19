@@ -136,7 +136,7 @@ window.AtypicalTests = (function() {
             });
             let test3 = new Test3();
 
-            AT.defineConversion("Test1", "Test2", function(x){ return new Test2(); });
+            AT.defineConversion(Test1, Test2, function(x){ return new Test2(); });
 
             assert(AT.canConvert(Test1, Test2));
             assert(test1.canConvert(Test2));
@@ -177,23 +177,23 @@ window.AtypicalTests = (function() {
             });
             let destination = new Destination();
 
-            AT.defineConversion("Source", "Intermediary", function(x) {
+            AT.defineConversion(Source, Intermediary, function(x) {
                return new Intermediary();
             });
-            AT.defineConversion("Intermediary", "Destination", function(x) {
+            AT.defineConversion(Intermediary, Destination, function(x) {
                return new Destination();
             });
 
             assert(!AT.canConvert(Source, Destination));
 
-            AT.defineConversionsViaIntermediary("Source", "Intermediary", "Destination");
+            AT.defineConversionsViaIntermediary(Source, Intermediary, Destination);
 
             assert(AT.canConvert(Source, Destination));
             assert(source.canConvert(Destination));
             assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
-            AT.defineConversion("Source", "Destination", function(s) {
+            AT.defineConversion(Source, Destination, function(s) {
                return new Destination(s.x);
             });
             assert(source.convert(Destination).y === 5);
@@ -227,23 +227,23 @@ window.AtypicalTests = (function() {
             });
             let destination = new Destination();
 
-            AT.defineConversion("Source", "Intermediary", function(x) {
+            AT.defineConversion(Source, Intermediary, function(x) {
                return new Intermediary();
             });
-            AT.defineConversion("Intermediary", "Destination", function(x) {
+            AT.defineConversion(Intermediary, Destination, function(x) {
                return new Destination();
             });
 
             assert(!AT.canConvert(Source, Destination));
 
-            AT.defineConversionsViaIntermediary("Source", "Intermediary", null);
+            AT.defineConversionsViaIntermediary(Source, Intermediary, null);
 
             assert(AT.canConvert(Source, Destination));
             assert(source.canConvert(Destination));
             assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
-            AT.defineConversion("Source", "Destination", function(s) {
+            AT.defineConversion(Source, Destination, function(s) {
                return new Destination(s.x);
             });
             assert(source.convert(Destination).y === 5);
@@ -277,23 +277,23 @@ window.AtypicalTests = (function() {
             });
             let destination = new Destination();
 
-            AT.defineConversion("Source", "Intermediary", function(x) {
+            AT.defineConversion(Source, Intermediary, function(x) {
                return new Intermediary();
             });
-            AT.defineConversion("Intermediary", "Destination", function(x) {
+            AT.defineConversion(Intermediary, Destination, function(x) {
                return new Destination();
             });
 
             assert(!AT.canConvert(Source, Destination));
 
-            AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
+            AT.defineConversionsViaIntermediary(null, Intermediary, Destination);
 
             assert(AT.canConvert(Source, Destination));
             assert(source.canConvert(Destination));
             assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
-            AT.defineConversion("Source", "Destination", function(s) {
+            AT.defineConversion(Source, Destination, function(s) {
                return new Destination(s.x);
             });
             assert(source.convert(Destination).y === 5);
@@ -328,16 +328,16 @@ window.AtypicalTests = (function() {
             });
             let destination = new Destination();
 
-            AT.defineConversion("Source", "Intermediary", function(x) {
+            AT.defineConversion(Source, Intermediary, function(x) {
                return new Intermediary();
             });
-            AT.defineConversion("Intermediary", "Destination", function(x) {
+            AT.defineConversion(Intermediary, Destination, function(x) {
                return new Destination();
             });
 
             assert(!AT.canConvert(Source, Destination));
 
-            AT.defineConversion("Source", "Destination", function(s) {
+            AT.defineConversion(Source, Destination, function(s) {
                return new Destination(s.x);
             });
 
@@ -345,7 +345,7 @@ window.AtypicalTests = (function() {
             assert(source.canConvert(Destination));
             assert(source.convert(Destination).y === 5);
 
-            AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
+            AT.defineConversionsViaIntermediary(null, Intermediary, Destination);
 
             // TODO: is this correct behaviour? Seems like potentially surprising behaviour.
             assert(source.convert(Destination).y === 0);
@@ -373,10 +373,10 @@ window.AtypicalTests = (function() {
             });
             let right = new Right();
 
-            AT.defineConversion("Left", "Middle", function(x) {
+            AT.defineConversion(Left, Middle, function(x) {
                return new Middle();
             });
-            AT.defineConversion("Middle", "Left", function(x) {
+            AT.defineConversion(Middle, Left, function(x) {
                return new Left();
             });
 
@@ -389,8 +389,8 @@ window.AtypicalTests = (function() {
 
             // Now define conversions for Left <-> Middle <-> T
             // for any T where Middle <-> T exists.
-            AT.defineConversionsViaIntermediary("Left", "Middle", null);
-            AT.defineConversionsViaIntermediary(null, "Middle", "Left");
+            AT.defineConversionsViaIntermediary(Left, Middle, null);
+            AT.defineConversionsViaIntermediary(null, Middle, Left);
 
             // This still shouldn't change anything just yet.
             assert(!left.canConvert(Right));
@@ -400,7 +400,7 @@ window.AtypicalTests = (function() {
 
             // NOW, define conversion for Middle -> Right, enabling the
             // Left -> Middle -> Right conversion.
-            AT.defineConversion("Middle", "Right", function(x) {
+            AT.defineConversion(Middle, Right, function(x) {
                return new Right();
             });
 
@@ -412,7 +412,7 @@ window.AtypicalTests = (function() {
 
             // NOW, define conversion for Right -> Middle, enabling the
             // Right -> Middle -> Left conversion.
-            AT.defineConversion("Right", "Middle", function(x) {
+            AT.defineConversion(Right, Middle, function(x) {
                return new Right();
             });
 
@@ -449,26 +449,26 @@ window.AtypicalTests = (function() {
             });
             let right = new Right("rightValue");
 
-            AT.defineConversion("Left", "Middle", function(x) {
+            AT.defineConversion(Left, Middle, function(x) {
                return new Middle();
             });
-            AT.defineConversion("Middle", "Left", function(x) {
+            AT.defineConversion(Middle, Left, function(x) {
                return new Left();
             });
 
             // Define conversions for Left <-> Middle <-> T
             // for any T where Middle <-> T exists.
-            AT.defineConversionsViaIntermediary("Left", "Middle", null);
-            AT.defineConversionsViaIntermediary(null, "Middle", "Left");
+            AT.defineConversionsViaIntermediary(Left, Middle, null);
+            AT.defineConversionsViaIntermediary(null, Middle, Left);
 
             // But also define an explicit Left -> Right conversion.
-            AT.defineConversion("Left", "Right", function(l) {
+            AT.defineConversion(Left, Right, function(l) {
                return new Right(l.x);
             });
 
             // NOW, define conversion for Middle -> Right, enabling the
             // Left -> Middle -> Right intermediary conversion.
-            AT.defineConversion("Middle", "Right", function(x) {
+            AT.defineConversion(Middle, Right, function(x) {
                return new Right();
             });
 
@@ -483,7 +483,7 @@ window.AtypicalTests = (function() {
 
             // NOW, define conversion for Right -> Middle, enabling the
             // Right -> Middle -> Left conversion.
-            AT.defineConversion("Right", "Middle", function(x) {
+            AT.defineConversion(Right, Middle, function(x) {
                return new Right();
             });
 
@@ -499,7 +499,7 @@ window.AtypicalTests = (function() {
             assert(right.convert(Left).x === "nothing left");
             
             // Until we define our own custom conversion for the reverse.
-            AT.defineConversion("Right", "Left", function(r) {
+            AT.defineConversion(Right, Left, function(r) {
                return new Left(r.x);
             });
 
@@ -536,8 +536,8 @@ window.AtypicalTests = (function() {
             let four = new Four(4);
 
             // Define conversions 2 -> 3 -> 4
-            AT.defineConversion("Two", "Three", function(x){ return new Three(x.x); });
-            AT.defineConversion("Three", "Four", function(x){ return new Four(x.x); });
+            AT.defineConversion(Two, Three, function(x){ return new Three(x.x); });
+            AT.defineConversion(Three, Four, function(x){ return new Four(x.x); });
 
             AT.defineConversionsViaIntermediary(null, "Three", "Four");
 
@@ -556,7 +556,7 @@ window.AtypicalTests = (function() {
             assert(three.convert(Four).x === 3);
 
             // But this should.
-            AT.defineConversion("One", "Two", function(x) { return new One(x.x); });
+            AT.defineConversion(One, Two, function(x) { return new One(x.x); });
             
             // This is obvious.
             assert(one.convert(Two).x === 1); 
