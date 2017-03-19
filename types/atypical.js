@@ -22,16 +22,27 @@ function AtypicalModuleGenerator() {
    var _intermediaryConversionsToAnyDestination = {}; // TODO: DOC
    var _intermediaryConversionsFromAnySource = {}; // TODO: DOC
 
+   // TODO: DOC
+   function _typename(constructorOrName) {
+      if (typeof constructorOrName === "function") {
+         return constructorOrName.name;
+      }
+      else {
+         return constructorOrName;
+      }
+   }
+   
    // Base for all types. Contains some common functionality needed in all of them.
    AT.Type = function() {};
    AT.Type.prototype = {
       // Converts this object to another type, returning the converted object or undefined
       // if no conversion exists.
       //
-      // typename: Name of the destination type. Must be a type name that's already been
-      //           defined.
-      convert: function(typename) {
-         if (!AT.typeIsDefined(typename)) {
+      // type: Name or constructor function of the destination type. Must be a type that's
+      //       already been defined. TODO: UPDATE
+      convert: function(type) {
+         let typename = _typename(type);
+         if (!AT.typeIsDefined(type)) {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
@@ -50,7 +61,7 @@ function AtypicalModuleGenerator() {
       // Checks whether a conversion function between this object and another type exists.
       //
       // typename: Name of the type you want to convert to. Must be a type name that's already
-      //           been defined.
+      //           been defined. TODO: UPDATE
       canConvert: function(typename) {
          return AT.canConvert(this.typename, typename);
       },
@@ -78,28 +89,29 @@ function AtypicalModuleGenerator() {
 
    // Checks whether a type with the given name is already defined.
    // 
-   // typename: The name of the type you want to check for. Must be a string, if not a string
-   //           this function returns false.
-   AT.typeIsDefined = function(typename) {
-      return typeof(typename) === "string" && _types.hasOwnProperty(typename)
+   // type: The name or constructor of the type you want to check for.
+   AT.typeIsDefined = function(type) {
+      let typename = _typename(type);
+      return typeof(typename) === "string" && _types.hasOwnProperty(typename);
    };
 
    // Returns whether or not this type is a primitive type. Types are considered to be
    // primitive if they have a "toPrimitive" function in their definition.
    //
-   // typename: The name that you wish to check. Should be an Atypical type name that has already
-   //           been defined. If not, returns false.
-   AT.isPrimitive = function(typename) {
-      return (AT.typeIsDefined(typename)
+   // type: The name or constructor for the type that you wish to check. Should be an Atypical
+   //       type name that has already been defined. If not, returns false.
+   AT.isPrimitive = function(type) {
+      let typename = _typename(type);
+      return (AT.typeIsDefined(type)
          && typeof _types[typename].prototype.toPrimitive === "function");
    };
 
    // Returns the constructor function for the given type.
    //
-   // typename: The name of the type you want the function for. Should be the name of an Atypical
-   //           type that has already been defined. If not, returns undefined.
+   // typename: The name of the type you want the function for. Should be the string name of an
+   //           Atypical type that has already been defined. If not, returns undefined.
    AT.typeNamed = function(typename) {
-      if (!AT.typeIsDefined(typename)) {
+      if (typeof typename !== "string" && !AT.typeIsDefined(typename)) {
          return undefined;
       }
       return _types[typename];

@@ -29,6 +29,7 @@ window.AtypicalTests = (function() {
             assert(Test1);
             assert(AT.Test1);
             assert(AT.typeIsDefined("Test1"));
+            assert(AT.typeIsDefined(Test1));
             assert(!AT.typeIsDefined("Test2"));
 
             let test1 = new AT.Test1(456);
@@ -71,7 +72,9 @@ window.AtypicalTests = (function() {
                assert(MyCoolType !== undefined);
                assert(AT.hasOwnProperty(workingTestNames[i]));
                assert(AT.typeIsDefined(workingTestNames[i]));
+               assert(AT.typeIsDefined(MyCoolType));
                assert(MyCoolType === AT.typeNamed(workingTestNames[i]));
+               assert(MyCoolType === AT[workingTestNames[i]]);
                assert(MyCoolType.name === workingTestNames[i]);
             }
          },
@@ -585,8 +588,8 @@ window.AtypicalTests = (function() {
 
             assert(prim.isPrimitive());
             assert(!nonPrim.isPrimitive());
-            assert(AT.isPrimitive("Prim"));
-            assert(!AT.isPrimitive("NonPrim"));
+            assert(AT.isPrimitive(Prim));
+            assert(!AT.isPrimitive(NonPrim));
 
             assert(prim.toPrimitive() === 6);
             assert((new Prim(prim.toPrimitive())).x === 6)
