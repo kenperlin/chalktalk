@@ -27,10 +27,11 @@ window.AtypicalTests = (function() {
                getDummy: function() { return this.dummyname; }
             });
             assert(Test1);
+            assert(AT.Test1);
             assert(AT.typeIsDefined("Test1"));
             assert(!AT.typeIsDefined("Test2"));
 
-            let test1 = new Test1(456);
+            let test1 = new AT.Test1(456);
 
             assert(test1.dummyname === "dummyvalue");
             assert(test1.getDummy() === "dummyvalue");
@@ -60,46 +61,37 @@ window.AtypicalTests = (function() {
          //--------------------------------------------------------------------------------
          // Test that type names are set properly
          function () {
-            let MyCoolType = AT.defineType({
-               typename: "TestType",
-               init: function(){}
-            });
-            assert(MyCoolType);
-            assert(AT.typeIsDefined("TestType"));
-            assert(MyCoolType === AT.typeNamed("TestType"));
-            assert(MyCoolType.name === "TestType");
+            let workingTestNames = ["TestType", "Test_Type", "_TestType", "Test3Type",
+               "TestType3", "_TestType_", "testtype"];
+            for (let i = 0; i < workingTestNames.length; i++) {
+               let MyCoolType = AT.defineType({
+                  typename: workingTestNames[i],
+                  init: function(){}
+               });
+               assert(MyCoolType !== undefined);
+               assert(AT.hasOwnProperty(workingTestNames[i]));
+               assert(AT.typeIsDefined(workingTestNames[i]));
+               assert(MyCoolType === AT.typeNamed(workingTestNames[i]));
+               assert(MyCoolType.name === workingTestNames[i]);
+            }
          },
         
          //--------------------------------------------------------------------------------
          // Test that type names have proper validation
          function () {
-            disableConsoleErrors();
-            let Test1 = AT.defineType({
-               typename: "Test Type",
-               init: function(){}
-            });
-            let Test2 = AT.defineType({
-               typename: "Test-Type",
-               init: function(){}
-            });
-            let Test3 = AT.defineType({
-               typename: "3TestType",
-               init: function(){}
-            });
-            let Test4 = AT.defineType({
-               typename: "Test<Type",
-               init: function(){}
-            });
-            let Test5 = AT.defineType({
-               typename: "TestType    ",
-               init: function(){}
-            });
-            enableConsoleErrors();
-            assert(!Test1);
-            assert(!Test2);
-            assert(!Test3);
-            assert(!Test4);
-            assert(!Test5);
+            let brokenTestnames = ["Test Type", "Test-Type", "3TestType", "Test<Type",
+               "TestType ", " TestType"];
+
+            for (let i = 0; i < brokenTestnames.length; i++) {
+               disableConsoleErrors();
+               let Test = AT.defineType({
+                  typename: brokenTestnames[i],
+                  init: function(){}
+               });
+               enableConsoleErrors();
+               assert(Test === undefined);
+               assert(AT[brokenTestnames[i]] === undefined);
+            }
          },
 
          //--------------------------------------------------------------------------------

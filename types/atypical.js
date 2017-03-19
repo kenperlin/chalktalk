@@ -122,14 +122,19 @@ function AtypicalModuleGenerator() {
       return (_conversions[sourceTypename][destinationTypename] !== undefined);
    };
 
-   // Internal function to build an Atypical type. Sets up the correct prototype, the
-   // required functions, and so on.
+   // Function to build an Atypical type. Sets up the correct prototype, the required functions,
+   // and so on, returning the constructor function for that type, or undefined if the type
+   // definition fails. Also adds the constructor function to the AT object, so that you can access
+   // it with AT.YourTypeNameHere.
    //
    // implementation: An object containing the implementation details of the type. 
    //
    //                 The following properties MUST be defined on this object:
    //                 typename: A string containing the name of the type. Must be unique and
-   //                           follow Javascript identifier syntax.
+   //                           follow Javascript identifier syntax, and must be a type name that
+   //                           has not already been defined and does not overlap with any existing
+   //                           functions or variables on the AT object (e.g. hasOwnProperty,
+   //                           defineType)
    //                 init: Initialization function. Should take the same arguments as your
    //                       constructor and handle all initialization logic. Should also do any
    //                       required validation of the arguments and throw a ConstructionError if
@@ -161,6 +166,11 @@ function AtypicalModuleGenerator() {
       }
       if (AT.typeIsDefined(implementation.typename)) {
          console.error("A type with the name " + implementation.typename + " is already defined.");
+         return undefined;
+      }
+      if (AT[implementation.typename] !== undefined) {
+         console.error("Cannot define a type with the name " + implementation.typename
+            + ", as it overlaps with an existing property of the AT object.");
          return undefined;
       }
 
@@ -217,6 +227,8 @@ function AtypicalModuleGenerator() {
       _conversions[implementation.typename] = {};
       _intermediaryConversionsFromAnySource[implementation.typename] = [];
       _intermediaryConversionsToAnyDestination[implementation.typename] = [];
+
+      AT[implementation.typename] = AtypicalType;
 
       return AtypicalType;
    };
@@ -479,7 +491,7 @@ function AtypicalModuleGenerator() {
 
    // Type definitions start here.
 
-   AT.String = AT.defineType({
+   AT.defineType({
       typename: "String",
       init: function(s) {
          this._def("str", "" + s);
@@ -489,7 +501,7 @@ function AtypicalModuleGenerator() {
       }
    });
 
-   AT.Float = AT.defineType({
+   AT.defineType({
       typename: "Float",
       init: function(value) {
          if (value instanceof Number) {
@@ -517,7 +529,7 @@ function AtypicalModuleGenerator() {
       }
    });
 
-   AT.Vector3 = AT.defineType({
+   AT.defineType({
       typename: "Vector3",
       init: function(x, y, z) {
          if (x instanceof AT.Float && y instanceof AT.Float && z instanceof AT.Float) {
@@ -555,7 +567,7 @@ function AtypicalModuleGenerator() {
       return new AT.Vector3(numbers[0] || 0, numbers[1] || 0, numbers[2] || 0);
    });
 
-   AT.Int = AT.defineType({
+   AT.defineType({
       typename: "Int",
       init: function(value) {
          if (value instanceof Number) {
@@ -592,7 +604,7 @@ function AtypicalModuleGenerator() {
    });
    
 
-   AT.Bool = AT.defineType({
+   AT.defineType({
       typename: "Bool",
       init: function(value) {
          this._def("value", !!value);

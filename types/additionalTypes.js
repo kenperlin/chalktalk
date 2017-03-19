@@ -7,7 +7,7 @@
    // converted to use Atypical types yet. It's just a dumb wrapper around a JS variable, and while
    // other types can be converted to it, it can't be converted to any type (as it effectively
    // erases any type information).
-   AT.Unknown = AT.defineType({
+   AT.defineType({
       typename: "Unknown",
       init: function(value) {
          this._def("value", value);
@@ -31,7 +31,7 @@
 
    // Type defining an angle in radians, wrapped to interval between -PI and PI,
    // freely convertible to Float
-   AT.Radians = AT.defineType({
+   AT.defineType({
       typename: "Radians",
       init: function(theta) {
          let mod = function (x, base) {
