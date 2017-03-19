@@ -1,6 +1,6 @@
 "use strict";
 
-(function(AT) {
+(function() {
    // Chalktalk-specific type defintions go in this file.
 
    // This type is meant to allow a degree of interoperability for sketches that have not been
@@ -63,4 +63,4 @@
    AT.defineConversionsViaIntermediary("Radians", "Float", "Int");
 
    AT.defineConversionsViaIntermediary("Radians", "Float", "Unknown");
-})(Atypical);
+})();
