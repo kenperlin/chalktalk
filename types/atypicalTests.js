@@ -93,6 +93,24 @@ window.AtypicalTests = (function() {
                assert(AT[brokenTestnames[i]] === undefined);
             }
          },
+        
+         //--------------------------------------------------------------------------------
+         // Test that you can't define types with the same name as a built-in function
+         // in Object.prototype or previously-defined Atypical functions
+         function () {
+            let brokenTestnames = ["isPrototypeOf", "hasOwnProperty", "valueOf", "defineType",
+               "typeIsDefined", "isPrimitive", "canConvert", "Type"];
+
+            for (let i = 0; i < brokenTestnames.length; i++) {
+               disableConsoleErrors();
+               let Test = AT.defineType({
+                  typename: brokenTestnames[i],
+                  init: function(){}
+               });
+               enableConsoleErrors();
+               assert(Test === undefined);
+            }
+         },
 
          //--------------------------------------------------------------------------------
          // Test that basic conversions work
