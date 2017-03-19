@@ -60,10 +60,10 @@ function AtypicalModuleGenerator() {
 
       // Checks whether a conversion function between this object and another type exists.
       //
-      // typename: Name of the type you want to convert to. Must be a type name that's already
-      //           been defined. TODO: UPDATE
-      canConvert: function(typename) {
-         return AT.canConvert(this.typename, typename);
+      // typename: Name or constructor of the type you want to convert to. Must be a type that's
+      //           already been defined.
+      canConvert: function(type) {
+         return AT.canConvert(this.typename, _typename(type));
       },
 
       // Returns whether or not this object is of a primitive type. Types are considered to be
@@ -119,14 +119,18 @@ function AtypicalModuleGenerator() {
 
    // Checks whether you can convert from one type to another.
    //
-   // sourceTypename: The name of the type you'd like to convert from. Must be already defined.
-   // destinationTypename: The name of the type you'd like to convert from. Must be already defined.
-   AT.canConvert = function(sourceTypename, destinationTypename) {
-      if (!AT.typeIsDefined(sourceTypename)) {
+   // sourceType: The name or constructor of the type you'd like to convert from.
+   //             Must be already defined.
+   // destinationType: The name or constructor of the type you'd like to convert from.
+   //                  Must be already defined.
+   AT.canConvert = function(sourceType, destinationType) {
+      let sourceTypename = _typename(sourceType);
+      let destinationTypename = _typename(destinationType);
+      if (!AT.typeIsDefined(sourceType)) {
          console.error("Type " + sourceTypename + " not defined.");
          return undefined;
       }
-      if (!AT.typeIsDefined(destinationTypename)) {
+      if (!AT.typeIsDefined(destinationType)) {
          console.error("Type " + destinationTypename + " not defined.");
          return undefined;
       }

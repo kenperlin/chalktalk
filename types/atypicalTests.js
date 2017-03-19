@@ -138,15 +138,15 @@ window.AtypicalTests = (function() {
 
             AT.defineConversion("Test1", "Test2", function(x){ return new Test2(); });
 
-            assert(AT.canConvert("Test1", "Test2"));
-            assert(test1.canConvert("Test2"));
+            assert(AT.canConvert(Test1, Test2));
+            assert(test1.canConvert(Test2));
 
-            assert(!AT.canConvert("Test1", "Test3"));
-            assert(!test1.canConvert("Test3"));
+            assert(!AT.canConvert(Test1, Test3));
+            assert(!test1.canConvert(Test3));
 
             // Conversions are not bidirectional by default
-            assert(!AT.canConvert("Test2", "Test1"));
-            assert(!test2.canConvert("Test1"));
+            assert(!AT.canConvert(Test2, Test1));
+            assert(!test2.canConvert(Test1));
          },
 
          //--------------------------------------------------------------------------------
@@ -184,19 +184,19 @@ window.AtypicalTests = (function() {
                return new Destination();
             });
 
-            assert(!AT.canConvert("Source", "Destination"));
+            assert(!AT.canConvert(Source, Destination));
 
             AT.defineConversionsViaIntermediary("Source", "Intermediary", "Destination");
 
-            assert(AT.canConvert("Source", "Destination"));
-            assert(source.canConvert("Destination"));
-            assert(source.convert("Destination").y === 0);
+            assert(AT.canConvert(Source, Destination));
+            assert(source.canConvert(Destination));
+            assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
             AT.defineConversion("Source", "Destination", function(s) {
                return new Destination(s.x);
             });
-            assert(source.convert("Destination").y === 5);
+            assert(source.convert(Destination).y === 5);
          },
 
          //--------------------------------------------------------------------------------
@@ -234,19 +234,19 @@ window.AtypicalTests = (function() {
                return new Destination();
             });
 
-            assert(!AT.canConvert("Source", "Destination"));
+            assert(!AT.canConvert(Source, Destination));
 
             AT.defineConversionsViaIntermediary("Source", "Intermediary", null);
 
-            assert(AT.canConvert("Source", "Destination"));
-            assert(source.canConvert("Destination"));
-            assert(source.convert("Destination").y === 0);
+            assert(AT.canConvert(Source, Destination));
+            assert(source.canConvert(Destination));
+            assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
             AT.defineConversion("Source", "Destination", function(s) {
                return new Destination(s.x);
             });
-            assert(source.convert("Destination").y === 5);
+            assert(source.convert(Destination).y === 5);
          },
 
          //--------------------------------------------------------------------------------
@@ -284,19 +284,19 @@ window.AtypicalTests = (function() {
                return new Destination();
             });
 
-            assert(!AT.canConvert("Source", "Destination"));
+            assert(!AT.canConvert(Source, Destination));
 
             AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
 
-            assert(AT.canConvert("Source", "Destination"));
-            assert(source.canConvert("Destination"));
-            assert(source.convert("Destination").y === 0);
+            assert(AT.canConvert(Source, Destination));
+            assert(source.canConvert(Destination));
+            assert(source.convert(Destination).y === 0);
 
             // Ensure you can still override intermediary conversions if need be
             AT.defineConversion("Source", "Destination", function(s) {
                return new Destination(s.x);
             });
-            assert(source.convert("Destination").y === 5);
+            assert(source.convert(Destination).y === 5);
          },
          
          //--------------------------------------------------------------------------------
@@ -335,20 +335,20 @@ window.AtypicalTests = (function() {
                return new Destination();
             });
 
-            assert(!AT.canConvert("Source", "Destination"));
+            assert(!AT.canConvert(Source, Destination));
 
             AT.defineConversion("Source", "Destination", function(s) {
                return new Destination(s.x);
             });
 
-            assert(AT.canConvert("Source", "Destination"));
-            assert(source.canConvert("Destination"));
-            assert(source.convert("Destination").y === 5);
+            assert(AT.canConvert(Source, Destination));
+            assert(source.canConvert(Destination));
+            assert(source.convert(Destination).y === 5);
 
             AT.defineConversionsViaIntermediary(null, "Intermediary", "Destination");
 
             // TODO: is this correct behaviour? Seems like potentially surprising behaviour.
-            assert(source.convert("Destination").y === 0);
+            assert(source.convert(Destination).y === 0);
          },
 
          //--------------------------------------------------------------------------------
@@ -382,10 +382,10 @@ window.AtypicalTests = (function() {
 
             // No conversions from Left <-> Right are defined yet,
             // nor are any Middle <-> Right conversions.
-            assert(!left.canConvert("Right"));
-            assert(!right.canConvert("Left"));
-            assert(!middle.canConvert("Right"));
-            assert(!right.canConvert("Middle"));
+            assert(!left.canConvert(Right));
+            assert(!right.canConvert(Left));
+            assert(!middle.canConvert(Right));
+            assert(!right.canConvert(Middle));
 
             // Now define conversions for Left <-> Middle <-> T
             // for any T where Middle <-> T exists.
@@ -393,10 +393,10 @@ window.AtypicalTests = (function() {
             AT.defineConversionsViaIntermediary(null, "Middle", "Left");
 
             // This still shouldn't change anything just yet.
-            assert(!left.canConvert("Right"));
-            assert(!right.canConvert("Left"));
-            assert(!middle.canConvert("Right"));
-            assert(!right.canConvert("Middle"));
+            assert(!left.canConvert(Right));
+            assert(!right.canConvert(Left));
+            assert(!middle.canConvert(Right));
+            assert(!right.canConvert(Middle));
 
             // NOW, define conversion for Middle -> Right, enabling the
             // Left -> Middle -> Right conversion.
@@ -405,10 +405,10 @@ window.AtypicalTests = (function() {
             });
 
             // This changes some of the landscape.
-            assert(left.canConvert("Right"));
-            assert(!right.canConvert("Left"));
-            assert(middle.canConvert("Right"));
-            assert(!right.canConvert("Middle"));
+            assert(left.canConvert(Right));
+            assert(!right.canConvert(Left));
+            assert(middle.canConvert(Right));
+            assert(!right.canConvert(Middle));
 
             // NOW, define conversion for Right -> Middle, enabling the
             // Right -> Middle -> Left conversion.
@@ -417,10 +417,10 @@ window.AtypicalTests = (function() {
             });
 
             // And now we have all our conversions.
-            assert(left.canConvert("Right"));
-            assert(right.canConvert("Left"));
-            assert(middle.canConvert("Right"));
-            assert(right.canConvert("Middle"));
+            assert(left.canConvert(Right));
+            assert(right.canConvert(Left));
+            assert(middle.canConvert(Right));
+            assert(right.canConvert(Middle));
          },
 
          //--------------------------------------------------------------------------------
@@ -472,14 +472,14 @@ window.AtypicalTests = (function() {
                return new Right();
             });
 
-            assert(left.canConvert("Right"));
-            assert(!right.canConvert("Left"));
-            assert(middle.canConvert("Right"));
-            assert(!right.canConvert("Middle"));
+            assert(left.canConvert(Right));
+            assert(!right.canConvert(Left));
+            assert(middle.canConvert(Right));
+            assert(!right.canConvert(Middle));
 
             // BUT we should still have our custom conversion function.
             // The implicitly created intermediary one should not have overridden it.
-            assert(left.convert("Right").x === "leftValue");
+            assert(left.convert(Right).x === "leftValue");
 
             // NOW, define conversion for Right -> Middle, enabling the
             // Right -> Middle -> Left conversion.
@@ -488,15 +488,15 @@ window.AtypicalTests = (function() {
             });
 
             // And now we have all our conversions.
-            assert(left.canConvert("Right"));
-            assert(right.canConvert("Left"));
-            assert(middle.canConvert("Right"));
-            assert(right.canConvert("Middle"));
+            assert(left.canConvert(Right));
+            assert(right.canConvert(Left));
+            assert(middle.canConvert(Right));
+            assert(right.canConvert(Middle));
 
             // This should still be custom.
-            assert(left.convert("Right").x === "leftValue");
+            assert(left.convert(Right).x === "leftValue");
             // But the reverse should be the intermediary conversion.
-            assert(right.convert("Left").x === "nothing left");
+            assert(right.convert(Left).x === "nothing left");
             
             // Until we define our own custom conversion for the reverse.
             AT.defineConversion("Right", "Left", function(r) {
@@ -504,7 +504,7 @@ window.AtypicalTests = (function() {
             });
 
             // And now the custom conversion should override the intermediary one.
-            assert(right.convert("Left").x === "rightValue");
+            assert(right.convert(Left).x === "rightValue");
          },
 
          //--------------------------------------------------------------------------------
@@ -542,29 +542,29 @@ window.AtypicalTests = (function() {
             AT.defineConversionsViaIntermediary(null, "Three", "Four");
 
             // You should be able to convert downwards along the 2 -> 3 -> 4 chain now
-            assert(!one.canConvert("Two")); // Still not defined
-            assert(two.convert("Three").x === 2);
-            assert(two.convert("Four").x === 2);
-            assert(three.convert("Four").x === 3);
+            assert(!one.canConvert(Two)); // Still not defined
+            assert(two.convert(Three).x === 2);
+            assert(two.convert(Four).x === 2);
+            assert(three.convert(Four).x === 3);
 
             // This shouldn't change anything immediately
             AT.defineConversionsViaIntermediary(null, "Two", "Three");
 
-            assert(!one.canConvert("Two")); // Still not defined
-            assert(two.convert("Three").x === 2);
-            assert(two.convert("Four").x === 2);
-            assert(three.convert("Four").x === 3);
+            assert(!one.canConvert(Two)); // Still not defined
+            assert(two.convert(Three).x === 2);
+            assert(two.convert(Four).x === 2);
+            assert(three.convert(Four).x === 3);
 
             // But this should.
             AT.defineConversion("One", "Two", function(x) { return new One(x.x); });
             
             // This is obvious.
-            assert(one.convert("Two").x === 1); 
+            assert(one.convert(Two).x === 1); 
             // This should also have been defined by the intermediary conversion.
-            assert(one.convert("Three").x === 1); 
+            assert(one.convert(Three).x === 1); 
 
             // TODO: is this correct behaviour though?
-            assert(!one.canConvert("Four")); 
+            assert(!one.canConvert(Four)); 
             // After all, you can convert 2 -> 3 -> 4 without problem, 1 -> 2 gives an entry point
             // into that chain, so should this be allowed?
          },
