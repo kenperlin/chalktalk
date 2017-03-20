@@ -539,10 +539,10 @@ function AtypicalModuleGenerator() {
          return this.value;
       }
    });
-   AT.defineConversion("Float", "String", function(f) {
+   AT.defineConversion(AT.Float, AT.String, function(f) {
       return new AT.String("" + f.value.toFixed(3));
    });
-   AT.defineConversion("String", "Float", function(str) {
+   AT.defineConversion(AT.String, AT.Float, function(str) {
       var num = parseFloat(str.str);
       if (isNaN(num)) {
          return new AT.Float(0);
@@ -573,17 +573,17 @@ function AtypicalModuleGenerator() {
                + this.z.value*this.z.value);
       }
    });
-   AT.defineConversion("Vector3", "Float", function(vec) {
+   AT.defineConversion(AT.Vector3, AT.Float, function(vec) {
       return new AT.Float(vec.magnitude());
    });
-   AT.defineConversion("Float", "Vector3", function(r) {
+   AT.defineConversion(AT.Float, AT.Vector3, function(r) {
       return new AT.Vector3(new AT.Float(r.value), new AT.Float(r.value), new AT.Float(r.value));
    });
-   AT.defineConversion("Vector3", "String", function(v) {
+   AT.defineConversion(AT.Vector3, AT.String, function(v) {
       return new AT.String("(" + v.x.convert("String").str
          + ", " + v.y.convert("String").str + ", " + v.z.convert("String").str + ")");
    });
-   AT.defineConversion("String", "Vector3", function(str) {
+   AT.defineConversion(AT.String, AT.Vector3, function(str) {
       let numbers = str.str.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
          function(value) { return !isNaN(value); }
       );
@@ -602,7 +602,7 @@ function AtypicalModuleGenerator() {
          return this.value;
       }
    });
-   AT.defineConversion("Float", "Int", function(num) {
+   AT.defineConversion(AT.Float, AT.Int, function(num) {
       try {
          return new AT.Int(num.value);
       }
@@ -615,14 +615,14 @@ function AtypicalModuleGenerator() {
          }
       }
    });
-   AT.defineConversion("Int", "Float", function(i) {
+   AT.defineConversion(AT.Int, AT.Float, function(i) {
       return new AT.Float(i.value);
    });
-   AT.defineConversionsViaIntermediary(null, "Float", "Int");
-   AT.defineConversionsViaIntermediary("Int", "Float", null);
+   AT.defineConversionsViaIntermediary(null, AT.Float, AT.Int);
+   AT.defineConversionsViaIntermediary(AT.Int, AT.Float, null);
    // Define a custom conversion to string. The float intermediary already gives us conversion
    // from string for free, but we want our ints to print without decimal places.
-   AT.defineConversion("Int", "String", function(i) {
+   AT.defineConversion(AT.Int, AT.String, function(i) {
       return new AT.String("" + i.value)
    });
    
@@ -648,30 +648,30 @@ function AtypicalModuleGenerator() {
          return new AT.Bool(this.value !== other.value);
       }
    });
-   AT.defineConversion("Bool", "String", function(b) {
+   AT.defineConversion(AT.Bool, AT.String, function(b) {
       return new AT.String(b.value ? "true" : "false");
    });
-   AT.defineConversion("String", "Bool", function(str) {
+   AT.defineConversion(AT.String, AT.Bool, function(str) {
       var lower = str.str.toLowerCase();
       return new AT.Bool(lower !== "false" && lower !== "0" && lower !== "f");
    });
-   AT.defineConversion("Int", "Bool", function(i) {
+   AT.defineConversion(AT.Int, AT.Bool, function(i) {
       return new AT.Bool(i.value);
    });
-   AT.defineConversion("Float", "Bool", function(num) {
+   AT.defineConversion(AT.Float, AT.Bool, function(num) {
       return new AT.Bool(Math.abs(num.value) > 0.001);
    });
-   AT.defineConversion("Vector3", "Bool", function(v) {
+   AT.defineConversion(AT.Vector3, AT.Bool, function(v) {
       let notZero = (Math.abs(v.x) > 0.001 || Math.abs(v.y) > 0.001 || Math.abs(v.z) > 0.001);
       return new AT.Bool(notZero);
    });
-   AT.defineConversion("Bool", "Int", function(b) {
+   AT.defineConversion(AT.Bool, AT.Int, function(b) {
       return new AT.Int(b.value ? 1 : 0);
    });
-   AT.defineConversion("Bool", "Float", function(b) {
+   AT.defineConversion(AT.Bool, AT.Float, function(b) {
       return new AT.Float(b.value ? 1 : 0);
    });
-   AT.defineConversion("Bool", "Vector3", function(b) {
+   AT.defineConversion(AT.Bool, AT.Vector3, function(b) {
       return new AT.Vector3(0, b.value ? 1 : 0, 0);
    });
 
