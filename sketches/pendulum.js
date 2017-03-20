@@ -69,9 +69,9 @@ function() {
       return this.angle;
    });
 
-   this.defineInput("Radians");
+   this.defineInput(AT.Radians);
    // Allow us to connect this to objects not yet migrated to the new type system.
-   this.defineAlternateInputType("Unknown", function(unk) {
+   this.defineAlternateInputType(AT.Unknown, function(unk) {
       if (isNumeric(unk.value)) {
          return +(unk.value);
       }

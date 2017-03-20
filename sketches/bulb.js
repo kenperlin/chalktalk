@@ -56,7 +56,7 @@ function() {
       mCurve(C);
    }
 
-   this.defineInput("Float");
+   this.defineInput(AT.Float);
    this.defineOutput(AT.Float, function() {
       return lightValue(this);
    });

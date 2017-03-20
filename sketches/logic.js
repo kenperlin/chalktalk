@@ -79,14 +79,14 @@ function() {
       // This ensures that the input port setup happens AFTER the "selection" variable is set.
       switch (this.selection) {
          case 0: // For buffers, allow for a propagation delay and only one boolean input.
-            this.defineInput("Bool");
-            this.defineInput("Float");
+            this.defineInput(AT.Bool);
+            this.defineInput(AT.Float);
             break;
          case 1:
          case 2:
          case 3: // All other gates are two-input gates
-            this.defineInput("Bool");
-            this.defineInput("Bool");
+            this.defineInput(AT.Bool);
+            this.defineInput(AT.Bool);
             break;
       }
    }

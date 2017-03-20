@@ -65,8 +65,8 @@ function() {
       });
    }
 
-   this.defineInput("Bool");
-   this.defineInput("Bool");
+   this.defineInput(AT.Bool);
+   this.defineInput(AT.Bool);
 
    this.defineOutput(AT.Bool, function() {
       var a = this.inputs.hasValue(0) ? this.inputs.value(0) : 0;

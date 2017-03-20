@@ -24,6 +24,6 @@ function() {
       }
    );
 
-   this.defineInput("Bool");
+   this.defineInput(AT.Bool);
 }
 
