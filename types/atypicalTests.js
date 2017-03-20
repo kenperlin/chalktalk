@@ -37,6 +37,9 @@ window.AtypicalTests = (function() {
             assert(test1.dummyname === "dummyvalue");
             assert(test1.getDummy() === "dummyvalue");
             assert(test1.thing === 456);
+            assert(test1.typename === "Test1");
+            assert(test1.type === Test1);
+            assert(test1.type.name === "Test1");
          },
         
          //--------------------------------------------------------------------------------
@@ -120,9 +123,9 @@ window.AtypicalTests = (function() {
          function() {
             let Test1 = AT.defineType({
                typename: "Test1",
-               init: function(){}
+               init: function(x) { this._def("x", x); }
             });
-            let test1 = new Test1();
+            let test1 = new Test1(56);
 
             let Test2 = AT.defineType({
                typename: "Test2",
@@ -143,6 +146,9 @@ window.AtypicalTests = (function() {
 
             assert(!AT.canConvert(Test1, Test3));
             assert(!test1.canConvert(Test3));
+
+            assert(AT.canConvert(Test1, Test1));
+            assert(test1.convert(Test1).x === 56);
 
             // Conversions are not bidirectional by default
             assert(!AT.canConvert(Test2, Test1));

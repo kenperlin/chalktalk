@@ -51,10 +51,10 @@ function AtypicalModuleGenerator() {
             console.error("Type " + typename + " not defined.");
             return undefined;
          }
-         if (typename == this.typename) {
+         if (type === this.type) {
             return this;
          }
-         var conversionFunction = _conversions[this.typename][typename];
+         var conversionFunction = _conversions[this.type.name][typename];
          if (!conversionFunction) {
             return undefined;
          }
@@ -68,13 +68,13 @@ function AtypicalModuleGenerator() {
       // typename: Name or constructor of the type you want to convert to. Must be a type that's
       //           already been defined.
       canConvert: function(type) {
-         return AT.canConvert(this.typename, _typename(type));
+         return AT.canConvert(this.type, type);
       },
 
       // Returns whether or not this object is of a primitive type. Types are considered to be
       // primitive if they have a "toPrimitive" function in their definition.
       isPrimitive: function() {
-         return AT.isPrimitive(this.typename);
+         return AT.isPrimitive(this.type);
       },
 
       // Helper function for defining an immutable property on this object.
@@ -169,6 +169,12 @@ function AtypicalModuleGenerator() {
    //                              some special treatment. They should have an init function of one
    //                               argument that allows you to convert these primitive JS values
    //                               back into Atypical objects.
+   //
+   //                 The following properties MUST NOT be defined on this object:
+   //                 type: This property will be set to the type constructor for this type. Any
+   //                       custom value will be overridden.
+   //                 Also be careful to avoid name collisions with AT.Type convenience functions,
+   //                 such as "convert", "canConvert", etc.
    //                 
    //                 This object may also contain any other functions and elements that are
    //                 required for this type.
@@ -239,6 +245,7 @@ function AtypicalModuleGenerator() {
       for (var element in implementation) {
          proto[element] = implementation[element];
       }
+      proto.type = AtypicalType;
 
       AtypicalType.prototype = proto;
 
