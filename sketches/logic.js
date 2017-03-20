@@ -91,7 +91,7 @@ function() {
       }
    }
 
-   this.defineOutput("Bool", function() {
+   this.defineOutput(AT.Bool, function() {
       var s  = this.selection;
       return this.evalCode(this.codes[s + 4 * this.invert],
          s==0 ? this.getDelayedValue()

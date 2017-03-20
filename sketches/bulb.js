@@ -57,7 +57,7 @@ function() {
    }
 
    this.defineInput("Float");
-   this.defineOutput("Float", function() {
+   this.defineOutput(AT.Float, function() {
       return lightValue(this);
    });
 }

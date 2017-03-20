@@ -15,7 +15,7 @@ function() {
       }
    }
 
-   this.defineOutput("Bool",
+   this.defineOutput(AT.Bool,
       function() {
          if (this.inputs.hasValue(0)) {
             return this.inputs.value(0);

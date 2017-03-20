@@ -75,7 +75,7 @@ function() {
       });
    }
 
-   this.defineOutput("Float", function() {
+   this.defineOutput(AT.Float, function() {
       return lerp(this.t, this.lo, this.hi);
    });
 }

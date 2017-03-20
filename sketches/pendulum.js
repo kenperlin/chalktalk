@@ -65,7 +65,7 @@ function() {
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
    }
 
-   this.defineOutput("Radians", function() {
+   this.defineOutput(AT.Radians, function() {
       return this.angle;
    });
 
