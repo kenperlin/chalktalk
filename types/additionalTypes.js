@@ -16,16 +16,16 @@
          return this.value;
       }
    });
-   AT.defineConversion("Float", "Unknown", function(f) {
+   AT.defineConversion(AT.Float, AT.Unknown, function(f) {
       return new AT.Unknown(f.toPrimitive());
    });
-   AT.defineConversion("Vector3", "Unknown", function(vec) {
+   AT.defineConversion(AT.Vector3, AT.Unknown, function(vec) {
       return new AT.Unknown([vec.x.value, vec.y.value, vec.z.value]);
    });
-   AT.defineConversion("Bool", "Unknown", function(b) {
+   AT.defineConversion(AT.Bool, AT.Unknown, function(b) {
       return new AT.Unknown(b.toPrimitive());
    });
-   AT.defineConversion("String", "Unknown", function(s) {
+   AT.defineConversion(AT.String, AT.Unknown, function(s) {
       return new AT.Unknown(s.toPrimitive());
    });
 
@@ -49,18 +49,18 @@
          return this.theta;
       }
    });
-   AT.defineConversion("Radians", "Float", function(ang) {
+   AT.defineConversion(AT.Radians, AT.Float, function(ang) {
       return new AT.Float(ang.theta);
    });
-   AT.defineConversion("Float", "Radians", function(f) {
+   AT.defineConversion(AT.Float, AT.Radians, function(f) {
       return new AT.Radians(f.value); // Constructor takes care of wrapping
    });
-   AT.defineConversionsViaIntermediary("String", "Float", "Radians");
-   AT.defineConversion("Radians", "String", function(ang) {
+   AT.defineConversionsViaIntermediary(AT.String, AT.Float, AT.Radians);
+   AT.defineConversion(AT.Radians, AT.String, function(ang) {
       return new AT.String(ang.theta.toFixed(2) + " rad");
    });
-   AT.defineConversionsViaIntermediary("Int", "Float", "Radians");
-   AT.defineConversionsViaIntermediary("Radians", "Float", "Int");
+   AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Radians);
+   AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Int);
 
-   AT.defineConversionsViaIntermediary("Radians", "Float", "Unknown");
+   AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
 })();
