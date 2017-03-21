@@ -155,7 +155,9 @@ function AtypicalModuleGenerator() {
    //                           follow Javascript identifier syntax, and must be a type name that
    //                           has not already been defined and does not overlap with any existing
    //                           functions or variables on the AT object (e.g. hasOwnProperty,
-   //                           defineType)
+   //                           defineType).
+   //                           This property will NOT be copied to objects of this type. To access
+   //                           the typename of an object, use object.type.name.
    //                 init: Initialization function. Should take the same arguments as your
    //                       constructor and handle all initialization logic. Should also do any
    //                       required validation of the arguments and throw a ConstructionError if
@@ -243,7 +245,9 @@ function AtypicalModuleGenerator() {
       var proto = Object.create(AT.Type.prototype);
 
       for (var element in implementation) {
-         proto[element] = implementation[element];
+         if (element !== "typename") {
+            proto[element] = implementation[element];
+         }
       }
       proto.type = AtypicalType;
 

@@ -37,7 +37,6 @@ window.AtypicalTests = (function() {
             assert(test1.dummyname === "dummyvalue");
             assert(test1.getDummy() === "dummyvalue");
             assert(test1.thing === 456);
-            assert(test1.typename === "Test1");
             assert(test1.type === Test1);
             assert(test1.type.name === "Test1");
          },
