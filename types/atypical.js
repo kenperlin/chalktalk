@@ -8,6 +8,9 @@ function AtypicalModuleGenerator() {
    // being their constructors.
    var _types = {};
 
+   // TODO: DOC
+   var _genericTypes = {};
+
    // This internal variable will hold all our conversion functions, in the following structure:
    // {
    //     typename_converted_from: {
@@ -207,7 +210,7 @@ function AtypicalModuleGenerator() {
          console.error("Typename string is required when creating a new type.");
          return undefined;
       }
-      if (!_validateTypename(implementation.typename)) {
+      if (!(implementation._isGeneratedType || _validateTypename(implementation.typename))) {
          return undefined;
       }
 
@@ -271,6 +274,59 @@ function AtypicalModuleGenerator() {
       AT[implementation.typename] = AtypicalType;
 
       return AtypicalType;
+   };
+
+   // TODO: DOC
+   // Should return a function that CREATES constructors
+   AT.defineGenericType = function(implementation) {
+      if (typeof implementation.init !== "function") {
+         console.error("Initialization function is required when creating a new generic type.");
+         return undefined;
+      }
+      if (typeof implementation.typename !== "string") {
+         console.error("Typename string is required when creating a new generic type.");
+         return undefined;
+      }
+      if (!_validateTypename(implementation.typename)) {
+         return undefined;
+      }
+
+      let GenericType = function() {
+         let typename = '$_' + implementation.typename + '$$';
+         let typeParameters = [];
+         for (let i = 0; i < arguments.length; i++) {
+            if (!AT.typeIsDefined(arguments[i])) {
+               console.error('Attempted to construct a generic ' + implementation.typename
+                  + ' with a type parameter that is not actually a defined type.');
+               return undefined;
+            }
+            typename += arguments[i].name + '$';
+            typeParameters.push(arguments[i]);
+         }
+         typename += '$';
+
+         if (AT.typeIsDefined(typename)) {
+            // Already defined, just return it.
+            return AT.typeNamed(typename);
+         }
+         else {
+            // Create the type, then return it.
+            let type = AT.defineType({
+               typename: typename,
+               init: implementation.init,
+               typeParameters: typeParameters,
+               _isGeneratedType: true,
+               // TODO: how to add more members?
+            });
+            return type;
+         }
+      }
+
+      _genericTypes[implementation.typename] = GenericType;
+
+      AT[implementation.typename] = GenericType;
+
+      return GenericType;
    };
 
    // Adds a conversion function to the global list of conversion functions, enabling it to
@@ -693,6 +749,9 @@ function AtypicalModuleGenerator() {
    AT.defineConversion(AT.Bool, AT.Vector3, function(b) {
       return new AT.Vector3(0, b.value ? 1 : 0, 0);
    });
+
+
+   // TODO: DEFINE AN ARRAY TYPE
 
 
    return AT;

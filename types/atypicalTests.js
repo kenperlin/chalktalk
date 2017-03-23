@@ -598,6 +598,37 @@ window.AtypicalTests = (function() {
 
             assert(prim.toPrimitive() === 6);
             assert((new Prim(prim.toPrimitive())).x === 6)
+         },
+
+         //--------------------------------------------------------------------------------
+         // Test defining generic types
+         function() {
+            let GenericThing = AT.defineGenericType({
+               typename: "GenericThing",
+               init: function(x) { 
+                  x = new (this.typeParameters[0])(x);
+                  this._def("x", x);
+               },
+               genericConvert: function(newGenericType) {
+                  return new GenericThing(newGenericType)(
+                     x.convert(newGenericType.typeParameters[0]));
+               }
+            });
+            let FloatThing = GenericThing(AT.Float);
+            assert(FloatThing !== undefined);
+            assert(AT.typeIsDefined(FloatThing));
+            assert(typeof FloatThing === "function");
+            let OtherFloatThing = GenericThing(AT.Float);
+            assert(FloatThing === OtherFloatThing);
+            assert(FloatThing.prototype.typeParameters.length === 1);
+            assert(FloatThing.prototype.typeParameters[0] === AT.Float);
+            
+            let floatValue = new FloatThing(5);
+            assert(floatValue.x.value === 5);
+            assert(floatValue.typeParameters.length === 1);
+            assert(floatValue.typeParameters[0] === AT.Float);
+
+            // TODO: test and implement generic conversions
          }
       ];
 
