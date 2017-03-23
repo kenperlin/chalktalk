@@ -615,20 +615,26 @@ window.AtypicalTests = (function() {
                }
             });
 
-            let FloatThing = GenericThing(AT.Float);
-            assert(FloatThing !== undefined);
-            assert(AT.typeIsDefined(FloatThing));
-            assert(typeof FloatThing === "function");
+            // Test instantiating it with a bunch of different types and initial values
+            let typeValuePairs = [[AT.Float, 5.5], [AT.Int, 6], [AT.String, "Hi there"]];
+            for (let i = 0; i < typeValuePairs.length; i++) {
+               let ConcreteThing = GenericThing(typeValuePairs[i][0]);
+               assert(ConcreteThing !== undefined);
+               assert(AT.typeIsDefined(ConcreteThing));
+               assert(typeof ConcreteThing === "function");
 
-            let OtherFloatThing = GenericThing(AT.Float);
-            assert(FloatThing === OtherFloatThing);
-            assert(FloatThing.prototype.typeParameters.length === 1);
-            assert(FloatThing.prototype.typeParameters[0] === AT.Float);
-            
-            let floatValue = new FloatThing(5);
-            assert(floatValue.x.value === 5);
-            assert(floatValue.typeParameters.length === 1);
-            assert(floatValue.typeParameters[0] === AT.Float);
+               let OtherConcreteThing = GenericThing(typeValuePairs[i][0]);
+               assert(ConcreteThing === OtherConcreteThing);
+               assert(ConcreteThing.prototype.typeParameters.length === 1);
+               assert(ConcreteThing.prototype.typeParameters[0] === typeValuePairs[i][0]);
+               
+               let concreteValue = new ConcreteThing(typeValuePairs[i][1]);
+               assert(concreteValue.x.toPrimitive() == typeValuePairs[i][1]);
+               assert(concreteValue.typeParameters.length === 1);
+               assert(concreteValue.typeParameters[0] === typeValuePairs[i][0]);
+            }
+
+            // TODO: test and implement generic conversions
 
             // Ensure you can't construct generic types with random other values
             function fakeConstructor(){}
@@ -640,7 +646,16 @@ window.AtypicalTests = (function() {
                assert(brokenThing === undefined);
             }
 
-            // TODO: test and implement generic conversions
+            // Test nested generics
+            let DoubleFloatThing = GenericThing(GenericThing(AT.Float));
+            assert(DoubleFloatThing !== undefined);
+            assert(AT.typeIsDefined(DoubleFloatThing));
+            assert(typeof DoubleFloatThing === "function");
+
+            let doubleFloatValue = new DoubleFloatThing(7);
+            assert(doubleFloatValue.x.x.value === 7);
+            assert(doubleFloatValue.typeParameters.length === 1);
+            assert(doubleFloatValue.typeParameters[0] === GenericThing(AT.Float));
          }
       ];
 
