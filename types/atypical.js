@@ -143,6 +143,24 @@ function AtypicalModuleGenerator() {
       return (_conversions[sourceTypename][destinationTypename] !== undefined);
    };
 
+   function _validateTypename(typename) {
+      if (!/^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(typename)) {
+         console.error("Typename must follow Javascript identifier syntax, and must not start with "
+            + "a dollar sign.");
+         return false;
+      }
+      if (AT.typeIsDefined(typename)) {
+         console.error("A type with the name " + typename + " is already defined.");
+         return false;
+      }
+      if (AT[typename] !== undefined) {
+         console.error("Cannot define a type with the name " + typename
+            + ", as it overlaps with an existing property of the AT object.");
+         return false;
+      }
+      return true;
+   }
+
    // Function to build an Atypical type. Sets up the correct prototype, the required functions,
    // and so on, returning the constructor function for that type, or undefined if the type
    // definition fails. Also adds the constructor function to the AT object, so that you can access
@@ -189,17 +207,7 @@ function AtypicalModuleGenerator() {
          console.error("Typename string is required when creating a new type.");
          return undefined;
       }
-      if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(implementation.typename)) {
-         console.error("Typename must follow Javascript identifier syntax.");
-         return undefined;
-      }
-      if (AT.typeIsDefined(implementation.typename)) {
-         console.error("A type with the name " + implementation.typename + " is already defined.");
-         return undefined;
-      }
-      if (AT[implementation.typename] !== undefined) {
-         console.error("Cannot define a type with the name " + implementation.typename
-            + ", as it overlaps with an existing property of the AT object.");
+      if (!_validateTypename(implementation.typename)) {
          return undefined;
       }
 
