@@ -614,10 +614,12 @@ window.AtypicalTests = (function() {
                      x.convert(newGenericType.typeParameters[0]));
                }
             });
+
             let FloatThing = GenericThing(AT.Float);
             assert(FloatThing !== undefined);
             assert(AT.typeIsDefined(FloatThing));
             assert(typeof FloatThing === "function");
+
             let OtherFloatThing = GenericThing(AT.Float);
             assert(FloatThing === OtherFloatThing);
             assert(FloatThing.prototype.typeParameters.length === 1);
@@ -627,6 +629,16 @@ window.AtypicalTests = (function() {
             assert(floatValue.x.value === 5);
             assert(floatValue.typeParameters.length === 1);
             assert(floatValue.typeParameters[0] === AT.Float);
+
+            // Ensure you can't construct generic types with random other values
+            function fakeConstructor(){}
+            let brokenConstructors = [5, "test", console.log, fakeConstructor];
+            for (let i = 0; i < brokenConstructors.length; i++) {
+               disableConsoleErrors();
+               let brokenThing = GenericThing(brokenConstructors[i]);
+               enableConsoleErrors();
+               assert(brokenThing === undefined);
+            }
 
             // TODO: test and implement generic conversions
          }

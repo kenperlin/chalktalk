@@ -297,7 +297,7 @@ function AtypicalModuleGenerator() {
          for (let i = 0; i < arguments.length; i++) {
             if (!AT.typeIsDefined(arguments[i])) {
                console.error('Attempted to construct a generic ' + implementation.typename
-                  + ' with a type parameter that is not actually a defined type.');
+                  + ' with a type parameter that is not a type.');
                return undefined;
             }
             typename += arguments[i].name + '$';
