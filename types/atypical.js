@@ -292,7 +292,7 @@ function AtypicalModuleGenerator() {
       }
 
       let GenericType = function() {
-         let typename = '$_' + implementation.typename + '$$';
+         let typename = '$' + implementation.typename + '_';
          let typeParameters = [];
          for (let i = 0; i < arguments.length; i++) {
             if (!AT.typeIsDefined(arguments[i])) {
@@ -300,10 +300,9 @@ function AtypicalModuleGenerator() {
                   + ' with a type parameter that is not a type.');
                return undefined;
             }
-            typename += arguments[i].name + '$';
+            typename += arguments[i].name + '_';
             typeParameters.push(arguments[i]);
          }
-         typename += '$';
 
          if (AT.typeIsDefined(typename)) {
             // Already defined, just return it.
