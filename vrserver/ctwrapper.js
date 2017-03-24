@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.135');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
@@ -20,6 +20,7 @@ holojam.on('onmousemove',(flake) => {
 });
 
 holojam.on('onmousedown',(flake) => {
+  console.log("mouse down");
     var m = {
    eventType: "onmousedown",
    event: {
@@ -32,6 +33,7 @@ holojam.on('onmousedown',(flake) => {
 });
 
 holojam.on('onmouseup',(flake) => {
+  console.log("mouse up");
     var m = {
    eventType: "onmouseup",
    event: {
@@ -73,7 +75,7 @@ function readHeader(data){
   ctdata01 += data.toString('ascii',4,5);
   ctdata01 += data.toString('ascii',7,8);
   ctdata01 += data.toString('ascii',6,7);
-  console.log("start with", ctdata01);
+  //console.log("start with", ctdata01);
   return ctdata01;
 }
 
@@ -195,20 +197,20 @@ function testMTU(){
 ws.on('message', function incoming(data, flags) {
   // flags.binary will be set if a binary data is received.
   // flags.masked will be set if the data was masked.
-  console.log("data",data);
+  //console.log("data",data);
   // time I received displayList
-  console.log("Receive displayList", getTime());
+  //console.log("Receive displayList", getTime());
   var header = readHeader(data);
   if (header === "CTdata01"){
       //var curveFlakes = readCurves(data);
       var curveFlakes = {label: 'Display',bytes:data}
-      console.log("curveFlakes",curveFlakes);
+      //console.log("curveFlakes",curveFlakes);
       // time I parsed displayList and send
       //console.log("Parsed displayList and send", getTime());
-      console.log("FlakeSize ", curveFlakes.bytes.length);
+      //console.log("FlakeSize ", curveFlakes.bytes.length);
       // test maximum size of package
       //curveFlakes = testMTU();
-      console.log("curveFlakes Bytes width",curveFlakes.bytes[16] + curveFlakes.bytes[17] * 256);
+      //console.log("curveFlakes Bytes width",curveFlakes.bytes[16] + curveFlakes.bytes[17] * 256);
       holojam.Send(holojam.BuildUpdate('ChalkTalk', [curveFlakes]));
   }
 });
