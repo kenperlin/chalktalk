@@ -606,13 +606,10 @@ window.AtypicalTests = (function() {
             let GenericThing = AT.defineGenericType({
                typename: "GenericThing",
                init: function(x) { 
-                  x = new (this.typeParameters[0])(x);
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
                   this._def("x", x);
-               },
-               genericConvert: function(newGenericType) {
-                  // TODO: should take in new type parameters instead of generic type maybe?
-                  return new GenericThing(newGenericType)(
-                     x.convert(newGenericType.typeParameters[0]));
                },
                customIntConstant: 35,
                customStringConstant: "Hi there",
@@ -620,6 +617,9 @@ window.AtypicalTests = (function() {
                   return this.x;
                }
             });
+
+            assert(typeof AT.GenericThing === "function");
+            assert(AT.GenericThing === GenericThing);
 
             // Test instantiating it with a bunch of different types and initial values
             let typeValuePairs = [[AT.Float, 5.5], [AT.Int, 6], [AT.String, "Hi there"]];
@@ -646,8 +646,6 @@ window.AtypicalTests = (function() {
                   && concreteValue.customMethod().toPrimitive() === typeValuePairs[i][1]);
             }
 
-            // TODO: test and implement generic conversions
-
             // Ensure you can't construct generic types with random other values
             function fakeConstructor(){}
             let brokenConstructors = [5, "test", console.log, fakeConstructor];
@@ -668,6 +666,51 @@ window.AtypicalTests = (function() {
             assert(doubleFloatValue.x.x.value === 7);
             assert(doubleFloatValue.typeParameters.length === 1);
             assert(doubleFloatValue.typeParameters[0] === GenericThing(AT.Float));
+         },
+
+         //--------------------------------------------------------------------------------
+         // Test generic type conversions
+         function() {
+            let GenericThing = AT.defineGenericType({
+               typename: "GenericThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertTypeParameters: function(typeParameters) {
+                  return new (GenericThing(typeParameters[0]))(
+                     this.x.convert(typeParameters[0]));
+               },
+            });
+
+            let floatThing = new (AT.GenericThing(AT.Float))(6.28);
+            assert(floatThing.x.value === 6.28);
+            assert(floatThing.canConvert(AT.GenericThing(AT.Float)) // Identity conversion
+               && floatThing.convert(AT.GenericThing(AT.Float)).x.value === 6.28);
+            assert(floatThing.canConvert(AT.GenericThing(AT.Int))
+               && floatThing.convert(AT.GenericThing(AT.Int)).x.value === 6);
+
+            let intThing = new (AT.GenericThing(AT.Int))(42);
+            assert(intThing.x.value === 42);
+            assert(intThing.canConvert(AT.GenericThing(AT.Float))
+               && intThing.convert(AT.GenericThing(AT.Float)).x.value === 42);
+
+            // Test non-convertible generic types
+            let NonConvertibleThing = AT.defineGenericType({
+               typename: "NonConvertibleThing",
+               init: function(y) { 
+                  y = new (this.typeParameters[0])(y);
+                  this._def("y", y);
+               },
+            });
+
+            let nonConvertibleFloat = new (AT.NonConvertibleThing(AT.Float))(3.14);
+            assert(!nonConvertibleFloat.canConvert(AT.NonConvertibleThing(AT.Int)));
+            assert(!AT.canConvert(NonConvertibleThing(AT.Int), NonConvertibleThing(AT.Float)));
+
+            // TODO: test converting to type parameters
          }
       ];
 

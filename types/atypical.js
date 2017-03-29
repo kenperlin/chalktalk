@@ -10,6 +10,7 @@ function AtypicalModuleGenerator() {
 
    // TODO: DOC
    var _genericTypes = {};
+   var _concreteGenerics = {};
 
    // This internal variable will hold all our conversion functions, in the following structure:
    // {
@@ -278,6 +279,9 @@ function AtypicalModuleGenerator() {
 
    // TODO: DOC
    // Should return a function that CREATES constructors
+   // Generic types are convertible between themselves if convertTypeParameters is defined,
+   // same number of type parameters, and each type parameter is convertible to its corresponding
+   // type parameter in the other type
    AT.defineGenericType = function(implementation) {
       if (typeof implementation.init !== "function") {
          console.error("Initialization function is required when creating a new generic type.");
@@ -292,6 +296,8 @@ function AtypicalModuleGenerator() {
       }
 
       let GenericType = function() {
+         // This function will return a concrete implementation of the generic type,
+         // with concrete type parameters.
          let typename = '$' + implementation.typename + '_';
          let typeParameters = [];
          for (let i = 0; i < arguments.length; i++) {
@@ -309,7 +315,7 @@ function AtypicalModuleGenerator() {
             return AT.typeNamed(typename);
          }
          else {
-            // Create the type, then return it.
+            // First, define the type itself
             let concreteImplementation = {
                // TODO: doc the properties that you CANNOT use for custom properties
                typename: typename,
@@ -322,11 +328,64 @@ function AtypicalModuleGenerator() {
                concreteImplementation[property] = implementation[property];
             }
             let type = AT.defineType(concreteImplementation);
+            _concreteGenerics[implementation.typename][typename] = type;
+
+            // Define conversions between this type and others of the same generic type class,
+            // where possible.
+            if (implementation.convertTypeParameters) {
+               if (typeof implementation.convertTypeParameters !== "function"
+                  || implementation.convertTypeParameters.length !== 1)
+               {
+                  console.error("Error defining generic types: convertTypeParameters "
+                     + " must be a function of one argument.")
+               }
+               else {
+                  for (let otherTypename in _concreteGenerics[implementation.typename]) {
+                     let otherType = _concreteGenerics[implementation.typename][otherTypename];
+                     if (type === otherType) { continue; }
+
+                     let otherTypeParameters = otherType.prototype.typeParameters;
+                     if (typeParameters.length !== otherTypeParameters.length) {
+                        continue;
+                     }
+
+                     let canConvertToOtherType = true;
+                     for (let i = 0; i < typeParameters.length; i++) {
+                        if (!AT.canConvert(typeParameters[i], otherTypeParameters[i])) {
+                           canConvertToOtherType = false;
+                        }
+                     }
+                     if (canConvertToOtherType) {
+                        AT.defineConversion(type, otherType, function(instance) {
+                           return instance.convertTypeParameters(
+                              otherType.prototype.typeParameters);
+                        });
+                     }
+
+                     let canConvertFromOtherType = true;
+                     for (let i = 0; i < typeParameters.length; i++) {
+                        if (!AT.canConvert(otherTypeParameters[i], typeParameters[i])) {
+                           canConvertFromOtherType = false;
+                        }
+                     }
+                     if (canConvertFromOtherType) {
+                        AT.defineConversion(otherType, type, function(instance) {
+                           return instance.convertTypeParameters(
+                              type.prototype.typeParameters);
+                        });
+                     }
+                  }
+               }
+            }
+            
+            // TODO: define conversions between this type and its type parameters where possible
+
             return type;
          }
       }
 
       _genericTypes[implementation.typename] = GenericType;
+      _concreteGenerics[implementation.typename] = {};
 
       AT[implementation.typename] = GenericType;
 
