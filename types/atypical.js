@@ -310,13 +310,18 @@ function AtypicalModuleGenerator() {
          }
          else {
             // Create the type, then return it.
-            let type = AT.defineType({
+            let concreteImplementation = {
+               // TODO: doc the properties that you CANNOT use for custom properties
                typename: typename,
                init: implementation.init,
                typeParameters: typeParameters,
                _isGeneratedType: true,
-               // TODO: how to add more members?
-            });
+            };
+            for (let property in implementation) {
+               if (concreteImplementation.hasOwnProperty(property)) { continue; }
+               concreteImplementation[property] = implementation[property];
+            }
+            let type = AT.defineType(concreteImplementation);
             return type;
          }
       }
@@ -393,8 +398,9 @@ function AtypicalModuleGenerator() {
       }
    };
 
-   // This function allows you to define a conversion between any two types S and D by using type T
-   // as an intermediary. That is, when converting S to D, you first convert S to T and then T to D.
+   // This function allows you to define a conversion between any two types S and D by using
+   // type T as an intermediary. That is, when converting S to D, you first convert S to T and
+   // then T to D.
    //
    // The arguments correspond to the types as so:
    //

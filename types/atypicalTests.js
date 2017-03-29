@@ -610,8 +610,14 @@ window.AtypicalTests = (function() {
                   this._def("x", x);
                },
                genericConvert: function(newGenericType) {
+                  // TODO: should take in new type parameters instead of generic type maybe?
                   return new GenericThing(newGenericType)(
                      x.convert(newGenericType.typeParameters[0]));
+               },
+               customIntConstant: 35,
+               customStringConstant: "Hi there",
+               customMethod: function() {
+                  return this.x;
                }
             });
 
@@ -632,6 +638,12 @@ window.AtypicalTests = (function() {
                assert(concreteValue.x.toPrimitive() == typeValuePairs[i][1]);
                assert(concreteValue.typeParameters.length === 1);
                assert(concreteValue.typeParameters[0] === typeValuePairs[i][0]);
+               assert(concreteValue._isGeneratedType);
+
+               assert(concreteValue.customIntConstant === 35);
+               assert(concreteValue.customStringConstant === "Hi there");
+               assert(typeof concreteValue.customMethod === "function"
+                  && concreteValue.customMethod().toPrimitive() === typeValuePairs[i][1]);
             }
 
             // TODO: test and implement generic conversions
