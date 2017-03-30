@@ -169,8 +169,15 @@ function AtypicalModuleGenerator() {
 
       if (sourceTypename === destinationTypename) { return true; }
 
+      // Explicitly-defined conversions override everything else
+      if (_conversions[sourceTypename][destinationTypename] !== undefined) {
+         return true;
+      }
+
       sourceType = AT.typeNamed(sourceTypename);
       destinationType = AT.typeNamed(destinationTypename);
+
+      // Generic types have special rules for conversions
 
       if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
          // Do some special processing for conversions between two generic types.
@@ -198,7 +205,7 @@ function AtypicalModuleGenerator() {
          }
       }
 
-      return (_conversions[sourceTypename][destinationTypename] !== undefined);
+      return false;
    };
 
    function _validateTypename(typename) {

@@ -731,10 +731,28 @@ window.AtypicalTests = (function() {
             AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(); });
             assert(AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
+            // Non-convertible things remain non-convertible unless you explicitly define 
+            // conversions between them
+
             assert(!AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
             assert(!AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
 
-            // TODO: test converting to same generic type via intermediary
+            AT.defineConversion(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B),
+               function(nonA) {
+                  return new (NonConvertibleThing(AT.B))();
+               });
+
+            assert(AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
+            assert(!AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
+
+            AT.defineConversion(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A),
+               function(nonB) {
+                  return new (NonConvertibleThing(AT.A))();
+               });
+
+            assert(AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
+            assert(AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
+            
             // Ensure that the same rules apply to conversions via intermediaries
 
             AT.defineType({
