@@ -638,7 +638,7 @@ window.AtypicalTests = (function() {
                assert(concreteValue.x.toPrimitive() == typeValuePairs[i][1]);
                assert(concreteValue.typeParameters.length === 1);
                assert(concreteValue.typeParameters[0] === typeValuePairs[i][0]);
-               assert(concreteValue._isGeneratedType);
+               assert(concreteValue.genericType === GenericThing);
 
                assert(concreteValue.customIntConstant === 35);
                assert(concreteValue.customStringConstant === "Hi there");
@@ -710,7 +710,30 @@ window.AtypicalTests = (function() {
             assert(!nonConvertibleFloat.canConvert(AT.NonConvertibleThing(AT.Int)));
             assert(!AT.canConvert(NonConvertibleThing(AT.Int), NonConvertibleThing(AT.Float)));
 
-            // TODO: test converting to type parameters
+            // Test generic conversions for newly-defined types and conversions
+            AT.defineType({
+               typename: "A",
+               init: function(){}
+            });
+            AT.defineType({
+               typename: "B",
+               init: function(){}
+            });
+
+            assert(!AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
+            assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
+
+            AT.defineConversion(AT.A, AT.B, function(a){ return new AT.B(); })
+            assert(AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
+            assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
+
+            AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(); })
+            assert(AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
+
+            assert(!AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
+            assert(!AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
+
+            // TODO: test converting to same generic type via intermediary
          }
       ];
 

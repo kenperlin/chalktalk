@@ -41,6 +41,11 @@ function AtypicalModuleGenerator() {
       }
    }
    
+   // TODO: doc
+   function _isGenericType(type) {
+      return typeof type.prototype.genericType === "function";
+   }
+   
    // Base for all types. Contains some common functionality needed in all of them.
    AT.Type = function() {};
    AT.Type.prototype = {
@@ -51,6 +56,7 @@ function AtypicalModuleGenerator() {
       //       defined.
       convert: function(type) {
          let typename = _typename(type);
+         type = AT.typeNamed(typename);
          if (!AT.typeIsDefined(type)) {
             console.error("Type " + typename + " not defined.");
             return undefined;
@@ -58,9 +64,25 @@ function AtypicalModuleGenerator() {
          if (type === this.type) {
             return this;
          }
+
+
          var conversionFunction = _conversions[this.type.name][typename];
          if (!conversionFunction) {
-            return undefined;
+            if (_isGenericType(this.type) && _isGenericType(type)) {
+               // The following call should take care of all the cases where the generic type
+               // can't be converted.
+               if (!AT.canConvert(this.type, type)) { return undefined; }
+               if (this.genericType === type.prototype.genericType) {
+                  return this.convertTypeParameters(type.prototype.typeParameters);
+               }
+               else {
+                  // TODO: implement generic type conversion between different generic types
+                  return undefined;
+               }
+            }
+            else {
+               return undefined;
+            }
          }
          else {
             return conversionFunction(this);
@@ -135,6 +157,7 @@ function AtypicalModuleGenerator() {
    AT.canConvert = function(sourceType, destinationType) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
+
       if (!AT.typeIsDefined(sourceType)) {
          console.error("Type " + sourceTypename + " not defined.");
          return undefined;
@@ -143,7 +166,38 @@ function AtypicalModuleGenerator() {
          console.error("Type " + destinationTypename + " not defined.");
          return undefined;
       }
+
       if (sourceTypename === destinationTypename) { return true; }
+
+      sourceType = AT.typeNamed(sourceTypename);
+      destinationType = AT.typeNamed(destinationTypename);
+
+      if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
+         // Do some special processing for conversions between two generic types.
+         if (sourceType.prototype.genericType === destinationType.prototype.genericType) {
+            // Can't convert if no conversion function exists.
+            if (!sourceType.prototype.convertTypeParameters) { return false; }
+            // Can't convert if there's a differing number of type parameters
+            if (sourceType.prototype.typeParameters.length
+               !== destinationType.prototype.typeParameters.length)
+            {
+               return false
+            }
+            // Can't convert if any of the type parameters are not convertible
+            for (let i = 0; i < sourceType.prototype.typeParameters.length; i++) {
+               if (!AT.canConvert(sourceType.prototype.typeParameters[i],
+                  destinationType.prototype.typeParameters[i]))
+               {
+                  return false;
+               }
+            }
+            return true;
+         }
+         else {
+            // TODO: add conversions between different generic types
+         }
+      }
+
       return (_conversions[sourceTypename][destinationTypename] !== undefined);
    };
 
@@ -197,6 +251,7 @@ function AtypicalModuleGenerator() {
    //                 The following properties MUST NOT be defined on this object:
    //                 type: This property will be set to the type constructor for this type. Any
    //                       custom value will be overridden.
+   //                 genericType: This property is reserved for sub-types of generic types only.
    //                 Also be careful to avoid name collisions with AT.Type convenience functions,
    //                 such as "convert", "canConvert", etc.
    //                 
@@ -211,7 +266,9 @@ function AtypicalModuleGenerator() {
          console.error("Typename string is required when creating a new type.");
          return undefined;
       }
-      if (!(implementation._isGeneratedType || _validateTypename(implementation.typename))) {
+      if (!(typeof implementation.genericType === "function"
+         || _validateTypename(implementation.typename)))
+      {
          return undefined;
       }
 
@@ -295,7 +352,7 @@ function AtypicalModuleGenerator() {
          return undefined;
       }
 
-      let GenericType = function() {
+      let GenericType = function GenericType() {
          // This function will return a concrete implementation of the generic type,
          // with concrete type parameters.
          let typename = '$' + implementation.typename + '_';
@@ -319,65 +376,28 @@ function AtypicalModuleGenerator() {
             let concreteImplementation = {
                // TODO: doc the properties that you CANNOT use for custom properties
                typename: typename,
+               genericType: GenericType,
                init: implementation.init,
                typeParameters: typeParameters,
-               _isGeneratedType: true,
             };
             for (let property in implementation) {
                if (concreteImplementation.hasOwnProperty(property)) { continue; }
                concreteImplementation[property] = implementation[property];
             }
+
+            // Check conversion fcn between different instances of this generic type
+            if (implementation.convertTypeParameters !== undefined
+               && (typeof implementation.convertTypeParameters !== "function"
+                  || implementation.convertTypeParameters.length !== 1))
+            {
+               console.error("Error defining generic types: convertTypeParameters "
+                  + " must be a function of one argument.")
+               return undefined;
+            }
+
             let type = AT.defineType(concreteImplementation);
             _concreteGenerics[implementation.typename][typename] = type;
 
-            // Define conversions between this type and others of the same generic type class,
-            // where possible.
-            if (implementation.convertTypeParameters) {
-               if (typeof implementation.convertTypeParameters !== "function"
-                  || implementation.convertTypeParameters.length !== 1)
-               {
-                  console.error("Error defining generic types: convertTypeParameters "
-                     + " must be a function of one argument.")
-               }
-               else {
-                  for (let otherTypename in _concreteGenerics[implementation.typename]) {
-                     let otherType = _concreteGenerics[implementation.typename][otherTypename];
-                     if (type === otherType) { continue; }
-
-                     let otherTypeParameters = otherType.prototype.typeParameters;
-                     if (typeParameters.length !== otherTypeParameters.length) {
-                        continue;
-                     }
-
-                     let canConvertToOtherType = true;
-                     for (let i = 0; i < typeParameters.length; i++) {
-                        if (!AT.canConvert(typeParameters[i], otherTypeParameters[i])) {
-                           canConvertToOtherType = false;
-                        }
-                     }
-                     if (canConvertToOtherType) {
-                        AT.defineConversion(type, otherType, function(instance) {
-                           return instance.convertTypeParameters(
-                              otherType.prototype.typeParameters);
-                        });
-                     }
-
-                     let canConvertFromOtherType = true;
-                     for (let i = 0; i < typeParameters.length; i++) {
-                        if (!AT.canConvert(otherTypeParameters[i], typeParameters[i])) {
-                           canConvertFromOtherType = false;
-                        }
-                     }
-                     if (canConvertFromOtherType) {
-                        AT.defineConversion(otherType, type, function(instance) {
-                           return instance.convertTypeParameters(
-                              type.prototype.typeParameters);
-                        });
-                     }
-                  }
-               }
-            }
-            
             // TODO: define conversions between this type and its type parameters where possible
 
             return type;
