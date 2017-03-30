@@ -711,6 +711,7 @@ window.AtypicalTests = (function() {
             assert(!AT.canConvert(NonConvertibleThing(AT.Int), NonConvertibleThing(AT.Float)));
 
             // Test generic conversions for newly-defined types and conversions
+            
             AT.defineType({
                typename: "A",
                init: function(){}
@@ -723,11 +724,11 @@ window.AtypicalTests = (function() {
             assert(!AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
             assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
-            AT.defineConversion(AT.A, AT.B, function(a){ return new AT.B(); })
+            AT.defineConversion(AT.A, AT.B, function(a){ return new AT.B(); });
             assert(AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
             assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
-            AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(); })
+            AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(); });
             assert(AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
             assert(!AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
