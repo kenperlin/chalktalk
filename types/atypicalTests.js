@@ -698,11 +698,14 @@ window.AtypicalTests = (function() {
                && intThing.convert(AT.GenericThing(AT.Float)).x.value === 42);
 
             // Test non-convertible generic types
+            
             let NonConvertibleThing = AT.defineGenericType({
                typename: "NonConvertibleThing",
-               init: function(y) { 
-                  y = new (this.typeParameters[0])(y);
-                  this._def("y", y);
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
                },
             });
 
@@ -714,24 +717,46 @@ window.AtypicalTests = (function() {
             
             AT.defineType({
                typename: "A",
-               init: function(){}
+               init: function(str){ this._def("str", str === undefined ? "nothingA" : str); }
             });
             AT.defineType({
                typename: "B",
-               init: function(){}
+               init: function(str){ this._def("str", str === undefined ? "nothingB" : str); }
             });
 
             assert(!AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
             assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
-            AT.defineConversion(AT.A, AT.B, function(a){ return new AT.B(); });
+            AT.defineConversion(AT.A, AT.B, function(a){ return new AT.B(a.str); });
             assert(AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
             assert(!AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
-            AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(); });
+            AT.defineConversion(AT.B, AT.A, function(b){ return new AT.A(b.str); });
             assert(AT.canConvert(GenericThing(AT.B), GenericThing(AT.A)));
 
-            // Non-convertible things remain non-convertible unless you explicitly define 
+            assert((new (GenericThing(AT.A))()).convert(
+               GenericThing(AT.B)).x.str === "nothingA");
+            assert((new (GenericThing(AT.B))()).convert(
+               GenericThing(AT.A)).x.str === "nothingB");
+
+            // Explicitly-defined conversions between generic types overrides the default generic
+            // conversion
+            
+            AT.defineConversion(GenericThing(AT.A), GenericThing(AT.B),
+               function(nonA) {
+                  return new (GenericThing(AT.B))("convertedToB");
+               });
+            assert((new (GenericThing(AT.A))()).convert(
+               GenericThing(AT.B)).x.str === "convertedToB");
+            
+            AT.defineConversion(GenericThing(AT.B), GenericThing(AT.A),
+               function(nonB) {
+                  return new (GenericThing(AT.A))("convertedToA");
+               });
+            assert((new (GenericThing(AT.B))()).convert(
+               GenericThing(AT.A)).x.str === "convertedToA");
+
+            // Non-convertible generic types remain non-convertible unless you explicitly define 
             // conversions between them
 
             assert(!AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
@@ -739,19 +764,23 @@ window.AtypicalTests = (function() {
 
             AT.defineConversion(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B),
                function(nonA) {
-                  return new (NonConvertibleThing(AT.B))();
+                  return new (NonConvertibleThing(AT.B))("convertedToB");
                });
 
             assert(AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
+            assert((new (NonConvertibleThing(AT.A))()).convert(
+               NonConvertibleThing(AT.B)).x.str === "convertedToB");
             assert(!AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
 
             AT.defineConversion(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A),
                function(nonB) {
-                  return new (NonConvertibleThing(AT.A))();
+                  return new (NonConvertibleThing(AT.A))("convertedToA");
                });
 
             assert(AT.canConvert(NonConvertibleThing(AT.A), NonConvertibleThing(AT.B)));
             assert(AT.canConvert(NonConvertibleThing(AT.B), NonConvertibleThing(AT.A)));
+            assert((new (NonConvertibleThing(AT.B))()).convert(
+               NonConvertibleThing(AT.A)).x.str === "convertedToA");
             
             // Ensure that the same rules apply to conversions via intermediaries
 
