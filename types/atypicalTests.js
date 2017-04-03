@@ -1043,7 +1043,35 @@ window.AtypicalTests = (function() {
                && convertedPair.x.x === 4.5
                && convertedPair.y.x === 4.5);
 
-            // TODO: TEST OVERRIDING OF THESE CONVERSIONS
+            // Allow overriding of conversion
+            AT.defineConversion(ABPair, A, function(pair) {
+               return new A(75);
+            });
+
+            assert(abPair.convert(A).x === 75);
+
+            AT.defineConversion(ABPair, B, function(pair) {
+               return new B(56);
+            });
+
+            assert(abPair.convert(B).x === 56);
+
+            AT.defineConversion(A, ABPair, function(a) {
+               return new ABPair(6, 7);
+            });
+
+            let convertedPair2 = (new AT.A(4.5)).convert(ABPair);
+            assert(convertedPair2 !== undefined
+               && convertedPair2.x.x === 6
+               && convertedPair2.y.x === 7);
+
+            // Ensure these overridden conversions don't affect other instances of this generic type
+            let FloatIntPair = GenericPair(AT.Float, AT.Int);
+            let floatIntPair = new FloatIntPair(2.3, 4);
+            assert(floatIntPair.convert(AT.Int).value === 4);
+            
+            // TODO: should convert(To|From)TypeParameterOfIndex(n) call the overridden conversion?
+            // If so, should the corresponding canConvert functions call AT.canConvert?
          }
       ];
 
