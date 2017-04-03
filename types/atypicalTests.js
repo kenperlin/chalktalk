@@ -832,6 +832,73 @@ window.AtypicalTests = (function() {
             assert(floatThing.convert(AT.Float).value === 5.3);
             assert(floatValue.canConvert(FloatThing));
             assert(floatValue.convert(FloatThing).x.value === 7.4);
+            
+            // Things that don't define conversion functions shouldn't be convertible
+
+            let NonConvertibleThing = AT.defineGenericType({
+               typename: "NonConvertibleThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               }
+            });
+
+            let NonConvertibleFloat = NonConvertibleThing(AT.Float);
+            let nonConvFloat = new NonConvertibleFloat(1.2);
+
+            assert(!AT.canConvert(NonConvertibleFloat, AT.Float));
+            assert(!AT.canConvert(AT.Float, NonConvertibleFloat));
+            assert(!nonConvFloat.canConvert(AT.Float));
+            assert(!floatValue.canConvert(NonConvertibleFloat));
+
+            // Things that define only one conversion function should be convertible
+            // only in one direction.
+
+            let OnlyUnwrappableThing = AT.defineGenericType({
+               typename: "OnlyUnwrappableThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertToTypeParameterOfIndex(index) {
+                  return index === 0 ? this.x : undefined;
+               }
+            });
+
+            let OnlyUnwrappableFloat = OnlyUnwrappableThing(AT.Float);
+            let unwrappableFloat = new OnlyUnwrappableFloat(7.8);
+
+            assert(AT.canConvert(OnlyUnwrappableFloat, AT.Float));
+            assert(!AT.canConvert(AT.Float, OnlyUnwrappableFloat));
+            assert(unwrappableFloat.canConvert(AT.Float));
+            assert(unwrappableFloat.convert(AT.Float).value === 7.8)
+            assert(!floatValue.canConvert(OnlyUnwrappableFloat));
+            
+            let OnlyWrappableThing = AT.defineGenericType({
+               typename: "OnlyWrappableThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertFromTypeParameterOfIndex(index, value) {
+                  return index === 0 ? new (this.type)(value) : undefined;
+               }
+            });
+
+            let OnlyWrappableFloat = OnlyWrappableThing(AT.Float);
+            let wrappableFloat = new OnlyWrappableFloat(9.8);
+
+            assert(!AT.canConvert(OnlyWrappableFloat, AT.Float));
+            assert(AT.canConvert(AT.Float, OnlyWrappableFloat));
+            assert(!wrappableFloat.canConvert(AT.Float));
+            assert(floatValue.canConvert(OnlyWrappableFloat));
+            assert(floatValue.convert(OnlyWrappableFloat).x.value === 7.4);
 
             // TODO: implement the restriction of canConvertToTypeParameterOfIndex,
             // so that you can define which things can and cannot be converted.
