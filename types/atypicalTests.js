@@ -962,15 +962,33 @@ window.AtypicalTests = (function() {
             assert(!AT.BrokenThing);
             assert(!AT.typeIsDefined("BrokenThing"));
             
-            /*let GenericPair = AT.defineGenericType({
-               typename: "GenericThing",
-               init: function(x) { 
+            // Test restrictions on conversion
+            
+            // Types that provide no restrictions should return true for any type parameter that
+            // it contains.
+            assert(floatThing.canConvertToTypeParameterOfIndex(0));
+            assert(!floatThing.canConvertToTypeParameterOfIndex(1));
+            assert(floatThing.canConvertFromTypeParameterOfIndex(0));
+            assert(!floatThing.canConvertFromTypeParameterOfIndex(1));
+
+            // Types that provide no conversion functions should return false for all these
+            // canConvert... functions.
+            assert(!nonConvFloat.canConvertToTypeParameterOfIndex(0));
+            assert(!nonConvFloat.canConvertToTypeParameterOfIndex(1));
+            assert(!nonConvFloat.canConvertFromTypeParameterOfIndex(0));
+            assert(!nonConvFloat.canConvertFromTypeParameterOfIndex(1));
+
+            // Otherwise, types can define their own restrictions on type parameter conversion.
+
+            let GenericPair = AT.defineGenericType({
+               typename: "GenericPair",
+               init: function(x, y) { 
                   if (!(x instanceof this.typeParameters[0])) {
                      x = new (this.typeParameters[0])(x);
                   }
                   this._def("x", x);
-                  if (!(y instanceof this.typeParameters[0])) {
-                     y = new (this.typeParameters[0])(y);
+                  if (!(y instanceof this.typeParameters[1])) {
+                     y = new (this.typeParameters[1])(y);
                   }
                   this._def("y", y);
                },
@@ -984,10 +1002,48 @@ window.AtypicalTests = (function() {
                   return index === 0;
                },
                convertFromTypeParameterOfIndex(index, value) {
-                  return (this.canConvertFromTypeParameterOfIndex(index)
-                     ? new (this.type)(value) : undefined);
+                  return new (this.type)(value, value.convert(this.typeParameters[1]));
                }
-            });*/
+            });
+
+            assert(GenericPair);
+
+            let A = AT.defineType({
+               typename: "A",
+               init: function(x) { this._def("x", x); }
+            });
+            
+            let B = AT.defineType({
+               typename: "B",
+               init: function(x) { this._def("x", x); }
+            });
+            AT.defineConversion(A, B, function(a) {
+               return new B(a.x);
+            });
+            AT.defineConversion(B, A, function(b) {
+               return new A(b.x);
+            });
+
+            let ABPair = GenericPair(AT.A, AT.B);
+            let abPair = new ABPair(4.5, 7.6);
+
+            assert(!abPair.canConvertToTypeParameterOfIndex(0));
+            assert(abPair.canConvertToTypeParameterOfIndex(1));
+            assert(abPair.canConvertFromTypeParameterOfIndex(0));
+            assert(!abPair.canConvertFromTypeParameterOfIndex(1));
+
+            assert(!AT.canConvert(ABPair, AT.A));
+            assert(AT.canConvert(ABPair, AT.B));
+            assert(AT.canConvert(AT.A, ABPair));
+            assert(!AT.canConvert(AT.B, ABPair));
+
+            assert(abPair.convert(AT.B).x === 7.6);
+            let convertedPair = (new AT.A(4.5)).convert(ABPair);
+            assert(convertedPair !== undefined
+               && convertedPair.x.x === 4.5
+               && convertedPair.y.x === 4.5);
+
+            // TODO: TEST OVERRIDING OF THESE CONVERSIONS
          }
       ];
 
