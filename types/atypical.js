@@ -73,7 +73,7 @@ function AtypicalModuleGenerator() {
                // can't be converted.
                if (!AT.canConvert(this.type, type)) { return undefined; }
                if (this.genericType === type.prototype.genericType) {
-                  return this.convertTypeParameters(type.prototype.typeParameters);
+                  return this.changeTypeParameters(type.prototype.typeParameters);
                }
                else {
                   // TODO: implement generic type conversion between different generic types
@@ -183,7 +183,7 @@ function AtypicalModuleGenerator() {
          // Do some special processing for conversions between two generic types.
          if (sourceType.prototype.genericType === destinationType.prototype.genericType) {
             // Can't convert if no conversion function exists.
-            if (!sourceType.prototype.convertTypeParameters) { return false; }
+            if (!sourceType.prototype.changeTypeParameters) { return false; }
             // Can't convert if there's a differing number of type parameters
             if (sourceType.prototype.typeParameters.length
                !== destinationType.prototype.typeParameters.length)
@@ -343,7 +343,7 @@ function AtypicalModuleGenerator() {
 
    // TODO: DOC
    // Should return a function that CREATES constructors
-   // Generic types are convertible between themselves if convertTypeParameters is defined,
+   // Generic types are convertible between themselves if changeTypeParameters is defined,
    // same number of type parameters, and each type parameter is convertible to its corresponding
    // type parameter in the other type
    AT.defineGenericType = function(implementation) {
@@ -393,11 +393,11 @@ function AtypicalModuleGenerator() {
             }
 
             // Check conversion fcn between different instances of this generic type
-            if (implementation.convertTypeParameters !== undefined
-               && (typeof implementation.convertTypeParameters !== "function"
-                  || implementation.convertTypeParameters.length !== 1))
+            if (implementation.changeTypeParameters !== undefined
+               && (typeof implementation.changeTypeParameters !== "function"
+                  || implementation.changeTypeParameters.length !== 1))
             {
-               console.error("Error defining generic types: convertTypeParameters "
+               console.error("Error defining generic types: changeTypeParameters "
                   + " must be a function of one argument.")
                return undefined;
             }
