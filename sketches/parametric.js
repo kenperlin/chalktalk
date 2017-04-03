@@ -3,7 +3,7 @@ function() {
    this.nu = 20;
    this.nv = 10;
    this.is3D = true;
-   this.code = [["", 'return [cos(TAU*u),sin(TAU*u),2*v-1];' ]];
+   this.code = [["", 'return [\n   cos(2*PI*u),\n   sin(2*PI*u),\n   2*v-1\n];' ]];
    this.mouseDrag = function(x, y) {
       if (this.y0 === undefined)
          this.y0 = y;
