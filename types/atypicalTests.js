@@ -822,6 +822,7 @@ window.AtypicalTests = (function() {
 
             assert(BrokenThing === undefined);
             assert(AT.BrokenThing === undefined);
+            assert(!AT.typeIsDefined("BrokenThing"));
          },
 
          //--------------------------------------------------------------------------------
@@ -921,9 +922,46 @@ window.AtypicalTests = (function() {
             assert(floatValue.canConvert(OnlyWrappableFloat));
             assert(floatValue.convert(OnlyWrappableFloat).x.value === 7.4);
 
-            // TODO: implement the restriction of canConvertToTypeParameterOfIndex,
-            // so that you can define which things can and cannot be converted.
+            // Test incorrect definitions of convertible types (should give error)
 
+            disableConsoleErrors();
+            let BrokenThing = AT.defineGenericType({
+               typename: "BrokenThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertToTypeParameterOfIndex(index, broken) {
+                  return index === 0 ? this.x : undefined;
+               }
+            });
+            enableConsoleErrors();
+
+            assert(!BrokenThing);
+            assert(!AT.BrokenThing);
+            assert(!AT.typeIsDefined("BrokenThing"));
+
+            disableConsoleErrors();
+            BrokenThing = AT.defineGenericType({
+               typename: "BrokenThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertFromTypeParameterOfIndex(index) {
+                  return undefined;
+               }
+            });
+            enableConsoleErrors();
+
+            assert(!BrokenThing);
+            assert(!AT.BrokenThing);
+            assert(!AT.typeIsDefined("BrokenThing"));
+            
             /*let GenericPair = AT.defineGenericType({
                typename: "GenericThing",
                init: function(x) { 

@@ -372,6 +372,23 @@ function AtypicalModuleGenerator() {
          return undefined;
       }
 
+      if (implementation.convertToTypeParameterOfIndex !== undefined
+         && !_isFunctionOfNArguments(implementation.convertToTypeParameterOfIndex, 1))
+      {
+         console.error("Error defining generic types: convertToTypeParameterOfIndex "
+            + "must be a function of one argument taking in only the index.");
+         return undefined;
+      }
+
+      if (implementation.convertFromTypeParameterOfIndex !== undefined
+         && !_isFunctionOfNArguments(implementation.convertFromTypeParameterOfIndex, 2))
+      {
+         console.error("Error defining generic types: convertFromTypeParameterOfIndex "
+            + "must be a function of two arguments taking in the index and the value "
+            + "to be converted.");
+         return undefined;
+      }
+
       let GenericType = function GenericType() {
          // This function will return a concrete implementation of the generic type,
          // with concrete type parameters.
@@ -412,36 +429,19 @@ function AtypicalModuleGenerator() {
             
             if (implementation.convertToTypeParameterOfIndex !== undefined) {
                // TODO: allow types to restrict what they're converting to and from
-               if (typeof implementation.convertToTypeParameterOfIndex !== "function"
-                  || implementation.convertToTypeParameterOfIndex.length !== 1)
-               {
-                  console.error("Error defining generic types: convertToTypeParameterOfIndex "
-                     + "must be a function of one argument taking in only the index.");
-               }
-               else {
-                  for (let i = 0; i < typeParameters.length; i++) {
-                     AT.defineConversion(type, typeParameters[i], function(genericValue) {
-                        return genericValue.convertToTypeParameterOfIndex(i);
-                     });
-                  }
+               for (let i = 0; i < typeParameters.length; i++) {
+                  AT.defineConversion(type, typeParameters[i], function(genericValue) {
+                     return genericValue.convertToTypeParameterOfIndex(i);
+                  });
                }
             }
 
             if (implementation.convertFromTypeParameterOfIndex !== undefined) {
                // TODO: allow types to restrict what they're converting to and from
-               if (typeof implementation.convertFromTypeParameterOfIndex !== "function"
-                  || implementation.convertFromTypeParameterOfIndex.length !== 2)
-               {
-                  console.error("Error defining generic types: convertFromTypeParameterOfIndex "
-                     + "must be a function of two arguments taking in the index and the value "
-                     + "to be converted.");
-               }
-               else {
-                  for (let i = 0; i < typeParameters.length; i++) {
-                     AT.defineConversion(typeParameters[i], type, function(parameterValue) {
-                        return type.prototype.convertFromTypeParameterOfIndex(i, parameterValue);
-                     });
-                  }
+               for (let i = 0; i < typeParameters.length; i++) {
+                  AT.defineConversion(typeParameters[i], type, function(parameterValue) {
+                     return type.prototype.convertFromTypeParameterOfIndex(i, parameterValue);
+                  });
                }
             }
 
