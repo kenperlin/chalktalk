@@ -669,7 +669,7 @@ window.AtypicalTests = (function() {
          },
 
          //--------------------------------------------------------------------------------
-         // Test generic type conversions
+         // Test generic type conversions between generics with the same generic type
          function() {
             let GenericThing = AT.defineGenericType({
                typename: "GenericThing",
@@ -682,7 +682,7 @@ window.AtypicalTests = (function() {
                changeTypeParameters: function(typeParameters) {
                   return new (GenericThing(typeParameters[0]))(
                      this.x.convert(typeParameters[0]));
-               },
+               }
             });
 
             let floatThing = new (AT.GenericThing(AT.Float))(6.28);
@@ -801,6 +801,67 @@ window.AtypicalTests = (function() {
             AT.defineConversionsViaIntermediary(null, AT.B, AT.A);
             assert(AT.canConvert(GenericThing(AT.A), GenericThing(AT.C)));
             assert(AT.canConvert(GenericThing(AT.C), GenericThing(AT.A)));
+         },
+
+         //--------------------------------------------------------------------------------
+         // Test generic type conversions between generics and their type parameters
+         function () {
+            let GenericThing = AT.defineGenericType({
+               typename: "GenericThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               convertToTypeParameterOfIndex(index) {
+                  return index === 0 ? this.x : undefined;
+               },
+               convertFromTypeParameterOfIndex(index, value) {
+                  return index === 0 ? new (this.type)(value) : undefined;
+               }
+            });
+
+            let FloatThing = GenericThing(AT.Float);
+            let floatThing = new FloatThing(5.3);
+            let floatValue = new AT.Float(7.4);
+
+            assert(AT.canConvert(FloatThing, AT.Float));
+            assert(AT.canConvert(AT.Float, FloatThing));
+            assert(floatThing.canConvert(AT.Float));
+            assert(floatThing.convert(AT.Float).value === 5.3);
+            assert(floatValue.canConvert(FloatThing));
+            assert(floatValue.convert(FloatThing).x.value === 7.4);
+
+            // TODO: implement the restriction of canConvertToTypeParameterOfIndex,
+            // so that you can define which things can and cannot be converted.
+
+            /*let GenericPair = AT.defineGenericType({
+               typename: "GenericThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+                  if (!(y instanceof this.typeParameters[0])) {
+                     y = new (this.typeParameters[0])(y);
+                  }
+                  this._def("y", y);
+               },
+               canConvertToTypeParameterOfIndex(index) {
+                  return index === 1;
+               },
+               convertToTypeParameterOfIndex(index) {
+                  return this.y;
+               },
+               canConvertFromTypeParameterOfIndex(index) {
+                  return index === 0;
+               },
+               convertFromTypeParameterOfIndex(index, value) {
+                  return (this.canConvertFromTypeParameterOfIndex(index)
+                     ? new (this.type)(value) : undefined);
+               }
+            });*/
          }
       ];
 
