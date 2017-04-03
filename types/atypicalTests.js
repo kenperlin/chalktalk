@@ -801,6 +801,27 @@ window.AtypicalTests = (function() {
             AT.defineConversionsViaIntermediary(null, AT.B, AT.A);
             assert(AT.canConvert(GenericThing(AT.A), GenericThing(AT.C)));
             assert(AT.canConvert(GenericThing(AT.C), GenericThing(AT.A)));
+
+            // Test error handling for the changeTypeParameters property
+
+            disableConsoleErrors();
+            let BrokenThing = AT.defineGenericType({
+               typename: "BrokenThing",
+               init: function(x) { 
+                  if (!(x instanceof this.typeParameters[0])) {
+                     x = new (this.typeParameters[0])(x);
+                  }
+                  this._def("x", x);
+               },
+               changeTypeParameters: function(typeParameters, tooManyArguments) {
+                  return new (GenericThing(typeParameters[0]))(
+                     this.x.convert(typeParameters[0]));
+               }
+            });
+            enableConsoleErrors();
+
+            assert(BrokenThing === undefined);
+            assert(AT.BrokenThing === undefined);
          },
 
          //--------------------------------------------------------------------------------

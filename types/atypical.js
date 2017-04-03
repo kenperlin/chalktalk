@@ -45,6 +45,10 @@ function AtypicalModuleGenerator() {
    function _isGenericType(type) {
       return typeof type.prototype.genericType === "function";
    }
+
+   function _isFunctionOfNArguments(func, n) {
+      return typeof func === "function" && func.length === n;
+   }
    
    // Base for all types. Contains some common functionality needed in all of them.
    AT.Type = function() {};
@@ -359,6 +363,15 @@ function AtypicalModuleGenerator() {
          return undefined;
       }
 
+      // Check conversion fcn between different instances of this generic type
+      if (implementation.changeTypeParameters !== undefined
+         && !_isFunctionOfNArguments(implementation.changeTypeParameters, 1))
+      {
+         console.error("Error defining generic types: changeTypeParameters "
+            + "must be a function of one argument.");
+         return undefined;
+      }
+
       let GenericType = function GenericType() {
          // This function will return a concrete implementation of the generic type,
          // with concrete type parameters.
@@ -390,16 +403,6 @@ function AtypicalModuleGenerator() {
             for (let property in implementation) {
                if (concreteImplementation.hasOwnProperty(property)) { continue; }
                concreteImplementation[property] = implementation[property];
-            }
-
-            // Check conversion fcn between different instances of this generic type
-            if (implementation.changeTypeParameters !== undefined
-               && (typeof implementation.changeTypeParameters !== "function"
-                  || implementation.changeTypeParameters.length !== 1))
-            {
-               console.error("Error defining generic types: changeTypeParameters "
-                  + " must be a function of one argument.");
-               return undefined;
             }
 
             let type = AT.defineType(concreteImplementation);
