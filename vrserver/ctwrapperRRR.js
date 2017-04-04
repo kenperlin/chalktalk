@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.38');
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
@@ -75,7 +75,7 @@ function readHeader(data){
   ctdata01 += data.toString('ascii',4,5);
   ctdata01 += data.toString('ascii',7,8);
   ctdata01 += data.toString('ascii',6,7);
-  //console.log("start with", ctdata01);
+  console.log("start with", ctdata01);
   return ctdata01;
 }
 

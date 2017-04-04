@@ -1,7 +1,7 @@
 
 
 const WebSocket = require('ws');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.122');
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
@@ -166,10 +166,11 @@ function testMTU(){
             y: 0,
             z: 0,
             w: 0,
-         }],ints:[0]};
+         }],ints:[0],bytes:[0]};
   for(var i = 0; i < 50; i++){
     curveObjs.vector4s[i] = {x:1,y:1,z:1,w:1};
     curveObjs.ints[i] = 1;
+    curveObjs.bytes[i] = 1;
   }
   return curveObjs;
 }
@@ -183,8 +184,11 @@ ws.on('message', function incoming(data, flags) {
   var header = readHeader(data);
   if (header === "CTdata01"){
       //var curveFlakes = readCurves(data);
+      //var curveFlakes = {label: 'Display',bytes:[]}
+      // test []
+      //curveFlakes.bytes = new Uint8Array(data.length);
       var curveFlakes = {label: 'Display',bytes:data}
-      console.log("curveFlakes",curveFlakes);
+      console.log("curveFlakes",curveFlakes, curveFlakes.bytes.length);
       // time I parsed displayList and send
       console.log("Parsed displayList and send", getTime());
       // test maximum size of package
