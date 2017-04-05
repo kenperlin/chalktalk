@@ -836,10 +836,10 @@ window.AtypicalTests = (function() {
                   }
                   this._def("x", x);
                },
-               convertToTypeParameterOfIndex(index) {
+               convertToTypeParameter(index) {
                   return index === 0 ? this.x : undefined;
                },
-               convertFromTypeParameterOfIndex(index, value) {
+               convertFromTypeParameter(index, value) {
                   return index === 0 ? new (this.type)(value) : undefined;
                }
             });
@@ -886,7 +886,7 @@ window.AtypicalTests = (function() {
                   }
                   this._def("x", x);
                },
-               convertToTypeParameterOfIndex(index) {
+               convertToTypeParameter(index) {
                   return index === 0 ? this.x : undefined;
                }
             });
@@ -908,7 +908,7 @@ window.AtypicalTests = (function() {
                   }
                   this._def("x", x);
                },
-               convertFromTypeParameterOfIndex(index, value) {
+               convertFromTypeParameter(index, value) {
                   return index === 0 ? new (this.type)(value) : undefined;
                }
             });
@@ -933,7 +933,7 @@ window.AtypicalTests = (function() {
                   }
                   this._def("x", x);
                },
-               convertToTypeParameterOfIndex(index, broken) {
+               convertToTypeParameter(index, broken) {
                   return index === 0 ? this.x : undefined;
                }
             });
@@ -952,7 +952,7 @@ window.AtypicalTests = (function() {
                   }
                   this._def("x", x);
                },
-               convertFromTypeParameterOfIndex(index) {
+               convertFromTypeParameter(index) {
                   return undefined;
                }
             });
@@ -966,17 +966,17 @@ window.AtypicalTests = (function() {
             
             // Types that provide no restrictions should return true for any type parameter that
             // it contains.
-            assert(floatThing.canConvertToTypeParameterOfIndex(0));
-            assert(!floatThing.canConvertToTypeParameterOfIndex(1));
-            assert(floatThing.canConvertFromTypeParameterOfIndex(0));
-            assert(!floatThing.canConvertFromTypeParameterOfIndex(1));
+            assert(floatThing.canConvertToTypeParameter(0));
+            assert(!floatThing.canConvertToTypeParameter(1));
+            assert(floatThing.canConvertFromTypeParameter(0));
+            assert(!floatThing.canConvertFromTypeParameter(1));
 
             // Types that provide no conversion functions should return false for all these
             // canConvert... functions.
-            assert(!nonConvFloat.canConvertToTypeParameterOfIndex(0));
-            assert(!nonConvFloat.canConvertToTypeParameterOfIndex(1));
-            assert(!nonConvFloat.canConvertFromTypeParameterOfIndex(0));
-            assert(!nonConvFloat.canConvertFromTypeParameterOfIndex(1));
+            assert(!nonConvFloat.canConvertToTypeParameter(0));
+            assert(!nonConvFloat.canConvertToTypeParameter(1));
+            assert(!nonConvFloat.canConvertFromTypeParameter(0));
+            assert(!nonConvFloat.canConvertFromTypeParameter(1));
 
             // Otherwise, types can define their own restrictions on type parameter conversion.
 
@@ -992,16 +992,16 @@ window.AtypicalTests = (function() {
                   }
                   this._def("y", y);
                },
-               canConvertToTypeParameterOfIndex(index) {
+               canConvertToTypeParameter(index) {
                   return index === 1;
                },
-               convertToTypeParameterOfIndex(index) {
+               convertToTypeParameter(index) {
                   return this.y;
                },
-               canConvertFromTypeParameterOfIndex(index) {
+               canConvertFromTypeParameter(index) {
                   return index === 0;
                },
-               convertFromTypeParameterOfIndex(index, value) {
+               convertFromTypeParameter(index, value) {
                   return new (this.type)(value, value.convert(this.typeParameters[1]));
                }
             });
@@ -1027,10 +1027,10 @@ window.AtypicalTests = (function() {
             let ABPair = GenericPair(AT.A, AT.B);
             let abPair = new ABPair(4.5, 7.6);
 
-            assert(!abPair.canConvertToTypeParameterOfIndex(0));
-            assert(abPair.canConvertToTypeParameterOfIndex(1));
-            assert(abPair.canConvertFromTypeParameterOfIndex(0));
-            assert(!abPair.canConvertFromTypeParameterOfIndex(1));
+            assert(!abPair.canConvertToTypeParameter(0));
+            assert(abPair.canConvertToTypeParameter(1));
+            assert(abPair.canConvertFromTypeParameter(0));
+            assert(!abPair.canConvertFromTypeParameter(1));
 
             assert(!AT.canConvert(ABPair, AT.A));
             assert(AT.canConvert(ABPair, AT.B));
