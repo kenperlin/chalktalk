@@ -68,7 +68,6 @@ function AtypicalModuleGenerator() {
             return this;
          }
 
-
          var conversionFunction = _conversions[this.type.name][typename];
          if (!conversionFunction) {
             if (_isGenericType(this.type) && _isGenericType(type)) {
@@ -237,19 +236,23 @@ function AtypicalModuleGenerator() {
    // implementation: An object containing the implementation details of the type. 
    //
    //                 The following properties MUST be defined on this object:
+   //
    //                 typename: A string containing the name of the type. Must be unique and
    //                           follow Javascript identifier syntax, and must be a type name that
    //                           has not already been defined and does not overlap with any existing
    //                           functions or variables on the AT object (e.g. hasOwnProperty,
    //                           defineType).
+   //
    //                           This property will NOT be copied to objects of this type. To access
    //                           the typename of an object, use object.type.name.
+   //
    //                 init: Initialization function. Should take the same arguments as your
    //                       constructor and handle all initialization logic. Should also do any
    //                       required validation of the arguments and throw a ConstructionError if
    //                       incorrect arguments are provided.
    //
    //                 The following properties MAY be defined on this object:
+   //
    //                 toPrimitive: Should be a function that returns a simple, unwrapped Javascript
    //                              object that is equivalent to this type. (E.g. the Float type can
    //                              simply return a Javascript float). Types that define this 
