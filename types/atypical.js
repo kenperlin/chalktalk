@@ -10,7 +10,6 @@ function AtypicalModuleGenerator() {
 
    // TODO: DOC
    var _genericTypes = {};
-   var _concreteGenerics = {};
 
    // This internal variable will hold all our conversion functions, in the following structure:
    // {
@@ -463,7 +462,6 @@ function AtypicalModuleGenerator() {
             }
 
             let type = AT.defineType(concreteImplementation);
-            _concreteGenerics[implementation.typename][typename] = type;
 
             // Define conversions between this type and its type parameters where possible
             
@@ -492,7 +490,6 @@ function AtypicalModuleGenerator() {
       }
 
       _genericTypes[implementation.typename] = GenericType;
-      _concreteGenerics[implementation.typename] = {};
 
       AT[implementation.typename] = GenericType;
 
