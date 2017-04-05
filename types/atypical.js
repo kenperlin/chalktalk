@@ -8,7 +8,8 @@ function AtypicalModuleGenerator() {
    // being their constructors.
    var _types = {};
 
-   // TODO: DOC
+   // This internal variable holds all our generic types, with keys being their names and values
+   // being their metaconstructor functions (i.e. functions that return constructors).
    var _genericTypes = {};
 
    // This internal variable will hold all our conversion functions, in the following structure:
@@ -40,11 +41,12 @@ function AtypicalModuleGenerator() {
       }
    }
    
-   // TODO: doc
+   // Internal function for checking whether a type is a concrete subtype of a generic type.
    function _isGenericType(type) {
       return typeof type.prototype.genericType === "function";
    }
 
+   // Convenience function. Returns true iff func is a function that takes in exactly n arguments.
    function _isFunctionOfNArguments(func, n) {
       return typeof func === "function" && func.length === n;
    }
@@ -262,9 +264,12 @@ function AtypicalModuleGenerator() {
    //                               back into Atypical objects.
    //
    //                 The following properties MUST NOT be defined on this object:
+   //
    //                 type: This property will be set to the type constructor for this type. Any
    //                       custom value will be overridden.
+   //
    //                 genericType: This property is reserved for sub-types of generic types only.
+   //
    //                 Also be careful to avoid name collisions with AT.Type convenience functions,
    //                 such as "convert", "canConvert", etc.
    //                 
@@ -347,11 +352,97 @@ function AtypicalModuleGenerator() {
       return AtypicalType;
    };
 
-   // TODO: DOC
-   // Should return a function that CREATES constructors
-   // Generic types are convertible between themselves if changeTypeParameters is defined,
-   // same number of type parameters, and each type parameter is convertible to its corresponding
-   // type parameter in the other type
+   // This function, when called, registers a generic type with Atypical. Unlike the AT.defineType
+   // function, which returns a constructor (and puts that constructor in the AT module),
+   // this function returns (and adds to the AT object) a metaconstructor, a function that RETURNS
+   // constructor functions when given one or more types as arguments. For example:
+   //
+   // AT.defineGenericType({ typename: "Pair", ... });
+   // let floatIntValue = new (AT.Pair(AT.Float, AT.Int))(5.6, 7);
+   //
+   // (Unfortunately, the extra parentheses are required due to JS syntax limitations.
+   //  One way around that is to assign the returned constructor to a variable,
+   //  e.g. let FloatIntPair = AT.Pair(AT.Float, AT.Int))
+   //  
+   // implementation: An object describing the implementation details of the generic type. Any
+   //                 properties added to this object, except the special properties described
+   //                 below, will be set as properties of every object of every instance of this
+   //                 generic type.
+   //
+   //                 The following properties MUST be defined on this object:
+   //                 
+   //                 typename: The name of the generic type as a string.
+   //                           This must be a valid JS identifier and must not start with a dollar
+   //                           sign. In addition, this must not be the same as any previously-
+   //                           defined types or any existing properties of the AT object
+   //                           (e.g. "canConvert", "defineType", etc.), as the metaconstructor
+   //                           will be added to the AT object under this name.
+   //                           Typenames for all concrete subtypes of this generic type will be
+   //                           auto-generated based on this name and the names of the type
+   //                           parameters.
+   //
+   //                 init: This is the initialization function for all concrete subtypes of this
+   //                       generic type. To access the type parameters, use the
+   //                       this.typeParameters property, as it will be set to an array of the type
+   //                       parameters each concrete subtype was created with.
+   //
+   //                 The following properties MAY be defined on this object:
+   //
+   //                 changeTypeParameters: If defined, this allows generic types to be
+   //                                       automatically convertible between different subtypes
+   //                                       of the same generic type if their type paramters are
+   //                                       convertible. For example, if this function is defined
+   //                                       on our Pair example above, type A is convertible to type
+   //                                       X, and type B is convertible to type Y, then Pair(A, B)
+   //                                       will be automatically convertible to Pair(X, Y) by using
+   //                                       this function as the conversion function.
+   //                                       Only generic types with the same number of type
+   //                                       parameters will be set as automatically convertible.
+   //
+   //                                       If this is defined, it MUST be defined as a function
+   //                                       of one argument, taking in only an array of the new type
+   //                                       parameters, and returning a new instance of the 
+   //                                       converted object of the new type.
+   //
+   //                 convertToTypeParameter, convertFromTypeParameter:
+   //                      These are optional functions that allow concrete subtypes of this generic
+   //                      type to be automatically made convertible with their type parameters.
+   //                      For example, if this function is defined on our Pair example above,
+   //                      then these could be defined to automatically allow Pair(Float, Int) to 
+   //                      be convertible to and/or from Float and/or Int.
+   //
+   //                      convertToTypeParameter must be defined as a function of one argument
+   //                      taking in the index of the type parameter this object should be
+   //                      converted to, and returning the converted object. In this function, you
+   //                      may use "this" to access any properties of the object to be converted.
+   //
+   //                      convertFromTypeParameter must be defined as a function of two arguments
+   //                      taking in the index of the type parameter this object should be
+   //                      converted from and the value it should be converted from (which is
+   //                      guaranteed to be an object of the same type as the type parameter of the
+   //                      given index). It should return the converted object of this generic type.
+   //                      In this function, you may use "this" to access any properties of the
+   //                      PROTOTYPE of this generic type (e.g. anything defined in this
+   //                      implementation object, as well as properties like this.type and this.
+   //                      typeParameters, but not anything defined in the init function).
+   //
+   //                      If these functions are defined, and the corresponding
+   //                      canConvertTo/FromTypeParameter functions are not, Atypical will assume
+   //                      that this generic type can be converted to or from all of its type
+   //                      parameters, and will automatically define canConvertTo/FromTypeParameter
+   //                      functions to reflect that.
+   //
+   //                 canConvertToTypeParameter, canConvertFromTypeParameter:
+   //
+   //                 The following proeprties MUST NOT be defined on this object:
+   //
+   //                 type: Will be set to the constructor function of the type of every instance.
+   //                 
+   //                 genericType: Will be set to the metaconstructor of the generic type of every
+   //                              instance.
+   //                 
+   //                 typeParameters: Will be set to an array of the type parameters this type was 
+   //                                 instantiated with.
    AT.defineGenericType = function(implementation) {
       if (typeof implementation.init !== "function") {
          console.error("Initialization function is required when creating a new generic type.");
@@ -453,7 +544,6 @@ function AtypicalModuleGenerator() {
          else {
             // First, define the type itself
             let concreteImplementation = {
-               // TODO: doc the properties that you CANNOT use for custom properties
                typename: typename,
                genericType: GenericType,
                init: implementation.init,

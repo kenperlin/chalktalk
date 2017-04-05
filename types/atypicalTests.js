@@ -1070,7 +1070,7 @@ window.AtypicalTests = (function() {
             let floatIntPair = new FloatIntPair(2.3, 4);
             assert(floatIntPair.convert(AT.Int).value === 4);
             
-            // TODO: should convert(To|From)TypeParameterOfIndex(n) call the overridden conversion?
+            // TODO: should convert(To|From)TypeParameter(n) call the overridden conversion?
             // If so, should the corresponding canConvert functions call AT.canConvert?
          }
       ];
