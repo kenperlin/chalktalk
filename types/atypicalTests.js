@@ -680,7 +680,7 @@ window.AtypicalTests = (function() {
                   this._def("x", x);
                },
                changeTypeParameters: function(typeParameters) {
-                  return new (GenericThing(typeParameters[0]))(
+                  return new (this.genericType(typeParameters[0]))(
                      this.x.convert(typeParameters[0]));
                }
             });
@@ -814,7 +814,7 @@ window.AtypicalTests = (function() {
                   this._def("x", x);
                },
                changeTypeParameters: function(typeParameters, tooManyArguments) {
-                  return new (GenericThing(typeParameters[0]))(
+                  return new (this.genericType(typeParameters[0]))(
                      this.x.convert(typeParameters[0]));
                }
             });
