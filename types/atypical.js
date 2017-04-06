@@ -213,8 +213,8 @@ function AtypicalModuleGenerator() {
    };
 
    function _validateTypename(typename) {
-      if (!/^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(typename)) {
-         console.error("Typename must follow Javascript identifier syntax, and must not start with "
+      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(typename)) {
+         console.error("Typename must follow Javascript identifier syntax, and must not contain "
             + "a dollar sign.");
          return false;
       }
@@ -240,10 +240,10 @@ function AtypicalModuleGenerator() {
    //                 The following properties MUST be defined on this object:
    //
    //                 typename: A string containing the name of the type. Must be unique and
-   //                           follow Javascript identifier syntax, and must be a type name that
-   //                           has not already been defined and does not overlap with any existing
-   //                           functions or variables on the AT object (e.g. hasOwnProperty,
-   //                           defineType).
+   //                           follow Javascript identifier syntax, must not contain a dollar sign,
+   //                           and must be a type name that has not already been defined and does
+   //                           not overlap with any existing functions or variables on the AT
+   //                           object (e.g. hasOwnProperty, defineType).
    //
    //                           This property will NOT be copied to objects of this type. To access
    //                           the typename of an object, use object.type.name.
@@ -372,10 +372,10 @@ function AtypicalModuleGenerator() {
    //                 The following properties MUST be defined on this object:
    //                 
    //                 typename: The name of the generic type as a string.
-   //                           This must be a valid JS identifier and must not start with a dollar
+   //                           This must be a valid JS identifier and must not contain a dollar
    //                           sign. In addition, this must not be the same as any previously-
    //                           defined types or any existing properties of the AT object
-   //                           (e.g. "canConvert", "defineType", etc.), as the metaconstructor
+   //                           (e.g. "hasOwnProperty", "defineType", etc.), as the metaconstructor
    //                           will be added to the AT object under this name.
    //                           Typenames for all concrete subtypes of this generic type will be
    //                           auto-generated based on this name and the names of the type
@@ -525,7 +525,7 @@ function AtypicalModuleGenerator() {
       let GenericType = function GenericType() {
          // This function will return a concrete implementation of the generic type,
          // with concrete type parameters.
-         let typename = '$' + implementation.typename + '_';
+         let typename = '$' + implementation.typename + '_$';
          let typeParameters = [];
          for (let i = 0; i < arguments.length; i++) {
             if (!AT.typeIsDefined(arguments[i])) {
@@ -533,9 +533,10 @@ function AtypicalModuleGenerator() {
                   + ' with a type parameter that is not a type.');
                return undefined;
             }
-            typename += arguments[i].name + '_';
+            typename += arguments[i].name + '$';
             typeParameters.push(arguments[i]);
          }
+         typename += '_';
 
          if (AT.typeIsDefined(typename)) {
             // Already defined, just return it.

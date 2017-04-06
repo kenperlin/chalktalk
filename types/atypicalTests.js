@@ -65,7 +65,7 @@ window.AtypicalTests = (function() {
          // Test that type names are set properly
          function () {
             let workingTestNames = ["TestType", "Test_Type", "_TestType", "Test3Type",
-               "TestType3", "_TestType_", "testtype", "Test$Type"];
+               "TestType3", "_TestType_", "testtype"];
             for (let i = 0; i < workingTestNames.length; i++) {
                let MyCoolType = AT.defineType({
                   typename: workingTestNames[i],
@@ -85,7 +85,7 @@ window.AtypicalTests = (function() {
          // Test that type names have proper validation
          function () {
             let brokenTestnames = ["Test Type", "Test-Type", "3TestType", "Test<Type",
-               "TestType ", " TestType", "$TestType"];
+               "TestType ", " TestType", "$TestType", "Test$Type"];
 
             for (let i = 0; i < brokenTestnames.length; i++) {
                disableConsoleErrors();
