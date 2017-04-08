@@ -6,12 +6,16 @@ function() {
    var jPrev = function(j, P) { return (j - 1 + P.length) % P.length; }
 
    this.fillMode = 0;
+   this.isSmooth = false;
+   this.showKeys = false;
    this.P = null;
    this.mF = new M4();
    this.mI = new M4();
 
    this.onSwipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 1) % 3; }];
    this.onSwipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 2) % 3; }];
+   this.onSwipe[2] = ['smooth', function() { this.isSmooth = ! this.isSmooth; }];
+   this.onSwipe[6] = ['keys'  , function() { this.showKeys = ! this.showKeys; }];
 
    this.mouseDown = function(x, y) {
 
@@ -36,9 +40,9 @@ function() {
             var j = (i + 1) % this.P.length;
             var p = this.mF.transform(this.P[i]);
             var q = this.mF.transform(this.P[j]);
-            var a = [ (p[0] + q[0]) / 2, (p[1] + q[1]) / 2 ];
+            var a = mix(p, q, .5);
             if (len(a[0] - x, a[1] - y) <= clickSize()) {
-               this.P.splice(j, 0, this.mI.transform([ x, y ]));
+               this.P.splice(j, 0, this.mI.transform(a));
                this.jP = j;
                break;
             }
@@ -67,6 +71,7 @@ function() {
          if (len(a[0] - q[0], a[1] - q[1]) <= clickSize() / 2)
             this.P.splice(j, 1);
       }
+      this.jP = -1;
    }
    this.render = function() {
       function makeNgon(n) { return makeOval(-1,-1,2,2, n, TAU/4, TAU/4 - TAU * (n-1) / n); }
@@ -78,20 +83,29 @@ function() {
          case 'Polygon6' : this.P = makeNgon(6); break;
          }
       }
+      var P = this.isSmooth ? makeBSpline(this.P, true) : this.P;
       switch (this.fillMode) {
       case 0:
-         mClosedCurve(this.P);
+         mClosedCurve(P);
          break;
       case 1:
          var c = _g.strokeStyle;
          color(fadedColor(0.25, this.colorId));
-         mFillCurve(this.P);
+         mFillCurve(P);
          color(c);
-         mClosedCurve(this.P);
+         mClosedCurve(P);
          break;
       case 2:
-         mFillCurve(this.P);
+         mFillCurve(P);
          break;
+      }
+
+      if (this.jP >= 0)
+         mDot(this.P[this.jP], 0.36);
+
+      if (this.isSmooth && this.showKeys) {
+         lineWidth(.5);
+         mClosedCurve(this.P);
       }
    }
    this.output = function() {
