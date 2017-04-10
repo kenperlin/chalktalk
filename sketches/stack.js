@@ -4,6 +4,7 @@ function() {
     this._openOutput = false;
     this._removeTop = false;
     this._pushContinuous = false;
+    this._EMPTY_OUTPUT = -1
     this.onSwipe[0] = [
         'peek', 
         function() {
@@ -45,7 +46,7 @@ function() {
            if (this._pushContinuous) {
               return;
            }
-           if (this.inValue === undefined || this.inValue[0] === undefined) {
+           if (this.inValue === undefined || this.inValue[0] === undefined /*|| this.inValue[0] == this._EMPTY_OUTPUT*/) {
               console.log("TRIED TO PUSH, BUT NOTHING TO ADD");
               return;
            }
@@ -57,7 +58,7 @@ function() {
     this.onSwipe[4] = [
        'push continuously',
        function() {
-          if (this.inValue[0] === undefined) {
+          if (this.inValue[0] === undefined /*|| this.inValue[0] == this._EMPTY_OUTPUT*/) {
               this._pushContinuous = false;
               return;
           }
@@ -118,14 +119,41 @@ function() {
     }
 
     this.output = function() {
-        if (this._openOutput) {
-            this._openOutput = false;
-            if (this._removeTop) {
-                this._removeTop = false;
-                var val = this._stack.pop();
-                return val;
-            }
-            return this._stack[this._stack.length - 1];
-        }
+      if (this._stack.length == 0) {
+        // return this._EMPTY_OUTPUT;
+        return 0;
+      }
+      if (this._removeTop) {
+          this._removeTop = false;
+          var val = this._stack.pop();
+          return val;
+      }
+      return this._stack[this._stack.length - 1];
     };
+
+    // this.output = function() {
+    //     if (this._openOutput) {
+    //         this._openOutput = false;
+    //         if (this._removeTop) {
+    //             this._removeTop = false;
+    //             var val = this._stack.pop();
+    //             return val;
+    //         }
+    //         return this._stack[this._stack.length - 1];
+    //     }
+    // };
+
+    // this.output = function() {
+    //    this._openOutput = true;
+    //    if (this._stack.length > 0) {
+    //         if (this._removeTop) {
+    //             this._removeTop = false;
+    //             var val = this._stack.pop();
+    //             return val;
+    //         }
+    //         return this._stack[this._stack.length - 1];
+    //    }
+    //    console.log("HMMMMMMMMMMM");
+    //    return "_NONE_";
+    // };
 }
