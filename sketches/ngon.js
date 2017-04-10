@@ -83,7 +83,7 @@ function() {
          case 'Polygon6' : this.P = makeNgon(6); break;
          }
       }
-      var P = this.isSmooth ? makeBSpline(this.P, true) : this.P;
+      var nt = 20, P = this.isSmooth ? makeBSpline(this.P, nt, true) : this.P;
       switch (this.fillMode) {
       case 0:
          mClosedCurve(P);
