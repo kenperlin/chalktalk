@@ -864,9 +864,9 @@ function AtypicalModuleGenerator() {
    AT.defineType({
       typename: "Float",
       init: function(value) {
-         if (value instanceof Number) {
-            value = value.valueOf();
-         }
+         if (value === undefined) { value = 0; }
+         else if (value instanceof Number) { value = value.valueOf(); }
+
          if (isNaN(value)) {
             throw new AT.ConstructionError("Float constructed with non-numerical input ("+value+")");
          }
@@ -930,8 +930,11 @@ function AtypicalModuleGenerator() {
    AT.defineType({
       typename: "Int",
       init: function(value) {
-         if (value instanceof Number) {
-            value = value.valueOf();
+         if (value === undefined) { value = 0; }
+         else if (value instanceof Number) { value = value.valueOf(); }
+
+         if (isNaN(value)) {
+            throw new AT.ConstructionError("Int constructed with non-numerical input ("+value+")");
          }
          this._def("value", Math.round(value));
       },
