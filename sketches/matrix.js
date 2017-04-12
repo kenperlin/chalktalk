@@ -1,6 +1,6 @@
 function() {
    this.USES_DEPRECATED_PORT_SYSTEM = true;
-   this.labels = 'Matrix bezier hermite'.split(' ');
+   this.labels = 'Matrix bezier bspline hermite'.split(' ');
    this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }
    var c = "cos";
@@ -99,6 +99,18 @@ function() {
             sketchMatrix();
          });
          break;
+      case 'bspline':
+         this.duringSketch(function() {
+            mLine([-1,-1],[-1, 1]);
+            mCurve( [[-1,1],[-.5,1]].concat(makeOval(-1,0,1,1,16,PI/2,-PI/2))
+                                    .concat([[-.5,0],[-1,0]]) );
+            mCurve( [[-1,0],[-.25,0]].concat(makeOval(-.75,-1,1,1,16,PI/2,-PI/2))
+                                     .concat([[-.25,-1],[-1,-1]]) );
+         });
+         this.afterSketch(function() {
+            sketchMatrix();
+         });
+         break;
       case 'hermite':
          this.duringSketch(function() {
             mLine([-1, 1],[-1,-1]);
@@ -127,6 +139,13 @@ function() {
 
          case 'bezier':
             out = [ -1,3,-3,1 , 3,-6,3,0 , -3,3,0,0 , 1,0,0,0 ];
+            break;
+
+         case 'bspline':
+            out = [ '-1/6', ' 3/6', '-3/6', ' 1/6',
+	            ' 3/6', '-6/6', '   0', ' 4/6',
+		    '-3/6', ' 3/6', ' 3/6', ' 1/6',
+		    ' 1/6', '   0', '   0', '   0' ];
             break;
 
          case 'hermite':
@@ -199,6 +218,8 @@ function() {
             x = (col - 1.5) / 2;
             y = (1.5 - row) / 2;
             val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
+	    if (isNumeric(val))
+	       val = rounded(val);
             textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
             mText(val, [x, y], .5, .5);
          }
