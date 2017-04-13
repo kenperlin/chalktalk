@@ -854,10 +854,10 @@ function AtypicalModuleGenerator() {
    AT.defineType({
       typename: "String",
       init: function(s) {
-         this._def("str", "" + s);
+         this._def("value", "" + s);
       },
       toPrimitive: function() {
-         return this.str;
+         return this.value;
       }
    });
 
@@ -880,7 +880,7 @@ function AtypicalModuleGenerator() {
       return new AT.String("" + f.value.toFixed(3));
    });
    AT.defineConversion(AT.String, AT.Float, function(str) {
-      var num = parseFloat(str.str);
+      var num = parseFloat(str.value);
       if (isNaN(num)) {
          return new AT.Float(0);
       }
@@ -917,11 +917,11 @@ function AtypicalModuleGenerator() {
       return new AT.Vector3(new AT.Float(r.value), new AT.Float(r.value), new AT.Float(r.value));
    });
    AT.defineConversion(AT.Vector3, AT.String, function(v) {
-      return new AT.String("(" + v.x.convert("String").str
-         + ", " + v.y.convert("String").str + ", " + v.z.convert("String").str + ")");
+      return new AT.String("(" + v.x.convert("String").value
+         + ", " + v.y.convert("String").value + ", " + v.z.convert("String").value + ")");
    });
    AT.defineConversion(AT.String, AT.Vector3, function(str) {
-      let numbers = str.str.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
+      let numbers = str.value.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
          function(value) { return !isNaN(value); }
       );
       return new AT.Vector3(numbers[0] || 0, numbers[1] || 0, numbers[2] || 0);
@@ -992,7 +992,7 @@ function AtypicalModuleGenerator() {
       return new AT.String(b.value ? "true" : "false");
    });
    AT.defineConversion(AT.String, AT.Bool, function(str) {
-      var lower = str.str.toLowerCase();
+      var lower = str.value.toLowerCase();
       return new AT.Bool(lower !== "false" && lower !== "0" && lower !== "f");
    });
    AT.defineConversion(AT.Int, AT.Bool, function(i) {
