@@ -1111,6 +1111,27 @@ window.AtypicalTests = (function() {
             assert(stringArray.get(0).value === "a");
             assert(stringArray.get(1).value === "b");
             assert(stringArray.get(2).value === "65");
+
+            let smallerArray = new FloatArray(2, 3);
+            let vec3 = smallerArray.convert(AT.Vector3);
+            assert(vec3.x === 2);
+            assert(vec3.y === 3);
+            assert(vec3.z === 0);
+            smallerArray = vec3.convert(AT.Array(AT.Float));
+            assert(smallerArray.get(0).value === 2);
+            assert(smallerArray.get(1).value === 3);
+            assert(smallerArray.get(2).value === 0);
+
+            let IntArray = AT.Array(AT.Int);
+            assert(AT.canConvert(FloatArray, IntArray));
+            let intArray = floatArray.convert(IntArray);
+            assert(intArray.get(0).value === 1);
+            assert(intArray.get(1).value === 3);
+            assert(intArray.get(2).value === 6);
+            let intVec3 = intArray.convert(AT.Vector3);
+            assert(intVec3.x === 1);
+            assert(intVec3.y === 3);
+            assert(intVec3.z === 6);
          }
       ];
 

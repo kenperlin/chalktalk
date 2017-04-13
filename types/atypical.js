@@ -1055,6 +1055,13 @@ function AtypicalModuleGenerator() {
       convertFromTypeParameter: function(index, value) {
          return new (this.type)([value]);
       },
+      changeTypeParameters: function(newTypeParams) {
+         return new (this.genericType(newTypeParams[0]))(
+            this.values.map(function(value) {
+               return value.convert(newTypeParams[0]);
+            }
+         ));
+      },
       get: function(index) {
          return this.values[index];
       },
@@ -1069,6 +1076,17 @@ function AtypicalModuleGenerator() {
          });
       }
    });
+   // Define a few specific conversions for specific subtypes
+   AT.defineConversion(AT.Vector3, AT.Array(AT.Float), function (vec3) {
+      return new (AT.Array(AT.Float))(vec3.x, vec3.y, vec3.z);
+   });
+   AT.defineConversion(AT.Array(AT.Float), AT.Vector3, function(arr) {
+      return new AT.Vector3(arr.values[0] || 0, arr.values[1] || 0, arr.values[2] || 0);
+   });
+   // TODO: is it possible to make the last argument there just any AT.Array with a float-compatible type?
+   AT.defineConversionsViaIntermediary(AT.Vector3, AT.Array(AT.Float), AT.Array(AT.Int));
+   // TODO: same for the first argument here
+   AT.defineConversionsViaIntermediary(AT.Array(AT.Int), AT.Array(AT.Float), AT.Vector3);
 
 
    return AT;
