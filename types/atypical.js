@@ -1088,6 +1088,17 @@ function AtypicalModuleGenerator() {
    // TODO: same for the first argument here
    AT.defineConversionsViaIntermediary(AT.Array(AT.Int), AT.Array(AT.Float), AT.Vector3);
 
+   // TODO: WISH LIST FOR ARRAYS:
+   // Ability to define intermediary Vector3 -> Array(Float) -> Array(T) for any Float -> T, e.g.
+   // AT.defineConversionsViaIntermediary(AT.Vector3, AT.Array(AT.Float), AT.Array);
+   // Ability to define conversion Array(T) -> String for any T -> String
+   // AT.defineConversion(AT.Array, AT.String, function(arr) {
+   //    // Pass each value through String conversion, intersperse commas and surround with []
+   // },
+   // function(typeParameters) {
+   //    return typeParameters[0].canConvert(AT.String);
+   // });
+
 
    return AT;
 };
