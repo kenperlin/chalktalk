@@ -355,6 +355,66 @@ window.AtypicalTests = (function() {
             // TODO: is this correct behaviour? Seems like potentially surprising behaviour.
             assert(source.convert(Destination).y === 0);
          },
+         
+         //--------------------------------------------------------------------------------
+         // Test that broad intermediary conversions are overriden by later broad intermediary
+         // conversions
+         function() {
+            let Source = AT.defineType({
+               typename: "Source",
+               init: function() { }
+            });
+            let source = new Source(5);
+
+            let Intermediary1 = AT.defineType({
+               typename: "Intermediary1",
+               init: function() {
+                  this._def("x", 1);
+               }
+            });
+            let intermediary1 = new Intermediary1();
+
+            let Intermediary2 = AT.defineType({
+               typename: "Intermediary2",
+               init: function() {
+                  this._def("x", 2);
+               }
+            });
+            let intermediary2 = new Intermediary2();
+
+            let Destination = AT.defineType({
+               typename: "Destination",
+               init: function(x) {
+                  this._def("x", x);
+               }
+            });
+            let destination = new Destination();
+
+            AT.defineConversion(Source, Intermediary1, function(source) {
+               return new Intermediary1();
+            });
+            AT.defineConversion(Intermediary1, Destination, function(interm1) {
+               return new Destination(interm1.x);
+            });
+
+            AT.defineConversion(Source, Intermediary2, function(source) {
+               return new Intermediary2();
+            });
+            AT.defineConversion(Intermediary2, Destination, function(interm2) {
+               return new Destination(interm2.x);
+            });
+
+            assert(!AT.canConvert(Source, Destination));
+
+            AT.defineConversionsViaIntermediary(null, Intermediary1, Destination);
+
+            assert(source.convert(Destination).x === 1);
+
+            // Another of the same conversion should override the previous
+            AT.defineConversionsViaIntermediary(null, Intermediary2, Destination);
+
+            assert(source.convert(Destination).x === 2);
+         },
 
          //--------------------------------------------------------------------------------
          // Test that intermediary conversions work even when definite conversions are defined only
