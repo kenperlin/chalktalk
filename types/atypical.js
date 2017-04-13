@@ -145,9 +145,15 @@ function AtypicalModuleGenerator() {
    };
 
    // TODO: doc
-   function _conversionFunction(sourceType, destinationType) {
+   // Priorities:
+   // 0: Only explicitly-defined conversion functions or equivalents
+   // 1: All above including generic type conversions
+   // 2+: All above including broad intermediary type conversions
+   function _conversionFunction(sourceType, destinationType, priority) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
+
+      if (priority === undefined) { priority = 999; }
 
       if (sourceTypename === destinationTypename) {
          // Same types, return the identity function
@@ -159,6 +165,8 @@ function AtypicalModuleGenerator() {
          return _conversions[sourceTypename][destinationTypename];
       }
 
+      if (priority <= 0) { return undefined; }
+
       sourceType = AT.typeNamed(sourceTypename);
       destinationType = AT.typeNamed(destinationTypename);
 
@@ -166,7 +174,7 @@ function AtypicalModuleGenerator() {
 
       if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
 
-         // Do some special processing for conversions between two types with the same generic type
+         // Do some special processing for conversions between 2 types with the same generic type
          if (sourceType.prototype.genericType === destinationType.prototype.genericType) {
 
             // Can't convert if no conversion function exists.
@@ -197,6 +205,65 @@ function AtypicalModuleGenerator() {
             return undefined;
          }
       }
+
+      if (priority <= 1) { return undefined; }
+
+      // Last option: broad intermediary conversions
+      
+      function findIntermediaryConversion(sourceTypename, destinationTypename,
+                                          possibleIntermediaries)
+      {
+         if (possibleIntermediaries !== undefined) {
+            // Iterate backwards so that later definitions are prioritized
+            for (let i = possibleIntermediaries.length - 1; i >= 0; i--) {
+
+               let intermediaryTypename = possibleIntermediaries[i];
+               if (AT.canConvert(sourceTypename, intermediaryTypename)) {
+
+                  // We set a priority of 1 here to avoid "chaining" of broad intermediary
+                  // conversions.
+                  // E.g. if you've defined 4 types, called 1-4, and you've defined a conversion
+                  // 1 -> 2, and you've also defined broad intermediary conversions * -> 2 -> 3
+                  // and * -> 3 -> 4, that should NOT give you licence to go down that chain
+                  // all the way from 1 -> 2 -> 3 -> 4 by calling _conversionFunction recursively
+                  // and chaining those broad intermediary conversions.
+                  // Things get way too messy if you allow that and you end up with
+                  // unintentionally huge conversion chains.
+                  let conversionToIntermediary = _conversionFunction(
+                     sourceTypename, intermediaryTypename, 1);
+                  let conversionToDestination = _conversionFunction(
+                     intermediaryTypename, destinationTypename, 1);
+
+                  if (conversionToIntermediary !== undefined
+                     && conversionToDestination !== undefined)
+                  {
+                     return function(value) {
+                        return conversionToDestination(conversionToIntermediary(value));
+                     }
+                  }
+               }
+            }
+         }
+         return undefined;
+      }
+
+      let intermediaryConversionFunction = findIntermediaryConversion(
+         sourceTypename, destinationTypename,
+         _intermediaryConversionsFromAnySource[destinationTypename]);
+      
+      if (intermediaryConversionFunction !== undefined) {
+         return intermediaryConversionFunction;
+      }
+
+      intermediaryConversionFunction = findIntermediaryConversion(
+         sourceTypename, destinationTypename,
+         _intermediaryConversionsToAnyDestination[sourceTypename]);
+
+      if (intermediaryConversionFunction !== undefined) {
+         return intermediaryConversionFunction;
+      }
+
+      // Give up, nothing works!
 
       return undefined;
    };
@@ -617,31 +684,6 @@ function AtypicalModuleGenerator() {
       }
 
       _conversions[sourceTypename][destinationTypename] = conversionFunction;
-
-      // If either of these types are an intermediary type for conversions, update the conversion
-      // map to account for the fact that this new conversion now exists.
-      // In the following comments, call our source and destination types T and U and our newly-
-      // defined conversion T -> U.
-      
-      // Update all conversions T -> U -> V where V has set U as an intermediary from any source.
-      for (let i = 0; i < _intermediaryConversionsFromAnySource[destinationTypename].length; i++) {
-         let finalTypename = _intermediaryConversionsFromAnySource[destinationTypename][i];
-         // Don't override any conversions that have already been created
-         if (!AT.canConvert(sourceTypename, finalTypename)) {
-            AT.defineConversionsViaIntermediary(
-               sourceTypename, destinationTypename, finalTypename);
-         }
-      }
-
-      // Update all conversions V -> T -> U where V has set T as an intermediary to any destination.
-      for (let i = 0; i < _intermediaryConversionsToAnyDestination[sourceTypename].length; i++) {
-         let originalTypename = _intermediaryConversionsToAnyDestination[sourceTypename][i]; 
-         // Don't override any conversions that have already been created
-         if (!AT.canConvert(originalTypename, destinationTypename)) {
-            AT.defineConversionsViaIntermediary(
-               originalTypename, sourceTypename, destinationTypename);
-         }
-      }
    };
 
    // This function allows you to define a conversion between any two types S and D by using
@@ -679,7 +721,9 @@ function AtypicalModuleGenerator() {
    // that are added. E.g. if you set a conversion S -> T -> D for all D, and then define a new
    // type Q, and a new conversion for T -> Q, then the Atypical system will create S -> Q via
    // S -> T -> Q unless a previous S -> Q conversion was already defined.
-   AT.defineConversionsViaIntermediary = function(sourceType, intermediaryType, destinationType) {
+   AT.defineConversionsViaIntermediary = function(
+      sourceType, intermediaryType, destinationType)
+   {
       let sourceTypename = _typename(sourceType);
       let intermediaryTypename = _typename(intermediaryType);
       let destinationTypename = _typename(destinationType);
@@ -734,21 +778,10 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         // TODO: rethink this. Probably setting it as explicit conversion is not the best way of doing things.
-         for (let sourceTypename in _conversions) {
-            if (_conversions[sourceTypename][intermediaryTypename]
-               && sourceTypename !== destinationTypename)
-            {
-               let conversionToIntermediary = _conversionFunction(
-                  sourceTypename, intermediaryTypename);
-
-               _conversions[sourceTypename][destinationTypename] = function(value) {
-                  return conversionToDestination(conversionToIntermediary(value));
-               }
-            }
-         }
-
-         _intermediaryConversionsFromAnySource[intermediaryTypename].push(destinationTypename);
+         // Just note that this intermediary conversion has been established.
+         // The _conversionFunction function will handle actually building the conversion
+         // function.
+         _intermediaryConversionsFromAnySource[destinationTypename].push(intermediaryTypename);
       }
       else if (destinationTypename === null) {
          // Define S -> T -> D for all D.
@@ -762,7 +795,8 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToIntermediary = _conversionFunction(sourceTypename, intermediaryTypename);
+         let conversionToIntermediary = _conversionFunction(
+            sourceTypename, intermediaryTypename);
 
          if (!conversionToIntermediary) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
@@ -771,20 +805,10 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         for (let destinationTypename in _conversions) {
-            if (_conversions[intermediaryTypename][destinationTypename]
-               && intermediaryTypename !== destinationTypename)
-            {
-               let conversionToDestination = _conversionFunction(
-                  intermediaryTypename, destinationTypename);
-
-               _conversions[sourceTypename][destinationTypename] = function(value) {
-                  return conversionToDestination(conversionToIntermediary(value));
-               }
-            }
-         }
-
-         _intermediaryConversionsToAnyDestination[intermediaryTypename].push(sourceTypename);
+         // Just note that this intermediary conversion has been established.
+         // The _conversionFunction function will handle actually building the conversion
+         // function.
+         _intermediaryConversionsToAnyDestination[sourceTypename].push(intermediaryTypename);
       }
       else {
          // Define S -> T -> D for specifc S and D.
@@ -807,7 +831,8 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToIntermediary = _conversionFunction(sourceTypename, intermediaryTypename);
+         let conversionToIntermediary = _conversionFunction(
+            sourceTypename, intermediaryTypename);
 
          if (!conversionToIntermediary) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
@@ -827,6 +852,9 @@ function AtypicalModuleGenerator() {
                + destinationTypename + " exists.");
             return;
          }
+
+         // This one is equivalent to an explicit conversion definition, so we modify
+         // the _conversions map directly.
          _conversions[sourceTypename][destinationTypename] = function(value) {
             return conversionToDestination(conversionToIntermediary(value));
          }

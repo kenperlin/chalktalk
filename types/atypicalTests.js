@@ -305,8 +305,7 @@ window.AtypicalTests = (function() {
          },
          
          //--------------------------------------------------------------------------------
-         // TODO: should intermediary conversions override previously-defined explicit conversions?
-         // Need to decide that.
+         // Ensure that broad intermediary conversions can't override explicit conversions
          function() {
             let Source = AT.defineType({
                typename: "Source",
@@ -352,7 +351,11 @@ window.AtypicalTests = (function() {
 
             AT.defineConversionsViaIntermediary(null, Intermediary, Destination);
 
-            // TODO: is this correct behaviour? Seems like potentially surprising behaviour.
+            // Previous conversion should be preserved.
+            assert(source.convert(Destination).y === 5);
+
+            // However, a narrow intermediary conversion should override the previous conversion.
+            AT.defineConversionsViaIntermediary(Source, Intermediary, Destination);
             assert(source.convert(Destination).y === 0);
          },
          
@@ -628,10 +631,14 @@ window.AtypicalTests = (function() {
             // This should also have been defined by the intermediary conversion.
             assert(one.convert(Three).x === 1); 
 
-            // TODO: is this correct behaviour though?
+            // This is intentional behaviour:
             assert(!one.canConvert(Four)); 
-            // After all, you can convert 2 -> 3 -> 4 without problem, 1 -> 2 gives an entry point
-            // into that chain, so should this be allowed?
+            // You could argue that you can convert 1 -> 2 -> 3 and 2 -> 3 -> 4 without
+            // problem, and that thus converting 1 -> 2 -> 3 -> 4 should be allowed.
+            // However, the longer the conversion path, the harder it is to tell how an
+            // object got to its final type. 
+            // As such, there was an intentional design decision to avoid accidentally
+            // creating these long chains of conversions.
          },
          
          //--------------------------------------------------------------------------------
