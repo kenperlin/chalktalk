@@ -893,21 +893,19 @@ function AtypicalModuleGenerator() {
       typename: "Vector3",
       init: function(x, y, z) {
          if (x instanceof AT.Float && y instanceof AT.Float && z instanceof AT.Float) {
-            this._def("x", x);
-            this._def("y", y);
-            this._def("z", z);
+            this._def("x", x.value);
+            this._def("y", y.value);
+            this._def("z", z.value);
          }
          else {
             // AT.Float will take care of validating our arguments.
-            this._def("x", new AT.Float(x));
-            this._def("y", new AT.Float(y));
-            this._def("z", new AT.Float(z));
+            this._def("x", (new AT.Float(x)).value);
+            this._def("y", (new AT.Float(y)).value);
+            this._def("z", (new AT.Float(z)).value);
          }
       },
       magnitude: function() {
-         return sqrt(this.x.value*this.x.value
-               + this.y.value*this.y.value
-               + this.z.value*this.z.value);
+         return sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
       }
    });
    AT.defineConversion(AT.Vector3, AT.Float, function(vec) {
@@ -917,8 +915,9 @@ function AtypicalModuleGenerator() {
       return new AT.Vector3(new AT.Float(r.value), new AT.Float(r.value), new AT.Float(r.value));
    });
    AT.defineConversion(AT.Vector3, AT.String, function(v) {
-      return new AT.String("(" + v.x.convert("String").value
-         + ", " + v.y.convert("String").value + ", " + v.z.convert("String").value + ")");
+      return new AT.String("(" + new AT.Float(v.x).convert("String").value
+         + ", " + new AT.Float(v.y).convert("String").value
+         + ", " + new AT.Float(v.z).convert("String").value + ")");
    });
    AT.defineConversion(AT.String, AT.Vector3, function(str) {
       let numbers = str.value.split(/[^\d\.\+-eE]/).map(parseFloat).filter(

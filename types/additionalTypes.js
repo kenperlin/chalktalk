@@ -20,7 +20,7 @@
       return new AT.Unknown(f.toPrimitive());
    });
    AT.defineConversion(AT.Vector3, AT.Unknown, function(vec) {
-      return new AT.Unknown([vec.x.value, vec.y.value, vec.z.value]);
+      return new AT.Unknown([vec.x, vec.y, vec.z]);
    });
    AT.defineConversion(AT.Bool, AT.Unknown, function(b) {
       return new AT.Unknown(b.toPrimitive());
