@@ -1016,7 +1016,53 @@ function AtypicalModuleGenerator() {
    });
 
 
-   // TODO: DEFINE AN ARRAY TYPE
+   AT.defineGenericType({
+      typename: "Array",
+      // TODO: possible utility functions
+      // set(index, value) function
+      // init(length) function, which inits empty objects
+      init: function() {
+         let values = null;
+         if (arguments.length === 1 && arguments[0] instanceof Array) {
+            values = arguments[0];
+         }
+         else {
+            values = Array.from(arguments);
+         }
+
+         for (let i = 0; i < values.length; i++) {
+            if (!(values[i] instanceof this.typeParameters[0])) {
+               values[i] = new (this.typeParameters[0])(values[i]);
+            }
+         }
+         this._def("values", values);
+      },
+      canConvertToTypeParameter:  function(index) {
+         return index === 0;
+      },
+      canConvertFromTypeParameter: function(index) {
+         return index === 0;
+      },
+      convertToTypeParameter: function(index) {
+         return this.values[0];
+      },
+      convertFromTypeParameter: function(index, value) {
+         return new (this.type)([value]);
+      },
+      get: function(index) {
+         return this.values[index];
+      },
+      toPrimitive: function() {
+         return this.values.map(function (value) {
+            if (value.isPrimitive()) {
+               return value.toPrimitive();
+            }
+            else {
+               return value;
+            }
+         });
+      }
+   });
 
 
    return AT;

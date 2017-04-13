@@ -1072,6 +1072,28 @@ window.AtypicalTests = (function() {
             
             // TODO: should convert(To|From)TypeParameter(n) call the overridden conversion?
             // If so, should the corresponding canConvert functions call AT.canConvert?
+         },
+
+         //--------------------------------------------------------------------------------
+         // Test array type
+         function() {
+            assert(typeof AT.Array === "function");
+            assert(typeof AT.Array(AT.Float) === "function");
+
+            let FloatArray = AT.Array(AT.Float);
+            let floatArray = new FloatArray([1.2, 3.4, 5.6]);
+            assert(floatArray.get(0).value === 1.2);
+            assert(floatArray.get(1).value === 3.4);
+            assert(floatArray.get(2).value === 5.6);
+
+            assert(floatArray.isPrimitive());
+            assert(arraysEqual(floatArray.toPrimitive(), [1.2, 3.4, 5.6]));
+
+            let StringArray = AT.Array(AT.String);
+            let stringArray = new StringArray("a", "b", 65);
+            assert(stringArray.get(0).value === "a");
+            assert(stringArray.get(1).value === "b");
+            assert(stringArray.get(2).value === "65");
          }
       ];
 
@@ -1092,6 +1114,15 @@ window.AtypicalTests = (function() {
       }
       function enableConsoleErrors() {
          console.error = defaultError;
+      }
+
+      // Convenience function for comparing two flat arrays of simple values
+      function arraysEqual(a, b) {
+         if (a.length !== b.length) { return false; }
+         for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) { return false; }
+         }
+         return true;
       }
       
 
