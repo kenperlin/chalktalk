@@ -724,7 +724,9 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+         let conversionToDestination = _conversionFunction(
+            intermediaryTypename, destinationTypename);
+
          if (!conversionToDestination) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
                + "conversions to " + destinationTypename
@@ -732,11 +734,14 @@ function AtypicalModuleGenerator() {
             return;
          }
 
+         // TODO: rethink this. Probably setting it as explicit conversion is not the best way of doing things.
          for (let sourceTypename in _conversions) {
             if (_conversions[sourceTypename][intermediaryTypename]
                && sourceTypename !== destinationTypename)
             {
-               let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+               let conversionToIntermediary = _conversionFunction(
+                  sourceTypename, intermediaryTypename);
+
                _conversions[sourceTypename][destinationTypename] = function(value) {
                   return conversionToDestination(conversionToIntermediary(value));
                }
@@ -757,7 +762,8 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+         let conversionToIntermediary = _conversionFunction(sourceTypename, intermediaryTypename);
+
          if (!conversionToIntermediary) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
                + "conversions from " + sourceTypename
@@ -769,7 +775,9 @@ function AtypicalModuleGenerator() {
             if (_conversions[intermediaryTypename][destinationTypename]
                && intermediaryTypename !== destinationTypename)
             {
-               let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+               let conversionToDestination = _conversionFunction(
+                  intermediaryTypename, destinationTypename);
+
                _conversions[sourceTypename][destinationTypename] = function(value) {
                   return conversionToDestination(conversionToIntermediary(value));
                }
@@ -799,7 +807,8 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToIntermediary = _conversions[sourceTypename][intermediaryTypename];
+         let conversionToIntermediary = _conversionFunction(sourceTypename, intermediaryTypename);
+
          if (!conversionToIntermediary) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
                + "conversions from " + sourceTypename + " to " + destinationTypename
@@ -808,7 +817,9 @@ function AtypicalModuleGenerator() {
             return;
          }
 
-         let conversionToDestination = _conversions[intermediaryTypename][destinationTypename];
+         let conversionToDestination = _conversionFunction(
+            intermediaryTypename, destinationTypename);
+
          if (!conversionToDestination) {
             console.error("Attempted to set " + intermediaryTypename + " as an intermediary for "
                + "conversions from " + sourceTypename + " to " + destinationTypename
