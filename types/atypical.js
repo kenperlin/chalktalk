@@ -70,27 +70,9 @@ function AtypicalModuleGenerator() {
             return this;
          }
 
-         var conversionFunction = _conversions[this.type.name][typename];
-         if (!conversionFunction) {
-            if (_isGenericType(this.type) && _isGenericType(type)) {
-               // The following call should take care of all the cases where the generic type
-               // can't be converted.
-               if (!AT.canConvert(this.type, type)) { return undefined; }
-               if (this.genericType === type.prototype.genericType) {
-                  return this.changeTypeParameters(type.prototype.typeParameters);
-               }
-               else {
-                  // TODO: implement generic type conversion between different generic types
-                  return undefined;
-               }
-            }
-            else {
-               return undefined;
-            }
-         }
-         else {
-            return conversionFunction(this);
-         }
+         var conversionFunction = _conversionFunction(this.type, type);
+         if (conversionFunction === undefined) { return undefined; }
+         else { return conversionFunction(this); }
       },
 
       // Checks whether a conversion function between this object and another type exists.
@@ -159,23 +141,22 @@ function AtypicalModuleGenerator() {
    // destinationType: The name or constructor of the type you'd like to convert from.
    //                  Must be already defined.
    AT.canConvert = function(sourceType, destinationType) {
+      return _conversionFunction(sourceType, destinationType) !== undefined;
+   };
+
+   // TODO: doc
+   function _conversionFunction(sourceType, destinationType) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
 
-      if (!AT.typeIsDefined(sourceType)) {
-         console.error("Type " + sourceTypename + " not defined.");
-         return undefined;
+      if (sourceTypename === destinationTypename) {
+         // Same types, return the identity function
+         return function(x) { return x; }
       }
-      if (!AT.typeIsDefined(destinationType)) {
-         console.error("Type " + destinationTypename + " not defined.");
-         return undefined;
-      }
-
-      if (sourceTypename === destinationTypename) { return true; }
 
       // Explicitly-defined conversions override everything else
       if (_conversions[sourceTypename][destinationTypename] !== undefined) {
-         return true;
+         return _conversions[sourceTypename][destinationTypename];
       }
 
       sourceType = AT.typeNamed(sourceTypename);
@@ -184,32 +165,40 @@ function AtypicalModuleGenerator() {
       // Generic types have special rules for conversions
 
       if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
-         // Do some special processing for conversions between two generic types.
+
+         // Do some special processing for conversions between two types with the same generic type
          if (sourceType.prototype.genericType === destinationType.prototype.genericType) {
+
             // Can't convert if no conversion function exists.
-            if (!sourceType.prototype.changeTypeParameters) { return false; }
+            if (!sourceType.prototype.changeTypeParameters) { return undefined; }
+
             // Can't convert if there's a differing number of type parameters
             if (sourceType.prototype.typeParameters.length
                !== destinationType.prototype.typeParameters.length)
             {
-               return false
+               return undefined;
             }
+
             // Can't convert if any of the type parameters are not convertible
             for (let i = 0; i < sourceType.prototype.typeParameters.length; i++) {
                if (!AT.canConvert(sourceType.prototype.typeParameters[i],
                   destinationType.prototype.typeParameters[i]))
                {
-                  return false;
+                  return undefined;
                }
             }
-            return true;
+
+            return function(sourceValue) {
+               return sourceValue.changeTypeParameters(destinationType.prototype.typeParameters);
+            }
          }
          else {
             // TODO: add conversions between different generic types
+            return undefined;
          }
       }
 
-      return false;
+      return undefined;
    };
 
    function _validateTypename(typename) {
