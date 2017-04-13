@@ -892,16 +892,23 @@ function AtypicalModuleGenerator() {
    AT.defineType({
       typename: "Vector3",
       init: function(x, y, z) {
-         if (x instanceof AT.Float && y instanceof AT.Float && z instanceof AT.Float) {
-            this._def("x", x.value);
-            this._def("y", y.value);
-            this._def("z", z.value);
+         let values = [x, y, z];
+         if (x instanceof Array) {
+            values = x;
          }
-         else {
-            // AT.Float will take care of validating our arguments.
-            this._def("x", (new AT.Float(x)).value);
-            this._def("y", (new AT.Float(y)).value);
-            this._def("z", (new AT.Float(z)).value);
+
+         let keys = ["x", "y", "z"];
+         for (let i = 0; i < keys.length; i++) {
+            if (values[i] === undefined) {
+               this._def(keys[i], 0);
+            }
+            else if (values[i] instanceof AT.Float) {
+               this._def(keys[i], values[i].value);
+            }
+            else {
+               // AT.Float will take care of validating our arguments.
+               this._def(keys[i], (new AT.Float(values[i])).value);
+            }
          }
       },
       magnitude: function() {

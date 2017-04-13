@@ -1075,6 +1075,23 @@ window.AtypicalTests = (function() {
          },
 
          //--------------------------------------------------------------------------------
+         // Test vector3 type
+         function() {
+            let a = new AT.Vector3(3, 4, 5);
+            assert(a.x === 3 && a.y === 4 && a.z === 5);
+
+            let b = new AT.Vector3([4, 5, 6]);
+            assert(b.x === 4 && b.y === 5 && b.z === 6);
+
+            let c = new AT.Vector3();
+            assert(c.x === 0 && c.y === 0 && c.z === 0);
+
+            let d = new AT.Vector3(6);
+            assert(d.x === 6 && d.y === 0 && d.z === 0);
+
+         },
+
+         //--------------------------------------------------------------------------------
          // Test array type
          function() {
             assert(typeof AT.Array === "function");
