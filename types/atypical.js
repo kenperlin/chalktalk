@@ -1176,11 +1176,6 @@ function AtypicalModuleGenerator() {
                + "type parameters. Use AT.Function(AT.Void) for functions that return "
                + "no values and take no arguments.");
          }
-         if (func.length !== this.typeParameters.length - 1) {
-            throw new AT.ConstructionError(
-               "Attempted to construct a Function with an incorrect number of arguments. "
-               + "Expected " + (this.typeParameters.length - 1) + ", got " + func.length);
-         }
          this._def("func", func);
       },
       toPrimitive: function() {

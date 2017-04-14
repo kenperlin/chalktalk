@@ -1224,13 +1224,6 @@ window.AtypicalTests = (function() {
                let brokenFunction = new (AT.Function(AT.Float))(3.5);
             });
 
-            // Enforce the same number of arguments in function as in type params
-            assertThrows(AT.ConstructionError, function() {
-               let brokenFunction = new (AT.Function(AT.Float, AT.Float))(function(x, y) {
-                  return x + y;
-               });
-            });
-
             let additionFunc = function(x, y) {
                return x + y;
             }
