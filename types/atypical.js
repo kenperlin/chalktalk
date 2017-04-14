@@ -1192,8 +1192,14 @@ function AtypicalModuleGenerator() {
          let args = [];
          for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
             let wrappedArg = arguments[i];
+            // Wrap or convert the argument if needed
             if (!(wrappedArg instanceof this.typeParameters[i])) {
-               wrappedArg = new this.typeParameters[i](arguments[i]);
+               if (wrappedArg instanceof AT.Type) {
+                  wrappedArg = wrappedArg.convert(this.typeParameters[i]);
+               }
+               else {
+                  wrappedArg = new this.typeParameters[i](arguments[i]);
+               }
             }
 
             if (wrappedArg.isPrimitive()) {
@@ -1209,12 +1215,21 @@ function AtypicalModuleGenerator() {
          let returnValue = this.func.apply(this, args);
 
          let returnType = this.typeParameters[this.typeParameters.length - 1];
-         if (returnType === AT.Void && returnValue === undefined) {
-            return returnValue;
+
+         if (returnType === AT.Void) {
+            return undefined;
          }
+
+         // Wrap or convert the return value if needed
          if (!(returnValue instanceof returnType)) {
-            returnValue = new returnType(returnValue);
+            if (returnValue instanceof AT.Type) {
+               returnValue = returnValue.convert(returnType);
+            }
+            else {
+               returnValue = new returnType(returnValue);
+            }
          }
+
          // If it's a primitive, wrapping it and unwrapping it is the easiest way
          // to do type verification.
          if (AT.isPrimitive(returnType)) {

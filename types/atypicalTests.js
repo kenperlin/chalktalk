@@ -1253,6 +1253,15 @@ window.AtypicalTests = (function() {
 
             assert(stringifier.call(new AT.Float(5)) === "6 is the answer");
             assert(stringifier2.call(new AT.Float(5)) === "6 is the answer");
+
+            // Arguments and return values should automatically convert
+            let intMaker = new (AT.Function(AT.Int, AT.String))(function(x) {
+               return x - 1;
+            });
+            assert(intMaker.call(3.2) === "2");
+            assert(intMaker.call(3.45) === "2");
+            assert(intMaker.call(new AT.Float(3.45)) === "2");
+            assert(intMaker.call(new AT.String("3")) === "2");
          }
       ];
 
