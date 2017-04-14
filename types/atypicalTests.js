@@ -1195,6 +1195,7 @@ window.AtypicalTests = (function() {
             assert(intArray.get(0).value === 1);
             assert(intArray.get(1).value === 3);
             assert(intArray.get(2).value === 6);
+            assert(arraysEqual(intArray.toPrimitive(), [1, 3, 6]));
             let intVec3 = intArray.convert(AT.Vector3);
             assert(intVec3.x === 1);
             assert(intVec3.y === 3);
