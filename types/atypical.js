@@ -1154,6 +1154,77 @@ function AtypicalModuleGenerator() {
    //    return typeParameters[0].canConvert(AT.String);
    // });
 
+   // Void type, mostly a convenient placeholder type for use in Function type parameters.
+   AT.defineType({
+      typename: "Void",
+      init: function() {
+         throw new AT.ConstructionError("Attempted to construct a Void object.");
+      }
+   });
+
+   // TODO: document function types (initial type parameters are arguments, last is return value)
+   // Functions should take in and return primitive values where possible
+   AT.defineGenericType({
+      typename: "Function",
+      init: function(func) {
+         if (typeof func !== "function") {
+            throw new AT.ConstructionError("Attempted to construct a Function with a(n) "
+                                           + (typeof func) + " instead of a function");
+         }
+         if (this.typeParameters.length === 0) {
+            throw new AT.ConstructionError("Attempted to construct a Function with no "
+               + "type parameters. Use AT.Function(AT.Void) for functions that return "
+               + "no values and take no arguments.");
+         }
+         if (func.length !== this.typeParameters.length - 1) {
+            throw new AT.ConstructionError(
+               "Attempted to construct a Function with an incorrect number of arguments. "
+               + "Expected " + (this.typeParameters.length - 1) + ", got " + func.length);
+         }
+         this._def("func", func);
+      },
+      toPrimitive: function() {
+         return this.func;
+      },
+      call: function() {
+         // Clean up arguments to make sure they're the right type (converting them to primitive
+         // values where possible)
+         let args = [];
+         for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
+            let wrappedArg = arguments[i];
+            if (!(wrappedArg instanceof this.typeParameters[i])) {
+               wrappedArg = new this.typeParameters[i](arguments[i]);
+            }
+
+            if (wrappedArg.isPrimitive()) {
+               // If it's a primitive, wrapping it and unwrapping it is the easiest way
+               // to do type verification.
+               args.push(wrappedArg.toPrimitive());
+            }
+            else {
+               args.push(wrappedArg);
+            }
+         }
+
+         let returnValue = this.func.apply(this, args);
+
+         let returnType = this.typeParameters[this.typeParameters.length - 1];
+         if (returnType === AT.Void && returnValue === undefined) {
+            return returnValue;
+         }
+         if (!(returnValue instanceof returnType)) {
+            returnValue = new returnType(returnValue);
+         }
+         // If it's a primitive, wrapping it and unwrapping it is the easiest way
+         // to do type verification.
+         if (AT.isPrimitive(returnType)) {
+            return returnValue.toPrimitive();
+         }
+         else {
+            return returnValue;
+         }
+      }
+   });
 
    return AT;
 };

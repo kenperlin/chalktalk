@@ -1201,6 +1201,58 @@ window.AtypicalTests = (function() {
             assert(intVec3.x === 1);
             assert(intVec3.y === 3);
             assert(intVec3.z === 6);
+         },
+
+         //--------------------------------------------------------------------------------
+         // Test function types
+         function() {
+            let procedureCalled = false;
+            let procedure = new (AT.Function(AT.Void))(function() { 
+               procedureCalled = true;
+            });
+            assert(!procedureCalled);
+            procedure.call();
+            assert(procedureCalled);
+
+            // Disallow empty type parameters
+            assertThrows(AT.ConstructionError, function() {
+               let brokenProcedure = new (AT.Function())(function(){});
+            });
+
+            // Disallow things that are not functions
+            assertThrows(AT.ConstructionError, function(){
+               let brokenFunction = new (AT.Function(AT.Float))(3.5);
+            });
+
+            // Enforce the same number of arguments in function as in type params
+            assertThrows(AT.ConstructionError, function() {
+               let brokenFunction = new (AT.Function(AT.Float, AT.Float))(function(x, y) {
+                  return x + y;
+               });
+            });
+
+            let additionFunc = function(x, y) {
+               return x + y;
+            }
+
+            let floatAdder = new (AT.Function(AT.Float, AT.Float, AT.Float))(additionFunc);
+            assert(floatAdder.call(3.1, 4.3) === 7.4);
+            let intAdder = new (AT.Function(AT.Float, AT.Float, AT.Int))(additionFunc);
+            assert(intAdder.call(3.1, 4.3) === 7);
+            
+            let stringifier = new (AT.Function(AT.Float, AT.String))(function (f) {
+               return (f + 1) + " is the answer";
+            });
+            assert(stringifier.call(5) === "6 is the answer");
+            
+            // Ensure the right thing happens even if you return wrapped values
+            let stringifier2 = new (AT.Function(AT.Float, AT.String))(function (f) {
+               return new AT.String((f + 1) + " is the answer");
+            });
+            assert(stringifier2.call(5) === "6 is the answer");
+
+            assert(stringifier.call(new AT.Float(5)) === "6 is the answer");
+            assert(stringifier2.call(new AT.Float(5)) === "6 is the answer");
          }
       ];
 
