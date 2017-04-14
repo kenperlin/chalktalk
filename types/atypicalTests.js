@@ -1132,7 +1132,8 @@ window.AtypicalTests = (function() {
                && convertedPair2.x.x === 6
                && convertedPair2.y.x === 7);
 
-            // Ensure these overridden conversions don't affect other instances of this generic type
+            // Ensure these overridden conversions don't affect other instances of this generic
+            // type
             let FloatIntPair = GenericPair(AT.Float, AT.Int);
             let floatIntPair = new FloatIntPair(2.3, 4);
             assert(floatIntPair.convert(AT.Int).value === 4);
@@ -1233,7 +1234,8 @@ window.AtypicalTests = (function() {
       
 
       for (let i = 0; i < tests.length; i++) {
-         // Ensure the tests use a fresh, clean AT module with no definitions from the other tests.
+         // Ensure the tests use a fresh, clean AT module with no definitions from the other
+         // tests.
          AT = window.AT._createTestingModule();
 
          tests[i]();
