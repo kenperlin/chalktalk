@@ -1097,6 +1097,16 @@ function AtypicalModuleGenerator() {
          }
          this._def("values", values);
       },
+      toPrimitive: function() {
+         return this.values.map(function (value) {
+            if (value.isPrimitive()) {
+               return value.toPrimitive();
+            }
+            else {
+               return value;
+            }
+         });
+      },
       canConvertToTypeParameter:  function(index) {
          return index === 0;
       },
@@ -1116,18 +1126,9 @@ function AtypicalModuleGenerator() {
             }
          ));
       },
+
       get: function(index) {
          return this.values[index];
-      },
-      toPrimitive: function() {
-         return this.values.map(function (value) {
-            if (value.isPrimitive()) {
-               return value.toPrimitive();
-            }
-            else {
-               return value;
-            }
-         });
       }
    });
    // Define a few specific conversions for specific subtypes
