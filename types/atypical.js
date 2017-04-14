@@ -23,8 +23,21 @@ function AtypicalModuleGenerator() {
    // }
    var _conversions = {};
 
-   var _intermediaryConversionsToAnyDestination = {}; // TODO: DOC
-   var _intermediaryConversionsFromAnySource = {}; // TODO: DOC
+   // This internal variable holds information about which types have defined broad conversions
+   // via an intermediary to any destination type. The format is this:
+   // {
+   //    source_typename: [intermediary_typename_1, intermediary_typename_2, ...]
+   //    ...
+   // }
+   var _intermediaryConversionsToAnyDestination = {};
+
+   // This internal variable holds information about which types have defined broad conversions
+   // via an intermediary from any source type. The format is this:
+   // {
+   //    destination_typename: [intermediary_typename_1, intermediary_typename_2, ...]
+   //    ...
+   // }
+   var _intermediaryConversionsFromAnySource = {};
 
    // Utility function to get the type name from a variable when you don't know whether they're
    // strings or constructor functions.
@@ -144,11 +157,18 @@ function AtypicalModuleGenerator() {
       return _conversionFunction(sourceType, destinationType) !== undefined;
    };
 
-   // TODO: doc
-   // Priorities:
-   // 0: Only explicitly-defined conversion functions or equivalents
-   // 1: All above including generic type conversions
-   // 2+: All above including broad intermediary type conversions
+   // Internal function for retrieving the conversion function between two types.
+   // Returns undefined if the conversion does not exist.
+   //
+   // sourceType: The name or constructor of the type you're converting from.
+   // destinationType: The name or constructor of the type you're converting to.
+   // priority: (optional) An integer specifying what "level" of conversion functions you
+   //           want to retrieve.
+   //              0: Only explicitly-defined conversion functions or equivalents
+   //              1: All above including generic type conversions
+   //              2+: All above including broad intermediary type conversions
+   //           If not specified, this defaults to the highest value (i.e. return all types
+   //           of conversions).
    function _conversionFunction(sourceType, destinationType, priority) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
