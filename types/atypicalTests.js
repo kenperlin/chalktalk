@@ -907,7 +907,7 @@ window.AtypicalTests = (function() {
                   return index === 0 ? this.x : undefined;
                },
                convertFromTypeParameter(index, value) {
-                  return index === 0 ? new (this.type)(value) : undefined;
+                  return index === 0 ? new this.type(value) : undefined;
                }
             });
 
@@ -976,7 +976,7 @@ window.AtypicalTests = (function() {
                   this._def("x", x);
                },
                convertFromTypeParameter(index, value) {
-                  return index === 0 ? new (this.type)(value) : undefined;
+                  return index === 0 ? new this.type(value) : undefined;
                }
             });
 
@@ -1069,7 +1069,7 @@ window.AtypicalTests = (function() {
                   return index === 0;
                },
                convertFromTypeParameter(index, value) {
-                  return new (this.type)(value, value.convert(this.typeParameters[1]));
+                  return new this.type(value, value.convert(this.typeParameters[1]));
                }
             });
 

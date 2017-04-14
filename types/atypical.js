@@ -1117,7 +1117,7 @@ function AtypicalModuleGenerator() {
          return this.values[0];
       },
       convertFromTypeParameter: function(index, value) {
-         return new (this.type)([value]);
+         return new this.type([value]);
       },
       changeTypeParameters: function(newTypeParams) {
          return new (this.genericType(newTypeParams[0]))(
