@@ -1255,6 +1255,17 @@ window.AtypicalTests = (function() {
             assert(intMaker.call(3.45) === "2");
             assert(intMaker.call(new AT.Float(3.45)) === "2");
             assert(intMaker.call(new AT.String("3")) === "2");
+
+            // Values can be converted to constant functions that return them
+            assert(AT.canConvert(AT.Int, AT.Function(AT.Int)));
+            assert(AT.canConvert(AT.Int, AT.Function(AT.Int, AT.Int)));
+            assert(AT.canConvert(AT.Int, AT.Function(AT.Int, AT.Int, AT.Int)));
+            assert(AT.canConvert(AT.String, AT.Function(AT.Float, AT.Int, AT.String)));
+            let intValue = new AT.Int(3);
+            let constantIntFunc = intValue.convert(AT.Function(AT.Int));
+            assert(constantIntFunc && constantIntFunc.call() === 3);
+
+            // TODO: test converting e.g. Function<Float, Float, Float> to Function<Int, Int, Int>
          }
       ];
 

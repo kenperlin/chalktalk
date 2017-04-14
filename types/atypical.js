@@ -1181,6 +1181,15 @@ function AtypicalModuleGenerator() {
       toPrimitive: function() {
          return this.func;
       },
+      // Can convert from return value (makes it a constant function)
+      canConvertFromTypeParameter: function(index) {
+         return index === this.typeParameters.length - 1;
+      },
+      convertFromTypeParameter: function(index, value) {
+         return new this.type(function() {
+            return value;
+         });
+      },
       call: function() {
          // Clean up arguments to make sure they're the right type (converting them to primitive
          // values where possible)
