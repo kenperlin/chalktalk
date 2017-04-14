@@ -1214,6 +1214,22 @@ window.AtypicalTests = (function() {
          }
       }
 
+      function assertThrows(errorType, callback) {
+         let errorThrown = false;
+         try {
+            callback();
+         }
+         catch (err) {
+            if (!(err instanceof errorType)) {
+               throw err;
+            }
+            else {
+               errorThrown = true;
+            }
+         }
+         assert(errorThrown);
+      }
+
       var defaultError = console.error;
 
       function disableConsoleErrors() {
