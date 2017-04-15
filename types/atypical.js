@@ -484,8 +484,8 @@ function AtypicalModuleGenerator() {
    //                                       convertible. For example, if this function is defined
    //                                       on our Pair example above, type A is convertible to
    //                                       type X, and type B is convertible to type Y, then
-   //                                       Pair(A, B) will be automatically convertible to
-   //                                       Pair(X, Y) by using this function as the conversion
+   //                                       Generic(A, B) will be automatically convertible to
+   //                                       Generic(X, Y) by using this function as the conversion
    //                                       function.
    //                                       Only generic types with the same number of type
    //                                       parameters will be set as automatically convertible.
@@ -495,8 +495,34 @@ function AtypicalModuleGenerator() {
    //                                       type parameters, and returning a new instance of the 
    //                                       converted object of the new type.
    //
-   //                 typeParameterIsContravariant: 
-   //                 // TODO
+   //                 typeParameterIsContravariant:
+   //                      Only has any meaning when changeTypeParameters is also defined.
+   //                      Must be defined as a function taking in only one argument, an index
+   //                      into the type parameters list. Must return true or false.
+   //
+   //                      When determining eligibility for calling changeTypeParameters for
+   //                      type conversion, if this function returns true, the directionality
+   //                      of the conversion check between the two corresponding type parameters
+   //                      is reversed. E.g. if you have Generic(A, B) and Generic(X, Y) with
+   //                      changeTypeParameters defined, and this function returns true when
+   //                      called with an index of 1, then Generic(A, B) will only be convertible
+   //                      to Generic(X, Y) if A is convertible to X and Y is convertible to B.
+   //                      (Note the direction change on the second type parameter!)
+   //
+   //                      This is useful for things like function types, where a 
+   //                      function (A, B) -> C can only be treated as a function (X, Y) -> Z if
+   //                      C can be converted to Z, and X and Y can be converted to A and B
+   //                      respectively. (Note the inverted conversion requirements in the input
+   //                      type!)
+   //
+   //                      In this function, you may use "this" to access any properties of the
+   //                      PROTOTYPE of this generic type (e.g. anything defined in this
+   //                      implementation object, as well as properties like this.type and
+   //                      this.typeParameters, but not anything defined in the init function).
+   //
+   //                      If changeTypeParameters is defined but this function is not, a default
+   //                      "always return false" implementation of this function
+   //                      is provided automatically.
    //
    //                 convertToTypeParameter, convertFromTypeParameter:
    //                      These are optional functions that allow concrete subtypes of this
@@ -519,7 +545,7 @@ function AtypicalModuleGenerator() {
    //                      of this generic type. In this function, you may use "this" to access
    //                      any properties of the PROTOTYPE of this generic type (e.g. anything
    //                      defined in this implementation object, as well as properties like
-   //                      this.type and this. typeParameters, but not anything defined in the
+   //                      this.type and this.typeParameters, but not anything defined in the
    //                      init function).
    //
    //                      If these functions are defined, and the corresponding
@@ -529,7 +555,19 @@ function AtypicalModuleGenerator() {
    //                      canConvertTo/FromTypeParameter functions to reflect that.
    //
    //                 canConvertToTypeParameter, canConvertFromTypeParameter:
-   //                 // TODO?????
+   //                      Must be defined as a function taking in only one argument, an index
+   //                      into the type parameters list. Must return true or false.
+   //
+   //                      Allows a generic type to restrict which type parameters this generic
+   //                      type can be converted to or from. For example, if these functions return
+   //                      true only when the index is 0, then concrete subtypes of this generic
+   //                      type will only be convertible to/from the type specified in the first
+   //                      type parameter.
+   //
+   //                      In this function, you may use "this" to access any properties of the
+   //                      PROTOTYPE of this generic type (e.g. anything defined in this
+   //                      implementation object, as well as properties like this.type and
+   //                      this.typeParameters, but not anything defined in the init function).
    //
    //                 The following proeprties MUST NOT be defined on this object:
    //
