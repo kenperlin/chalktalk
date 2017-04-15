@@ -1259,7 +1259,11 @@ function AtypicalModuleGenerator() {
             this._def("func", func);
          },
          toPrimitive: function() {
-            return this.func;
+            let that = this;
+            return function() {
+               let args = Array.from(arguments);
+               return that.call.apply(that, args);
+            };
          },
          // Can convert from return value (makes it a constant function)
          canConvertFromTypeParameter: function(index) {
