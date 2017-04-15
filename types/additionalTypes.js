@@ -97,7 +97,9 @@
 
    AT.defineConversion(AT.Expression, AT.String, function(exp) {
       try {
-         return new AT.String(exp.eval());
+         let value = exp.eval();
+         // Undefined values convert to empty strings
+         return new AT.String(value === undefined ? "" : value);
       }
       catch (error) {
          return new AT.String(exp.str);

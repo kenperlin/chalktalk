@@ -28,11 +28,15 @@ window.AdditionalTests = [
       T.assert(stringThing.value === "evaluateme");
       stringThing = (new AT.Expression("dontevaluateme").convert(AT.String));
       T.assert(stringThing.value === "dontevaluateme");
+      // If the expression returns undefined, convert that to an empty string
+      stringThing = (new AT.Expression("").convert(AT.String));
+      T.assert(stringThing.value === "");
       // When strings are converted to expressions, they're escaped and surrounded with quotes
       stringThing = new AT.String("\'single\' and \"double\" quotes and \\backslashes");
       let stringExpression = stringThing.convert(AT.Expression);
       T.assert(stringExpression.str ===
          "\"\\\'single\\\' and \\\"double\\\" quotes and \\\\backslashes\"");
+
 
       let boolThing = (new AT.Expression("1 != 2 && 4 < 5")).convert(AT.Bool);
       T.assert(boolThing.value === true);
