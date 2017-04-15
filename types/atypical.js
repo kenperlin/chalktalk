@@ -207,12 +207,24 @@ function AtypicalModuleGenerator() {
                return undefined;
             }
 
-            // Can't convert if any of the type parameters are not convertible
+            // Can't convert if any of the type parameters are not convertible in the right
+            // direction
             for (let i = 0; i < sourceType.prototype.typeParameters.length; i++) {
-               if (!AT.canConvert(sourceType.prototype.typeParameters[i],
-                  destinationType.prototype.typeParameters[i]))
-               {
-                  return undefined;
+               if (sourceType.prototype.typeParameterIsContravariant(i)) {
+                  // Conversion requirements go in the opposite direction for contravariant
+                  // type parameters.
+                  if (!AT.canConvert(destinationType.prototype.typeParameters[i],
+                     sourceType.prototype.typeParameters[i]))
+                  {
+                     return undefined;
+                  }
+               }
+               else {
+                  if (!AT.canConvert(sourceType.prototype.typeParameters[i],
+                     destinationType.prototype.typeParameters[i]))
+                  {
+                     return undefined;
+                  }
                }
             }
 
@@ -483,6 +495,9 @@ function AtypicalModuleGenerator() {
    //                                       type parameters, and returning a new instance of the 
    //                                       converted object of the new type.
    //
+   //                 typeParameterIsContravariant: 
+   //                 // TODO
+   //
    //                 convertToTypeParameter, convertFromTypeParameter:
    //                      These are optional functions that allow concrete subtypes of this
    //                      generic type to be automatically made convertible with their type
@@ -514,6 +529,7 @@ function AtypicalModuleGenerator() {
    //                      canConvertTo/FromTypeParameter functions to reflect that.
    //
    //                 canConvertToTypeParameter, canConvertFromTypeParameter:
+   //                 // TODO?????
    //
    //                 The following proeprties MUST NOT be defined on this object:
    //
@@ -539,12 +555,23 @@ function AtypicalModuleGenerator() {
       }
 
       // Check conversion function between different instances of this generic type
-      if (implementation.changeTypeParameters !== undefined
-         && !_isFunctionOfNArguments(implementation.changeTypeParameters, 1))
-      {
-         console.error("Error defining generic types: changeTypeParameters "
-            + "must be a function of one argument.");
-         return undefined;
+      if (implementation.changeTypeParameters !== undefined) {
+         if (!_isFunctionOfNArguments(implementation.changeTypeParameters, 1)) {
+            console.error("Error defining generic types: changeTypeParameters "
+               + "must be a function of one argument.");
+            return undefined;
+         }
+
+         if (implementation.typeParameterIsContravariant !== undefined) {
+            if(!_isFunctionOfNArguments(implementation.typeParameterIsContravariant, 1)) {
+               console.error("Error defining generic types: typeParameterIsContravariant "
+                  + "must be a function of one argument taking in only the index.");
+               return undefined;
+            }
+         }
+         else {
+            implementation.typeParameterIsContravariant = function (index) { return false; }
+         }
       }
 
       if (implementation.convertToTypeParameter !== undefined) {
