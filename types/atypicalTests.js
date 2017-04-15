@@ -577,7 +577,6 @@ window.AtypicalTests = (function() {
 
          //--------------------------------------------------------------------------------
          // Test chained, implicit intermediary conversions
-         // TODO: should you be able to go all the way down any chain that allows you to?
          function() {
             let One = AT.defineType({
                typename: "One",
