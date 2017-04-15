@@ -110,18 +110,6 @@
       ) + "\"");
    });
 
-   AT.defineConversion(AT.Expression, AT.Int, function(exp) {
-      try {
-         return new AT.Int(exp.eval());
-      }
-      catch (error) {
-         return new AT.Int(0);
-      }
-   });
-   AT.defineConversion(AT.Int, AT.Expression, function(i) {
-      return new AT.Expression("" + i.value);
-   });
-
    AT.defineConversion(AT.Expression, AT.Float, function(exp) {
       try {
          return new AT.Float(exp.eval());
