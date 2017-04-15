@@ -1264,6 +1264,28 @@ window.AtypicalTests = (function() {
             let constantIntFunc = intValue.convert(AT.Function(AT.Int));
             assert(constantIntFunc && constantIntFunc.call() === 3);
 
+            // Functions can be converted to other functions where the types are compatible
+
+            let makeBiggerFloat = new (AT.Function(AT.Float, AT.Float))(function (x) {
+               return x + 0.5;
+            });
+            assert(makeBiggerFloat.call(2.1) === 2.6);
+            assert(AT.canConvert(AT.Function(AT.Float, AT.Float), AT.Function(AT.Int, AT.Int)));
+            let makeBiggerInt = makeBiggerFloat.convert(AT.Function(AT.Int, AT.Int));
+            assert(makeBiggerInt && makeBiggerInt.call(1.7) === 3);
+
+            // But types are only compatible in certain directions: covariantly in the return type
+            // and contravariantly in the argument types
+
+            AT.defineType({ typename: "A", init: function(){} });
+            AT.defineType({ typename: "B", init: function(){} });
+            AT.defineConversion(AT.A, AT.B, function(a) { return new AT.B() });
+
+            // In other words, input types have to be converted in the opposite direction
+            assert(AT.canConvert(AT.Function(AT.B, AT.B, AT.A), AT.Function(AT.A, AT.A, AT.B)));
+            assert(!AT.canConvert(AT.Function(AT.A, AT.A, AT.A), AT.Function(AT.B, AT.B, AT.B)));
+            assert(!AT.canConvert(AT.Function(AT.B, AT.B, AT.B), AT.Function(AT.A, AT.A, AT.A)));
+
             // TODO: test converting e.g. Function<Float, Float, Float> to Function<Int, Int, Int>
          }
       ];

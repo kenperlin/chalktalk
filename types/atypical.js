@@ -1229,86 +1229,116 @@ function AtypicalModuleGenerator() {
 
    // TODO: document function types (initial type parameters are arguments, last is return value)
    // Functions should take in and return primitive values where possible
-   AT.defineGenericType({
-      typename: "Function",
-      init: function(func) {
-         if (typeof func !== "function") {
-            throw new AT.ConstructionError("Attempted to construct a Function with a(n) "
-                                           + (typeof func) + " instead of a function");
+   (function() {
+      // A few utility functions for the function type, that shouldn't be exposed to the
+      // rest of Atypical
+      function wrapOrConvertValue(type, value) {
+         if (!(value instanceof type)) {
+            if (value instanceof AT.Type) {
+               value = value.convert(type);
+            }
+            else {
+               value = new type(value);
+            }
          }
-         if (this.typeParameters.length === 0) {
-            throw new AT.ConstructionError("Attempted to construct a Function with no "
-               + "type parameters. Use AT.Function(AT.Void) for functions that return "
-               + "no values and take no arguments.");
-         }
-         this._def("func", func);
-      },
-      toPrimitive: function() {
-         return this.func;
-      },
-      // Can convert from return value (makes it a constant function)
-      canConvertFromTypeParameter: function(index) {
-         return index === this.typeParameters.length - 1;
-      },
-      convertFromTypeParameter: function(index, value) {
-         return new this.type(function() {
-            return value;
-         });
-      },
-      call: function() {
-         // Clean up arguments to make sure they're the right type (converting them to primitive
-         // values where possible)
-         let args = [];
-         for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
-            let wrappedArg = arguments[i];
-            // Wrap or convert the argument if needed
-            if (!(wrappedArg instanceof this.typeParameters[i])) {
-               if (wrappedArg instanceof AT.Type) {
-                  wrappedArg = wrappedArg.convert(this.typeParameters[i]);
+         return value;
+      }
+
+      AT.defineGenericType({
+         typename: "Function",
+         init: function(func) {
+            if (typeof func !== "function") {
+               throw new AT.ConstructionError("Attempted to construct a Function with a(n) "
+                  + (typeof func) + " instead of a function");
+            }
+            if (this.typeParameters.length === 0) {
+               throw new AT.ConstructionError("Attempted to construct a Function with no "
+                  + "type parameters. Use AT.Function(AT.Void) for functions that return "
+                     + "no values and take no arguments.");
+            }
+            this._def("func", func);
+         },
+         toPrimitive: function() {
+            return this.func;
+         },
+         // Can convert from return value (makes it a constant function)
+         canConvertFromTypeParameter: function(index) {
+            return index === this.typeParameters.length - 1;
+         },
+         convertFromTypeParameter: function(index, value) {
+            return new this.type(function() {
+               return value;
+            });
+         },
+         changeTypeParameters: function(newTypes) {
+            let sourceFunction = this;
+            return new (this.genericType.apply(null, newTypes))(function() {
+               let convertedArguments = [];
+               for (let i = 0;
+                  i < Math.min(arguments.length, sourceFunction.typeParameters.length - 1); i++)
+               {
+                  convertedArguments.push(
+                     wrapOrConvertValue(sourceFunction.typeParameters[i], arguments[i]));
+               }
+
+               let returnValue = sourceFunction.callWrapped.apply(
+                                    sourceFunction, convertedArguments);
+
+               return returnValue.convert(newTypes[newTypes.length - 1]);
+            });
+         },
+         typeParameterIsContravariant: function(index) {
+            // When converting a function that takes in (A, B) and returns C to one that takes in
+            // (X, Y) and returns Z, you need the return value to be convertible from the source
+            // type to the destination type (i.e. C -> Z, as the internal function will return a
+            // C), but the ARGUMENT types need to go in the opposite direction (i.e. X -> A
+            // and Y -> B, because the arguments need to be converted in that direction in order
+            // to be passed into the internal function.)
+            return index !== this.typeParameters.length - 1;
+         },
+         // TODO: doc this
+         callWrapped: function() {
+            // Clean up arguments to make sure they're the right type (converting them to primitive
+            // values where possible)
+            let args = [];
+            for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
+               let wrappedArg = wrapOrConvertValue(this.typeParameters[i], arguments[i]);
+
+               if (wrappedArg.isPrimitive()) {
+                  // If it's a primitive, wrapping it and unwrapping it is the easiest way
+                  // to do type verification.
+                  args.push(wrappedArg.toPrimitive());
                }
                else {
-                  wrappedArg = new this.typeParameters[i](arguments[i]);
+                  args.push(wrappedArg);
                }
             }
 
-            if (wrappedArg.isPrimitive()) {
-               // If it's a primitive, wrapping it and unwrapping it is the easiest way
-               // to do type verification.
-               args.push(wrappedArg.toPrimitive());
+            let returnValue = this.func.apply(this, args);
+
+            let returnType = this.typeParameters[this.typeParameters.length - 1];
+
+            if (returnType === AT.Void) {
+               return undefined;
+            }
+
+            return wrapOrConvertValue(returnType, returnValue);
+         },
+         // TODO: doc this
+         call: function() {
+            let args = Array.from(arguments);
+            let returnValue = this.callWrapped.apply(this, args);
+            // If it's a primitive, wrapping it and unwrapping it is the easiest way
+            // to do type verification.
+            if (returnValue !== undefined && returnValue.isPrimitive()) {
+               return returnValue.toPrimitive();
             }
             else {
-               args.push(wrappedArg);
+               return returnValue;
             }
          }
-
-         let returnValue = this.func.apply(this, args);
-
-         let returnType = this.typeParameters[this.typeParameters.length - 1];
-
-         if (returnType === AT.Void) {
-            return undefined;
-         }
-
-         // Wrap or convert the return value if needed
-         if (!(returnValue instanceof returnType)) {
-            if (returnValue instanceof AT.Type) {
-               returnValue = returnValue.convert(returnType);
-            }
-            else {
-               returnValue = new returnType(returnValue);
-            }
-         }
-
-         // If it's a primitive, wrapping it and unwrapping it is the easiest way
-         // to do type verification.
-         if (AT.isPrimitive(returnType)) {
-            return returnValue.toPrimitive();
-         }
-         else {
-            return returnValue;
-         }
-      }
-   });
+      });
+   })();
 
    return AT;
 };
