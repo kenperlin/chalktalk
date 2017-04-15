@@ -1272,7 +1272,9 @@ window.AtypicalTests = (function() {
             assert(makeBiggerFloat.call(2.1) === 2.6);
             assert(AT.canConvert(AT.Function(AT.Float, AT.Float), AT.Function(AT.Int, AT.Int)));
             let makeBiggerInt = makeBiggerFloat.convert(AT.Function(AT.Int, AT.Int));
-            assert(makeBiggerInt && makeBiggerInt.call(1.7) === 3);
+            let wrappedIntResult = makeBiggerInt.callWrapped(1.7);
+            assert(wrappedIntResult instanceof AT.Int && wrappedIntResult.value === 3);
+            assert(makeBiggerInt.call(1.7) === 3);
 
             // But types are only compatible in certain directions: covariantly in the return type
             // and contravariantly in the argument types
@@ -1285,8 +1287,6 @@ window.AtypicalTests = (function() {
             assert(AT.canConvert(AT.Function(AT.B, AT.B, AT.A), AT.Function(AT.A, AT.A, AT.B)));
             assert(!AT.canConvert(AT.Function(AT.A, AT.A, AT.A), AT.Function(AT.B, AT.B, AT.B)));
             assert(!AT.canConvert(AT.Function(AT.B, AT.B, AT.B), AT.Function(AT.A, AT.A, AT.A)));
-
-            // TODO: test converting e.g. Function<Float, Float, Float> to Function<Int, Int, Int>
          }
       ];
 
