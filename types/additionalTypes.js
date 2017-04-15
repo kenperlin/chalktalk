@@ -1,7 +1,15 @@
 "use strict";
 
-(function() {
+(function AdditionalTypes(AT) {
    // Chalktalk-specific type defintions go in this file.
+   
+   // Override the _createTestingModule function so that we can test these additional types as well
+   let originalModuleCreator = AT._createTestingModule;
+   AT._createTestingModule = function() {
+      let newAT = originalModuleCreator();
+      AdditionalTypes(newAT);
+      return newAT;
+   }
 
    // This type is meant to allow a degree of interoperability for sketches that have not been
    // converted to use Atypical types yet. It's just a dumb wrapper around a JS variable, and while
@@ -68,4 +76,4 @@
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Function(AT.Float, AT.Radians), null);
 
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
-})();
+})(AT);

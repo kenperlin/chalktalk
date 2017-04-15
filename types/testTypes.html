@@ -7,9 +7,14 @@
    See atypicalTests.js for where the tests are actually defined.
 -->
 
+<!-- Test harness -->
+<script src="/types/testHarness.js"></script>
 <!-- Type system -->
 <script src="/types/atypical.js"></script>
 <script src="/types/atypicalTests.js"></script>
+<!-- Additional, more Chalktalk-specific types -->
+<script src="/types/additionalTypes.js"></script>
+<script src="/types/additionalTests.js"></script>
 
 <style>
    p {
@@ -48,7 +53,7 @@ Tests threw an error or haven't finished running yet.
 
 <script>
 var testText = document.getElementById("testResults");
-if(AtypicalTests.runTests()) {
+if(TestHarness.runTests(AtypicalTests) && TestHarness.runTests(AdditionalTests)) {
    testText.style.color = "#0f0";
    testText.textContent = "All tests passed.";
 }
