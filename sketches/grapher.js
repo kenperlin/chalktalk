@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "Grapher";
 
    this.choice = new Choice();
@@ -32,7 +31,17 @@ function() {
 
    resetValues();
 
-   var recordValue = function (v) {
+   var recordValue = function (v, elapsed) {
+      sinceLastMeasurement += elapsed
+
+      if (sinceLastMeasurement > .0625) {
+         if (values.length >= 100) {
+            // Expire older records if buffer is full
+            values.splice(0,1);
+            scrolledBy += 1;
+         }
+      }
+
       if (isDef(v) && v !== null && isNumeric(v)) {
          v = Math.round(v*1000)/1000;
          if (values.length == 1 && v == values[0])
@@ -53,6 +62,8 @@ function() {
       }
    };
 
+   this.defineInput(AT.Function(AT.Float, AT.Float));
+
    this.render = function(elapsed) {
       var sc = this.size / 400;
       m.scale(sc);
@@ -63,28 +74,8 @@ function() {
           resetValues();
       this.s = this.choice.getState();
 
-      // Record measurement
-
-      if (this.inValues_DEPRECATED_PORT_SYSTEM.length > 0) {
-
-         sinceLastMeasurement += elapsed
-
-         if (sinceLastMeasurement > .0625) {
-            if (values.length >= 100) {
-
-               // Expire older records if buffer is full
-
-               values.splice(0,1);
-               scrolledBy += 1;
-            }
-
-            // Capture input
-
-            var val = this.inValues_DEPRECATED_PORT_SYSTEM[0];
-            if (typeof val == 'function')
-               val = val(time);
-            recordValue(val);
-         }
+      if (this.inputs.hasValue(0)) {
+         recordValue(this.inputs.value(0)(time), elapsed);
       }
 
       // zero line (if one is in range)
