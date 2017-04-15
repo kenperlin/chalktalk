@@ -76,4 +76,73 @@
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Function(AT.Float, AT.Radians), null);
 
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
+
+
+   // TODO: DOC
+   
+   AT.defineType({
+      typename: "Expression",
+      init: function(str) {
+         if (str instanceof AT.Expression) { str = str.str; }
+         else if (str instanceof AT.String) { str = str.value; }
+         this._def("str", "" + str);
+      },
+      toPrimitive: function() {
+         return this.str;
+      },
+      eval: function() {
+         return eval(this.str);
+      }
+   });
+
+   AT.defineConversion(AT.Expression, AT.String, function(exp) {
+      try {
+         return new AT.String(exp.eval());
+      }
+      catch (error) {
+         return new AT.String(exp.str);
+      }
+   });
+   AT.defineConversion(AT.String, AT.Expression, function(str) {
+      // When strings are converted to expressions, they're escaped and surrounded with quotes
+      return new AT.Expression("\"" + str.value.replace(/(["'\\])/g,
+         function(str) { return "\\" + str; }
+      ) + "\"");
+   });
+
+   AT.defineConversion(AT.Expression, AT.Int, function(exp) {
+      try {
+         return new AT.Int(exp.eval());
+      }
+      catch (error) {
+         return new AT.Int(0);
+      }
+   });
+   AT.defineConversion(AT.Int, AT.Expression, function(i) {
+      return new AT.Expression("" + i.value);
+   });
+
+   AT.defineConversion(AT.Expression, AT.Float, function(exp) {
+      try {
+         return new AT.Float(exp.eval());
+      }
+      catch (error) {
+         return new AT.Float(0);
+      }
+   });
+   AT.defineConversion(AT.Float, AT.Expression, function(f) {
+      return new AT.Expression("" + f.value);
+   });
+
+   AT.defineConversion(AT.Expression, AT.Bool, function(exp) {
+      try {
+         return new AT.Bool(exp.eval());
+      }
+      catch (error) {
+         return new AT.Bool(false);
+      }
+   });
+   AT.defineConversion(AT.Bool, AT.Expression, function(b) {
+      return new AT.Expression("" + b.value);
+   });
 })(AT);
