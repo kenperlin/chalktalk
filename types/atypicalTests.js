@@ -1142,19 +1142,31 @@ window.AtypicalTests = (function() {
          },
 
          //--------------------------------------------------------------------------------
-         // Test vector3 type
+         // A few tests for basic types
          function() {
-            let a = new AT.Vector3(3, 4, 5);
-            assert(a.x === 3 && a.y === 4 && a.z === 5);
+            let f1 = new AT.Float(5.6);
+            assert(f1 && f1.value === 5.6);
+            let f2 = new AT.Float(f1);
+            assert(f2 && f2.value === 5.6); // Ensure no nested floats
+            
+            let i1 = new AT.Int(4.2);
+            assert(i1 && i1.value === 4);
+            let i2 = new AT.Int(i1);
+            assert(i2 && i2.value === 4); // Ensure no nested ints
 
-            let b = new AT.Vector3([4, 5, 6]);
-            assert(b.x === 4 && b.y === 5 && b.z === 6);
+            let s1 = new AT.String("hi");
+            assert(s1 && s1.value === "hi");
+            let s2 = new AT.String(s1);
+            assert(s2 && s2.value === "hi"); // Same with strings
 
-            let c = new AT.Vector3();
-            assert(c.x === 0 && c.y === 0 && c.z === 0);
-
-            let d = new AT.Vector3(6);
-            assert(d.x === 6 && d.y === 0 && d.z === 0);
+            let v1 = new AT.Vector3(3, 4, 5);
+            assert(v1.x === 3 && v1.y === 4 && v1.z === 5);
+            let v2 = new AT.Vector3([4, 5, 6]);
+            assert(v2.x === 4 && v2.y === 5 && v2.z === 6);
+            let v3 = new AT.Vector3();
+            assert(v3.x === 0 && v3.y === 0 && v3.z === 0);
+            let v4 = new AT.Vector3(6);
+            assert(v4.x === 6 && v4.y === 0 && v4.z === 0);
 
          },
 
