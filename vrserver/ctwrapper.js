@@ -1,70 +1,46 @@
 const WebSocket = require('ws');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
+//const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.134');
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
   ws.send(JSON.stringify({global: "displayListener", value: true }));
 });
 
-// reroute data to ChalkTalk Server
-holojam.on('onmousemove',(flake) => {
+const width = 1440;
+const height = 900;
+
+holojam.on('mouseEvent',(flake) => {
+
+  var t = flake.ints[0];
+  t = (t == 0 ? "onmousedown" : (t == 1 ? "onmousemove" : "onmouseup"));
+
   var m = {
-   eventType: "onmousemove",
-   event: {
-      button : flake.ints[0],     // EITHER 0,1,2 or 3
-      clientX: flake.floats[0],     // X SCREEN COORD -1.0 … +1.0
-      clientY: flake.floats[1]      // Y SCREEN COORD -1.0 … +1.0
-   }};
-   m = JSON.stringify(m);
-   ws.send(m);
+    eventType: t,
+    event: {
+      button : 3,
+      clientX : (flake.floats[0]+1)/2 * width,
+      clientY : height - (flake.floats[1]+1)/2 * height
+    }
+  }
+  m = JSON.stringify(m);
+
+  //console.log(m);
+  ws.send(m);
 });
 
-holojam.on('onmousedown',(flake) => {
-  console.log("mouse down");
-    var m = {
-   eventType: "onmousedown",
-   event: {
-      button : flake.ints[0],     // EITHER 0,1,2 or 3
-      clientX: flake.floats[0],     // X SCREEN COORD -1.0 … +1.0
-      clientY: flake.floats[1]      // Y SCREEN COORD -1.0 … +1.0
-   }};
-   m = JSON.stringify(m);
-   ws.send(m);
-});
+holojam.on('keyEvent',(flake) => {
+  var t = flake.ints[1];
+  t = (t == 0 ? "onkeydown" : "onkeyup");
 
-holojam.on('onmouseup',(flake) => {
-  console.log("mouse up");
-    var m = {
-   eventType: "onmouseup",
-   event: {
-      button : flake.ints[0],     // EITHER 0,1,2 or 3
-      clientX: flake.floats[0],     // X SCREEN COORD -1.0 … +1.0
-      clientY: flake.floats[1]      // Y SCREEN COORD -1.0 … +1.0
-   }};
-   m = JSON.stringify(m);
-   ws.send(m);
+  var m = {
+    eventType: t,
+    event: {
+    keyCode : flake.ints[0] + 48
+  }};
+  m = JSON.stringify(m);
+  ws.send(m);
 });
-
-holojam.on('onkeydown',(flake) => {
-    var m = {
-   eventType: "onkeydown",
-   event: {
-      keyCode : flake.ints[0] + 48
-   }};
-   m = JSON.stringify(m);
-   ws.send(m);
-});
-
-holojam.on('onkeyup',(flake) => {
-    var m = {
-   eventType: "onkeyup",
-   event: {
-      keyCode : flake.ints[0] + 48
-   }};
-   m = JSON.stringify(m);
-   ws.send(m);
-});
-
 
 function readHeader(data){
    var ctdata01 = data.toString('ascii',1,2);
@@ -80,6 +56,7 @@ function readHeader(data){
 }
 
 
+/*
 function readCurves(data){
   var curveObjs = {label: 'Display',vector4s:[{
             x: 0,
@@ -193,6 +170,7 @@ function testMTU(){
   }
   return curveObjs;
 }
+*/
 
 ws.on('message', function incoming(data, flags) {
   // flags.binary will be set if a binary data is received.
@@ -200,10 +178,15 @@ ws.on('message', function incoming(data, flags) {
   //console.log("data",data);
   // time I received displayList
   //console.log("Receive displayList", getTime());
+
+  //let t = process.hrtime();
+
   var header = readHeader(data);
   if (header === "CTdata01"){
       //var curveFlakes = readCurves(data);
+
       var curveFlakes = {label: 'Display',bytes:data}
+
       //console.log("curveFlakes",curveFlakes);
       // time I parsed displayList and send
       //console.log("Parsed displayList and send", getTime());
@@ -211,6 +194,24 @@ ws.on('message', function incoming(data, flags) {
       // test maximum size of package
       //curveFlakes = testMTU();
       //console.log("curveFlakes Bytes width",curveFlakes.bytes[16] + curveFlakes.bytes[17] * 256);
+
       holojam.Send(holojam.BuildUpdate('ChalkTalk', [curveFlakes]));
+
+      //console.log(process.hrtime(t)[1] / 1e6);
   }
 });
+
+/*
+setInterval(() => {
+	holojam.Send(
+		holojam.BuildUpdate('Test',
+			[
+				{label: 'test',vector3s:[{x:2,y:4,z:6}]}
+			]
+	));
+}, 20);
+
+holojam.on('tick', (s,r) => {
+	console.log(s);
+});
+*/
