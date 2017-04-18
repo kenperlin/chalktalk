@@ -115,9 +115,6 @@
          return new AT.Float(0);
       }
    });
-   AT.defineConversion(AT.Float, AT.Expression, function(f) {
-      return new AT.Expression("" + f.value);
-   });
 
    AT.defineConversion(AT.Expression, AT.Bool, function(exp) {
       try {
@@ -126,8 +123,5 @@
       catch (error) {
          return new AT.Bool(false);
       }
-   });
-   AT.defineConversion(AT.Bool, AT.Expression, function(b) {
-      return new AT.Expression("" + b.value);
    });
 })(AT);

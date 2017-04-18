@@ -10,19 +10,15 @@ window.AdditionalTests = [
    function() {
       let floatThing = (new AT.Expression("3.14")).convert(AT.Float);
       T.assert(floatThing.value === 3.14);
-      T.assert(floatThing.convert(AT.Expression).str === "3.14");
 
       floatThing = (new AT.Expression("3.1-2.1")).convert(AT.Float);
       T.assert(floatThing.value === 1.0);
-      T.assert(floatThing.convert(AT.Expression).str === "1");
 
       floatThing = (new AT.Expression("potato")).convert(AT.Float);
       T.assert(floatThing.value === 0.0);
-      T.assert(floatThing.convert(AT.Expression).str === "0");
 
       let intThing = (new AT.Expression("1.1+2.2")).convert(AT.Int);
       T.assert(intThing.value === 3);
-      T.assert(intThing.convert(AT.Expression).str === "3");
 
       let stringThing = (new AT.Expression("\"evaluate\" + \"me\"").convert(AT.String));
       T.assert(stringThing.value === "evaluateme");
@@ -42,7 +38,6 @@ window.AdditionalTests = [
       T.assert(boolThing.value === true);
       boolThing = (new AT.Expression("syntax errors {}!!!")).convert(AT.Bool);
       T.assert(boolThing.value === false);
-      T.assert(boolThing.convert(AT.Expression).str === "false");
    }
 ];
 
