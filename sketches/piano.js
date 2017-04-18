@@ -6,10 +6,10 @@ function() {
    this.minOctave = 3;
    this.maxOctave = 3;
    this.pt = newVec3(-100,0,0);
-   this.cmdSwipe[0] = ['add left octave', function() { this.maxOctave++; }];
-   this.cmdSwipe[2] = ['seven octaves', function() { this.minOctave = 0; this.maxOctave = 6; }];
-   this.cmdSwipe[4] = ['add right octave', function() { this.minOctave = max(0, this.minOctave - 1); }];
-   this.cmdSwipe[6] = ['only one octave', function() { this.minOctave = this.maxOctave = 3; }];
+   this.onCmdSwipe[0] = ['add left octave', function() { this.maxOctave++; }];
+   this.onCmdSwipe[2] = ['seven octaves', function() { this.minOctave = 0; this.maxOctave = 6; }];
+   this.onCmdSwipe[4] = ['add right octave', function() { this.minOctave = max(0, this.minOctave - 1); }];
+   this.onCmdSwipe[6] = ['only one octave', function() { this.minOctave = this.maxOctave = 3; }];
    this.notePressed = null;
    this.onPress = function(p) { this.pt.copy(p); };
    this.onDrag = function(p) { this.pt.copy(p); };

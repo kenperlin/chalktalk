@@ -16,14 +16,7 @@ function() {
 
    this.onClick = [ 'remove 4D rotation', function() { trackball.identity(); } ];
 
-   this.onCmdSwipe = function(dx, dy) {
-      var dir = pieMenuIndex(dx, dy);
-      switch (dir) {
-      case 3:
-         this.isLines = ! this.isLines;
-	 break;
-      }
-   }
+   this.onCmdSwipe[6] = ['show lines', function() { this.isLines = ! this.isLines; }];
 
    this.onPress = function(T1) {
       T0.copy(T1);

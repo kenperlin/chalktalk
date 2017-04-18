@@ -69,12 +69,8 @@ function() {
    // CMD-SWIPE UP TO TOGGLE BETW BAR CHART AND LINE CHART.
    // CMD-SWIPE DOWN TO TOGGLE NOISE VALUES.
 
-   this.onCmdSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy)) {
-      case 1: this.isLines = ! this.isLines; break;
-      case 3: this.isNoise = ! this.isNoise; break;
-      }
-   }
+   this.onCmdSwipe[2] = ['bar/line', function() { this.isLines = ! this.isLines; }];
+   this.onCmdSwipe[6] = ['noise', function() { this.isNoise = ! this.isNoise; }];
 
    this.nValues = 1;
    this.valueIndex = -1;

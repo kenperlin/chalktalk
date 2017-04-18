@@ -30,15 +30,8 @@ function() {
    this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
    this.cmdMode = 0;
    this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
-   this.onCmdSwipe = function(dx,dy) {
-      var dir = pieMenuIndex(dx, dy, 8);
-      switch (dir) {
-      case 2:
-      case 6:
-         this.is_xyzt = ! this.is_xyzt;
-         break;
-      }
-   }
+   this.onCmdSwipe[2] = ['show labels', function() { this.is_xyzt = ! this.is_xyzt; }];
+   this.onCmdSwipe[6] = ['show labels', function() { this.is_xyzt = ! this.is_xyzt; }];
    this.onPress = function(p) { this.p.copy(p); }
 
    this.onSwipe[0] = ['select\nrow'   , function() { this.row = max(0, min(3, floor((1 - this.p.y) / 2 * 4))); }];
