@@ -13,10 +13,10 @@ function() {
    this.mF = new M4();
    this.mI = new M4();
 
-   this.onSwipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 1) % 3; }];
-   this.onSwipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 2) % 3; }];
-   this.onSwipe[2] = ['smooth', function() { this.isSmooth = ! this.isSmooth; }];
-   this.onSwipe[6] = ['keys'  , function() { this.showKeys = ! this.showKeys; }];
+   this.onCmdSwipe[0] = ['fill'  , function() { this.fillMode = (this.fillMode + 1) % 3; }];
+   this.onCmdSwipe[4] = ['unfill', function() { this.fillMode = (this.fillMode + 2) % 3; }];
+   this.onCmdSwipe[2] = ['smooth', function() { this.isSmooth = ! this.isSmooth; }];
+   this.onCmdSwipe[6] = ['keys'  , function() { this.showKeys = ! this.showKeys; }];
 
    this.mouseDown = function(x, y) {
 
