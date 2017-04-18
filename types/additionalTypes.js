@@ -70,11 +70,6 @@
    AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Radians);
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Int);
 
-   // TODO: is there a way to do this generically, for all types?
-   // Also, does this make sense? And does it makes sense to do this for all types?
-   AT.defineConversionsViaIntermediary(AT.Radians, AT.Function(AT.Radians), null);
-   AT.defineConversionsViaIntermediary(AT.Radians, AT.Function(AT.Float, AT.Radians), null);
-
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
 
 

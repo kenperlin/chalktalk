@@ -63,6 +63,10 @@ function() {
    };
 
    this.defineInput(AT.Function(AT.Float, AT.Float));
+   this.defineAlternateInputType(AT.Float, function(f) {
+      // Convert floats into constant functions for easy handling
+      return function() { return f.value; }
+   });
 
    this.render = function(elapsed) {
       var sc = this.size / 400;
