@@ -1,7 +1,7 @@
 function() {
    this.label = 'tristrip';
    this.mode = 0;
-   this.onClick = function() { this.mode++; }
+   this.onClick = ['next mode', function() { this.mode = (this.mode + 1) % 5; }];
    this.render = function() {
       mLine([-1,-1],[-1, 1]);
       mLine([-1, 1],[ 1, 1]);

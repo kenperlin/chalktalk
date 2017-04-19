@@ -2,7 +2,7 @@
 function() {
    this.label = "Boolean";
    this.state = true;
-   this.onClick = function() { this.state = ! this.state; }
+   this.onClick = ['toggle T/F', function() { this.state = ! this.state; }];
    this.render = function() {
       lineWidth(this.mScale(0.2));
       if (this.output()) {

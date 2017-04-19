@@ -27,7 +27,7 @@ function() {
     ];
    this.mode = 0;
    this.is_xyzt = false;
-   this.onClick = function() { this.mode = (this.mode + 1) % this.vals.length; }
+   this.onClick = ['next type', function() { this.mode = (this.mode + 1) % this.vals.length; }];
    this.cmdMode = 0;
    this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
    this.onCmdSwipe[2] = ['show labels', function() { this.is_xyzt = ! this.is_xyzt; }];

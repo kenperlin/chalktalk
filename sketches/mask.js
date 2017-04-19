@@ -5,7 +5,6 @@ function() {
 
    this.isLines = 0;
 
-   this.onClick = function() { console.log(++this.nWiggle); }
    this.onCmdSwipe[0] = ['show lines', function() { this.isLines = ! this.isLines; }];
 
    this.isAlreadyOutput = 0;
