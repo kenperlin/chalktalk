@@ -1267,6 +1267,17 @@ window.AtypicalTests = [
       let constantIntFunc = intValue.convert(AT.Function(AT.Int));
       T.assert(constantIntFunc && constantIntFunc.call() === 3);
 
+      // Functions of fewer arguments with the same return value can be converted to functions
+      // of more arguments
+      T.assert(AT.canConvert(AT.Function(AT.Int), AT.Function(AT.Int, AT.Int)));
+      T.assert(AT.canConvert(AT.Function(AT.Int), AT.Function(AT.Int, AT.String, AT.Int)));
+      T.assert(AT.canConvert(AT.Function(AT.String), AT.Function(AT.Float, AT.Int, AT.String)));
+      let intFunc = new (AT.Function(AT.Int, AT.Int))(function(x) { return x + 1; });
+      let intFunc2 = intFunc.convert(AT.Function(AT.Int, AT.String, AT.Int));
+      T.assert(intFunc2 && intFunc2.call(2, "potato") === 3);
+      // But functions of more arguments cannot be converted to functions of fewer arguments.
+      T.assert(!AT.canConvert(AT.Function(AT.Int, AT.Int, AT.Int), AT.Function(AT.Int, AT.Int)));
+
       // Functions can be converted to other functions where the types are compatible
 
       let makeBiggerFloat = new (AT.Function(AT.Float, AT.Float))(function (x) {
@@ -1284,10 +1295,12 @@ window.AtypicalTests = [
 
       AT.defineType({ typename: "A", init: function(){} });
       AT.defineType({ typename: "B", init: function(){} });
+      AT.defineType({ typename: "C", init: function(){} });
       AT.defineConversion(AT.A, AT.B, function(a) { return new AT.B() });
 
       // In other words, input types have to be converted in the opposite direction
       T.assert(AT.canConvert(AT.Function(AT.B, AT.B, AT.A), AT.Function(AT.A, AT.A, AT.B)));
+      T.assert(AT.canConvert(AT.Function(AT.B, AT.B, AT.A), AT.Function(AT.A, AT.A, AT.C, AT.B)));
       T.assert(!AT.canConvert(AT.Function(AT.A, AT.A, AT.A), AT.Function(AT.B, AT.B, AT.B)));
       T.assert(!AT.canConvert(AT.Function(AT.B, AT.B, AT.B), AT.Function(AT.A, AT.A, AT.A)));
    },

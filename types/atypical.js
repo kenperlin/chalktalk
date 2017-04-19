@@ -200,32 +200,11 @@ function AtypicalModuleGenerator() {
             // Can't convert if no conversion function exists.
             if (!sourceType.prototype.changeTypeParameters) { return undefined; }
 
-            // Can't convert if there's a differing number of type parameters
-            if (sourceType.prototype.typeParameters.length
-               !== destinationType.prototype.typeParameters.length)
+            // Can't convert if the type parameters are not convertible
+            if (!sourceType.prototype.canChangeTypeParameters(
+               destinationType.prototype.typeParameters))
             {
                return undefined;
-            }
-
-            // Can't convert if any of the type parameters are not convertible in the right
-            // direction
-            for (let i = 0; i < sourceType.prototype.typeParameters.length; i++) {
-               if (sourceType.prototype.typeParameterIsContravariant(i)) {
-                  // Conversion requirements go in the opposite direction for contravariant
-                  // type parameters.
-                  if (!AT.canConvert(destinationType.prototype.typeParameters[i],
-                     sourceType.prototype.typeParameters[i]))
-                  {
-                     return undefined;
-                  }
-               }
-               else {
-                  if (!AT.canConvert(sourceType.prototype.typeParameters[i],
-                     destinationType.prototype.typeParameters[i]))
-                  {
-                     return undefined;
-                  }
-               }
             }
 
             return function(sourceValue) {
@@ -495,34 +474,7 @@ function AtypicalModuleGenerator() {
    //                                       type parameters, and returning a new instance of the 
    //                                       converted object of the new type.
    //
-   //                 typeParameterIsContravariant:
-   //                      Only has any meaning when changeTypeParameters is also defined.
-   //                      Must be defined as a function taking in only one argument, an index
-   //                      into the type parameters list. Must return true or false.
-   //
-   //                      When determining eligibility for calling changeTypeParameters for
-   //                      type conversion, if this function returns true, the directionality
-   //                      of the conversion check between the two corresponding type parameters
-   //                      is reversed. E.g. if you have Generic(A, B) and Generic(X, Y) with
-   //                      changeTypeParameters defined, and this function returns true when
-   //                      called with an index of 1, then Generic(A, B) will only be convertible
-   //                      to Generic(X, Y) if A is convertible to X and Y is convertible to B.
-   //                      (Note the direction change on the second type parameter!)
-   //
-   //                      This is useful for things like function types, where a 
-   //                      function (A, B) -> C can only be treated as a function (X, Y) -> Z if
-   //                      C can be converted to Z, and X and Y can be converted to A and B
-   //                      respectively. (Note the inverted conversion requirements in the input
-   //                      type!)
-   //
-   //                      In this function, you may use "this" to access any properties of the
-   //                      PROTOTYPE of this generic type (e.g. anything defined in this
-   //                      implementation object, as well as properties like this.type and
-   //                      this.typeParameters, but not anything defined in the init function).
-   //
-   //                      If changeTypeParameters is defined but this function is not, a default
-   //                      "always return false" implementation of this function
-   //                      is provided automatically.
+   //                 canChangeTypeParameters: TODO DOC THIS
    //
    //                 convertToTypeParameter, convertFromTypeParameter:
    //                      These are optional functions that allow concrete subtypes of this
@@ -600,15 +552,25 @@ function AtypicalModuleGenerator() {
             return undefined;
          }
 
-         if (implementation.typeParameterIsContravariant !== undefined) {
-            if(!_isFunctionOfNArguments(implementation.typeParameterIsContravariant, 1)) {
-               console.error("Error defining generic types: typeParameterIsContravariant "
-                  + "must be a function of one argument taking in only the index.");
+         if (implementation.canChangeTypeParameters !== undefined) {
+            if (!_isFunctionOfNArguments(implementation.canChangeTypeParameters, 1)) {
+               console.error("Error defining generic types: canChangeTypeParameters "
+                  + "must be a function of one argument.");
                return undefined;
             }
          }
          else {
-            implementation.typeParameterIsContravariant = function (index) { return false; }
+            implementation.canChangeTypeParameters = function(newTypeParams) {
+               if (this.typeParameters.length !== newTypeParams.length) {
+                  return false;
+               }
+               for (let i = 0; i < newTypeParams.length; i++) {
+                  if (!AT.canConvert(this.typeParameters[i], newTypeParams[i])) {
+                     return false;
+                  }
+               }
+               return true;
+            }
          }
       }
 
@@ -742,8 +704,8 @@ function AtypicalModuleGenerator() {
    // If called multiple times with the same types, each call overrides the previous
    // conversion function.
    //
-   // sourceType: The name or constructor of the type you're converting from. Must be a type that's
-   //             already been defined.
+   // sourceType: The name or constructor of the type you're converting from. Must be a type
+   //             that's already been defined.
    // destinationType: The name or constructor of the type you're converting to. Must be a type
    //                  that's already been defined.
    // conversionFunction: A function, taking in one argument of the source type, that returns
@@ -1295,19 +1257,43 @@ function AtypicalModuleGenerator() {
                return returnValue.convert(newTypes[newTypes.length - 1]);
             });
          },
-         typeParameterIsContravariant: function(index) {
+         canChangeTypeParameters: function(newTypeParams) {
+            // You can always convert a function of fewer arguments to a function of more
+            // arguments so long as you have a compatible return value.
+            // E.g. a Function(Int, String) can be converted to a Function(Int, Float, String)
+            // by just ignoring the second argument.
+            // The opposite is impossible, though.
+            if (this.typeParameters.length > newTypeParams.length) {
+               return false;
+            }
+
             // When converting a function that takes in (A, B) and returns C to one that takes in
             // (X, Y) and returns Z, you need the return value to be convertible from the source
             // type to the destination type (i.e. C -> Z, as the internal function will return a
             // C), but the ARGUMENT types need to go in the opposite direction (i.e. X -> A
             // and Y -> B, because the arguments need to be converted in that direction in order
             // to be passed into the internal function.)
-            return index !== this.typeParameters.length - 1;
+            
+            if (!AT.canConvert(this.typeParameters[this.typeParameters.length - 1],
+               newTypeParams[newTypeParams.length - 1]))
+            {
+               return false;
+            }
+            
+            for (let i = 0;
+               i < Math.min(this.typeParameters.length - 1, newTypeParams.length - 1);
+               i++)
+            {
+               if (!AT.canConvert(newTypeParams[i], this.typeParameters[i])) {
+                  return false;
+               }
+            }
+            return true;
          },
          // TODO: doc this
          callWrapped: function() {
-            // Clean up arguments to make sure they're the right type (converting them to primitive
-            // values where possible)
+            // Clean up arguments to make sure they're the right type (converting them to
+            // primitive values where possible)
             let args = [];
             for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
                let wrappedArg = wrapOrConvertValue(this.typeParameters[i], arguments[i]);
