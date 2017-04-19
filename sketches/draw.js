@@ -211,11 +211,11 @@ function() {
 
    // THIS SHOULD BE CHANGED TO DELETE JUST THE LINE OR ARC CLICKED ON.
 
-   this.onClick = function(pt) {
+   this.onClick = ['erase', function(pt) {
       var curves = this._curves[this.selection];
       if (curves.length > 1)
          curves.pop();
-   }
+   }];
 
    this.onMove = function(pt) {
       var curves = this._curves[this.selection], i, curve, that = this, cx, cy, rx, ry;;

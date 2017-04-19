@@ -1,7 +1,7 @@
 function() {
    this.label = 'cube4d';
    this.is3D = true;
-   this.onClick = function() { trackball.identity(); }
+   this.onClick = ['unrotate', function() { trackball.identity(); }];
    this.onPress = function(B) { A.copy(B); }
    this.onDrag = function(B) { trackball.rotate([A.x,A.y,A.z,1], [B.x,B.y,B.z,1]); A.copy(B); }
 

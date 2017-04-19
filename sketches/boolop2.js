@@ -26,9 +26,9 @@ function() {
       "true",
    ];
 
-   this.onClick = function(p) {
+   this.onClick = ['toggle bits', function(p) {
       this.flipBit((p.x + p.y < 0 ? 1 : 0) + (p.y - p.x < 0 ? 2 : 0));
-   }
+   }];
 
    this.onCmdClick = function(p) {
       this.showStateNames = ! this.showStateNames;
