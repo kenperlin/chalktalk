@@ -2,28 +2,6 @@ function() {
    this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.s = -1;
 
-   function blur(x,d) {
-      if (sk().lpb === undefined)
-         sk().lpb = [];
-
-      sk().lpb.push(x);
-
-      var n = max(2, floor(100 * d));
-      while (sk().lpb.length > n)
-         sk().lpb.splice(0, 1);
-
-      if (sk().lpb.length < n)
-         return sk().lpb[sk().lpb.length - 1];
-
-      var sum = 0, wgt = 0;
-      for (var i = 0 ; i < n ; i++) {
-         var w = .5 + .5 * cos(TAU * (i / n - .5));
-         sum += w * sk().lpb[i];
-         wgt += w;
-      }
-      return sum / wgt;
-   }
-
    function makeCurve(f) {
       var curve = [];
       for (var t = -1 ; t <= 1 ; t += .03)
@@ -32,7 +10,6 @@ function() {
    }
 
    this.code = [
-      ["blur" , "blur(x, y)"],
       ["cos"  , "cos(x * exp(y))"],
       ["floor", "floor(x-.5)"],
       ["pow2" , "pow(2, x)"],
@@ -42,7 +19,6 @@ function() {
    ];
 
    var curves = [
-      /* blur  */ makeCurve(function(x) { return [x, x<0?1:1-x]; }), 
       /* cos   */ makeCurve(function(x) { return [x, cos(PI * x) / PI]; }), 
       /* floor */ makeCurve(function(x) { return [x, (floor(x)+.5)]; }), 
       /* pow2  */ makeCurve(function(x) { return [x, exp(x - 1)]; }), 
