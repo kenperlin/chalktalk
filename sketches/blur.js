@@ -1,5 +1,7 @@
 
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
+
    this._buffer = newArray(100);
 
    this._blur = function(x, d) {
@@ -27,7 +29,7 @@ function() {
    this.label = 'blur';
 
    this.render = function(elapsed) {
-      var y = max(-1, min(1, this.getInValue(1, 1))), C = [], x;
+      var y = max(-1, min(1, this.getInValue_DEPRECATED_PORT_SYSTEM(1, 1))), C = [], x;
 
       for (x = -1 ; x <= 1.001 ; x += 1/30)
          C.push([x*y, cos(PI * x) * .5 + .5]);
