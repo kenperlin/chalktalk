@@ -6,7 +6,7 @@ function() {
    this.isAnimated = false;
    this.state = [0,0,0,0,0,0,0,0,0,0,0,0];
    this.onCmdClick = function() { this.isAnimated = ! this.isAnimated; }
-   this.onClick = function() { this.isNeutral = ! this.isNeutral; }
+   this.onClick = ['open eyes', function() { this.isNeutral = ! this.isNeutral; }]
    this.render = function() {
       function p(x,y,s) {
          var z = sqrt(1 - x * x - y * y);

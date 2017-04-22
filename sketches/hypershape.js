@@ -4,6 +4,7 @@ function() {
    this.isFirstTime = true;
 
    this.graph = new Graph();
+   this.isLines = true;
 
    var trackball = new Trackball(4);
    var mode = 0;
@@ -14,6 +15,8 @@ function() {
    }
 
    this.onClick = [ 'remove 4D rotation', function() { trackball.identity(); } ];
+
+   this.onCmdSwipe[6] = ['show lines', function() { this.isLines = ! this.isLines; }];
 
    this.onPress = function(T1) {
       T0.copy(T1);
@@ -80,7 +83,7 @@ function() {
       project(pt, P[n]);
       var vertex = this.mesh.children[n];
       vertex.position.copy(P[n]);
-      vertex.scale.set(.1,.1,.1);
+      vertex.scale.set(.1, .1, .1);
       this.extendBounds([[P[n].x,P[n].y,P[n].z]]);
 
       if (this.graph.nodes[n] !== undefined) {
@@ -125,7 +128,6 @@ function() {
                this.placeEdge(n, n - S.length, i, j);
                n++;
             }
-
             
 	    this.isFirstTime = false;
          });
@@ -233,6 +235,10 @@ function() {
             for (var j = i+1 ; j < 24 ; j++) {
                var k = edgeColor(V[i], V[j], mode % 3);
                if (k >= 0) {
+	          if (this.isLines) {
+		     color(colors[k]);
+		     mLine(P[i], P[j]);
+                  }
                   this.mesh.children[n].setMaterial(materials[k]);
                   this.placeEdge(n, n - V.length, i, j);
                   n++;
@@ -266,13 +272,16 @@ function() {
    }
 
    var materials = [];
+   var colors = [];
 
    this.createMesh = function() {
       var R = [1,2,0,0,2,2,0],
           G = [1,0,1,0,2,0,2],
           B = [1,0,0,2,0,2,2];
-      for (var i = 0 ; i < R.length ; i++)
+      for (var i = 0 ; i < R.length ; i++) {
          materials.push(this.shaderMaterial(R[i], G[i], B[i]));
+	 colors.push('rgb(' + (255*R[i]) + ',' + (255*G[i]) + ',' + (255*B[i]) + ')');
+      }
 
       var mesh = new THREE.Mesh();
 

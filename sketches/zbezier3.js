@@ -15,7 +15,7 @@ function() {
 
    this.mode = 0;
    this.isVerbose = 1;
-   this.cmdSwipe[0] = ['toggle lines', function() { this.isVerbose = ! this.isVerbose; }];
+   this.onCmdSwipe[0] = ['toggle lines', function() { this.isVerbose = ! this.isVerbose; }];
    this.onCmdClick = function() {
       this.mode = (this.mode + 1) % 4;
    }

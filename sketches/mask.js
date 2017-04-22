@@ -5,12 +5,7 @@ function() {
 
    this.isLines = 0;
 
-   this.onClick = function() { console.log(++this.nWiggle); }
-   this.onCmdSwipe = function(dx, dy) {
-      switch (pieMenuIndex(dx, dy, 8)) {
-      case 0: this.isLines = ! this.isLines; break;
-      }
-   }
+   this.onCmdSwipe[0] = ['show lines', function() { this.isLines = ! this.isLines; }];
 
    this.isAlreadyOutput = 0;
 
