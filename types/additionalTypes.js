@@ -124,4 +124,49 @@
          return new AT.Bool(false);
       }
    });
+
+   (function() {
+      function makeFunction(exp, FuncType, argString, defaultArguments, defaultReturnValue) {
+         try {
+            let func = new FuncType(exp.eval());
+            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            return func;
+         } catch(error) {}
+         try {
+            let func = new FuncType(eval("(" + exp.str + ")"));
+            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            return func;
+         } catch(error) {}
+         try {
+            let func = new FuncType(eval("(function(" + argString + ") { return "
+               + exp.str + "})"));
+            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            return func;
+         } catch(error) {}
+         // Forget it, just return a default function.
+         return new FuncType(function() { return defaultReturnValue; });
+      }
+
+      AT.defineConversion(AT.Expression,
+         AT.Function(AT.Float, AT.Float, AT.Float, AT.Float),
+         function(exp) {
+            return makeFunction(exp, AT.Function(AT.Float, AT.Float, AT.Float, AT.Float),
+               "x, y, z", [0,0,0], 0);
+         });
+      AT.defineConversion(AT.Expression,
+         AT.Function(AT.Float, AT.Float, AT.Float),
+         function(exp) {
+            return makeFunction(exp, AT.Function(AT.Float, AT.Float, AT.Float), "x, y", [0,0], 0);
+         });
+      AT.defineConversion(AT.Expression,
+         AT.Function(AT.Float, AT.Float),
+         function(exp) {
+            return makeFunction(exp, AT.Function(AT.Float, AT.Float), "x", [0], 0);
+         });
+      AT.defineConversion(AT.Expression,
+         AT.Function(AT.Float),
+         function(exp) {
+            return makeFunction(exp, AT.Function(AT.Float), "", [], 0);
+         });
+   })();
 })(AT);
