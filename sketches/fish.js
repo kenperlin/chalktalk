@@ -11,7 +11,7 @@ function() {
    this.render = function() {
       var c = 0;
       this.afterSketch(function() {
-         var angle, p0, p1;
+         var angle, p0, p1, dx, dy, dz;;
 
          if (this.swim) {
             if (this.swimTime === undefined)
@@ -23,13 +23,24 @@ function() {
             else {
                p0 = this.inValue_DEPRECATED_PORT_SYSTEM[0]( t/4         % 1);
                p1 = this.inValue_DEPRECATED_PORT_SYSTEM[0]((t/4 + .001) % 1);
-               m.translate(2 * p0[0], 2 * p0[1], 2 * p0[2]);
 
-               angle = atan2(p0[0] - p1[0], p1[1] - p0[1]);
+               dx = p1[0] - p0[0];
+               dy = p1[1] - p0[1];
+               dz = p1[2] - p0[2];
+
+               angle = atan2(-dx, dy);
                while (angle - this.angleZ >  PI) angle -= TAU;
                while (angle - this.angleZ < -PI) angle += TAU;
                this.angleZ = mix(this.angleZ, angle, .1);
-               m.rotateZ(PI/2 + this.angleZ);
+
+               angle = atan2(-sqrt(dx * dx + dy * dy), dz);
+               while (angle - this.angleY >  PI) angle -= TAU;
+               while (angle - this.angleY < -PI) angle += TAU;
+               this.angleY = mix(this.angleY, angle, .1);
+
+               m.translate(2 * p0[0], 2 * p0[1], 2 * p0[2]);
+               m.rotateZ(  PI/2 + this.angleZ );
+               m.rotateY(-(PI/2 + this.angleY));
             }
             m.translate(1,0,0);
             m.rotateZ(-c/2);
