@@ -10,15 +10,8 @@ function() {
    // ALLOW USER TO DECIDE WHETHER TO DISPLAY KEY POINTS.
 
    this.onCmdClick = function() { this.showKeys = ! this.showKeys; }
+   this.onCmdSwipe[6] = ['loop', function() { this.isLoop = ! this.isLoop; }];
 
-   this.onCmdSwipe = function(dx,dy) {
-      var dir = pieMenuIndex(dx, dy, 8);
-      switch (dir) {
-      case 6:
-         this.isLoop = ! this.isLoop;
-         break;
-      }
-   }
    this._projectPoints = function(pt, unadjust) {
 
       // FIND PROJECTIONS ONTO SCREEN.

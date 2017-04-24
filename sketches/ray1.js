@@ -4,7 +4,7 @@ function() {
    this.rayX = 0;
    this.rayY = 0;
    this.showLabels = false;
-   this.onClick = function() { this.showLabels = ! this.showLabels; }
+   this.onClick = ['show labels', function() { this.showLabels = ! this.showLabels; }];
    this.mouseDrag = function(x, y) {
       this.rayX = 1 - 2 * (x-this.xlo) / (this.xhi - this.xlo);
       this.rayY = 2 * (y-this.yhi) / (this.ylo - this.yhi) - 1;

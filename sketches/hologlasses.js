@@ -2,7 +2,7 @@ function() {
    this.label = 'hologlasses';
    this.is3D = true;
    this.displayMode = 0;
-   this.onClick = function() { this.displayMode = (this.displayMode + 1) % 4; }
+   this.onClick = ['next mode', function() { this.displayMode = (this.displayMode + 1) % 4; }];
    function curve1(x) { return [[x,.3],[x,-.3],[.2*x,-.3],[.1*x,.3]]; }
    function curve2(x) { return [[x,.3,-1.25],[x,.05,-1.55],
                                 [x,-.02,-1.6],

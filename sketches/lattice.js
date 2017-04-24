@@ -6,7 +6,7 @@ function() {
    this.showNoise = false;
    this.pts = [];
    this.noise = new Noise();
-   this.onClick = function() {
+   this.onClick = ['next mode', function() {
       if (this.showNoise)
          ;
       else if (this.showCube) {
@@ -29,7 +29,7 @@ function() {
          this.showCube = true;
       else
          this.showLattice = true;
-   }
+   }];
    this.render = function(elapsed) {
       m.save();
          m.scale(this.size / 400);

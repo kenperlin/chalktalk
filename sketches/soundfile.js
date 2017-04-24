@@ -35,10 +35,10 @@ function() {
       this.createCodeFunction();
       this.setOutPortValue( self.codeFunction );
 
-      this.onClick = function(e) {
+      this.onClick = ['choose file', function(e) {
          this.input.click();
          this.input.addEventListener('change', handleFileSelect, false);
-      };
+      }];
 
       // Handle File Selection and asynchronous audio buffer decoding:
 
