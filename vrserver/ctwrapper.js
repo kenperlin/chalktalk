@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 //const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.135');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.226');
 const ws = new WebSocket('ws://localhost:22346');
 
 ws.on('open', function open() {
@@ -25,7 +25,8 @@ holojam.on('mouseEvent',(flake) => {
   }
   m = JSON.stringify(m);
 
-  //console.log(m);
+  console.log(m);
+  //debug
   ws.send(m);
 });
 
@@ -39,6 +40,7 @@ holojam.on('keyEvent',(flake) => {
     keyCode : flake.ints[0] + 48
   }};
   m = JSON.stringify(m);
+  //debug
   ws.send(m);
 });
 
@@ -171,6 +173,50 @@ function testMTU(){
   return curveObjs;
 }
 */
+var fs = require('fs');
+var savedBuffer = []; //Buffer.from('');
+holojam.on('update', (flakes, scope, origin) => {
+  //console.log(flakes);
+  flakes.forEach(function (flake){
+      if(flake.label == 'Stylus'){
+      // save to memory first
+      var jsonObj = {
+        pos:  flake.vector3s[0],
+        rot:  flake.vector3s[1],
+        touchpad:   {x: flake.floats[0], y: flake.floats[1]},
+        button:   flake.bytes
+      };
+      console.log("new obj", jsonObj);
+      savedBuffer.push(jsonObj);
+      // if(savedBuffer.length == 0){
+      //   savedBuffer = Buffer.from(flake.bytes);
+      // }else{
+      //   var curBytes = Buffer.from(flake.bytes);
+      //   savedBuffer = Buffer.concat([savedBuffer, curBytes]);  
+      // }
+      
+      //console.log("after savedBuffer", savedBuffer);
+    }
+  })
+  
+});
+
+// flush it to file when required
+holojam.on('save',(flake) => {
+  fs.unlink('/tmp/test',(err) => {
+    //if(err) throw err;
+    console.log('successfully deleted /tmp/test');
+  });
+  fs.writeFile("/tmp/test", JSON.stringify(savedBuffer) , 'utf-8', function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+  });
+});
+
+ 
 
 ws.on('message', function incoming(data, flags) {
   // flags.binary will be set if a binary data is received.
