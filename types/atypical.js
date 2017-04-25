@@ -1160,6 +1160,9 @@ function AtypicalModuleGenerator() {
 
       get: function(index) {
          return this.values[index];
+      },
+      length: function() {
+         return this.values.length;
       }
    });
    // Define a few specific conversions for specific subtypes
