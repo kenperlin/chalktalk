@@ -111,7 +111,7 @@ app.route("/getTime").get(function(req, res) {
 
 // handle request for list of available sketches
 app.route("/ls_sketches").get(function(req, res) {
-   readDir(res, "sketches");
+   readDir(res, "sketches", ".js");
 });
 
 // handle request for list of available images
@@ -130,7 +130,7 @@ function returnString(res, str) {
    res.end();
 };
 
-function readDir(res, dirName) {
+function readDir(res, dirName, extension) {
    fs.readdir("./" + dirName + "/", function(err, files) {
       if (err) {
          res.writeHead(500, { "Content-Type": "text/plain" });
@@ -142,7 +142,9 @@ function readDir(res, dirName) {
 
       res.writeHead(200, { "Content-Type": "text/plain" });
       for (var i = 0; i < files.length; i++) {
-         res.write(files[i] + "\n");
+         if (!extension || files[i].toLowerCase().endsWith(extension.toLowerCase())) {
+            res.write(files[i] + "\n");
+         }
       }
       res.end();
    });
