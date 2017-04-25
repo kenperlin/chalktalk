@@ -114,6 +114,11 @@ app.route("/ls_sketches").get(function(req, res) {
    readDir(res, "sketches", ".js");
 });
 
+// handle request for list of available sketch libraries
+app.route("/ls_sketchlibs").get(function(req, res) {
+   readDir(res, "sketchlibs", ".js");
+});
+
 // handle request for list of available images
 app.route("/ls_images").get(function(req, res) {
    readDir(res, "images");
