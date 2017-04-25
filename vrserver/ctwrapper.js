@@ -184,9 +184,11 @@ holojam.on('update', (flakes, scope, origin) => {
         pos:  flake.vector3s[0],
         rot:  flake.vector3s[1],
         touchpad:   {x: flake.floats[0], y: flake.floats[1]},
-        button:   flake.bytes
+        button:   flake.ints[0]
       };
       console.log("new obj", jsonObj);
+      console.log("flake bytes", flake.ints);
+      console.log("flake bytes[0]", flake.ints[0]);
       savedBuffer.push(jsonObj);
       // if(savedBuffer.length == 0){
       //   savedBuffer = Buffer.from(flake.bytes);
@@ -207,7 +209,7 @@ holojam.on('save',(flake) => {
     //if(err) throw err;
     console.log('successfully deleted /tmp/test');
   });
-  fs.writeFile("/tmp/test", JSON.stringify(savedBuffer) , 'utf-8', function(err) {
+  fs.writeFile("/tmp/test", JSON.stringify(savedBuffer,null,'\t') , 'utf-8', function(err) {
     if(err) {
         return console.log(err);
     }
@@ -236,7 +238,7 @@ ws.on('message', function incoming(data, flags) {
       //console.log("curveFlakes",curveFlakes);
       // time I parsed displayList and send
       //console.log("Parsed displayList and send", getTime());
-      console.log("FlakeSize ", curveFlakes.bytes.length);
+      //console.log("FlakeSize ", curveFlakes.bytes.length);
       // test maximum size of package
       //curveFlakes = testMTU();
       //console.log("curveFlakes Bytes width",curveFlakes.bytes[16] + curveFlakes.bytes[17] * 256);
