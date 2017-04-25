@@ -1150,14 +1150,14 @@ window.AtypicalTests = [
       let s2 = new AT.String(s1);
       T.assert(s2 && s2.value === "hi"); // Same with strings
 
-      let v1 = new AT.Vector3(3, 4, 5);
-      T.assert(v1.x === 3 && v1.y === 4 && v1.z === 5);
-      let v2 = new AT.Vector3([4, 5, 6]);
-      T.assert(v2.x === 4 && v2.y === 5 && v2.z === 6);
-      let v3 = new AT.Vector3();
-      T.assert(v3.x === 0 && v3.y === 0 && v3.z === 0);
-      let v4 = new AT.Vector3(6);
-      T.assert(v4.x === 6 && v4.y === 0 && v4.z === 0);
+      let v1 = new AT.Vector(3, 4, 5);
+      T.assert(v1.x() === 3 && v1.y() === 4 && v1.z() === 5);
+      let v2 = new AT.Vector([4, 5, 6]);
+      T.assert(v2.x() === 4 && v2.y() === 5 && v2.z() === 6);
+      let v3 = new AT.Vector();
+      T.assert(v3.x() === 0 && v3.y() === 0 && v3.z() === 0);
+      let v4 = new AT.Vector(6);
+      T.assert(v4.x() === 6 && v4.y() === 0 && v4.z() === 0);
 
    },
 
@@ -1183,14 +1183,15 @@ window.AtypicalTests = [
       T.assert(stringArray.get(2).value === "65");
 
       let smallerArray = new FloatArray(2, 3);
-      let vec3 = smallerArray.convert(AT.Vector3);
-      T.assert(vec3.x === 2);
-      T.assert(vec3.y === 3);
-      T.assert(vec3.z === 0);
-      smallerArray = vec3.convert(AT.Array(AT.Float));
+      let vec2 = smallerArray.convert(AT.Vector);
+      T.assert(vec2.x() === 2);
+      T.assert(vec2.y() === 3);
+      T.assert(vec2.z() === 0);
+      T.assert(vec2.dim() === 2);
+      smallerArray = vec2.convert(AT.Array(AT.Float));
       T.assert(smallerArray.get(0).value === 2);
       T.assert(smallerArray.get(1).value === 3);
-      T.assert(smallerArray.get(2).value === 0);
+      T.assert(smallerArray.length() === 2);
 
       let IntArray = AT.Array(AT.Int);
       T.assert(AT.canConvert(FloatArray, IntArray));
@@ -1199,10 +1200,10 @@ window.AtypicalTests = [
       T.assert(intArray.get(1).value === 3);
       T.assert(intArray.get(2).value === 6);
       T.assert(T.arraysEqual(intArray.toPrimitive(), [1, 3, 6]));
-      let intVec3 = intArray.convert(AT.Vector3);
-      T.assert(intVec3.x === 1);
-      T.assert(intVec3.y === 3);
-      T.assert(intVec3.z === 6);
+      let intVec3 = intArray.convert(AT.Vector);
+      T.assert(intVec3.x() === 1);
+      T.assert(intVec3.y() === 3);
+      T.assert(intVec3.z() === 6);
    },
 
    //--------------------------------------------------------------------------------

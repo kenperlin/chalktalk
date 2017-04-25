@@ -974,47 +974,71 @@ function AtypicalModuleGenerator() {
    });
 
    AT.defineType({
-      typename: "Vector3",
-      init: function(x, y, z) {
-         let values = [x, y, z];
-         if (x instanceof Array) {
-            values = x;
+      typename: "Vector",
+      init: function() {
+         let values = Array.from(arguments);
+         if (values[0] instanceof Array) {
+            values = values[0];
          }
-
-         let keys = ["x", "y", "z"];
-         for (let i = 0; i < keys.length; i++) {
-            if (values[i] === undefined) {
-               this._def(keys[i], 0);
-            }
-            else if (values[i] instanceof AT.Float) {
-               this._def(keys[i], values[i].value);
+         for (let i = 0; i < values.length; i++) {
+            if (values[i] instanceof AT.Float) {
+               values[i] = values[i].value;
             }
             else {
                // AT.Float will take care of validating our arguments.
-               this._def(keys[i], (new AT.Float(values[i])).value);
+               values[i] = (new AT.Float(values[i])).value;
             }
          }
+         this._def("values", values);
       },
       magnitude: function() {
-         return sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+         let squares = this.values.map(function(x) { return x*x; });
+         let sum = squares.reduce(function(acc, val) { return acc + val; }, 0);
+         return sqrt(sum);
+      },
+      value: function(dimensionIndex) {
+         return this.values[dimensionIndex] || 0;
+      },
+      x: function() {
+         return this.value(0);
+      },
+      y: function() {
+         return this.value(1);
+      },
+      z: function() {
+         return this.value(2);
+      },
+      w: function() {
+         return this.value(3);
+      },
+      dim: function() {
+         return this.values.length;
+      },
+      length: function() {
+         return this.dim();
       }
+      // TODO: dot and cross products, other convenience functions
    });
-   AT.defineConversion(AT.Vector3, AT.Float, function(vec) {
+   AT.defineConversion(AT.Vector, AT.Float, function(vec) {
       return new AT.Float(vec.magnitude());
    });
-   AT.defineConversion(AT.Float, AT.Vector3, function(r) {
-      return new AT.Vector3(new AT.Float(r.value), new AT.Float(r.value), new AT.Float(r.value));
+   AT.defineConversion(AT.Float, AT.Vector, function(r) {
+      return new AT.Vector(r.value);
    });
-   AT.defineConversion(AT.Vector3, AT.String, function(v) {
-      return new AT.String("(" + new AT.Float(v.x).convert("String").value
-         + ", " + new AT.Float(v.y).convert("String").value
-         + ", " + new AT.Float(v.z).convert("String").value + ")");
+   AT.defineConversion(AT.Vector, AT.String, function(v) {
+      return this.values.reduce(function(acc, val) {
+         if (acc.length === 1) {
+            return acc + val;
+         } else {
+            return acc + ", " + val;
+         }
+      }, "(") + ")";
    });
-   AT.defineConversion(AT.String, AT.Vector3, function(str) {
+   AT.defineConversion(AT.String, AT.Vector, function(str) {
       let numbers = str.value.split(/[^\d\.\+-eE]/).map(parseFloat).filter(
          function(value) { return !isNaN(value); }
       );
-      return new AT.Vector3(numbers[0] || 0, numbers[1] || 0, numbers[2] || 0);
+      return new AT.Vector(numbers);
    });
 
    AT.defineType({
@@ -1092,8 +1116,8 @@ function AtypicalModuleGenerator() {
    AT.defineConversion(AT.Float, AT.Bool, function(num) {
       return new AT.Bool(Math.abs(num.value) > 0.001);
    });
-   AT.defineConversion(AT.Vector3, AT.Bool, function(v) {
-      let notZero = (Math.abs(v.x) > 0.001 || Math.abs(v.y) > 0.001 || Math.abs(v.z) > 0.001);
+   AT.defineConversion(AT.Vector, AT.Bool, function(v) {
+      let notZero = (v.magnitude() > 0.001);
       return new AT.Bool(notZero);
    });
    AT.defineConversion(AT.Bool, AT.Int, function(b) {
@@ -1102,8 +1126,8 @@ function AtypicalModuleGenerator() {
    AT.defineConversion(AT.Bool, AT.Float, function(b) {
       return new AT.Float(b.value ? 1 : 0);
    });
-   AT.defineConversion(AT.Bool, AT.Vector3, function(b) {
-      return new AT.Vector3(0, b.value ? 1 : 0, 0);
+   AT.defineConversion(AT.Bool, AT.Vector, function(b) {
+      return new AT.Vector(b.value ? 1 : 0);
    });
 
 
@@ -1166,20 +1190,20 @@ function AtypicalModuleGenerator() {
       }
    });
    // Define a few specific conversions for specific subtypes
-   AT.defineConversion(AT.Vector3, AT.Array(AT.Float), function (vec3) {
-      return new (AT.Array(AT.Float))(vec3.x, vec3.y, vec3.z);
+   AT.defineConversion(AT.Vector, AT.Array(AT.Float), function (vec3) {
+      return new (AT.Array(AT.Float))(vec3.values);
    });
-   AT.defineConversion(AT.Array(AT.Float), AT.Vector3, function(arr) {
-      return new AT.Vector3(arr.values[0] || 0, arr.values[1] || 0, arr.values[2] || 0);
+   AT.defineConversion(AT.Array(AT.Float), AT.Vector, function(arr) {
+      return new AT.Vector(arr.values);
    });
    // TODO: is it possible to make the last argument there just any AT.Array with a float-compatible type?
-   AT.defineConversionsViaIntermediary(AT.Vector3, AT.Array(AT.Float), AT.Array(AT.Int));
+   AT.defineConversionsViaIntermediary(AT.Vector, AT.Array(AT.Float), AT.Array(AT.Int));
    // TODO: same for the first argument here
-   AT.defineConversionsViaIntermediary(AT.Array(AT.Int), AT.Array(AT.Float), AT.Vector3);
+   AT.defineConversionsViaIntermediary(AT.Array(AT.Int), AT.Array(AT.Float), AT.Vector);
 
    // TODO: WISH LIST FOR ARRAYS:
-   // Ability to define intermediary Vector3 -> Array(Float) -> Array(T) for any Float -> T, e.g.
-   // AT.defineConversionsViaIntermediary(AT.Vector3, AT.Array(AT.Float), AT.Array);
+   // Ability to define intermediary Vector -> Array(Float) -> Array(T) for any Float -> T, e.g.
+   // AT.defineConversionsViaIntermediary(AT.Vector, AT.Array(AT.Float), AT.Array);
    // Ability to define conversion Array(T) -> String for any T -> String
    // AT.defineConversion(AT.Array, AT.String, function(arr) {
    //    // Pass each value through String conversion, intersperse commas and surround with []
