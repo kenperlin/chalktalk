@@ -880,6 +880,14 @@ window.AtypicalTests = [
       T.assert(BrokenThing === undefined);
       T.assert(AT.BrokenThing === undefined);
       T.assert(!AT.typeIsDefined("BrokenThing"));
+
+      // Nested generics should also be convertible
+      let DoubleA = GenericThing(GenericThing(AT.A));
+      let DoubleB = GenericThing(GenericThing(AT.B));
+      T.assert(AT.canConvert(DoubleA, DoubleB));
+      let dubA = new DoubleA();
+      T.assert(dubA.canConvert(DoubleB));
+      T.assert(dubA.convert(DoubleB).x.x.str === "convertedToB");
    },
 
    //--------------------------------------------------------------------------------
