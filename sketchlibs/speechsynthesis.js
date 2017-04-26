@@ -1,9 +1,9 @@
 "use strict";
 
-let speech = (function() {
-   let speech = {};
+let Speech = (function() {
+   let Speech = {};
 
-   speech.say = function(words) {
+   Speech.say = function(words) {
       if (window.speechSynthesis) {
          let msg = new SpeechSynthesisUtterance(words);
          window.speechSynthesis.speak(msg);
@@ -14,5 +14,5 @@ let speech = (function() {
       }
    }
 
-   return speech;
+   return Speech;
 })();
