@@ -129,3 +129,20 @@ To get the input values, you can access `this.inValue[n]`, which is an array of 
 There's also `this.inValues`, which gives you a *flattened* version of the input values. For example, with the vector sketches, that output an array of 3 numbers, `this.inValues[0]` would give you the x coordinate of the first vector.
 
 Note that there's not much guarantee as to what kind of value you're going to be getting in the `inValues` array. Like many other things in Chalktalk, this is an area of active research and as such the API may be changing over the next few months. (See the `type-system` branch if you're curious.)
+
+# Interacting with other sketches
+
+There are a few functions that can be defined on a sketch that get called when sketches are moved over them:
+
+``` javascript
+this.onIntersect = function(otherSketch) { ... }
+```
+
+When you move a sketch around, if it overlaps with another sketch, `this.onIntersect` is called on both sketches. This gets called every frame that the two sketches are touching. `obj` is the object this sketch is touching.
+
+``` javascript
+this.over = function(otherSketch) { ... }
+this.under = function(otherSketch) { ... }
+```
+
+When one sketch is moved and dropped onto another sketch, then `this.over` is called *on the sketch being dropped*, with the sketch that it was dropped into as the parameter. Meanwhile, `this.under` is called *on the sketch that was dropped onto*, with the sketch that was dropped onto it as the parameter. In other words, if sketch A is moved and dropped onto sketch B, then `A.over(B)` is called and `B.under(A)` is called.
