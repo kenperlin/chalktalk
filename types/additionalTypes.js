@@ -169,4 +169,6 @@
             return makeFunction(exp, AT.Function(AT.Float), "", [], 0);
          });
    })();
+
+   // TODO: add conversions to Array(Float) and Vector
 })(AT);
