@@ -410,11 +410,10 @@ function AtypicalModuleGenerator() {
       // too much evil.
       // Bless me father, for I have sinned.
       var AtypicalType = eval("(function() {\n" +
-         "var func = function " + implementation.typename + "() {\n" +
+         "return function " + implementation.typename + "() {\n" +
             "this.init.apply(this, arguments);\n" +
          "};\n" +
-         "return func;" +
-      "})()");
+      "})();");
 
       var proto = Object.create(AT.Type.prototype);
 
@@ -714,11 +713,11 @@ function AtypicalModuleGenerator() {
 
       // As with when we define regular types, we use eval here to ensure that the Generic
       // type's function name is the same as its actual typename.
-      let GenericType = eval("(function() {"
-            + "return function " + implementation.typename + "() {"
-               + "return createType.apply(null, arguments);"
-            + "}"
-         + "})();");
+      let GenericType = eval("(function() {\n" +
+            "return function " + implementation.typename + "() {\n" +
+               "return createType.apply(null, arguments);\n" +
+            "};\n" +
+         "})();");
 
       _genericTypes[implementation.typename] = GenericType;
 
