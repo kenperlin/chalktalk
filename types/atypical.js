@@ -176,6 +176,24 @@ function AtypicalModuleGenerator() {
       return _conversionFunction(sourceType, destinationType) !== undefined;
    };
 
+   // TODO: DOC
+   AT.prettyTypename = function(type) {
+      if (!type.prototype.genericType) {
+         return type.name;
+      }
+      else {
+         let typename = type.prototype.genericType.name + "(";
+         for (let i = 0; i < type.prototype.typeParameters.length; i++) {
+            if (i !== 0) {
+               typename += ", ";
+            }
+            typename += AT.prettyTypename(type.prototype.typeParameters[i]);
+         }
+         typename += ")";
+         return typename;
+      }
+   }
+
    // Internal function for retrieving the conversion function between two types.
    // Returns undefined if the conversion does not exist.
    //

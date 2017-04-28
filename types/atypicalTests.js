@@ -1348,6 +1348,22 @@ window.AtypicalTests = [
       T.assert(AT.canConvert(FloatIntPair, AT.Float));
       T.assert(myPair.convert(AT.Float).value === 4.4);
       T.assert(myPair.convert(AT.Int).value === 6);
+   },
+
+   //--------------------------------------------------------------------------------
+   // Test "pretty printing" of type names
+   function() {
+      T.assert(AT.prettyTypename(AT.Float) === "Float");
+
+      let FloatIntPair = AT.Pair(AT.Float, AT.Int);
+
+      T.assert(AT.prettyTypename(FloatIntPair) === "Pair(Float, Int)");
+
+      let CrazyType = AT.Pair(AT.Pair(AT.Float, AT.Pair(AT.String, AT.Int)),
+         AT.Pair(AT.Function(AT.Float, AT.String, AT.Void), AT.Array(AT.Float)));
+
+      T.assert(AT.prettyTypename(CrazyType) === "Pair(Pair(Float, Pair(String, Int)), "
+         + "Pair(Function(Float, String, Void), Array(Float)))");
    }
 ];
 
