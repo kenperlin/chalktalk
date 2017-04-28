@@ -677,6 +677,7 @@ window.AtypicalTests = [
 
       T.assert(typeof AT.GenericThing === "function");
       T.assert(AT.GenericThing === GenericThing);
+      T.assert(AT.GenericThing.name === "GenericThing");
 
       // Test instantiating it with a bunch of different types and initial values
       let typeValuePairs = [[AT.Float, 5.5], [AT.Int, 6], [AT.String, "Hi there"]];

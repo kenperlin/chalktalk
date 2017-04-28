@@ -651,7 +651,7 @@ function AtypicalModuleGenerator() {
          }
       }
 
-      let GenericType = function GenericType() {
+      function createType() {
          // This function will return a concrete implementation of the generic type,
          // with concrete type parameters.
          let typename = '$' + implementation.typename + '_$';
@@ -711,6 +711,14 @@ function AtypicalModuleGenerator() {
             return type;
          }
       }
+
+      // As with when we define regular types, we use eval here to ensure that the Generic
+      // type's function name is the same as its actual typename.
+      let GenericType = eval("(function() {"
+            + "return function " + implementation.typename + "() {"
+               + "return createType.apply(null, arguments);"
+            + "}"
+         + "})();");
 
       _genericTypes[implementation.typename] = GenericType;
 
