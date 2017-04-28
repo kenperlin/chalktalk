@@ -487,6 +487,7 @@ function AtypicalModuleGenerator() {
    //                                       function.
    //                                       Only generic types with the same number of type
    //                                       parameters will be set as automatically convertible.
+   //                                       BY DEFAULT ONLY TODO EXPAND ON THIS
    //
    //                                       If this is defined, it MUST be defined as a function
    //                                       of one argument, taking in only an array of the new
@@ -1360,6 +1361,28 @@ function AtypicalModuleGenerator() {
          }
          else {
             return returnValue;
+         }
+      }
+   });
+
+   AT.defineGenericType({
+      typename: "Pair",
+      init: function(first, second) {
+         this._def("first", _wrapOrConvertValue(this.typeParameters[0], first));
+         this._def("second", _wrapOrConvertValue(this.typeParameters[1], second));
+      },
+      changeTypeParameters: function(newTypes) {
+         return new (this.genericType.apply(null, newTypes))(this.first, this.second);
+      },
+      canConvertToTypeParameter: function(typeIndex) {
+         return typeIndex === 0 || typeIndex === 1;
+      },
+      convertToTypeParameter: function(typeIndex) {
+         if (typeIndex === 0) {
+            return this.first;
+         }
+         else {
+            return this.second;
          }
       }
    });

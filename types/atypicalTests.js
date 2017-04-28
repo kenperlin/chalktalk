@@ -1328,6 +1328,25 @@ window.AtypicalTests = [
 
       let intThing = (new AT.Expression("1.1+2.2")).convert(AT.Int);
       T.assert(intThing.value === 3);
+   },
+
+   //--------------------------------------------------------------------------------
+   // Test pair type
+   function() {
+      let FloatIntPair = AT.Pair(AT.Float, AT.Int);
+      let IntFloatPair = AT.Pair(AT.Int, AT.Float);
+
+      let myPair = new FloatIntPair(4.4, 6.2);
+      T.assert(myPair.first.value === 4.4);
+      T.assert(myPair.second.value === 6);
+      T.assert(AT.canConvert(FloatIntPair, IntFloatPair));
+      let convertedPair = myPair.convert(IntFloatPair);
+      T.assert(convertedPair.first.value === 4);
+      T.assert(convertedPair.second.value === 6);
+
+      T.assert(AT.canConvert(FloatIntPair, AT.Float));
+      T.assert(myPair.convert(AT.Float).value === 4.4);
+      T.assert(myPair.convert(AT.Int).value === 6);
    }
 ];
 
