@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.s = -1;
 
    function makeCurve(f) {
@@ -45,14 +44,17 @@ function() {
          this.selectedIndex = this.selection;
    }
 
-   this.output = function() {
-      var x = this.getInValue_DEPRECATED_PORT_SYSTEM(0, time);
-      var y = this.getInValue_DEPRECATED_PORT_SYSTEM(1, 0);
+   this.defineInput(AT.Float);
+   this.defineInput(AT.Float);
+
+   this.defineOutput(AT.Float, function() {
+      var x = this.inputs.hasValue(0) ? this.inputs.value(0) : time;
+      var y = this.inputs.hasValue(1) ? this.inputs.value(1) : 0;
       var result = null;
       try {
          eval("result = (" + this.code[this.selection][1] + ")");
       } catch (e) { console.log(e); }
       return result;
-   }
+   });
 }
 
