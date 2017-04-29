@@ -1107,7 +1107,7 @@ window.AtypicalTests = [
       let convertedPair = (new AT.A(4.5)).convert(ABPair);
       T.assert(convertedPair !== undefined
          && convertedPair.x.x === 4.5
-            && convertedPair.y.x === 4.5);
+         && convertedPair.y.x === 4.5);
 
       // Allow overriding of conversion
       AT.defineConversion(ABPair, A, function(pair) {
@@ -1129,7 +1129,7 @@ window.AtypicalTests = [
       let convertedPair2 = (new AT.A(4.5)).convert(ABPair);
       T.assert(convertedPair2 !== undefined
          && convertedPair2.x.x === 6
-            && convertedPair2.y.x === 7);
+         && convertedPair2.y.x === 7);
 
       // Ensure these overridden conversions don't affect other instances of this generic
       // type
