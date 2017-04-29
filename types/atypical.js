@@ -126,7 +126,7 @@ function AtypicalModuleGenerator() {
       //
       // propertyName: A string containing the desired name of the property.
       // value: The value you want it to have. This cannot be changed later.
-      _def: function(propertyName, value) {
+      _set: function(propertyName, value) {
          if (typeof propertyName !== "string") {
             console.error(
                "Attempted to define a property with non-string name ("+propertyName+")");
@@ -981,7 +981,7 @@ function AtypicalModuleGenerator() {
       typename: "String",
       init: function(s) {
          if (s instanceof AT.String) { s = s.value; }
-         this._def("value", "" + s);
+         this._set("value", "" + s);
       },
       toPrimitive: function() {
          return this.value;
@@ -999,7 +999,7 @@ function AtypicalModuleGenerator() {
             throw new AT.ConstructionError("Float constructed with non-numerical input ("
                +value+")");
          }
-         this._def("value", value);
+         this._set("value", value);
       },
       toPrimitive: function() {
          return this.value;
@@ -1034,7 +1034,7 @@ function AtypicalModuleGenerator() {
                values[i] = (new AT.Float(values[i])).value;
             }
          }
-         this._def("values", values);
+         this._set("values", values);
       },
       magnitude: function() {
          let squares = this.values.map(function(x) { return x*x; });
@@ -1096,7 +1096,7 @@ function AtypicalModuleGenerator() {
          if (isNaN(value)) {
             throw new AT.ConstructionError("Int constructed with non-numerical input ("+value+")");
          }
-         this._def("value", Math.round(value));
+         this._set("value", Math.round(value));
       },
       toPrimitive: function() {
          return this.value;
@@ -1130,7 +1130,7 @@ function AtypicalModuleGenerator() {
    AT.defineType({
       typename: "Bool",
       init: function(value) {
-         this._def("value", !!value);
+         this._set("value", !!value);
       },
       toPrimitive: function() {
          return this.value;
@@ -1195,7 +1195,7 @@ function AtypicalModuleGenerator() {
                values[i] = new (this.typeParameters[0])(values[i]);
             }
          }
-         this._def("values", values);
+         this._set("values", values);
       },
       toPrimitive: function() {
          return this.values.map(function (value) {
@@ -1279,7 +1279,7 @@ function AtypicalModuleGenerator() {
                + "type parameters. Use AT.Function(AT.Void) for functions that return "
                   + "no values and take no arguments.");
          }
-         this._def("func", func);
+         this._set("func", func);
       },
       toPrimitive: function() {
          let that = this;
@@ -1393,8 +1393,8 @@ function AtypicalModuleGenerator() {
    AT.defineGenericType({
       typename: "Pair",
       init: function(first, second) {
-         this._def("first", _wrapOrConvertValue(this.typeParameters[0], first));
-         this._def("second", _wrapOrConvertValue(this.typeParameters[1], second));
+         this._set("first", _wrapOrConvertValue(this.typeParameters[0], first));
+         this._set("second", _wrapOrConvertValue(this.typeParameters[1], second));
       },
       changeTypeParameters: function(newTypes) {
          return new (this.genericType.apply(null, newTypes))(this.first, this.second);

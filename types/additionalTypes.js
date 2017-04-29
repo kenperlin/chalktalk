@@ -18,7 +18,7 @@
    AT.defineType({
       typename: "Unknown",
       init: function(value) {
-         this._def("value", value);
+         this._set("value", value);
       },
       toPrimitive: function() {
          return this.value;
@@ -51,7 +51,7 @@
             // e.g. wrap(1.1, -1, 1) = -0.9
             return mod(x - low, high - low) + low;
          }
-         this._def("theta", wrap(theta, -Math.PI, Math.PI));
+         this._set("theta", wrap(theta, -Math.PI, Math.PI));
       },
       toPrimitive: function() {
          return this.theta;
@@ -80,7 +80,7 @@
       init: function(str) {
          if (str instanceof AT.Expression) { str = str.str; }
          else if (str instanceof AT.String) { str = str.value; }
-         this._def("str", "" + str);
+         this._set("str", "" + str);
       },
       toPrimitive: function() {
          return this.str;

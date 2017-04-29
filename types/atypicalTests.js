@@ -12,7 +12,7 @@ window.AtypicalTests = [
       let Test1 = AT.defineType({
          typename: "Test1",
          init: function(x) {
-            this._def("thing", x);
+            this._set("thing", x);
          },
          dummyname: "dummyvalue",
          getDummy: function() { return this.dummyname; }
@@ -113,7 +113,7 @@ window.AtypicalTests = [
    function() {
       let Test1 = AT.defineType({
          typename: "Test1",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       let test1 = new Test1(56);
 
@@ -151,7 +151,7 @@ window.AtypicalTests = [
       let Source = AT.defineType({
          typename: "Source",
          init: function(x) {
-            this._def("x", x);
+            this._set("x", x);
          }
       });
       let source = new Source(5);
@@ -168,7 +168,7 @@ window.AtypicalTests = [
             if (y === undefined) {
                y = 0;
             }
-            this._def("y", y);
+            this._set("y", y);
          }
       });
       let destination = new Destination();
@@ -201,7 +201,7 @@ window.AtypicalTests = [
       let Source = AT.defineType({
          typename: "Source",
          init: function(x) {
-            this._def("x", x);
+            this._set("x", x);
          }
       });
       let source = new Source(5);
@@ -218,7 +218,7 @@ window.AtypicalTests = [
             if (y === undefined) {
                y = 0;
             }
-            this._def("y", y);
+            this._set("y", y);
          }
       });
       let destination = new Destination();
@@ -251,7 +251,7 @@ window.AtypicalTests = [
       let Source = AT.defineType({
          typename: "Source",
          init: function(x) {
-            this._def("x", x);
+            this._set("x", x);
          }
       });
       let source = new Source(5);
@@ -268,7 +268,7 @@ window.AtypicalTests = [
             if (y === undefined) {
                y = 0;
             }
-            this._def("y", y);
+            this._set("y", y);
          }
       });
       let destination = new Destination();
@@ -301,7 +301,7 @@ window.AtypicalTests = [
       let Source = AT.defineType({
          typename: "Source",
          init: function(x) {
-            this._def("x", x);
+            this._set("x", x);
          }
       });
       let source = new Source(5);
@@ -318,7 +318,7 @@ window.AtypicalTests = [
             if (y === undefined) {
                y = 0;
             }
-            this._def("y", y);
+            this._set("y", y);
          }
       });
       let destination = new Destination();
@@ -363,7 +363,7 @@ window.AtypicalTests = [
       let Intermediary1 = AT.defineType({
          typename: "Intermediary1",
          init: function() {
-            this._def("x", 1);
+            this._set("x", 1);
          }
       });
       let intermediary1 = new Intermediary1();
@@ -371,7 +371,7 @@ window.AtypicalTests = [
       let Intermediary2 = AT.defineType({
          typename: "Intermediary2",
          init: function() {
-            this._def("x", 2);
+            this._set("x", 2);
          }
       });
       let intermediary2 = new Intermediary2();
@@ -379,7 +379,7 @@ window.AtypicalTests = [
       let Destination = AT.defineType({
          typename: "Destination",
          init: function(x) {
-            this._def("x", x);
+            this._set("x", x);
          }
       });
       let destination = new Destination();
@@ -489,7 +489,7 @@ window.AtypicalTests = [
       let Left = AT.defineType({
          typename: "Left",
          init: function(x) {
-            this._def("x", x ? x : "nothing left");
+            this._set("x", x ? x : "nothing left");
          }
       });
       let left = new Left("leftValue");
@@ -503,7 +503,7 @@ window.AtypicalTests = [
       let Right = AT.defineType({
          typename: "Right",
          init: function(x) {
-            this._def("x", x ? x : "nothing right");
+            this._set("x", x ? x : "nothing right");
          }
       });
       let right = new Right("rightValue");
@@ -571,25 +571,25 @@ window.AtypicalTests = [
    function() {
       let One = AT.defineType({
          typename: "One",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       let one = new One(1);
 
       let Two = AT.defineType({
          typename: "Two",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       let two = new Two(2);
 
       let Three = AT.defineType({
          typename: "Three",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       let three = new Three(3);
 
       let Four = AT.defineType({
          typename: "Four",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       let four = new Four(4);
 
@@ -636,7 +636,7 @@ window.AtypicalTests = [
    function() {
       let Prim = AT.defineType({
          typename: "Prim",
-         init: function(x) { this._def("x", x); },
+         init: function(x) { this._set("x", x); },
          toPrimitive: function() { return this.x; }
       });
       let prim = new Prim(6);
@@ -644,7 +644,7 @@ window.AtypicalTests = [
 
       let NonPrim = AT.defineType({
          typename: "NonPrim",
-         init: function(y) { this._def("y", y); },
+         init: function(y) { this._set("y", y); },
       });
       let nonPrim = new NonPrim(17);
 
@@ -666,7 +666,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          customIntConstant: 35,
          customStringConstant: "Hi there",
@@ -735,7 +735,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          changeTypeParameters: function(typeParameters) {
             return new (this.genericType(typeParameters[0]))(
@@ -763,7 +763,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
       });
 
@@ -775,11 +775,11 @@ window.AtypicalTests = [
 
       AT.defineType({
          typename: "A",
-         init: function(str){ this._def("str", str === undefined ? "nothingA" : str); }
+         init: function(str){ this._set("str", str === undefined ? "nothingA" : str); }
       });
       AT.defineType({
          typename: "B",
-         init: function(str){ this._def("str", str === undefined ? "nothingB" : str); }
+         init: function(str){ this._set("str", str === undefined ? "nothingB" : str); }
       });
 
       T.assert(!AT.canConvert(GenericThing(AT.A), GenericThing(AT.B)));
@@ -869,7 +869,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          changeTypeParameters: function(typeParameters, tooManyArguments) {
             return new (this.genericType(typeParameters[0]))(
@@ -900,7 +900,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          convertToTypeParameter(index) {
             return index === 0 ? this.x : undefined;
@@ -929,7 +929,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          }
       });
 
@@ -950,7 +950,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          convertToTypeParameter(index) {
             return index === 0 ? this.x : undefined;
@@ -972,7 +972,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          convertFromTypeParameter(index, value) {
             return index === 0 ? new this.type(value) : undefined;
@@ -997,7 +997,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          convertToTypeParameter(index, broken) {
             return index === 0 ? this.x : undefined;
@@ -1016,7 +1016,7 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
          },
          convertFromTypeParameter(index) {
             return undefined;
@@ -1052,11 +1052,11 @@ window.AtypicalTests = [
             if (!(x instanceof this.typeParameters[0])) {
                x = new (this.typeParameters[0])(x);
             }
-            this._def("x", x);
+            this._set("x", x);
             if (!(y instanceof this.typeParameters[1])) {
                y = new (this.typeParameters[1])(y);
             }
-            this._def("y", y);
+            this._set("y", y);
          },
          canConvertToTypeParameter(index) {
             return index === 1;
@@ -1076,12 +1076,12 @@ window.AtypicalTests = [
 
       let A = AT.defineType({
          typename: "A",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
 
       let B = AT.defineType({
          typename: "B",
-         init: function(x) { this._def("x", x); }
+         init: function(x) { this._set("x", x); }
       });
       AT.defineConversion(A, B, function(a) {
          return new B(a.x);
