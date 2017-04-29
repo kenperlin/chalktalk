@@ -38,6 +38,8 @@ function() {
    }
 
    this.defineInput(AT.Float);
+   this.defineInput(AT.Float);
+
    this.defineOutput(AT.Float, function() {
       let x = (this.inputs.hasValue(0)) ? this.inputs.value(0) : 0;
       let y = (this.inputs.hasValue(1)) ? this.inputs.value(1) : 1;       
