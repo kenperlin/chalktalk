@@ -1,7 +1,15 @@
 const WebSocket = require('ws');
 //const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.226');
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.135');
 const ws = new WebSocket('ws://localhost:22346');
+
+const APPKEY = 0;
+const GRIPKEY = 1;
+const TOUCHPRESS = 2;
+const TRIGGER = 3;
+const TOUCHTOUCH = 4;
+
+var saveControlData = true;
 
 ws.on('open', function open() {
   ws.send(JSON.stringify({global: "displayListener", value: true }));
@@ -25,7 +33,7 @@ holojam.on('mouseEvent',(flake) => {
   }
   m = JSON.stringify(m);
 
-  console.log(m);
+  //console.log(m);
   //debug
   ws.send(m);
 });
@@ -175,10 +183,11 @@ function testMTU(){
 */
 var fs = require('fs');
 var savedBuffer = []; //Buffer.from('');
+//var prevPos = newVec3(0,0,0);
 holojam.on('update', (flakes, scope, origin) => {
   //console.log(flakes);
   flakes.forEach(function (flake){
-      if(flake.label == 'Stylus'){
+    /*if(flake.label == 'Stylus'){
       // save to memory first
       var jsonObj = {
         pos:  flake.vector3s[0],
@@ -186,10 +195,10 @@ holojam.on('update', (flakes, scope, origin) => {
         touchpad:   {x: flake.floats[0], y: flake.floats[1]},
         button:   flake.ints[0]
       };
-      console.log("new obj", jsonObj);
-      console.log("flake bytes", flake.ints);
-      console.log("flake bytes[0]", flake.ints[0]);
-      savedBuffer.push(jsonObj);
+      console.log("old obj", jsonObj);
+      //console.log("flake bytes", flake.ints);
+      //console.log("flake bytes[0]", flake.ints[0]);
+      //savedBuffer.push(jsonObj);
       // if(savedBuffer.length == 0){
       //   savedBuffer = Buffer.from(flake.bytes);
       // }else{
@@ -198,6 +207,25 @@ holojam.on('update', (flakes, scope, origin) => {
       // }
       
       //console.log("after savedBuffer", savedBuffer);
+    }
+    else */if((flake.label.indexOf('left') > -1) || (flake.label.indexOf('right') > -1)){
+      if(flake.vector3s[0].x != 0){
+        var jsonObj = {
+        pos:  flake.vector3s[0],
+        rot:  flake.vector4s[0],
+        touchpad:   {x: flake.floats[0], y: flake.floats[1]},
+        button:   (flake.ints[TRIGGER] << 7) | (flake.ints[TOUCHTOUCH] << 6) | (flake.ints[TOUCHPRESS] << 5) | (flake.ints[APPKEY] << 4),
+      };
+      console.log("new obj",jsonObj);
+      //console.log("flake bytes", flake.ints);
+      //console.log("flake bytes[0]", flake.ints[0]);
+      saveControlData = false;
+      if(saveControlData)
+        savedBuffer.push(jsonObj);
+      }
+      
+      // todo: send json as an event to chalktalk
+      //ws.send(jsonObj);
     }
   })
   
@@ -214,7 +242,7 @@ holojam.on('save',(flake) => {
         return console.log(err);
     }
 
-    console.log("The file was saved!");
+    console.log("The file was saved!",savedBuffer.length);
   });
 });
 
