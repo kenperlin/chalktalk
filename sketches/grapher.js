@@ -67,6 +67,17 @@ function() {
       // Convert floats into constant functions for easy handling
       return function() { return f.value; }
    });
+   this.defineAlternateInputType(AT.Unknown, function(unk) {
+      // Convert unknown values into constant functions of floats for easy handling
+      return function() {
+         if (isNumeric(unk.value)) {
+            return +(unk.value);
+         }
+         else {
+            return 0;
+         }
+      }
+   });
 
    this.render = function(elapsed) {
       var sc = this.size / 400;
