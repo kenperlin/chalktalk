@@ -39,8 +39,8 @@ function() {
    }
 
    this.output = function() {
-      let x = this.getInValue(0, 0);
-      let y = this.getInValue(1, 1);
+      let x = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0);
+      let y = this.getInValue_DEPRECATED_PORT_SYSTEM(1, 1);
       return this._blur(x, y);
    }
 }
