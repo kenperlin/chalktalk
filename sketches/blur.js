@@ -1,7 +1,5 @@
 
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
-
    this._buffer = newArray(100);
 
    this._blur = function(x, d) {
@@ -29,7 +27,8 @@ function() {
    this.label = 'blur';
 
    this.render = function(elapsed) {
-      var y = max(-1, min(1, this.getInValue_DEPRECATED_PORT_SYSTEM(1, 1))), C = [], x;
+      var y = max(-1, min(1, (this.inputs.hasValue(1)) ? this.inputs.value(1) : 1)), C = [], x;
+
 
       for (x = -1 ; x <= 1.001 ; x += 1/30)
          C.push([x*y, cos(PI * x) * .5 + .5]);
@@ -38,10 +37,11 @@ function() {
       mCurve(C);
    }
 
-   this.output = function() {
-      let x = this.getInValue_DEPRECATED_PORT_SYSTEM(0, 0);
-      let y = this.getInValue_DEPRECATED_PORT_SYSTEM(1, 1);
+   this.defineInput(AT.Float);
+   this.defineOutput(AT.Float, function() {
+      let x = (this.inputs.hasValue(0)) ? this.inputs.value(0) : 0;
+      let y = (this.inputs.hasValue(1)) ? this.inputs.value(1) : 1;       
       return this._blur(x, y);
-   }
+   });
 }
 

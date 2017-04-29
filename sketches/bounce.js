@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "bounce";
    this.isBouncing = false;
    this.bouncing = 0;
@@ -11,7 +10,10 @@ function() {
    this.render = function(elapsed) {
       this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
                                       : max(0, this.bouncing - elapsed);
-      var bouncing = max(0, min(1, this.getInValue_DEPRECATED_PORT_SYSTEM(0, this.bouncing)));
+       
+call <SNR>4_SelectAll()
+var bouncing = max(0, min(1, (this.inputs.hasValue(0)) ? this.inputs.value(0) : this.bouncing));
+    
 
       this.afterSketch(function() {
          color(fadedColor(.25, this.colorId));
@@ -38,5 +40,12 @@ function() {
       this.extendBounds([[-1, 0], [1, 2]]);
    }
 
-   this.output = function() { return this.y; }
+   this.defineInput(AT.Float);
+   this.defineOutput(AT.Float, function() {
+      return this.y;    
+   });
 }
+
+
+
+
