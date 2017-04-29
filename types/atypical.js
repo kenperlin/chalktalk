@@ -63,25 +63,6 @@ function AtypicalModuleGenerator() {
    function _isFunctionOfNArguments(func, n) {
       return typeof func === "function" && func.length === n;
    }
-
-   // Utility function for converting a value to a given Atypical type.
-   function _wrapOrConvertValue(type, value) {
-      if (!(value instanceof type)) {
-         if (value instanceof AT.Type) {
-            if (value.canConvert(type)) {
-               value = value.convert(type);
-            }
-            else {
-               throw AT.ConstructionError("Error converting an argument, "
-                  + "must be convertible to " + type.name);
-            }
-         }
-         else {
-            value = new type(value);
-         }
-      }
-      return value;
-   }
    
    // Base for all types. Contains some common functionality needed in all of them.
    AT.Type = function() {};
@@ -174,7 +155,26 @@ function AtypicalModuleGenerator() {
    //                  Must be already defined.
    AT.canConvert = function(sourceType, destinationType) {
       return _conversionFunction(sourceType, destinationType) !== undefined;
-   };
+   }
+
+   // Utility function for converting a value to a given Atypical type.
+   AT.wrapOrConvertValue = function(type, value) {
+      if (!(value instanceof type)) {
+         if (value instanceof AT.Type) {
+            if (value.canConvert(type)) {
+               value = value.convert(type);
+            }
+            else {
+               throw AT.ConstructionError("Error converting an argument, "
+                  + "must be convertible to " + type.name);
+            }
+         }
+         else {
+            value = new type(value);
+         }
+      }
+      return value;
+   }
 
    // TODO: DOC
    AT.prettyTypename = function(type) {
@@ -1305,7 +1305,7 @@ function AtypicalModuleGenerator() {
                i < Math.min(arguments.length, sourceFunction.typeParameters.length - 1); i++)
             {
                convertedArguments.push(
-                  _wrapOrConvertValue(sourceFunction.typeParameters[i], arguments[i]));
+                  AT.wrapOrConvertValue(sourceFunction.typeParameters[i], arguments[i]));
             }
 
             let returnValue = sourceFunction.callWrapped.apply(
@@ -1353,7 +1353,7 @@ function AtypicalModuleGenerator() {
          // primitive values where possible)
          let args = [];
          for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
-            let wrappedArg = _wrapOrConvertValue(this.typeParameters[i], arguments[i]);
+            let wrappedArg = AT.wrapOrConvertValue(this.typeParameters[i], arguments[i]);
 
             if (wrappedArg.isPrimitive()) {
                // If it's a primitive, wrapping it and unwrapping it is the easiest way
@@ -1373,7 +1373,7 @@ function AtypicalModuleGenerator() {
             return undefined;
          }
 
-         return _wrapOrConvertValue(returnType, returnValue);
+         return AT.wrapOrConvertValue(returnType, returnValue);
       },
       // TODO: doc this
       call: function() {
@@ -1393,8 +1393,8 @@ function AtypicalModuleGenerator() {
    AT.defineGenericType({
       typename: "Pair",
       init: function(first, second) {
-         this._set("first", _wrapOrConvertValue(this.typeParameters[0], first));
-         this._set("second", _wrapOrConvertValue(this.typeParameters[1], second));
+         this._set("first", AT.wrapOrConvertValue(this.typeParameters[0], first));
+         this._set("second", AT.wrapOrConvertValue(this.typeParameters[1], second));
       },
       changeTypeParameters: function(newTypes) {
          return new (this.genericType.apply(null, newTypes))(this.first, this.second);
