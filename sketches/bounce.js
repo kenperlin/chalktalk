@@ -10,9 +10,8 @@ function() {
    this.render = function(elapsed) {
       this.bouncing = this.isBouncing ? min(1, this.bouncing + elapsed)
                                       : max(0, this.bouncing - elapsed);
-       
-call <SNR>4_SelectAll()
-var bouncing = max(0, min(1, (this.inputs.hasValue(0)) ? this.inputs.value(0) : this.bouncing));
+   
+      var bouncing = max(0, min(1, (this.inputs.hasValue(0)) ? this.inputs.value(0) : this.bouncing));
     
 
       this.afterSketch(function() {
