@@ -118,10 +118,11 @@ function() {
 
          // DRAW LEFT AND RIGHT ANTENNAE
 
-         lineWidth(mix(2, 0.5, transition));
-
-         mCurve(createCurvedLine([-0.03, 0.28],[-0.2, 0.8], -0.1));
-         mCurve(createCurvedLine([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+         this.afterSketch(function() {
+            lineWidth(mix(2, 0.5, transition));
+            mCurve(createCurvedLine([-0.03, 0.28],[-0.2, 0.8], -0.1));
+            mCurve(createCurvedLine([ 0.03, 0.28],[ 0.2, 0.8],  0.1));
+         });
 
          break;
 
