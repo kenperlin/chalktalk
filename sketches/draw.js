@@ -44,12 +44,6 @@ function() {
       return { type: 'joint', data: data };
    }
 
-   this.p2p = function(src, dst) {
-      this.pointToPixel(src, dst);
-      dst.x = this.unadjustX(dst.x);
-      dst.y = this.unadjustY(dst.y);
-   }
-
    this.renderCurve = function(curve, i) {
       if (curve.type == 'joint') {
 	 mDrawDisk(curve.data, 0.2);
@@ -220,8 +214,6 @@ function() {
       var curves = this._curves[this.selection], i, curve, that = this, cx, cy, rx, ry;;
 
       this.pointToPixel(pt, this._p0);
-      this._p0.x = this.unadjustX(this._p0.x);
-      this._p0.y = this.unadjustY(this._p0.y);
 
       function checkForMouseAtCursor(x, y) {
          pt.x = x;

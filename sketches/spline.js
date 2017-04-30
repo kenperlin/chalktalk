@@ -12,18 +12,13 @@ function() {
    this.onCmdClick = function() { this.showKeys = ! this.showKeys; }
    this.onCmdSwipe[6] = ['loop', function() { this.isLoop = ! this.isLoop; }];
 
-   this._projectPoints = function(pt, unadjust) {
+   this._projectPoints = function(pt) {
 
       // FIND PROJECTIONS ONTO SCREEN.
 
       if (this.pix === undefined)
          this.pix = newVec3();
       this.pointToPixel(pt, this.pix);
-      if (unadjust) {
-         this.pix.x = this.unadjustX(this.pix.x);
-         this.pix.y = this.unadjustY(this.pix.y);
-      }
-
       for (var n = 0 ; n < this.P.length ; n++) {
          if (this.Pix[n] === undefined)
             this.Pix[n] = newVec3();
@@ -32,7 +27,7 @@ function() {
    }
    this.onMove = function(pt) {
 
-      this._projectPoints(pt, true);
+      this._projectPoints(pt);
 
       // CHECK FOR MOUSE DOWN ON A KEY.
 
