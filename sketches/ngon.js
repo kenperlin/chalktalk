@@ -18,7 +18,33 @@ function() {
    this.onCmdSwipe[2] = ['smooth', function() { this.isSmooth = ! this.isSmooth; }];
    this.onCmdSwipe[6] = ['keys'  , function() { this.showKeys = ! this.showKeys; }];
 
+   this.mouseMove = function(x, y) {
+      this._vertexAtCursor = null;
+      if (bgClickCount)
+         return;
+
+      var i, j, p;
+
+      this.standardView(this.mF);
+      this.standardViewInverse(this.mI);
+
+      for (i = 0 ; i < this.P.length ; i++) {
+         p = this.mF.transform(this.P[i]);
+         if (len(p[0] - x, p[1] - y) <= clickSize()) {
+	    this._vertexAtCursor = this.mI.transform(p);
+            break;
+         }
+         j = (i + 1) % this.P.length;
+         p = mix(p, this.mF.transform(this.P[j]), .5);
+         if (len(p[0] - x, p[1] - y) <= clickSize()) {
+	    this._vertexAtCursor = this.mI.transform(p);
+            return;
+         }
+      }
+   }
+
    this.mouseDown = function(x, y) {
+      this._vertexAtCursor = null;
 
       this.standardView(this.mF);
       this.standardViewInverse(this.mI);
@@ -101,12 +127,17 @@ function() {
          break;
       }
 
-      if (this.jP >= 0)
-         mDot(this.P[this.jP], 0.36);
-
       if (this.isSmooth && this.showKeys) {
          lineWidth(.5);
          mClosedCurve(this.P);
+      }
+
+      if (this.jP >= 0)
+         mDot(this.P[this.jP], 0.36);
+
+      else if (this._vertexAtCursor) {
+         lineWidth(1.5);
+         mDot(this._vertexAtCursor, 0.36, true);
       }
    }
    this.output = function() {

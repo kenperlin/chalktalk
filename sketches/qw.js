@@ -3,7 +3,7 @@ function() {
    this.onEnter   = function(p) { window.isWritingToTextSketch = true; }
    this.onExit    = function(p) { window.isWritingToTextSketch = false; }
    this.onDelete  = function(p) { window.isWritingToTextSketch = false; }
-   this.mouseMove = function(x, y) { this.qw.trackXY(this.xyToSketchPoint(x, y)); }
+   this.mouseMove = function(x, y, z) { this.qw.trackXY(this.inverseTransform([x, y, def(z)])); }
    this.qw = new QW();
    this.render = function() {
       this.duringSketch(function() {
