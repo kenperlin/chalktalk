@@ -13,10 +13,7 @@ function() {
       m.rotateY(2);
 
       var a = [-1,.75], b = [1,.75], c = [1,-.75], d = [-1,-.75];
-      mLine(a, b);
-      mLine(b, c);
-      mLine(c, d);
-      mLine(d, a);
+      mClosedCurve([a, b, c, d]);
       mLine([0,0,-2],[this.rayX,this.rayY,2]);
 
       this.afterSketch(function() {
