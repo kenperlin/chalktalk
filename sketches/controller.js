@@ -27,12 +27,12 @@ function() {
 
       lineWidth(trigger ? 4 : 1);
       m._xf(pqm);
-      mLine([-.2,1],[-.2,-1]);
-      mLine([-.2,1],[ .2, 1]);
-      mLine([ .2,1],[ .2,-1]);
+      mLine([-.2,.5],[-.2,-1.5]);
+      mLine([-.2,.5],[ .2,  .5]);
+      mLine([ .2,.5],[ .2,-1.5]);
       this.afterSketch(function() {
          lineWidth(press ? 9 : touch ? 3 : 1);
-         mDrawDisk([0,.3], .15);
+         mDrawDisk([0,-.2], .15);
       });
    }
 }
