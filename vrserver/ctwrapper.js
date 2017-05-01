@@ -225,7 +225,14 @@ holojam.on('update', (flakes, scope, origin) => {
       }
       
       // todo: send json as an event to chalktalk
-      //ws.send(jsonObj);
+      var m = {
+        eventType: "oncontroller",
+        event: {
+          jsonObj
+        }
+      }
+      m = JSON.stringify(m);
+      ws.send(m);
     }
   })
   
