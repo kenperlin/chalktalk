@@ -1,6 +1,7 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "c2s";
+
+   this.useInputColors();
 
    this.render = function() {
       this.duringSketch(function() {
@@ -8,6 +9,5 @@ function() {
          mCurve(makeOval(-1,-1,2,2,20, PI/2,3*PI/2));
       });
       mSphere();
-      this.useInputColors_DEPRECATED_PORT_SYSTEM();
    }
 }

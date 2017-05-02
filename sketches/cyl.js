@@ -1,6 +1,7 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "cyl";
+
+   this.useInputColors();
 
    this.render = function() {
       this.duringSketch(function() {
@@ -9,6 +10,5 @@ function() {
       });
       m.rotateX(PI/2);
       mCylinder();
-      this.useInputColors_DEPRECATED_PORT_SYSTEM();
    }
 }
