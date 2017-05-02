@@ -67,8 +67,8 @@
    AT.defineConversion(AT.Radians, AT.String, function(ang) {
       return new AT.String(ang.theta.toFixed(2) + " rad");
    });
-   AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Radians);
-   AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Int);
+   AT.defineConversionsViaIntermediary(null, AT.Float, AT.Radians);
+   AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, null);
 
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
 
