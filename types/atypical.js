@@ -194,41 +194,96 @@ function AtypicalModuleGenerator() {
       }
    }
 
-   // Internal function for retrieving the conversion function between two types.
-   // Returns undefined if the conversion does not exist.
-   //
-   // sourceType: The name or constructor of the type you're converting from.
-   // destinationType: The name or constructor of the type you're converting to.
-   // priority: (optional) An integer specifying what "level" of conversion functions you
-   //           want to retrieve.
-   //              0: Only explicitly-defined conversion functions or equivalents
-   //              1: All above including generic type conversions
-   //              2+: All above including broad intermediary type conversions
-   //           If not specified, this defaults to the highest value (i.e. return all types
-   //           of conversions).
-   function _conversionFunction(sourceType, destinationType, priority) {
+   // TODO: doc. Prints type graph in DOT format
+   AT.typeGraphString = function() {
+      function quoted(type) {
+         return "\"" + AT.prettyTypename(type) + "\"";
+      }
+
+      let graphString = "digraph Atypical {\n";
+      for (let typename in _types) {
+         let type = AT.typeNamed(typename);
+         graphString += quoted(type) + ";\n";
+      }
+      let typenames = Object.keys(_types);
+      for (let i = 0; i < typenames.length; i++) {
+         for (let j = i+1; j < typenames.length; j++) {
+            let typeA = AT.typeNamed(typenames[i]);
+            let typeB = AT.typeNamed(typenames[j]);
+
+            let explicitAToB = _explicitConversionFunction(typeA, typeB);
+            let explicitBToA = _explicitConversionFunction(typeB, typeA);
+            let genericAToB = _genericConversionFunction(typeA, typeB);
+            let genericBToA = _genericConversionFunction(typeB, typeA);
+
+            // For these, we're going to put a normal arrowhead
+            let anyFirmAToB = explicitAToB || genericAToB;
+            let anyFirmBToA = explicitBToA || genericBToA;
+
+            if (!anyFirmAToB && !anyFirmBToA) { 
+               // We don't need to put any arrows.
+               continue;
+            }
+
+            // For these, we're going to put an empty inverted arrow tail
+            // at the back of the edge
+            let intermediaryFromSourceToAToB = _intermediaryConversionsFromAnySource[
+               _typename(typeB)].indexOf(_typename(typeA)) !== -1;
+            let intermediaryFromSourceToBToA = _intermediaryConversionsFromAnySource[
+               _typename(typeA)].indexOf(_typename(typeB)) !== -1;
+
+            // For these, we're going to put an empty arrow head just behind
+            // the "main" arrow head
+            let intermediaryFromAToBToDestination = _intermediaryConversionsToAnyDestination[
+               _typename(typeA)].indexOf(_typename(typeB)) !== -1;
+            let intermediaryFromBToAToDestination = _intermediaryConversionsToAnyDestination[
+               _typename(typeB)].indexOf(_typename(typeA)) !== -1;
+
+            if ((anyFirmAToB && intermediaryFromSourceToBToA)
+               || (anyFirmBToA && intermediaryFromSourceToAToB))
+            {
+               // In these cases, the arrows get a bit too cluttered, so we're going to
+               // split them into two arrows
+               if (anyFirmAToB) {
+                  graphString += quoted(typeA) + " -> " + quoted(typeB) + "[dir=both"
+                     + " arrowhead=normal" + (intermediaryFromAToBToDestination ? "onormal" : "")
+                     + " arrowtail=" + (intermediaryFromSourceToAToB ? "oinv" : "none")
+                     + "];\n";
+               }
+               if (anyFirmBToA) {
+                  graphString += quoted(typeB) + " -> " + quoted(typeA) + "[dir=both"
+                     + " arrowhead=normal" + (intermediaryFromBToAToDestination ? "onormal" : "")
+                     + " arrowtail=" + (intermediaryFromSourceToBToA ? "oinv" : "none")
+                     + "];\n";
+               }
+            }
+            else {
+               // In all the rest of the cases, we can combine the two arrows into one edge
+               graphString += quoted(typeA) + " -> " + quoted(typeB) + "[dir=both"
+                  + " arrowhead=" + (anyFirmAToB ? "normal" : "none")
+                     + (intermediaryFromAToBToDestination ? "onormal" : "")
+                     + (intermediaryFromSourceToBToA ? "oinv" : "")
+                  + " arrowtail=" + (anyFirmBToA ? "normal" : "none")
+                     + (intermediaryFromBToAToDestination ? "onormal" : "")
+                     + (intermediaryFromSourceToAToB ? "oinv" : "none")
+                  + "];\n"
+            }
+         }
+      }
+      graphString += "}";
+      return graphString;
+   }
+
+   // TODO: DOC. helper function for getting explicitly-defined conversions (and explicit
+   // intermediary conversions).
+   function _explicitConversionFunction(sourceType, destinationType) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
+      return _conversions[sourceTypename][destinationTypename];
+   }
 
-      if (priority === undefined) { priority = 999; }
-
-      if (sourceTypename === destinationTypename) {
-         // Same types, return the identity function
-         return function(x) { return x; }
-      }
-
-      // Explicitly-defined conversions override everything else
-      if (_conversions[sourceTypename][destinationTypename] !== undefined) {
-         return _conversions[sourceTypename][destinationTypename];
-      }
-
-      if (priority <= 0) { return undefined; }
-
-      sourceType = AT.typeNamed(sourceTypename);
-      destinationType = AT.typeNamed(destinationTypename);
-
-      // Generic types have special rules for conversions
-
+   // TODO: DOC. helper function for getting generic types' conversion functions
+   function _genericConversionFunction(sourceType, destinationType) {
       if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
 
          // Do some special processing for conversions between 2 types with the same generic type
@@ -253,10 +308,13 @@ function AtypicalModuleGenerator() {
             return undefined;
          }
       }
+      return undefined;
+   }
 
-      if (priority <= 1) { return undefined; }
-
-      // Last option: broad intermediary conversions
+   // TODO: DOC. helper function for looking for broad intermediary conversions
+   function _broadIntermediaryConversionFunction(sourceType, destinationType) {
+      let sourceTypename = _typename(sourceType);
+      let destinationTypename = _typename(destinationType);
       
       function findIntermediaryConversion(sourceTypename, destinationTypename,
                                           possibleIntermediaries)
@@ -287,7 +345,7 @@ function AtypicalModuleGenerator() {
                   {
                      return function(value) {
                         return conversionToDestination(conversionToIntermediary(value));
-                     }
+                     };
                   }
                }
             }
@@ -310,6 +368,49 @@ function AtypicalModuleGenerator() {
       if (intermediaryConversionFunction !== undefined) {
          return intermediaryConversionFunction;
       }
+   }
+
+   // Internal function for retrieving the conversion function between two types.
+   // Returns undefined if the conversion does not exist.
+   //
+   // sourceType: The name or constructor of the type you're converting from.
+   // destinationType: The name or constructor of the type you're converting to.
+   // priority: (optional) An integer specifying what "level" of conversion functions you
+   //           want to retrieve.
+   //              0: Only explicitly-defined conversion functions or equivalents
+   //              1: All above including generic type conversions
+   //              2+: All above including broad intermediary type conversions
+   //           If not specified, this defaults to the highest value (i.e. return all types
+   //           of conversions).
+   function _conversionFunction(sourceType, destinationType, priority) {
+      let sourceTypename = _typename(sourceType);
+      let destinationTypename = _typename(destinationType);
+      sourceType = AT.typeNamed(sourceTypename);
+      destinationType = AT.typeNamed(destinationTypename);
+
+      if (priority === undefined) { priority = 999; }
+
+      if (sourceType === destinationType) {
+         // Same types, return the identity function
+         return function(x) { return x; }
+      }
+
+      // Explicitly-defined conversions override everything else
+      let explicitConversion = _explicitConversionFunction(sourceType, destinationType);
+      if (explicitConversion) { return explicitConversion; }
+
+      if (priority <= 0) { return undefined; }
+
+      // Generic types have special rules for conversions
+      let genericConversion = _genericConversionFunction(sourceType, destinationType);
+      if (genericConversion) { return genericConversion; }
+
+      if (priority <= 1) { return undefined; }
+
+      // Last option: broad intermediary conversions
+      let broadIntermediaryConversion = _broadIntermediaryConversionFunction(
+         sourceType, destinationType);
+      if (broadIntermediaryConversion) { return broadIntermediaryConversion; }
 
       // Give up, nothing works!
 
