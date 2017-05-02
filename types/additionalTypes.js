@@ -88,15 +88,15 @@
             g = r[1];
             r = r[0];
          }
-         function validate(channel) {
-            if (channel === undefined) { channel = 0; }
+         function validate(channel, defaultValue) {
+            if (channel === undefined) { channel = defaultValue; }
             channel = AT.wrapOrConvertValue(AT.Float, channel).value;
             return Math.min(1, Math.max(0, channel));
          }
-         this._set("r", validate(r));
-         this._set("g", validate(g));
-         this._set("b", validate(b));
-         this._set("a", validate(a));
+         this._set("r", validate(r, 0));
+         this._set("g", validate(g, 0));
+         this._set("b", validate(b, 0));
+         this._set("a", validate(a, 1));
       }
    });
    AT.defineConversion(AT.Color, AT.Array(AT.Float), function(col) {
