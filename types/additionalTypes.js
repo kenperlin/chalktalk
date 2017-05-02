@@ -97,6 +97,12 @@
          this._set("g", validate(g, 0));
          this._set("b", validate(b, 0));
          this._set("a", validate(a, 1));
+      },
+      getRGB: function() {
+         return [this.r, this.g, this.b];
+      },
+      getRGBA: function() {
+         return [this.r, this.g, this.b, this.a];
       }
    });
    AT.defineConversion(AT.Color, AT.Array(AT.Float), function(col) {
