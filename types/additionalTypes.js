@@ -73,6 +73,59 @@
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
 
 
+   AT.defineType({
+      typename: "Color",
+      init: function(r, g, b, a) {
+         if (r instanceof AT.Color) {
+            a = r.a;
+            b = r.b;
+            g = r.g;
+            r = r.r;
+         }
+         else if (r instanceof Array) {
+            a = r[3];
+            b = r[2];
+            g = r[1];
+            r = r[0];
+         }
+         function validate(channel) {
+            if (channel === undefined) { channel = 0; }
+            channel = AT.wrapOrConvertValue(AT.Float, channel).value;
+            return Math.min(1, Math.max(0, channel));
+         }
+         this._set("r", validate(r));
+         this._set("g", validate(g));
+         this._set("b", validate(b));
+         this._set("a", validate(a));
+      }
+   });
+   AT.defineConversion(AT.Color, AT.Array(AT.Float), function(col) {
+      return new (AT.Array(Float))(col.r, col.g, col.b, col.a);
+   });
+   AT.defineConversion(AT.Array(AT.Float), AT.Color, function(arr) {
+      return new AT.Color(arr.get(0), arr.get(1), arr.get(2), arr.get(3));
+   });
+   AT.defineConversion(AT.Color, AT.String, function(col) {
+      return new AT.String(
+         "rgba(" + col.r.toFixed(3)
+            + ", " + col.g.toFixed(3)
+            + ", " + col.b.toFixed(3)
+            + ", " + col.a.toFixed(3) + ")");
+   });
+   AT.defineConversion(AT.String, AT.Color, function(str) {
+      let numbers = str.value.split(/[^\d\.]/).map(parseFloat).filter(
+         function(value) { return !isNaN(value); }
+      );
+      return new AT.Color(
+         numbers[0] || 0,
+         numbers[1] || 0,
+         numbers[2] || 0,
+         numbers[3] || 0
+      );
+   });
+   // TODO: more conversions?
+
+
    // TODO: DOC
    
    AT.defineType({
@@ -169,6 +222,9 @@
             return makeFunction(exp, AT.Function(AT.Float), "", [], 0);
          });
    })();
+
+   AT.defineConversionsViaIntermediary(AT.Expression, AT.String, AT.Color);
+   AT.defineConversionsViaIntermediary(AT.Color, AT.String, AT.Expression);
 
    // TODO: add conversions to Array(Float) and Vector
 })(AT);

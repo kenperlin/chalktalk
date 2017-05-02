@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    /*
       Select an rgb color, and send it to the output.
    */
@@ -39,17 +38,21 @@ function() {
          mLine([x, 1],[x,-1]);
       }
       this.afterSketch(function() {
-         if (this.inValue_DEPRECATED_PORT_SYSTEM[0] !== undefined)
-	    for (var i = 0 ; i < min(this.inValue_DEPRECATED_PORT_SYSTEM[0].length, this.rgb.length) ; i++)
-	       this.rgb[i] = max(0, min(1, this.inValue_DEPRECATED_PORT_SYSTEM[0][i]));
          mLineWidth(0.1);
          for (var i = 0 ; i < 3 ; i++) {
             color(colors[i]);
-	    var x = (i-1)*2/3;
-	    var y = 2 * this.rgb[i] - 1;
+            var x = (i-1)*2/3;
+            var y = 2 * this.rgb[i] - 1;
             mLine([x-.24, y], [x+.24, y]);
          }
       });
    }
-   this.output = function() { return this.rgb; }
+
+   this.defineInput(AT.Color, function(col) {
+      this.rgb = [col.r, col.g, col.b];
+   });
+
+   this.defineOutput(AT.Color, function() {
+      return new AT.Color(this.rgb);
+   });
 }
