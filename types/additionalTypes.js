@@ -224,7 +224,6 @@
    })();
 
    AT.defineConversionsViaIntermediary(AT.Expression, AT.String, AT.Color);
-   AT.defineConversionsViaIntermediary(AT.Color, AT.String, AT.Expression);
 
    // TODO: add conversions to Array(Float) and Vector
 })(AT);
