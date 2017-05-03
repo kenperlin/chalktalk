@@ -1,5 +1,5 @@
 function() {
-   var nelf = this;
+   var self = this;
    this.label = 'Soundfile';
    window.soundfileSketch = this;
 
