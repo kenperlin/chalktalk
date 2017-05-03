@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var self = this;
    this.label = 'Soundfile';
 
@@ -13,20 +12,23 @@ function() {
    };
 
    this.createCodeFunction = function() {
-      if (this.soundBuffer) {
-         this.codeFunction = function(t) {
-            return this.tToSample(t);
-         }.bind(this);
-      } else {
-         this.codeFunction = function(t) {
-            return 0;
-         }.bind(this);
-      }
    };
 
    this.input = document.createElement('input');
    this.input.type = 'file';
    this.input.style = 'visibility:hidden';
+
+   this.defineOutput(AT.Function(AT.Seconds, AT.AudioSample), function() {
+      if (this.soundBuffer) {
+         return function(t) {
+            return this.tToSample(t);
+         }.bind(this);
+      } else {
+         return function(t) {
+            return 0;
+         }.bind(this);
+      }
+   });
 
    this.render = function(elapsed) {
 
@@ -34,9 +36,6 @@ function() {
 
       mDrawOval([-1, -1], [1, 1], 32, PI/2, PI/2 - TAU);
       mCurve([[-.3, .5], [.5, 0], [-.3, -.5]]);
-
-      this.createCodeFunction();
-      this.setOutPortValue_DEPRECATED_PORT_SYSTEM( self.codeFunction );
 
       this.onClick = ['choose file', function(e) {
          this.input.click();
@@ -93,9 +92,6 @@ function() {
                // Get first channel data (assume it's mono).
 
                self.soundBufferChannelData = audioBuffer.getChannelData(0);
-
-               self.createCodeFunction();
-               self.setOutPortValue( self.codeFunction );
             },
             function(error) {
                console.log('Error decoding audio: ' + error.message);

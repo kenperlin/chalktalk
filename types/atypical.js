@@ -1448,7 +1448,7 @@ function AtypicalModuleGenerator() {
          }
          return true;
       },
-      // TODO: doc this
+      // TODO: doc this (returns wrapped return value)
       callWrapped: function() {
          // Clean up arguments to make sure they're the right type (converting them to
          // primitive values where possible)
