@@ -1,7 +1,6 @@
 function() {
    var self = this;
    this.label = 'Soundfile';
-   window.soundfileSketch = this;
 
    this.soundBuffer = null;
    this.soundBufferChannelData = null;
@@ -14,10 +13,13 @@ function() {
 
    this.createCodeFunction = function() {
       if (this.soundBuffer) {
-         var codeText = 'return ( soundfileSketch.tToSample(t) )';
-         this.codeFunction = new Function('t', codeText);
+         this.codeFunction = function(t) {
+            return this.tToSample(t);
+         }.bind(this);
       } else {
-         this.codeFunction = new Function('t', 'return t');
+         this.codeFunction = function(t) {
+            return 0;
+         }.bind(this);
       }
    };
 
