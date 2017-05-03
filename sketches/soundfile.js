@@ -46,6 +46,9 @@ function() {
 
       var handleFileSelect = function(e) {
          var file = e.target.files[0];
+
+         if (!file) { return; } // User pressed cancel
+
          if (file && file.type && file.type.indexOf('audio') === -1) {
             console.log('Error: not a valid audio file');
             return;
