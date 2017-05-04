@@ -25,5 +25,5 @@ function() {
          this.sketchTexts[0].setValue(roundedString(this.inValues_DEPRECATED_PORT_SYSTEM[0]));
    }
 
-   this.output = function() { return this.sketchTexts[0].value; }
+   this.output = function() { return +(this.sketchTexts[0].value); }
 }
