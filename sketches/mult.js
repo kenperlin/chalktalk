@@ -7,7 +7,7 @@ function() {
    this.render = function() {
       mLine( [-1, 1], [ 1, -1] );
       mLine( [ 1, 1], [-1, -1] );
-      if (isDef(this.inLinks[0]) && isDef(this.inLinks[1]))
+      if (this.inputs.hasLink(0) && this.inputs.hasLink(1))
          this.outValue_DEPRECATED_PORT_SYSTEM[0] = mult(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.inValue_DEPRECATED_PORT_SYSTEM[1]);
    }
 }

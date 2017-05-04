@@ -39,7 +39,7 @@ function sum(x,y) {
       mLine( [ 0, 1], [ 0, -1] );
       mLine( [-1, 0], [ 1,  0] );
 
-      if (isDef(this.inLinks[0]) && isDef(this.inLinks[1])) {
+      if (this.inputs.hasLink(0) && this.inputs.hasLink(1)) {
          this.outValue_DEPRECATED_PORT_SYSTEM[0] = sum(this.inValue_DEPRECATED_PORT_SYSTEM[0], this.inValue_DEPRECATED_PORT_SYSTEM[1]);
       }
    }

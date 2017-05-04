@@ -77,13 +77,13 @@ function() {
    this.valueIndex = -1;
    this.values = newArray(100);
    this.displayMode = function() {
-      var link = this.inLinks[0];
+      var link = this.inputs.link(0);
       if (isDef(link))
          return link.displayMode();
       return 0;
    }
    this.displayIndex = function() {
-      var link = this.inLinks[0];
+      var link = this.inputs.link(0);
       if (isDef(link))
          return link.displayIndex();
       return 0;
