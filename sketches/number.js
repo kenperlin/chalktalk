@@ -3,6 +3,14 @@ function() {
    this.labels = '0 1 2 3 4 5 6 7 8 9'.split(' ');
    this.is3D = true;
 
+   let updateSketchText = function() {
+      if (this.sketchTexts.length == 0) {
+         this.setSketchText(0, '' + this.selection, [0,-.1], 1.5);
+      }
+   }.bind(this);
+
+   this.setup = updateSketchText;
+
    this.render = function() {
       this.duringSketch(function() {
          var curves = CT.lineFont[0][48 + this.selection];
@@ -10,8 +18,7 @@ function() {
             mCurve(curves[i]);
       });
       this.afterSketch(function() {
-         if (this.sketchTexts.length == 0)
-            this.setSketchText(0, '' + this.selection, [0,-.1], 1.5);
+         updateSketchText();
       });
 
       if (isDef(this.inValues_DEPRECATED_PORT_SYSTEM[0]))
