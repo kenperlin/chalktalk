@@ -7,11 +7,12 @@ function() {
    }
    this.defineAllRemainingInputs(AT.Function(AT.Seconds, AT.AudioSample));
    this.defineOutput(AT.Function(AT.Seconds, AT.AudioSample), function() {
+      let mixer = this;
       return function(t) {
          var sum = 0;
-         for (var i = 0 ; i < this.inputs.numPorts(); i++) {
-            if (this.inputs.hasValue(i)) {
-               sum += valueOf(this.inputs.value(i), t);
+         for (var i = 0 ; i < mixer.inputs.numPorts(); i++) {
+            if (mixer.inputs.hasValue(i)) {
+               sum += valueOf(mixer.inputs.value(i), t);
             }
          }
          return sum;
