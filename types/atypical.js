@@ -1452,21 +1452,20 @@ function AtypicalModuleGenerator() {
       callWrapped: function() {
          // Clean up arguments to make sure they're the right type (converting them to
          // primitive values where possible)
-         let args = [];
          for (let i = 0; i < Math.min(arguments.length, this.typeParameters.length - 1); i++) {
             let wrappedArg = AT.wrapOrConvertValue(this.typeParameters[i], arguments[i]);
 
             if (wrappedArg.isPrimitive()) {
                // If it's a primitive, wrapping it and unwrapping it is the easiest way
                // to do type verification.
-               args.push(wrappedArg.toPrimitive());
+               arguments[i] = wrappedArg.toPrimitive();
             }
             else {
-               args.push(wrappedArg);
+               arguments[i] = wrappedArg;
             }
          }
 
-         let returnValue = this.func.apply(this, args);
+         let returnValue = this.func.apply(this, arguments);
 
          let returnType = this.typeParameters[this.typeParameters.length - 1];
 
@@ -1478,8 +1477,7 @@ function AtypicalModuleGenerator() {
       },
       // TODO: doc this
       call: function() {
-         let args = Array.from(arguments);
-         let returnValue = this.callWrapped.apply(this, args);
+         let returnValue = this.callWrapped.apply(this, arguments);
          // If it's a primitive, wrapping it and unwrapping it is the easiest way
          // to do type verification.
          if (returnValue !== undefined && returnValue.isPrimitive()) {
