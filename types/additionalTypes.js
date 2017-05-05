@@ -70,8 +70,6 @@
    AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Radians);
    AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, null);
 
-   AT.defineConversionsViaIntermediary(AT.Radians, AT.Float, AT.Unknown);
-
    AT.defineType({
       typename: "Seconds",
       init: function(sec) {
