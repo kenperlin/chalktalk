@@ -252,5 +252,14 @@
 
    AT.defineConversionsViaIntermediary(AT.Expression, AT.String, AT.Color);
 
+   AT.defineConversion(AT.Expression, AT.Unknown, function(exp) {
+      try {
+         return new AT.Unknown(exp.eval());
+      }
+      catch (error) {
+         return new AT.Unknown(0);
+      }
+   });
+
    // TODO: add conversions to Array(Float) and Vector
 })(AT);
