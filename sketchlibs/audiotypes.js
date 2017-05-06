@@ -1,3 +1,5 @@
+"use strict";
+
 AT.defineType({
    typename: "AudioSample",
    init: function(sample) {
