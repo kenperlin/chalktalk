@@ -82,8 +82,8 @@
       }
    });
    AT.defineConversion(AT.Seconds, AT.Float, function(sec) { return new AT.Float(sec.value); });
-   AT.defineConversion(AT.Float, AT.Seconds, function(f) { return new AT.Seconds(AT.Float); });
    AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Seconds);
+   AT.defineConversion(AT.Float, AT.Seconds, function(f) { return new AT.Seconds(f.value); });
    AT.defineConversionsViaIntermediary(AT.Seconds, AT.Float, null);
 
    AT.defineType({
