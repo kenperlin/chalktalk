@@ -3,12 +3,15 @@ function() {
    this.setSketchText(0, '1', [0, 0], .3);
 
    this.defineInput(AT.Function(AT.Seconds, AT.AudioSample));
-   this.defineInput(AT.Seconds);
+   this.defineInput(AT.Function(AT.Seconds, AT.Seconds));
+
    this.defineOutput(AT.Function(AT.Seconds, AT.AudioSample), function() {
-      var input = this.inputs.value(0);
-      var delay = def(this.inputs.value(1), this.sketchTexts[0].value);
+      var input = def(this.inputs.value(0), function(t) { return 0; });
+      var delay = def(this.inputs.value(1), 
+         function(t) { return this.sketchTexts[0].value; }.bind(this));
+
       return function(t) {
-         return valueOf(input, t - valueOf(delay, t));
+         return input(t - delay(t));
       }
    });
 
