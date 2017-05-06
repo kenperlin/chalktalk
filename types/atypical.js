@@ -311,10 +311,25 @@ function AtypicalModuleGenerator() {
       return undefined;
    }
 
+   function _directConversionFunction(sourceType, destinationType) {
+
+      // Explicitly-defined conversions override everything else
+      let explicitConversion = _explicitConversionFunction(sourceType, destinationType);
+      if (explicitConversion) { return explicitConversion; }
+
+      // Generic types have special rules for conversions
+      let genericConversion = _genericConversionFunction(sourceType, destinationType);
+      if (genericConversion) { return genericConversion; }
+
+      return undefined;
+   }
+
    // TODO: DOC. helper function for looking for broad intermediary conversions
    function _broadIntermediaryConversionFunction(sourceType, destinationType) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
+      sourceType = AT.typeNamed(sourceTypename);
+      destinationType = AT.typeNamed(destinationTypename);
       
       function findIntermediaryConversion(sourceTypename, destinationTypename,
                                           possibleIntermediaries)
@@ -324,27 +339,17 @@ function AtypicalModuleGenerator() {
             for (let i = possibleIntermediaries.length - 1; i >= 0; i--) {
 
                let intermediaryTypename = possibleIntermediaries[i];
-               if (AT.canConvert(sourceTypename, intermediaryTypename)) {
+               let intermediaryType = AT.typeNamed(intermediaryTypename);
 
-                  // We set a priority of 1 here to avoid "chaining" of broad intermediary
-                  // conversions.
-                  // E.g. if you've defined 4 types, called 1-4, and you've defined a conversion
-                  // 1 -> 2, and you've also defined broad intermediary conversions * -> 2 -> 3
-                  // and * -> 3 -> 4, that should NOT give you licence to go down that chain
-                  // all the way from 1 -> 2 -> 3 -> 4 by calling _conversionFunction recursively
-                  // and chaining those broad intermediary conversions.
-                  // Things get way too messy if you allow that and you end up with
-                  // unintentionally huge conversion chains.
-                  let conversionToIntermediary = _conversionFunction(
-                     sourceTypename, intermediaryTypename, 1);
-                  let conversionToDestination = _conversionFunction(
-                     intermediaryTypename, destinationTypename, 1);
+               let sourceToIntermediary = _directConversionFunction(sourceType, intermediaryType);
+               if (sourceToIntermediary) {
 
-                  if (conversionToIntermediary !== undefined
-                     && conversionToDestination !== undefined)
-                  {
+                  let intermediaryToDestination = _directConversionFunction(
+                     intermediaryType, destinationType);
+
+                  if (intermediaryToDestination) {
                      return function(value) {
-                        return conversionToDestination(conversionToIntermediary(value));
+                        return intermediaryToDestination(sourceToIntermediary(value));
                      };
                   }
                }
@@ -375,37 +380,19 @@ function AtypicalModuleGenerator() {
    //
    // sourceType: The name or constructor of the type you're converting from.
    // destinationType: The name or constructor of the type you're converting to.
-   // priority: (optional) An integer specifying what "level" of conversion functions you
-   //           want to retrieve.
-   //              0: Only explicitly-defined conversion functions or equivalents
-   //              1: All above including generic type conversions
-   //              2+: All above including broad intermediary type conversions
-   //           If not specified, this defaults to the highest value (i.e. return all types
-   //           of conversions).
-   function _conversionFunction(sourceType, destinationType, priority) {
+   function _conversionFunction(sourceType, destinationType) {
       let sourceTypename = _typename(sourceType);
       let destinationTypename = _typename(destinationType);
       sourceType = AT.typeNamed(sourceTypename);
       destinationType = AT.typeNamed(destinationTypename);
-
-      if (priority === undefined) { priority = 999; }
 
       if (sourceType === destinationType) {
          // Same types, return the identity function
          return function(x) { return x; }
       }
 
-      // Explicitly-defined conversions override everything else
-      let explicitConversion = _explicitConversionFunction(sourceType, destinationType);
-      if (explicitConversion) { return explicitConversion; }
-
-      if (priority <= 0) { return undefined; }
-
-      // Generic types have special rules for conversions
-      let genericConversion = _genericConversionFunction(sourceType, destinationType);
-      if (genericConversion) { return genericConversion; }
-
-      if (priority <= 1) { return undefined; }
+      let directConversion = _directConversionFunction(sourceType, destinationType);
+      if (directConversion) { return directConversion; }
 
       // Last option: broad intermediary conversions
       let broadIntermediaryConversion = _broadIntermediaryConversionFunction(
