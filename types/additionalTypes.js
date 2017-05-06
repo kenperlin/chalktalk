@@ -82,9 +82,11 @@
       }
    });
    AT.defineConversion(AT.Seconds, AT.Float, function(sec) { return new AT.Float(sec.value); });
-   AT.defineConversionsViaIntermediary(AT.Int, AT.Float, AT.Seconds);
    AT.defineConversion(AT.Float, AT.Seconds, function(f) { return new AT.Seconds(f.value); });
+   AT.defineConversionsViaIntermediary(null, AT.Float, AT.Seconds);
    AT.defineConversionsViaIntermediary(AT.Seconds, AT.Float, null);
+   AT.defineConversionsViaIntermediary(AT.Float, AT.Seconds, null);
+   AT.defineConversionsViaIntermediary(null, AT.Seconds, AT.Float);
 
    AT.defineType({
       typename: "Color",
