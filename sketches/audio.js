@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    var _audio_volume = 1;
    this.label = "Audio";
    this.code = [
@@ -17,6 +16,10 @@ function() {
    this.savedY = "";
    this.savedZ = "";
 
+   this.defineInput(AT.Hertz);
+   this.defineInput(AT.Float);
+   this.defineInput(AT.Float);
+
    this.onDelete = function() {
       setAudioSignal(function(t) { return 0; });
    }
@@ -32,19 +35,19 @@ function() {
       mLine([1,1],[1,-1]);
       mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       if ( this.code[cs][1] != this.savedCode ||
-           this.inputs.hasLink(0) && this.inValues_DEPRECATED_PORT_SYSTEM[0] != this.savedX ||
-           this.inputs.hasLink(1) && this.inValues_DEPRECATED_PORT_SYSTEM[1] != this.savedY ||
-           this.inputs.hasLink(2) && this.inValues_DEPRECATED_PORT_SYSTEM[2] != this.savedZ ) {
+           this.inputs.hasLink(0) && this.inputs.value(0) != this.savedX ||
+           this.inputs.hasLink(1) && this.inputs.value(1) != this.savedY ||
+           this.inputs.hasLink(2) && this.inputs.value(2) != this.savedZ ) {
 
          var code = this.savedCode = this.code[cs][1];
 
-         if (this.inputs.hasLink(0)) this.savedX = this.inValue_DEPRECATED_PORT_SYSTEM[0];
-         if (this.inputs.hasLink(1)) this.savedY = this.inValue_DEPRECATED_PORT_SYSTEM[1];
-         if (this.inputs.hasLink(2)) this.savedZ = this.inValue_DEPRECATED_PORT_SYSTEM[2];
+         if (this.inputs.hasLink(0)) this.savedX = this.inputs.value(0);
+         if (this.inputs.hasLink(1)) this.savedY = this.inputs.value(1);
+         if (this.inputs.hasLink(2)) this.savedZ = this.inputs.value(2);
 
-         var var_xyz = "var x=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[0]) + ")," +
-                           "y=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[1]) + ")," +
-                           "z=(" + def(this.inValues_DEPRECATED_PORT_SYSTEM[2]) + ");" ;
+         var var_xyz = "var x=(" + def(this.inputs.value(0)) + ")," +
+                           "y=(" + def(this.inputs.value(1)) + ")," +
+                           "z=(" + def(this.inputs.value(2)) + ");" ;
 
          // MAKE SURE THE CODE IS VALID.
 

@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
 /*
    TODO:  Add chords.
 */
@@ -67,8 +66,8 @@ function() {
    this.noteToPitch = function(note) {
       return 261.6 * pow(2, note / 12);
    }
-   this.output = function() {
+   this.defineOutput(AT.Hertz, function() {
       return this.notePressed == null ? 0 : this.noteToPitch(this.notePressed);
-   }
+   });
 }
 
