@@ -44,11 +44,16 @@ window.TestHarness = (function() {
       console.error = defaultError;
    }
 
-   // Convenience function for comparing two flat arrays of simple values
+   // Convenience function for comparing two flat or nested arrays of simple values
    T.arraysEqual = function(a, b) {
       if (a.length !== b.length) { return false; }
       for (let i = 0; i < a.length; i++) {
-         if (a[i] !== b[i]) { return false; }
+         if (a[i] instanceof Array && b[i] instanceof Array) {
+            if (!T.arraysEqual(a[i], b[i])) {
+               return false;
+            }
+         }
+         else if (a[i] !== b[i]) { return false; }
       }
       return true;
    }

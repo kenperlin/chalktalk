@@ -1174,6 +1174,112 @@ function AtypicalModuleGenerator() {
       return new AT.Vector(numbers);
    });
 
+
+   AT.defineType({
+      typename: "Matrix",
+      init: function(rowsOrInit, columns) {
+         let values = [];
+         if (rowsOrInit instanceof AT.Matrix) {
+            // Init from another matrix object
+            values = rowsOrInit.values;
+         }
+         else if (typeof(rowsOrInit) === "object" && rowsOrInit._quickConstruct != undefined) {
+            // This is another option for construction. Pass in an object with "quickconstruct"
+            // set to a well-formed array of arrays of floats with every "row" of the matrix
+            // being the same length, and this will construct it by just a simple pointer copy
+            // with no validation performed at all.
+            // This is more meant for internal use and is not recommended unless performance is
+            // critical!
+            values = rowsOrInit._quickConstruct;
+         }
+         else if (typeof(rowsOrInit) === "number" && typeof(columns) === "number") {
+            // Init from size of rows and columns
+            values = new Array(rowsOrInit).fill(new Array(columns).fill(0));
+         }
+         else if (rowsOrInit instanceof Array) {
+            // Init from a 2D array of numbers
+            let columns = rowsOrInit.reduce(function(max, row) {
+               return Math.max(max, row.length);
+            }, 0);
+            values = new Array(rowsOrInit.length);
+            for (let row = 0; row < rowsOrInit.length; row++) {
+               values[row] = new Array(columns).fill(0);
+               for (let column = 0; column < rowsOrInit[row].length; column++) {
+                  // Convert via AT.Float for validation purposes
+                  values[row][column] = new AT.Float(rowsOrInit[row][column]).value;
+               }
+            }
+         }
+         this._set("values", values);
+      },
+      numRows: function() {
+         return this.values.length;
+      },
+      numColumns: function() {
+         return this.values[0] === undefined ? 0 : this.values[0].length;
+      },
+      dimensions: function() {
+         return [this.numRows(), this.numColumns()];
+      },
+      element: function(row, column) {
+         if (row >= this.values.length || column >= this.values[row].length) {
+            return 0;
+         }
+         return this.values[row][column];
+      },
+      times: function(other) {
+         if (other instanceof AT.Float) {
+            other = other.value;
+         }
+         if (typeof(other) === "number") {
+            // Multiply by a constant
+            return new AT.Matrix({_quickConstruct:
+               this.values.map(function(row) {
+                  return row.map(function(element) {
+                     return element * other;
+                  });
+               })
+            });
+         }
+
+         // Multiply by another matrix
+         if (!(other instanceof AT.Matrix)) {
+            console.error("Attempted to multiply a matrix by a non-matrix object " + other);
+            return undefined;
+         }
+         else if (this.numColumns() !== other.numRows()) {
+            console.error("Attempted to multiply matrices with incompatible dimensions, "
+               + this.dimensions() + " times " + other.dimensions());
+            return undefined;
+         }
+         
+         let result = new Array(this.numRows());
+         for (let i = 0; i < this.numRows(); i++) {
+            result[i] = new Array(other.numColumns());
+            for (let j = 0; j < other.numColumns(); j++) {
+               let element = 0;
+               for (let k = 0; k < this.numRows(); k++) {
+                  element += this.element(i, k) * other.element(k, j);
+               }
+               result[i][j] = element;
+            }
+         }
+         return new AT.Matrix({_quickConstruct: result});
+      },
+      transpose: function() {
+         let newValues = new Array(this.numColumns());
+         for (let row = 0; row < this.numColumns(); row++) {
+            newValues[row] = new Array(this.numRows());
+            for (let column = 0; column < this.numRows(); column++) {
+               newValues[row][column] = this.element(column, row);
+            }
+         }
+         return new AT.Matrix({_quickConstruct: newValues});
+      }
+   });
+
+
+
    AT.defineType({
       typename: "Int",
       init: function(value) {
@@ -1365,7 +1471,7 @@ function AtypicalModuleGenerator() {
          if (this.typeParameters.length === 0) {
             throw new AT.ConstructionError("Attempted to construct a Function with no "
                + "type parameters. Use AT.Function(AT.Void) for functions that return "
-                  + "no values and take no arguments.");
+               + "no values and take no arguments.");
          }
          this._set("func", func);
       },
