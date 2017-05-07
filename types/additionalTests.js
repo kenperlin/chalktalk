@@ -56,6 +56,9 @@ window.AdditionalTests = [
          T.assert(mx.element(3, 1) === 10);
          T.assert(mx.element(3, 2) === 0);
          T.assert(mx.element(4, 2) === 0);
+
+         let referenceValues = [[1, 2, 3], [4, 5, 6], [7, 8, 0], [9, 10, 0]];
+         T.assert(T.arraysEqual(mx.values, referenceValues));
       }
 
       testMx(mx1);
@@ -72,10 +75,11 @@ window.AdditionalTests = [
          }
       }
 
-      let mx4 = new AT.Matrix([[1, 2, 3],
-                               [4, 5, 6],
-                               [7, 8, 9],
-                               [10, 11, 12]]);
+      let someValues = [[1, 2, 3],
+                        [4, 5, 6],
+                        [7, 8, 9],
+                        [10, 11, 12]];
+      let mx4 = new AT.Matrix(someValues);
       let transposedValues = [[1, 4, 7, 10], [2, 5, 8, 11], [3, 6, 9, 12]];
       T.assert(T.arraysEqual(mx4.transpose().values, transposedValues));
 
@@ -84,6 +88,7 @@ window.AdditionalTests = [
                                [9, 10, 11, 12],
                                [13, 14, 15, 16],
                                [17, 18, 19, 20]]);
+      T.assert(mx5.canMultiply(mx4));
       let resultMx = mx5.times(mx4);
       T.assert(T.arraysEqual(resultMx.values, 
          [[ 70,  80,  90],
@@ -92,6 +97,7 @@ window.AdditionalTests = [
            [334, 392, 450],
            [422, 496, 570]]));
 
+      T.assert(!mx4.canMultiply(mx5));
       T.disableConsoleErrors();
       T.assert(mx4.times(mx5) === undefined);
       T.enableConsoleErrors();
@@ -100,8 +106,18 @@ window.AdditionalTests = [
                              [8, 10, 12],
                              [14, 16, 18],
                              [20, 22, 24]];
+      T.assert(mx4.canMultiply(2));
+      T.assert(mx4.canMultiply(new AT.Float(2)));
       T.assert(T.arraysEqual(mx4.times(2).values, doubledMxValues));
       T.assert(T.arraysEqual(mx4.times(new AT.Float(2)).values, doubledMxValues));
+
+      let mx6 = new AT.Matrix(4, 3);
+      for (let row = 0; row < 4; row++) {
+         for (let col = 0; col < 3; col++) {
+            mx6.setElement(row, col, someValues[row][col]);
+         }
+      }
+      T.assert(T.arraysEqual(mx6.values, someValues));
    }
 ];
 

@@ -1194,7 +1194,10 @@ function AtypicalModuleGenerator() {
          }
          else if (typeof(rowsOrInit) === "number" && typeof(columns) === "number") {
             // Init from size of rows and columns
-            values = new Array(rowsOrInit).fill(new Array(columns).fill(0));
+            values = new Array(rowsOrInit);
+            for (let row = 0; row < rowsOrInit; row++) {
+               values[row] = new Array(columns).fill(0);
+            }
          }
          else if (rowsOrInit instanceof Array) {
             // Init from a 2D array of numbers
@@ -1210,7 +1213,7 @@ function AtypicalModuleGenerator() {
                }
             }
          }
-         this._set("values", values);
+         this.values = values.slice();
       },
       numRows: function() {
          return this.values.length;
@@ -1226,6 +1229,28 @@ function AtypicalModuleGenerator() {
             return 0;
          }
          return this.values[row][column];
+      },
+      setElement: function(row, column, value) {
+         if (row >= this.numRows() || column >= this.numColumns()) {
+            console.error("Attempted to set element (" + row + ", " + column + ") of a(n) "
+               + this.numRows() + "x" + this.numColumns() + " matrix");
+            return;
+         }
+         this.values[row][column] = value;
+      },
+      copy: function() {
+         return new AT.Matrix(this);
+      },
+      canMultiply: function(other) {
+         if (other instanceof AT.Float || typeof(other) === "number") {
+            return true;
+         }
+         else if (other instanceof AT.Matrix) {
+            return this.numColumns() === other.numRows();
+         }
+         else {
+            return false;
+         }
       },
       times: function(other) {
          if (other instanceof AT.Float) {
@@ -1276,6 +1301,7 @@ function AtypicalModuleGenerator() {
          }
          return new AT.Matrix({_quickConstruct: newValues});
       }
+      // TODO: toFlatArray, fromFlatArray, conversion to string
    });
 
 
