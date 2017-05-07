@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = 'Matrix bezier bspline hermite'.split(' ');
    this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }
@@ -9,7 +8,7 @@ function() {
    var ns = "-sin";
    this.row = -1;
    this.col = -1;
-   this.identityMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+   this.identityMatrix = new AT.Matrix([[1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1]]);
    this.xyztLabel = [
       'x\u2080 y\u2080 z\u2080 t\u2080'.split(' '),
       'x\u2081 y\u2081 z\u2081 t\u2081'.split(' '),
@@ -146,9 +145,16 @@ function() {
             break;
 
          case 'Matrix':
-            if (isMatrixArray(this.inValue_DEPRECATED_PORT_SYSTEM[0])) {
-               for (var i = 0 ; i < 16 ; i++)
-                  out.push(roundedString(this.inValues_DEPRECATED_PORT_SYSTEM[i]));
+            let control = this.inputs.value(0);
+            if (control instanceof AT.Matrix
+                && control.numRows() === 4
+                && control.numColumns() === 4)
+            {
+               for (let row = 0; row < 4; row++) {
+                  for (let column = 0; column < 4; column++) {
+                     out.push(roundedString(control.element(row, column)));
+                  }
+               }
             }
             else {
                sub = ["x","y","z"];
@@ -161,16 +167,14 @@ function() {
                case 6: sub = ["px","py","pz"]; break;
                }
 
-               if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0])) {
-		  if (this.inValue_DEPRECATED_PORT_SYSTEM[0] instanceof Array) {
-                     x = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][0], 0);
-                     y = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][1], x);
-                     z = rounded(this.inValue_DEPRECATED_PORT_SYSTEM[0][2], y);
+               if (isDef(control)) {
+                  if (control instanceof AT.Matrix) {
+                     x = rounded(control.element(0, 0), 0);
+                     y = rounded(control.element(0, 1), x);
+                     z = rounded(control.element(0, 2), y);
                   }
-		  else {
-		     value = parseFloat(this.inValue_DEPRECATED_PORT_SYSTEM[0]);
-                     if (isNumeric(value))
-                        x = y = z = rounded(value, 0);
+                  else {
+                     x = y = z = rounded(control, 0);
                   }
 
                   switch (this.mode) {
@@ -206,33 +210,52 @@ function() {
             break;
          }
 
-         for (col = 0 ; col < 4 ; col++)
-         for (row = 0 ; row < 4 ; row++) {
-            x = (col - 1.5) / 2;
-            y = (1.5 - row) / 2;
-            val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
-	    if (isNumeric(val))
-	       val = rounded(val);
-            textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
-            mText(val, [x, y], .5, .5);
+         for (col = 0 ; col < 4 ; col++) {
+            for (row = 0 ; row < 4 ; row++) {
+               x = (col - 1.5) / 2;
+               y = (1.5 - row) / 2;
+               val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
+               if (isNumeric(val))
+                  val = rounded(val);
+               textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
+               mText(val, [x, y], .5, .5);
+            }
          }
 
-         for (i = 0 ; i < 16 ; i++) {
-            value = parseFloat(out[i]);
-            this.matrixValues[i] = isNumeric(value) ? value : out[i];
+         for (let row = 0; row < 4; row++) {
+            for (let column = 0; column < 4; column++) {
+               value = parseFloat(out[row * 4 + column]);
+               this.matrixValues.setElement(row, column, isNumeric(value) ? value : out[i]);
+            }
          }
       });
    }
 
-   this.output = function() {
+   this.setup = function() {
       var type = this.labels[this.selection];
-      var outValue = type != 'Matrix' || this.inValues_DEPRECATED_PORT_SYSTEM.length > 0 ? this.matrixValues : this.identityMatrix;
-      var i = this.labels[this.selection] == 'Matrix' ? 1 : 0;
-      if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[i]))
-         outValue = mult(outValue, this.inValue_DEPRECATED_PORT_SYSTEM[i]);
-      return outValue;
+
+      if (type === "Matrix") {
+         // Generic matrices need a "control" input as their first input
+         this.defineInput(AT.Float);
+         this.defineAlternateInputType(AT.Matrix);
+      }
+
+      // Second input on generic matrices, and first input on bezier and so on,
+      // are a second matrix to multiply this by.
+      this.defineInput(AT.Matrix);
    }
 
-   this.matrixValues = newArray(16);
+   this.defineOutput(AT.Matrix, function() {
+      var type = this.labels[this.selection];
+      var outValue = (type !== 'Matrix' || this.inputs.hasValue(0)) ? this.matrixValues
+                                                                    : this.identityMatrix;
+      let multIndex = (type === "Matrix") ? 1 : 0;
+      if (this.inputs.hasValue(multIndex) && this.inputs.value(multIndex).canMultiply(outValue)) {
+         outValue = this.inputs.value(multIndex).times(outValue);
+      }
+      return outValue;
+   })
+
+   this.matrixValues = new AT.Matrix(4, 4);
 }
 
