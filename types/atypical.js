@@ -1301,7 +1301,21 @@ function AtypicalModuleGenerator() {
          }
          return new AT.Matrix({_quickConstruct: newValues});
       }
-      // TODO: toFlatArray, fromFlatArray, conversion to string
+      // TODO: toFlatArray, fromFlatArray
+   });
+
+   AT.defineConversion(AT.Matrix, AT.String, function(mx) {
+      let outputString = "[";
+      for (let row = 0; row < mx.numRows(); row++) {
+         outputString += (row === 0) ? "[" : "\n [";
+         for (let col = 0; col < mx.numColumns(); col++) {
+            if (col !== 0) { outputString += ", "; }
+            outputString += mx.element(row, col).toFixed(3);
+         }
+         outputString += "]";
+      }
+      outputString += "]";
+      return new AT.String(outputString);
    });
 
 
