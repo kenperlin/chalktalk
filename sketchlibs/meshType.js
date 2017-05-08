@@ -28,7 +28,9 @@ AT.defineConversion(AT.String, AT.Mesh, function(str) {
 });
 AT.defineConversionsViaIntermediary(AT.Int, AT.String, AT.Mesh);
 AT.defineConversionsViaIntermediary(AT.Float, AT.String, AT.Mesh);
-AT.defineConversionsViaIntermediary(AT.Expression, AT.String, AT.Mesh);
+AT.defineConversion(AT.Expression, AT.Mesh, function (exp) {
+   return new AT.String(exp.str).convert(AT.Mesh);
+});
 
 // For use in the matrix sketch, show pairs of matrices and meshes just as matrices
 // when connecting to the background or convering to a string.
