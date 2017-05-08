@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = "Midi";
 
    // Draw as a musical note.
@@ -9,11 +8,11 @@ function() {
       mDrawOval([-.8,-1], [0,-.2], 32, 0, -TAU);
    }
 
-   this.output = function() {
+   this.defineOutput(AT.Array(AT.Hertz), function() {
       var out = [];
-      for (key in midi.downKeys)
+      for (let key in midi.downKeys)
          out.push(midi.frequencyFromNoteNumber(key));
-      return out.length > 0 ? out : 0;
-   }
+      return out;
+   });
 }
 

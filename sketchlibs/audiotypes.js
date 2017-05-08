@@ -35,6 +35,9 @@ AT.defineConversionsViaIntermediary(
 AT.defineType({
    typename: "Hertz",
    init: function(hz) {
+      if (hz === undefined) {
+         hz = 0;
+      }
       if (isNaN(hz)) {
          throw new AT.ConstructionError("Attempted to create a Hertz with "
             + "non-numerical input " + hz);
@@ -51,7 +54,7 @@ AT.defineConversion(AT.Hertz, AT.Float, function(hz) { return new AT.Float(hz.va
 AT.defineConversion(AT.Float, AT.Hertz, function(f) { return new AT.Hertz(f.value); });
 
 AT.defineConversion(AT.Hertz, AT.String, function(hz) {
-   return new AT.String(hz.value.toFixed(3) + " Hz");
+   return new AT.String(hz.value.toFixed(0) + " Hz");
 });
 AT.defineConversionsViaIntermediary(AT.String, AT.Float, AT.Hertz);
 
@@ -59,3 +62,11 @@ AT.defineConversionsViaIntermediary(null, AT.Float, AT.Hertz);
 AT.defineConversionsViaIntermediary(AT.Hertz, AT.Float, null);
 AT.defineConversionsViaIntermediary(AT.Float, AT.Hertz, null);
 AT.defineConversionsViaIntermediary(null, AT.Hertz, AT.Float);
+
+// TODO: is there any way to do this for ALL AT.Array(AT.X) where X -> String?
+AT.defineConversion(AT.Array(AT.Hertz), AT.String, function(arr) {
+   return new AT.String("[" + arr.values.map(function(val) {
+         return val.convert(AT.String).value;
+      }).join(", ") + "]"
+   );
+});
