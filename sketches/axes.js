@@ -50,47 +50,55 @@ function() {
 
          if (this.inputs.hasValue(0)) {
             inValue = this.inputs.value(0).mesh;
-            switch (arrayDepth(inValue)) {
-            case 1:
-               V = inValue; x = V[0]; y = V[1]; z = def(V[2]);
-               lineWidth(0.5);
-               mLine([x,0,0],[x,y,0]);
-               mLine([0,y,0],[x,y,0]);
-               mLine([x,0,0],[x,0,z]);
-               mLine([0,0,z],[x,0,z]);
-               mLine([0,y,0],[0,y,z]);
-               mLine([0,0,z],[0,y,z]);
-               mLine([0,y,z], V);
-               mLine([x,0,z], V);
-               mLine([x,y,0], V);
-               lineWidth(4);
-               mLine([x-.01,y,z], [x+.01,y,z]);
-               mLine([x,y-.01,z], [x,y+.01,z]);
-               mLine([x,y,z-.01], [x,y,z+.01]);
-	       mFillDisk(V, 0.05);
-               break;
-            case 2:
-               if (inValue.color)
-                  color(inValue.color);
-               m.scale(.5,.5,.5);
-               if (inValue && inValue.fillMode > 0) {
-                  if (inValue.fillMode == 1) {
-                     color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
-                     m.translate(0,0,-.001);
-                     mFillCurve(inValue);
-                     m.translate(0,0,.001);
-                     color(c);
+            if (inValue.length > 0) {
+               switch (arrayDepth(inValue)) {
+               case 1:
+                  V = inValue; x = V[0]; y = V[1]; z = def(V[2]);
+                  lineWidth(0.5);
+                  mLine([x,0,0],[x,y,0]);
+                  mLine([0,y,0],[x,y,0]);
+                  mLine([x,0,0],[x,0,z]);
+                  mLine([0,0,z],[x,0,z]);
+                  mLine([0,y,0],[0,y,z]);
+                  mLine([0,0,z],[0,y,z]);
+                  mLine([0,y,z], V);
+                  mLine([x,0,z], V);
+                  mLine([x,y,0], V);
+                  lineWidth(4);
+                  mLine([x-.01,y,z], [x+.01,y,z]);
+                  mLine([x,y-.01,z], [x,y+.01,z]);
+                  mLine([x,y,z-.01], [x,y,z+.01]);
+                  mFillDisk(V, 0.05);
+                  break;
+               case 2:
+                  if (inValue.color) {
+                     color(inValue.color);
                   }
-                  else
-                     mFillCurve(inValue);
+                  m.scale(.5,.5,.5);
+                  if (inValue && inValue.fillMode > 0) {
+                     if (inValue.fillMode == 1) {
+                        color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
+                        m.translate(0,0,-.001);
+                        mFillCurve(inValue);
+                        m.translate(0,0,.001);
+                        color(c);
+                     }
+                     else {
+                        mFillCurve(inValue);
+                     }
+                  }
+                  if (edges = inValue.edges) {
+                     for (i = 0 ; i < edges.length ; i++) {
+                        mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
+                     }
+                  }
+                  else {
+                     for (i = 0 ; i < inValue.length ; i++) {
+                        mDot(inValue[i], 0.1);
+                     }
+                  }
+                  break;
                }
-               if (edges = inValue.edges)
-                  for (i = 0 ; i < edges.length ; i++)
-                     mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
-               else
-                  for (i = 0 ; i < inValue.length ; i++)
-                     mDot(inValue[i], 0.1);
-               break;
             }
          }
 
