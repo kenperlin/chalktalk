@@ -1450,7 +1450,7 @@ function AtypicalModuleGenerator() {
          return index === 0;
       },
       convertToTypeParameter: function(index) {
-         return this.values[0];
+         return this.values[0] !== undefined ? this.values[0] : new (this.typeParameters[0])();
       },
       convertFromTypeParameter: function(index, value) {
          return new this.type([value]);
