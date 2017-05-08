@@ -241,20 +241,30 @@ function() {
       }
 
       // Second input on generic matrices, and first input on bezier and so on,
-      // are a second matrix to multiply this by.
+      // are a second matrix to multiply this by, or a mesh to transform by this matrix.
+      this.defineInput(AT.Mesh);
       this.defineInput(AT.Matrix);
    }
 
-   this.defineOutput(AT.Matrix, function() {
+   let MatrixOrMesh = AT.Pair(AT.Matrix, AT.Mesh)
+   this.defineOutput(MatrixOrMesh, function() {
       var type = this.labels[this.selection];
       var outValue = (type !== 'Matrix' || this.inputs.hasValue(0)) ? this.matrixValues
                                                                     : this.identityMatrix;
-      let multIndex = (type === "Matrix") ? 1 : 0;
-      if (this.inputs.hasValue(multIndex) && this.inputs.value(multIndex).canMultiply(outValue)) {
-         outValue = this.inputs.value(multIndex).times(outValue);
+
+      let multObject = this.inputs.value((type === "Matrix") ? 1 : 0);
+
+      let outMatrix = outValue;
+      let outMesh = new AT.Mesh([]);
+      
+      if (multObject instanceof AT.Matrix && multObject.canMultiply(outValue)) {
+         outMatrix = multObject.times(outValue);
       }
-      return outValue;
-   })
+      else if (multObject instanceof AT.Mesh) {
+         outMesh = multObject.transform(outValue);
+      }
+      return new MatrixOrMesh(outMatrix, outMesh);
+   });
 
    this.matrixValues = new AT.Matrix(4, 4);
 }
