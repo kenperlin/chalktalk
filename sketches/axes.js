@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Axes';
    this.is3D = true;
    this.mode = 0;
@@ -21,6 +20,8 @@ function() {
       this.rot.add(point).sub(this.point);
       this.point.copy(point);
    }
+
+   this.defineInput(AT.Mesh);
 
    var tmp = newVec3();
    this.render = function() {
@@ -47,8 +48,8 @@ function() {
          if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
-         if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0]) && this.inValue_DEPRECATED_PORT_SYSTEM[0].length != 16) {
-            inValue = this.inValue_DEPRECATED_PORT_SYSTEM[0];
+         if (this.inputs.hasValue(0)) {
+            inValue = this.inputs.value(0).mesh;
             switch (arrayDepth(inValue)) {
             case 1:
                V = inValue; x = V[0]; y = V[1]; z = def(V[2]);

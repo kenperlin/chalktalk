@@ -1300,8 +1300,10 @@ function AtypicalModuleGenerator() {
             }
          }
          return new AT.Matrix({_quickConstruct: newValues});
+      },
+      toFlatArray: function() {
+         return this.values.reduce(function(acc, row) { return acc.concat(row); }, []);
       }
-      // TODO: toFlatArray, fromFlatArray
    });
 
    AT.defineConversion(AT.Matrix, AT.String, function(mx) {

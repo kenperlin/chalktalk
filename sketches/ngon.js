@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = "Polygon3 Polygon4 Polygon5 Polygon6".split(' ');
    this.is3D = true;
 
@@ -140,15 +139,15 @@ function() {
          mDot(this._vertexAtCursor, 0.36, true);
       }
    }
-   this.output = function() {
+   this.defineOutput(AT.Mesh, function() {
       this.P.color = palette.color[this.colorId];
       this.P.fillMode = this.fillMode;
       if (! this.P.edges || this.P.edges.length != this.P.length) {
          this.P.edges = [];
          for (var i = 0 ; i < this.P.length ; i++)
-	    this.P.edges.push([i, (i + 1) % this.P.length]);
+            this.P.edges.push([i, (i + 1) % this.P.length]);
       }
-      return this.P;
-   }
+      return new AT.Mesh(this.P);
+   });
 }
 
