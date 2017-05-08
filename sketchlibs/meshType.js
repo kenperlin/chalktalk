@@ -16,6 +16,20 @@ AT.defineType({
    }
 });
 
+// A couple of silly conversions
+AT.defineConversion(AT.String, AT.Mesh, function(str) {
+   let firstChar = str.value.charCodeAt(0);
+   if (isNaN(firstChar)) {
+      return new AT.Mesh([]);
+   }
+   else {
+      return new AT.Mesh(CT.lineFont.charMesh(firstChar) || []);
+   }
+});
+AT.defineConversionsViaIntermediary(AT.Int, AT.String, AT.Mesh);
+AT.defineConversionsViaIntermediary(AT.Float, AT.String, AT.Mesh);
+AT.defineConversionsViaIntermediary(AT.Expression, AT.String, AT.Mesh);
+
 // For use in the matrix sketch, show pairs of matrices and meshes just as matrices
 // when connecting to the background or convering to a string.
 AT.defineConversionsViaIntermediary(AT.Pair(AT.Matrix, AT.Mesh), AT.Matrix, AT.String);
