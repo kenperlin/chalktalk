@@ -1,6 +1,8 @@
 const WebSocket = require('ws');
 //const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.69');
-const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.135');
+//const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.19');// rrr
+const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.140');// holojam-dev
+//const holojam = require('holojam-node')(['emitter','sink'],'192.168.1.111');// holojam-go
 const ws = new WebSocket('ws://localhost:22346');
 
 const APPKEY = 0;
