@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = '0 1 2 3 4 5 6 7 8 9'.split(' ');
    this.is3D = true;
 
@@ -21,9 +20,10 @@ function() {
          updateSketchText();
       });
 
-      if (isDef(this.inValues_DEPRECATED_PORT_SYSTEM[0]))
-         this.sketchTexts[0].setValue(roundedString(this.inValues_DEPRECATED_PORT_SYSTEM[0]));
+      if (this.inputs.hasValue(0))
+         this.sketchTexts[0].setValue(roundedString(this.inputs.value(0)));
    }
 
-   this.output = function() { return +(this.sketchTexts[0].value); }
+   this.defineInput(AT.Float);
+   this.defineOutput(AT.Float, function() { return +(this.sketchTexts[0].value); });
 }
