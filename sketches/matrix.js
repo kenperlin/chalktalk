@@ -210,22 +210,38 @@ function() {
             break;
          }
 
+         for (let row = 0; row < 4; row++) {
+            for (let column = 0; column < 4; column++) {
+               value = parseFloat(out[row * 4 + column]);
+               this.matrixValues.setElement(row, column, isNumeric(value) ? value
+                  : this.identityMatrix.element(row, column));
+            }
+         }
+
+         let multObject = this.inputs.value((type === "Matrix") ? 1 : 0);
+         if (multObject instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
+            if (multObject.first.canMultiply(this.matrixValues)) {
+               this.matrixValues = multObject.first.times(this.matrixValues);
+            }
+         }
+         else if (multObject instanceof AT.Matrix && multObject.canMultiply(this.matrixValues)) {
+            this.matrixValues = multObject.times(this.matrixValues);
+         }
+
          for (col = 0 ; col < 4 ; col++) {
             for (row = 0 ; row < 4 ; row++) {
                x = (col - 1.5) / 2;
                y = (1.5 - row) / 2;
-               val = this.is_xyzt ? this.xyztLabel[row][col] : out[row + 4 * col];
+
+               val = this.is_xyzt ? this.xyztLabel[row][col]
+                  : (isNumeric(parseFloat(out[row * 4 + col]))
+                     ? this.matrixValues.element(row, col)
+                     : out[row * 4 + col]);
+
                if (isNumeric(val))
                   val = rounded(val);
                textHeight(max(this.xhi - this.xlo, this.yhi - this.ylo) / 9 / pow(("" + val).length, 0.4));
                mText(val, [x, y], .5, .5);
-            }
-         }
-
-         for (let row = 0; row < 4; row++) {
-            for (let column = 0; column < 4; column++) {
-               value = parseFloat(out[row * 4 + column]);
-               this.matrixValues.setElement(row, column, isNumeric(value) ? value : out[i]);
             }
          }
       });
@@ -242,14 +258,15 @@ function() {
 
       // Second input on generic matrices, and first input on bezier and so on,
       // are a second matrix to multiply this by, or a mesh to transform by this matrix.
-      this.defineInput(AT.Mesh);
-      this.defineInput(AT.Matrix);
+      this.defineInput(AT.Pair(AT.Matrix, AT.Mesh));
+      this.defineAlternateInputType(AT.Mesh);
+      this.defineAlternateInputType(AT.Matrix);
    }
 
    let MatrixOrMesh = AT.Pair(AT.Matrix, AT.Mesh)
    this.defineOutput(MatrixOrMesh, function() {
-      var type = this.labels[this.selection];
-      var outValue = (type !== 'Matrix' || this.inputs.hasValue(0)) ? this.matrixValues
+      let type = this.labels[this.selection];
+      let outValue = (type !== 'Matrix' || this.inputs.hasValue(0)) ? this.matrixValues
                                                                     : this.identityMatrix;
 
       let multObject = this.inputs.value((type === "Matrix") ? 1 : 0);
@@ -257,8 +274,8 @@ function() {
       let outMatrix = outValue;
       let outMesh = new AT.Mesh([]);
       
-      if (multObject instanceof AT.Matrix && multObject.canMultiply(outValue)) {
-         outMatrix = multObject.times(outValue);
+      if (multObject instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
+         outMesh = multObject.second.transform(outValue);
       }
       else if (multObject instanceof AT.Mesh) {
          outMesh = multObject.transform(outValue);
