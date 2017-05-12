@@ -113,6 +113,9 @@
          this._set("b", validate(b, 0));
          this._set("a", validate(a, 1));
       },
+      luminance: function() {
+         return 0.2126*this.r + 0.7152*this.g + 0.0722*this.b;
+      },
       getRGB: function() {
          return [this.r, this.g, this.b];
       },
