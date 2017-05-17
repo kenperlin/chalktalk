@@ -8,19 +8,18 @@ This version of Chalktalk requires node.js to run. Go to http://nodejs.org/downl
 ### Installation
 
 	git clone git@github.com:kenperlin/chalktalk.git   # download chalktalk
-	cd ./chalktalk/server
+	cd ./chalktalk/server/
 	npm install                                        # install chalktalk server's dependencies
 	
 ### Run
-Get your terminal back into ```./chalktalk``` directory.
+From the directory's root :
 
-	# cd ..              
-	./run                # run chalktalk
+	./run                                         # from root ./chalktalk, run chalktalk             
 
 Then, open `localhost:11235` in your browser. Or via terminal :
 
-	google-chrome http://localhost:11235       # with chrome
-	chromium-browser "http://localhost:11235"  # with chromium
+	google-chrome http://localhost:11235          # open with chrome
+	chromium-browser "http://localhost:11235"     # OR open with chromium
 
 You can now draw your objects and play around.
 

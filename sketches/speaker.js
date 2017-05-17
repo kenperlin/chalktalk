@@ -11,4 +11,8 @@ function() {
             setAudioSignal();
       });
    }
+
+   this.onDelete = function() {
+      setAudioSignal();
+   }
 }
