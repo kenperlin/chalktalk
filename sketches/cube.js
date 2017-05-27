@@ -6,7 +6,7 @@ function() {
    this._scaleX = 1;
    this._scaleY = 1;
    this._p = newVec3();
-   this.onClick = function(p) { this._isSolid = ! this._isSolid; }
+   this.onCmdClick = [ 'toggle wireframe' , function(p) { this._isSolid = ! this._isSolid; } ];
    this.onPress = function(p) { this._p.copy(p); }
    this.onDrag = function(p) {
       this._scaleX += p.x - this._p.x;

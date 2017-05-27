@@ -3,7 +3,7 @@ function() {
    this.is3D = true;
    this._isSolid = true;
    this.nSteps = 8;
-   this.onClick = function(p) { this._isSolid = ! this._isSolid; }
+   this.onCmdClick = [ 'toggle wireframe' , function(p) { this._isSolid = ! this._isSolid; } ];
    this.mouseDrag = function(x, y) {
       if (this.y0 === undefined)
          this.y0 = y;
