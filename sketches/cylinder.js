@@ -1,7 +1,9 @@
 function() {
-   this.label = "cyl1";
+   this.label = "cylinder";
    this.is3D = true;
+   this._isSolid = true;
    this.nSteps = 8;
+   this.onClick = function(p) { this._isSolid = ! this._isSolid; }
    this.mouseDrag = function(x, y) {
       if (this.y0 === undefined)
          this.y0 = y;
@@ -21,6 +23,12 @@ function() {
          mCurve([[-1,1],[1,1],[1,-1]]);
       });
       this.afterSketch(function() {
+         if (this._isSolid) {
+            m.rotateX(PI/2);
+            m.rotateZ(PI/2);
+	    mCylinder(this.nSteps);
+	    return;
+	 }
          var C0 = [], C1 = [], C2 = [], C3 = [], C4 = [];
          for (var theta = 0 ; theta <= TAU + .0001 ; theta += TAU / this.nSteps) {
             var c = cos(theta);

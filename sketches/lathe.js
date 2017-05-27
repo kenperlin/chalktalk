@@ -1,5 +1,5 @@
 function() {
-   this.label = 'lathe2';
+   this.label = 'lathe';
 
    this.computeStatistics = function() {
       var axisX = this.size * S(0).x;                   // GET STATISTICS ON POSITION AND SIZE

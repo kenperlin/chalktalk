@@ -110,7 +110,6 @@ function() {
          }
       }
       var nt = 20, P = this.isSmooth ? makeBSpline(this.P, nt, true) : this.P;
-console.log(this.inValue[0]);
       if (this.inValue[0])
          P = this.inValue[0];
       switch (this.fillMode) {
