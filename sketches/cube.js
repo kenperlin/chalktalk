@@ -27,8 +27,8 @@ function() {
    this.render = function(elapsed) {
       m.scale(this._scaleX, this._scaleY, 1);
       this.duringSketch(function() {
-         mCurve([v[0],v[2],v[3]]);
-         mCurve([v[3],v[1],v[0]]);
+         mCurve([[-1,-1],[ 1,-1],[ 1, 1]]);
+         mCurve([[ 1, 1],[-1, 1],[-1,-1]]);
       });
       this.afterSketch(function() {
          if (this._isSolid)
@@ -44,4 +44,5 @@ function() {
       return v;
    }
 }
+
 

@@ -19,8 +19,8 @@ function() {
    }
    this.render = function(elapsed) {
       this.duringSketch(function() {
-         mCurve([[1,-1],[-1,-1],[-1,1]]);
-         mCurve([[-1,1],[1,1],[1,-1]]);
+         mCurve([[ 1,-1],[ 1, 1],[-1, 1]]);
+         mCurve([[-1, 1],[-1,-1],[ 1,-1]]);
       });
       this.afterSketch(function() {
          if (this._isSolid) {
