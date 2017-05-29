@@ -138,9 +138,15 @@ function returnString(res, str) {
 function readDir(res, dirName, extension) {
    fs.readdir("./" + dirName + "/", function(err, files) {
       if (err) {
-         res.writeHead(500, { "Content-Type": "text/plain" });
-         res.write(err.message);
-         console.log("error listing the " + dirName + " directory" + err);
+         if (err.code === "ENOENT") {
+            // Directory not found, return empty string
+            res.writeHead(200, { "Content-Type": "text/plain" });
+         }
+         else {
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.write(err.message);
+            console.log("error listing the " + dirName + " directory" + err);
+         }
          res.end();
          return;
       }
