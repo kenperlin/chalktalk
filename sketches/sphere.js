@@ -1,5 +1,5 @@
 function() {
-   this.label = "c2s";
+   this.label = "sphere";
 
    this.render = function() {
       this.duringSketch(function() {
