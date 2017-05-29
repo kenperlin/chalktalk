@@ -10,7 +10,7 @@ function() {
       var i0 = floor(this.y0 / 20);
       var i1 = floor(     y  / 20);
       if (i1 != i0) {
-         this.nSteps = max(4, this.nSteps + (i1 < i0 ? 1 : -1));
+         this.nSteps = max(3, this.nSteps + (i1 < i0 ? 1 : -1));
          this.y0 = y;
       }
    }
