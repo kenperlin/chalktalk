@@ -58,7 +58,13 @@ function() {
          if (this.showStateNames) {
             textHeight(this.mScale(.4));
             color(fadedColor(1));
-            mText(this.stateNames[this.state], [0,1], .5,1.3);
+            mText(this.stateNames[this.state], [0,.9], .5,-1);
+            color(overlayColor);
+            textHeight(this.mScale(.35));
+            mText(this.stateNames[ 5], [-.5,-1.15], .5,1);
+            mText(this.stateNames[10], [ .5,-1.15], .5,1);
+            mText(this.stateNames[ 3], [-1.15,-.5],1, .5);
+            mText(this.stateNames[12], [-1.15, .5],1, .5);
          }
       });
    }
