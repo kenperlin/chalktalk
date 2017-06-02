@@ -39,11 +39,6 @@ function() {
    this.onSwipe[4] = ['no\nrow'       , function() { this.row = -1; }];
    this.onSwipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
 
-   function sketchMatrix() {
-      mLine([ 1, 1],[ 1,-1]);
-      mLine([ 1,-1],[-1,-1]);
-   }
-
    this.render = function(elapsed) {
 
       this.afterSketch(function() {
@@ -73,38 +68,23 @@ function() {
 
       var type = this.labels[this.selection];
 
-      switch (type) {
-      case 'Matrix':
-         sketchMatrix();
-         break;
-      case 'bezier':
-         this.duringSketch(function() {
-            mCurve([[1,1],[1,-1],[-1,-1]]);
+      this.duringSketch(function() {
+         mCurve([[1,1],[1,-1],[-1,-1]]);
+         switch (type) {
+         case 'Matrix':
+            mCurve([[.5,1],[.5,-.5],[-1,-.5]]);
+            break;
+         case 'bezier':
             mCurve([[-.5,1],[-.5,-.5],[-.5,.5],[.5,.5],[.5,-.5],[-.5,-.5]]);
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      case 'bspline':
-         this.duringSketch(function() {
-            mCurve([[1,1],[1,-1],[-1,-1]]);
+            break;
+         case 'bspline':
             mCurve([[-.5,1],[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]]);
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      case 'hermite':
-         this.duringSketch(function() {
-            mCurve([[1,1],[1,-1],[-1,-1]]);
+            break;
+         case 'hermite':
             mCurve([[-.5,1],[-.5,-.5],[-.5,.5],[.5,.5],[.5,-.5]]);
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      }
+            break;
+         }
+      });
 
       this.afterSketch(function() {
          var i, x, y, z, sub, val, vals, value, col, row, out;
@@ -114,7 +94,7 @@ function() {
             mLine([ t,-1],[t, 1]);
          }
          lineWidth(2);
-         mCurve([[-1,-1],[-1,1],[1,1]]);
+         mClosedCurve([[-1,-1],[-1,1],[1,1],[1,-1]]);
 
          out = [];
 
