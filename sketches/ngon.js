@@ -1,4 +1,5 @@
 function() {
+   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = "Polygon3 Polygon4 Polygon5 Polygon6".split(' ');
    this.is3D = true;
 
@@ -104,12 +105,14 @@ function() {
       if (! isNumeric(this.xlo) || this.P == null) {
          switch (this.labels[this.selection]) {
          case 'Polygon3': this.P = makeNgon(3); break;
-         case 'Polygon4' : this.P = makeNgon(4); break;
+         case 'Polygon4': this.P = makeNgon(4); break;
          case 'Polygon5': this.P = makeNgon(5); break;
-         case 'Polygon6' : this.P = makeNgon(6); break;
+         case 'Polygon6': this.P = makeNgon(6); break;
          }
       }
       var nt = 20, P = this.isSmooth ? makeBSpline(this.P, nt, true) : this.P;
+      if (this.inValue_DEPRECATED_PORT_SYSTEM[0])
+         P = this.inValue_DEPRECATED_PORT_SYSTEM[0];
       switch (this.fillMode) {
       case 0:
          mClosedCurve(P);

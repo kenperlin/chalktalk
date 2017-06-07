@@ -3,8 +3,62 @@ function() {
    this.onEnter   = function(p) { window.isWritingToTextSketch = true; }
    this.onExit    = function(p) { window.isWritingToTextSketch = false; }
    this.onDelete  = function(p) { window.isWritingToTextSketch = false; }
-   this.mouseMove = function(x, y, z) { this.qw.trackXY(this.inverseTransform([x, y, def(z)])); }
-   this.qw = new QW();
+   this.mouseMove = function(x, y, z) {
+      if (this._isRespondingToMouseMove)
+         this.qw.trackXY(this.inverseTransform([x, y, def(z)]));
+   }
+   this._isRespondingToMouseMove = true;
+   this._isStartOfSentence = true;
+   this._counter = 0;
+   this.mouseDown = function(x, y, z) {
+      if (! this.isChoosingWord) {
+         this._isRespondingToMouseMove = false;
+         this._stroke = [ this.inverseTransform([x, y, def(z)]) ];
+      }
+   }
+   this.mouseDrag = function(x, y, z) {
+      if (! this.isChoosingWord) {
+         this._stroke.push(this.inverseTransform([x, y, def(z)]));
+         if (this._counter++ % 10 == 0)
+            this._words = qwLookupWord(this._stroke);
+      }
+   }
+   this.mouseUp = function(x, y, z) {
+      if (this.isChoosingWord) {
+         this.isChoosingWord = false;
+         var p = this.inverseTransform([x, y, def(z)]);
+         this.outputWord(this._words[p[1] > 0 ? 0 : 1]);
+	 this._words = null;
+      }
+      else if (this._stroke.length > 5) {
+         this._words = qwLookupWord(this._stroke);
+	 if (this._words.length == 1) {
+	    this.outputWord(this._words[0]);
+	    this._words = null;
+         }
+	 else
+	    this.isChoosingWord = true;
+         this._stroke = null;
+      }
+   }
+   this.outputWord = function(word) {
+      if (word.indexOf('DEL') == 0)
+         sketchPage.handleTextSketchChar('del');
+      else
+         for (let i = 0 ; i < word.length ; i++) {
+            let ch = word.substring(i, i+1);
+            if (ch.indexOf('.') == 0)
+               this._isStartOfSentence = true;
+            else if (i == 1 && this._isStartOfSentence) {
+               ch = ch.toUpperCase();
+               this._isStartOfSentence = false;
+            }
+            if (word === ' i' && ch === 'i')
+               ch = 'I';
+            sketchPage.handleTextSketchChar(ch);
+         }
+   }
+   this.qw = new QW2();
    this.render = function() {
       this.duringSketch(function() {
          mCurve([[.5,1],[-.5,-1],[-.5,1]]);
@@ -15,15 +69,15 @@ function() {
          color(palette.color[this.colorId]);
          for (var i = 0 ; i < this.qw.zones.length ; i++) {
             var z = this.qw.zones[i];
-	    if (i == this.qw.zone + 1) {
+            if (i == this.qw.zone + 1) {
                 color(fadedColor(faded, this.colorId));
                 mFillDisk(z, z[2]);
                 color(palette.color[this.colorId]);
-	    }
+            }
             lineWidth(this.mScale(i==0 && this.qw.sequence.length == 0 ? .03 : .01));
             mDrawDisk(z, z[2]);
          }
-	 this.workingChar = '';
+         this.workingChar = '';
          this.qw.sequenceToColAndRow();
          for (var col = 0 ; col < 9 ; col++)
          for (var row = 0 ; row < 9 ; row++) {
@@ -35,188 +89,144 @@ function() {
                mText(s, xy, .5, .5);
                if (col == this.qw.col && row == this.qw.row) {
                   mDrawDisk(xy, .1);
-	          this.workingChar = s;
+                  this.workingChar = s;
                }
             }
          }
-	 s = this.qw.selectedChar.length > 0 ? this.qw.selectedChar : this.workingChar;
+         s = this.qw.selectedChar.length > 0 ? this.qw.selectedChar : this.workingChar;
          textHeight(this.mScale(s.length == 1 ? .3 : .17));
-	 color(fadedColor(s == this.qw.selectedChar ? 1 : 2 * faded, this.colorId));
+         color(fadedColor(s == this.qw.selectedChar ? 1 : 2 * faded, this.colorId));
          mText(s.trim(), [0,0], .5,.5);
-      });
-   }
-}
 
-function QW() {
-
-   var C = [
-      "abcdefghi",
-      "z  C N  j",
-      "y       k",
-      "x'     -l",
-      "B       S",
-      "wL     Rm",
-      "v       !",
-      "u  , A  n",
-      "tE.srq?po",
-   ];
-   var N = [
-      "23`456~78",
-      "1  = N  9",
-      "#       ^",
-      "0+     -@",
-      "B       S",
-      "{;     _}",
-      "$       &",
-      "[  * A  ]",
-      "<E.\\|/:%>",
-   ];
-   this.zoneToCol = [2,2,1,0,0,0,1,2];
-   this.zoneToRow = [1,0,0,0,1,2,2,2];
-   this.zones = (function() {
-      var z = [[0, 0, .54]];
-      for (var i = 0 ; i < 8 ; i++)
-         z.push([.87 * cos(i * TAU / 8), .87 * sin(i * TAU / 8), .33]);
-      return z;
-   })();
-
-   this.zone = -2;
-   this.message = '';
-   this.isAlt = 0;
-   this.isCap = 0;
-   this.isNum = 0;
-   this.workingChar = '';
-   this.selectedChar = '';
-   this.sequence = [];
-
-   this.trackXY = function(xy) {
-      var radius = sqrt(xy[0] * xy[0] + xy[1] * xy[1]);
-      if (radius > 1.2) {
-         this.sequence = [];
-         this.zone = -2;
-         return;
-      }
-
-      var zone = -3;
-      for (var i = 0 ; i < this.zones.length && zone == -3 ; i++) {
-         var xyr = this.zones[i], dx = xy[0] - xyr[0], dy = xy[1] - xyr[1];
-         if (dx * dx + dy * dy <= xyr[2] * xyr[2])
-            zone = i - 1;
-      }
-
-      if (zone == -3 || this.zone == -2 && zone != -1)
-         return;
-
-      if (zone != this.zone) {
-         this.zone = zone;
-         if (zone != -1)  {
-            this.sequence.push(zone);
-            this.selectedChar = '';
+	 if (this._stroke) {
+	    color('red');
+	    lineWidth(4);
+	    mCurve(this._stroke);
          }
-         else
-            this.selectedChar = this.toVisibleChar(this.rowAndColToChar());
-      }
-   }
-
-   this.sequenceToColAndRow = function() {
-      if (this.sequence.length == 0) {
-         this.col = this.row = -1;
-         return;
-      }
-      var zone0 = this.sequence[0];
-      var zone1 = this.sequence[this.sequence.length - 1];
-      this.col = 3 * this.zoneToCol[zone0] + this.zoneToCol[zone1];
-      this.row = 3 * this.zoneToRow[zone0] + this.zoneToRow[zone1];
-   }
-
-   this.rowAndColToChar = function() {
-      if (this.col < 0)
-         return '';
-      this.sequence = [];
-      var sa = this.A(this.row, this.col);
-      if (sa === undefined)
-         return '';
-      var s = sa;
-      switch (s) {
-      case ' ':
-         return;
-      case 'A':
-         this.isAlt = ! this.isAlt;
-         return sa;
-      case 'B':
-         s = '\b';
-         break;
-      case 'C':
-         this.isCap = (this.isCap + 1) % 3;
-         return sa;
-      case 'E':
-         s = '\n';
-         break;
-      case 'L':
-         s = L_ARROW;
-         break;
-      case 'N':
-         this.isNum = ! this.isNum;
-         return sa;
-      case 'R':
-         s = R_ARROW;
-         break;
-      case 'S':
-         s = ' ';
-         break;
-      default:
-         s = this._handleShift(s);
-      }
-      if (this.isCap == 1)
-         this.isCap = 0;
-      sketchPage.handleTextSketchChar(s);
-      return sa;
-   }
-
-   this.A = function(row, col) {
-      var S = this.isNum ? N : C;
-      return S[row].substring(col, col+1);
-   }
-
-   this.toVisibleChar = function(s) {
-      switch (s) {
-      case 'A': s = 'ALT '  ; break;
-      case 'B': s = ' DEL'  ; break;
-      case 'C': s = ' CAP'  ; break;
-      case 'E': s = 'NL'    ; break;
-      case 'L': s = '\u8592'; break;
-      case 'N': s = 'NUM '  ; break;
-      case 'R': s = '\u8594'; break;
-      case 'S': s = 'SPC '  ; break;
-      }
-      return this._handleShift(s);
-   }
-
-   this.rowAndColToXY = function(row, col) {
-      var x = (4 * floor(col/3) + (col % 3) + 1) / 12;
-      var y = (4 * floor(row/3) + (row % 3) + 1) / 12;
-      x = 2 * x - 1;
-      y = 1 - 2 * y;
-
-      // MAKE LETTER ARRANGEMENT CIRCULAR.
-
-      if (col == 1) x += .07;
-      if (row == 1) y -= .07;
-      if (col == 7) x -= .07;
-      if (row == 7) y += .07;
-      var r = sqrt(x * x + y * y);
-      if (row > 0 && row < 8 && col > 0 && col < 8 ||
-          row == 2 || row == 6 || col == 2 || col == 6)
-         r *= 1.2;
-      if (row % 4 == 0 && col % 4 == 0)
-         r *= 0.92;
-      return [x / r, y / r];
-   }
-
-   this._handleShift = function(s) {
-      if (this.isCap)
-         s = s.toUpperCase();
-      return s;
+      });
+      if (this._words)
+         if (this._words.length == 1)
+            mText(this._words[0], [0,0], .5, .5);
+         else {
+            mText(this._words[0], [0,0], .5, 1.5);
+            mText(this._words[1], [0,0], .5,-0.5);
+	 }
    }
 }
+
+var qwDictionary = (function() {
+   function addToDictionary(word, stroke) {
+       dictionary.push({
+          word  : word,
+          stroke: resampleCurve(stroke, 100)
+       });
+   }
+   var dictionary = [];
+   var qw = new QW2();
+   function zoneToXY(zone) {
+      return [ .85 * Math.cos(zone * Math.PI / 4),
+               .85 * Math.sin(zone * Math.PI / 4) ];
+   }
+   for (let n = 0 ; n < 7697 ; n++) {
+      let word = wordList[n];
+
+      var stroke = [], prevZones;
+      for (let i = 0 ; i < word.length ; i++) {
+         let zones = qw.letterToZones(word.substring(i, i+1));
+
+	 if (i > 0 && zones[0] == prevZones[prevZones.length-1]) {
+	    let xy = zoneToXY(zones[0]);
+	    stroke.push([xy[0]/2, xy[1]/2]);
+	    if (i == word.length - 1 && zones.length == 1)
+	       continue;
+         }
+         prevZones = zones;
+
+         for (let j = 0 ; j < zones.length ; j++)
+            stroke.push(zoneToXY(zones[j]));
+      }
+
+      addToDictionary(' ' + word, stroke);
+   }
+   addToDictionary('DEL', [[0,0],[-.85, 0 ]]);
+   addToDictionary('\n' , [[0,0],[  0,-.85]]);
+   addToDictionary('.'  , [[0,0],[ .6,-.6 ]]);
+   addToDictionary(','  , [[0,0],[-.6,-.6 ]]);
+   return dictionary;
+})();
+
+function qwLookupWord(stroke) {
+   stroke = resampleCurve(stroke, 100);
+   var lowScore = [1000000, 1000000], I = [0,0];
+   for (let i = 0 ; i < qwDictionary.length ; i++) {
+      let s = qwDictionary[i].stroke, score = 0;
+      for (let j = 0 ; j < 100 ; j++) {
+         let x = stroke[j][0] - s[j][0];
+         let y = stroke[j][1] - s[j][1];
+	 score += x * x + y * y;
+      }
+      if (score < lowScore[0]) {
+	 lowScore[1] = lowScore[0];
+	 I[1] = I[0];
+         lowScore[0] = score;
+	 I[0] = i;
+      }
+      else if (score < lowScore[1]) {
+	 lowScore[1] = score;
+	 I[1] = i;
+      }
+   }
+   if (lowScore[1] >= lowScore[0] * 1.2)
+      return [ qwDictionary[I[0]].word ];
+   else
+      return [ qwDictionary[I[0]].word, qwDictionary[I[1]].word ];
+}
+
+function computeBigramConflicts() {
+   var N = 5000;
+   var conflicts = [];
+   for (let b = 0 ; b < bigramCount.length ; b++) {
+
+      let c = [];
+      for (let l = 0 ; l < 26 ; l++)
+         c.push(0);
+      conflicts.push(c);
+
+      let bigram = bigramCount[b][0];
+
+      for (let l = 0 ; l < 26 ; l++) {
+         let ch = String.fromCharCode(97 + l);
+	 if (bigram.indexOf(ch) < 0)
+            for (let w1 = 0 ; w1 < N ; w1++) {
+               let word1 = wordList[w1];
+	       let i = word1.indexOf(bigram);
+               if (i >= 0) {
+	          let word2 = word1.substring(0, i) + ch + word1.substring(i+2, word1.length);
+                  for (let w2 = 0 ; w2 < N ; w2++)
+	             if (wordList[w2] === word2)
+	                c[l]++;
+               }
+            }
+      }
+   }
+   return conflicts;
+}
+/*
+var conflicts = computeBigramConflicts();
+
+var str = 'var conflicts = [\n';
+for (let n = 0 ; n < bigramCount.length ; n++) {
+   str += '   [\'' + bigramCount[n][0] + '\',[';
+   for (let l = 0 ; l < 26 ; l++) {
+      let s = conflicts[n][l] + ',';
+      while (s.length < 3)
+         s = ' ' + s;
+      str += s;
+   }
+   str += ']],\n';
+}
+str += '];\n';
+
+console.log(str);
+*/
 

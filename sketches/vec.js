@@ -1,22 +1,5 @@
 function() {
    this.USES_DEPRECATED_PORT_SYSTEM = true;
-/*
-   this.code = [['',[''
-,'function Vector3() {'
-,'   this.x = 0;'
-,'   this.y = 0;'
-,'   this.z = 0;'
-,'}'
-,''
-,'Vector3.prototype = {'
-,'   set : function(x,y,z) {'
-,'      this.x = x;'
-,'      this.y = y;'
-,'      this.z = z;'
-,'   },'
-,'}'
-].join('\n')]]
-*/
    this.nRows = function() {
       return 2 + floor(this.selection / 2);
    }
@@ -80,18 +63,23 @@ function() {
          }
       }
       this.afterSketch(function() {
+
+         // IF INPUT IS A VECTOR WITH A DIFFERENT AXIS, OUTPUT IS DOT PRODUCT OF INPUT AND DISPLAYED VALUE.
+         // OTHERWISE, IF THERE IS INPUT, COPY INPUT TO BOTH DISPLAYED VALUE AND OUTPUT.
+
          textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (1 + this.precision));
+	 var s = this.inSketch(0), isDotProduct = s && s.typeName == this.typeName && s.axis() != this.axis();
          var outValue = [];
          for (var i = 0 ; i < this.nRows() ; i++) {
-            var t = (i+.5) / this.nRows();
-            var a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t);
-            var p = this.axis() == 0 ? [a,0] : [0,a];
-            var val = this.getInValue_DEPRECATED_PORT_SYSTEM(i, this.value[i]);
+            let t = (i+.5) / this.nRows(),
+                a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t),
+                p = this.axis() == 0 ? [a,0] : [0,a],
+                val = isDotProduct ? this.value[i] : this.getInValue_DEPRECATED_PORT_SYSTEM(i, this.value[i]);
             mText(roundedString(val, this.precision), p, .5, .5);
             outValue.push(val);
          }
-         if (isDef(this.inValue_DEPRECATED_PORT_SYSTEM[0]))
-            outValue = mult(this.inValue_DEPRECATED_PORT_SYSTEM[0], outValue);
+         if (s)
+	    outValue = isDotProduct ? mult(outValue, this.inValue_DEPRECATED_PORT_SYSTEM[0]) : this.inValue_DEPRECATED_PORT_SYSTEM[0];
          this.outValue_DEPRECATED_PORT_SYSTEM[0] = outValue;
       });
    }

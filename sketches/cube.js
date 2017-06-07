@@ -2,10 +2,12 @@ function() {
    this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'cube';
    this.is3D = true;
+   this._isSolid = true;
 
    this._scaleX = 1;
    this._scaleY = 1;
    this._p = newVec3();
+   this.onCmdClick = [ 'toggle wireframe' , function(p) { this._isSolid = ! this._isSolid; } ];
    this.onPress = function(p) { this._p.copy(p); }
    this.onDrag = function(p) {
       this._scaleX += p.x - this._p.x;
@@ -26,12 +28,15 @@ function() {
    this.render = function(elapsed) {
       m.scale(this._scaleX, this._scaleY, 1);
       this.duringSketch(function() {
-         mCurve([v[0],v[2],v[3]]);
-         mCurve([v[3],v[1],v[0]]);
+         mCurve([[-1,-1],[ 1,-1],[ 1, 1]]);
+         mCurve([[ 1, 1],[-1, 1],[-1,-1]]);
       });
       this.afterSketch(function() {
-         for (var n = 0 ; n < v.edges.length ; n++)
-            mLine(v[v.edges[n][0]], v[v.edges[n][1]]);
+         if (this._isSolid)
+	    mCube();
+         else
+            for (var n = 0 ; n < v.edges.length ; n++)
+               mLine(v[v.edges[n][0]], v[v.edges[n][1]]);
       });
    }
 
@@ -40,4 +45,5 @@ function() {
       return v;
    }
 }
+
 
