@@ -87,7 +87,7 @@ function() {
       });
 
       this.afterSketch(function() {
-         var i, x, y, z, sub, val, vals, value, col, row, out;
+         var i, x, y, z, sub, val, vals, value, out;
 
          for (let t = -.5 ; t <= .5 ; t += .5) {
             mLine([-1, t],[1, t]);
@@ -130,12 +130,12 @@ function() {
             else {
                sub = ["x","y","z"];
                switch (this.mode) {
-               case 1: sub = ["tx","ty","tz"]; break;
-               case 2:
-               case 3:
-               case 4: sub = ["cos","sin","-sin"]; break;
-               case 5: sub = ["sx","sy","sz"]; break;
-               case 6: sub = ["px","py","pz"]; break;
+                  case 1: sub = ["tx","ty","tz"]; break;
+                  case 2:
+                  case 3:
+                  case 4: sub = ["cos","sin","-sin"]; break;
+                  case 5: sub = ["sx","sy","sz"]; break;
+                  case 6: sub = ["px","py","pz"]; break;
                }
 
                if (isDef(control)) {
@@ -149,33 +149,34 @@ function() {
                   }
 
                   switch (this.mode) {
-                  case 1:
-                  case 5:
-                  case 6:
-                     sub[0] = x;
-                     sub[1] = y;
-                     sub[2] = z;
-                     break;
-                  case 2:
-                  case 3:
-                  case 4:
-                     sub[0] = rounded(cos(x));
-                     sub[1] = rounded(sin(y));
-                     sub[2] = -sub[1];
-                     break;
+                     case 1:
+                     case 5:
+                     case 6:
+                        sub[0] = x;
+                        sub[1] = y;
+                        sub[2] = z;
+                        break;
+                     case 2:
+                     case 3:
+                     case 4:
+                        sub[0] = rounded(cos(x));
+                        sub[1] = rounded(sin(y));
+                        sub[2] = -sub[1];
+                        break;
                   }
                }
-            }
 
-            vals = this.vals[this.mode];
+               vals = this.vals[this.mode];
 
-            for (col = 0 ; col < 4 ; col++)
-            for (row = 0 ; row < 4 ; row++) {
-               val = "" + vals[row + 4 * col];
-               if (val == "A") val = sub[0];
-               if (val == "B") val = sub[1];
-               if (val == "C") val = sub[2];
-               out.push(val);
+               for (let row = 0 ; row < 4 ; row++) {
+                  for (let column = 0 ; column < 4 ; column++) {
+                     val = "" + vals[column * 4 + row];
+                     if (val == "A") val = sub[0];
+                     if (val == "B") val = sub[1];
+                     if (val == "C") val = sub[2];
+                     out.push(val);
+                  }
+               }
             }
 
             break;
@@ -189,25 +190,15 @@ function() {
             }
          }
 
-         let multObject = this.inputs.value((type === "Matrix") ? 1 : 0);
-         if (multObject instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
-            if (multObject.first.canMultiply(this.matrixValues)) {
-               this.matrixValues = multObject.first.times(this.matrixValues);
-            }
-         }
-         else if (multObject instanceof AT.Matrix && multObject.canMultiply(this.matrixValues)) {
-            this.matrixValues = multObject.times(this.matrixValues);
-         }
-
-         for (col = 0 ; col < 4 ; col++) {
-            for (row = 0 ; row < 4 ; row++) {
-               x = (col - 1.5) / 2;
+         for (row = 0 ; row < 4 ; row++) {
+            for (column = 0 ; column < 4 ; column++) {
+               x = (column - 1.5) / 2;
                y = (1.5 - row) / 2;
 
-               val = this.is_xyzt ? this.xyztLabel[row][col]
-                  : (isNumeric(parseFloat(out[row * 4 + col]))
-                     ? this.matrixValues.element(row, col)
-                     : out[row * 4 + col]);
+               val = this.is_xyzt ? this.xyztLabel[row][column]
+                  : (isNumeric(parseFloat(out[row * 4 + column]))
+                     ? this.matrixValues.element(row, column)
+                     : out[row * 4 + column]);
 
                if (isNumeric(val))
                   val = rounded(val);
@@ -246,10 +237,18 @@ function() {
       let outMesh = new AT.Mesh([]);
       
       if (multObject instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
+         if (multObject.first.canMultiply(outMatrix)) {
+            outMatrix = multObject.first.times(outMatrix);
+         }
          outMesh = multObject.second.transform(outValue);
       }
       else if (multObject instanceof AT.Mesh) {
          outMesh = multObject.transform(outValue);
+      }
+      else if (multObject instanceof AT.Matrix) {
+         if (multObject.canMultiply(outMatrix)) {
+            outMatrix = multObject.times(outMatrix);
+         }
       }
       return new MatrixOrMesh(outMatrix, outMesh);
    });
