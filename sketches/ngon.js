@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.labels = "Polygon3 Polygon4 Polygon5 Polygon6".split(' ');
    this.is3D = true;
 
@@ -111,8 +110,9 @@ function() {
          }
       }
       var nt = 20, P = this.isSmooth ? makeBSpline(this.P, nt, true) : this.P;
-      if (this.inValue_DEPRECATED_PORT_SYSTEM[0])
-         P = this.inValue_DEPRECATED_PORT_SYSTEM[0];
+      // TODO: implement a curve type, then make this take one in
+      /*if (this.inputs.hasValue(0))
+         P = this.inputs.value(0);*/
       switch (this.fillMode) {
       case 0:
          mClosedCurve(P);
@@ -142,6 +142,8 @@ function() {
          mDot(this._vertexAtCursor, 0.36, true);
       }
    }
+
+   
    this.defineOutput(AT.Mesh, function() {
       this.P.color = palette.color[this.colorId];
       this.P.fillMode = this.fillMode;
