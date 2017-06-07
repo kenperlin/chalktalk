@@ -1445,10 +1445,8 @@ window.AtypicalTests = [
       }
       T.assert(T.arraysEqual(mx6.values, someValues));
 
-      let flatValues = [1, 2, 3,
-                        4, 5, 6,
-                        7, 8, 9,
-                        10, 11, 12];
+      // Conversion to flat array outputs it in column-major order
+      let flatValues = [1, 4, 7, 10,   2, 5, 8, 11,   3, 6, 9, 12];
       T.assert(T.arraysEqual(mx4.toFlatArray(), flatValues));
    }
 ];

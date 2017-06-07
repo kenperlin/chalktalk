@@ -1302,7 +1302,14 @@ function AtypicalModuleGenerator() {
          return new AT.Matrix({_quickConstruct: newValues});
       },
       toFlatArray: function() {
-         return this.values.reduce(function(acc, row) { return acc.concat(row); }, []);
+         // The rest of chalktalk keeps its array in column-major order
+         let flatArray = new Array(this.numColumns() * this.numRows());
+         for (let column = 0; column < this.numColumns(); column++) {
+            for (let row = 0; row < this.numRows(); row++) {
+               flatArray[column * this.numRows() + row] = this.element(row, column);
+            }
+         }
+         return flatArray;
       }
    });
 
