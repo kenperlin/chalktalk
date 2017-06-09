@@ -1,76 +1,141 @@
 "use strict";
 
-let Pointer = (function() {
-   let p = {};
+// DECIDED TO SEPARATE "HEAVIER IMPLEMENTATION" FROM SOME OF THE RELEVANT SKETCHES FOR NOW
 
-   p.PointerGraphic = function(posFromFunc, posToFunc, name) {
-      this.getPosFrom = posFromFunc;
-      this.getPosTo = posToFunc;
-      this.name = name;
-
-      let that = this;
-
-      this.draw = function(ctContext, structure) {
-
-         let posA = that.getPosFrom(structure);
-         let posB = that.getPosTo(structure);
-
-         //function drawArrow() {
-            mCurve([[posA.x, posA.y], [posB.x, posB.y]]);
-            
-            m.save();
-            m.translate([posA.x, 0, 0]);
-            m.scale(0.03);
-            mDrawOval([-1, -1],[1, 1], 36, PI / 2, PI / 2 - TAU);
-            //fillOval(-1, -1, 1, 1, 36, PI / 2, PI / 2 - TAU);
-
-            m.restore();
-
-            let offX = 0.1;
-            let offY = 0.05;
-            mCurve([[posB.x - offX, posB.y + offY], [posB.x, posB.y], [posB.x - offX, posB.y - offY]]);
-            textHeight(ctContext.mScale(.14));
-            mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2], .5, 0);
-         //}
-
-         //drawArrow();
-      }
-   };
-   return p;
-})();
-
-let Orientation = (function() {
+let Location = (function() {
    let pos = {};
    pos.Position = function(x, y, z) {
       this.x = x;
       this.y = y;
       this.z = (z === undefined) ? 0 : z;
 
+      // BASIC ADDITION AND SUBTRACTION OF POINTS (IN PRACTICE, PERHAPS THEY ARE MORE LIKE VEC3s, WHICH I COULD POSSIBLY USE INSTEAD)
+      //
+
       this.plus = function(other) {
-         return new Orientation.Position(
+         return new Location.Position(
             this.x + other.x,
             this.y + other.y,
             this.z + other.z
          );
-      }
+      };
 
+      this.plusEquals = function(other) {
+         this.x += other.x;
+         this.y += other.y;
+         this.z += other.z;
+         return this;
+      };
+
+      this.plusArr = function(otherAsArr) {
+         return new Location.Position(
+            this.x + otherAsArr[0],
+            this.y + otherAsArr[1],
+            this.z + otherAsArr[2]
+         ); 
+      };
+
+      this.plusEqualsArr = function(otherAsArr) {
+         this.x += otherAsArr[0],
+         this.y += otherAsArr[1],
+         this.z += otherAsArr[2]
+         return this;
+      };
+
+      //
       this.minus = function(other) {
-         return new Orientation.Position(
+         return new Location.Position(
             this.x - other.x,
             this.y - other.y,
             this.z - other.z
          );
-      }
+      };
+
+      this.minusEquals = function(other) {
+         this.x -= other.x;
+         this.y -= other.y;
+         this.z -= other.z;
+         return this;
+      };
+
+      this.minusArr = function(otherAsArr) {
+         return new Location.Position(
+            this.x - otherAsArr[0],
+            this.y - otherAsArr[1],
+            this.z - otherAsArr[2]
+         ); 
+      };
+
+      this.minusEqualsArr = function(otherAsArr) {
+         this.x -= otherAsArr[0],
+         this.y -= otherAsArr[1],
+         this.z -= otherAsArr[2]
+         return this;
+      };
+
+      // SWAP COORDINATES BETWEEN POSITION OBJECTS
+      this.swap = function(other) {
+         let storeXYZ = this.xyz();
+         this.x = other.x;
+         this.y = other.y;
+         this.z = other.z;
+         other.x = storeXYZ[0];
+         other.y = storeXYZ[1];
+         other.z = storeXYZ[2];
+      };
+
+      // RETURN THE XYZ COORDINATES AS A LEN-3 ARRAY
+      this.xyz = function() {
+         return [this.x, this.y, this.z];
+      };
    };
+
+   // RETURN A (0, 0, 0) Position OBJECT
+   pos.CartesianOrigin = function() {
+      return new Location.Position(0, 0, 0);
+   }
+   // RETURN A POSITION OBJECT REPRESENTING THE 
+   // TOP-LEFT CORNER POSITION OF AN ITEM OF DIMENSION dim 
+   // IF IT WERE TO BE DRAWN AT the (0, 0, 0) ORIGIN
+   pos.ObjectCenter = function(dim) {
+      let w = dim.w;
+      let h = dim.h;
+      let d = dim.d;
+      return new Location.Position(
+         -w / 2,
+         h / 2,
+         d / 2
+      );
+   }
 
    return pos;
 
 })();
 
+let Dimension = (function() {
+   let dim = {};
+   
+   dim.Dimension = function(w, h, d) {
+      this.w = w;
+      this.h = h;
+      this.d = (d === undefined) ? 0 : d;
+   };
+   
+   return dim;
+})();
+
+
+
 let Bound = (function() {
    let shape = {};
 
-   shape.drawBasicBox = function(x, y, w, h) {
+   // GIVEN A POSITION (TOP-LEFT CORNER) AND DIMENSION, DRAW A BASIC RECTANGLE
+   shape.drawRect = function(pos, dim) {
+      let x = pos.x;
+      let y = pos.y;
+      let z = pos.z; // TODO Z COORDINATE?
+      let w = dim.w;
+      let h = dim.h;
       mCurve([
          [x, y], 
          [x, y - h], 
@@ -80,122 +145,214 @@ let Bound = (function() {
       ]);  
    }
 
-   shape.BoundRect = function(relativePos, w, h, d, func) {
-      this.pos = relativePos;
-      this.w = w;
-      this.h = h;
-      this.d = (d === undefined) ? 0 : d;
-      this.func = (func === undefined) ? Bound.drawBasicBox : func;
+   shape.drawNothing = function() {return;};
 
-      this.draw = function(offsetX, offsetY, offsetZ, refObject) {
-         let x = this.pos.x + offsetX;
-         let y = this.pos.y + offsetY;
-         let z = this.pos.z + offsetZ;
-         this.func(x, y, this.w, this.h); // z coordinate to do
+   // BOUNDING BOX REPRESENTING POSITION AND DIMENSIONS, SPECIFY A FUNCTION FOR DRAWING (E.G. THE PROVIDED drawRect(...) OR A CUSTOM PROCEDURE)
+   shape.BoundRect = function(pos, dimensions, func) {
+      this.pos = pos;
+      this.dim = dimensions;
+      this.func = (func === undefined) ? Bound.drawRect : func;
+
+      // DRAW CURRENT POSITION WITH OR WITHOUT OFFSET
+      this.draw = function(offsetPos) {
+         this.func((offsetPos === undefined) ? this.pos : this.pos.plus(offsetPos), this.dim); // z coordinate to do
       };
+
+      // DRAW AT A SPECIFIC POSITION, OPTIONALLY WITH SPECIFIC DIMENSIONS (IGNORE THE BOUNDING RECTANGLE'S DATA FOR THIS DRAW)
+      this.drawAt = function(pos, dim) {
+         this.func(pos, (dim === undefined) ? this.dim : dim);
+      }
    };
 
-   // shape.BoundingSphere = function(centerPos, r) {
-   //    this.pos = centerPos;
-   //    this.r = r;
-   //    this.draw = function() {
-   //       mCurve([[], [], [], []]);
-   //    };
-   // };
+   // TODO BOUNDING SPHERE?
 
    return shape;
 })();
 
+let Pointer = (function() {
+   let p = {};
+
+   p.PointerGraphic = function(posFromFunc, posToFunc, name, bound, pos) {
+      this.getPosFrom = posFromFunc;
+      this.getPosTo = posToFunc;
+      this.name = name;
+      this.pos = pos;
+
+      if (bound === undefined) {
+         this._hasBound = false;
+      } 
+      else {
+         this.bound = bound;
+         this._hasBound = true;
+      }
+
+      let that = this;
+
+      this.hasBound = function() {
+         return this._hasBound;
+      };
+
+
+      // DRAW POINTER ARROW, DYNAMICALLY FIND EXIT AND ENTRY POINTS
+      this.draw = function(ctContext, structure, boundPos, shouldDrawLabel) {
+         _g.save();
+         color("violet");
+         // DRAW POINTER BOUND IF EXISTS
+         if (that.hasBound()) {
+            let dim = new Dimension.Dimension(that.bound.dim.w, structure.bound.dim.h, that.bound.dim.d);
+            that.bound.drawAt(boundPos, dim);
+         }
+
+         // FIND THE POINTER START AND POINTEE POSITIONS
+         let posA = that.getPosFrom(that, structure, boundPos);
+         let posB = that.getPosTo(that, structure);
+
+         // posB.y += 1.2;
+
+         // DRAW THE POINTER ARROW
+         // NOTE, INSERT BETTER ARROW / CURVE PROCEDURE HERE GIVEN THE TWO POINTS
+         mCurve([[posA.x, posA.y], [posB.x, posB.y]]);
+         
+         // DRAW EXIT CIRCLE
+         m.save();
+            const scale = 0.03;
+
+
+            m.translate([posA.x, posA.y, posA.z]);
+            m.scale(scale);
+
+            mDrawOval([-1, -1],[1, 1], 36, PI / 2, PI / 2 - TAU);
+            //fillOval(-1, -1, 1, 1, 36, PI / 2, PI / 2 - TAU);
+         m.restore();
+
+         // DRAW THE ARROW AT THE TIP *NOTE, ROTATION OF ARROW CURRENTLY INCORRECT TODO
+         let offX = 0.1;
+         let offY = 0.05;
+         
+         m.save();
+            m.translate([posB.x, posB.y, posB.z]);
+            let rotPt = CT.normalize(posB.xyz());
+            m.rotateZ(atan(rotPt[1], rotPt[0]));
+            m.translate([-posB.x, -posB.y, -posB.z]);
+            mCurve([[posB.x - offX, posB.y + offY], [posB.x, posB.y], [posB.x - offX, posB.y - offY]]);
+         m.restore();
+         
+         // DRAW POINTER LABEL
+         if (shouldDrawLabel) {
+            textHeight(ctContext.mScale(.14));
+            mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2], .5, -1.5);
+         }
+
+         _g.restore();
+
+      }
+
+
+   };
+   return p;
+})();
+
 let DSNode = (function() {
    let node = {};
-
-   node.Node = function(container, payload, bound, pointers, MODE) {
+   // BASIC INTERFACE FOR NODE, MAY CHANGE
+   node.Node = function(container, payload, bound, drawableElements, pointers) {
       this.container = container;
       this.payload = payload;
       this.bound = bound;
+      this.drawableElements = drawableElements;
       this.pointers = pointers;
-
-      // this.posSet = function(x, y) {
-      //    let pos = this.bound.pos;
-      //    pos.x = x;
-      //    pos.y = y;
-      // };
-      this.posOffset = function(x, y, z) {
-         let pos = this.bound.pos;
-         pos.x += x;
-         pos.y += y;
-         if (z === undefined) {
-            return;
-         }
-         pos.z += z;
-      }
    };
 
    return node;
 })();
 
 let LinkedList = (function() {
-   let linkedlist = {};
+   const linkedlist = {};
 
-   linkedlist.SinglyLinkedNode = function(container, payload, bound, drawableElements, pointers, MODE) {
-      DSNode.Node.call(this, container, payload, bound, pointers, MODE);
-      this.drawableElements = drawableElements;
-      this.next = null;
-
-      // this.posSet = function(x, y) {
-      //    let pos = this.bound.pos;
-      //    pos.x = x;
-      //    pos.y = y;
-
-      //    pos = this.drawableElements[0].bound.pos;
-      //    pos.x = x;
-      //    pos.y = y;
-      // };
-      this.posOffset = function(x, y) {
-         let pos = this.bound.pos;
-         pos.x += x;
-         pos.y += y;
-
-         pos = this.drawableElements[0].pos;
-         pos.x += x;
-         pos.y += y;
-      }
-
-      this.draw = function(offsetX, offsetY) {
-         this.bound.draw(offsetX, offsetY);
-         this.drawableElements[0].draw(offsetX, offsetY, this);
-
-         textHeight(this.container.ctContext.mScale(.2));
-         mText(this.payload, [this.bound.pos.x + .5 + offsetX, this.bound.pos.y - (this.bound.h / 2) + offsetY], 0, 0);
-         
-         for (let i = 0; i < this.pointers.length; i++) {
-            let deferred = {};
-            deferred.func = this.pointers[i].draw;
-            deferred.args = [this.container.ctContext, this];
-
-            this.container.enqueueDrawDeferred(deferred);
-            // this.pointers[i].draw(this.container.ctContext, this);
-         }
-      };
-   };
-
-   linkedlist.DoublyLinkedNode = function(container, payload, bound, drawableElements, pointers) {
+   linkedlist.SinglyLinkedNode = function(container, payload, bound, drawableElements, pointers) {
       DSNode.Node.call(this, container, payload, bound, drawableElements, pointers);
       this.next = null;
-      this.prev = null;
+
+      let that = this;
+
+      // PERMANENTLY OFFSET THE NODE COORDINATES
+      this.posOffset = function(offsetPos) {
+         let pos = this.bound.pos;
+         pos.x += offsetPos.x;
+         pos.y += offsetPos.y;
+         pos.z += offsetPos.z;
+      }
+
+      // DRAW NODE AND RECURSIVELY DRAW ALL ELEMENTS
+      this.draw = function(tempOffsetPos) {
+         // DRAW NODE BOUNDARY
+         this.bound.draw(tempOffsetPos);
+
+         // UNUSED EXTRA DRAWABLE ELEMENTS TODO ?
+         for (let i = 0; i < this.drawableElements.length; i++) {
+            this.drawableElements[i].draw(this, tempOffsetPos);
+         }
+
+         if (tempOffsetPos === undefined) {
+            tempOffsetPos = Location.CartesianOrigin();
+         }
+
+         let offsetX = tempOffsetPos.x;
+         let offsetY = tempOffsetPos.y;
+         
+         let horizontalPayloadShift = 0;
+         // SET-UP POINTER BOUND AND POINTER LINK POSITIONS (DOES NOT SET, ALL BASED ON OFFSETS FROM NODE BOUND FOR NOW)
+         for (let i = 0; i < this.pointers.length; i++) {
+            // START BY ALIGNING THE DESIRED POINTER BOUND ON THE RIGHT OF THE NODE BOUND
+            let ptrBoundPos = this.bound.pos.plusArr([this.bound.dim.w, 0, 0]);
+
+            let ptrI = this.pointers[i];
+            if (ptrI.hasBound()) {
+               // MOVE THE DESIRED POINTER BOUND(s) LEFTWARDS INTO THE NODE BOUND SPACE
+               ptrBoundPos.minusEqualsArr([ptrI.bound.dim.w * (i + 1), 0, 0]);
+               horizontalPayloadShift += ptrI.bound.dim.w;
+            }
+
+            // SET-UP DEFERRED DRAWS
+            let deferred = {};
+            deferred.func = ptrI.draw;
+            deferred.args = [this.container.ctContext, this, ptrBoundPos, true];
+
+            this.container.enqueueDrawDeferred(deferred);
+
+            // DRAWING IMMEDIATELY RESULTED IN A JITTERY LOOK SINCE THE "NEXT" NODES MIGHT MOVE IN THEIR UPDATE PROCEDURES, TODO ALTERNATE SOLUTION?
+            // RESPONSE BY ME : TWO COMPLETE LOOPS IN UPDATE FUNCTIONS, FIRST OFFSETS, SECOND DRAWS, NOT GREATEST SOLUTION, BUT WORKS
+            //ptrI.draw(this.container.ctContext, this, ptrBoundPos, true);
+         }
+
+         // DRAW THE PAYLOAD AS TEXT, TODO OR DEFINE A "PAYLOAD" OBJECT REPRESENTATION FOR SOMETHING FANCIER?
+         textHeight(this.container.ctContext.mScale(.2));
+         let p = [this.bound.pos.x + .5 + offsetX - (horizontalPayloadShift / 2), this.bound.pos.y - (this.bound.dim.h / 2) + offsetY];
+         mText(this.payload, p, 0.5, 0.5);
+      };
+
+      // OBJECTS TO WHICH WE CAN POINT (POINTEES) SHOULD DEFINE THIS FUNCTION TO SPECIFY A "POINT AT ME HERE" POSITION
+      this.getPointeePos = function() {
+         let pos = this.bound.pos;
+         return new Location.Position(pos.x, pos.y - (this.bound.dim.h / 2), pos.z);
+      };
+
+   };
+
+   linkedlist.SinglyLinkedNode.defaultDimension = function() {
+      return new Dimension.Dimension(1, .5, 0);
    };
 
    linkedlist.SinglyLinked = function(ctContext) {
       this.ctContext = ctContext;
       this.head = null;
-      this.size = 0;
+      this._size = 0;
 
       this.currOperation = "NONE";
+      this.nodeBeginUpdate = this.head;
 
-      this.operations = {
-
-      };
-
+      // SOME ELEMENTS (POINTER LINKS FOR EXAMPLE) FULLY UPDATED ONLY AFTER EACH NODE HAS BEEN UPDATED,
+      // SO FOR NOW IT IS NECESSARY TO DEFER DRAWING OF THOSE ELEMENTS TO A POINT AFTER THE INITIAL UPDATES
       this._deferredDrawQueue = [];
       this.enqueueDrawDeferred = function(item) {
          this._deferredDrawQueue.push(item);
@@ -203,69 +360,66 @@ let LinkedList = (function() {
       this.drawDeferred = function() {
          for (let i = 0; i < this._deferredDrawQueue.length; i++) {
             let args = this._deferredDrawQueue[i].args;
-            this._deferredDrawQueue[i].func(args[0], args[1]);
+            this._deferredDrawQueue[i].func(args[0], args[1], args[2], args[3]); // TODO: SHOULD MAKE ARGS AN OBJECT LATER
          }
          this._deferredDrawQueue = [];
       };
 
-      this.updateAllPositionsFmtA = function() {
-
-      }
-
-      this.updateAllPositionsFmtB = function() {
-         
-      }
-
       this.insertFront = function(payload) {
          this.currOperation = "insertFront";
-         let outerBoxPos = new Orientation.Position(-1 + .5, .25, 0);
-         let innerBoxPos = new Orientation.Position(-1 + .5 + .75, .25, 0);
-
-         let ptrOutPos = new Orientation.Position(-1 + .5 + .75 + 0.125, 0, 0);
 
          let that = this;
-         let currSize = this.getSize();
+
+         let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
 
          let newNode = new LinkedList.SinglyLinkedNode(
+            // POINTER TO THE CONTAINER (e.g. list)
             this,
+            // PAYLOAD STORED
             payload,
+            // BOUND FOR THE NODE
             new Bound.BoundRect(
-               outerBoxPos, 
-               1, 
-               .5,
-               0,
-               Bound.drawBasicBox
+               // RANDOMIZE DEFAULT POSITION OF NODE TO AVOID "STATIC LOOK"
+               Location.ObjectCenter(defaultDims).plusEqualsArr(
+                  [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, .4)]
+               ),
+               defaultDims,
+               Bound.drawRect
             ),
             [
-               new Bound.BoundRect(
-                  innerBoxPos,
-                  .25,
-                  .5,
-                  0,
-               ),
+               // UNUSED-FOR-NOW DRAWABLE ELEMENTS ARRAY
             ],
             [
                new Pointer.PointerGraphic(
-                  // pointer out
-                  function(node) {
-                     let pos = node.drawableElements[0].pos;
-                     return new Orientation.Position(pos.x + 0.125, 0, 0);
-                  },
-                  // pointee
-                  function(node) {
-                     if (node.next !== null) {
-                        let x = node.next.bound.pos.x;
-                        let y = 0;
-                        let pos = new Orientation.Position(x, y, 0);
-                        return pos;
+                  // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
+                  function(pointer, node, boundPos) {
+                     if (!pointer.hasBound()) {
+                        return pointer.pos;
                      }
 
-                     return new Orientation.Position(node.bound.pos.x + 2, 0, 0);
+                     let pPos = pointer.pos;
+
+                     return boundPos.plus(pPos);
                   },
-                  "next"
+                  // PROCEDURE TO LOCATE POINTER IN (POINTEE) POSITION DYNAMICALLY
+                  function(pointer, node) {
+                     if (node.next !== null) {
+                        return node.next.getPointeePos();
+                     }
+                     let pos = node.bound.pos; 
+                     return new Location.Position(pos.x + (that.HORIZONTAL_OFFSET * .8), /*pos.y - (pointer.bound.dim.h / 2)*/ 0, pos.z);
+                  },
+                  "next",
+                  new Bound.BoundRect(
+                     Location.ObjectCenter(defaultDims),
+                     new Dimension.Dimension(.25, .5, 0),
+                     Bound.drawRect
+                  ),
+                  new Location.Position(0.125, -0.25, 0)         
                ),
             ]
          );
+
          newNode.next = this.head;
          this.head = newNode;
          this.incSize();
@@ -273,6 +427,9 @@ let LinkedList = (function() {
 
       this.removeFront = function() {
          this.currOperation = "removeFront";
+         if (this.size() <= 0) {
+            return;
+         }
          let toRemove = this.head;
          this.head = this.head.next;
          toRemove.next = null;
@@ -280,23 +437,27 @@ let LinkedList = (function() {
          return toRemove;
       };
 
+      this._merge = function() {
+         this.currOperation = "merge";
+      }
+
       this.incSize = function() {
-         this.size++;
+         this._size++;
       };
 
       this.decSize = function() {
-         this.size--;
+         this._size--;
       };
 
-      this.getSize = function() {
-         return this.size;
+      this.size = function() {
+         return this._size;
       };
 
       this._setSize = function(newSize) {
-         this.size = newSize;
+         this._size = newSize;
       } 
 
-      // ORIGINAL
+      // INTERNAL ONE-SHOT IN-PLACE LIST REVERSAL
       this.reverseInPlace = function() {
          let curr = this.head;
          let prev = null;
@@ -318,23 +479,18 @@ let LinkedList = (function() {
          }
 
          let i = 0;
-         let j = listSave.length -1;
+         let j = listSave.length - 1;
          while (i < j) {
-            let swapPos = listSave[i].bound.pos;
-            let swapPosIn = listSave[i].drawableElements[0].pos;
-
-            listSave[i].bound.pos = listSave[j].bound.pos;
-            listSave[i].drawableElements[0].pos = listSave[j].drawableElements[0].pos;
-
-            listSave[j].bound.pos = swapPos;
-            listSave[j].drawableElements[0].pos = swapPosIn;
+            let posI = listSave[i].bound.pos;
+            let posJ = listSave[j].bound.pos;
+            posI.swap(posJ);
 
             i++;
             j--;
          }
       };
 
-      // STEP-THROUGH ALGORITHM
+      // TODO STEP-THROUGH ALGORITHM
       this._reverseInPlace = Stepthrough.makeStepFunc(function*() {
          let curr = this.head;
          let prev = null;
@@ -350,50 +506,128 @@ let LinkedList = (function() {
          yield;
       });
 
+      // OUTER POINTER TO OBJECT
       let that = this;
+      
+      // SEPARATE DRAW LOOP "STATES" POSSIBLY FOR USE WITH SMOOTHER ANIMATION / TRANSITIONS, "currOperation" CONTROLS WHICH SUB-ROUTINE TO RUN
+      this.opQueue = [];
+      this.HORIZONTAL_OFFSET = 2;
       this.state = "all";
       this.states = {
-         "all" : function () {
-                     let tempOffsetX = 0;
-                     let tempOffsetY = 0;
-                     let offsetX = 0;
-                     let offsetY = 0;
-                     let nullTailOffset = -2;
-                     if (that.currOperation !== "NONE") {
-                        if (that.currOperation === "insertFront") {
-                           offsetX = 2;
-                        }
-                        else if (that.currOperation === "removeFront") {
-                           offsetX = -2;
-                        }
-                     }
+         "all" : {
+            // NO OPERATION / PASSIVE
+            "NONE" : function(that) {
+               //that.opQueue.push("NONE");
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
 
-                     let curr = that.head;
-                     if (curr !== null && that.currOperation !== "removeFront") {
-                        curr.draw(tempOffsetX, tempOffsetY);
-                        nullTailOffset = curr.bound.pos.x;
-                        curr = curr.next;          
-                     }
-                     while (curr !== null) {
-                        curr.posOffset(offsetX, offsetY);
-                        curr.draw(tempOffsetX, tempOffsetY);
-                        nullTailOffset = curr.bound.pos.x;
-                        curr = curr.next;
-                     }
-                     textHeight(that.ctContext.mScale(.2));
-                     mText("NULL", [nullTailOffset + 2, 0], 0, 0);
-                     //textHeight(this.ctContext.mScale(1 / .5));
+               let curr = that.head;
+               while (curr !== null) {
+                  //m.translate([0, sin(time + (0.5 * i)), 0]);
+                  //curr.bound.dim.h = sin(curr.bound.dim.h + time * 0.1); // silliness here !
+                  curr.draw();
+                  nullTailOffset.x = curr.bound.pos.x;
+                  
+                  curr = curr.next;
+               }
 
-                     offsetX = 0;
-                     offsetY = 0; 
-                     that.currOperation = "NONE";     
-                  },
+               textHeight(that.ctContext.mScale(.2));
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+               that.drawDeferred();
+            },
+            "merge" : function(that) {
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+               textHeight(that.ctContext.mScale(.2));
+
+               let posArr = [];
+               let curr = that.head;
+               while (curr !== null) {
+                  posArr.push([curr.bound.pos, curr]);
+                  curr = curr.next;
+               }
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+               that.drawDeferred();
+               that.currOperation = "NONE";               
+            },
+            "insertFront" : function(that) {
+               //that.opQueue.push("insertFront");
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+               let offset = Location.CartesianOrigin();
+
+               let curr = that.head;
+               while (curr !== null) {
+                  // UPDATE POSITIONS, SHIFTING RIGHTWARDS TO ACCOMODATE THE NEW NODE
+                  curr.posOffset(offset);
+                                    curr.draw();
+
+                  nullTailOffset.x = curr.bound.pos.x;
+
+                  curr = curr.next;
+                  offset.x = that.HORIZONTAL_OFFSET;
+               }
+               // curr = that.head;
+               // while (curr !== null) {
+               //    curr.draw();
+               //    curr = curr.next;
+               // }
+
+               textHeight(that.ctContext.mScale(.2));
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+               that.drawDeferred();
+
+               // MUST RESET STATE
+               that.currOperation = "NONE";
+            },
+            "removeFront" : function(that) {
+               if (that.size() <= 0) {
+                  that.currOperation = "NONE";
+                  return;
+               }
+               //that.opQueue.push("removeFront");
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+               let offset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+
+               let curr = that.head;
+               while (curr !== null) {
+                  // UPDATE POSITIONS, SHIFTING LEFTWARDS TO ACCOMODATE THE EMPTY SPACE LEFT BY REMOVED NODE
+                  curr.posOffset(offset);
+                  curr.draw();
+                  nullTailOffset.x = curr.bound.pos.x;
+
+                  curr = curr.next;
+               }
+               // curr = that.head;
+               // while (curr !== null) {
+               //    curr.draw();
+               //    curr = curr.next;
+               // }
+
+               textHeight(that.ctContext.mScale(.2));
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+               that.drawDeferred();
+
+               // RESET STATE
+               that.currOperation = "NONE";
+            }
+         },
       };
-
+      // MAIN DRAW PROCEDURE FOR LIST
       this.draw = function() {
-         this.states[this.state]();
+         this.states[this.state][this.currOperation](this);
       }
 
+      // CONSOLE PRINT-OUT OF LIST
       this.print = function() {
          let strOut = "head->";
          let curr = this.head;
@@ -406,11 +640,24 @@ let LinkedList = (function() {
       };
    };
 
+   linkedlist.SinglyLinked.Operation = Object.freeze({
+      IDLE : '1',
+      INSERT_FRONT : '2',
+      REMOVE_FRONT : '3',
+      INSERT_ARBITRARY : '4',
+      REMOVE_ARBITRARY : '5',
+      REVERSE_IN_PLACE : '6',
+   });
+
+   // THE FUTURE?
    linkedlist.DoublyLinked = function(ctContext) {
       this.ctContext = ctContext;
       this.head = null;
       this.tail = null;
-      this.size = 0;
+      this._size = 0;
+
+      this.currOperation = "NONE";
+      this.nodeBeginUpdate = this.head;
    };
 
    return linkedlist;

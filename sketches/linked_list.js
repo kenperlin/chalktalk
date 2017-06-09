@@ -55,6 +55,29 @@ function() {
       this.list = new LinkedList.SinglyLinked(this);
    };
 
+   this.onPress = function(p) {
+      // if (this.list.size() <= 0) {
+      //   return;
+      // }
+
+      // let bla = this.list.head.bound.pos;
+      // bla.x = p.x;
+      // bla.y = p.y;
+      // bla.z = p.z;
+      //console.log(p.x, p.y, p.z);
+   };
+
+   this.onDrag = function(p) {
+      // if (this.list.size() <= 3) {
+      //   return;
+      // }
+
+      // let bla = this.list.head.bound.pos;
+      // bla.x = p.x;
+      // bla.y = p.y;
+      // bla.z = p.z;    
+   }
+
    this.printed = false;
    this.render = function() {
       this.duringSketch(function() {
@@ -72,10 +95,17 @@ function() {
          mCurve([[-1, -1], [1, -1]]);
          this.list.print();
          this.list.draw();
-         this.list.drawDeferred()
       });
    }
 
+   this.over = function(other) {
+
+   };
+
+   this.under = function(other) {
+      let curr = this.head;
+      
+   };
 
 
     this.output = function() {
