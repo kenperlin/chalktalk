@@ -178,7 +178,7 @@ let Pointer = (function() {
       this.name = name;
       this.pos = pos;
 
-      if (bound === undefined) {
+      if (bound === undefined || bound === null) {
          this._hasBound = false;
       } 
       else {
@@ -199,7 +199,7 @@ let Pointer = (function() {
          color("violet");
          // DRAW POINTER BOUND IF EXISTS
          if (that.hasBound()) {
-            let dim = new Dimension.Dimension(that.bound.dim.w, structure.bound.dim.h, that.bound.dim.d);
+            let dim = new Dimension.Dimension(that.bound.dim.w, (structure === null) ? that.bound.dim.h : structure.bound.dim.h, that.bound.dim.d);
             that.bound.drawAt(boundPos, dim);
          }
 
@@ -217,11 +217,10 @@ let Pointer = (function() {
          m.save();
             const scale = 0.03;
 
-
             m.translate([posA.x, posA.y, posA.z]);
             m.scale(scale);
 
-            mDrawOval([-1, -1],[1, 1], 36, PI / 2, PI / 2 - TAU);
+            mFillOval([-1, -1],[1, 1], 36, PI / 2, PI / 2 - TAU);
             //fillOval(-1, -1, 1, 1, 36, PI / 2, PI / 2 - TAU);
          m.restore();
 
@@ -229,13 +228,13 @@ let Pointer = (function() {
          let offX = 0.1;
          let offY = 0.05;
          
-         m.save();
-            m.translate([posB.x, posB.y, posB.z]);
-            let rotPt = CT.normalize(posB.xyz());
-            m.rotateZ(atan(rotPt[1], rotPt[0]));
-            m.translate([-posB.x, -posB.y, -posB.z]);
-            mCurve([[posB.x - offX, posB.y + offY], [posB.x, posB.y], [posB.x - offX, posB.y - offY]]);
-         m.restore();
+          m.save();
+         //    m.translate([posB.x, posB.y, posB.z]);
+         //    let rotPt = CT.normalize(posB.xyz());
+         //    m.rotateZ(atan(rotPt[1], rotPt[0]));
+         //    m.translate([-posB.x, -posB.y, -posB.z]);
+             mCurve([[posB.x - offX, posB.y + offY], [posB.x, posB.y], [posB.x - offX, posB.y - offY]]);
+          m.restore();
          
          // DRAW POINTER LABEL
          if (shouldDrawLabel) {
@@ -344,11 +343,13 @@ let LinkedList = (function() {
    };
 
    linkedlist.SinglyLinked = function(ctContext) {
+      // OUTER POINTER TO OBJECT
+      let that = this;
       this.ctContext = ctContext;
       this.head = null;
       this._size = 0;
 
-      this.currOperation = "NONE";
+      this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
       this.nodeBeginUpdate = this.head;
 
       // SOME ELEMENTS (POINTER LINKS FOR EXAMPLE) FULLY UPDATED ONLY AFTER EACH NODE HAS BEEN UPDATED,
@@ -365,8 +366,46 @@ let LinkedList = (function() {
          this._deferredDrawQueue = [];
       };
 
+      this.headGraphic = (function() {
+         const h = {};
+         h.ptr = new Pointer.PointerGraphic(
+                     // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
+                     function(pointer, node, boundPos) {
+                        // if (!pointer.hasBound()) {
+                        //    return pointer.pos;
+                        // }
+
+                        // let pPos = pointer.pos;
+
+                        // return boundPos.plus(pPos);
+                        return pointer.pos;
+                     },
+                     // PROCEDURE TO LOCATE POINTER IN (POINTEE) POSITION DYNAMICALLY
+                     function(pointer, node) {
+                        if (node !== null) {
+                           return node.getPointeePos();
+                        }
+                        return new Location.Position(0 - .25, 0, pointer.pos.z);
+                     },
+                     "head",
+                     new Bound.BoundRect(
+                        Location.ObjectCenter(new Dimension.Dimension(.25, .5, 0)).minusEqualsArr([1, 1, 0]),
+                        new Dimension.Dimension(.25, .5, 0),
+                        Bound.drawRect
+                     ),
+                     new Location.Position(-1, -1, 0)
+         );
+
+         h.draw = function() {
+            h.ptr.draw(that.ctContext, that.head, h.ptr.bound.pos, true);
+         };
+
+         return h;
+      })();
+
+
       this.insertFront = function(payload) {
-         this.currOperation = "insertFront";
+         this.currOperation = LinkedList.SinglyLinked.Operation.INSERT_FRONT;
 
          let that = this;
 
@@ -426,7 +465,7 @@ let LinkedList = (function() {
       };
 
       this.removeFront = function() {
-         this.currOperation = "removeFront";
+         this.currOperation = LinkedList.SinglyLinked.Operation.REMOVE_FRONT;
          if (this.size() <= 0) {
             return;
          }
@@ -480,20 +519,25 @@ let LinkedList = (function() {
 
          let i = 0;
          let j = listSave.length - 1;
+         let posI = null;
+         let posJ = null;
          while (i < j) {
-            let posI = listSave[i].bound.pos;
-            let posJ = listSave[j].bound.pos;
+            posI = listSave[i].bound.pos;
+            posJ = listSave[j].bound.pos;
             posI.swap(posJ);
 
             i++;
             j--;
          }
+
+         console.log("REVERSED");
       };
 
       // TODO STEP-THROUGH ALGORITHM
       this._reverseInPlace = Stepthrough.makeStepFunc(function*() {
          let curr = this.head;
          let prev = null;
+         yield;
          while (curr !== null) {
             let next = curr.next;
             yield;
@@ -505,9 +549,6 @@ let LinkedList = (function() {
          this.head = prev;
          yield;
       });
-
-      // OUTER POINTER TO OBJECT
-      let that = this;
       
       // SEPARATE DRAW LOOP "STATES" POSSIBLY FOR USE WITH SMOOTHER ANIMATION / TRANSITIONS, "currOperation" CONTROLS WHICH SUB-ROUTINE TO RUN
       this.opQueue = [];
@@ -515,8 +556,7 @@ let LinkedList = (function() {
       this.state = "all";
       this.states = {
          "all" : {
-            // NO OPERATION / PASSIVE
-            "NONE" : function(that) {
+            [LinkedList.SinglyLinked.Operation.IDLE] : function(that) {
                //that.opQueue.push("NONE");
                let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
 
@@ -530,31 +570,16 @@ let LinkedList = (function() {
                   curr = curr.next;
                }
 
-               textHeight(that.ctContext.mScale(.2));
-               _g.save();
-               color("rgb(10, 40, 120)");
-               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
-               _g.restore();
-               that.drawDeferred();
-            },
-            "merge" : function(that) {
-               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
-               textHeight(that.ctContext.mScale(.2));
+               that.headGraphic.draw();
 
-               let posArr = [];
-               let curr = that.head;
-               while (curr !== null) {
-                  posArr.push([curr.bound.pos, curr]);
-                  curr = curr.next;
-               }
+               textHeight(that.ctContext.mScale(.2));
                _g.save();
                color("rgb(10, 40, 120)");
                mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
                _g.restore();
                that.drawDeferred();
-               that.currOperation = "NONE";               
             },
-            "insertFront" : function(that) {
+            [LinkedList.SinglyLinked.Operation.INSERT_FRONT] : function(that) {
                //that.opQueue.push("insertFront");
                let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
                let offset = Location.CartesianOrigin();
@@ -570,6 +595,8 @@ let LinkedList = (function() {
                   curr = curr.next;
                   offset.x = that.HORIZONTAL_OFFSET;
                }
+
+               that.headGraphic.draw();
                // curr = that.head;
                // while (curr !== null) {
                //    curr.draw();
@@ -584,11 +611,11 @@ let LinkedList = (function() {
                that.drawDeferred();
 
                // MUST RESET STATE
-               that.currOperation = "NONE";
+               that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
             },
-            "removeFront" : function(that) {
+            [LinkedList.SinglyLinked.Operation.REMOVE_FRONT] : function(that) {
                if (that.size() <= 0) {
-                  that.currOperation = "NONE";
+                  that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
                   return;
                }
                //that.opQueue.push("removeFront");
@@ -604,6 +631,8 @@ let LinkedList = (function() {
 
                   curr = curr.next;
                }
+
+               that.headGraphic.draw();
                // curr = that.head;
                // while (curr !== null) {
                //    curr.draw();
@@ -618,10 +647,32 @@ let LinkedList = (function() {
                that.drawDeferred();
 
                // RESET STATE
-               that.currOperation = "NONE";
-            }
-         },
+               that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            },
+            // TODO [REVERSE_IN_PLACE] : function(that) {}
+            // TODO [MERGE] : function(that) {
+                  // UN-IMPLEMENTED
+                     // let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+                     // textHeight(that.ctContext.mScale(.2));
+
+                     // let posArr = [];
+                     // let curr = that.head;
+                     // while (curr !== null) {
+                     //    posArr.push([curr.bound.pos, curr]);
+                     //    curr = curr.next;
+                     // }
+                     // _g.save();
+                     // color("rgb(10, 40, 120)");
+                     // mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+                     // _g.restore();
+                     // that.drawDeferred();
+                     // that.currOperation = "NONE";               
+            //},
+
+         }
       };
+      this.states["all"] = Object.freeze(this.states["all"]);
+
       // MAIN DRAW PROCEDURE FOR LIST
       this.draw = function() {
          this.states[this.state][this.currOperation](this);

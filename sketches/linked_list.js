@@ -53,6 +53,30 @@ function() {
 
    this.setup = function() {
       this.list = new LinkedList.SinglyLinked(this);
+      this.code = {
+        "SL_NODE" : [
+        "struct list_node<T> {",
+        "    T data;",
+        "    struct list_node * next;",
+        "};"
+        ],
+
+        "SL_REVERSE_IN_PLACE" : [
+        "void reverse_in_place(void)",
+        "{",
+        "    struct list_node * curr = this->head;",
+        "    struct list_node * prev = nullptr;",
+        "    while (curr != nullptr) {",
+        "        next = curr->next;",
+        "        curr->next = prev;",
+        "        prev = curr;",
+        "        curr = next;",
+        "    }",
+        "    this->head = prev;",
+        "}"
+        ],
+
+      };
    };
 
    this.onPress = function(p) {
@@ -76,7 +100,7 @@ function() {
       // bla.x = p.x;
       // bla.y = p.y;
       // bla.z = p.z;    
-   }
+   };
 
    this.printed = false;
    this.render = function() {
@@ -91,12 +115,10 @@ function() {
         ]);
       });
       this.afterSketch(function() {
-         mCurve([[-1, 1], [1, 1]]);
-         mCurve([[-1, -1], [1, -1]]);
          this.list.print();
          this.list.draw();
       });
-   }
+   };
 
    this.over = function(other) {
 
