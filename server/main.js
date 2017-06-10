@@ -7,22 +7,74 @@ const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
 
+const holojam = require('holojam-node')(['relay']);
+
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
 app.use(parser.json());
 app.use(parser.urlencoded({ extended: true }));
 
 const http = require('http');
+const port = process.argv[2] || 11235;
 let server = http.Server(app);
 
-const port = process.argv[2] || 11235;
+server.listen(parseInt(port, 10), () =>
+   console.log('HTTP server listening on port %d', server.address().port)
+);
+
 let data = [], time = 0;
 
-String.prototype.endsWith = suffix => {
+function readHeader(data) {
+   let header = data.toString('ascii', 1, 2);
+   header += data.toString('ascii', 0, 1);
+   header += data.toString('ascii', 3, 4);
+   header += data.toString('ascii', 2, 3);
+   header += data.toString('ascii', 5, 6);
+   header += data.toString('ascii', 4, 5);
+   header += data.toString('ascii', 7, 8);
+   header += data.toString('ascii', 6, 7);
+   return header;
+}
+
+// Websocket endpoint setup
+try {
+   let WebSocketServer = require('ws').Server;
+   let wss = new WebSocketServer({ port: 22346 });
+   let websockets = [];
+
+   wss.on('connection', ws => {
+      for (ws.index = 0; websockets[ws.index]; ws.index++);
+      websockets[ws.index] = ws;
+
+      // Listen for curves
+      if (ws.index == 0) {
+         ws.send(JSON.stringify({global: "displayListener", value: true }));
+
+        ws.on('message', data => {
+           let header = readHeader(data);
+           if (header == 'CTdata01') {
+              holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                 label: 'Display', bytes: data
+              }]));
+           }
+        });
+      }
+
+      // Remove this websocket
+      ws.on('close', () => websockets.splice(ws.index, 1));
+   });
+} catch (err) {
+   console.log(
+      '\x1b[31mCouldn\'t load websocket library. Disabling event broadcasting.'
+      + ' Run \'npm install\' from Chalktalk\'s server directory\x1b[0m'
+   );
+}
+
+String.prototype.endsWith = function(suffix) {
    return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
-String.prototype.contains = substr => {
+String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
 
@@ -37,8 +89,9 @@ function readDir(res, dirName, extension) {
       if (err) {
          res.writeHead(500, { 'Content-Type': 'text/plain' });
          res.write(err);
-         console.log('error listing the ' + dirName + ' directory' + err);
          res.end();
+
+         console.log('Error listing the ' + dirName + ' directory' + err);
          return;
       }
 
@@ -143,34 +196,9 @@ app.route('/ls_images').get((req, res) => readDir(res, 'images'));
 // handle request for list of state files
 app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
-// Websocket endpoint setup
-try {
-   let WebSocketServer = require('ws').Server;
-   let wss = new WebSocketServer({ port: 22346 });
-   let websockets = [];
-
-   wss.on('connection', ws => {
-      for (ws.index = 0; websockets[ws.index]; ws.index++);
-      websockets[ws.index] = ws;
-
-      ws.on('message', msg => {
-         for (let i = 0; i < websockets.length; ++i) {
-            if (i != ws.index)
-               websockets[index].send(msg);
-         }
-      });
-
-      // Remove this websocket
-      ws.on('close', () => websockets.splice(ws.index, 1));
-   });
-} catch (err) {
-   console.log(
-      '\x1b[31mCouldn\'t load websocket library. Disabling event broadcasting.'
-      + ' Run \'npm install\' from Chalktalk\'s server directory\x1b[0m'
-   );
-}
-
-// Start the http server
-server.listen(parseInt(port, 10), () =>
-   console.log('HTTP server listening on port %d', server.address().port)
-);
+// Debug
+/*
+holojam.on('tick', (a, b) => {
+  console.log(a, b);
+});
+*/
