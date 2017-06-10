@@ -1,10 +1,17 @@
 function() {
     this.label = 'LinkedList';
 
-    this.list = null;
+    // CURRENTLY PARTIALLY-SUPPORTED OPERATIONS:
+    //   insertFront
+    //   removeFront
+    //   remove (removeArbitrary)
+    //   reverseInPlace
+    //   COMPACT (just for testing/fun, not high priority-wise)
+    //
+
     this.openOutput = false;
 
-    this.onSwipe[0] = [
+    this.onSwipe[4] = [
        'insert front',
        function() {
            if (this.inValue === undefined || this.inValue[0] === undefined) {
@@ -15,19 +22,38 @@ function() {
        }
     ];
 
-    this.onSwipe[4] = [
-       'remove front', 
-       function() {
-           if (this.list.size == 0) {
-              return;
-           } 
-           if (this.out[0] !== undefined) {
-             this.openOutput = true;
-           }
-           else {
-             this.list.removeFront(); 
-           }
-       }
+   this.onSwipe[0] = [
+      'remove front', 
+      function() {
+         if (this.list.size() == 0) {
+            return;
+         } 
+           //if (this.out[0] !== undefined) {
+           //  this.openOutput = true;
+           //}
+           //else {
+         this.list.removeFront(); 
+           //}
+      }
+   ];
+
+   this.onSwipe[2] = [
+      'remove arbitrary',
+      function() {
+         if (this.list.size() == 0) {
+            return;
+         } 
+         //if (this.out[0] !== undefined) {
+         //   this.openOutput = true;
+         //}
+         //else {
+         if (this.inValue === undefined || this.inValue[0] === undefined) {
+            return;
+         }
+         var input = this.inValue[0];
+            this.list.remove(input);
+         //}
+      }
    ];
 
     // this.onSwipe[6] = [
@@ -44,12 +70,14 @@ function() {
       }
    ];
 
-    this.onSwipe[2] = [
-      'debug',
-       function() {
-          console.log(this);
-       }
-    ];
+   this.onSwipe[7] = [
+      "compact",
+      function() {
+         this.list._compact();
+      }
+   ];
+
+
 
    this.setup = function() {
       this.list = new LinkedList.SinglyLinked(this);

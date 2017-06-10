@@ -84,10 +84,19 @@ let Location = (function() {
          other.z = storeXYZ[2];
       };
 
+      this.distance = function(other) {
+         return sqrt(pow(other.x - this.x, 2) + pow(other.y - this.y, 2));
+      }
+
       // RETURN THE XYZ COORDINATES AS A LEN-3 ARRAY
       this.xyz = function() {
          return [this.x, this.y, this.z];
       };
+
+      // RETURN THE XY COORDINATES AS A LEN-2 ARRAY (NO TRANSFORMATION)
+      this.xy = function() {
+         return [this.x, this.y];
+      }
    };
 
    // RETURN A (0, 0, 0) Position OBJECT
@@ -145,6 +154,21 @@ let Bound = (function() {
       ]);  
    }
 
+   shape.fillRect = function(pos, dim) {
+      let x = pos.x;
+      let y = pos.y;
+      let z = pos.z; // TODO Z COORDINATE?
+      let w = dim.w;
+      let h = dim.h;
+      mFillCurve([
+         [x, y], 
+         [x, y - h], 
+         [x + w, y - h], 
+         [x + w, y],
+         [x, y]
+      ]);  
+   }
+
    shape.drawNothing = function() {return;};
 
    // BOUNDING BOX REPRESENTING POSITION AND DIMENSIONS, SPECIFY A FUNCTION FOR DRAWING (E.G. THE PROVIDED drawRect(...) OR A CUSTOM PROCEDURE)
@@ -158,9 +182,17 @@ let Bound = (function() {
          this.func((offsetPos === undefined) ? this.pos : this.pos.plus(offsetPos), this.dim); // z coordinate to do
       };
 
+      this.drawWithFunc = function(func, offsetPos) {
+         func((offsetPos === undefined) ? this.pos : this.pos.plus(offsetPos), this.dim); // z coordinate to do         
+      }
+
       // DRAW AT A SPECIFIC POSITION, OPTIONALLY WITH SPECIFIC DIMENSIONS (IGNORE THE BOUNDING RECTANGLE'S DATA FOR THIS DRAW)
       this.drawAt = function(pos, dim) {
          this.func(pos, (dim === undefined) ? this.dim : dim);
+      }
+
+      this.drawAtWithFunc = function(pos, dim, func) {
+         func(pos, (dim === undefined) ? this.dim : dim);         
       }
    };
 
@@ -195,8 +227,6 @@ let Pointer = (function() {
 
       // DRAW POINTER ARROW, DYNAMICALLY FIND EXIT AND ENTRY POINTS
       this.draw = function(ctContext, structure, boundPos, shouldDrawLabel) {
-         _g.save();
-         color("violet");
          // DRAW POINTER BOUND IF EXISTS
          if (that.hasBound()) {
             let dim = new Dimension.Dimension(that.bound.dim.w, (structure === null) ? that.bound.dim.h : structure.bound.dim.h, that.bound.dim.d);
@@ -207,47 +237,56 @@ let Pointer = (function() {
          let posA = that.getPosFrom(that, structure, boundPos);
          let posB = that.getPosTo(that, structure);
 
-         // posB.y += 1.2;
+         _g.save();
+            color("violet");
 
-         // DRAW THE POINTER ARROW
-         // NOTE, INSERT BETTER ARROW / CURVE PROCEDURE HERE GIVEN THE TWO POINTS
-         mCurve([[posA.x, posA.y], [posB.x, posB.y]]);
-         
-         // DRAW EXIT CIRCLE
-         m.save();
-            const scale = 0.03;
+            // DRAW THE POINTER ARROW
+            // NOTE, INSERT BETTER ARROW / CURVE PROCEDURE HERE GIVEN THE TWO POINTS
+            mCurve([[posA.x, posA.y], [posB.x, posB.y]]);
 
-            m.translate([posA.x, posA.y, posA.z]);
-            m.scale(scale);
+            // DRAW EXIT CIRCLE
+            const exitDiskRadius = 0.03;
+            mFillDisk(posA.xy(), exitDiskRadius);
 
-            mFillOval([-1, -1],[1, 1], 36, PI / 2, PI / 2 - TAU);
-            //fillOval(-1, -1, 1, 1, 36, PI / 2, PI / 2 - TAU);
-         m.restore();
+            // DRAW THE ARROW AT THE TIP
+            function mArrowHead(a, b, r) {
+               if (r === undefined) r = 0.1;
 
-         // DRAW THE ARROW AT THE TIP *NOTE, ROTATION OF ARROW CURRENTLY INCORRECT TODO
-         let offX = 0.1;
-         let offY = 0.05;
-         
-          m.save();
-         //    m.translate([posB.x, posB.y, posB.z]);
-         //    let rotPt = CT.normalize(posB.xyz());
-         //    m.rotateZ(atan(rotPt[1], rotPt[0]));
-         //    m.translate([-posB.x, -posB.y, -posB.z]);
-             mCurve([[posB.x - offX, posB.y + offY], [posB.x, posB.y], [posB.x - offX, posB.y - offY]]);
-          m.restore();
-         
-         // DRAW POINTER LABEL
-         if (shouldDrawLabel) {
-            textHeight(ctContext.mScale(.14));
-            mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2], .5, -1.5);
-         }
+               a[2] = def(a[2]);
+               b[2] = def(b[2]);
+
+               var A = mTransform(a);
+               var B = mTransform(b);
+
+               var U = [ r * (B[0] - A[0]), r * (B[1] - A[1]), r * (B[2] - A[2]) ];
+
+               _g_beginPath();
+               _g_sketchTo([ B[0]-U[0]+U[1], B[1]-U[1]-U[0], B[2]-U[2] ], 0);
+               _g_sketchTo(B, 1);
+               _g_sketchTo([ B[0]-U[0]-U[1], B[1]-U[1]+U[0], B[2]-U[2] ], 1);
+               _g_stroke();  
+            }
+
+            // TODO AVOID USING A CONDITIONAL HERE?
+            const dist = posA.distance(posB);
+            if (dist < 0.5) {
+               mArrowHead([posA.x, posA.y], [posB.x, posB.y], 0.5);
+            }
+            else {
+               mArrowHead([posA.x, posA.y], [posB.x, posB.y], .06);
+            }
+            
+            // DRAW POINTER LABEL
+            if (shouldDrawLabel) {
+               textHeight(ctContext.mScale(.14));
+               mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2], .5, -1.5);
+            }
 
          _g.restore();
-
       }
-
-
    };
+
+
    return p;
 })();
 
@@ -280,6 +319,13 @@ let LinkedList = (function() {
          pos.x += offsetPos.x;
          pos.y += offsetPos.y;
          pos.z += offsetPos.z;
+      }
+
+      this.posSet = function(newPos) {
+         let pos = this.bound.pos;
+         pos.x = newPos.x;
+         pos.y = newPos.y;
+         pos.z = newPos.z;
       }
 
       // DRAW NODE AND RECURSIVELY DRAW ALL ELEMENTS
@@ -350,7 +396,7 @@ let LinkedList = (function() {
       this._size = 0;
 
       this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
-      this.nodeBeginUpdate = this.head;
+      this.mostRecentlyChangedNode = this.head;
 
       // SOME ELEMENTS (POINTER LINKS FOR EXAMPLE) FULLY UPDATED ONLY AFTER EACH NODE HAS BEEN UPDATED,
       // SO FOR NOW IT IS NECESSARY TO DEFER DRAWING OF THOSE ELEMENTS TO A POINT AFTER THE INITIAL UPDATES
@@ -396,37 +442,49 @@ let LinkedList = (function() {
                      new Location.Position(-1, -1, 0)
          );
 
-         h.draw = function() {
-            h.ptr.draw(that.ctContext, that.head, h.ptr.bound.pos, true);
+         h.draw = function(_color) {
+            if (color !== undefined) {
+               _g.save();
+               color(_color);
+               h.ptr.draw(that.ctContext, that.head, h.ptr.bound.pos, true);
+               _g.restore();
+            }
+            else {
+               h.ptr.draw(that.ctContext, that.head, h.ptr.bound.pos, true);
+            }
          };
 
          return h;
       })();
 
-
-      this.insertFront = function(payload) {
-         this.currOperation = LinkedList.SinglyLinked.Operation.INSERT_FRONT;
-
-         let that = this;
-
+      this.createBasicNodeGraphic = function(that, payload) {
          let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
+
+         // RANDOMIZE DEFAULT POSITION OF NODE TO AVOID "STATIC LOOK"
+         let boundPos = Location.ObjectCenter(defaultDims).plusEqualsArr(
+               [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, .4)]
+         );
 
          let newNode = new LinkedList.SinglyLinkedNode(
             // POINTER TO THE CONTAINER (e.g. list)
-            this,
+            that,
             // PAYLOAD STORED
             payload,
             // BOUND FOR THE NODE
             new Bound.BoundRect(
-               // RANDOMIZE DEFAULT POSITION OF NODE TO AVOID "STATIC LOOK"
-               Location.ObjectCenter(defaultDims).plusEqualsArr(
-                  [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, .4)]
-               ),
+               boundPos,
                defaultDims,
                Bound.drawRect
             ),
             [
-               // UNUSED-FOR-NOW DRAWABLE ELEMENTS ARRAY
+               {
+                  draw : function() {
+                     _g.save();
+                     color(backgroundColor);
+                     newNode.bound.drawWithFunc(Bound.fillRect);
+                     _g.restore();
+                  }
+               }
             ],
             [
                new Pointer.PointerGraphic(
@@ -459,26 +517,68 @@ let LinkedList = (function() {
             ]
          );
 
+         return newNode;
+      }
+
+
+      this.insertFront = function(payload) {
+         this.currOperation = LinkedList.SinglyLinked.Operation.INSERT_FRONT;
+
+         let newNode = this.createBasicNodeGraphic(this, payload);
+
          newNode.next = this.head;
          this.head = newNode;
          this.incSize();
+
+         this.mostRecentlyChangedNode = this.head;
       };
 
       this.removeFront = function() {
-         this.currOperation = LinkedList.SinglyLinked.Operation.REMOVE_FRONT;
          if (this.size() <= 0) {
             return;
          }
+         this.currOperation = LinkedList.SinglyLinked.Operation.REMOVE_FRONT;
+
          let toRemove = this.head;
          this.head = this.head.next;
          toRemove.next = null;
          this.decSize();
+
+         this.mostRecentlyChangedNode = this.head;
          return toRemove;
       };
 
-      this._merge = function() {
-         this.currOperation = "merge";
-      }
+      this.remove = function(dataToRemove) {
+         if (this.size() <= 0) {
+            return;
+         }
+         this.currOperation = LinkedList.SinglyLinked.Operation.REMOVE_ARBITRARY;
+
+         let prev = null;
+         let curr = this.head;
+
+         while (curr !== null && curr.payload != dataToRemove) {
+            prev = curr;
+            curr = curr.next;
+         }
+
+         if (curr === null) {
+            this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            return null;
+         }
+
+         let toRemove = curr;
+         if (prev === null) {
+            this.head = curr.next;
+         }
+         else {
+            prev.next = curr.next;
+         }
+         this.mostRecentlyChangedNode = prev;
+         this.decSize();
+         return toRemove;
+
+      };
 
       this.incSize = function() {
          this._size++;
@@ -530,10 +630,11 @@ let LinkedList = (function() {
             j--;
          }
 
+         this.mostRecentlyChangedNode = this.head;
          console.log("REVERSED");
       };
 
-      // TODO STEP-THROUGH ALGORITHM
+      // TODO STEP-THROUGH ALGORITHM TODO, VERY MUCH SO
       this._reverseInPlace = Stepthrough.makeStepFunc(function*() {
          let curr = this.head;
          let prev = null;
@@ -549,6 +650,15 @@ let LinkedList = (function() {
          this.head = prev;
          yield;
       });
+
+      // TODO
+      this._merge = function() {
+         this.currOperation = "merge";
+      }
+      // TODO
+      this._compact = function() {
+         this.currOperation = "COMPACT";
+      }
       
       // SEPARATE DRAW LOOP "STATES" POSSIBLY FOR USE WITH SMOOTHER ANIMATION / TRANSITIONS, "currOperation" CONTROLS WHICH SUB-ROUTINE TO RUN
       this.opQueue = [];
@@ -570,7 +680,7 @@ let LinkedList = (function() {
                   curr = curr.next;
                }
 
-               that.headGraphic.draw();
+               that.headGraphic.draw("violet");
 
                textHeight(that.ctContext.mScale(.2));
                _g.save();
@@ -596,7 +706,7 @@ let LinkedList = (function() {
                   offset.x = that.HORIZONTAL_OFFSET;
                }
 
-               that.headGraphic.draw();
+               that.headGraphic.draw("violet");
                // curr = that.head;
                // while (curr !== null) {
                //    curr.draw();
@@ -632,7 +742,7 @@ let LinkedList = (function() {
                   curr = curr.next;
                }
 
-               that.headGraphic.draw();
+               that.headGraphic.draw("violet");
                // curr = that.head;
                // while (curr !== null) {
                //    curr.draw();
@@ -648,6 +758,78 @@ let LinkedList = (function() {
 
                // RESET STATE
                that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            },
+            [LinkedList.SinglyLinked.Operation.REMOVE_ARBITRARY] : function(that) {
+               if (that.size() <= 0) {
+                  that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+                  return;
+               }
+
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+               let offset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+
+               let curr = that.head;
+               while (curr !== null && that.mostRecentlyChangedNode !== null && 
+                      curr !== that.mostRecentlyChangedNode.next) 
+               {
+                  curr.draw();
+                  nullTailOffset.x = curr.bound.pos.x;
+                  
+                  curr = curr.next;
+               }
+               while (curr !== null) {
+                  // UPDATE POSITIONS, SHIFTING LEFTWARDS TO ACCOMODATE THE EMPTY SPACE LEFT BY REMOVED NODE 
+                  // TODO, distance shouldn't be constant, should be calculated based on removed distance when node was removed
+                  curr.posOffset(offset);
+                  curr.draw();
+                  nullTailOffset.x = curr.bound.pos.x;
+
+                  curr = curr.next;                  
+               }
+
+               that.headGraphic.draw("violet");
+
+               textHeight(that.ctContext.mScale(.2));
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+               that.drawDeferred();
+
+               // RESET STATE
+               that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            },
+            "COMPACT" : function(that) {
+               let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
+               let boundPos = Location.ObjectCenter(defaultDims);
+               let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
+
+               let curr = that.head;
+
+               let i = 0;
+               while (curr !== null) {
+                  curr.posSet(boundPos.plusArr([defaultDims.w * i, 0, 0]));
+                  curr.draw();
+
+                  nullTailOffset.x = curr.bound.pos.x;
+                  curr = curr.next;
+                  i++;
+               }
+
+               that.headGraphic.draw("violet");
+
+               textHeight(that.ctContext.mScale(.2));
+               _g.save();
+               color("rgb(10, 40, 120)");
+               mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
+               _g.restore();
+
+               that.drawDeferred();
+
+               // RESET STATE
+               that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+
+               console.log("COMPACTED ???");              
             },
             // TODO [REVERSE_IN_PLACE] : function(that) {}
             // TODO [MERGE] : function(that) {
@@ -678,7 +860,8 @@ let LinkedList = (function() {
          this.states[this.state][this.currOperation](this);
       }
 
-      // CONSOLE PRINT-OUT OF LIST
+      // DEBUG CONSOLE PRINT-OUT OF LIST
+      this.asString = null;
       this.print = function() {
          let strOut = "head->";
          let curr = this.head;
@@ -687,6 +870,10 @@ let LinkedList = (function() {
             curr = curr.next;
          }
          strOut += "NULL";
+         if (strOut === this.asString) {
+            return;
+         }
+         this.asString = strOut;
          console.log(strOut);
       };
    };
@@ -699,17 +886,24 @@ let LinkedList = (function() {
       REMOVE_ARBITRARY : '5',
       REVERSE_IN_PLACE : '6',
    });
+   linkedlist.SinglyLinked.StepOperation = Object.freeze({
+      INSERT_FRONT : '1',
+      REMOVE_FRONT : '2',
+      INSERT_ARBITRARY : '3',
+      REMOVE_ARBITRARY : '4',
+      REVERSE_IN_PLACE : '5',
+   });
 
    // THE FUTURE?
-   linkedlist.DoublyLinked = function(ctContext) {
-      this.ctContext = ctContext;
-      this.head = null;
-      this.tail = null;
-      this._size = 0;
+   // linkedlist.DoublyLinked = function(ctContext) {
+   //    this.ctContext = ctContext;
+   //    this.head = null;
+   //    this.tail = null;
+   //    this._size = 0;
 
-      this.currOperation = "NONE";
-      this.nodeBeginUpdate = this.head;
-   };
+   //    this.currOperation = "NONE";
+   //    this.nodeBeginUpdate = this.head;
+   // };
 
    return linkedlist;
 })();
