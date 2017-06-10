@@ -36,32 +36,69 @@ function readHeader(data) {
    return header;
 }
 
-// Websocket endpoint setup
 try {
-   let WebSocketServer = require('ws').Server;
-   let wss = new WebSocketServer({ port: 22346 });
-   let websockets = [];
+   let WebSocket = require('ws').Server;
+   let wss = new WebSocket({ port: 22346 });
+   let sockets = [];
 
    wss.on('connection', ws => {
-      for (ws.index = 0; websockets[ws.index]; ws.index++);
-      websockets[ws.index] = ws;
+      for (ws.index = 0; sockets[ws.index]; ws.index++);
+      sockets[ws.index] = ws;
 
-      // Listen for curves
+      // Communicate with first connection only
       if (ws.index == 0) {
+         // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
 
-        ws.on('message', data => {
-           let header = readHeader(data);
-           if (header == 'CTdata01') {
-              holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                 label: 'Display', bytes: data
-              }]));
-           }
-        });
+         // Broadcast curve data
+         ws.on('message', data => {
+            let header = readHeader(data);
+            if (header == 'CTdata01') {
+               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  label: 'Display', bytes: data
+               }]));
+            }
+         });
+
+         /* VR Input (deprecated events) */
+
+         holojam.on('mouseEvent', flake => {
+            var type = flake.ints[0];
+            type = (type == 0 ? "onmousedown"
+               : (type == 1 ? "onmousemove" : "onmouseup"));
+
+            var e = {
+               eventType: type,
+               event: {
+                  button: 3,
+                  clientX: flake.floats[0],
+                  clientY: flake.floats[1]
+               }
+            }
+
+            ws.send(JSON.stringify(e));
+         });
+
+         holojam.on('keyEvent', (flake) => {
+            var type = flake.ints[1];
+            type = (type == 0 ? "onkeydown" : "onkeyup");
+
+            var e = {
+               eventType: type,
+               event: {
+                  keyCode: flake.ints[0] + 48
+            }};
+
+            ws.send(JSON.stringify(e));
+         });
+
+         holojam.on('update', (flakes, scope, origin) => {
+            //
+         });
       }
 
-      // Remove this websocket
-      ws.on('close', () => websockets.splice(ws.index, 1));
+      // Remove this sockets
+      ws.on('close', () => sockets.splice(ws.index, 1));
    });
 } catch (err) {
    console.log(
@@ -197,8 +234,6 @@ app.route('/ls_images').get((req, res) => readDir(res, 'images'));
 app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
 // Debug
-/*
 holojam.on('tick', (a, b) => {
   console.log(a, b);
 });
-*/
