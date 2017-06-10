@@ -7,12 +7,6 @@ const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
 
-const dgram = require('dgram');
-const udp = dgram.createSocket('udp4');
-
-udp.on('message', message => dgram.push(message));
-udp.bind(9090, '127.0.0.1');
-
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
 app.use(parser.json());
