@@ -53,7 +53,6 @@ try {
          // Broadcast curve data
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
-               console.log(data.length);
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
@@ -235,5 +234,5 @@ app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
 // Debug
 holojam.on('tick', (a, b) => {
-  console.log(a, b);
+  console.log('VR: [ ' + a[0] + ', ' + b[0] + ' ]');
 });
