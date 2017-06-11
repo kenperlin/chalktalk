@@ -52,8 +52,8 @@ try {
 
          // Broadcast curve data
          ws.on('message', data => {
-            let header = readHeader(data);
-            if (header == 'CTdata01') {
+            if (readHeader(data) == 'CTdata01') {
+               console.log(data.length);
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
