@@ -1,17 +1,20 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'scope';
    this.setSketchText(0, '1', [0,-.8],.1);
+
+   this.defineInput(AT.Function(AT.Seconds, AT.Float));
+
    this.render = function() {
       mClosedCurve([[-1,1],[1,1],[1,-1],[-1,-1]]);
       this.duringSketch(function() {
          mCurve(curveForSignal);
       });
       this.afterSketch(function() {
-         if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] !== 'function')
+         if (!this.inputs.hasValue(0)) {
             mCurve(curveForSignal);
+         }
          else {
-            var func = this.inValue_DEPRECATED_PORT_SYSTEM[0];
+            var func = this.inputs.value(0);
             var freq = this.sketchTexts[0].value;
 
             var curve = [];
