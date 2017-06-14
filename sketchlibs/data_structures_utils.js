@@ -85,7 +85,9 @@ let Location = (function() {
       };
 
       this.distance = function(other) {
-         return sqrt(pow(other.x - this.x, 2) + pow(other.y - this.y, 2));
+         const dx = other.x - this.x;
+         const dy = other.y - this.y;
+         return sqrt((dx * dx) + (dy * dy));
       }
 
       // RETURN THE XYZ COORDINATES AS A LEN-3 ARRAY
@@ -142,31 +144,100 @@ let Bound = (function() {
    shape.drawRect = function(pos, dim) {
       let x = pos.x;
       let y = pos.y;
-      let z = pos.z; // TODO Z COORDINATE?
+      let z = pos.z; 
       let w = dim.w;
       let h = dim.h;
-      mCurve([
-         [x, y], 
-         [x, y - h], 
-         [x + w, y - h], 
-         [x + w, y],
-         [x, y]
-      ]);  
+      let d = dim.d;
+
+      if (d == 0) {
+         mCurve([
+            [x, y, z], 
+            [x, y - h, z], 
+            [x + w, y - h, z], 
+            [x + w, y, z],
+            [x, y, z]
+         ]);
+      }
+      else {
+         mCurve([
+            [x, y, z + (d / 2)], 
+            [x, y - h, z + (d / 2)], 
+            [x + w, y - h, z + (d / 2)], 
+            [x + w, y, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mCurve([
+            [x, y, z - (d / 2)], 
+            [x, y - h, z - (d / 2)], 
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y, z - (d / 2)],
+            [x, y, z - (d / 2)]
+         ]);
+
+         mCurve([
+            [x, y, z + (d / 2)], 
+            [x, y, z - (d / 2)],
+            [x + w, y, z - (d / 2)], 
+            [x + w, y, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mCurve([
+            [x, y - h, z + (d / 2)], 
+            [x, y - h, z - (d / 2)],
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y - h, z + (d / 2)],
+            [x, y - h, z + (d / 2)]
+         ]);   
+      }
    }
 
    shape.fillRect = function(pos, dim) {
       let x = pos.x;
       let y = pos.y;
-      let z = pos.z; // TODO Z COORDINATE?
+      let z = pos.z; 
       let w = dim.w;
       let h = dim.h;
-      mFillCurve([
-         [x, y], 
-         [x, y - h], 
-         [x + w, y - h], 
-         [x + w, y],
-         [x, y]
-      ]);  
+      let d = dim.d // TODO depth
+      if (d == 0) {
+         mFillCurve([
+            [x, y, z], 
+            [x, y - h, z], 
+            [x + w, y - h, z], 
+            [x + w, y, z],
+            [x, y, z]
+         ]);
+      }
+      else {
+         mCurve([
+            [x, y, z + (d / 2)], 
+            [x, y - h, z + (d / 2)], 
+            [x + w, y - h, z + (d / 2)], 
+            [x + w, y, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mCurve([
+            [x, y, z - (d / 2)], 
+            [x, y - h, z - (d / 2)], 
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y, z - (d / 2)],
+            [x, y, z - (d / 2)]
+         ]);
+
+         mCurve([
+            [x, y, z + (d / 2)], 
+            [x, y, z - (d / 2)],
+            [x + w, y, z - (d / 2)], 
+            [x + w, y, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mCurve([
+            [x, y - h, z + (d / 2)], 
+            [x, y - h, z - (d / 2)],
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y - h, z + (d / 2)],
+            [x, y - h, z + (d / 2)]
+         ]);   
+      }
    }
 
    shape.drawNothing = function() {return;};
@@ -242,11 +313,23 @@ let Pointer = (function() {
 
             // DRAW THE POINTER ARROW
             // NOTE, INSERT BETTER ARROW / CURVE PROCEDURE HERE GIVEN THE TWO POINTS
-            mCurve([[posA.x, posA.y], [posB.x, posB.y]]);
+            // mCurve([[posA.x, posA.y, posA.z], [posB.x, posB.y, posB.z]]);
 
             // DRAW EXIT CIRCLE
-            const exitDiskRadius = 0.03;
-            mFillDisk(posA.xy(), exitDiskRadius);
+            const EXIT_RADIUS = 0.03;
+            //mFillDisk(posA.xy(), EXIT_RADIUS);
+
+            // OVAL DRAWN AT SPECIFIC POSITION WOULD BE BETTER, TAKEN FROM mask.js BUT BROKEN IN THIS CONTEXT ??? TODO
+            function mFillOvalMask(p, r) {
+               var c = [];
+               for (var i = 0 ; i < 24 ; i++) {
+                  var theta = i * TAU / 24;
+                  c.push([p[0] + r * cos(theta), p[1] + r * sin(theta), p[2]]);
+               }
+               mFillCurve(c);
+            }
+
+            mFillOvalMask(posA.xyz(), EXIT_RADIUS);
 
             // DRAW THE ARROW AT THE TIP
             function mArrowHead(a, b, r) {
@@ -270,21 +353,45 @@ let Pointer = (function() {
             // TODO AVOID USING A CONDITIONAL HERE?
             const dist = posA.distance(posB);
             if (dist < 0.5) {
-               mArrowHead([posA.x, posA.y], [posB.x, posB.y], 0.5);
+               //mArrowHead([posA.x, posA.y, posA.z], [posB.x, posB.y, posB.z], 0.5);
+               mArrow([posA.x, posA.y, posA.z], [posB.x, posB.y, posB.z], 0.5);
             }
             else {
-               mArrowHead([posA.x, posA.y], [posB.x, posB.y], .06);
+               //mArrowHead([posA.x, posA.y, posA.z], [posB.x, posB.y, posB.z], .06);
+               mArrow([posA.x, posA.y, posA.z], [posB.x, posB.y, posB.z], .06);
             }
             
             // DRAW POINTER LABEL
             if (shouldDrawLabel) {
                textHeight(ctContext.mScale(.14));
-               mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2], .5, -1.5);
+               mText(that.name, [(posA.x + posB.x) / 2, (posA.y + posB.y) / 2, (posA.z + posB.z) / 2], .5, -1.5, .5);
             }
 
          _g.restore();
       }
    };
+
+   // https://stackoverflow.com/questions/10281115/is-there-a-better-way-to-simulate-pointers-in-javascript
+   // p.createPointerSim = function(read, write) {
+   //    return {
+   //       get value() { return read(); }, set value(v) { return write(); }
+   //    };
+   // };
+   // pass in pointee as [value]
+   p.createPointerSim = function(pointeeAsArray) {
+      return {
+         v : pointeeAsArray,
+         get value() {
+            return this.v[0];
+         },
+         set value(val) {
+            this.v[0] = val;
+         },
+         set pointee(_pointeeAsArray) {
+            this.v = _pointeeAsArray
+         }
+      };
+   }
 
 
    return p;
@@ -344,6 +451,7 @@ let LinkedList = (function() {
 
          let offsetX = tempOffsetPos.x;
          let offsetY = tempOffsetPos.y;
+         let offsetZ = tempOffsetPos.z;
          
          let horizontalPayloadShift = 0;
          // SET-UP POINTER BOUND AND POINTER LINK POSITIONS (DOES NOT SET, ALL BASED ON OFFSETS FROM NODE BOUND FOR NOW)
@@ -372,7 +480,7 @@ let LinkedList = (function() {
 
          // DRAW THE PAYLOAD AS TEXT, TODO OR DEFINE A "PAYLOAD" OBJECT REPRESENTATION FOR SOMETHING FANCIER?
          textHeight(this.container.ctContext.mScale(.2));
-         let p = [this.bound.pos.x + .5 + offsetX - (horizontalPayloadShift / 2), this.bound.pos.y - (this.bound.dim.h / 2) + offsetY];
+         let p = [this.bound.pos.x + .5 + offsetX - (horizontalPayloadShift / 2), this.bound.pos.y - (this.bound.dim.h / 2) + offsetY, this.bound.pos.z + (this.bound.dim.d / 2) + 0.05 + offsetZ];
          mText(this.payload, p, 0.5, 0.5);
       };
 
@@ -431,7 +539,7 @@ let LinkedList = (function() {
                         if (node !== null) {
                            return node.getPointeePos();
                         }
-                        return new Location.Position(0 - .25, 0, pointer.pos.z);
+                        return new Location.Position(0 - .25, 0, 0);
                      },
                      "head",
                      new Bound.BoundRect(
@@ -459,10 +567,11 @@ let LinkedList = (function() {
 
       this.createBasicNodeGraphic = function(that, payload) {
          let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
+         //defaultDims.d = .5;
 
          // RANDOMIZE DEFAULT POSITION OF NODE TO AVOID "STATIC LOOK"
          let boundPos = Location.ObjectCenter(defaultDims).plusEqualsArr(
-               [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, .4)]
+               [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, 0)] // bug with moving towards camera?
          );
 
          let newNode = new LinkedList.SinglyLinkedNode(
@@ -504,7 +613,7 @@ let LinkedList = (function() {
                         return node.next.getPointeePos();
                      }
                      let pos = node.bound.pos; 
-                     return new Location.Position(pos.x + (that.HORIZONTAL_OFFSET * .8), /*pos.y - (pointer.bound.dim.h / 2)*/ 0, pos.z);
+                     return new Location.Position(pos.x + (that.HORIZONTAL_OFFSET * .8), /*pos.y - (pointer.bound.dim.h / 2)*/ 0, 0);
                   },
                   "next",
                   new Bound.BoundRect(
@@ -577,7 +686,6 @@ let LinkedList = (function() {
          this.mostRecentlyChangedNode = prev;
          this.decSize();
          return toRemove;
-
       };
 
       this.incSize = function() {
@@ -769,8 +877,9 @@ let LinkedList = (function() {
                let offset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
 
                let curr = that.head;
-               while (curr !== null && that.mostRecentlyChangedNode !== null && 
-                      curr !== that.mostRecentlyChangedNode.next) 
+               while (curr !== null && 
+                        that.mostRecentlyChangedNode !== null && 
+                        curr !== that.mostRecentlyChangedNode.next) 
                {
                   curr.draw();
                   nullTailOffset.x = curr.bound.pos.x;
@@ -800,6 +909,7 @@ let LinkedList = (function() {
                that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
             },
             "COMPACT" : function(that) {
+
                let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
                let boundPos = Location.ObjectCenter(defaultDims);
                let nullTailOffset = new Location.Position(-that.HORIZONTAL_OFFSET, 0, 0);
@@ -855,10 +965,17 @@ let LinkedList = (function() {
       };
       this.states["all"] = Object.freeze(this.states["all"]);
 
+      this.scheduleOperation = function(operation, args) {
+         if (operation === undefined) {
+            return;
+         }
+         this.currOperation = operation;
+      };
+
       // MAIN DRAW PROCEDURE FOR LIST
       this.draw = function() {
          this.states[this.state][this.currOperation](this);
-      }
+      };
 
       // DEBUG CONSOLE PRINT-OUT OF LIST
       this.asString = null;
@@ -887,11 +1004,11 @@ let LinkedList = (function() {
       REVERSE_IN_PLACE : '6',
    });
    linkedlist.SinglyLinked.StepOperation = Object.freeze({
-      INSERT_FRONT : '1',
-      REMOVE_FRONT : '2',
-      INSERT_ARBITRARY : '3',
-      REMOVE_ARBITRARY : '4',
-      REVERSE_IN_PLACE : '5',
+      INSERT_FRONT : '7',
+      REMOVE_FRONT : '8',
+      INSERT_ARBITRARY : '9',
+      REMOVE_ARBITRARY : '10',
+      REVERSE_IN_PLACE : '11',
    });
 
    // THE FUTURE?

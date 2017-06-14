@@ -1,5 +1,6 @@
 function() {
     this.label = 'LinkedList';
+    this.is3D = true;
 
     // CURRENTLY PARTIALLY-SUPPORTED OPERATIONS:
     //   insertFront
@@ -81,28 +82,71 @@ function() {
 
    this.setup = function() {
       this.list = new LinkedList.SinglyLinked(this);
-      this.code = {
-        "SL_NODE" : [
-        "struct list_node<T> {",
-        "    T data;",
-        "    struct list_node * next;",
-        "};"
-        ],
 
-        "SL_REVERSE_IN_PLACE" : [
-        "void reverse_in_place(void)",
-        "{",
-        "    struct list_node * curr = this->head;",
-        "    struct list_node * prev = nullptr;",
-        "    while (curr != nullptr) {",
-        "        next = curr->next;",
-        "        curr->next = prev;",
-        "        prev = curr;",
-        "        curr = next;",
-        "    }",
-        "    this->head = prev;",
-        "}"
-        ],
+      this.code = {
+         "SL_NODE" : [
+         "struct list_node<T> {",
+         "    T data;",
+         "    struct list_node * next;",
+         "};"
+         ],
+
+         "SL_REMOVE_ARBITRARY" : [
+         "void remove(T value)",
+         "{",
+         "    struct list_node * prev = nullptr;",
+         "    struct list_node * curr = this->head;",
+         "",
+         "    while (curr != nullptr && curr->data != value) {",
+         "        prev = curr;",
+         "        curr = curr->next;",
+         "    }",
+         "    if (curr == nullptr) {",
+         "        return;",
+         "    }",
+         "",
+         "    if (prev == nullptr) {",
+         "        this->head = curr->next;",
+         "    } else {",
+         "        prev->next = curr->next;",
+         "    }",
+         "    this->_size--;",
+         "}"         
+         ],
+
+         "SL_REMOVE_ARBITRARY_LINUS_TORVALDS" : [
+         // https://medium.com/@bartobri/applying-the-linus-tarvolds-good-taste-coding-requirement-99749f37684a
+         // LINUS TORVALDS STYLE
+         "void remove(T value)",
+         "{",
+         "    struct list_node ** indirect = &(this->head);",
+         "",
+         "    while ((*indirect) != nullptr && (*indirect)->data != value) {",
+         "        indirect = &(*indirect)->next;",
+         "    }",
+         "    if ((*indirect) == nullptr) {",
+         "        return;",
+         "    }",
+         "",
+         "    *indirect = (*indirect)->next;",
+         "    this->_size--;",
+         "}",
+         ],
+
+         "SL_REVERSE_IN_PLACE" : [
+         "void reverse_in_place(void)",
+         "{",
+         "    struct list_node * curr = this->head;",
+         "    struct list_node * prev = nullptr;",
+         "    while (curr != nullptr) {",
+         "        next = curr->next;",
+         "        curr->next = prev;",
+         "        prev = curr;",
+         "        curr = next;",
+         "    }",
+         "    this->head = prev;",
+         "}"
+         ],
 
       };
    };
@@ -129,6 +173,15 @@ function() {
       // bla.y = p.y;
       // bla.z = p.z;    
    };
+
+   // linkedlist.SinglyLinked.Operation = Object.freeze({
+   //    IDLE : '1',
+   //    INSERT_FRONT : '2',
+   //    REMOVE_FRONT : '3',
+   //    INSERT_ARBITRARY : '4',
+   //    REMOVE_ARBITRARY : '5',
+   //    REVERSE_IN_PLACE : '6',
+   // });
 
    this.printed = false;
    this.render = function() {
