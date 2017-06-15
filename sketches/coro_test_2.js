@@ -134,7 +134,7 @@ function() {
       mArrow([posA[0], posA[1], posA[2]], [posB[0], posB[1], posB[2]], 0.05);
 
       if (fin) {
-         this.ani = new SketchAnimation.Path(SketchAnimation.LINE, {start : new Location.Position(-1, -1, -1), end : new Location.Position(1, 1, 1)}, 5);
+         this.ani.reverse();
       }
 
       color("purple");
@@ -150,17 +150,7 @@ function() {
       mArrow([posA[0], posA[1], posA[2]], [posB[0], posB[1], posB[2]], 0.05);
 
       if (fin) {
-         this.aniB = new SketchAnimation.Path(
-            SketchAnimation.BEZIER_CUBIC, 
-            {
-
-               start : new Location.Position(1, 1, -1), 
-               end : new Location.Position(-1, -1, 1),
-               control1 : new Location.Position(-.5 * FACTOR, -.5 * FACTOR, -.5 * FACTOR),
-               control2 : new Location.Position(.5 * FACTOR, .5 * FACTOR, .5 * FACTOR),
-            }, 
-            7
-         );
+         this.aniB.reverse();
       }
    }
 
