@@ -39,7 +39,7 @@ function() {
    ];
 
    this.onSwipe[2] = [
-      'remove arbitrary',
+      'remove arbitrary (data)',
       function() {
          if (this.list.size() == 0) {
             return;
@@ -52,8 +52,21 @@ function() {
             return;
          }
          var input = this.inValue[0];
-            this.list.remove(input);
+            this.list.removeByData(input);
          //}
+      }
+   ];
+   this.onSwipe[3] = [
+      'remove arbitrary (selection)',
+      function() {
+         if (this.list.size() == 0) {
+            return;
+         }
+         let s = this.list.getSelectedStructure();
+         if (s === null) {
+            return;
+         }
+         this.list.removeByPtr(s.structure);
       }
    ];
 
@@ -161,6 +174,7 @@ function() {
       // bla.y = p.y;
       // bla.z = p.z;
       //console.log(p.x, p.y, p.z);
+      this.selectSubstructure(p);
    };
 
    this.onDrag = function(p) {
@@ -172,6 +186,10 @@ function() {
       // bla.x = p.x;
       // bla.y = p.y;
       // bla.z = p.z;    
+   };
+
+   this.selectSubstructure = function(p) {
+      this.list.selectSubstructure(p);
    };
 
    // linkedlist.SinglyLinked.Operation = Object.freeze({

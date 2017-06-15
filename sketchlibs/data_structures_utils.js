@@ -265,6 +265,12 @@ let Bound = (function() {
       this.drawAtWithFunc = function(pos, dim, func) {
          func(pos, (dim === undefined) ? this.dim : dim);         
       }
+
+      this.drawSelectionRect = function() {
+         let pos = this.bound.pos.plusArr([-.1, .1, 0]);
+         let dim = new Dimension.Dimension(this.bound.dim.w + 0.2, this.bound.dim.h + 0.2);
+         Bound.drawRect(pos, dim);
+      };
    };
 
    // TODO BOUNDING SPHERE?
@@ -294,7 +300,6 @@ let Pointer = (function() {
       this.hasBound = function() {
          return this._hasBound;
       };
-
 
       // DRAW POINTER ARROW, DYNAMICALLY FIND EXIT AND ENTRY POINTS
       this.draw = function(ctContext, structure, boundPos, shouldDrawLabel) {
@@ -332,23 +337,23 @@ let Pointer = (function() {
             mFillOvalMask(posA.xyz(), EXIT_RADIUS);
 
             // DRAW THE ARROW AT THE TIP
-            function mArrowHead(a, b, r) {
-               if (r === undefined) r = 0.1;
+            // function mArrowHead(a, b, r) {
+            //    if (r === undefined) r = 0.1;
 
-               a[2] = def(a[2]);
-               b[2] = def(b[2]);
+            //    a[2] = def(a[2]);
+            //    b[2] = def(b[2]);
 
-               var A = mTransform(a);
-               var B = mTransform(b);
+            //    var A = mTransform(a);
+            //    var B = mTransform(b);
 
-               var U = [ r * (B[0] - A[0]), r * (B[1] - A[1]), r * (B[2] - A[2]) ];
+            //    var U = [ r * (B[0] - A[0]), r * (B[1] - A[1]), r * (B[2] - A[2]) ];
 
-               _g_beginPath();
-               _g_sketchTo([ B[0]-U[0]+U[1], B[1]-U[1]-U[0], B[2]-U[2] ], 0);
-               _g_sketchTo(B, 1);
-               _g_sketchTo([ B[0]-U[0]-U[1], B[1]-U[1]+U[0], B[2]-U[2] ], 1);
-               _g_stroke();  
-            }
+            //    _g_beginPath();
+            //    _g_sketchTo([ B[0]-U[0]+U[1], B[1]-U[1]-U[0], B[2]-U[2] ], 0);
+            //    _g_sketchTo(B, 1);
+            //    _g_sketchTo([ B[0]-U[0]-U[1], B[1]-U[1]+U[0], B[2]-U[2] ], 1);
+            //    _g_stroke();  
+            // }
 
             // TODO AVOID USING A CONDITIONAL HERE?
             const dist = posA.distance(posB);
@@ -378,20 +383,20 @@ let Pointer = (function() {
    //    };
    // };
    // pass in pointee as [value]
-   p.createPointerSim = function(pointeeAsArray) {
-      return {
-         v : pointeeAsArray,
-         get value() {
-            return this.v[0];
-         },
-         set value(val) {
-            this.v[0] = val;
-         },
-         set pointee(_pointeeAsArray) {
-            this.v = _pointeeAsArray
-         }
-      };
-   }
+   // p.createPointerSim = function(pointeeAsArray) {
+   //    return {
+   //       v : pointeeAsArray,
+   //       get value() {
+   //          return this.v[0];
+   //       },
+   //       set value(val) {
+   //          this.v[0] = val;
+   //       },
+   //       set pointee(_pointeeAsArray) {
+   //          this.v = _pointeeAsArray
+   //       }
+   //    };
+   // }
 
 
    return p;
@@ -657,7 +662,39 @@ let LinkedList = (function() {
          return toRemove;
       };
 
-      this.remove = function(dataToRemove) {
+      this.removeByPtr = function(nodeToRemove) {
+         if (this.size() <= 0) {
+            return;
+         }
+         this.currOperation = LinkedList.SinglyLinked.Operation.REMOVE_ARBITRARY;
+
+         let prev = null;
+         let curr = this.head;
+
+         while (curr !== null && curr !== nodeToRemove) {
+            prev = curr;
+            curr = curr.next;
+         }
+
+         if (curr === null) {
+            this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            return null;
+         }
+
+         let toRemove = curr;
+         if (prev === null) {
+            this.head = curr.next;
+         }
+         else {
+            prev.next = curr.next;
+         }
+         this.mostRecentlyChangedNode = prev;
+         this.decSize();
+         this.selectedStructure = null;
+         return toRemove;
+      };
+
+      this.removeByData = function(dataToRemove) {
          if (this.size() <= 0) {
             return;
          }
@@ -685,6 +722,7 @@ let LinkedList = (function() {
          }
          this.mostRecentlyChangedNode = prev;
          this.decSize();
+         this.selectedStructure = null;
          return toRemove;
       };
 
@@ -767,6 +805,37 @@ let LinkedList = (function() {
       this._compact = function() {
          this.currOperation = "COMPACT";
       }
+
+      this.nodeMap = []; // for better point range query-based node find algorithm? WOULD APPRECIATE HELP WITH THIS TODO ^2
+
+      this.selectedStructure = null;
+      this.getSelectedStructure = function() {
+         return this.selectedStructure;
+      };
+      this.boundAndPointCollide = function(b, p) { // TODO ONLY 2D, WOULD ALSO APPRECIATE HELP WITH SOMEHOW GETTING THE CORRECT BOX REGARDLESS OF ROTATION in 3D 
+         let pos = b.pos;
+         if (pos.x > pos.x || pos.y < pos.y) {
+            return false;
+         }
+         let dim = b.dim;
+         if (pos.x + dim.w < p.x || pos.y - dim.h > p.y) {
+            return false;
+         }
+         return true;
+      };
+      this.findClickedStructure = function(p) {
+         let curr = this.head;
+         while (curr !== null) {
+            if (this.boundAndPointCollide(curr.bound, p)) {
+               return {structure : curr, pos : curr.getPointeePos()};
+            }
+            curr = curr.next;
+         }
+         return null;
+      };
+      this.selectSubstructure = function(p) {
+         this.selectedStructure = this.findClickedStructure(p);
+      };
       
       // SEPARATE DRAW LOOP "STATES" POSSIBLY FOR USE WITH SMOOTHER ANIMATION / TRANSITIONS, "currOperation" CONTROLS WHICH SUB-ROUTINE TO RUN
       this.opQueue = [];
@@ -796,6 +865,16 @@ let LinkedList = (function() {
                mText("NULL", nullTailOffset.plusEqualsArr([that.HORIZONTAL_OFFSET, 0, 0]).xyz(), .5, .5);
                _g.restore();
                that.drawDeferred();
+
+               if (that.selectedStructure === null) {
+                  return;
+               }
+
+               _g.save();
+               color("blue");
+               //that.selectedStructure.bound.drawSelectionRect();
+               Bound.drawRect(that.selectedStructure.pos.plusArr([-.1, .1, 0]), new Dimension.Dimension(.2, .2, .2));
+               _g.restore();
             },
             [LinkedList.SinglyLinked.Operation.INSERT_FRONT] : function(that) {
                //that.opQueue.push("insertFront");
@@ -939,7 +1018,7 @@ let LinkedList = (function() {
                // RESET STATE
                that.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
 
-               console.log("COMPACTED ???");              
+               console.log("COMPACTED ??? (Will break because of currently constant offsets between un-compacted nodes");              
             },
             // TODO [REVERSE_IN_PLACE] : function(that) {}
             // TODO [MERGE] : function(that) {
