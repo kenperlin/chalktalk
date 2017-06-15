@@ -69,6 +69,14 @@ var SketchAnimation = (function() {
          this.prevTime = time;
          this.elapsedTime = 0;
       };
+
+      this.reverse = function() {
+         this.prevTime = time;
+         this.elapsedTime = 0;
+         let end = this.args.end;
+         this.args.end = this.args.start;
+         this.args.start = end;
+      };
    };
 
    return a;
