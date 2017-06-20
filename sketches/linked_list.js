@@ -96,7 +96,7 @@ function() {
    this.setup = function() {
       this.list = new LinkedList.SinglyLinked(this);
 
-      this.code = {
+      this.demonstrationCode = {
          "SL_NODE" : [
          "struct list_node<T> {",
          "    T data;",
@@ -202,20 +202,23 @@ function() {
    // });
 
    this.printed = false;
-   this.render = function() {
+   this.render = function(elapsed) {
       this.duringSketch(function() {
-        let seventh = 1 / 7;
-        let height = 0.25;
-        mCurve([[-1, 0], [1, 0]]);
-        mCurve([
+         let seventh = 1 / 7;
+         let height = 0.25;
+         mCurve([[-1, 0], [1, 0]]);
+         mCurve([
                   [-1 + (4 * seventh) + .75, -height], [-1 + (4 * seventh) + .75, height],
                   [-1 + seventh + .25, height],  [-1 + seventh + .25, -height],
                   [-1 + (4 * seventh) + .75, -height]
-        ]);
+         ]);
       });
       this.afterSketch(function() {
+         this.mutex = "BLOCK"; 
          this.list.print();
          this.list.draw();
+         this.mutex = "UNBLOCK";
+         //console.log(elapsed);
       });
    };
 
@@ -224,12 +227,24 @@ function() {
    };
 
    this.under = function(other) {
-      let curr = this.head;
-      
+      if (other.output === undefined) {
+         return;
+      }
+
+      let out = other.output();
+      let additionPoint = this.list.getSelectedStructure();
+      if (additionPoint === null) {
+         this.list.insertFront(out);
+      }
+      else {
+         this.list.insertByPtr(out, additionPoint.structure);
+      }
+      other.fade();
+      other.delete();
    };
 
 
     this.output = function() {
-      return 0;
+      return this.list.head;
     };
 }

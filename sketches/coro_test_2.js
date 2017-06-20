@@ -111,7 +111,6 @@ function() {
       this.aniB = new SketchAnimation.Path(
          SketchAnimation.BEZIER_CUBIC, 
          {
-
             start : new Location.Position(1, 1, -1), 
             end : new Location.Position(-1, -1, 1),
             control1 : new Location.Position(-.5 * FACTOR, -.5 * FACTOR, -.5 * FACTOR),

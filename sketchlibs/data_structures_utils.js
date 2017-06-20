@@ -187,7 +187,22 @@ let Bound = (function() {
             [x + w, y - h, z - (d / 2)], 
             [x + w, y - h, z + (d / 2)],
             [x, y - h, z + (d / 2)]
-         ]);   
+         ]);
+
+         mCurve([
+            [x, y, z + (d / 2)], 
+            [x, y, z - (d / 2)],
+            [x, y - h, z - (d / 2)], 
+            [x, y - h, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mCurve([
+            [x + w, y, z + (d / 2)], 
+            [x + w, y, z - (d / 2)],
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y - h, z + (d / 2)],
+            [x + w, y, z + (d / 2)]
+         ]); 
       }
    }
 
@@ -208,14 +223,14 @@ let Bound = (function() {
          ]);
       }
       else {
-         mCurve([
+         mFillCurve([
             [x, y, z + (d / 2)], 
             [x, y - h, z + (d / 2)], 
             [x + w, y - h, z + (d / 2)], 
             [x + w, y, z + (d / 2)],
             [x, y, z + (d / 2)]
          ]);
-         mCurve([
+         mFillCurve([
             [x, y, z - (d / 2)], 
             [x, y - h, z - (d / 2)], 
             [x + w, y - h, z - (d / 2)], 
@@ -223,19 +238,34 @@ let Bound = (function() {
             [x, y, z - (d / 2)]
          ]);
 
-         mCurve([
+         mFillCurve([
             [x, y, z + (d / 2)], 
             [x, y, z - (d / 2)],
             [x + w, y, z - (d / 2)], 
             [x + w, y, z + (d / 2)],
             [x, y, z + (d / 2)]
          ]);
-         mCurve([
+         mFillCurve([
             [x, y - h, z + (d / 2)], 
             [x, y - h, z - (d / 2)],
             [x + w, y - h, z - (d / 2)], 
             [x + w, y - h, z + (d / 2)],
             [x, y - h, z + (d / 2)]
+         ]);
+
+         mFillCurve([
+            [x, y, z + (d / 2)], 
+            [x, y, z - (d / 2)],
+            [x, y - h, z - (d / 2)], 
+            [x, y - h, z + (d / 2)],
+            [x, y, z + (d / 2)]
+         ]);
+         mFillCurve([
+            [x + w, y, z + (d / 2)], 
+            [x + w, y, z - (d / 2)],
+            [x + w, y - h, z - (d / 2)], 
+            [x + w, y - h, z + (d / 2)],
+            [x + w, y, z + (d / 2)]
          ]);   
       }
    }
@@ -303,6 +333,15 @@ let Pointer = (function() {
 
       // DRAW POINTER ARROW, DYNAMICALLY FIND EXIT AND ENTRY POINTS
       this.draw = function(ctContext, structure, boundPos, shouldDrawLabel) {
+
+         if (ctContext.isArgList) { 
+            let args = ctContext;
+            ctContext = args.ctContext;
+            structure = args.structure;
+            boundPos = args.boundPos;
+            shouldDrawLabel = args.shouldDrawLabel;
+         }
+
          // DRAW POINTER BOUND IF EXISTS
          if (that.hasBound()) {
             let dim = new Dimension.Dimension(that.bound.dim.w, (structure === null) ? that.bound.dim.h : structure.bound.dim.h, that.bound.dim.d);
@@ -472,9 +511,16 @@ let LinkedList = (function() {
             }
 
             // SET-UP DEFERRED DRAWS
-            let deferred = {};
-            deferred.func = ptrI.draw;
-            deferred.args = [this.container.ctContext, this, ptrBoundPos, true];
+            let deferred = {
+               func : ptrI.draw,
+               args : {
+                  isArgList : true,
+                  ctContext : this.container.ctContext,
+                  structure : this,
+                  boundPos : ptrBoundPos,
+                  shouldDrawLabel : true
+               }
+            };
 
             this.container.enqueueDrawDeferred(deferred);
 
@@ -520,7 +566,8 @@ let LinkedList = (function() {
       this.drawDeferred = function() {
          for (let i = 0; i < this._deferredDrawQueue.length; i++) {
             let args = this._deferredDrawQueue[i].args;
-            this._deferredDrawQueue[i].func(args[0], args[1], args[2], args[3]); // TODO: SHOULD MAKE ARGS AN OBJECT LATER
+            //this._deferredDrawQueue[i].func(args[0], args[1], args[2], args[3]); // TODO: SHOULD MAKE ARGS AN OBJECT LATER
+            this._deferredDrawQueue[i].func(args);
          }
          this._deferredDrawQueue = [];
       };
@@ -572,7 +619,9 @@ let LinkedList = (function() {
 
       this.createBasicNodeGraphic = function(that, payload) {
          let defaultDims = LinkedList.SinglyLinkedNode.defaultDimension();
-         //defaultDims.d = .5;
+         let DEPTH = 0.0;
+         //DEPTH = 0.1;
+         defaultDims.d = DEPTH;
 
          // RANDOMIZE DEFAULT POSITION OF NODE TO AVOID "STATIC LOOK"
          let boundPos = Location.ObjectCenter(defaultDims).plusEqualsArr(
@@ -623,7 +672,7 @@ let LinkedList = (function() {
                   "next",
                   new Bound.BoundRect(
                      Location.ObjectCenter(defaultDims),
-                     new Dimension.Dimension(.25, .5, 0),
+                     new Dimension.Dimension(.25, .5, DEPTH),
                      Bound.drawRect
                   ),
                   new Location.Position(0.125, -0.25, 0)         
@@ -645,6 +694,34 @@ let LinkedList = (function() {
          this.incSize();
 
          this.mostRecentlyChangedNode = this.head;
+      };
+
+      // TEMPORARY FOR DEMONSTRATION
+      this.insertByPtr = function(payload, postInsertionPointNode) { // TODO MUST ADD THE STATE SYSTEM WITH MORE OPERATIONS FOR FUTURE INCORPORATION OF ANIMATIONS
+         if (postInsertionPointNode === null) {
+            this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
+            return;
+         }
+         else if (postInsertionPointNode === this.head) {
+            this.insertFront(payload);
+            return;
+         }
+
+         this.currOperation = LinkedList.SinglyLinked.Operation.INSERT_FRONT;
+
+         let newNode = this.createBasicNodeGraphic(this, payload);
+         newNode.next = postInsertionPointNode;
+
+         let curr = this.head;
+         while (curr !== null && curr.next !== postInsertionPointNode) {
+            curr = curr.next;
+         }
+         if (curr !== null) {
+            curr.next = newNode;
+            this.incSize();
+         }
+
+         this.mostRecentlyChangedNode = (curr === null) ? this.head : curr;         
       };
 
       this.removeFront = function() {
@@ -780,7 +857,7 @@ let LinkedList = (function() {
          console.log("REVERSED");
       };
 
-      // TODO STEP-THROUGH ALGORITHM TODO, VERY MUCH SO
+      // TODO STEP-THROUGH ALGORITHM TODO -- VERY MUCH SO
       this._reverseInPlace = Stepthrough.makeStepFunc(function*() {
          let curr = this.head;
          let prev = null;
@@ -812,13 +889,37 @@ let LinkedList = (function() {
       this.getSelectedStructure = function() {
          return this.selectedStructure;
       };
-      this.boundAndPointCollide = function(b, p) { // TODO ONLY 2D, WOULD ALSO APPRECIATE HELP WITH SOMEHOW GETTING THE CORRECT BOX REGARDLESS OF ROTATION in 3D 
+      this.boundAndPointCollide2D = function(b, p) {
          let pos = b.pos;
-         if (pos.x > pos.x || pos.y < pos.y) {
+         let x = pos.x;
+         let y = pos.y;
+
+         if (x > p.x || y < p.y) {
             return false;
          }
          let dim = b.dim;
-         if (pos.x + dim.w < p.x || pos.y - dim.h > p.y) {
+         if (x + dim.w < p.x || y - dim.h > p.y) {
+            return false;
+         }
+         return true;
+      };
+      this.boundAndPointCollide3D = function(b, p) { // TODO , BUGGY
+         let pos = b.pos;
+         let dim = b.dim;
+         let w = dim.w;
+         let h = dim.h;
+         let d = dim.d;
+
+         let x = pos.x;
+         let y = pos.y;
+         let z = pos.z;
+
+         console.log("mouseZ: " + p.z + " boundZBack: " + (z - (d / 2)) + " boundZFront: " + (z + (d / 2)));
+
+         if (x > p.x || y < p.y || z - (d / 2) > p.z) {
+            return false;
+         }
+         if (x + w < p.x || y - h > p.y || z + (d / 2) < p.z) {
             return false;
          }
          return true;
@@ -826,8 +927,11 @@ let LinkedList = (function() {
       this.findClickedStructure = function(p) {
          let curr = this.head;
          while (curr !== null) {
-            if (this.boundAndPointCollide(curr.bound, p)) {
-               return {structure : curr, pos : curr.getPointeePos()};
+            if (this.boundAndPointCollide2D(curr.bound, p)) {
+               return {
+                  structure : curr, 
+                  pos : curr.getPointeePos()
+               };
             }
             curr = curr.next;
          }
@@ -838,8 +942,8 @@ let LinkedList = (function() {
       };
       
       // SEPARATE DRAW LOOP "STATES" POSSIBLY FOR USE WITH SMOOTHER ANIMATION / TRANSITIONS, "currOperation" CONTROLS WHICH SUB-ROUTINE TO RUN
-      this.opQueue = [];
-      this.HORIZONTAL_OFFSET = 2;
+      //this.opQueue = [];
+      this.HORIZONTAL_OFFSET = 2; // SHOULD BE VARIABLE 
       this.state = "all";
       this.states = {
          "all" : {
@@ -873,7 +977,7 @@ let LinkedList = (function() {
                _g.save();
                color("blue");
                //that.selectedStructure.bound.drawSelectionRect();
-               Bound.drawRect(that.selectedStructure.pos.plusArr([-.1, .1, 0]), new Dimension.Dimension(.2, .2, .2));
+               Bound.drawRect(that.selectedStructure.structure.getPointeePos().plusArr([-.1, .1, 0]), new Dimension.Dimension(.2, .2, .2));
                _g.restore();
             },
             [LinkedList.SinglyLinked.Operation.INSERT_FRONT] : function(that) {
@@ -885,7 +989,7 @@ let LinkedList = (function() {
                while (curr !== null) {
                   // UPDATE POSITIONS, SHIFTING RIGHTWARDS TO ACCOMODATE THE NEW NODE
                   curr.posOffset(offset);
-                                    curr.draw();
+                  curr.draw();
 
                   nullTailOffset.x = curr.bound.pos.x;
 
@@ -958,7 +1062,7 @@ let LinkedList = (function() {
                let curr = that.head;
                while (curr !== null && 
                         that.mostRecentlyChangedNode !== null && 
-                        curr !== that.mostRecentlyChangedNode.next) 
+                        curr !== that.mostRecentlyChangedNode.next)
                {
                   curr.draw();
                   nullTailOffset.x = curr.bound.pos.x;
