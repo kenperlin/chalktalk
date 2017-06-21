@@ -41,7 +41,7 @@ var SketchAnimation = (function() {
       ];
    };
    
-   a.Path = function(stepProcedure, args, timeToCompleteSeconds) {
+   a.Path = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
       let that = this;
       this.prevTime = time;
       this.args = args;
@@ -49,21 +49,38 @@ var SketchAnimation = (function() {
       this.elapsedTime = 0;
       this.stepProcedure = stepProcedure;
 
-      this.step = function() {
-         let dT = time - this.prevTime;
-         this.prevTime = time;
-         this.elapsedTime += dT;
+      if (doProvideElapsed === undefined || !doProvideElapsed) {
+         this.step = function() {
+            let dT = time - this.prevTime;
+            this.prevTime = time;
+            this.elapsedTime += dT;
 
-         let fin = false;
-         if (this.elapsedTime >= this.timeToComplete) {
-            this.elapsedTime = this.timeToComplete;
-            fin = true;
-         }
+            let fin = false;
+            if (this.elapsedTime >= this.timeToComplete) {
+               this.elapsedTime = this.timeToComplete;
+               fin = true;
+            }
 
-         let nextPt = this.stepProcedure(this.args, this.elapsedTime / this.timeToComplete);
-         
-         return {point : nextPt, finished : fin};
-      };
+            let nextPt = this.stepProcedure(this.args, this.elapsedTime / this.timeToComplete);
+            
+            return {point : nextPt, finished : fin};
+         };
+      }
+      else {
+         this.step = function(elapsed) {
+            this.elapsedTime += elapsed;
+
+            let fin = false;
+            if (this.elapsedTime >= this.timeToComplete) {
+               this.elapsedTime = this.timeToComplete;
+               fin = true;
+            }
+
+            let nextPt = this.stepProcedure(this.args, this.elapsedTime / this.timeToComplete);
+            
+            return {point : nextPt, finished : fin};
+         };         
+      }
 
       this.reset = function() {
          this.prevTime = time;

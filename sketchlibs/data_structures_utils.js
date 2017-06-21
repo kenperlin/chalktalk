@@ -572,6 +572,11 @@ let LinkedList = (function() {
          this._deferredDrawQueue = [];
       };
 
+
+      // TODO make sentinel nodes for organization (?)
+      // this.headSentinel = ...
+      // this.nullSentinel = ...
+
       this.headGraphic = (function() {
          const h = {};
          h.ptr = new Pointer.PointerGraphic(
@@ -752,7 +757,6 @@ let LinkedList = (function() {
             prev = curr;
             curr = curr.next;
          }
-
          if (curr === null) {
             this.currOperation = LinkedList.SinglyLinked.Operation.IDLE;
             return null;
@@ -766,6 +770,7 @@ let LinkedList = (function() {
             prev.next = curr.next;
          }
          this.mostRecentlyChangedNode = prev;
+         toRemove.next = null;
          this.decSize();
          this.selectedStructure = null;
          return toRemove;
@@ -1156,7 +1161,7 @@ let LinkedList = (function() {
       };
 
       // MAIN DRAW PROCEDURE FOR LIST
-      this.draw = function() {
+      this.update = function() {
          this.states[this.state][this.currOperation](this);
       };
 
@@ -1207,6 +1212,17 @@ let LinkedList = (function() {
 
    return linkedlist;
 })();
+
+// let SketchState = (function() {
+//    let st = {};
+//    st.SketchState = function(states, startIndices) {
+//       this.states = states;
+//       this.marker = (startIndices === undefined) ? {r : 0, c : 0} : startIndices; // ON SECOND THOUGHT, MIGHT USE FUNCTION NAMES INSTEAD
+//       this.traverse
+// 
+//    };
+//    return st;
+// })();
 
 
 

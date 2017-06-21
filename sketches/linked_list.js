@@ -104,8 +104,19 @@ function() {
          "};"
          ],
 
+         // "SL_INSERT_ARBITRARY" : [
+         // "void <T> insert(T value, size_t idx)",
+         // "{",
+         // "    struct list_node * to_insert = new list_node(value);",
+         // "    struct list_node * curr = this->head;",
+         // "    for (size_t i = 0; i < idx && curr != nullptr; i++) {",
+         // "        curr = curr->next",
+         // "    }",
+         // "}"
+         // ],
+
          "SL_REMOVE_ARBITRARY" : [
-         "void remove(T value)",
+         "void <T> remove(T value)",
          "{",
          "    struct list_node * prev = nullptr;",
          "    struct list_node * curr = this->head;",
@@ -123,6 +134,9 @@ function() {
          "    } else {",
          "        prev->next = curr->next;",
          "    }",
+         "",
+         "    curr->next = nullptr;",
+         "    free(curr);",
          "    this->_size--;",
          "}"         
          ],
@@ -130,7 +144,7 @@ function() {
          "SL_REMOVE_ARBITRARY_LINUS_TORVALDS" : [
          // https://medium.com/@bartobri/applying-the-linus-tarvolds-good-taste-coding-requirement-99749f37684a
          // LINUS TORVALDS STYLE
-         "void remove(T value)",
+         "void <T> remove(T value)",
          "{",
          "    struct list_node ** indirect = &(this->head);",
          "",
@@ -141,7 +155,11 @@ function() {
          "        return;",
          "    }",
          "",
+         "    struct list_node * to_free = *indirect",
          "    *indirect = (*indirect)->next;",
+         "",
+         "    to_free->next = nullptr;",
+         "    free(to_free);",
          "    this->_size--;",
          "}",
          ],
@@ -214,11 +232,8 @@ function() {
          ]);
       });
       this.afterSketch(function() {
-         this.mutex = "BLOCK"; 
          this.list.print();
-         this.list.draw();
-         this.mutex = "UNBLOCK";
-         //console.log(elapsed);
+         this.list.update();
       });
    };
 
