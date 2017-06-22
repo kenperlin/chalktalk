@@ -23,9 +23,9 @@ var SketchAnimation = (function() {
       let t2 = fc * fc;
       let t3 = t2 * fc;
       return a + (-a * 3 + fc * (3 * a - a * fc)) * fc +
-         (3 * b + fc * (-6 * b + b * 3 * fc)) * fc +
-         (c * 3 - c * 3 * fc) * t2 +
-         d * t3;
+            (3 * b + fc * (-6 * b + b * 3 * fc)) * fc +
+            (c * 3 - c * 3 * fc) * t2 +
+            d * t3;
    }
 
    a.BEZIER_CUBIC = function(args, fractionComplete) {
@@ -51,8 +51,9 @@ var SketchAnimation = (function() {
 
       if (doProvideElapsed === undefined || !doProvideElapsed) {
          this.step = function() {
-            let dT = time - this.prevTime;
-            this.prevTime = time;
+            let currTime = time;
+            let dT = currTime - this.prevTime;
+            this.prevTime = currTime;
             this.elapsedTime += dT;
 
             let fin = false;
