@@ -85,10 +85,24 @@ function() {
          new SketchAnimation.Animation(
             SketchAnimation.Type.LINE({
                start : new Location.Position(-1, 0, 0), 
-               end : new Location.Position(-1, -1, 0)
+               end : new Location.Position(-1, 5, 0)
             }),
             null,
             1,
+            true
+         ),
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.BOUNCE({
+               startY : 5,
+               endX : -1,
+               endY : -1,
+               endZ : 0,
+               numBounces : 20,
+               threshold : 0.01,
+               velocityX : 4 // truthfully not very realistic horizontal component for now...
+            }),
+            null,
+            3.75,
             true
          ),
       ];
@@ -106,11 +120,34 @@ function() {
          // mDrawOval([-.5*FACTOR_X,.2*FACTOR_X],[-.3*FACTOR_Y,.4*FACTOR_Y],32,-PI,0);         
       }
 
+      function drawXO(scaleX, scaleY) {
+         let FACTOR_X = (scaleX === undefined) ? .25 : scaleX;
+         let FACTOR_Y = (scaleY === undefined) ? .25 : scaleY;
+
+         mDrawOval([-1*FACTOR_X,-1*FACTOR_X],[1*FACTOR_Y,1*FACTOR_Y],32,PI/2,PI/2-TAU);
+         m.save();
+         m.translate([0, -.43*FACTOR_Y, 0]);
+         mDrawOval([-.2*FACTOR_X,-.2*FACTOR_X],[.2*FACTOR_Y,.2*FACTOR_Y],32,PI/2,PI/2-TAU);
+         m.restore();
+         mCurve([[-.4*FACTOR_X, .4*FACTOR_Y], [-.2*FACTOR_X, .1*FACTOR_Y]]);
+         mCurve([[-.4*FACTOR_X, .1*FACTOR_Y], [-.2*FACTOR_X, .4*FACTOR_Y]]);
+         mCurve([[.4*FACTOR_X, .4*FACTOR_Y], [.2*FACTOR_X, .1*FACTOR_Y]]);
+         mCurve([[.4*FACTOR_X, .1*FACTOR_Y], [.2*FACTOR_X, .4*FACTOR_Y]]);
+         //mDrawOval([-.2*FACTOR_X,-.2*FACTOR_X],[.8*FACTOR_Y,.5*FACTOR_Y],32,PI*.5,PI*.2);
+         //mDrawOval([ .5*FACTOR_X,.2*FACTOR_X],[ .3*FACTOR_Y,.4*FACTOR_Y],32,-PI,0);
+         //mDrawOval([-1*FACTOR_X,.2*FACTOR_X],[.3*FACTOR_Y,.9*FACTOR_Y],32,-PI*.6,-PI*.4);
+         // mDrawOval([-.8*FACTOR_X,-.2*FACTOR_X],[.2*FACTOR_Y,.5*FACTOR_Y],32,PI*.8,PI*.5);
+         // mDrawOval([-.5*FACTOR_X,.2*FACTOR_X],[-.3*FACTOR_Y,.4*FACTOR_Y],32,-PI,0);         
+      }
+
       let _scale = .2
+      //idx = 5;
+      
       while (true) {
          let ret = null;
          let pos = null;
          let dim = null;
+         let doSay = true; // temp for fun
          while (true) {
             ret = ani[idx].step(this.ELAPSED);
 
@@ -127,7 +164,16 @@ function() {
             //this.bound.drawAt(pos, dim);
             m.translate(pos.xyz());
 
-            drawSmile();
+            if (idx === 5 && pos.y <= -.5) {
+               drawXO();
+               if (pos.y <= .7 && doSay) {
+                  Speech.say("ouch!");
+                  doSay = false;
+               }
+            }
+            else {
+               drawSmile();
+            }
 
 
             //this.bird.update(this.ELAPSED);
@@ -152,7 +198,12 @@ function() {
             //this.bound.drawAt(pos, dim);
             m.translate(pos.xyz());
 
-            drawSmile();
+            if (idx === 5 && pos.y <= -.5) {
+               drawXO();
+            }
+            else {
+               drawSmile();
+            }
             //this.bird.update(this.ELAPSED);
 
             yield;

@@ -213,6 +213,107 @@ var SketchAnimation = (function() {
          ];
       };
    }
+
+   a.Type.BOUNCE = function(args) {
+      args = args || {};
+
+      let startY = args.startY;
+      let endY = args.endY;
+      let delta = endY - startY;
+
+      let numBounces = args.numBounces;
+      let threshold = args.threshold || 0.001;
+
+      function energyToHeight(energy) {
+         return energy; // h = E/mg
+      }
+
+      function heightToEnergy(height) {
+         return height; // E = mgh
+      }
+
+      function bounceTime(height) {
+         return 2 * sqrt(2 * height); // 2 * half bounce time measured from peak
+      }
+
+      function speed(energy) {
+         return sqrt(2 * energy); // E = 1/2 m v^2, s = |sqrt(2E/m)|
+      }
+
+      let height = 1;
+      let potential = heightToEnergy(height);
+      let elasticity = pow(threshold, 1 / numBounces);
+
+      // critical points mark contact with ground
+
+      let criticalPoints = [{
+         time : -bounceTime(height) / 2,
+         energy : potential  
+      },
+      {
+         time : bounceTime(height) / 2,
+         energy : potential * elasticity
+      }];
+
+      potential *= elasticity;
+      height = energyToHeight(potential);
+
+      let localTime = criticalPoints[1].time;
+      for (let i = 1; i < numBounces; i++) {
+         localTime += bounceTime(height);
+         potential *= elasticity; // remove energy following each bounce
+
+         criticalPoints.push({
+            time : localTime,
+            energy : potential
+         });
+
+         height = energyToHeight(potential);
+      }
+
+      let duration = localTime;
+
+      let x = args.endX || 0;
+      let z = args.endZ || 0;
+
+      let velocityX = args.velocityX;
+
+      return function(UNUSED, fractionComplete) {
+         let t = clamp(fractionComplete, 0, 1);
+         let tAdj = t * duration;
+
+         if (tAdj === 0) {
+            return [x, 0, z];
+         }
+         else if (tAdj >= duration) {
+            return [x, 1, z];
+         }
+
+         function findBouncePointAbove(arr, val) {
+            let idx = 1;
+            for (let idx = 0; idx < arr.length; idx++) {
+               if (criticalPoints[idx].time > val) {
+                  return idx;
+               }
+            }
+            return arr.length;           
+         }
+
+         let idx = findBouncePointAbove(criticalPoints, tAdj);
+         let bouncePoint = criticalPoints[idx - 1];
+
+         tAdj -= bouncePoint.time;
+
+         let v0 = speed(bouncePoint.energy);
+         let pos = v0 * tAdj + -0.5 * tAdj * tAdj;
+
+         return [
+            (velocityX === undefined) ? x : velocityX * t + x,
+            startY + (1 - pos) * delta,
+            z
+         ];
+      }
+   }
    
    a.Animation = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
       let that = this;
