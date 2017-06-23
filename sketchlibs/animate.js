@@ -40,14 +40,188 @@ var SketchAnimation = (function() {
          _cubic(fractionComplete, start.z, c1.z, c2.z, end.z)
       ];
    };
+
+   a.Type = {};
+   a.Type.LINE = function(args) {
+      return function(UNUSED, fractionComplete) {
+         const start = args.start;
+         const end = args.end;
+
+         const dx = end.x - start.x;
+         const dy = end.y - start.y;
+         const dz = end.z - start.z;
+         return [
+            start.x + (dx * fractionComplete),
+            start.y + (dy * fractionComplete),
+            start.z + (dz * fractionComplete)
+         ];            
+      }
+   };
+
+
+   // Thank you Daniel Zhang for sharing this: https://medium.com/analytic-animations/the-spring-factory-4c3d988e7129
    
-   a.Path = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
+   function clamp(x, _min, _max) {
+      return min(max(x, _min), _max);
+   }
+
+   function nvl(x, ifNull) {
+      return x === undefined || x === null ? ifNull : x;
+   }
+
+   function computeOmega(A, B, k, zeta) {
+      if (A * B < 0 && k >= 1) {
+         k--;
+      }
+
+      return (-atan(A / B) + PI * k) / (2 * PI * sqrt(1 - zeta * zeta));
+   }
+
+   function numericallySolveOmegaAndB(args) {
+      args = args || {};
+
+      let zeta = args.zeta;
+      let k = args.k;
+      let y0 = nvl(args.y0, 1);
+      v0 = args.v0 || 0;
+
+      function errorfn(B, omega) {
+         let omegaD = omega * sqrt(1 - zeta * zeta);
+         return B - ((zeta * omega * y0) + v0) / omegaD;
+      }
+
+      let A = y0;
+      let B = zeta;
+      let omega = 0;
+      let error = 0;
+      let direction = 0;
+
+      function step() {
+         omega = computeOmega(A, B, k, zeta);
+         error = errorfn(B, omega);
+         direction = -Math.sign(error);
+      }
+
+      step();
+
+      let tolerance = 1e-6;
+      let lower = 0;
+      let upper = 0;
+
+      let ct = 0;
+      let maxct = 1e3;
+
+      if (direction > 0) {
+         while (direction > 0) {
+            ct++;
+
+            if (ct > maxct) {
+               break;
+            }
+
+            lower = B;
+
+            B *= 2;
+            step();
+         }
+         upper = B;
+      }
+      else {
+         upper = B;
+         B *= -1;
+
+         while (direction < 0) {
+            ct++;
+
+            if (ct > maxct) {
+               break;
+            }
+
+            lower = B;
+
+            B *= 2;
+            step();
+         }
+         lower = B;
+      }
+
+      while (abs(error) > tolerance) {
+         ct++;
+
+         if (ct > maxct) {
+            break;
+         }
+
+         B = (upper + lower) / 2;
+         step();
+
+         if (direction > 0) {
+            lower = B;
+         }
+         else {
+            upper = B;
+         }
+      }
+
+      return {
+         omega : omega,
+         B : B
+      };
+   }
+
+   a.Type.SPRING = function(args) {
+      args = args || {};
+
+      let zeta = args.damping;
+      let k = args.halfCycles;
+      let y0 = nvl(args.startY, 1);
+      let v0 = args.initialVelocity || 0;
+
+      let A = y0;
+      let B = 0;
+      let omega = 0;
+
+      if (abs(v0) < 1e-6) {
+         B = zeta * y0 / sqrt(1 - zeta * zeta);
+         omega = computeOmega(A, B, k, zeta);
+      }
+      else {
+         let result = numericallySolveOmegaAndB({
+            zeta : zeta,
+            k : k,
+            y0, y0,
+            v0, v0
+         });
+
+         B = result.B;
+         omega = result.omega;
+      }
+
+      omega *= 2 * PI;
+      let omegaD = omega * sqrt(1 - zeta * zeta);
+
+      let x = args.startX || 0;
+      let z = args.startZ || 0;
+
+      return function(UNUSED, fractionComplete) {
+         let t = fractionComplete;
+         let sinusoid = A * cos(omegaD * t) + B * sin(omegaD * t);
+         return [
+            x,
+            (exp(-t * zeta * omega) * sinusoid),
+            z,
+         ];
+      };
+   }
+   
+   a.Animation = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
       let that = this;
       this.prevTime = time;
       this.args = args;
       this.timeToComplete = timeToCompleteSeconds;
       this.elapsedTime = 0;
       this.stepProcedure = stepProcedure;
+      this.isReversed = false;
 
       if (doProvideElapsed === undefined || !doProvideElapsed) {
          this.step = function() {
@@ -62,7 +236,8 @@ var SketchAnimation = (function() {
                fin = true;
             }
 
-            let nextPt = this.stepProcedure(this.args, this.elapsedTime / this.timeToComplete);
+            let fractionComplete = this.elapsedTime / this.timeToComplete;
+            let nextPt = this.stepProcedure(this.args, (this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };
@@ -77,7 +252,8 @@ var SketchAnimation = (function() {
                fin = true;
             }
 
-            let nextPt = this.stepProcedure(this.args, this.elapsedTime / this.timeToComplete);
+            let fractionComplete = this.elapsedTime / this.timeToComplete;
+            let nextPt = this.stepProcedure(this.args, (this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };         
@@ -89,13 +265,48 @@ var SketchAnimation = (function() {
       };
 
       this.reverse = function() {
-         this.prevTime = time;
-         this.elapsedTime = 0;
-         let end = this.args.end;
-         this.args.end = this.args.start;
-         this.args.start = end;
+         this.isReversed = !this.isReversed;
       };
    };
+
+   // a.Synchronizer = function(animations) {
+   //    this.animations = [];
+   //    for (let i = 0; i < animations.length; i++) {
+   //       this.animations.push({
+   //          animation :,
+   //          point : null,
+   //          finished  : false
+   //       });
+   //    }
+
+   //    this.step = function(elapsed) {
+   //       let fin = true;
+   //       for (let i = 0; i < this.animations.length; i++) {
+   //          let aniI = this.animations[i];
+   //          if (aniI.finished) {
+   //             continue;
+   //          }
+   //          else {
+   //             fin = false;
+   //          }
+
+   //          // STEP EACH INCOMPLETE ANIMATION
+   //          let status = aniI.step(elapsed);
+
+   //          if (status.finished) {
+   //             aniI.finished = true;
+   //          }
+   //       }
+   //    };
+
+   //    this.resetAll = function() {
+   //       for (let i = 0; i < this.animations.length; i++) {
+   //          this.animations[i].finished = false;
+   //       }         
+   //    };
+   // }
+
+   a.Path = a.Animation;
 
    return a;
 })();

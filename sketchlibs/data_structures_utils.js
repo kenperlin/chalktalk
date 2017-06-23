@@ -100,6 +100,7 @@ let Location = (function() {
          return [this.x, this.y];
       }
    };
+   pos.create = pos.Position;
 
    // RETURN A (0, 0, 0) Position OBJECT
    pos.CartesianOrigin = function() {
@@ -122,6 +123,7 @@ let Location = (function() {
    return pos;
 
 })();
+let Position = Location;
 
 let Dimension = (function() {
    let dim = {};

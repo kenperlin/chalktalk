@@ -5,6 +5,7 @@ function() {
    this.is3D = true;
    this.isStepwise = true;
    this.blocked = true;
+   this.showArrow = false;
 
    this.onSwipe[0] = [
       "toggle stepwise",
@@ -26,16 +27,23 @@ function() {
       }
    ]
 
+   this.onSwipe[6] = [
+      "toggle arrow",
+      function() {
+         this.showArrow = !this.showArrow;
+      }
+   ]
+
    this.animationLoop = function*(args) {
       let idx = 0;
       let adjust = 2;
       let ani = [
-         new SketchAnimation.Path(
-            SketchAnimation.LINE, 
-            {
+         new SketchAnimation.Animation( // new version of arg passing that generates functions 
+            SketchAnimation.Type.LINE({
                start : new Location.Position(-1, -1, 0), 
                end : new Location.Position(1, 1, 0)
-            }, 
+            }),
+            null, // will need to change arg list so it's just an object and this null becomes unnecessary
             2,
             true
          ),
@@ -60,7 +68,29 @@ function() {
             }, 
             2,
             true
-         )
+         ),
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.SPRING({
+               halfCycles : 15, // [1, +inf)
+               damping : 0.2, // [0, 1)
+               startX : -1,
+               startY : -.9,
+               startZ : 0,
+               initialVelocity : 0
+            }),
+            null,
+            4,
+            true
+         ),
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.LINE({
+               start : new Location.Position(-1, 0, 0), 
+               end : new Location.Position(-1, -1, 0)
+            }),
+            null,
+            1,
+            true
+         ),
       ];
 
       function drawSmile(scaleX, scaleY) {
@@ -87,6 +117,13 @@ function() {
             pos = new Location.Position(ret.point[0], ret.point[1], ret.point[2]);
             dim = new Dimension.Dimension(_scale * ret.point[0], _scale * ret.point[1], _scale * ret.point[2]);
 
+            if (this.showArrow) {
+               _g.save();
+               color("red");
+               mArrow([-1, -1, 0], pos.xyz());
+               _g.restore();
+            }
+
             //this.bound.drawAt(pos, dim);
             m.translate(pos.xyz());
 
@@ -94,11 +131,6 @@ function() {
 
 
             //this.bird.update(this.ELAPSED);
-
-            // _g.save();
-            // color("red");
-            // mArrow([-1, -1, 0], pos.xyz());
-            // _g.restore();
 
             if (ret.finished) {
                break;
@@ -110,15 +142,18 @@ function() {
          yield;
 
          while (this.isStepwise && this.blocked) {
+            if (this.showArrow) {
+               _g.save();
+               color("red");
+               mArrow([-1, -1, 0], pos.xyz());
+               _g.restore();
+            }
+
             //this.bound.drawAt(pos, dim);
             m.translate(pos.xyz());
 
             drawSmile();
             //this.bird.update(this.ELAPSED);
-            // _g.save();
-            // color("red");
-            // mArrow([-1, -1, 0], pos.zyz());
-            // _g.restore();
 
             yield;
          }
