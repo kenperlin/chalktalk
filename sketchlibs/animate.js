@@ -5,6 +5,7 @@ var SketchAnimation = (function() {
 
    // https://stackoverflow.com/a/17096947/7361580
 
+   // OLD VERSION
    a.LINE = function(args, fractionComplete) {
       const start = args.start;
       const end = args.end;
@@ -19,7 +20,7 @@ var SketchAnimation = (function() {
       ];
    };
 
-   function _cubic(fc, a, b, c, d) {
+   function cubic(fc, a, b, c, d) {
       let t2 = fc * fc;
       let t3 = t2 * fc;
       return a + (-a * 3 + fc * (3 * a - a * fc)) * fc +
@@ -28,6 +29,7 @@ var SketchAnimation = (function() {
             d * t3;
    }
 
+   // OLD VERSION
    a.BEZIER_CUBIC = function(args, fractionComplete) {
       const start = args.start;
       const end = args.end;
@@ -35,9 +37,9 @@ var SketchAnimation = (function() {
       const c2 = args.control2;
 
       return [
-         _cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
-         _cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
-         _cubic(fractionComplete, start.z, c1.z, c2.z, end.z)
+         cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
+         cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
+         cubic(fractionComplete, start.z, c1.z, c2.z, end.z)
       ];
    };
 
@@ -55,11 +57,91 @@ var SketchAnimation = (function() {
             start.y + (dy * fractionComplete),
             start.z + (dz * fractionComplete)
          ];            
-      }
+      };
+   };
+
+   a.Type.BEZIER_CUBIC = function(args) {
+      return function(UNUSED, fractionComplete) {
+         const start = args.start;
+         const end = args.end;
+         const c1 = args.control1;
+         const c2 = args.control2;
+
+         return [
+            cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
+            cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
+            cubic(fractionComplete, start.z, c1.z, c2.z, end.z)
+         ];
+      };
+   };
+
+   a.Type.BEZIER_QUADRATIC = function(args) {
+      return function(UNUSED, fractionComplete) {
+         const start = args.start;
+         const end = args.end;
+         const cp = args.control;
+         const fc = fractionComplete;
+
+         return [
+            (1 - fc) * (1 - fc) * start.x + 2 * (1 - fc) * fc * cp.x + (fc * fc) * end.x,
+            (1 - fc) * (1 - fc) * start.y + 2 * (1 - fc) * fc * cp.y + (fc * fc) * end.y,
+            (1 - fc) * (1 - fc) * start.z + 2 * (1 - fc) * fc * cp.z + (fc * fc) * end.z,
+         ];
+      };
    };
 
 
-   // Thank you Daniel Zhang for sharing this: https://medium.com/analytic-animations/the-spring-factory-4c3d988e7129
+   a.Type.FUNCTION_ONE_INPUT = function(args) {
+      return function(UNUSED, fractionComplete) {
+         const startX = defined(args.startX, 0);
+         const startY = defined(args.startY, 0);
+         const startZ = defined(args.startZ, 0);
+
+         const endX = defined(args.endX, 1);
+         const endY = defined(args.endY, 0);
+         const endZ = defined(args.endZ, 0);
+
+         const func = args.function;
+         const dx = endX - startX;
+
+         let x = startX + (dx * fractionComplete);
+
+         let inX = defined(args.inX, 1);
+         let inY = defined(args.inY, 0);
+         let inZ = defined(args.inZ, 0);
+
+         if (inX) {
+            return [
+               x,
+               func(x) + startY,
+               startZ
+            ];
+         }
+         else if (inY) {
+            return [
+               func(x) + startY,
+               x,
+               startZ
+            ];
+         }
+         else if (inZ) {
+            return [
+               startZ,
+               func(x) + startY,
+               x
+            ];            
+         }
+         else {
+            return [0, 0, 0];
+         }
+      }
+   };
+
+   // Thank you Daniel Zhang for sharing this: https://medium.com/analytic-animations/the-spring-factory-4c3d988e7129 ~ KTR
+
+   function defined(arg, defaultVal) {
+      return (arg === undefined || arg === null) ? defaultVal : arg;
+   }
    
    function clamp(x, _min, _max) {
       return min(max(x, _min), _max);
@@ -82,7 +164,7 @@ var SketchAnimation = (function() {
 
       let zeta = args.zeta;
       let k = args.k;
-      let y0 = nvl(args.y0, 1);
+      let y0 = defined(args.y0, 1);
       v0 = args.v0 || 0;
 
       function errorfn(B, omega) {
@@ -174,7 +256,7 @@ var SketchAnimation = (function() {
 
       let zeta = args.damping;
       let k = args.halfCycles;
-      let y0 = nvl(args.startY, 1);
+      let y0 = defined(args.startY, 1);
       let v0 = args.initialVelocity || 0;
 
       let A = y0;
@@ -200,8 +282,8 @@ var SketchAnimation = (function() {
       omega *= 2 * PI;
       let omegaD = omega * sqrt(1 - zeta * zeta);
 
-      let x = args.startX || 0;
-      let z = args.startZ || 0;
+      let x = defined(args.startX, 0);
+      let z = defined(args.startZ, 0);
 
       return function(UNUSED, fractionComplete) {
          let t = fractionComplete;
@@ -212,7 +294,7 @@ var SketchAnimation = (function() {
             z,
          ];
       };
-   }
+   };
 
    a.Type.BOUNCE = function(args) {
       args = args || {};
@@ -222,7 +304,7 @@ var SketchAnimation = (function() {
       let delta = endY - startY;
 
       let numBounces = args.numBounces;
-      let threshold = args.threshold || 0.001;
+      let threshold = defined(args.threshold, 0.001);
 
       function energyToHeight(energy) {
          return energy; // h = E/mg
@@ -273,8 +355,8 @@ var SketchAnimation = (function() {
 
       let duration = localTime;
 
-      let x = args.endX || 0;
-      let z = args.endZ || 0;
+      let x = defined(args.endX, 0);
+      let z = defined(args.endZ, 0);
 
       let velocityX = args.velocityX;
 
@@ -283,10 +365,10 @@ var SketchAnimation = (function() {
          let tAdj = t * duration;
 
          if (tAdj === 0) {
-            return [x, 0, z];
+            return [x, startY, z];
          }
          else if (tAdj >= duration) {
-            return [x, 1, z];
+            return [defined(velocityX, 0) + x, endY, z];
          }
 
          function findBouncePointAbove(arr, val) {
@@ -312,8 +394,66 @@ var SketchAnimation = (function() {
             startY + (1 - pos) * delta,
             z
          ];
+      };
+   };
+
+   a.Type.SIGMOID_EASE_IN_OUT = function(args) {
+      let length = defined(args.length, 0);
+      let sharpness = args.sharpness;
+
+      function base(t) {
+         return (1 / (1 + exp(-sharpness * t))) - 0.5;
       }
-   }
+
+      let correction = 0.5 / base(1);
+
+      let x = defined(args.startX, -1);
+      let y = defined(args.startY, 0);
+      let z = defined(args.startZ, 0);
+
+      let inX = defined(args.inX, 1);
+      let inY = defined(args.inY, 0);
+      let inZ = defined(args.inZ, 0);
+
+      return function(UNUSED, fractionComplete) {
+         let t = clamp(fractionComplete, 0, 1);
+         let displacement = ((correction * base(2 * t - 1) + 0.5) * length);
+         return [
+            x + (displacement * inX), 
+            y + (displacement * inY),
+            z + (displacement * inZ)
+         ]
+      };
+   };
+
+   a.Type.SIGMOID_EASE_OUT = function(args) {
+      let length = defined(args.length, 0);
+      let sharpness = (args.sharpness === 0) ? 1e-7 : args.sharpness;
+
+      function base(t) {
+         return (1 / (1 + exp(-sharpness * t))) - 0.5;
+      }
+
+      let x = defined(args.startX, -1);
+      let y = defined(args.startY, 0);
+      let z = defined(args.startZ, 0);
+
+      let inX = defined(args.inX, 1);
+      let inY = defined(args.inY, 0);
+      let inZ = defined(args.inZ, 0);
+
+      let denominator = base(1);
+
+      return function(UNUSED, fractionComplete) {
+         let t = clamp(fractionComplete, 0, 1);
+         let displacement = (base(t) / denominator) * length;
+         return [
+            x + (displacement * inX), 
+            y + (displacement * inY),
+            z + (displacement * inZ)
+         ];
+      };
+   };
    
    a.Animation = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
       let that = this;

@@ -1,5 +1,4 @@
 
-
 function() {
    this.label = "coro3";
    this.is3D = true;
@@ -37,6 +36,7 @@ function() {
    this.animationLoop = function*(args) {
       let idx = 0;
       let adjust = 2;
+      // ARRAY OF SKETCHES THROUGH WHICH THIS EXAMPLE CYCLES
       let ani = [
          new SketchAnimation.Animation( // new version of arg passing that generates functions 
             SketchAnimation.Type.LINE({
@@ -47,25 +47,25 @@ function() {
             2,
             true
          ),
-         new SketchAnimation.Path(
-            SketchAnimation.BEZIER_CUBIC, 
-            {
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.BEZIER_CUBIC({
                start : new Location.Position(1, 1, 0),
                end : new Location.Position(-1, -1, 0),
                control1 : new Location.Position(5, .5, 0), 
                control2 : new Location.Position(-2, -.5, 0),
-            }, 
+            }),
+            null, 
             2,
             true
          ),
-         new SketchAnimation.Path(
-            SketchAnimation.BEZIER_CUBIC, 
-            {
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.BEZIER_CUBIC({
                start : new Location.Position(-1, -1, 0),
                end : new Location.Position(-1, -1, 0),
                control1 : new Location.Position(-1 - adjust, -1 + adjust, 0), 
                control2 : new Location.Position(-1, + adjust, -1 - adjust, 0),
-            }, 
+            }),
+            null, 
             2,
             true
          ),
@@ -97,7 +97,7 @@ function() {
                endX : -1,
                endY : -1,
                endZ : 0,
-               numBounces : 20,
+               numBounces : 7,
                threshold : 0.01,
                velocityX : 4 // truthfully not very realistic horizontal component for now...
             }),
@@ -105,6 +105,58 @@ function() {
             3.75,
             true
          ),
+         (function() {
+            let a = new SketchAnimation.Animation(
+               SketchAnimation.Type.SIGMOID_EASE_IN_OUT({
+                  length : 4,
+                  sharpness : 7,
+                  startX : -1,
+                  startY : -1,
+                  startZ : 0,
+                  inX : 1,
+               }),
+               null,
+               2.25,
+               true
+
+            );
+            a.reverse();
+            return a;
+         }()),
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.FUNCTION_ONE_INPUT({
+               startX : -1,
+               startY : -1,
+               startZ : 0,
+               endX : 1,
+               inX : 1,
+               inY : 0,
+               inZ : 0,
+               function : function(x) {
+                  return .5 * sin(3 * x);
+               }
+            }),
+            null,
+            5,
+            true
+         ),
+         new SketchAnimation.Animation(
+            SketchAnimation.Type.FUNCTION_ONE_INPUT({
+               startX : 1,
+               startY : -1,
+               startZ : 0,
+               endX : -1,
+               inX : 1,
+               inY : 0,
+               inZ : 0,
+               function : function(x) {
+                  return .1 / ((x === 0) ? 0.00001 : x);
+               }
+            }),
+            null,
+            3,
+            true
+         )
       ];
 
       function drawSmile(scaleX, scaleY) {
@@ -140,14 +192,12 @@ function() {
          // mDrawOval([-.5*FACTOR_X,.2*FACTOR_X],[-.3*FACTOR_Y,.4*FACTOR_Y],32,-PI,0);         
       }
 
-      let _scale = .2
-      //idx = 5;
-      
+      let _scale = .2      
       while (true) {
          let ret = null;
          let pos = null;
          let dim = null;
-         let doSay = true; // temp for fun
+         let doSay = true; // temporary, for fun
          while (true) {
             ret = ani[idx].step(this.ELAPSED);
 
