@@ -6,6 +6,8 @@ function() {
    this.blocked = true;
    this.showArrow = false;
 
+   this.mostRecentPos = null;
+
    this.onSwipe[0] = [
       "toggle stepwise",
       function() {
@@ -203,6 +205,7 @@ function() {
 
             pos = new Location.Position(ret.point[0], ret.point[1], ret.point[2]);
             dim = new Dimension.Dimension(_scale * ret.point[0], _scale * ret.point[1], _scale * ret.point[2]);
+            this.mostRecentPos = pos;
 
             if (this.showArrow) {
                _g.save();
@@ -297,6 +300,10 @@ function() {
    };
 
    this.output = function() {
-      return 0;
+      if (this.mostRecentPos === null) {
+         return 0;
+      }
+
+      return SketchAnimation.clamp(this.mostRecentPos.y, -10, 10);
    };
 }

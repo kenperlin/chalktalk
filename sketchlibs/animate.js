@@ -146,6 +146,7 @@ var SketchAnimation = (function() {
    function clamp(x, _min, _max) {
       return min(max(x, _min), _max);
    }
+   a.clamp = clamp;
 
    function nvl(x, ifNull) {
       return x === undefined || x === null ? ifNull : x;
