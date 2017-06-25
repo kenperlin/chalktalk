@@ -3,49 +3,13 @@
 var SketchAnimation = (function() {
    let a = {};
 
-   // https://stackoverflow.com/a/17096947/7361580
+   // https://stackoverflow.com/a/17096947/7361580 for LINE and BEZIER
 
-   // OLD VERSION
-   a.LINE = function(args, fractionComplete) {
-      const start = args.start;
-      const end = args.end;
-
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const dz = end.z - start.z;
-      return [
-         start.x + (dx * fractionComplete),
-         start.y + (dy * fractionComplete),
-         start.z + (dz * fractionComplete)
-      ];
-   };
-
-   function cubic(fc, a, b, c, d) {
-      let t2 = fc * fc;
-      let t3 = t2 * fc;
-      return a + (-a * 3 + fc * (3 * a - a * fc)) * fc +
-            (3 * b + fc * (-6 * b + b * 3 * fc)) * fc +
-            (c * 3 - c * 3 * fc) * t2 +
-            d * t3;
-   }
-
-   // OLD VERSION
-   a.BEZIER_CUBIC = function(args, fractionComplete) {
-      const start = args.start;
-      const end = args.end;
-      const c1 = args.control1;
-      const c2 = args.control2;
-
-      return [
-         cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
-         cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
-         cubic(fractionComplete, start.z, c1.z, c2.z, end.z)
-      ];
-   };
+   // INTERPOLATION-BASED FUNCTIONS, GIVEN "FRACTION ALONG PATH COMPLETE" VALUE, RETURN POINT
 
    a.Type = {};
    a.Type.LINE = function(args) {
-      return function(UNUSED, fractionComplete) {
+      return function(/*UNUSED, */fractionComplete) {
          const start = args.start;
          const end = args.end;
 
@@ -60,13 +24,22 @@ var SketchAnimation = (function() {
       };
    };
 
-   a.Type.BEZIER_CUBIC = function(args) {
-      return function(UNUSED, fractionComplete) {
-         const start = args.start;
-         const end = args.end;
-         const c1 = args.control1;
-         const c2 = args.control2;
+   function cubic(fc, a, b, c, d) {
+      let t2 = fc * fc;
+      let t3 = t2 * fc;
+      return a + (-a * 3 + fc * (3 * a - a * fc)) * fc +
+            (3 * b + fc * (-6 * b + b * 3 * fc)) * fc +
+            (c * 3 - c * 3 * fc) * t2 +
+            d * t3;
+   }
 
+   a.Type.BEZIER_CUBIC = function(args) {
+      const start = args.start;
+      const end = args.end;
+      const c1 = args.control1;
+      const c2 = args.control2;
+
+      return function(/*UNUSED, */fractionComplete) {
          return [
             cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
             cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
@@ -76,10 +49,11 @@ var SketchAnimation = (function() {
    };
 
    a.Type.BEZIER_QUADRATIC = function(args) {
-      return function(UNUSED, fractionComplete) {
-         const start = args.start;
-         const end = args.end;
-         const cp = args.control;
+      const start = args.start;
+      const end = args.end;
+      const cp = args.control;
+
+      return function(/*UNUSED, */fractionComplete) {
          const fc = fractionComplete;
 
          return [
@@ -91,24 +65,33 @@ var SketchAnimation = (function() {
    };
 
 
-   a.Type.FUNCTION_ONE_INPUT = function(args) {
-      return function(UNUSED, fractionComplete) {
-         const startX = defined(args.startX, 0);
-         const startY = defined(args.startY, 0);
-         const startZ = defined(args.startZ, 0);
+   // TODO
+   // a.Type.BSPLINE = function(args) {
+   //    return function(/*UNUSED, */fractionComplete) {
 
-         const endX = defined(args.endX, 1);
-         const endY = defined(args.endY, 0);
-         const endZ = defined(args.endZ, 0);
+   //    }
+   // };
+
+
+   a.Type.FUNCTION_ONE_INPUT = function(args) {
+      const startX = defined(args.startX, 0);
+      const startY = defined(args.startY, 0);
+      const startZ = defined(args.startZ, 0);
+
+      const endX = defined(args.endX, 1);
+      const endY = defined(args.endY, 0);
+      const endZ = defined(args.endZ, 0);
+
+      let inX = defined(args.inX, 1);
+      let inY = defined(args.inY, 0);
+      let inZ = defined(args.inZ, 0);
+
+      return function(/*UNUSED, */fractionComplete) {
 
          const func = args.function;
          const dx = endX - startX;
 
          let x = startX + (dx * fractionComplete);
-
-         let inX = defined(args.inX, 1);
-         let inY = defined(args.inY, 0);
-         let inZ = defined(args.inZ, 0);
 
          if (inX) {
             return [
@@ -286,7 +269,7 @@ var SketchAnimation = (function() {
       let x = defined(args.startX, 0);
       let z = defined(args.startZ, 0);
 
-      return function(UNUSED, fractionComplete) {
+      return function(/*UNUSED, */fractionComplete) {
          let t = fractionComplete;
          let sinusoid = A * cos(omegaD * t) + B * sin(omegaD * t);
          return [
@@ -361,7 +344,7 @@ var SketchAnimation = (function() {
 
       let velocityX = args.velocityX;
 
-      return function(UNUSED, fractionComplete) {
+      return function(/*UNUSED, */fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let tAdj = t * duration;
 
@@ -416,7 +399,7 @@ var SketchAnimation = (function() {
       let inY = defined(args.inY, 0);
       let inZ = defined(args.inZ, 0);
 
-      return function(UNUSED, fractionComplete) {
+      return function(/*UNUSED, */fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let displacement = ((correction * base(2 * t - 1) + 0.5) * length);
          return [
@@ -445,7 +428,7 @@ var SketchAnimation = (function() {
 
       let denominator = base(1);
 
-      return function(UNUSED, fractionComplete) {
+      return function(/*UNUSED, */fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let displacement = (base(t) / denominator) * length;
          return [
@@ -456,16 +439,17 @@ var SketchAnimation = (function() {
       };
    };
    
-   a.Animation = function(stepProcedure, args, timeToCompleteSeconds, doProvideElapsed) {
+   a.Animation = function(stepProcedure, /*args, */timeToCompleteSeconds, doProvideElapsed) {
       let that = this;
       this.prevTime = time;
-      this.args = args;
+      //this.args = args;
       this.timeToComplete = timeToCompleteSeconds;
       this.elapsedTime = 0;
       this.stepProcedure = stepProcedure;
       this.isReversed = false;
 
-      if (doProvideElapsed === undefined || !doProvideElapsed) {
+      // TRACK INTERNAL ELAPSED TIME AND TIME DIFFERENCES
+      if (doProvideElapsed === undefined || doProvideElapsed === null || !doProvideElapsed) {
          this.step = function() {
             let currTime = time;
             let dT = currTime - this.prevTime;
@@ -479,12 +463,12 @@ var SketchAnimation = (function() {
             }
 
             let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure(this.args, (this.isReversed) ? 1 - fractionComplete : fractionComplete);
+            let nextPt = this.stepProcedure(/*this.args, */(this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };
       }
-      else {
+      else { // ALTERNATIVE: USE CHALKTALK SKETCH TIME DIFFERENCES FOR ELAPSED TIME ( TODO decide which version is better default )
          this.step = function(elapsed) {
             this.elapsedTime += elapsed;
 
@@ -495,7 +479,7 @@ var SketchAnimation = (function() {
             }
 
             let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure(this.args, (this.isReversed) ? 1 - fractionComplete : fractionComplete);
+            let nextPt = this.stepProcedure(/*this.args, */(this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };         
@@ -510,6 +494,9 @@ var SketchAnimation = (function() {
          this.isReversed = !this.isReversed;
       };
    };
+
+   // TODO IS THERE A HELPFUL WAY TO SYNCHRONIZE MULTIPLE ANIMATION OBJECTS 
+   // TO GUARANTEE THAT A FUNCTION PROCEEDS ONLY AFTER a, b, and c ANIMATIONS TERMINATE?
 
    // a.Synchronizer = function(animations) {
    //    this.animations = [];

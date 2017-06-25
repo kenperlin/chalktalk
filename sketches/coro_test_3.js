@@ -40,12 +40,12 @@ function() {
       let adjust = 2;
       // ARRAY OF SKETCHES THROUGH WHICH THIS EXAMPLE CYCLES
       let ani = [
-         new SketchAnimation.Animation( // new version of arg passing that generates functions 
+         new SketchAnimation.Animation(
             SketchAnimation.Type.LINE({
                start : new Location.Position(-1, -1, 0), 
                end : new Location.Position(1, 1, 0)
             }),
-            null, // will need to change arg list so it's just an object and this null becomes unnecessary
+            //null, // will need to change arg list so it's just an object and this null becomes unnecessary
             2,
             true
          ),
@@ -56,7 +56,7 @@ function() {
                control1 : new Location.Position(5, .5, 0), 
                control2 : new Location.Position(-2, -.5, 0),
             }),
-            null, 
+            //null, 
             2,
             true
          ),
@@ -67,7 +67,7 @@ function() {
                control1 : new Location.Position(-1 - adjust, -1 + adjust, 0), 
                control2 : new Location.Position(-1, + adjust, -1 - adjust, 0),
             }),
-            null, 
+            //null, 
             2,
             true
          ),
@@ -80,7 +80,7 @@ function() {
                startZ : 0,
                initialVelocity : 0
             }),
-            null,
+            //null,
             4,
             true
          ),
@@ -89,7 +89,7 @@ function() {
                start : new Location.Position(-1, 0, 0), 
                end : new Location.Position(-1, 5, 0)
             }),
-            null,
+            //null,
             1,
             true
          ),
@@ -103,7 +103,7 @@ function() {
                threshold : 0.01,
                velocityX : 4 // truthfully not very realistic horizontal component for now...
             }),
-            null,
+            //null,
             3.75,
             true
          ),
@@ -117,7 +117,7 @@ function() {
                   startZ : 0,
                   inX : 1,
                }),
-               null,
+               //null,
                2.25,
                true
 
@@ -138,7 +138,7 @@ function() {
                   return .5 * sin(3 * x);
                }
             }),
-            null,
+            //null,
             5,
             true
          ),
@@ -155,7 +155,7 @@ function() {
                   return .1 / ((x === 0) ? 0.00001 : x);
                }
             }),
-            null,
+            //null,
             3,
             true
          )
@@ -228,9 +228,6 @@ function() {
                drawSmile();
             }
 
-
-            //this.bird.update(this.ELAPSED);
-
             if (ret.finished) {
                break;
             }
@@ -257,7 +254,6 @@ function() {
             else {
                drawSmile();
             }
-            //this.bird.update(this.ELAPSED);
 
             yield;
          }
@@ -275,23 +271,17 @@ function() {
          Bound.drawRect
       );
 
-      this.bird = new Bird();
       this.loop = this.animationLoop();
    };
    this.ELAPSED = 0;
    this.render = function(elapsed) {
       _g.save();
       color("red");
-      mCurve([[-1, 1], [1, 1]]);
-      mCurve([[1, 1], [1, -1]]);
-      mCurve([[1, -1], [-1, -1], [-1, 1]]);
+      let scaleOut = 0;
+      mCurve([[-1 -scaleOut, 1 + scaleOut], [1 + scaleOut, 1 + scaleOut]]);
+      mCurve([[1 + scaleOut, 1 + scaleOut], [1 + scaleOut, -1 - scaleOut]]);
+      mCurve([[1 + scaleOut, -1 - scaleOut], [-1 - scaleOut, -1 - scaleOut], [-1 - scaleOut, 1 + scaleOut]]);
       _g.restore();
-
-   this.bird.legLength  = this.stretch('leg length' , (.2 * S(2).height) / 0.2 );
-   this.bird.bodyLength = this.stretch('body length', (.2 * S(1).height) / 0.15);
-   this.bird.headWidth  = this.stretch('head width' , (.2 * S(0).width)  / 0.15);
-   this.bird.headHeight = 0.2;
-   //this.bird.headHeight = this.stretch('head height', (S(0).height) / 0.1 );
 
       this.afterSketch(function() {
          this.ELAPSED = elapsed;

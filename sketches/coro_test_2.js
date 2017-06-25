@@ -107,16 +107,25 @@ function() {
          return "Yay this is working";
       });
 
-      this.ani = new SketchAnimation.Path(SketchAnimation.LINE, {start : new Location.Position(-1, -1, -1), end : new Location.Position(1, 1, 1)}, 5);
+      this.ani = new SketchAnimation.Animation(
+         SketchAnimation.Type.LINE({
+            start : new Location.Position(-1, -1, -1), 
+            end : new Location.Position(1, 1, 1)
+         }),
+         //null,
+         5,
+         false
+      );
       this.aniB = new SketchAnimation.Path(
-         SketchAnimation.BEZIER_CUBIC, 
-         {
+         SketchAnimation.Type.BEZIER_CUBIC({
             start : new Location.Position(1, 1, -1), 
             end : new Location.Position(-1, -1, 1),
             control1 : new Location.Position(-.5 * FACTOR, -.5 * FACTOR, -.5 * FACTOR),
             control2 : new Location.Position(.5 * FACTOR, .5 * FACTOR, .5 * FACTOR),
-         }, 
-         7
+         }),
+         //null, 
+         7,
+         false
       );
    };
 
