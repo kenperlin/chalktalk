@@ -26,14 +26,14 @@ function() {
       function() {
          this.blocked = false;
       }
-   ]
+   ];
 
    this.onSwipe[6] = [
       "toggle arrow",
       function() {
          this.showArrow = !this.showArrow;
       }
-   ]
+   ];
 
    this.animationLoop = function*(args) {
       let idx = 0;
