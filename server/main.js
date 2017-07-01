@@ -234,5 +234,5 @@ app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
 // Debug
 holojam.on('tick', (a, b) => {
-  console.log('VR: [ ' + a[0] + ', ' + b[0] + ' ]');
+  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
 });
