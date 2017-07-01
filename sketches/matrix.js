@@ -39,13 +39,6 @@ function() {
    this.onSwipe[4] = ['no\nrow'       , function() { this.row = -1; }];
    this.onSwipe[6] = ['no\ncolumn'    , function() { this.col = -1; }];
 
-   function sketchMatrix() {
-      mCurve([[1,1],[1,-1],[-1,-1]]);
-      lineWidth(1);
-      mLine([ .5,1],[ .5,-1]);
-      mLine([-1,-.5],[1,-.5]);
-   }
-
    this.render = function(elapsed) {
 
       this.afterSketch(function() {
@@ -75,55 +68,33 @@ function() {
 
       var type = this.labels[this.selection];
 
-      switch (type) {
-      case 'Matrix':
-         sketchMatrix();
-         break;
-      case 'bezier':
-         this.duringSketch(function() {
-            mLine([-1, 1],[-1,-1]);
-            mCurve( [[-1,1],[-.5,1]].concat(makeOval(-1,0,1,1,16,PI/2,-PI/2))
-                                    .concat([[-.5,0],[-1,0]]) );
-            mCurve( [[-1,0],[-.25,0]].concat(makeOval(-.75,-1,1,1,16,PI/2,-PI/2))
-                                     .concat([[-.25,-1],[-1,-1]]) );
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      case 'bspline':
-         this.duringSketch(function() {
-            mLine([-1,-1],[-1, 1]);
-            mCurve( [[-1,1],[-.5,1]].concat(makeOval(-1,0,1,1,16,PI/2,-PI/2))
-                                    .concat([[-.5,0],[-1,0]]) );
-            mCurve( [[-1,0],[-.25,0]].concat(makeOval(-.75,-1,1,1,16,PI/2,-PI/2))
-                                     .concat([[-.25,-1],[-1,-1]]) );
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      case 'hermite':
-         this.duringSketch(function() {
-            mLine([-1, 1],[-1,-1]);
-            mLine([-1, 0],[ 1, 0]);
-            mLine([ 1, 1],[ 1,-1]);
-         });
-         this.afterSketch(function() {
-            sketchMatrix();
-         });
-         break;
-      }
+      this.duringSketch(function() {
+         mCurve([[1,1],[1,-1],[-1,-1]]);
+         switch (type) {
+         case 'Matrix':
+            mCurve([[.5,1],[.5,-.5],[-1,-.5]]);
+            break;
+         case 'bezier':
+            mCurve([[-.5,1],[-.5,-.5],[-.5,.5],[.5,.5],[.5,-.5],[-.5,-.5]]);
+            break;
+         case 'bspline':
+            mCurve([[-.5,1],[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]]);
+            break;
+         case 'hermite':
+            mCurve([[-.5,1],[-.5,-.5],[-.5,.5],[.5,.5],[.5,-.5]]);
+            break;
+         }
+      });
 
       this.afterSketch(function() {
          var i, x, y, z, sub, val, vals, value, col, row, out;
 
-         mLine([-1, .5],[1,  .5]);
-         mLine([-1,  0],[1,   0]);
-         mLine([-.5, 1],[-.5,-1]);
-         mLine([  0, 1],[  0,-1]);
+         for (let t = -.5 ; t <= .5 ; t += .5) {
+            mLine([-1, t],[1, t]);
+            mLine([ t,-1],[t, 1]);
+         }
          lineWidth(2);
-         mCurve([[-1,-1],[-1,1],[1,1]]);
+         mClosedCurve([[-1,-1],[-1,1],[1,1],[1,-1]]);
 
          out = [];
 
@@ -225,7 +196,8 @@ function() {
 
    this.output = function() {
       var type = this.labels[this.selection];
-      var outValue = type != 'Matrix' || this.inValues.length > 0 ? this.matrixValues : this.identityMatrix;
+      var outValue = type != 'Matrix' || this.inValues.length > 0 ? this.matrixValues :
+                     isMatrixArray(this.inValue[0]) ? this.inValue[0] : this.identityMatrix;
       var i = this.labels[this.selection] == 'Matrix' ? 1 : 0;
       if (isDef(this.inValue[i]))
          outValue = mult(outValue, this.inValue[i]);

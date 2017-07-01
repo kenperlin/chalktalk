@@ -29,7 +29,7 @@ function() {
       this.afterSketch(function() {
          var e = this.pointToPixelMatrix.elements;
          var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
-         var i, V, x, y, z, inValue, edges;
+         var c, i, V, x, y, z, inValue, edges;
         
          textHeight(this.mScale(.1));
          mText("x=-1",[-1.2,0,0],.5,.5);

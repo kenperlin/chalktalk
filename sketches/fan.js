@@ -49,4 +49,7 @@ function() {
       });
       m.restore();
    }
+   this.output = function() {
+      return this.angle;
+   }
 }

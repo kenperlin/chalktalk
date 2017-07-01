@@ -10,7 +10,7 @@ function() {
 
    this.output = function() {
       var out = [];
-      for (key in midi.downKeys)
+      for (let key in midi.downKeys)
          out.push(midi.frequencyFromNoteNumber(key));
       return out.length > 0 ? out : 0;
    }

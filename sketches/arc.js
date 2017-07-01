@@ -5,7 +5,7 @@ function() {
    this.angle = [0, PI / 4];
    this.showRadii = true;
    this.labelsMode = false;
-   this.onCmdClick = ['toggle lagels', function() { this.labelsMode = (this.labelsMode + 1) % 4; }];
+   this.onCmdClick = ['toggle labels', function() { this.labelsMode = (this.labelsMode + 1) % 4; }];
    this.onClick = ['toggle radii', function() { this.showRadii = ! this.showRadii; }];
    this.pt = function(angle) { return [ cos(angle), sin(angle) ]; }
    this.onPress = function(p) {
