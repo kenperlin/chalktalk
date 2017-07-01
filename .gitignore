@@ -1,6 +1,8 @@
 .DS_Store
 *.swp
+*.swo
 *~
+
 node_modules
 node.log
 .vimrc
