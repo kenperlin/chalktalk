@@ -1,3 +1,7 @@
+'use strict'
+ // TODO: Write tests!
+
+
 var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
@@ -5,13 +9,14 @@ var fs = require("fs");
 var http = require("http");
 var path = require("path");
 
+const holojam = require('holojam-node')(['relay']);
 
 var ttDgram = require('dgram');
 var ttServer = ttDgram.createSocket('udp4');
 ttServer.on('listening', function () { });
 ttServer.on('message', function (message, remote) { ttData.push(message); });
 ttServer.bind(9090, '127.0.0.1');
-ttData = [];
+let ttdata = [];
 
 
 var app = express();
@@ -20,6 +25,20 @@ var port = process.argv[2] || 11235;
 // serve static files from main directory
 app.use(express.static("./"));
 
+
+//Displaylist header reader
+function readHeader(data) {
+    let header = data.toString('ascii', 1, 2);
+    header += data.toString('ascii', 0, 1);
+    header += data.toString('ascii', 3, 4);
+    header += data.toString('ascii', 2, 3);
+    header += data.toString('ascii', 5, 6);
+    header += data.toString('ascii', 4, 5);
+    header += data.toString('ascii', 7, 8);
+    header += data.toString('ascii', 6, 7);
+    return header;
+ }
+ 
 // handle uploaded files
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -168,41 +187,88 @@ String.prototype.endsWith = function(suffix) {
 String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
-
 // CREATE THE HTTP SERVER
 var httpserver = http.Server(app);
 
-// WEBSOCKET ENDPOINT SETUP
 try {
-   var WebSocketServer = require("ws").Server;
-   var wss = new WebSocketServer({ port: 22346 });
-   var websockets = [];
+   let WebSocket = require('ws').Server;
+   let wss = new WebSocket({ port: 22346 });
+   let sockets = [];
 
-   wss.on("connection", function(ws) {
+   wss.on('connection', ws => {
+      for (ws.index = 0; sockets[ws.index]; ws.index++);
+      sockets[ws.index] = ws;
 
-      for (ws.index = 0 ; websockets[ws.index] ; ws.index++)
-	 ;
-      websockets[ws.index] = ws;
+      // Communicate with first connection only
+      if (ws.index == 0) {
+         // Initialize
+         ws.send(JSON.stringify({global: "displayListener", value: true }));
 
-      ws.on("message", function(msg) {
-         for (var index = 0 ; index < websockets.length ; index++)
-            if (index != ws.index)
-               websockets[index].send(msg);
-      });
+         // Broadcast curve data
+         ws.on('message', data => {
+            if (readHeader(data) == 'CTdata01') {
+               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  label: 'Display', bytes: data
+               }]));
+            }
+         });
 
-      ws.on("close", function() {
-         // REMOVE THIS WEBSOCKET
-         websockets.splice(ws.index, 1);
-      });
+         /* VR Input (deprecated events) */
+
+         holojam.on('mouseEvent', flake => {
+            var type = flake.ints[0];
+            type = (type == 0 ? "onmousedown"
+               : (type == 1 ? "onmousemove" : "onmouseup"));
+
+            var e = {
+               eventType: type,
+               event: {
+                  button: 3,
+                  clientX: flake.floats[0],
+                  clientY: flake.floats[1]
+               }
+            }
+
+            ws.send(JSON.stringify(e));
+         });
+
+         holojam.on('keyEvent', (flake) => {
+            var type = flake.ints[1];
+            type = (type == 0 ? "onkeydown" : "onkeyup");
+
+            var e = {
+               eventType: type,
+               event: {
+                  keyCode: flake.ints[0] + 48
+            }};
+
+            ws.send(JSON.stringify(e));
+         });
+
+         holojam.on('update', (flakes, scope, origin) => {
+            //
+         });
+      }
+
+      // Remove this sockets
+      ws.on('close', () => sockets.splice(ws.index, 1));
    });
 } catch (err) {
-   console.log("\x1b[31mCouldn't load websocket library. Disabling event broadcasting."
-         + " Please run 'npm install' from Chalktalk's server directory\x1b[0m");
+   console.log(
+      '\x1b[31mCouldn\'t load websocket library. Disabling event broadcasting.'
+      + ' Run \'npm install\' from Chalktalk\'s server directory\x1b[0m'
+   );
 }
+
 
 // START THE HTTP SERVER
 httpserver.listen(parseInt(port, 10), function() {
    console.log("HTTP server listening on port %d", httpserver.address().port);
+});
+
+// Debug
+holojam.on('tick', (a, b) => {
+  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
 });
 
 
