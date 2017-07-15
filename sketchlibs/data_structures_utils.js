@@ -1218,6 +1218,69 @@ let LinkedList = (function() {
    return linkedlist;
 })();
 
+let State = (function() {
+   let s = {};
+
+   s.StateMachine = function(args) {
+      this.mapping = args.mapping;
+      this.stateTypes = args.stateTypes;
+      this.object = args.object;
+
+      this.update = function(args) {
+         // if the transition ends, 
+         // the state should be updated based on a value returned (the value is a transition type),
+         // note that a "transition" might be an empty function or just an immediate final state without a real transition
+      
+         // usually the args.stateType argument will be ignored during an operation ... 
+         // for stepwise operation there will probably need to be a way to block and unblock (animations) -- an extra argument?
+      }
+
+      // HOW THIS MAY WORK:
+      /*
+      // dictionary of state / operation types:
+      {
+         IDLE : 1
+         ADD_FRONT : 2 
+         REMOVE : 3
+         MERGE : 4
+         REVERSE : 5
+         ...
+      }
+      // mapping of functions (generators) for transition (from -> to) and (to -> from) 
+         (more complex structures may use this to greater effect than the linked list)
+      {
+         IDLE : {
+            ADD_FRONT : function(...) { // should be a generator
+               // transition from default state to add_front state
+            },
+            REMOVE : function(...) { // should be a generator
+               // transition from default state to remove state
+            },
+            ...
+         },
+         ADD_FRONT : {
+            IDLE : function(...) { // should be a generator
+               // transition from add_front state to default state
+            }
+         },
+         REMOVE : {
+            IDLE : function(...) { // should be a generator
+               // transition from from state to default state
+            }   
+         }
+         ...
+      }
+      */
+   };
+
+   // DEFINE transition functions (register these) between states.
+   // If "add front" is at [0, 1] and "default" is at [0, 0], 
+   // then a move from default to add front calls a generator for a transition animation
+
+
+   return s;
+})();
+
 // let SketchState = (function() {
 //    let st = {};
 //    st.SketchState = function(states, startIndices) {
