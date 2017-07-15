@@ -313,11 +313,13 @@ let Bound = (function() {
 let Pointer = (function() {
    let p = {};
 
-   p.PointerGraphic = function(posFromFunc, posToFunc, name, bound, pos) {
-      this.getPosFrom = posFromFunc;
-      this.getPosTo = posToFunc;
-      this.name = name;
-      this.pos = pos;
+   p.PointerGraphic = function(args) {
+      this.getPosFrom = args.posFromFunc;
+      this.getPosTo = args.posToFunc;
+      this.name = args.name;
+      this.pos = args.pos;
+
+      let bound = args.bound;
 
       if (bound === undefined || bound === null) {
          this._hasBound = false;
@@ -581,33 +583,34 @@ let LinkedList = (function() {
 
       this.headGraphic = (function() {
          const h = {};
-         h.ptr = new Pointer.PointerGraphic(
-                     // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
-                     function(pointer, node, boundPos) {
-                        // if (!pointer.hasBound()) {
-                        //    return pointer.pos;
-                        // }
+         h.ptr = new Pointer.PointerGraphic({
+            // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
+            posFromFunc : function(pointer, node, boundPos) {
+                              // if (!pointer.hasBound()) {
+                              //    return pointer.pos;
+                              // }
 
-                        // let pPos = pointer.pos;
+                              // let pPos = pointer.pos;
 
-                        // return boundPos.plus(pPos);
-                        return pointer.pos;
-                     },
-                     // PROCEDURE TO LOCATE POINTER IN (POINTEE) POSITION DYNAMICALLY
-                     function(pointer, node) {
-                        if (node !== null) {
-                           return node.getPointeePos();
-                        }
-                        return new Location.Position(0 - .25, 0, 0);
-                     },
-                     "head",
-                     new Bound.BoundRect(
+                              // return boundPos.plus(pPos);
+                              return pointer.pos;
+                           },
+            // PROCEDURE TO LOCATE POINTER IN (POINTEE) POSITION DYNAMICALLY
+            posToFunc : function(pointer, node) {
+                           if (node !== null) {
+                              return node.getPointeePos();
+                           }
+                           return new Location.Position(0 - .25, 0, 0);
+                        },
+            name : "head",
+            bound : new Bound.BoundRect(
                         Location.ObjectCenter(new Dimension.Dimension(.25, .5, 0)).minusEqualsArr([1, 1, 0]),
                         new Dimension.Dimension(.25, .5, 0),
                         Bound.drawRect
                      ),
-                     new Location.Position(-1, -1, 0)
-         );
+            pos : new Location.Position(-1, -1, 0)
+
+         });
 
          h.draw = function(_color) {
             if (color !== undefined) {
@@ -657,33 +660,33 @@ let LinkedList = (function() {
                }
             ],
             [
-               new Pointer.PointerGraphic(
+               new Pointer.PointerGraphic({
                   // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
-                  function(pointer, node, boundPos) {
-                     if (!pointer.hasBound()) {
-                        return pointer.pos;
-                     }
+                  posFromFunc : function(pointer, node, boundPos) {
+                                    if (!pointer.hasBound()) {
+                                       return pointer.pos;
+                                    }
 
-                     let pPos = pointer.pos;
+                                    let pPos = pointer.pos;
 
-                     return boundPos.plus(pPos);
-                  },
+                                    return boundPos.plus(pPos);
+                                 },
                   // PROCEDURE TO LOCATE POINTER IN (POINTEE) POSITION DYNAMICALLY
-                  function(pointer, node) {
-                     if (node.next !== null) {
-                        return node.next.getPointeePos();
-                     }
-                     let pos = node.bound.pos; 
-                     return new Location.Position(pos.x + (that.HORIZONTAL_OFFSET * .8), /*pos.y - (pointer.bound.dim.h / 2)*/ 0, 0);
-                  },
-                  "next",
-                  new Bound.BoundRect(
+                  posToFunc : function(pointer, node) {
+                                 if (node.next !== null) {
+                                    return node.next.getPointeePos();
+                                 }
+                                 let pos = node.bound.pos; 
+                                 return new Location.Position(pos.x + (that.HORIZONTAL_OFFSET * .8), /*pos.y - (pointer.bound.dim.h / 2)*/ 0, 0);
+                              },
+                  name : "next",
+                  bound : new Bound.BoundRect(
                      Location.ObjectCenter(defaultDims),
                      new Dimension.Dimension(.25, .5, DEPTH),
                      Bound.drawRect
                   ),
-                  new Location.Position(0.125, -0.25, 0)         
-               ),
+                  pos : new Location.Position(0.125, -0.25, 0)         
+               }),
             ]
          );
 
