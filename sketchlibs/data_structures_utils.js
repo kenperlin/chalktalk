@@ -448,12 +448,12 @@ let Pointer = (function() {
 let DSNode = (function() {
    let node = {};
    // BASIC INTERFACE FOR NODE, MAY CHANGE
-   node.Node = function(container, payload, bound, drawableElements, pointers) {
-      this.container = container;
-      this.payload = payload;
-      this.bound = bound;
-      this.drawableElements = drawableElements;
-      this.pointers = pointers;
+   node.Node = function(args) {
+      this.container = args.container;
+      this.payload = args.payload;
+      this.bound = args.bound;
+      this.drawableElements = args.drawableElements;
+      this.pointers = args.pointers;
    };
 
    return node;
@@ -462,8 +462,8 @@ let DSNode = (function() {
 let LinkedList = (function() {
    const linkedlist = {};
 
-   linkedlist.SinglyLinkedNode = function(container, payload, bound, drawableElements, pointers) {
-      DSNode.Node.call(this, container, payload, bound, drawableElements, pointers);
+   linkedlist.SinglyLinkedNode = function(args) {
+      DSNode.Node.call(this, args);
       this.next = null;
 
       let that = this;
@@ -638,18 +638,18 @@ let LinkedList = (function() {
                [THREE.Math.randFloat(-.1, .1), THREE.Math.randFloat(-.4, .4), THREE.Math.randFloat(-.4, 0)] // bug with moving towards camera?
          );
 
-         let newNode = new LinkedList.SinglyLinkedNode(
+         let newNode = new LinkedList.SinglyLinkedNode({
             // POINTER TO THE CONTAINER (e.g. list)
-            that,
+            container : that,
             // PAYLOAD STORED
-            payload,
+            payload : payload,
             // BOUND FOR THE NODE
-            new Bound.BoundRect(
+            bound : new Bound.BoundRect(
                boundPos,
                defaultDims,
                Bound.drawRect
             ),
-            [
+            drawableElements : [
                {
                   draw : function() {
                      _g.save();
@@ -659,7 +659,7 @@ let LinkedList = (function() {
                   }
                }
             ],
-            [
+            pointers : [
                new Pointer.PointerGraphic({
                   // PROCEDURE TO LOCATE POINTER OUT POSITION DYNAMICALLY
                   posFromFunc : function(pointer, node, boundPos) {
@@ -688,7 +688,7 @@ let LinkedList = (function() {
                   pos : new Location.Position(0.125, -0.25, 0)         
                }),
             ]
-         );
+         });
 
          return newNode;
       }
