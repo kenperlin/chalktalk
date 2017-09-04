@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Timer';
    this.initTimer = function() { this.timerTime = time; this.timerT = 0; }
    this.onCmdClick = function() { this.initTimer(); }
@@ -14,7 +13,8 @@ function() {
       this.afterSketch(function() {
          var s, c;
          mLine([0,0],[.6 * sin(minutesAngle), .6 * cos(minutesAngle)]);
-         this.timerT += def(this.inValues_DEPRECATED_PORT_SYSTEM[0], 1) * (time - this.timerTime);
+         let rate = this.inputs.hasValue(0) ? this.inputs.value(0) : 1;
+         this.timerT += rate * (time - this.timerTime);
          this.timerTime = time;
          for (var i = 0 ; i < 12 ; i++) {
             s = sin(i * TAU / 12);
@@ -30,6 +30,10 @@ function() {
                [0,-.4], .5,.5);
       });
    }
-   this.output = function() { return this.timerT; }
+
+   this.defineInput(AT.Float);
+   this.defineOutput(AT.Seconds, function() {
+      return this.timerT;
+   });
 }
 
