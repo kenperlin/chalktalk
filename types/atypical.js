@@ -176,7 +176,11 @@ function AtypicalModuleGenerator() {
       return value;
    }
 
-   // TODO: DOC
+   // Given a type, returns a nicely-formatted version of its type name.
+   // This is important for generic types. By default, generic types end up with typenames like
+   // "$Function_$$Array_$Float$_$$Array_$$Pair_$Int$Float$_$_$_", which is very hard to read. 
+   // This function instead prints them out in a more human-readable format such as 
+   // "Function(Array(Float), Array(Pair(Int, Float)))".
    AT.prettyTypename = function(type) {
       if (!type.prototype.genericType) {
          return type.name;
