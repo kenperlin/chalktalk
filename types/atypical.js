@@ -504,22 +504,33 @@ function AtypicalModuleGenerator() {
    //                 changeTypeParameters: If defined, this allows generic types to be
    //                                       automatically convertible between different subtypes
    //                                       of the same generic type if their type paramters are
-   //                                       convertible. For example, if this function is defined
-   //                                       on our Pair example above, type A is convertible to
-   //                                       type X, and type B is convertible to type Y, then
-   //                                       Generic(A, B) will be automatically convertible to
-   //                                       Generic(X, Y) by using this function as the conversion
-   //                                       function.
-   //                                       Only generic types with the same number of type
-   //                                       parameters will be set as automatically convertible.
-   //                                       BY DEFAULT ONLY TODO EXPAND ON THIS
-   //
+   //                                       convertible.
+   //                                       By default, only generic types with the same number of
+   //                                       type parameters, where each type parameter in the
+   //                                       source type is convertible to its corresponding
+   //                                       parameter in the destination type, will be set as
+   //                                       automatically convertible. For example, if this
+   //                                       function is defined on our Pair example above, type A
+   //                                       is convertible to  type X, and type B is convertible
+   //                                       to type Y, then Pair(A, B) will be automatically
+   //                                       convertible to Pair(X, Y) by using this function as
+   //                                       the conversion function.
+   //                                       This behaviour can be changed by defining the
+   //                                       canChangeTypeParameters function.
    //                                       If this is defined, it MUST be defined as a function
    //                                       of one argument, taking in only an array of the new
-   //                                       type parameters, and returning a new instance of the 
+   //                                       type parameters, and returning a new instance of the
    //                                       converted object of the new type.
    //
-   //                 canChangeTypeParameters: TODO DOC THIS
+   //                 canChangeTypeParameters: This function determines under which conditions
+   //                                          different subtypes of the same generic types are
+   //                                          to be convertible to each other. This allows for
+   //                                          customization of the conditions under which 
+   //                                          automatic generic conversion is possible.
+   //                                          If defined, this must be a function of one argument
+   //                                          taking in only the array of the new type parameters,
+   //                                          returning only true if the conversion is allowed
+   //                                          and false if it is not.
    //
    //                 convertToTypeParameter, convertFromTypeParameter:
    //                      These are optional functions that allow concrete subtypes of this
