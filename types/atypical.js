@@ -1458,13 +1458,10 @@ function AtypicalModuleGenerator() {
                + "no values and take no arguments.");
          }
          this._set("func", func);
+         this._set("call", func);
       },
       toPrimitive: function() {
-         let that = this;
-         return function() {
-            let args = Array.from(arguments);
-            return that.call.apply(that, args);
-         };
+         return this.call;
       },
       // Can convert from return value (makes it a constant function)
       canConvertFromTypeParameter: function(index) {
@@ -1552,8 +1549,8 @@ function AtypicalModuleGenerator() {
 
          return AT.wrapOrConvertValue(returnType, returnValue);
       },
-      // TODO: doc this
-      call: function() {
+      // TODO: doc this, does type checking for return values
+      callSafely: function() {
          let returnValue = this.callWrapped.apply(this, arguments);
          // If it's a primitive, wrapping it and unwrapping it is the easiest way
          // to do type verification.

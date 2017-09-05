@@ -1223,7 +1223,7 @@ window.AtypicalTests = [
          procedureCalled = true;
       });
       T.assert(!procedureCalled);
-      procedure.call();
+      procedure.callSafely();
       T.assert(procedureCalled);
 
       // Disallow empty type parameters
@@ -1241,32 +1241,35 @@ window.AtypicalTests = [
       }
 
       let floatAdder = new (AT.Function(AT.Float, AT.Float, AT.Float))(additionFunc);
-      T.assert(floatAdder.call(3.1, 4.3) === 7.4);
+      T.assert(floatAdder.callSafely(3.1, 4.3) === 7.4);
       let intAdder = new (AT.Function(AT.Float, AT.Float, AT.Int))(additionFunc);
-      T.assert(intAdder.call(3.1, 4.3) === 7);
+      T.assert(intAdder.callSafely(3.1, 4.3) === 7);
+      // Regular calls don't apply any type conversions for performance purposes
+      T.assert(intAdder.call(3.1, 4.3) === 7.4);
+      T.assert(intAdder.func(3.1, 4.3) === 7.4);
 
       let stringifier = new (AT.Function(AT.Float, AT.String))(function (f) {
          return (f + 1) + " is the answer";
       });
-      T.assert(stringifier.call(5) === "6 is the answer");
+      T.assert(stringifier.callSafely(5) === "6 is the answer");
 
       // Ensure the right thing happens even if you return wrapped values
       let stringifier2 = new (AT.Function(AT.Float, AT.String))(function (f) {
          return new AT.String((f + 1) + " is the answer");
       });
-      T.assert(stringifier2.call(5) === "6 is the answer");
+      T.assert(stringifier2.callSafely(5) === "6 is the answer");
 
-      T.assert(stringifier.call(new AT.Float(5)) === "6 is the answer");
-      T.assert(stringifier2.call(new AT.Float(5)) === "6 is the answer");
+      T.assert(stringifier.callSafely(new AT.Float(5)) === "6 is the answer");
+      T.assert(stringifier2.callSafely(new AT.Float(5)) === "6 is the answer");
 
       // Arguments and return values should automatically convert
       let intMaker = new (AT.Function(AT.Int, AT.String))(function(x) {
          return x - 1;
       });
-      T.assert(intMaker.call(3.2) === "2");
-      T.assert(intMaker.call(3.45) === "2");
-      T.assert(intMaker.call(new AT.Float(3.45)) === "2");
-      T.assert(intMaker.call(new AT.String("3")) === "2");
+      T.assert(intMaker.callSafely(3.2) === "2");
+      T.assert(intMaker.callSafely(3.45) === "2");
+      T.assert(intMaker.callSafely(new AT.Float(3.45)) === "2");
+      T.assert(intMaker.callSafely(new AT.String("3")) === "2");
 
       // Values can be converted to constant functions that return them
       T.assert(AT.canConvert(AT.Int, AT.Function(AT.Int)));
@@ -1275,7 +1278,7 @@ window.AtypicalTests = [
       T.assert(AT.canConvert(AT.String, AT.Function(AT.Float, AT.Int, AT.String)));
       let intValue = new AT.Int(3);
       let constantIntFunc = intValue.convert(AT.Function(AT.Int));
-      T.assert(constantIntFunc && constantIntFunc.call() === 3);
+      T.assert(constantIntFunc && constantIntFunc.callSafely() === 3);
 
       // Functions of fewer arguments with the same return value can be converted to functions
       // of more arguments
@@ -1284,7 +1287,7 @@ window.AtypicalTests = [
       T.assert(AT.canConvert(AT.Function(AT.String), AT.Function(AT.Float, AT.Int, AT.String)));
       let intFunc = new (AT.Function(AT.Int, AT.Int))(function(x) { return x + 1; });
       let intFunc2 = intFunc.convert(AT.Function(AT.Int, AT.String, AT.Int));
-      T.assert(intFunc2 && intFunc2.call(2, "potato") === 3);
+      T.assert(intFunc2 && intFunc2.callSafely(2, "potato") === 3);
       // But functions of more arguments cannot be converted to functions of fewer arguments.
       T.assert(!AT.canConvert(AT.Function(AT.Int, AT.Int, AT.Int), AT.Function(AT.Int, AT.Int)));
 
@@ -1293,12 +1296,12 @@ window.AtypicalTests = [
       let makeBiggerFloat = new (AT.Function(AT.Float, AT.Float))(function (x) {
          return x + 0.5;
       });
-      T.assert(makeBiggerFloat.call(2.1) === 2.6);
+      T.assert(makeBiggerFloat.callSafely(2.1) === 2.6);
       T.assert(AT.canConvert(AT.Function(AT.Float, AT.Float), AT.Function(AT.Int, AT.Int)));
       let makeBiggerInt = makeBiggerFloat.convert(AT.Function(AT.Int, AT.Int));
       let wrappedIntResult = makeBiggerInt.callWrapped(1.7);
       T.assert(wrappedIntResult instanceof AT.Int && wrappedIntResult.value === 3);
-      T.assert(makeBiggerInt.call(1.7) === 3);
+      T.assert(makeBiggerInt.callSafely(1.7) === 3);
 
       // But types are only compatible in certain directions: covariantly in the return type
       // and contravariantly in the argument types
