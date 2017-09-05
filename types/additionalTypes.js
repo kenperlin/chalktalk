@@ -207,7 +207,7 @@
          try {
             // Try just evaluating the string directly
             let func = new FuncType(exp.eval());
-            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            func.callSafely.apply(func, defaultArguments); // Call it to test if it works with no errors
             return func;
          } catch(error) {}
          try {
@@ -216,14 +216,14 @@
             // expression "(function (x) { return x; })", which actually gives us a function
             // when passed through eval.)
             let func = new FuncType(eval("(" + exp.str + ")"));
-            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            func.callSafely.apply(func, defaultArguments); // Call it to test if it works with no errors
             return func;
          } catch(error) {}
          try {
             // Lastly, try wrapping the string in a function expression with the given arguments
             let func = new FuncType(eval("(function(" + argString + ") { return "
                + exp.str + "})"));
-            func.call.apply(func, defaultArguments); // Call it to test if it works with no errors
+            func.callSafely.apply(func, defaultArguments); // Call it to test if it works with no errors
             return func;
          } catch(error) {}
          // Forget it, just return a default function.
