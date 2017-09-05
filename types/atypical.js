@@ -1468,9 +1468,16 @@ function AtypicalModuleGenerator() {
          return index === this.typeParameters.length - 1;
       },
       convertFromTypeParameter: function(index, value) {
-         return new this.type(function() {
-            return value;
-         });
+         if (value.isPrimitive()) {
+            return new this.type(function() {
+               return value.toPrimitive();
+            });
+         }
+         else {
+            return new this.type(function() {
+               return value;
+            });
+         }
       },
       changeTypeParameters: function(newTypes) {
          let sourceFunction = this;
