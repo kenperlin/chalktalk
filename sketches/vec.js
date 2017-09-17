@@ -2,6 +2,9 @@ function() {
    this.nValues = function() {
       return 2 + floor(this.selection / 2);
    }
+   this.isColumnVector = function() {
+      return this.axis() === 1;
+   }
    this.axis = function() {
       return 1 - this.selection % 2;
    }
@@ -94,11 +97,10 @@ function() {
    this.defineInput(AT.Matrix);
 
    this.defineOutput(AT.Matrix, function() {
-      let myMatrix;
-      switch(this.axis()) {
-      case 0: myMatrix = new AT.Matrix([this.value]);
-      case 1: myMatrix = new AT.Matrix(this.value.map(function(n) { return [n]; }));
-      }
+      let myMatrix = this.isColumnVector()
+         ? new AT.Matrix(this.value.map(function(n) { return [n]; }))
+         : new AT.Matrix([this.value]);
+
       if (this.inputs.hasValue(0) && this.inputs.value(0).canMultiply(myMatrix)) {
          return this.inputs.value(0).times(myMatrix);
       }
