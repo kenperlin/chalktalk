@@ -1448,6 +1448,19 @@ window.AtypicalTests = [
       }
       T.assert(T.arraysEqual(mx6.values, someValues));
 
+      // Test multiplication of row vs. column vectors
+      let rowVector = new AT.Matrix([[1, 2, 3, 4]]);
+      let columnVector = new AT.Matrix([[5], [6], [7], [8]]);
+      T.assert(rowVector.canMultiply(columnVector));
+      let dotProduct = rowVector.times(columnVector);
+      T.assert(T.arraysEqual(dotProduct.values, [[70]]));
+      let otherProduct = columnVector.times(rowVector);
+      T.assert(T.arraysEqual(otherProduct.values,
+         [[5, 10, 15, 20],
+          [6, 12, 18, 24],
+          [7, 14, 21, 28],
+          [8, 16, 24, 32]]))
+
       // Conversion to flat array outputs it in column-major order
       let flatValues = [1, 4, 7, 10,   2, 5, 8, 11,   3, 6, 9, 12];
       T.assert(T.arraysEqual(mx4.toFlatArray(), flatValues));

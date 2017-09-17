@@ -1218,7 +1218,7 @@ function AtypicalModuleGenerator() {
             result[i] = new Array(other.numColumns());
             for (let j = 0; j < other.numColumns(); j++) {
                let element = 0;
-               for (let k = 0; k < this.numRows(); k++) {
+               for (let k = 0; k < this.numColumns(); k++) {
                   element += this.element(i, k) * other.element(k, j);
                }
                result[i][j] = element;
