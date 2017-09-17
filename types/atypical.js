@@ -1443,8 +1443,21 @@ function AtypicalModuleGenerator() {
       }
    });
 
-   // TODO: document function types (initial type parameters are arguments, last is return value)
-   // Functions should take in and return primitive values where possible
+   // Type representing a function or closure.
+   // The last type parameter is the return type of the function (can be AT.Void if the function
+   // returns nothing).
+   // All other type parameters are the types of the arguments to the functions.
+   //
+   // For example, AT.Function(AT.Int, AT.String) is the type of a function that takes in an
+   // Int and returns a String, whereas AT.Function(AT.Float, AT.Float, AT.Void) takes in two
+   // Float arguments and returns nothing.
+   //
+   // For types that are primitives, such as Float, Int, and String, the function used to
+   // construct this AT.Function object should both return and assume that it'll be receiving
+   // unwrapped primitive arguments, such as regular Javascript numbers and strings.
+   //
+   // Once constructed, you can use function.call(...) to call the wrapped function directly,
+   // or use function.callSafely(...) to call it while verifying the arguments' types.
    AT.defineGenericType({
       typename: "Function",
       init: function(func) {
@@ -1529,7 +1542,31 @@ function AtypicalModuleGenerator() {
          }
          return true;
       },
-      // TODO: doc this (returns wrapped return value)
+      // This calls the internal function with some type checking, making sure that the arguments
+      // are wrapped or converted to the correct Atypical type (and then unwrapped, if they're
+      // primitives), and that the return value is also the correct type (again, unwrapped if it's
+      // a primitive).
+      //
+      // Throws AT.ConstructionError if an argument is passed that cannot be converted to the
+      // correct type, or if the return value cannot be converted to the correct type.
+      callSafely: function() {
+         let returnValue = this.callWrapped.apply(this, arguments);
+         // If it's a primitive, wrapping it and unwrapping it is the easiest way
+         // to do type verification.
+         if (returnValue !== undefined && returnValue.isPrimitive()) {
+            return returnValue.toPrimitive();
+         }
+         else {
+            return returnValue;
+         }
+      },
+      // This calls the internal function with some type checking, making sure that the arguments
+      // are wrapped or converted to the correct Atypical type (and then unwrapped, if they're
+      // primitives), and that the return value is also the correct type. However, unlike
+      // callSafely, this always returns a wrapped value, even for primitive types.
+      //
+      // Throws AT.ConstructionError if an argument is passed that cannot be converted to the
+      // correct type, or if the return value cannot be converted to the correct type.
       callWrapped: function() {
          // Clean up arguments to make sure they're the right type (converting them to
          // primitive values where possible)
@@ -1555,18 +1592,6 @@ function AtypicalModuleGenerator() {
          }
 
          return AT.wrapOrConvertValue(returnType, returnValue);
-      },
-      // TODO: doc this, does type checking for return values
-      callSafely: function() {
-         let returnValue = this.callWrapped.apply(this, arguments);
-         // If it's a primitive, wrapping it and unwrapping it is the easiest way
-         // to do type verification.
-         if (returnValue !== undefined && returnValue.isPrimitive()) {
-            return returnValue.toPrimitive();
-         }
-         else {
-            return returnValue;
-         }
       }
    });
 
