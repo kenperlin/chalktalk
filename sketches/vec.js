@@ -2,6 +2,12 @@ function() {
    this.nValues = function() {
       return 2 + floor(this.selection / 2);
    }
+   this.nRows = function() {
+      return this.isColumnVector() ? this.nValues() : 1;
+   }
+   this.nColumns = function() {
+      return this.isColumnVector() ? 1 : this.nValues;
+   }
    this.isColumnVector = function() {
       return this.axis() === 1;
    }
@@ -15,6 +21,7 @@ function() {
       this.value = [1,0,0,0];
       this.row = 0;
       this.precision = 1;
+      this.hasControlInput = false;
       this.updateLength();
    }
 
@@ -84,6 +91,16 @@ function() {
          }
       }
       this.afterSketch(function() {
+         // If first input is the same dimensions as this vector, use it as a control input.
+         this.hasControlInput = false;
+         if (this.inputs.hasValue(0)) {
+            let input = this.inputs.value(0);
+            if (input.numRows() === this.nRows() && input.numColumns() === this.nColumns()) {
+               this.value = input.toFlatArray();
+               this.hasControlInput = true;
+            }
+         }
+
          textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nValues() - 1) / (1 + this.precision));
          for (var i = 0 ; i < this.nValues() ; i++) {
             let t = (i+.5) / this.nValues(),
@@ -95,14 +112,17 @@ function() {
    }
 
    this.defineInput(AT.Matrix);
+   this.defineInput(AT.Matrix);
 
    this.defineOutput(AT.Matrix, function() {
       let myMatrix = this.isColumnVector()
          ? new AT.Matrix(this.value.map(function(n) { return [n]; }))
          : new AT.Matrix([this.value]);
 
-      if (this.inputs.hasValue(0) && this.inputs.value(0).canMultiply(myMatrix)) {
-         return this.inputs.value(0).times(myMatrix);
+      let multInput = this.hasControlInput ? 1 : 0;
+
+      if (this.inputs.hasValue(multInput) && this.inputs.value(multInput).canMultiply(myMatrix)) {
+         return this.inputs.value(multInput).times(myMatrix);
       }
       else {
          return myMatrix;
