@@ -1,5 +1,5 @@
 function() {
-   this.nRows = function() {
+   this.nValues = function() {
       return 2 + floor(this.selection / 2);
    }
    this.axis = function() {
@@ -19,7 +19,7 @@ function() {
       this.isDraggedValue = false;
       var mt = m.transform([x,y])[this.axis()];
       var t = this.axis() == 0 ? (1 + mt ) / 2 : (1 - mt) / 2;
-      this.row = max(0, min(this.nRows()-1, floor(this.nRows() * t)));
+      this.row = max(0, min(this.nValues()-1, floor(this.nValues() * t)));
       this.xVal = x;
       this.yVal = y;
    }
@@ -52,16 +52,16 @@ function() {
    }];
 
    this._updateLength = function() {
-      if (this.value.length != this.nRows()) {
-         while (this.nRows() > this.value.length) {
+      if (this.value.length != this.nValues()) {
+         while (this.nValues() > this.value.length) {
             this.value.push(0);
          }
-         this.value.length = this.nRows();
+         this.value.length = this.nValues();
       }
    }
 
    this.render = function(elapsed) {
-      var a = 1 / this.nRows();
+      var a = 1 / this.nValues();
       switch (this.axis()) {
       case 0: mCurve([[1,a],[1,-a],[-1,-a]]); break;
       case 1: mCurve([[a,1],[a,-1],[-a,-1]]); break;
@@ -73,17 +73,17 @@ function() {
          }
       });
       lineWidth(1);
-      for (var i = 1 ; i < this.nRows() ; i++) {
-         var b = mix(1, -1, i / this.nRows());
+      for (var i = 1 ; i < this.nValues() ; i++) {
+         var b = mix(1, -1, i / this.nValues());
          switch (this.axis()) {
          case 0: mLine([-b, a],[-b,-a]); break;
          case 1: mLine([-a, b],[ a, b]); break;
          }
       }
       this.afterSketch(function() {
-         textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (1 + this.precision));
-         for (var i = 0 ; i < this.nRows() ; i++) {
-            let t = (i+.5) / this.nRows(),
+         textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nValues() - 1) / (1 + this.precision));
+         for (var i = 0 ; i < this.nValues() ; i++) {
+            let t = (i+.5) / this.nValues(),
                a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t),
                p = this.axis() == 0 ? [a,0] : [0,a];
             mText(roundedString(this.value[i], this.precision), p, .5, .5);
