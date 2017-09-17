@@ -21,7 +21,6 @@ function() {
       this.value = [1,0,0,0];
       this.row = 0;
       this.precision = 1;
-      this.hasControlInput = false;
       this.updateLength();
    }
 
@@ -70,6 +69,26 @@ function() {
       }
    }
 
+   this.hasControlInput = function() {
+      // If first input is the same dimensions as this vector, use it as a control input.
+      if (this.inputs.hasValue(0)) {
+         let input = this.inputs.value(0);
+         if (input.numRows() === this.nRows() && input.numColumns() === this.nColumns()) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   this.valuesToUse = function() {
+      if (this.hasControlInput()) {
+         return this.inputs.value(0).toFlatArray();
+      }
+      else {
+         return this.value;
+      }
+   }
+
    this.render = function(elapsed) {
       var a = 1 / this.nValues();
       switch (this.axis()) {
@@ -91,22 +110,13 @@ function() {
          }
       }
       this.afterSketch(function() {
-         // If first input is the same dimensions as this vector, use it as a control input.
-         this.hasControlInput = false;
-         if (this.inputs.hasValue(0)) {
-            let input = this.inputs.value(0);
-            if (input.numRows() === this.nRows() && input.numColumns() === this.nColumns()) {
-               this.value = input.toFlatArray();
-               this.hasControlInput = true;
-            }
-         }
-
+         let values = this.valuesToUse();
          textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nValues() - 1) / (1 + this.precision));
          for (var i = 0 ; i < this.nValues() ; i++) {
             let t = (i+.5) / this.nValues(),
                a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t),
                p = this.axis() == 0 ? [a,0] : [0,a];
-            mText(roundedString(this.value[i], this.precision), p, .5, .5);
+            mText(roundedString(values[i], this.precision), p, .5, .5);
          }
       });
    }
@@ -115,11 +125,17 @@ function() {
    this.defineInput(AT.Matrix);
 
    this.defineOutput(AT.Matrix, function() {
-      let myMatrix = this.isColumnVector()
-         ? new AT.Matrix(this.value.map(function(n) { return [n]; }))
-         : new AT.Matrix([this.value]);
+      let myMatrix;
+      if (this.hasControlInput()) {
+         myMatrix = this.inputs.value(0);
+      }
+      else {
+         myMatrix = this.isColumnVector()
+            ? new AT.Matrix(this.valuesToUse().map(function(n) { return [n]; }))
+            : new AT.Matrix([this.valuesToUse()]);
+      }
 
-      let multInput = this.hasControlInput ? 1 : 0;
+      let multInput = this.hasControlInput() ? 1 : 0;
 
       if (this.inputs.hasValue(multInput) && this.inputs.value(multInput).canMultiply(myMatrix)) {
          return this.inputs.value(multInput).times(myMatrix);
