@@ -15,7 +15,7 @@ function() {
       this.value = [1,0,0,0];
       this.row = 0;
       this.precision = 1;
-      this._updateLength();
+      this.updateLength();
    }
 
    this.mouseDown = function(x, y) {
@@ -43,7 +43,7 @@ function() {
    this.onSwipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
    this.onSwipe[3] = ['shorter\nvector', function() { 
       if (! this.isDraggedValue && this.selection > 1) this.selection -= 2;
-      this._updateLength();
+      this.updateLength();
    }];
    this.onSwipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
    this.onSwipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
@@ -51,10 +51,10 @@ function() {
       if (! this.isDraggedValue) {
          this.selection += 2;
       }
-      this._updateLength();
+      this.updateLength();
    }];
 
-   this._updateLength = function() {
+   this.updateLength = function() {
       if (this.value.length != this.nValues()) {
          while (this.nValues() > this.value.length) {
             this.value.push(0);
