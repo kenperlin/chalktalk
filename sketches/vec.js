@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.nRows = function() {
       return 2 + floor(this.selection / 2);
    }
@@ -7,11 +6,15 @@ function() {
       return 1 - this.selection % 2;
    }
    this.labels = 'Hvec2 Vvec2 Hvec3 Vvec3 Hvec4 Vvec4'.split(' ');
-   this.value = [1,0,0,0];
-   this.row = 0;
-   this.precision = 1;
-   this.mxy = [0,0];
    this.p10 = [1,10,100,1000];
+   
+   this.setup = function() {
+      this.value = [1,0,0,0];
+      this.row = 0;
+      this.precision = 1;
+      this._updateLength();
+   }
+
    this.mouseDown = function(x, y) {
       this.isDraggedValue = false;
       var mt = m.transform([x,y])[this.axis()];
@@ -35,13 +38,28 @@ function() {
    this.mouseUp = function(x, y) { }
 
    this.onSwipe[0] = ['more\ndigits'   , function() { this.precision = min(3, this.precision + 1); }];
-   this.onSwipe[3] = ['shorter\nvector', function() { if (! this.isDraggedValue && this.selection > 1) this.selection -= 2; }];
+   this.onSwipe[3] = ['shorter\nvector', function() { 
+      if (! this.isDraggedValue && this.selection > 1) this.selection -= 2;
+      this._updateLength();
+   }];
    this.onSwipe[4] = ['fewer\ndigits'  , function() { this.precision = max(0, this.precision - 1); }];
    this.onSwipe[5] = ['transpose'      , function() { this.selection = (this.selection & 14) + 1 - (this.selection % 2); }];
-   this.onSwipe[7] = ['longer\nvector' , function() { if (! this.isDraggedValue) {
-                                                       this.selection += 2;
-						       while (this.nRows() > this.value.length)
-						          this.value.push(0); }}];
+   this.onSwipe[7] = ['longer\nvector' , function() {
+      if (! this.isDraggedValue) {
+         this.selection += 2;
+      }
+      this._updateLength();
+   }];
+
+   this._updateLength = function() {
+      if (this.value.length != this.nRows()) {
+         while (this.nRows() > this.value.length) {
+            this.value.push(0);
+         }
+         this.value.length = this.nRows();
+      }
+   }
+
    this.render = function(elapsed) {
       var a = 1 / this.nRows();
       switch (this.axis()) {
@@ -63,24 +81,29 @@ function() {
          }
       }
       this.afterSketch(function() {
-
-         // IF INPUT IS A VECTOR WITH A DIFFERENT AXIS, OUTPUT IS DOT PRODUCT OF INPUT AND DISPLAYED VALUE.
-         // OTHERWISE, IF THERE IS INPUT, COPY INPUT TO BOTH DISPLAYED VALUE AND OUTPUT.
-
          textHeight(m.transform([1,0,0,0])[0] / max(1.5, this.nRows() - 1) / (1 + this.precision));
-	 var s = this.inSketch(0), isDotProduct = s && s.typeName == this.typeName && s.axis() != this.axis();
-         var outValue = [];
          for (var i = 0 ; i < this.nRows() ; i++) {
             let t = (i+.5) / this.nRows(),
-                a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t),
-                p = this.axis() == 0 ? [a,0] : [0,a],
-                val = isDotProduct ? this.value[i] : this.getInValue_DEPRECATED_PORT_SYSTEM(i, this.value[i]);
-            mText(roundedString(val, this.precision), p, .5, .5);
-            outValue.push(val);
+               a = this.axis() == 0 ? mix(-1, 1, t) : mix(1, -1, t),
+               p = this.axis() == 0 ? [a,0] : [0,a];
+            mText(roundedString(this.value[i], this.precision), p, .5, .5);
          }
-         if (s)
-	    outValue = isDotProduct ? mult(outValue, this.inValue_DEPRECATED_PORT_SYSTEM[0]) : this.inValue_DEPRECATED_PORT_SYSTEM[0];
-         this.outValue_DEPRECATED_PORT_SYSTEM[0] = outValue;
       });
    }
+
+   this.defineInput(AT.Matrix);
+
+   this.defineOutput(AT.Matrix, function() {
+      let myMatrix;
+      switch(this.axis()) {
+      case 0: myMatrix = new AT.Matrix([this.value]);
+      case 1: myMatrix = new AT.Matrix(this.value.map(function(n) { return [n]; }));
+      }
+      if (this.inputs.hasValue(0) && this.inputs.value(0).canMultiply(myMatrix)) {
+         return this.inputs.value(0).times(myMatrix);
+      }
+      else {
+         return myMatrix;
+      }
+   });
 }
