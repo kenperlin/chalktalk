@@ -23,7 +23,7 @@ function() {
       this._drawQ = [];
 
       this._boundControlOffset = 0.1;
-      this._boundControlTolerance = 0.75;
+      this._boundControlTolerance = 0.1;
 
       this.selectBound = "none";
 
@@ -53,9 +53,6 @@ function() {
          let y = 0.0;
 
          m.save();
-            if (this.selectBound === "leftControl" && thatSketch.isMouseOver) {
-               color("blue");
-            }
             m.translate([this._pLeft[0], this._pLeft[1], 0.0]);
             m.scale(scale);
             mCurve([pL, [x + d, y], [x + d, y + d], [x - d, y + d], [x - d, y - d], [x, y - d], pL]);
@@ -63,10 +60,6 @@ function() {
          
          color("turquoise");
          m.save();
-
-            if (this.selectBound === "rightControl" && thatSketch.isMouseOver) {
-               color("blue");
-            }
             m.translate([this._pRight[0], this._pRight[1], 0.0]);
             m.scale(scale);
             mCurve([pR, [x - d, y], [x - d, y - d], [x + d, y - d], [x + d, y + d], [x, y + d], pR]);
@@ -555,22 +548,30 @@ function() {
             this.pressed = false;
          }
 
-         //BROKEN
+         ////BROKEN
          let l = this.grid.pLeft; // COPIES, NOT ORIGINAL
          let r = this.grid.pRight;
+
+         let delta = 0.4;
+
+         l[0]-= delta;
+         l[1]+= delta;
+         r[0]+= delta;
+         r[1]-= delta;
+
          let tr = [r[0], l[1]];
          let bl = [l[0], r[1]];
 
          _g.save();
          lineWidth(this.grid.strokeWidth);
          m.save();;
-            //m.scale(1.3);
             mLine(l, tr);
             mLine(tr, r);
             mLine(r, bl);
             mLine(bl, l);
          m.restore();
          _g.restore();
+
 
       });
    };
@@ -675,9 +676,9 @@ function() {
              this._b[1] >= pLeft[1]) {
             break;
          }
-         // if (this.isNear(this.grid.pLeftBoundControl, this._b, 0.2)) {
-         //    break;
-         // }
+         if (this.isNear(this.grid.pLeftBoundControl, this._b, 0.3)) {
+            break;
+         }
          this.grid.pRight = this._b;
          break;
       case "leftControl":
@@ -685,9 +686,9 @@ function() {
              this._b[1] <= pRight[1]) {
             break;
          }
-         // if (this.isNear(this.grid.pRightBoundControl, this._b, 0.2)) {
-         //    break;
-         // }
+         if (this.isNear(this.grid.pRightBoundControl, this._b, 0.3)) {
+            break;
+         }
          this.grid.pLeft = this._b;
          break;
       case "none" :
