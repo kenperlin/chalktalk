@@ -66,7 +66,7 @@ function() {
          m.restore();
          _g.restore();
       },
-      draw : function(elapsed) {
+      draw : function(elapsed, hideBoundControls) {
          _g.save();
          lineWidth(this.strokeWidth);
 
@@ -246,8 +246,10 @@ function() {
             for (let i = 0; i < Q.length; i++) {
                Q[i]();
             }
-            lineWidth(1);
-            this._drawBoundControls();           
+            if (!hideBoundControls) {
+               lineWidth(1);
+               this._drawBoundControls();
+            }           
          }
          _g.restore();
          _g.restore();
@@ -310,6 +312,8 @@ function() {
       this.sketchStubName = "newsketchstub.js";
 
       this.grid = new Grid();
+
+      this.is3D = true;
 
 
 
@@ -443,13 +447,27 @@ function() {
          }
       ];
 
-      // this.onSwipe[4] = [
-      //    "clear",
-      //    function() {
-      //       that.drawElementList = [];
-      //       that.resetCurElement();
-      //    }
-      // ];
+      this.deleting = false;
+      this.deleteTime = 0;
+
+      this.onSwipe[4] = [
+         "clear",
+         function() {
+            that.drawElementList = [];
+            that.resetCurElement();
+            thatSketch.deleting = true;
+            thatSketch.deleteTime = time;
+         }
+      ];
+
+      this.onSwipe[4] = [
+         "clear flip",
+         function() {
+            that.resetCurElement();
+            thatSketch.deleting = true;
+            thatSketch.deleteTime = time;
+         }
+      ];
 
       this.onSwipe[2] = [
          "save as sketch",
@@ -521,6 +539,60 @@ function() {
 
    };
 
+   // this.render = function(elapsed) {
+
+   //    this.duringSketch(function() {
+   //       mCurve([[-1, 1], [1, 1], [1, -1], [-1, -1], [-1, 1]]);
+   //       mCurve([[-1, 1], [-1.3, -1], [-1, -1]]);
+   //    });
+
+   //    this.afterSketch(function() {
+
+   //       let hasInput = this.checkAndUpdateInputs(this.grid, this.inValue);
+   //       if (hasInput || this.isMouseOver || this.grid._initAnimation) {
+   //          this.grid.draw(elapsed);
+   //       }
+   //       else {
+   //          this.grid._drawBoundControls();
+   //       }
+
+   //       if (!this.isMouseOver) {
+   //          this.resetCurElement();
+   //       }
+   //       this.drawAll();
+   //       //this.drawIncomplete(this._b);
+   //       if (this.pressed) {
+   //          this.drawOnPressed(this._a);
+   //          this.pressed = false;
+   //       }
+
+         // let l = this.grid.pLeft; // COPIES, NOT ORIGINAL
+         // let r = this.grid.pRight;
+
+         // let delta = 0.4;
+
+         // l[0]-= delta;
+         // l[1]+= delta;
+         // r[0]+= delta;
+         // r[1]-= delta;
+
+         // let tr = [r[0], l[1]];
+         // let bl = [l[0], r[1]];
+
+         // _g.save();
+         // lineWidth(this.grid.strokeWidth);
+         // m.save();;
+         //    mLine(l, tr);
+         //    mLine(tr, r);
+         //    mLine(r, bl);
+         //    mLine(bl, l);
+         // m.restore();
+         // _g.restore();
+
+
+   //    });
+   // };
+
    this.render = function(elapsed) {
 
       this.duringSketch(function() {
@@ -530,49 +602,83 @@ function() {
 
       this.afterSketch(function() {
 
+         m.save();
+
+         // TESTING
+            if (this.deleting) {
+               let change = time - this.deleteTime;
+               if (change < (PI / 2)) {
+                  m.translate(0, this.grid.pLeft[1], 0);
+                  m.rotateX(4 * -change);
+                  m.translate(0, -this.grid.pLeft[1], 0);
+                  if (change >= (PI / 8)) {
+                     this.drawElementList = [];
+                  }
+               }
+               else {
+                  this.curElement = [];
+                  this.drawElementList = [];
+                  this.deleting = false;
+               }
+            }
+
+
          let hasInput = this.checkAndUpdateInputs(this.grid, this.inValue);
-         if (hasInput || this.isMouseOver || this.grid._initAnimation) {
-            this.grid.draw(elapsed);
+         if (hasInput || this.isMouseOver || this.grid._initAnimation || this.deleting) {
+            this.grid.draw(elapsed, this.deleting);
          }
          else {
             this.grid._drawBoundControls();
          }
 
+         m.restore();
+         
+         if (this.deleting) {
+            this.grid.draw(elapsed, this.deleting);
+         }
+
          if (!this.isMouseOver) {
             this.resetCurElement();
          }
+
+         m.save();
+         if (this.deleting) {
+               if (time - this.deleteTime < (PI / 2)) {
+                  m.translate(0, this.grid.pLeft[1], 0);
+                  m.rotateX(4 * (-time + this.deleteTime));
+                  m.translate(0, -this.grid.pLeft[1], 0);
+               }            
+         }
          this.drawAll();
+         m.restore();
          //this.drawIncomplete(this._b);
          if (this.pressed) {
             this.drawOnPressed(this._a);
             this.pressed = false;
          }
 
-         ////BROKEN
-         let l = this.grid.pLeft; // COPIES, NOT ORIGINAL
-         let r = this.grid.pRight;
+         // let l = this.grid.pLeft; // COPIES, NOT ORIGINAL
+         // let r = this.grid.pRight;
 
-         let delta = 0.4;
+         // let delta = 0.4;
 
-         l[0]-= delta;
-         l[1]+= delta;
-         r[0]+= delta;
-         r[1]-= delta;
+         // l[0]-= delta;
+         // l[1]+= delta;
+         // r[0]+= delta;
+         // r[1]-= delta;
 
-         let tr = [r[0], l[1]];
-         let bl = [l[0], r[1]];
+         // let tr = [r[0], l[1]];
+         // let bl = [l[0], r[1]];
 
-         _g.save();
-         lineWidth(this.grid.strokeWidth);
-         m.save();;
-            mLine(l, tr);
-            mLine(tr, r);
-            mLine(r, bl);
-            mLine(bl, l);
-         m.restore();
-         _g.restore();
-
-
+         // _g.save();
+         // lineWidth(this.grid.strokeWidth);
+         // m.save();;
+         //    mLine(l, tr);
+         //    mLine(tr, r);
+         //    mLine(r, bl);
+         //    mLine(bl, l);
+         // m.restore();
+         // _g.restore();
       });
    };
 
