@@ -1,4 +1,5 @@
 function() {
+   // NOTE: CONTROL SCALING WITH BUILT-IN COMMAND INSTEAD OF WITH THE SLIDER SKETCHES
    this.label = 'builder';
 
    this.openOutput = false;
@@ -8,9 +9,9 @@ function() {
 
    let thatSketch = this;
 
-   function Grid(distX, distY, pLeft, pRight, color, strokeWidth) {
+   function Grid(distX, slope, pLeft, pRight, color, strokeWidth) {
       this._distX = distX || 0.20;
-      this._distY = distY || 0.20;
+      this._slope = slope || 1.0;
       this._pLeft  = pLeft || [-1.0, 1.0];
       this._pRight  = pRight || [1.0, -1.0];
       this.color = color || "violet";
@@ -36,7 +37,7 @@ function() {
             return gridDelta * Math.round(val / gridDelta); 
          }
 
-         return [snapOne(p[0], this.distX), snapOne(p[1], this.distY)];      
+         return [snapOne(p[0], this.distX), snapOne(p[1], this.distX * this.slope)];      
       },
       toggleSnap : function() {
          this.snapIsOn = !this.snapIsOn;
@@ -135,7 +136,7 @@ function() {
                   qXLeft.push(function() { return genInst.next().value; });
                }
                // HORIZONTAL LINES ABOVE ORIGIN
-               for (let y = 0, bound = pL[1]; y <= bound; y+= this._distY) {
+               for (let y = 0, bound = pL[1]; y <= bound; y+= (this._slope * this._distX)) {
                   function* gen() {
                      let ani = new SketchAnimation.Animation(
                         SketchAnimation.Type.LINE({
@@ -157,7 +158,7 @@ function() {
                   qYUp.push(function() { return genInst.next().value; });
                }
                // HORIZONTAL LINES BELOW ORIGIN
-               for (let y = -this._distY, bound = pR[1]; y >= bound; y-= this._distY) {
+               for (let y = -this._slope * this._distX, bound = pR[1]; y >= bound; y-= (this._slope * this._distX)) {
                   function* gen() {
                      let ani = new SketchAnimation.Animation(
                         SketchAnimation.Type.LINE({
@@ -195,14 +196,14 @@ function() {
                   qXLeft.push(function() { mLine([x, pL[1]], [x, pR[1]]); });
                }
                // HORIZONTAL LINES ABOVE ORIGIN
-               for (let y = 0, bound = pL[1]; y <= bound; y+= this._distY) {
+               for (let y = 0, bound = pL[1]; y <= bound; y+= (this._slope * this._distX)) {
                   if (y < pR[1]) {
                      continue;
                   }
                   qYUp.push(function() { mLine([pL[0], y], [pR[0], y]); });
                }
                // HORIZONTAL LINES BELOW ORIGIN
-               for (let y = -this._distY, bound = pR[1]; y >= bound; y-= this._distY) {
+               for (let y = -this._slope * this._distX, bound = pR[1]; y >= bound; y-= (this._slope * this._distX)) {
                   if (y > pL[1]) {
                      continue;
                   }
@@ -264,11 +265,11 @@ function() {
          this.isMutated = true;
       },
 
-      get distY() {
-         return this._distY;
+      get slope() {
+         return this._slope;
       },
-      set distY(val) {
-         this._distY = val;
+      set slope(val) {
+         this._slope = val;
          this.isMutated = true;
       },
 
@@ -309,7 +310,7 @@ function() {
       this.curElement = [];
       this.pressed = false;
 
-      this.sketchStubName = "newsketchstub.js";
+      this.sketchStubName = "newsketchstub";
 
       this.grid = new Grid();
 
@@ -450,6 +451,8 @@ function() {
       this.deleting = false;
       this.deleteTime = 0;
 
+      this.state = 
+
       this.onSwipe[4] = [
          "clear",
          function() {
@@ -499,7 +502,7 @@ function() {
          "set grid divisions to 0.1",
          function() {
             this.grid.distX = 0.1;
-            this.grid.distY = 0.1;
+            this.grid.slope = 0.1;
          }
       ];
 
@@ -528,10 +531,7 @@ function() {
          grid.distX = val;
          if (def(inVal[1])) {
             val = max(0.01, inVal[1]);
-            grid.distY = val;
-         }
-         else {
-            grid.distY = val;
+            grid.slope = val;
          }
       }
 
@@ -592,6 +592,42 @@ function() {
 
    //    });
    // };
+
+   // function StateMachine(matrix, start) {
+   //    function State(func) {
+   //       this.before = function() {
+
+   //       }
+   //    }
+   // }
+
+   // temp, make specialized objects with pointers to next states and transitions
+   // e.g.
+   // in = {
+   //    default : {
+   //       transitions : []...
+   //    }
+   // }   should I just create the States myself or should they be created during an internal initialization step?
+   // function StateMachine(in) {
+   //    
+   //    function State(name, .. some processing to figure what to put inside) {
+   //       this.transitions = {
+   //          // also in-transition animation states
+   //       }
+   //       has a render function, perhaps variations of the basic sketch operation functions like onDrag
+
+   //       this.act = function(/*pass name of operation or state to change, no-op if not in this.transitions*/) {
+
+   //       };
+   //    }
+   //    // some sort of processing etc. etc.
+   //    this.state = ... some default   
+   // }
+   //
+   //
+   //
+   // this.cx() and this.cy() get cursor position
+
 
    this.render = function(elapsed) {
 
