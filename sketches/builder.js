@@ -42,6 +42,28 @@ function() {
       toggleSnap : function() {
          this.snapIsOn = !this.snapIsOn;
       },
+      handleCollision : function(p, includeBoundControls) {
+         let pL = null;
+         let pR = null;
+         if (includeBoundControls) {
+            pL = this.pLeftBoundControl;
+            pR = this.pRightBoundControl;
+         }
+         else {
+            pL = this.pLeft;
+            pR = this.pRight;
+         }
+
+         let d = 0.1;
+
+         pL[0] -= d;
+         pL[1] += d;
+         pR[0] += d;
+         pR[1] -= d;
+
+         return !(p[0] < pL[0] || p[0] > pR[0] ||
+                  p[1] > pL[1] || p[1] < pR[1]);
+      },
       _drawBoundControls : function() {
          let pL = [0, 0];
          let pR = [0, 0];
@@ -243,7 +265,8 @@ function() {
             if (!this._initAnimation) {
                this._drawQ = [];
             }
-         } else {
+         }
+         else {
             for (let i = 0; i < Q.length; i++) {
                Q[i]();
             }
@@ -372,7 +395,8 @@ function() {
             p = [p[0], p[1]];
             if (that.curElement.length == 0) {
                that.curElement.push(p);
-            } else {
+            } 
+            else {
                let center = that.curElement[0];
                let cx = center[0];
                let cy = center[1];
@@ -380,19 +404,23 @@ function() {
                   let dx = p[0] - cx;
                   let dy = p[1] - cy;
                   let dist = Math.sqrt((dx * dx) + (dy * dy));
+                  //let dist = abs(dx);
+
+                  //let stretchY = thatSketch.grid.slope;
+                  let stretchY = 1.0;
                   
                   that.drawElementList.push(new DrawElement(
                         function(self) {
                            m.save();
                               m.translate(self.cx, self.cy, 0);
-                              mDrawOval([-1 * self.dist, -1 * self.dist],[1 * self.dist, 1 * self.dist], 36, PI/2, PI/2-TAU);
+                              mDrawOval([-1 * self.dist, -1 * self.dist * stretchY],[1 * self.dist, 1 * self.dist * stretchY], 36, PI/2, PI/2-TAU);
                            m.restore();
                         },
                         function(self) {
                            return "" +
                            "      m.save();\n" +
                            "         m.translate(" + self.cx + ", " + self.cy + ", " + 0 + ");\n" +
-                           "         mDrawOval([-1 * " + self.dist + ", -1 * " + self.dist + "],[1 * " + self.dist + ", 1 * " + self.dist + "], 36, PI/2, PI/2-TAU);\n" +
+                           "         mDrawOval([-1 * " + self.dist + ", -1 * " + (self.dist * stretchY) + "],[1 * " + self.dist + ", 1 * " + (self.dist * stretchY) + "], 36, PI/2, PI/2-TAU);\n" +
                            "      m.restore();\n" +
                            "";
                         },
@@ -403,8 +431,84 @@ function() {
                   that.resetCurElement();
                }
             }
+         },
+         curveQuarter : function(p) {
+            p = [p[0], p[1]];
+            if (that.curElement.length == 0) {
+               that.curElement.push(p);
+            }
+            else {
+               let p1 = that.curElement[0];
+               // TODO
+               if (p1[0] != p[0] && p1[1] != p[1]) {
+                  let cx = p[0];
+                  let cy = p1[1];
+
+                  let rx = cx - p1[0];
+                  let ry = p[1] - cy;
+
+                  that.drawElementList.push(new DrawElement(
+                        function(self) {
+                           m.save();
+                              m.translate(self.cx, self.cy, 0);
+                              //mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI/2, PI/2-TAU); // ACCIDENTALLY MADE SLOPE UNNECESSARY, THIS IS AN OBLONG CIRCLE
+                              mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI, PI/2);
+
+                           m.restore();                        
+                        },
+                        function(self) {
+                           return "/*...TODO...*/";
+                        },
+                        ["cx", cx, "cy", cy, "rx", rx, "ry", ry]
+                     )
+                  );
+
+                  that.resetCurElement();
+               }
+            }
+         },
+         curveQuarterInverted : function(p) {
+            p = [p[0], p[1]];
+            if (that.curElement.length == 0) {
+               that.curElement.push(p);
+            }
+            else {
+               let p1 = that.curElement[0];
+               // TODO
+               if (p1[0] != p[0] && p1[1] != p[1]) {
+                  let tmp = p1;
+                  p1 = p;
+                  p = tmp;
+
+                  let cx = p[0];
+                  let cy = p1[1];
+
+                  let rx = cx - p1[0];
+                  let ry = p[1] - cy;
+
+                  that.drawElementList.push(new DrawElement(
+                        function(self) {
+                           m.save();
+                              m.translate(self.cx, self.cy, 0);
+                              //mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI/2, PI/2-TAU); // ACCIDENTALLY MADE SLOPE UNNECESSARY, THIS IS AN OBLONG CIRCLE
+                              mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI, PI/2);
+
+                           m.restore();                        
+                        },
+                        function(self) {
+                           return "/*...TODO...*/";
+                        },
+                        ["cx", cx, "cy", cy, "rx", rx, "ry", ry]
+                     )
+                  );
+
+                  that.resetCurElement();
+               }
+            }
          }
-      };
+      }
+      this.drawProceduresListIdx = 0;
+      this.drawProceduresList = [this.drawProcedures.line, this.drawProcedures.oval, this.drawProcedures.curveQuarter, this.drawProcedures.curveQuarterInverted];
 
       this.drawProcedure = this.drawProcedures.line;
 
@@ -430,23 +534,73 @@ function() {
             let dx = p[0] - cx;
             let dy = p[1] - cy;
             let dist = Math.sqrt((dx * dx) + (dy * dy));
+            //let dist = abs(dx);
+
+            //let stretchY = thatSketch.grid.slope;
+            let stretchY = 1.0;
 
             m.save();
                m.translate(cx, cy, 0);
-               mDrawOval([-1 * dist, -1 * dist],[1 * dist, 1 * dist], 36, PI/2, PI/2-TAU);
+               mDrawOval([-1 * dist, -1 * dist * stretchY],[1 * dist, 1 * dist * stretchY], 36, PI/2, PI/2-TAU);
             m.restore();
 
          }
-      }
+      };
 
-      this.onSwipe[0] = [
-         "select draw type",
-         function() { 
-            that.drawProcedure = (that.drawProcedure === that.drawProcedures.line) ? 
-            that.drawProcedures.oval : that.drawProcedures.line;
-            that.curElement = [];
+      this.drawProcedures.curveQuarter.temp = function(p) {
+         if (that.curElement.length == 0) {
+            return;
          }
-      ];
+         let p1 = that.curElement[0];
+         // TODO
+         if (p1[0] != p[0] && p1[1] != p[1]) {
+            let cx = p[0];
+            let cy = p1[1];
+
+            let rx = cx - p1[0];
+            let ry = p[1] - cy;
+
+            m.save();
+               m.translate(cx, cy, 0);
+               //mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI/2, PI/2-TAU); // ACCIDENTALLY MADE SLOPE UNNECESSARY, THIS IS AN OBLONG CIRCLE
+               mDrawOval([-1 * rx, -1 * ry],[1 * rx, 1 * ry], 36, PI, PI/2);
+            m.restore();
+         }
+      };
+
+      this.drawProcedures.curveQuarterInverted.temp = function(p) {
+         if (that.curElement.length == 0) {
+            return;
+         }
+         let p1 = that.curElement[0];
+         // TODO
+         if (p1[0] != p[0] && p1[1] != p[1]) {
+            let tmp = p1;
+            p1 = p;
+            p = tmp;
+
+            let cx = p[0];
+            let cy = p1[1];
+
+            let rx = cx - p1[0];
+            let ry = p[1] - cy;
+
+            m.save();
+               m.translate(cx, cy, 0);
+               //mDrawOval([-1 * self.rx, -1 * self.ry],[1 * self.rx, 1 * self.ry], 36, PI/2, PI/2-TAU); // ACCIDENTALLY MADE SLOPE UNNECESSARY, THIS IS AN OBLONG CIRCLE
+               mDrawOval([-1 * rx, -1 * ry],[1 * rx, 1 * ry], 36, PI, PI/2);
+            m.restore();
+         }
+      };
+
+      // this.onSwipe[0] = [
+      //    "select draw type",
+      //    function() { 
+      //       that.drawProcedure = (that.drawProcedure === that.drawProcedures.line) ? 
+      //       that.drawProcedures.oval : that.drawProcedures.line;
+      //       that.curElement = [];
+      //    }
+      // ];
 
       this.deleting = false;
       this.deleteTime = 0;
@@ -495,14 +649,11 @@ function() {
                              "   };\n\n" +
                              "}\n"
             );
-         }
-      ];
-
-      this.onSwipe[6] = [
-         "set grid divisions to 0.1",
-         function() {
-            this.grid.distX = 0.1;
-            this.grid.slope = 0.1;
+            // BROKEN, LOADING THIS WAY DURING SAME RUN OF CHALKTALK LEADS TO STRANGE BEHAVIOR
+            // try {
+            //    importSketch('__' + this.sketchStubName + '.js', {count: 1});
+            // }
+            // catch (e) { console.log("TEST FAILED"); }
          }
       ];
 
@@ -522,21 +673,20 @@ function() {
    this.resetCurElement = function() {
       this.curElement = [];
    }
-
-
+   
    this.checkAndUpdateInputs = function(grid, inVal) {
       let val = null;
+      let minGranularity = 0.1;
       if (def(inVal[0])) {
-         val = max(0.01, inVal[0]);
+         val = max(minGranularity, inVal[0]);
          grid.distX = val;
          if (def(inVal[1])) {
-            val = max(0.01, inVal[1]);
+            val = max(minGranularity, inVal[1]);
             grid.slope = val;
          }
       }
 
       return (val !== null);
-
    };
 
    // this.render = function(elapsed) {
@@ -593,6 +743,9 @@ function() {
    //    });
    // };
 
+
+   // TODO POSSIBLE ORGANIZATION PLAN
+
    // function StateMachine(matrix, start) {
    //    function State(func) {
    //       this.before = function() {
@@ -626,8 +779,6 @@ function() {
    //
    //
    //
-   // this.cx() and this.cy() get cursor position
-
 
    this.render = function(elapsed) {
 
@@ -660,8 +811,9 @@ function() {
 
 
          let hasInput = this.checkAndUpdateInputs(this.grid, this.inValue);
+         this.grid.draw(elapsed, this.deleting);
          if (hasInput || this.isMouseOver || this.grid._initAnimation || this.deleting) {
-            this.grid.draw(elapsed, this.deleting);
+            // ;
          }
          else {
             this.grid._drawBoundControls();
@@ -687,47 +839,34 @@ function() {
          }
          this.drawAll();
          m.restore();
-         //this.drawIncomplete(this._b);
+
+
          if (this.pressed) {
             this.drawOnPressed(this._a);
             this.pressed = false;
          }
+         //DRAW FUTURE CURVE OR NOT? NOT SURE YET TODO
+         else if (this.isMouseOver) {
+            let cursorPoint = this.cursorPoint;
+            this.drawIncomplete((this.grid.snapIsOn ? this.grid.snap(cursorPoint) : cursorPoint));
+         }
 
-         // let l = this.grid.pLeft; // COPIES, NOT ORIGINAL
-         // let r = this.grid.pRight;
 
-         // let delta = 0.4;
+         // TEMP TODO will possibly replace with another radial menu similar to the help mode menu
+         // this.drawButtonsTemp();
+         // TEMPPPPPPP
+         let _pL = this.grid._pLeft;
+         let _pR = this.grid._pRight;
+         let _d = 0.25;
+         _g.save();
+         color("green");
 
-         // l[0]-= delta;
-         // l[1]+= delta;
-         // r[0]+= delta;
-         // r[1]-= delta;
-
-         // let tr = [r[0], l[1]];
-         // let bl = [l[0], r[1]];
-
-         // _g.save();
-         // lineWidth(this.grid.strokeWidth);
-         // m.save();;
-         //    mLine(l, tr);
-         //    mLine(tr, r);
-         //    mLine(r, bl);
-         //    mLine(bl, l);
-         // m.restore();
-         // _g.restore();
+         let _avgY = _pL[1] + _pR[1] / 2;
+         mDrawRect([_pR[0] + _d, _avgY], [_pR[0] + _d + .25, _avgY - 2 *_d]);
+         textHeight(this.mScale(.1));
+         mText(this.drawProcedure.name,[_pR[0] + _d, _avgY - _d ,0],0,0);
+         _g.restore();
       });
-   };
-
-   this.gridDelta = 0.25;
-
-   this.drawGrid = function() {
-      _g.save();
-      color("violet");
-      for (let i = -1; i <= 1; i += this.gridDelta) {
-         mLine([-1, i], [1, i]); // horizontal
-         mLine([i, -1], [i, 1]); // vertical
-      }
-      _g.restore();
    };
 
    this.drawAll = function() {
@@ -762,8 +901,23 @@ function() {
    };
 
 
-
+   this.buttonsTemp = [];
+   this.checkButtonsCollisionsTemp = function(p) {
+      for (let i = 0; i < this.buttonsTemp.length; i++) {
+         let button = this.buttonsTemp[i];
+         if (button.handleCollision(p) === true) {
+            return;
+         }
+      }
+   }
    this.onPress = function(p) {
+      if (this.grid.handleCollision([p.x, p.y], true) === false) {
+         this.drawProceduresListIdx = (this.drawProceduresListIdx + 1) % this.drawProceduresList.length;
+         this.drawProcedure = this.drawProceduresList[this.drawProceduresListIdx];
+         this.resetCurElement();
+         return;
+      }
+
       this._a[0] = p.x;
       this._a[1] = p.y;
 
@@ -794,7 +948,6 @@ function() {
             this.pressed = true;
          }
       }
-
    };
 
    this.onDrag = function(p) { 
@@ -834,7 +987,7 @@ function() {
          this.grid.pLeft = this._b;
          break;
       case "none" :
-         // SNAP
+         // SNAP         // TODO extend grid when simply drawing, not just dragging
          if (this.grid.snapIsOn) {
             this._b = this.grid.snap(this._b);
          }
@@ -879,6 +1032,12 @@ function() {
    this.over = function(other) {
 
    };
+
+   // TEST TODO
+   this.cursorPoint = [0.0, 0.0];
+   this.onMove = function(p) {
+      this.cursorPoint = [p.x, p.y];
+   }
 
    // TEST
    this.under = function(other) {
