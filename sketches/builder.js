@@ -2,8 +2,6 @@ function() {
    // NOTE: CONTROL SCALING WITH BUILT-IN COMMAND INSTEAD OF WITH THE SLIDER SKETCHES
    this.label = 'builder';
 
-   this.openOutput = false;
-
    this._a = [0, 0];
    this._b = [0, 0];
 
@@ -97,7 +95,7 @@ function() {
 
          this._elapsed = elapsed;
          
-         if (this.isMutated || this._drawQ.length == 0) { // CONIDTION IS WRONG, SHOULD CREATE A TRANSITION STATE FLAG OR USE A STATE MACHINE INSTEAD OF CHECKING DRAW QUEUE LENGTH, WHICH IS NOT REALLY RELATED
+         if (this.isMutated || this._drawQ.length == 0) { // CONIDTION IS NOT INTUITIVE, SHOULD CREATE A TRANSITION STATE FLAG OR USE A STATE MACHINE INSTEAD OF CHECKING DRAW QUEUE LENGTH, WHICH IS NOT REALLY RELATED
             this._drawQ = [];
             Q = this._drawQ;
 
@@ -457,7 +455,7 @@ function() {
                            m.restore();                        
                         },
                         function(self) {
-                           return "/*...TODO...*/";
+                           return "/*TODO...curveQuarter*/\n";
                         },
                         ["cx", cx, "cy", cy, "rx", rx, "ry", ry]
                      )
@@ -496,7 +494,7 @@ function() {
                            m.restore();                        
                         },
                         function(self) {
-                           return "/*...TODO...*/";
+                           return "/*TODO...curveQuarterInverted*/\n";
                         },
                         ["cx", cx, "cy", cy, "rx", rx, "ry", ry]
                      )
