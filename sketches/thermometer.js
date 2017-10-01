@@ -1,6 +1,6 @@
 function() {
    var cursor = newVec3();
-   this.label = "thermometer";
+   this.label = "thermom";
    this.onPress = function(point) { cursor.copy(point); }
    this.onDrag  = function(point) { cursor.copy(point); }
    this.value = 0;

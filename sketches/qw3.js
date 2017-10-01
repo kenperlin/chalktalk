@@ -85,7 +85,7 @@ function() {
          mCurve([[.5,1],[-.5,-1]]);
       });
       this.afterSketch(function() {
-         var faded = backgroundColor == 'white' ? .3 : .1;
+         var faded = isWhiteBackground() ? .3 : .1;
          color(palette.color[this.colorId]);
          lineWidth(this.mScale(.007));
          for (var i = 0 ; i < this.qw.zones.length ; i++) {

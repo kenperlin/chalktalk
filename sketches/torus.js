@@ -18,8 +18,9 @@ function() {
    }
 
    this.render = function() {
-      var r = max(.01, min(.99, this.stretch('thickness', (S(0).height - S(2).height) * 4) / 4 ));
-      m.scale(1 / (1+r));
+      var r = this.stretch('thickness', (S(0).height - S(2).height) * 4) / 2;
+      r = max(.01, min(.99, r));
+      m.scale(1 / (1+r/2));
       this.duringSketch(function() {
          mCurve(makeOval(-1-r,-1-r, 2+2*r,2+2*r, 20, -PI/2,   PI/2));
 	 mCurve(makeOval(-1-r,-1-r, 2+2*r,2+2*r, 20,  PI/2, 3*PI/2));
