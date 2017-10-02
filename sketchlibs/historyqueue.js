@@ -27,6 +27,9 @@ let HistoryQueue = (function() {
          if (this.idx <= 0) {
             return;
          }
+         else if (this.idx == this.states.length - 1) {
+            this.saveState();
+         }
 
          this.idx--;
          func(itemToRestore, this.states[this.idx]);

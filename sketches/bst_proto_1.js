@@ -4,38 +4,6 @@ function() {
 
    let sketchCtx = this;
    this.stack = [];
-   
-   // PUT IN SKETCHLIBS, BASIC COLOR MANAGEMENT OBJECT TO PLACE IN DRAWABLE ELEMENTS
-   function ColorManager() {
-      this.use = false;
-      this.color = "white";
-   }
-
-   ColorManager.prototype = {
-      setColor : function(color) {
-         this.color = color;
-         return this;
-      },
-      colorEnabled : function(bool) {
-         this.useColor = bool;
-         return this;
-      },
-      activateColor : function() {
-         if (this.useColor == false) {
-            return this;
-         }
-         _g.save();
-         color(this.color);
-         return this;
-      },
-      deactivateColor : function() {
-         if (this.useColor == false) {
-            return this;
-         }
-         _g.restore();
-         return this;
-      }     
-   };
 
    function BST() {
       this.root = null;
