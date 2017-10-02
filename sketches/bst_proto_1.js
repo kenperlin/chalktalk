@@ -26,8 +26,6 @@ function() {
          this.colorManager = new ColorManager();
       };
 
-
-
       let bst = this;
 
 
@@ -41,11 +39,12 @@ function() {
          }
       };
 
-      this.applyAll = function(func) {
-         if (this.root == null) {
+      this.applyAll = function(func, node) {
+         node = (node === undefined) ? this.root : node;
+         if (node == null) {
             return;
          }
-         this._applyAll(func, this.root);
+         this._applyAll(func, node);
       };
 
       this.resetGraphicTemporaries = function() {
@@ -142,7 +141,6 @@ function() {
 
             }());
             this.operationMemory.active = true;
-            this.doPendingOperations();
          }
          // else {
          //    let status = this.operationMemory.operation();
@@ -173,16 +171,26 @@ function() {
                return;
             }
             else if (value < comp) {
+               // HIGHLIGHT UN-TRAVERSED SUB-TREE
+               this.applyAll(function(node) {
+                  node.colorManager.colorEnabled(true).setColor("red");
+               }, current.right);
+
                current = current.left;
             }
             else {
+               // HIGHLIGHT UN-TRAVERSED SUB-TREE
+               this.applyAll(function(node) {
+                  node.colorManager.colorEnabled(true).setColor("red");
+               }, current.left);
+
                current = current.right;
             }
 
             // TESTING PAUSE (WILL BE MORE INTERESTING LATER ONCE THE EDGES ARE MADE AS OBJECTS THAT CAN BE CONFIGURED EASILY)
             let pause = SketchAnimation.create(
                SketchAnimation.Type.NONE(),
-               .2,
+               .6,
                true
             );
             while (!pause.step(sketchCtx.elapsed).finished) {
@@ -372,7 +380,7 @@ function() {
      mText(node.value, center, .5, .5, .5);
    };
 
-   this.drawTree = function(node, center, radius, xOffset = 5, yOffset = 2){
+   this.drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
       if (node === null) {
          return;
       }
@@ -390,7 +398,10 @@ function() {
          node.center = center;
       }
 
+      center = node.center;
+      
       this.drawNode(node, center, radius);
+
       if (node.left !== null) {
          let newCenter = [center[0] - xOffset * radius, center[1] - yOffset * radius];
          drawParentToChildEdge(center, radius, newCenter);
@@ -472,12 +483,12 @@ function() {
       }
    ];
 
-   this.onSwipe[0] = [
-      'redo',
-      function() {
-         this.tree.restoreFuture();
-      }
-   ];
+   // this.onSwipe[0] = [
+   //    'redo',
+   //    function() {
+   //       this.tree.restoreFuture();
+   //    }
+   // ];
 
      
    this.onCmdClick = function(p) {
@@ -512,15 +523,6 @@ function() {
 
          ci.y = point[1];
       };
-
-
-      // if (newDepth > 1){
-
-      // }
-      // else if (newDepth < 0) {
-      //
-      // }
-
    };
 
    this.under = function(other) {
@@ -529,7 +531,6 @@ function() {
       }
 
       let out = other.output();
-       //if (/^\d+$/.test(out)){
       out = Number(1 * out);
 
       this.tree.saveState();
@@ -537,7 +538,6 @@ function() {
 
       other.fade();
       other.delete();
-       //}
 
    };
 
@@ -558,23 +558,19 @@ function() {
    this.render = function(elapsed) {
       sketchCtx.elapsed = elapsed;
       this.duringSketch(function(){
-        mDrawOval([-1,-1], [1,1], 32, PI, 0);
-        // mLine([-1, 0], [1, 0]);
+         mDrawOval([-1,-1], [1,1], 32, PI, 0);
       });
       this.afterSketch(function() {
-         // this.drawNode([0,0],.5);
-         // this.drawNode([-1,-1],.5, [0,0],.5);
-         // this.drawNode([ 1,-1],.5, [0,0],.5);
          let nodeSize = 0.5;
          let center = [0,0];
 
          let curNode = this.tree.root;
          let depth = this.tree.depth;
 
-         if (depth > 4){
+         if (depth > 4) {
             this.drawTree(curNode, center, nodeSize, 20);
          }
-         else if (depth > 3){
+         else if (depth > 3) {
             this.drawTree(curNode, center, nodeSize, 10);
          }
          else if (depth > 0) {
