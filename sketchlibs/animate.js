@@ -8,6 +8,10 @@ var SketchAnimation = (function() {
    // INTERPOLATION-BASED FUNCTIONS, GIVEN "FRACTION ALONG PATH COMPLETE" VALUE, RETURN POINT
 
    a.Type = {};
+   a.Type.NONE = function() {
+      return function() { return []; };
+   };
+
    a.Type.LINE = function(args) {
       return function(/*UNUSED, */fractionComplete) {
          const start = args.start;
@@ -534,6 +538,10 @@ var SketchAnimation = (function() {
    //       }         
    //    };
    // }
+
+   a.create = function(stepProcedure, timeToCompleteSeconds, doProvideElapsed) {
+      return new a.Animation(stepProcedure, timeToCompleteSeconds, doProvideElapsed);
+   }
 
    a.Path = a.Animation;
 
