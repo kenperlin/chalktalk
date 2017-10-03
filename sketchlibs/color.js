@@ -13,7 +13,7 @@ ColorManager.prototype = {
       this.color = color;
       return this;
    },
-   colorEnabled : function(bool) {
+   enableColor: function(bool) {
       this.useColor = bool;
       return this;
    },

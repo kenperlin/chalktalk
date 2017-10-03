@@ -3,21 +3,26 @@ function() {
    this.label = 'BST';
 
    let sketchCtx = this;
-   this.stack = [];
 
-   function BST() {
+   function BinarySearchTree(sketchCtx) {
+      this.sketchCtx = sketchCtx;
+
       this.root = null;
 
       this.depth = 0;
 
-      // TODO : fix UNDO / REDO, WILL REPLACE LEGACY VERSION LATER
+      // TODO : FIX UNDO / REDO, WILL REPLACE LEGACY VERSION LATER
       this.history = HistoryQueue.create();
+      // TODO : REPLACE WITH WORKING HISTORY LATER
+      this.historyStack = [];
 
 
       // LEGACY UNDO
       this.useOldHistory = true;
 
-      BST.Node = function(value, center) {
+      this._mustInitializePositions = true;
+
+      BinarySearchTree.Node = function(value, center) {
          this.value = value;
          this.left = null;
          this.right = null;
@@ -50,11 +55,11 @@ function() {
       this.resetGraphicTemporaries = function() {
          this.applyAll(function(node) {
             // RESET COLORS
-            node.colorManager.colorEnabled(false);
+            node.colorManager.enableColor(false);
          });
       };
 
-      BST.Node.prototype = {
+      BinarySearchTree.Node.prototype = {
          getPredecessor : function(node) {
             let curNode = node.left;
             while (curNode.right !== null){
@@ -114,8 +119,8 @@ function() {
 
 
 
-   BST.prototype = {
-      doPendingOperations : function() {
+   BinarySearchTree.prototype = {
+      doPendingOperation : function() {
          if (!this.operationMemory.active) {
             return;
          }
@@ -123,11 +128,21 @@ function() {
          if (status.done) {
             this.operationMemory.active = false;
             this.operationMemory.operation = null;
+            // TODO : MAKE RE-INITIALIZATION CLEANER,
+            // ADDITIONAL CASES TO CONSIDER FOR IN-PROGRESS OPERATIONS
+            this._mustInitializePositions = true;
          }       
+      },
+      hasPendingOperation : function() {
+         return this.operationMemory.active;
       },
 
       doPendingDraws : function() {
          // TODO
+      },
+
+      mustInitializePositions : function() {
+         return this._mustInitializePositions;
       },
 
       insert : function(value) {
@@ -151,20 +166,20 @@ function() {
          // }
       },
       _insert : function*(value) {
+         let toInsert = new BinarySearchTree.Node(value);
          if (this.root === null) {
-            this.root = new BST.Node(value);
-            this.root.colorManager.colorEnabled(true).setColor("green");
+            this.root = toInsert;
+            this.root.colorManager.enableColor(true).setColor("green");
             return;
          }
 
-         let toInsert = new BST.Node(value);
-         toInsert.colorManager.colorEnabled(true).setColor("green");
+         toInsert.colorManager.enableColor(true).setColor("green");
          let parent = null;
          let current = this.root;
          let comp = null;
 
          while (current !== null) {
-            current.colorManager.colorEnabled(true).setColor("purple");
+            current.colorManager.enableColor(true).setColor("purple");
             parent = current;
             comp = current.value;
             if (value == comp) {
@@ -173,7 +188,7 @@ function() {
             else if (value < comp) {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.colorEnabled(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("red");
                }, current.right);
 
                current = current.left;
@@ -181,7 +196,7 @@ function() {
             else {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.colorEnabled(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("red");
                }, current.left);
 
                current = current.right;
@@ -193,7 +208,7 @@ function() {
                .6,
                true
             );
-            while (!pause.step(sketchCtx.elapsed).finished) {
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
                yield;
             }
          }
@@ -208,9 +223,11 @@ function() {
 
       remove : function(value){
          this.root = this.root.recursiveRemove(this.root, value);
+         // TEMPORARY FIX
+         this._mustInitializePositions = true;
       },
       copyData: function(oldNode) {
-         let newNode = new BST.Node(oldNode.value, oldNode.center);
+         let newNode = new BinarySearchTree.Node(oldNode.value, oldNode.center);
 
          if (oldNode.left !== null){
             newNode.left = this.copyData(oldNode.left)
@@ -221,13 +238,13 @@ function() {
          return newNode;
       },
       clone : function() {
-         let newBST = new BST();
+         let newBST = new BinarySearchTree(this.sketchCtx);
          let oldNode = this.root;
          if (this.root === null) {
             return newBST;
          }
 
-         newBST.root = new BST.Node(oldNode.value, oldNode.center);
+         newBST.root = new BinarySearchTree.Node(oldNode.value, oldNode.center);
          newBST.depth = this.depth;
          if (oldNode.left !== null) {
             newBST.root.left = this.copyData(oldNode.left);
@@ -248,8 +265,8 @@ function() {
 
       saveState : function() {
          if (this.useOldHistory) {
-            sketchCtx.stack.push(this.clone());
-            let newBST = sketchCtx.stack[sketchCtx.stack.length - 1];
+            this.historyStack.push(this.clone());
+            let newBST = this.historyStack[this.historyStack.length - 1];
             this.root = newBST.root;
             return;
          }
@@ -260,11 +277,11 @@ function() {
 
       restorePast : function() {
          if (this.useOldHistory) {
-            if (sketchCtx.stack.length <= 1) {
+            if (this.historyStack.length <= 1) {
                return;
             }
-            let temp = sketchCtx.stack.pop();
-            let oldBST = sketchCtx.stack[sketchCtx.stack.length - 1];
+            let temp = this.historyStack.pop();
+            let oldBST = this.historyStack[this.historyStack.length - 1];
 
             this.root = oldBST.root;
             this.depth = oldBST.depth;
@@ -284,7 +301,7 @@ function() {
             return null;
          }
          let mid = Math.trunc((start + end)/2);
-         let node = new BST.Node(arr[mid]);
+         let node = new BinarySearchTree.Node(arr[mid]);
          node.left = this._sortedArrayToBST(arr, start, mid-1);
          node.right = this._sortedArrayToBST(arr, mid+1, end);
          return node;
@@ -317,7 +334,7 @@ function() {
 
 
    this.setup = function() {
-      this.tree = new BST();
+      this.tree = new BinarySearchTree(this);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
    };
@@ -380,7 +397,8 @@ function() {
      mText(node.value, center, .5, .5, .5);
    };
 
-   this.drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
+   // TODO : MOVE DRAW FUNCTIONS INTO THE STRUCTURE ITSELF?
+   this._drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
       if (node === null) {
          return;
       }
@@ -394,7 +412,7 @@ function() {
          mLine(edgeOfParent, edgeOfChild);
       }
 
-      if (node.center === undefined) {
+      if (this.tree.mustInitializePositions()) {
          node.center = center;
       }
 
@@ -405,13 +423,18 @@ function() {
       if (node.left !== null) {
          let newCenter = [center[0] - xOffset * radius, center[1] - yOffset * radius];
          drawParentToChildEdge(center, radius, newCenter);
-         this.drawTree(node.left, newCenter, radius, xOffset / 2);
+         this._drawTree(node.left, newCenter, radius, xOffset / 2);
       }
       if (node.right !== null) {
          let newCenter = [center[0] + xOffset * radius, center[1] - yOffset * radius];
          drawParentToChildEdge(center, radius, newCenter);
-         this.drawTree(node.right, newCenter, radius, xOffset / 2);
+         this._drawTree(node.right, newCenter, radius, xOffset / 2);
       }
+   };
+
+   this.drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
+      this._drawTree(node, center, radius, xOffset, yOffset);
+      this.tree._mustInitializePositions = false;
    };
 
    // CHECK IF POINT LIES WITHIN CIRCLE
@@ -515,6 +538,7 @@ function() {
          newDepth = min(newDepth, 6);
          newDepth = max(newDepth, 0);
          this.tree.root = this.tree.createBSTWithDepth(newDepth);
+         this.tree._mustInitializePositions = true;
          if (!(this.tree.depth === 0 && newDepth === 0)) {
             this.tree.saveState();
          }
@@ -580,7 +604,7 @@ function() {
             this.drawEmpty(center, nodeSize);
          }
 
-         this.tree.doPendingOperations();
+         this.tree.doPendingOperation();
       });
    }
 }
