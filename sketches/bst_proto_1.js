@@ -26,7 +26,7 @@ function() {
          this.value = value;
          this.left = null;
          this.right = null;
-         this.center = (center == undefined) ? undefined : [center[0], center[1]];
+         this.center = (center == undefined) ? undefined : [center[0], center[1], 0];
          // MANAGE COLORS
          this.colorManager = new ColorManager();
       };
@@ -60,42 +60,6 @@ function() {
       };
 
       BinarySearchTree.Node.prototype = {
-         getPredecessor : function(node) {
-            let curNode = node.left;
-            while (curNode.right !== null){
-               curNode = curNode.right;
-            }
-            return curNode.value;
-         },
-
-
-         remove : function(node) {
-            if (node.left === null){
-               return node.right;
-            }
-            if (node.right === null){
-               return node.left;
-            }
-            let value = this.getPredecessor(node);
-            node.value = value;
-            node.left = this.recursiveRemove(node.left, value);
-            return node;
-         },
-
-         recursiveRemove: function(node, value) {
-            if (value < node.value){
-               node.left = this.recursiveRemove(node.left, value);
-            }
-            else if (value > node.value){
-               node.right = this.recursiveRemove(node.right, value);
-            }
-            else {
-               node = this.remove(node);
-            }
-            return node;
-         },
-
-
          toString : function() {
             return "(" + this.value + ")";
          },
@@ -145,6 +109,280 @@ function() {
          return this._mustInitializePositions;
       },
 
+      // beginOperation : function(generator, value) {
+      //    let self = this;
+      //    if (!this.operationMemory.active) {
+      //       this.operationMemory.operation = (function() { 
+      //          let op = generator(value);
+
+      //          return function(args) { return op.next(args); };
+
+      //       }());
+      //       this.operationMemory.active = true;
+      //    }
+      // },
+
+      remove : function(value) {
+         let self = this;
+         if (!this.operationMemory.active) {
+            this.operationMemory.operation = (function() { 
+               let op = self._remove(value, self.root, null);
+
+               return function(args) { return op.next(args); };
+
+            }());
+            this.operationMemory.active = true;
+         }        
+      },
+
+      _remove : function*(value, root, parent=null) {
+         if (root == null) {
+            return;
+         }
+//////////////////////////////
+         let current = root;
+         let comp = null;
+
+         while (current !== null) {
+            comp = current.value;
+            if (value == comp) {
+               current.colorManager.enableColor(true).setColor("orange");
+               this.applyAll(function(node) {
+                  node.colorManager.enableColor(true).setColor("red");
+               }, current.right);
+               break;
+            }
+            current.colorManager.enableColor(true).setColor("purple");
+            parent = current;
+            if (value < comp) {
+               // HIGHLIGHT UN-TRAVERSED SUB-TREE
+               this.applyAll(function(node) {
+                  node.colorManager.enableColor(true).setColor("red");
+               }, current.right);
+
+               current = current.left;
+            }
+            else {
+               // HIGHLIGHT UN-TRAVERSED SUB-TREE
+               this.applyAll(function(node) {
+                  node.colorManager.enableColor(true).setColor("red");
+               }, current.left);
+
+               current = current.right;
+            }
+
+            /////////
+            {
+               let pause = SketchAnimation.create(
+                  SketchAnimation.Type.NONE(),
+                  .6,
+                  true
+               );
+               while (!pause.step(this.sketchCtx.elapsed).finished) {
+                  yield;
+               }
+            }
+            /////////
+         }
+
+         // NODE TO REMOVE DOES NOT EXIST,ABORT
+         // (NO WAY TO SPECIFY NON-EXISTING NODE YET : TODO)
+         if (value != comp) {
+            return;
+         }
+
+         // CASES 1 AND 2: 1 CHILD,
+         if (parent == null) {
+            // SENTINEL
+            parent = new BinarySearchTree.Node(-1);
+         }
+         if (parent.left == current) {
+            if (current.left === null) {
+               /////////
+               {
+                  let pause = SketchAnimation.create(
+                     SketchAnimation.Type.NONE(),
+                     .6,
+                     true
+                  );
+                  while (!pause.step(this.sketchCtx.elapsed).finished) {
+                     yield;
+                  }
+               }
+               /////////
+               current.colorManager.setColor("orange");
+
+               parent.left = current.right;
+               return;
+            }
+            else if (current.right === null) {
+               /////////
+               {
+                  let pause = SketchAnimation.create(
+                     SketchAnimation.Type.NONE(),
+                     .6,
+                     true
+                  );
+                  while (!pause.step(this.sketchCtx.elapsed).finished) {
+                     yield;
+                  }
+               }
+               /////////
+               current.colorManager.setColor("orange");
+               parent.left = current.left;
+               return;
+            }
+         }
+         else if (parent.right == current) {
+            if (current.left === null) {
+               /////////
+               {
+                  let pause = SketchAnimation.create(
+                     SketchAnimation.Type.NONE(),
+                     .6,
+                     true
+                  );
+                  while (!pause.step(this.sketchCtx.elapsed).finished) {
+                     yield;
+                  }
+               }
+               /////////
+               current.colorManager.setColor("orange");
+               parent.right = current.right;
+               return;
+            }
+            else if (current.right === null) {
+               /////////
+               {
+                  let pause = SketchAnimation.create(
+                     SketchAnimation.Type.NONE(),
+                     .6,
+                     true
+                  );
+                  while (!pause.step(this.sketchCtx.elapsed).finished) {
+                     yield;
+                  }
+               }
+               /////////
+               current.colorManager.setColor("orange");
+               parent.right = current.left;
+               return;
+            }
+         }
+         else if (current.left == null && current.right == null) {
+            /////////
+            {
+               let pause = SketchAnimation.create(
+                  SketchAnimation.Type.NONE(),
+                  .6,
+                  true
+               );
+               while (!pause.step(this.sketchCtx.elapsed).finished) {
+                  yield;
+               }
+            }
+            /////////
+            current.colorManager.setColor("orange");
+            this.root = null;
+            return;
+         }
+
+         console.log("CASE 3");
+
+         // CASE 3 : FIND A PREDECESSOR
+
+         // NAVIGATE BRANCH TO FIND PREDECESSOR
+         let find = current.left;
+         let copyVal = 0;
+
+         ////////
+         {
+            let pause = SketchAnimation.create(
+               SketchAnimation.Type.NONE(),
+               .6,
+               true
+            );
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
+               yield;
+            }
+         }
+         /////////
+
+         find.colorManager.enableColor(true).setColor("cyan");
+
+         /////////
+         {
+            let pause = SketchAnimation.create(
+               SketchAnimation.Type.NONE(),
+               .6,
+               true
+            );
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
+               yield;
+            }
+         }
+         /////////
+
+         this.applyAll(function(node) {
+            node.colorManager.enableColor(true).setColor("red");
+         }, find.left);
+
+         while (find.right !== null) {
+            find = find.right;
+            find.colorManager.enableColor(true).setColor("cyan");
+            this.applyAll(function(node) {
+               node.colorManager.enableColor(true).setColor("red");
+            }, find.left);
+
+            if (find.right == null) {
+               break;
+            }
+
+            let pause = SketchAnimation.create(
+               SketchAnimation.Type.NONE(),
+               .6,
+               true
+            );
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
+               yield;
+            }
+         }
+
+         find.colorManager.enableColor(true).setColor("orange");
+
+         /////////
+         {
+            let pause = SketchAnimation.create(
+               SketchAnimation.Type.NONE(),
+               .6,
+               true
+            );
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
+               yield;
+            }
+         }
+         /////////
+
+         current.value = find.value;
+
+         /////////
+         {
+            let pause = SketchAnimation.create(
+               SketchAnimation.Type.NONE(),
+               .6,
+               true
+            );
+            while (!pause.step(this.sketchCtx.elapsed).finished) {
+               yield;
+            }
+         }
+         /////////
+
+         current.colorManager.enableColor(true).setColor("purple");
+
+         yield *this._remove(current.value, current.left, current);
+      },
+
       insert : function(value) {
          // THIS WILL BE A COMMON PATTERN THAT I'LL TRY TO ABSTRACT AWAY LATER
          let self = this;
@@ -152,28 +390,20 @@ function() {
             this.operationMemory.operation = (function() { 
                let op = self._insert(value);
 
-               return function(arg) { return op.next() };
+               return function(args) { return op.next(args); };
 
             }());
             this.operationMemory.active = true;
          }
-         // else {
-         //    let status = this.operationMemory.operation();
-         //    if (status.done) {
-         //       this.operationMemory.active = false;
-         //       this.operationMemory.operation = null;
-         //    }
-         // }
       },
       _insert : function*(value) {
          let toInsert = new BinarySearchTree.Node(value);
+         toInsert.colorManager.enableColor(true).setColor("green");
          if (this.root === null) {
             this.root = toInsert;
-            this.root.colorManager.enableColor(true).setColor("green");
             return;
          }
 
-         toInsert.colorManager.enableColor(true).setColor("green");
          let parent = null;
          let current = this.root;
          let comp = null;
@@ -221,12 +451,7 @@ function() {
          }
       },
 
-      remove : function(value){
-         this.root = this.root.recursiveRemove(this.root, value);
-         // TEMPORARY FIX
-         this._mustInitializePositions = true;
-      },
-      copyData: function(oldNode) {
+      copyData : function(oldNode) {
          let newNode = new BinarySearchTree.Node(oldNode.value, oldNode.center);
 
          if (oldNode.left !== null){
@@ -349,12 +574,13 @@ function() {
 
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
-   this.initTreeLayout = function(node, center = [0, 0], radius = 0.5, xOffset = 5, yOffset = 2) {
+   // UNUSED
+   this.initTreeLayout = function(node, center = [0, 0, 0], radius = 0.5, xOffset = 5, yOffset = 2, zOffset = 0) {
       if (node === null) {
          return;
       }
 
-      function traverseTree(node, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2) {
+      function traverseTree(node, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2, zOffset = 0) {
          node.center = [center[0], center[1]];
          if (node.left !== null) {
             let newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
@@ -586,7 +812,7 @@ function() {
       });
       this.afterSketch(function() {
          let nodeSize = 0.5;
-         let center = [0,0];
+         let center = [0, 0];
 
          let curNode = this.tree.root;
          let depth = this.tree.depth;
