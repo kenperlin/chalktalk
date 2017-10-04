@@ -110,12 +110,21 @@ function() {
       mustInitializePositions : function() {
          return this._mustInitializePositions;
       },
+      // TODO
+      calcTraversalPauseTime : function() {
+         let size = this.size();
+         if (size == 0) {
+            return 0.1;
+         }
+         let ret = max((4.2 / size), 0.13);
+         return ret;
+      },
 
       inOrder : function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._inOrderHelper(self.root);
+                let op = self._inOrder(self.root);
 
                 return function(args) { return op.next(args); };
 
@@ -124,28 +133,28 @@ function() {
           }
       },
 
-      _inOrderHelper: function*(node) {
-          node.colorManager.enableColor(true).setColor("orange");
+      _inOrder : function*(node) {
+          node.colorManager.enableColor(true).setColor("purple");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
           if (node === null){
             return;
           }
-          if (node.left !== null){
-            yield *this._inOrderHelper(node.left);
+          if (node.left !== null) {
+            yield *this._inOrder(node.left);
           }
           node.colorManager.enableColor(true).setColor("green");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-          if (node.right !== null){
-            yield *this._inOrderHelper(node.right);
+          if (node.right !== null) {
+            yield *this._inOrder(node.right);
           }
 
       },
 
-      preOrder: function() {
+      preOrder : function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._preOrderHelper(self.root);
+                let op = self._preOrder(self.root);
 
                 return function(args) { return op.next(args); };
 
@@ -154,32 +163,32 @@ function() {
           }
       },
 
-      _preOrderHelper: function*(node) {
-          node.colorManager.enableColor(true).setColor("orange");
+      _preOrder : function*(node) {
+          node.colorManager.enableColor(true).setColor("purple");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
 
-          if (node === null){
+          if (node === null) {
             return;
           }
 
           node.colorManager.enableColor(true).setColor("green");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
 
-          if (node.left !== null){
-            yield *this._preOrderHelper(node.left);
+          if (node.left !== null) {
+            yield *this._preOrder(node.left);
           }
 
-          if (node.right !== null){
-            yield *this._preOrderHelper(node.right);
+          if (node.right !== null) {
+            yield *this._preOrder(node.right);
           }
       },
 
 
-      postOrder: function() {
+      postOrder : function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._postOrderHelper(self.root);
+                let op = self._postOrder(self.root, self.calcTraversalPauseTime());
 
                 return function(args) { return op.next(args); };
 
@@ -188,24 +197,24 @@ function() {
           }
       },
 
-      _postOrderHelper: function*(node) {
-          node.colorManager.enableColor(true).setColor("orange");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+      _postOrder : function*(node, pauseTime) {
+          node.colorManager.enableColor(true).setColor("purple");
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
-          if (node === null){
+          if (node === null) {
             return;
           }
 
-          if (node.left !== null){
-            yield *this._postOrderHelper(node.left);
+          if (node.left !== null) {
+            yield *this._postOrder(node.left, pauseTime);
           }
 
-          if (node.right !== null){
-            yield *this._postOrderHelper(node.right);
+          if (node.right !== null) {
+            yield *this._postOrder(node.right, pauseTime);
           }
 
           node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
       },
 
@@ -465,6 +474,20 @@ function() {
          }
       },
 
+      size : function(node) {
+         if (node === undefined) {
+            node = this.root;
+         }
+         return this._size(this.root);
+      },
+
+      _size : function(node) {
+         if (node === null) {
+            return 0;
+         }
+         return this._size(node.left) + 1 + this._size(node.right);
+      },
+
       copyData : function(oldNode) {
          let newNode = new BinarySearchTree.Node(oldNode.value, oldNode.center);
 
@@ -576,14 +599,6 @@ function() {
       this.tree = new BinarySearchTree(this);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
-   };
-
-   // NOT USED RIGHT NOW
-   this.getSize = function(node) {
-      if (node === null) {
-         return 0;
-      }
-      return this.getSize(node.left) + 1 + this.getSize(node.right);
    };
 
 
@@ -740,7 +755,7 @@ function() {
    }
 
    this.onSwipe[0] = [
-      'inOrder',
+      'postorder traversal',
       function(){
         this.tree.postOrder();
       }

@@ -469,7 +469,7 @@ var SketchAnimation = (function() {
             }
 
             let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure(/*this.args, */(this.isReversed) ? 1 - fractionComplete : fractionComplete);
+            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };
@@ -485,7 +485,7 @@ var SketchAnimation = (function() {
             }
 
             let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure(/*this.args, */(this.isReversed) ? 1 - fractionComplete : fractionComplete);
+            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
             
             return {point : nextPt, finished : fin};
          };         
