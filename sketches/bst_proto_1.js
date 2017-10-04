@@ -1,6 +1,6 @@
 function() {
    // DEVELOPED BY KARL AND PAT
-   
+
    // TODO UPDATE DEPTH WHEN NODE IS ADDED
    this.label = 'BST';
 
@@ -720,6 +720,7 @@ function() {
       mText("nullptr", center, .5, .5, .5);
    };
 
+   // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    sketchCtx.elapsed = 0.0;
    this.render = function(elapsed) {
       sketchCtx.elapsed = elapsed;
