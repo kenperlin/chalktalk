@@ -135,7 +135,7 @@ function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._inOrder(self.root);
+                let op = self._inOrder(self.root, self.calcTraversalPauseTime());
 
 
                 return function(args) { return op.next(args); };
@@ -145,19 +145,19 @@ function() {
           }
       },
 
-      _inOrder : function*(node) {
+      _inOrder : function*(node, pauseTime) {
           node.colorManager.enableColor(true).setColor("purple");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
           if (node === null){
             return;
           }
           if (node.left !== null) {
-            yield *this._inOrder(node.left);
+            yield *this._inOrder(node.left, pauseTime);
           }
           node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
           if (node.right !== null) {
-            yield *this._inOrder(node.right);
+            yield *this._inOrder(node.right, pauseTime);
          }
       },
 
@@ -165,7 +165,7 @@ function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._preOrder(self.root);
+                let op = self._preOrder(self.root, self.calcTraversalPauseTime());
 
                 return function(args) { return op.next(args); };
 
@@ -174,23 +174,23 @@ function() {
           }
       },
 
-      _preOrder : function*(node) {
+      _preOrder : function*(node, pauseTime) {
           node.colorManager.enableColor(true).setColor("purple");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
           if (node === null) {
             return;
           }
 
           node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
           if (node.left !== null) {
-            yield *this._preOrder(node.left);
+            yield *this._preOrder(node.left, pauseTime);
           }
 
           if (node.right !== null){
-            yield *this._preOrder(node.right);
+            yield *this._preOrder(node.right, pauseTime);
           }
       },
 
