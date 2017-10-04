@@ -77,7 +77,7 @@ function() {
 
             lineWidth(4);
 
-            color(backgroundColor == 'black' ? 'cyan' : 'blue');
+            color(isBlackBackground() ? 'cyan' : 'blue');
             mCurve([A, B]);
             mDot(A, .15);
             mDot(B, .15);
@@ -85,7 +85,7 @@ function() {
             if (this.mode == 0)
                return;
 
-            color(backgroundColor == 'black' ? 'yellow' : 'red');
+            color(isBlackBackground() ? 'yellow' : 'red');
             mDot(mix(A,B,T), .15);
          }
 

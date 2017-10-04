@@ -1,5 +1,5 @@
 function() {
-   this.label = 'projectuv';
+   this.label = 'projuv';
    this.is3D = true;
    this.mode = 0;
    this.onCmdClick = function() { this.mode = (this.mode + 1) % 3; }
