@@ -209,7 +209,7 @@ function() {
       },
 
       _postOrder: function*(node, pauseTime) {
-          node.colorManager.enableColor(true).setColor("orange");
+          node.colorManager.enableColor(true).setColor("purple");
           for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
           if (node === null) {
             return;
