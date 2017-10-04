@@ -111,11 +111,34 @@ function() {
          return this._mustInitializePositions;
       },
 
+      getSize: function(){
+        return this._getSize(this.root);
+      },
+
+      _getSize : function(node) {
+         if (node === null) {
+            return 0;
+         }
+         return this._getSize(node.left) + 1 + this._getSize(node.right);
+      },
+
       inOrder : function() {
           let self = this;
+          let size = self.getSize();
+
+
+          let secDelay;
+          if (size < 10){
+            secDelay = 0.6;
+          } else if (size < 35){
+            secDelay = 0.3;
+          } else {
+            secDelay = 0.2;
+          }
+
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._inOrderHelper(self.root);
+                let op = self._inOrder(self.root,secDelay);
 
                 return function(args) { return op.next(args); };
 
@@ -124,19 +147,19 @@ function() {
           }
       },
 
-      _inOrderHelper: function*(node) {
+      _inOrder: function*(node, secDelay) {
           node.colorManager.enableColor(true).setColor("orange");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(secDelay, this.sketchCtx); p();) { yield; }
           if (node === null){
             return;
           }
           if (node.left !== null){
-            yield *this._inOrderHelper(node.left);
+            yield *this._inOrder(node.left, secDelay);
           }
           node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          for (let p = SketchAnimation.pause(secDelay, this.sketchCtx); p();) { yield; }
           if (node.right !== null){
-            yield *this._inOrderHelper(node.right);
+            yield *this._inOrder(node.right, secDelay);
           }
 
       },
@@ -145,7 +168,7 @@ function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._preOrderHelper(self.root);
+                let op = self._preOrder(self.root);
 
                 return function(args) { return op.next(args); };
 
@@ -154,7 +177,7 @@ function() {
           }
       },
 
-      _preOrderHelper: function*(node) {
+      _preOrder: function*(node) {
           node.colorManager.enableColor(true).setColor("orange");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
 
@@ -166,11 +189,11 @@ function() {
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
 
           if (node.left !== null){
-            yield *this._preOrderHelper(node.left);
+            yield *this._preOrder(node.left);
           }
 
           if (node.right !== null){
-            yield *this._preOrderHelper(node.right);
+            yield *this._preOrder(node.right);
           }
       },
 
@@ -179,7 +202,7 @@ function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
-                let op = self._postOrderHelper(self.root);
+                let op = self._postOrder(self.root);
 
                 return function(args) { return op.next(args); };
 
@@ -188,7 +211,7 @@ function() {
           }
       },
 
-      _postOrderHelper: function*(node) {
+      _postOrder: function*(node) {
           node.colorManager.enableColor(true).setColor("orange");
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
 
@@ -197,11 +220,11 @@ function() {
           }
 
           if (node.left !== null){
-            yield *this._postOrderHelper(node.left);
+            yield *this._postOrder(node.left);
           }
 
           if (node.right !== null){
-            yield *this._postOrderHelper(node.right);
+            yield *this._postOrder(node.right);
           }
 
           node.colorManager.enableColor(true).setColor("green");
@@ -579,12 +602,7 @@ function() {
    };
 
    // NOT USED RIGHT NOW
-   this.getSize = function(node) {
-      if (node === null) {
-         return 0;
-      }
-      return this.getSize(node.left) + 1 + this.getSize(node.right);
-   };
+
 
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -742,7 +760,7 @@ function() {
    this.onSwipe[0] = [
       'inOrder',
       function(){
-        this.tree.postOrder();
+        this.tree.inOrder();
       }
    ];
 
