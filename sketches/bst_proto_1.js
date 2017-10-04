@@ -1,6 +1,6 @@
 function() {
    // DEVELOPED BY KARL AND PAT
-   
+
    // TODO UPDATE DEPTH WHEN NODE IS ADDED
    this.label = 'BST';
 
@@ -97,7 +97,7 @@ function() {
             // TODO : MAKE RE-INITIALIZATION CLEANER,
             // ADDITIONAL CASES TO CONSIDER FOR IN-PROGRESS OPERATIONS
             this._mustInitializePositions = true;
-         }       
+         }
       },
       hasPendingOperation : function() {
          return this.operationMemory.active;
@@ -111,17 +111,47 @@ function() {
          return this._mustInitializePositions;
       },
 
+      inOrder : function() {
+          let self = this;
+          if (!this.operationMemory.active) {
+             this.operationMemory.operation = (function() {
+                let op = self._inOrderHelper(self.root);
+
+                return function(args) { return op.next(args); };
+
+             }());
+             this.operationMemory.active = true;
+          }
+      },
+
+      _inOrderHelper: function*(node) {
+          node.colorManager.enableColor(true).setColor("orange");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          if (node === null){
+            return;
+          }
+          if (node.left !== null){
+            yield *this._inOrderHelper(node.left);
+          }
+          node.colorManager.enableColor(true).setColor("green");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+          if (node.right !== null){
+            yield *this._inOrderHelper(node.right);
+          }
+
+      },
+
       remove : function(value) {
          let self = this;
          if (!this.operationMemory.active) {
-            this.operationMemory.operation = (function() { 
+            this.operationMemory.operation = (function() {
                let op = self._remove(value, self.root, null);
 
                return function(args) { return op.next(args); };
 
             }());
             this.operationMemory.active = true;
-         }        
+         }
       },
 
       _remove : function*(value, root, parent=null) {
@@ -310,7 +340,7 @@ function() {
          // THIS WILL BE A COMMON PATTERN THAT I'LL TRY TO ABSTRACT AWAY LATER
          let self = this;
          if (!this.operationMemory.active) {
-            this.operationMemory.operation = (function() { 
+            this.operationMemory.operation = (function() {
                let op = self._insert(value);
 
                return function(args) { return op.next(args); };
@@ -505,7 +535,7 @@ function() {
          if (node.right !== null) {
             let newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
             traverseTree(node.right, newCenter, radius, center, radius, xOffset / 2);
-         }       
+         }
       }
 
       let nodeSize = radius;
@@ -528,12 +558,12 @@ function() {
      let right = center[0] + radius;
      let bottom = center[1] - radius;
      let top = center[1] + radius;
- 
+
      node.colorManager.activateColor();
      // DRAW CONTAINER
      mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
      node.colorManager.deactivateColor();
- 
+
      // DRAW ELEMENT
      textHeight(this.mScale(.4));
      mText(node.value, center, .5, .5, .5);
@@ -548,7 +578,7 @@ function() {
       function drawParentToChildEdge(center, radius, childCenter) {
          let childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
          let childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
-         
+
          let edgeOfParent = [center[0] + radius / childParentDist * childParentVec[0], center[1] + radius / childParentDist * childParentVec[1]];
          let edgeOfChild = [childCenter[0] - radius / childParentDist * childParentVec[0], childCenter[1] - radius / childParentDist * childParentVec[1]];
          mLine(edgeOfParent, edgeOfChild);
@@ -559,7 +589,7 @@ function() {
       }
 
       center = node.center;
-      
+
       this.drawNode(node, center, radius);
 
       if (node.left !== null) {
@@ -605,7 +635,7 @@ function() {
    };
 
    this.findClickedNode = function(node, clickLocation) {
-      return (node === null) ? 
+      return (node === null) ?
                null : this._findClickedNode(node, clickLocation);
    };
 
@@ -622,6 +652,7 @@ function() {
       ci.x = p.x;
       ci.y = p.y;
       ci.time = time;
+
 
       this.tree.resetGraphicTemporaries();
    }
@@ -640,6 +671,12 @@ function() {
       ci.y = null;
    }
 
+   this.onSwipe[0] = [
+      'inOrder',
+      function(){
+        this.tree.inOrder();
+      }
+   ];
 
    this.onSwipe[4] = [
       'undo',
@@ -655,7 +692,7 @@ function() {
    //    }
    // ];
 
-     
+
    this.onCmdClick = function(p) {
       console.log("cmd_click");
    };
