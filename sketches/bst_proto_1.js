@@ -120,11 +120,23 @@ function() {
          return ret;
       },
 
+      getSize: function(){
+        return this._getSize(this.root);
+      },
+
+      _getSize : function(node) {
+         if (node === null) {
+            return 0;
+         }
+         return this._getSize(node.left) + 1 + this._getSize(node.right);
+      },
+
       inOrder : function() {
           let self = this;
           if (!this.operationMemory.active) {
              this.operationMemory.operation = (function() {
                 let op = self._inOrder(self.root);
+
 
                 return function(args) { return op.next(args); };
 
@@ -146,8 +158,7 @@ function() {
           for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
           if (node.right !== null) {
             yield *this._inOrder(node.right);
-          }
-
+         }
       },
 
       preOrder : function() {
@@ -178,7 +189,7 @@ function() {
             yield *this._preOrder(node.left);
           }
 
-          if (node.right !== null) {
+          if (node.right !== null){
             yield *this._preOrder(node.right);
           }
       },
@@ -197,19 +208,18 @@ function() {
           }
       },
 
-      _postOrder : function*(node, pauseTime) {
-          node.colorManager.enableColor(true).setColor("purple");
+      _postOrder: function*(node, pauseTime) {
+          node.colorManager.enableColor(true).setColor("orange");
           for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
-
           if (node === null) {
             return;
           }
 
-          if (node.left !== null) {
+          if (node.left !== null){
             yield *this._postOrder(node.left, pauseTime);
           }
 
-          if (node.right !== null) {
+          if (node.right !== null){
             yield *this._postOrder(node.right, pauseTime);
           }
 
@@ -600,7 +610,6 @@ function() {
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
    };
-
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
    // UNUSED
