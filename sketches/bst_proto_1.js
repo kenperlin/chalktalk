@@ -141,6 +141,74 @@ function() {
 
       },
 
+      preOrder: function() {
+          let self = this;
+          if (!this.operationMemory.active) {
+             this.operationMemory.operation = (function() {
+                let op = self._preOrderHelper(self.root);
+
+                return function(args) { return op.next(args); };
+
+             }());
+             this.operationMemory.active = true;
+          }
+      },
+
+      _preOrderHelper: function*(node) {
+          node.colorManager.enableColor(true).setColor("orange");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+
+          if (node === null){
+            return;
+          }
+
+          node.colorManager.enableColor(true).setColor("green");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+
+          if (node.left !== null){
+            yield *this._preOrderHelper(node.left);
+          }
+
+          if (node.right !== null){
+            yield *this._preOrderHelper(node.right);
+          }
+      },
+
+
+      postOrder: function() {
+          let self = this;
+          if (!this.operationMemory.active) {
+             this.operationMemory.operation = (function() {
+                let op = self._postOrderHelper(self.root);
+
+                return function(args) { return op.next(args); };
+
+             }());
+             this.operationMemory.active = true;
+          }
+      },
+
+      _postOrderHelper: function*(node) {
+          node.colorManager.enableColor(true).setColor("orange");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+
+          if (node === null){
+            return;
+          }
+
+          if (node.left !== null){
+            yield *this._postOrderHelper(node.left);
+          }
+
+          if (node.right !== null){
+            yield *this._postOrderHelper(node.right);
+          }
+
+          node.colorManager.enableColor(true).setColor("green");
+          for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+
+      },
+
       remove : function(value) {
          let self = this;
          if (!this.operationMemory.active) {
@@ -674,7 +742,7 @@ function() {
    this.onSwipe[0] = [
       'inOrder',
       function(){
-        this.tree.inOrder();
+        this.tree.postOrder();
       }
    ];
 
