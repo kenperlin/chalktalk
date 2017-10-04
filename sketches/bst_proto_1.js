@@ -109,19 +109,6 @@ function() {
          return this._mustInitializePositions;
       },
 
-      // beginOperation : function(generator, value) {
-      //    let self = this;
-      //    if (!this.operationMemory.active) {
-      //       this.operationMemory.operation = (function() { 
-      //          let op = generator(value);
-
-      //          return function(args) { return op.next(args); };
-
-      //       }());
-      //       this.operationMemory.active = true;
-      //    }
-      // },
-
       remove : function(value) {
          let self = this;
          if (!this.operationMemory.active) {
@@ -171,18 +158,7 @@ function() {
                current = current.right;
             }
 
-            /////////
-            {
-               let pause = SketchAnimation.create(
-                  SketchAnimation.Type.NONE(),
-                  .6,
-                  true
-               );
-               while (!pause.step(this.sketchCtx.elapsed).finished) {
-                  yield;
-               }
-            }
-            /////////
+            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; } // POTENTIAL EFFICIENCY ISSUES?
          }
 
          // NODE TO REMOVE DOES NOT EXIST,ABORT
@@ -198,7 +174,7 @@ function() {
          }
          if (parent.left == current) {
             if (current.left === null) {
-               /////////
+               ///////// VERBOSE WAY
                {
                   let pause = SketchAnimation.create(
                      SketchAnimation.Type.NONE(),
@@ -216,17 +192,8 @@ function() {
                return;
             }
             else if (current.right === null) {
-               /////////
-               {
-                  let pause = SketchAnimation.create(
-                     SketchAnimation.Type.NONE(),
-                     .6,
-                     true
-                  );
-                  while (!pause.step(this.sketchCtx.elapsed).finished) {
-                     yield;
-                  }
-               }
+               ///////// SHORTENED WAY
+               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
                /////////
                current.colorManager.setColor("orange");
                parent.left = current.left;
@@ -236,16 +203,7 @@ function() {
          else if (parent.right == current) {
             if (current.left === null) {
                /////////
-               {
-                  let pause = SketchAnimation.create(
-                     SketchAnimation.Type.NONE(),
-                     .6,
-                     true
-                  );
-                  while (!pause.step(this.sketchCtx.elapsed).finished) {
-                     yield;
-                  }
-               }
+               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
                /////////
                current.colorManager.setColor("orange");
                parent.right = current.right;
@@ -253,16 +211,7 @@ function() {
             }
             else if (current.right === null) {
                /////////
-               {
-                  let pause = SketchAnimation.create(
-                     SketchAnimation.Type.NONE(),
-                     .6,
-                     true
-                  );
-                  while (!pause.step(this.sketchCtx.elapsed).finished) {
-                     yield;
-                  }
-               }
+               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
                /////////
                current.colorManager.setColor("orange");
                parent.right = current.left;
@@ -271,23 +220,12 @@ function() {
          }
          else if (current.left == null && current.right == null) {
             /////////
-            {
-               let pause = SketchAnimation.create(
-                  SketchAnimation.Type.NONE(),
-                  .6,
-                  true
-               );
-               while (!pause.step(this.sketchCtx.elapsed).finished) {
-                  yield;
-               }
-            }
+            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
             /////////
             current.colorManager.setColor("orange");
             this.root = null;
             return;
          }
-
-         console.log("CASE 3");
 
          // CASE 3 : FIND A PREDECESSOR
 
@@ -296,31 +234,13 @@ function() {
          let copyVal = 0;
 
          ////////
-         {
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
-               .6,
-               true
-            );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
-               yield;
-            }
-         }
+         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
          /////////
 
          find.colorManager.enableColor(true).setColor("cyan");
 
          /////////
-         {
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
-               .6,
-               true
-            );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
-               yield;
-            }
-         }
+         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
          /////////
 
          this.applyAll(function(node) {
@@ -337,48 +257,49 @@ function() {
             if (find.right == null) {
                break;
             }
-
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
-               .6,
-               true
-            );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
-               yield;
-            }
+            /////////
+            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+            /////////
          }
 
          find.colorManager.enableColor(true).setColor("orange");
 
          /////////
+         for (let p = SketchAnimation.pause(.3, this.sketchCtx); p();) { yield; }
+         /////////
+
+         // MOVE THE COPY VALUE (VISUALLY)
          {
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
+            let c1 = find.center;
+            let c2 = current.center;
+            let valMoveAni = SketchAnimation.create(
+               SketchAnimation.Type.LINE({
+                  start : { x : c1[0], y : c1[1] },
+                  end : { x : c2[0], y : c2[1] }
+               }),
                .6,
                true
             );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
+            let ret = {};
+            while (!ret.finished) {
+               ret = valMoveAni.step(this.sketchCtx.elapsed);
+               textHeight(this.sketchCtx.mScale(.4));
+               mText(find.value, ret.point, .5, .5, .5);
                yield;
             }
          }
-         /////////
 
          current.value = find.value;
 
          /////////
-         {
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
-               .6,
-               true
-            );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
-               yield;
-            }
-         }
+         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
          /////////
 
          current.colorManager.enableColor(true).setColor("purple");
+
+         /////////
+         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+         /////////
 
          yield *this._remove(current.value, current.left, current);
       },
@@ -432,15 +353,8 @@ function() {
                current = current.right;
             }
 
-            // TESTING PAUSE (WILL BE MORE INTERESTING LATER ONCE THE EDGES ARE MADE AS OBJECTS THAT CAN BE CONFIGURED EASILY)
-            let pause = SketchAnimation.create(
-               SketchAnimation.Type.NONE(),
-               .6,
-               true
-            );
-            while (!pause.step(this.sketchCtx.elapsed).finished) {
-               yield;
-            }
+            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+
          }
 
          if (value < comp) {

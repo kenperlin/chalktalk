@@ -13,6 +13,8 @@ var SketchAnimation = (function() {
    };
 
    a.Type.LINE = function(args) {
+      args.start.z = args.start.z || 0.0;
+      args.end.z = args.end.z || 0.0;
       return function(/*UNUSED, */fractionComplete) {
          const start = args.start;
          const end = args.end;
@@ -488,15 +490,17 @@ var SketchAnimation = (function() {
             return {point : nextPt, finished : fin};
          };         
       }
+   };
 
-      this.reset = function() {
+   a.Animation.prototype = {
+      reset : function() {
          this.prevTime = time;
          this.elapsedTime = 0;
-      };
+      },
 
-      this.reverse = function() {
-         this.isReversed = !this.isReversed;
-      };
+      reverse : function() {
+         this.isReversed = !this.isReversed;         
+      }
    };
 
    // TODO IS THERE A HELPFUL WAY TO SYNCHRONIZE MULTIPLE ANIMATION OBJECTS 
@@ -541,6 +545,21 @@ var SketchAnimation = (function() {
 
    a.create = function(stepProcedure, timeToCompleteSeconds, doProvideElapsed) {
       return new a.Animation(stepProcedure, timeToCompleteSeconds, doProvideElapsed);
+   }
+
+   a.pause = function(timeToCompleteSeconds, elapsedSrc) {
+      if (elapsedSrc) {
+         return (function() {
+            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, true);
+            return function() { return !pause.step(elapsedSrc.elapsed).finished; };
+         }());
+      }
+      else {
+         return (function() {
+            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, false);
+            return function() { return !pause.step().finished; };
+         }());       
+      }
    }
 
    a.Path = a.Animation;
