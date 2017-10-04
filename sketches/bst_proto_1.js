@@ -1,5 +1,7 @@
 function() {
-  // TODO update depth when node is added.
+   // DEVELOPED BY KARL AND PAT
+   
+   // TODO UPDATE DEPTH WHEN NODE IS ADDED
    this.label = 'BST';
 
    let sketchCtx = this;
