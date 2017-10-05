@@ -4,7 +4,7 @@ function() {
    // TODO UPDATE DEPTH WHEN NODE IS ADDED
    this.label = 'BST';
 
-   let sketchCtx = this;
+   let sketchCtx = null;
 
    function BinarySearchTree(sketchCtx) {
       this.sketchCtx = sketchCtx;
@@ -132,99 +132,98 @@ function() {
       },
 
       inOrder : function() {
-          let self = this;
-          if (!this.operationMemory.active) {
-             this.operationMemory.operation = (function() {
-                let op = self._inOrder(self.root, self.calcTraversalPauseTime());
+         let self = this;
+         if (!this.operationMemory.active) {
+            this.operationMemory.operation = (function() {
+               let op = self._inOrder(self.root, self.calcTraversalPauseTime());
 
+               return function(args) { return op.next(args); };
 
-                return function(args) { return op.next(args); };
-
-             }());
-             this.operationMemory.active = true;
-          }
+            }());
+            this.operationMemory.active = true;
+         }
       },
 
       _inOrder : function*(node, pauseTime) {
-          node.colorManager.enableColor(true).setColor("purple");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
-          if (node === null){
+         node.colorManager.enableColor(true).setColor("purple");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         if (node === null){
             return;
-          }
-          if (node.left !== null) {
+         }
+         if (node.left !== null) {
             yield *this._inOrder(node.left, pauseTime);
-          }
-          node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
-          if (node.right !== null) {
+         }
+         node.colorManager.enableColor(true).setColor("green");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         if (node.right !== null) {
             yield *this._inOrder(node.right, pauseTime);
          }
       },
 
       preOrder : function() {
-          let self = this;
-          if (!this.operationMemory.active) {
-             this.operationMemory.operation = (function() {
-                let op = self._preOrder(self.root, self.calcTraversalPauseTime());
+         let self = this;
+         if (!this.operationMemory.active) {
+            this.operationMemory.operation = (function() {
+               let op = self._preOrder(self.root, self.calcTraversalPauseTime());
 
-                return function(args) { return op.next(args); };
+               return function(args) { return op.next(args); };
 
-             }());
-             this.operationMemory.active = true;
-          }
+            }());
+            this.operationMemory.active = true;
+         }
       },
 
       _preOrder : function*(node, pauseTime) {
-          node.colorManager.enableColor(true).setColor("purple");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         node.colorManager.enableColor(true).setColor("purple");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
-          if (node === null) {
+         if (node === null) {
             return;
-          }
+         }
 
-          node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         node.colorManager.enableColor(true).setColor("green");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
-          if (node.left !== null) {
+         if (node.left !== null) {
             yield *this._preOrder(node.left, pauseTime);
-          }
+         }
 
-          if (node.right !== null){
+         if (node.right !== null){
             yield *this._preOrder(node.right, pauseTime);
-          }
+         }
       },
 
 
       postOrder : function() {
-          let self = this;
-          if (!this.operationMemory.active) {
-             this.operationMemory.operation = (function() {
-                let op = self._postOrder(self.root, self.calcTraversalPauseTime());
+         let self = this;
+         if (!this.operationMemory.active) {
+            this.operationMemory.operation = (function() {
+               let op = self._postOrder(self.root, self.calcTraversalPauseTime());
 
-                return function(args) { return op.next(args); };
+               return function(args) { return op.next(args); };
 
-             }());
-             this.operationMemory.active = true;
-          }
+            }());
+            this.operationMemory.active = true;
+         }
       },
 
       _postOrder: function*(node, pauseTime) {
-          node.colorManager.enableColor(true).setColor("purple");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
-          if (node === null) {
+         node.colorManager.enableColor(true).setColor("purple");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         if (node === null) {
             return;
-          }
+         }
 
-          if (node.left !== null){
+         if (node.left !== null){
             yield *this._postOrder(node.left, pauseTime);
-          }
+         }
 
-          if (node.right !== null){
+         if (node.right !== null){
             yield *this._postOrder(node.right, pauseTime);
-          }
+         }
 
-          node.colorManager.enableColor(true).setColor("green");
-          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+         node.colorManager.enableColor(true).setColor("green");
+         for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
       },
 
@@ -254,7 +253,7 @@ function() {
             if (value == comp) {
                current.colorManager.enableColor(true).setColor("orange");
                this.applyAll(function(node) {
-                  node.colorManager.enableColor(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("grey");
                }, current.right);
                break;
             }
@@ -263,7 +262,7 @@ function() {
             if (value < comp) {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.enableColor(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("grey");
                }, current.right);
 
                current = current.left;
@@ -271,7 +270,7 @@ function() {
             else {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.enableColor(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("grey");
                }, current.left);
 
                current = current.right;
@@ -363,14 +362,14 @@ function() {
          /////////
 
          this.applyAll(function(node) {
-            node.colorManager.enableColor(true).setColor("red");
+            node.colorManager.enableColor(true).setColor("grey");
          }, find.left);
 
          while (find.right !== null) {
             find = find.right;
             find.colorManager.enableColor(true).setColor("cyan");
             this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("red");
+               node.colorManager.enableColor(true).setColor("grey");
             }, find.left);
 
             if (find.right == null) {
@@ -458,7 +457,7 @@ function() {
             else if (value < comp) {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.enableColor(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("grey");
                }, current.right);
 
                current = current.left;
@@ -466,7 +465,7 @@ function() {
             else {
                // HIGHLIGHT UN-TRAVERSED SUB-TREE
                this.applyAll(function(node) {
-                  node.colorManager.enableColor(true).setColor("red");
+                  node.colorManager.enableColor(true).setColor("grey");
                }, current.left);
 
                current = current.right;
@@ -606,7 +605,9 @@ function() {
 
 
    this.setup = function() {
-      this.tree = new BinarySearchTree(this);
+      sketchCtx = this;
+      sketchCtx.elapsed = 0.0;
+      this.tree = new BinarySearchTree(sketchCtx);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
    };
@@ -850,9 +851,8 @@ function() {
    };
 
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
-   sketchCtx.elapsed = 0.0;
    this.render = function(elapsed) {
-      sketchCtx.elapsed = elapsed;
+      this.elapsed = elapsed;
       this.duringSketch(function(){
          mDrawOval([-1,-1], [1,1], 32, PI, 0);
       });
