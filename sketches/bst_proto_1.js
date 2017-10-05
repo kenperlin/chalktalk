@@ -19,6 +19,9 @@ function() {
       this.historyStack = [];
 
 
+      // Keeps track of all operations for output
+      this.operationStack = [];
+
       // LEGACY UNDO
       this.useOldHistory = true;
 
@@ -228,6 +231,7 @@ function() {
       },
 
       remove : function(value) {
+         this.operationStack.push("remove("+value+")");
          let self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
@@ -244,7 +248,6 @@ function() {
          if (root == null) {
             return;
          }
-//////////////////////////////
          let current = root;
          let comp = null;
 
@@ -423,6 +426,7 @@ function() {
       },
 
       insert : function(value) {
+         this.operationStack.push("insert("+value+")");
          // THIS WILL BE A COMMON PATTERN THAT I'LL TRY TO ABSTRACT AWAY LATER
          let self = this;
          if (!this.operationMemory.active) {
@@ -573,6 +577,7 @@ function() {
          }
          let mid = Math.trunc((start + end)/2);
          let node = new BinarySearchTree.Node(arr[mid]);
+         this.operationStack.push("insert("+arr[mid]+")");
          node.left = this._sortedArrayToBST(arr, start, mid-1);
          node.right = this._sortedArrayToBST(arr, mid+1, end);
          return node;
@@ -820,6 +825,10 @@ function() {
          ci.y = point[1];
       };
    };
+
+   this.output = function() {
+      return this.tree.operationStack;
+   }
 
    this.under = function(other) {
       if (other.output === undefined) {
