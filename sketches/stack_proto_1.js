@@ -1,5 +1,5 @@
 function() {
-   this.label = 'Stack';
+   this.label = 'stack';
 
    let sketchCtx = this;
 

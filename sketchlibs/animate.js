@@ -454,6 +454,8 @@ var SketchAnimation = (function() {
       this.stepProcedure = stepProcedure;
       this.isReversed = false;
 
+      this.startTime = null;
+
       // TRACK INTERNAL ELAPSED TIME AND TIME DIFFERENCES
       if (doProvideElapsed === undefined || doProvideElapsed === null || !doProvideElapsed) {
          this.step = function() {
@@ -490,12 +492,39 @@ var SketchAnimation = (function() {
             return {point : nextPt, finished : fin};
          };         
       }
+
+      // TODO SIMPLIFY AND IMPROVE SO ELAPSED TIME BASED ON TIME_NOW - TIME_START INSTEAD OF RUNNING SUM
+      /*
+            this.step = function(elapsed) {
+            if (this.startTime == null) {
+               this.startTime = time;
+            }
+
+            let fin = false;
+            let fractionComplete = 0;
+            if (time - this.startTime >= this.timeToComplete) {
+               fractionComplete = 1;
+               fin = true;
+            }
+            else {
+               fractionComplete = (time - this.startTime) / this.timeToComplete;
+            }
+
+            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
+            
+            return {point : nextPt, finished : fin};
+         }; 
+
+      */
    };
 
    a.Animation.prototype = {
-      reset : function() {
+      reset : function(timeToCompleteSeconds) {
          this.prevTime = time;
          this.elapsedTime = 0;
+         if (timeToCompleteSeconds !== undefined && timeToCompleteSeconds >= 0) {
+            this.timeToComplete = timeToCompleteSeconds;
+         }
       },
 
       reverse : function() {
@@ -545,22 +574,57 @@ var SketchAnimation = (function() {
 
    a.create = function(stepProcedure, timeToCompleteSeconds, doProvideElapsed) {
       return new a.Animation(stepProcedure, timeToCompleteSeconds, doProvideElapsed);
-   }
+   };
 
    a.pause = function(timeToCompleteSeconds, elapsedSrc) {
       if (elapsedSrc) {
          return (function() {
             let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, true);
-            return function() { return !pause.step(elapsedSrc.elapsed).finished; };
+            let func = function() { return !pause.step(elapsedSrc.elapsed).finished; };
+            func.reset = function(timeToCompleteSeconds) { pause.reset(timeToCompleteSeconds); }
+
+            return func;
          }());
       }
       else {
          return (function() {
             let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, false);
-            return function() { return !pause.step().finished; };
+            let func = function() { return !pause.step().finished; };
+            func.reset = function(timeToCompleteSeconds) { pause.reset(timeToCompleteSeconds); }
+
+            return func;
          }());       
       }
-   }
+   };
+
+   a.pauseAutoReset = function(timeToCompleteSeconds, elapsedSrc) {
+      if (elapsedSrc) {
+         return (function() {
+            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, true);
+            let func = function() { 
+               let shouldPause = !pause.step(elapsedSrc.elapsed).finished;
+               if (!shouldPause) {
+                  pause.reset();
+               }
+               return shouldPause;
+            };
+            return func;
+         }());
+      }
+      else {
+         return (function() {
+            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, false);
+            let func = function() { 
+               let shouldPause = !pause.step().finished;
+               if (!shouldPause) {
+                  pause.reset();
+               }
+               return shouldPause; 
+            };
+            return func;
+         }());       
+      }
+   };
 
    a.Path = a.Animation;
 
