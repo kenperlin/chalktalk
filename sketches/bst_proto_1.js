@@ -65,6 +65,17 @@ function() {
       };
 
       BinarySearchTree.Node.prototype = {
+         get children() {
+            const _children = [];
+            if (this.left != null) {
+               _children.push(this.left);
+            }
+            if (this.right != null) {
+               _children.push(this.right);
+            }
+            return _children;
+         },
+
          toString : function() {
             return "(" + this.value + ")";
          },
@@ -113,7 +124,7 @@ function() {
       mustInitializePositions : function() {
          return this._mustInitializePositions;
       },
-      // TODO
+      // TODO IMPROVE
       calcTraversalPauseTime : function() {
          let size = this.size();
          if (size == 0) {
@@ -217,17 +228,58 @@ function() {
             return;
          }
 
-         if (node.left !== null){
+         if (node.left !== null) {
             yield *this._postOrder(node.left, pauseTime);
          }
 
-         if (node.right !== null){
+         if (node.right !== null) {
             yield *this._postOrder(node.right, pauseTime);
          }
 
          node.colorManager.enableColor(true).setColor("green");
          for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
+      },
+
+      breadthFirst : function() {
+         let self = this;
+         if (!this.operationMemory.active) {
+            this.operationMemory.operation = (function() {
+               let op = self._breadthFirst(self.calcTraversalPauseTime());
+
+               return function(args) { return op.next(args); };
+
+            }());
+            this.operationMemory.active = true;
+         }
+      },
+
+      _breadthFirst : function*(pauseTime) {
+         if (this.root === null) {
+            return;
+         }
+
+         const pauseDequeue = SketchAnimation.pauseAutoReset(pauseTime, this.sketchCtx);
+         const pauseEnqueue = SketchAnimation.pauseAutoReset(pauseTime, this.sketchCtx);
+
+         const queue = [];
+         let parent = this.root;
+
+         parent.colorManager.enableColor(true).setColor("yellow");
+         queue.push(parent);
+         while (pauseEnqueue()) { yield; }
+         
+         while (queue.length > 0) {
+            parent = queue.shift();
+            parent.colorManager.enableColor(true).setColor("green");
+            while (pauseDequeue()) { yield; }
+
+            for (const child of parent.children) {
+               child.colorManager.enableColor(true).setColor("yellow");
+               queue.push(child);
+               while (pauseEnqueue()) { yield; }
+            }
+         }
       },
 
       remove : function(value) {
@@ -615,6 +667,21 @@ function() {
       this.tree = new BinarySearchTree(sketchCtx);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
+
+      this.traversalTypeIdx = 0;
+      this.traversals = [
+         ["pre-order", function() { sketchCtx.tree.preOrder(); }],
+         ["in-order", function() { sketchCtx.tree.inOrder(); }],
+         ["post-order", function() { sketchCtx.tree.postOrder(); }],
+         ["breadth first", function() { sketchCtx.tree.breadthFirst(); }]
+      ];
+
+      this.onSwipe[0] = [
+         this.traversals[this.traversalTypeIdx][0],
+         function() {
+            this.traversals[this.traversalTypeIdx][1]();
+         }
+      ];
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -769,13 +836,6 @@ function() {
       ci.y = null;
    }
 
-   this.onSwipe[0] = [
-      'postorder traversal',
-      function(){
-        this.tree.postOrder();
-      }
-   ];
-
    this.onSwipe[4] = [
       'undo',
       function() {
@@ -792,7 +852,8 @@ function() {
 
 
    this.onCmdClick = function(p) {
-      console.log("cmd_click");
+      this.traversalTypeIdx = (this.traversalTypeIdx + 1) % this.traversals.length;
+      this.onSwipe[0][0] = this.traversals[this.traversalTypeIdx][0];
    };
    this.onCmdPress = function(p) {
       console.log("cmd_press");
@@ -859,9 +920,20 @@ function() {
       mText("nullptr", center, .5, .5, .5);
    };
 
+
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
       this.elapsed = elapsed;
+      
+      // TEMPORARY
+      if (isDef(this.selectedIndex)) {
+         this.selection = this.selectedIndex;
+      }
+      else {
+         this.selectedIndex = this.selection;
+      }
+      //
+
       this.duringSketch(function(){
          mDrawOval([-1,-1], [1,1], 32, PI, 0);
       });
