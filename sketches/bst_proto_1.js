@@ -464,7 +464,7 @@ function() {
             );
             let ret = {};
             while (!ret.done) {
-               ret = valMoveAni.step(this.sketchCtx.elapsed);
+               ret = valMoveAni.step();
                textHeight(this.sketchCtx.mScale(.4));
                mText(find.value, ret.point, .5, .5, .5);
                yield;
@@ -494,7 +494,7 @@ function() {
       },
 
       insert : function(value) {
-         this.operationStack.push("insert("+value+")");
+         this.operationStack.push("insert(" + value + ")");
          // THIS WILL BE A COMMON PATTERN THAT I'LL TRY TO ABSTRACT AWAY LATER
          const self = this;
          if (!this.operationMemory.active) {
@@ -739,10 +739,13 @@ function() {
       },
 
       createBSTWithDepth : function(value){
-        this.depth = value;
-        const arr = this.createArrWithDepth(value);
-
-        return this._sortedArrayToBST(arr, 0, arr.length-1);;
+         this.depth = value;
+         // TODO MAKE MORE EFFICIENT WITH PRE-CALCULATION
+         const arr = this.createArrWithDepth(value);
+         for (let i = 1; i <= arr.length; i++) {
+            this.depthCounts[i] = pow(2, i - 1); 
+         }
+         return this._sortedArrayToBST(arr, 0, arr.length - 1);
       },
 
       print : function() {
