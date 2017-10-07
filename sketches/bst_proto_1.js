@@ -27,6 +27,8 @@ function() {
 
       this._mustInitializePositions = true;
 
+      this.depthMonitor = {};
+
       BinarySearchTree.Node = function(value, center) {
          this.value = value;
          this.left = null;
@@ -489,6 +491,41 @@ function() {
 
             }());
             this.operationMemory.active = true;
+
+            // function depthHasIncreased() {
+            //    if (self.root === null) {
+            //       self.depth = 1;
+            //       self.depthMonitor[0] = 1;
+            //       return true;
+            //    }
+
+            //    let current = self.root;
+            //    let comp = null;
+
+            //    let _depth = 1;
+            //    while (current !== null) {
+            //       _depth++;
+            //       if (value == comp) {
+            //          return; 
+            //       }
+            //       else if (value < comp) {
+            //          current = current.left;
+            //       }
+            //       else {
+            //          current = current.right;
+            //       }
+            //    }
+            //    self.depthMonitor[_depth] = (self.depthMonitor[_depth] !== undefined) ? self.depthMonitor[_depth] + 1 : _depth;
+            //    if (self.depth < _depth) {
+            //       self.depth = _depth;
+            //       return true;
+            //    }
+            //    return false;               
+            // }  
+
+            // if (depthHasIncreased()) {
+            //    this._mustInitializePositions = true;
+            // }
          }
       },
       _insert : function*(value) {
@@ -496,6 +533,9 @@ function() {
          toInsert.colorManager.enableColor(true).setColor("green");
          if (this.root === null) {
             this.root = toInsert;
+            this.depth = 1;
+            this.depthMonitor[0] = 1;
+            this._mustInitializePositions = true;
             return;
          }
 
@@ -503,7 +543,10 @@ function() {
          let current = this.root;
          let comp = null;
 
+         let _depth = 1;
+
          while (current !== null) {
+            _depth++;
             current.colorManager.enableColor(true).setColor("purple");
             parent = current;
             comp = current.value;
@@ -536,6 +579,82 @@ function() {
          }
          else {
             parent.right = toInsert;
+         }
+
+         this.depthMonitor[_depth] = (this.depthMonitor[_depth] !== undefined) ? this.depthMonitor[_depth] + 1 : _depth;
+         if (this.depth < _depth) {
+            this.depth = _depth;
+            //this._mustInitializePositions = true;
+         }
+         else {
+            return;
+         }
+
+         // TODO : EXTRACT INTO SEPARATE FUNCTION (STRETCHING TREE DEPENDING ON DEPTHS)
+
+         function*stretchPositions(root, totalTime) {
+            // CREATE AN ARRAY OF THE ORIGINAL NODE POSITIONS
+            function getOriginalPositions(root, arr, nodeArr) {
+               if (root == null || root.center == undefined) {
+                  return;
+               }
+               arr.push(root.center);
+               nodeArr.push(root);
+               
+               getOriginalPositions(root.left, arr, nodeArr);
+               getOriginalPositions(root.right, arr, nodeArr);
+            }
+            // TRAVERSE THE TREE AND CALCULATE THE NEW NODE POSITIONS
+            // WITHOUT MUTATING THE TREE,
+            // RETURN AN ARRAY OF THESE NEW POSITIONS
+            // (SAME ORDER AS IN getOriginalPositions())
+            function getNewPositions(root, arr) {
+               sketchCtx._predictTreeLayout(root, arr);
+            }
+
+            let starts = [];
+            let nodes = [];
+            let ends = [];
+            
+            // GET CURRENT NODE POSITIONS AND POINTERS TO NODES
+            getOriginalPositions(root, starts, nodes);
+            // CALCULATE NEW NODE POSITIONS FOR STRETCHED TREE
+            getNewPositions(root, ends);
+
+            // CREATE LINEAR INTERPOLATION OBJECTS FOR EACH NODE'S
+            // MOVEMENT TOWARDS THEIR NEW POSITIONS
+            let transitions = [];
+            for (let t = 0; t < starts.length; t++) {
+               transitions.push(
+                  SketchAnimation.create(
+                     SketchAnimation.Type.LINE({
+                        start : {x : starts[t][0], y : starts[t][1]},
+                        end : {x : ends[t][0], y : ends[t][1]}
+                     }),
+                     totalTime,
+                     true
+                  )
+               );
+            }
+
+            // MOVE THE NODES UNTIL THEY REACH THEIR END POSITIONS
+            let finished = null;
+            let status = null;
+            do {
+               finished = true;
+               for (let t = 0; t < transitions.length; t++) {
+                  status = transitions[t].step(sketchCtx.elapsed);
+                  nodes[t].center = status.point;
+                  finished &= status.finished;
+               }  
+               yield;             
+            } while (!finished);
+         }
+
+         // STRETCH THE TREE OUTWARDS
+         let stretch = stretchPositions(this.root, 0.6);
+         while (!stretch.next().done) {
+            yield;
          }
       },
 
@@ -583,7 +702,6 @@ function() {
          return newBST;
 
       },
-
 
       setState : function(now, past) {
          now.root = past.root;
@@ -686,20 +804,26 @@ function() {
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
    // UNUSED
-   this.initTreeLayout = function(node, center = [0, 0, 0], radius = 0.5, xOffset = 5, yOffset = 2, zOffset = 0) {
+   this._predictTreeLayout = function(node, arr, center = [0, 0], radius = 0.5, xOffset = 5, yOffset = 2, zOffset = 0) {
       if (node === null) {
          return;
       }
 
-      function traverseTree(node, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2, zOffset = 0) {
-         node.center = [center[0], center[1]];
+      function traverseTree(node, arr, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2, zOffset = 0) {
+         // TODO, GIVE THE NEWLY INSERTED OR REMOVED NODE 
+         // A DEFAULT CENTER FOR THE TREE STRETCHING ANIMATION
+         if (node.center === undefined) {
+            return;
+         }
+         arr.push(center);
+
          if (node.left !== null) {
             let newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
-            traverseTree(node.left, newCenter, radius, center, radius, xOffset / 2);
+            traverseTree(node.left, arr, newCenter, radius, center, radius, xOffset / 2);
          }
          if (node.right !== null) {
             let newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
-            traverseTree(node.right, newCenter, radius, center, radius, xOffset / 2);
+            traverseTree(node.right, arr, newCenter, radius, center, radius, xOffset / 2);
          }
       }
 
@@ -708,13 +832,13 @@ function() {
       let depth = this.tree.depth;
 
       if (depth > 4){
-         traverseTree(curNode, center, nodeSize, undefined, undefined, 20);
+         traverseTree(curNode, arr, center, nodeSize, undefined, undefined, 20);
       }
       else if (depth > 3){
-         traverseTree(curNode, center, nodeSize, undefined, undefined, 10);
+         traverseTree(curNode, arr, center, nodeSize, undefined, undefined, 10);
       }
       else if (depth > 0) {
-         traverseTree(curNode, center, nodeSize);
+         traverseTree(curNode, arr, center, nodeSize);
       }
    }
 
@@ -741,6 +865,9 @@ function() {
       }
 
       function drawParentToChildEdge(center, radius, childCenter) {
+         if (childCenter == undefined) {
+            return;
+         }
          let childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
          let childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
 
@@ -753,17 +880,29 @@ function() {
          node.center = center;
       }
 
+      // TODO : DON'T ADD NEW NODE UNTIL REST OF TREE HAS MOVED TO CORRECT POSITIONS, THIS IS A TEMPORARY FIX
+      if (node.center == undefined) {
+         return;
+      }
+
       center = node.center;
 
       this.drawNode(node, center, radius);
 
+      let newCenter = null;
       if (node.left !== null) {
-         let newCenter = [center[0] - xOffset * radius, center[1] - yOffset * radius];
+         newCenter = (this.tree.mustInitializePositions()) ?
+                        [center[0] - xOffset * radius, center[1] - yOffset * radius] :
+                        node.left.center;
+
          drawParentToChildEdge(center, radius, newCenter);
          this._drawTree(node.left, newCenter, radius, xOffset / 2);
       }
       if (node.right !== null) {
-         let newCenter = [center[0] + xOffset * radius, center[1] - yOffset * radius];
+         newCenter = (this.tree.mustInitializePositions()) ?
+                        [center[0] + xOffset * radius, center[1] - yOffset * radius] :
+                        node.right.center;
+
          drawParentToChildEdge(center, radius, newCenter);
          this._drawTree(node.right, newCenter, radius, xOffset / 2);
       }
@@ -924,15 +1063,6 @@ function() {
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
       this.elapsed = elapsed;
-      
-      // TEMPORARY
-      if (isDef(this.selectedIndex)) {
-         this.selection = this.selectedIndex;
-      }
-      else {
-         this.selectedIndex = this.selection;
-      }
-      //
 
       this.duringSketch(function(){
          mDrawOval([-1,-1], [1,1], 32, PI, 0);
@@ -943,6 +1073,8 @@ function() {
 
          let curNode = this.tree.root;
          let depth = this.tree.depth;
+
+         this.tree.doPendingOperation();
 
          if (depth > 4) {
             this.drawTree(curNode, center, nodeSize, 20);
@@ -957,7 +1089,6 @@ function() {
             this.drawEmpty(center, nodeSize);
          }
 
-         this.tree.doPendingOperation();
       });
    }
 }
