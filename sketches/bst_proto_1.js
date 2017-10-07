@@ -92,18 +92,19 @@ function() {
             }
          }
       };
-
-      this.operationMemory = {
-         active : false,
-         operation : null
-      };
    }
 
 
 
    BinarySearchTree.prototype = {
+      operationMemory : {
+         active : false,
+         operation : null
+      },
+      isAcceptingInput : true,
       doPendingOperation : function() {
          if (!this.operationMemory.active) {
+            this.isAcceptingInput = true;
             return;
          }
          const status = this.operationMemory.operation();
@@ -113,7 +114,11 @@ function() {
             // TODO : MAKE RE-INITIALIZATION CLEANER,
             // ADDITIONAL CASES TO CONSIDER FOR IN-PROGRESS OPERATIONS
             this._mustInitializePositions = true;
+            this.isAcceptingInput = true;
+            return;
          }
+         this.isAcceptingInput = false;
+         return;
       },
       hasPendingOperation : function() {
          return this.operationMemory.active;
@@ -684,6 +689,10 @@ function() {
       },
 
       saveState : function() {
+         if (!this.isAcceptingInput) {
+            return;
+         }
+
          if (this.useOldHistory) {
             this.historyStack.push(this.clone());
             const newBST = this.historyStack[this.historyStack.length - 1];
@@ -696,6 +705,10 @@ function() {
       },
 
       restorePast : function() {
+         if (!this.isAcceptingInput) {
+            return;
+         }
+
          if (this.useOldHistory) {
             if (this.historyStack.length <= 1) {
                return;
@@ -712,6 +725,9 @@ function() {
       },
 
       restoreFuture : function() {
+         if (!this.isAcceptingInput) {
+            return;
+         }
          // TODO
          // this.history.restoreFuture(this, this.setState);
       },
@@ -732,18 +748,20 @@ function() {
          const height = depth - 1;
          const maxVal = pow(2, height + 1) - 1;
          const arr = [];
-         for (let i = 1; i <= maxVal; i++){
+         for (let i = 1; i <= maxVal; i++) {
             arr.push(i);
          }
          return arr;
       },
 
-      createBSTWithDepth : function(value){
+      createBSTWithDepth : function(value) {
          this.depth = value;
          // TODO MAKE MORE EFFICIENT WITH PRE-CALCULATION
          const arr = this.createArrWithDepth(value);
-         for (let i = 1; i <= arr.length; i++) {
-            this.depthCounts[i] = pow(2, i - 1); 
+         let count = 1;
+         for (let i = 1; i <= value; i++) {
+            this.depthCounts[i] = count;
+            count *= 2;
          }
          return this._sortedArrayToBST(arr, 0, arr.length - 1);
       },
@@ -759,7 +777,7 @@ function() {
 
    this.setup = function() {
       sketchCtx = this;
-      sketchCtx.elapsed = 0.0;
+
       this.tree = new BinarySearchTree(sketchCtx);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
@@ -778,6 +796,8 @@ function() {
             this.traversals[this.traversalTypeIdx][1]();
          }
       ];
+
+      this.isAcceptingInput = true;
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -805,18 +825,16 @@ function() {
          }
       }
 
-      const nodeSize = radius;
-      const curNode = node;
       const depth = this.tree.depth;
 
       if (depth > 4){
-         traverseTree(curNode, arr, center, nodeSize, undefined, undefined, 20);
+         traverseTree(node, arr, center, radius, undefined, undefined, 20);
       }
       else if (depth > 3){
-         traverseTree(curNode, arr, center, nodeSize, undefined, undefined, 10);
+         traverseTree(node, arr, center, radius, undefined, undefined, 10);
       }
       else if (depth > 0) {
-         traverseTree(curNode, arr, center, nodeSize);
+         traverseTree(node, arr, center, radius);
       }
    }
 
@@ -929,6 +947,10 @@ function() {
 
 
    this.onPress = function(p) {
+      if (!this.sketchIsAcceptingInput()) {
+         return;
+      }
+
       const ci = this.clickInfoCache;
       ci.x = p.x;
       ci.y = p.y;
@@ -939,6 +961,10 @@ function() {
    }
 
    this.onRelease = function(p) {
+      if (!this.sketchIsAcceptingInput()) {
+         return;
+      }
+
       const ci = this.clickInfoCache;
       if (abs(p.x - ci.x) < 0.05 &&
           abs(p.y - ci.y) < 0.05) {
@@ -982,6 +1008,10 @@ function() {
    };
 
    this.onDrag = function(p) {
+      if (!this.sketchIsAcceptingInput()) {
+         return;
+      }
+
       const ci = this.clickInfoCache;
       // save a point "boundary"/"threshold" for comparison
       const point = [p.x, p.y];
@@ -1011,11 +1041,13 @@ function() {
          return;
       }
 
-      let out = other.output();
-      out = Number(1 * out);
+      if (this.sketchIsAcceptingInput()) {
+         let out = other.output();
+         out = Number(1 * out);
 
-      this.tree.saveState();
-      this.tree.insert(out);
+         this.tree.saveState();
+         this.tree.insert(out);
+      }
 
       other.fade();
       other.delete();
@@ -1035,33 +1067,36 @@ function() {
    };
 
 
+   this.sketchIsAcceptingInput = function() {
+      return this.tree.isAcceptingInput;
+   }
+
+
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
-      this.elapsed = elapsed;
-
       this.duringSketch(function(){
-         mDrawOval([-1,-1], [1,1], 32, PI, 0);
+         mDrawOval([-1, -1], [1, 1], 32, PI, 0);
       });
       this.afterSketch(function() {
-         let nodeSize = 0.5;
+         let nodeRadius = 0.5;
          let center = [0, 0];
 
-         let curNode = this.tree.root;
+         let currNode = this.tree.root;
          let depth = this.tree.depth;
 
          this.tree.doPendingOperation();
 
          if (depth > 4) {
-            this.drawTree(curNode, center, nodeSize, 20);
+            this.drawTree(currNode, center, nodeRadius, 20);
          }
          else if (depth > 3) {
-            this.drawTree(curNode, center, nodeSize, 10);
+            this.drawTree(currNode, center, nodeRadius, 10);
          }
          else if (depth > 0) {
-            this.drawTree(curNode, center, nodeSize);
+            this.drawTree(currNode, center, nodeRadius);
          }
          else {
-            this.drawEmpty(center, nodeSize);
+            this.drawEmpty(center, nodeRadius);
          }
       });
    }
