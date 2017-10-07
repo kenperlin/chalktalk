@@ -27,7 +27,7 @@ function() {
 
       this._mustInitializePositions = true;
 
-      this.depthMonitor = {};
+      this.depthCounts = {};
 
       BinarySearchTree.Node = function(value, center) {
          this.value = value;
@@ -256,13 +256,13 @@ function() {
          }
       },
 
-      _breadthFirst : function*(pauseTime) {
+      _breadthFirst : function*(pauseDuration) {
          if (this.root === null) {
             return;
          }
 
-         const pauseDequeue = SketchAnimation.pauseAutoReset(pauseTime, this.sketchCtx);
-         const pauseEnqueue = SketchAnimation.pauseAutoReset(pauseTime, this.sketchCtx);
+         const pauseDequeue = SketchAnimation.pauseAutoReset(pauseDuration);
+         const pauseEnqueue = SketchAnimation.pauseAutoReset(pauseDuration);
 
          const queue = [];
          let parent = this.root;
@@ -285,7 +285,7 @@ function() {
       },
 
       remove : function(value) {
-         this.operationStack.push("remove("+value+")");
+         this.operationStack.push("remove(" + value + ")");
          const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
@@ -298,14 +298,19 @@ function() {
          }
       },
 
-      _remove : function*(value, root, parent=null) {
+      _remove : function*(value, root, parent = null) {
          if (root == null) {
             return;
          }
          let current = root;
          let comp = null;
 
+         let _depth = 0;
+
+         const movementPause = SketchAnimation.pauseAutoReset(0.6);
+
          while (current !== null) {
+            _depth++;
             comp = current.value;
             if (value == comp) {
                current.colorManager.enableColor(true).setColor("orange");
@@ -333,7 +338,7 @@ function() {
                current = current.right;
             }
 
-            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; } // POTENTIAL EFFICIENCY ISSUES?
+            while (movementPause()) { yield; }
          }
 
          // NODE TO REMOVE DOES NOT EXIST,ABORT
@@ -342,63 +347,68 @@ function() {
             return;
          }
 
-         // CASES 1 AND 2: 1 CHILD,
+         let hasTwoChildren = false;
+         // CASES 1 AND 2: 1 CHILD
          if (parent == null) {
             // SENTINEL
             parent = new BinarySearchTree.Node(-1);
          }
          if (parent.left == current) {
             if (current.left === null) {
-               ///////// VERBOSE WAY
-               {
-                  let pause = SketchAnimation.create(
-                     SketchAnimation.Type.NONE(),
-                     .6,
-                     true
-                  );
-                  while (!pause.step(this.sketchCtx.elapsed).done) {
-                     yield;
-                  }
-               }
-               /////////
+               while (movementPause()) { yield; }
+
                current.colorManager.setColor("orange");
 
                parent.left = current.right;
-               return;
             }
             else if (current.right === null) {
-               ///////// SHORTENED WAY
-               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-               /////////
+               while (movementPause()) { yield; }
+
                current.colorManager.setColor("orange");
                parent.left = current.left;
-               return;
+            }
+            else {
+               hasTwoChildren = true;
             }
          }
          else if (parent.right == current) {
             if (current.left === null) {
-               /////////
-               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-               /////////
+               while (movementPause()) { yield; }
+
                current.colorManager.setColor("orange");
                parent.right = current.right;
-               return;
             }
             else if (current.right === null) {
-               /////////
-               for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-               /////////
+               while (movementPause()) { yield; }
+
                current.colorManager.setColor("orange");
                parent.right = current.left;
-               return;
+            }
+            else {
+               hasTwoChildren = true;
             }
          }
          else if (current.left == null && current.right == null) {
-            /////////
-            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-            /////////
+            while (movementPause()) { yield; }
+
             current.colorManager.setColor("orange");
             this.root = null;
+         }
+         else {
+            hasTwoChildren = true;
+         }
+
+         if (!hasTwoChildren) {
+            // CHECK WHETHER MAXIMUM DEPTH HAS DECREASED
+            this.depthCounts[_depth]--;
+            if (this.depthCounts[_depth] == 0 && this.depth == _depth) {
+               this.depth = _depth - 1;
+               // STRETCH THE TREE INWARDS
+               const stretch = this._stretchPositions(this.root, 0.6);
+               while (!stretch.next().done) {
+                  yield;
+               }
+            }
             return;
          }
 
@@ -406,23 +416,23 @@ function() {
 
          // NAVIGATE BRANCH TO FIND PREDECESSOR
          let find = current.left;
+         _depth++;
          let copyVal = 0;
 
-         ////////
-         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-         /////////
+         while (movementPause()) { yield; }
 
          find.colorManager.enableColor(true).setColor("cyan");
 
-         /////////
-         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-         /////////
+         while (movementPause()) { yield; }
+
 
          this.applyAll(function(node) {
             node.colorManager.enableColor(true).setColor("grey");
          }, find.left);
 
          while (find.right !== null) {
+            _depth++;
+
             find = find.right;
             find.colorManager.enableColor(true).setColor("cyan");
             this.applyAll(function(node) {
@@ -432,16 +442,13 @@ function() {
             if (find.right == null) {
                break;
             }
-            /////////
-            for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-            /////////
+            
+            while (movementPause()) { yield; }
          }
 
          find.colorManager.enableColor(true).setColor("orange");
 
-         /////////
-         for (let p = SketchAnimation.pause(.3, this.sketchCtx); p();) { yield; }
-         /////////
+         while (movementPause()) { yield; }
 
          // MOVE THE COPY VALUE (VISUALLY)
          {
@@ -466,17 +473,24 @@ function() {
 
          current.value = find.value;
 
-         /////////
-         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-         /////////
+         while (movementPause()) { yield; }
 
          current.colorManager.enableColor(true).setColor("purple");
 
-         /////////
-         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
-         /////////
+         while (movementPause()) { yield; }
 
          yield *this._remove(current.value, current.left, current);
+
+         // CHECK WHETHER MAXIMUM DEPTH HAS DECREASED
+         this.depthCounts[_depth]--;
+         if (this.depthCounts[_depth] == 0 && this.depth == _depth) {
+            this.depth = _depth - 1;
+            // STRETCH THE TREE INWARDS
+            const stretch = this._stretchPositions(this.root, 0.6);
+            while (!stretch.next().done) {
+               yield;
+            }
+         }
       },
 
       insert : function(value) {
@@ -491,41 +505,6 @@ function() {
 
             }());
             this.operationMemory.active = true;
-
-            // function depthHasIncreased() {
-            //    if (self.root === null) {
-            //       self.depth = 1;
-            //       self.depthMonitor[0] = 1;
-            //       return true;
-            //    }
-
-            //    let current = self.root;
-            //    let comp = null;
-
-            //    let _depth = 1;
-            //    while (current !== null) {
-            //       _depth++;
-            //       if (value == comp) {
-            //          return; 
-            //       }
-            //       else if (value < comp) {
-            //          current = current.left;
-            //       }
-            //       else {
-            //          current = current.right;
-            //       }
-            //    }
-            //    self.depthMonitor[_depth] = (self.depthMonitor[_depth] !== undefined) ? self.depthMonitor[_depth] + 1 : _depth;
-            //    if (self.depth < _depth) {
-            //       self.depth = _depth;
-            //       return true;
-            //    }
-            //    return false;               
-            // }  
-
-            // if (depthHasIncreased()) {
-            //    this._mustInitializePositions = true;
-            // }
          }
       },
       _insert : function*(value) {
@@ -534,8 +513,7 @@ function() {
          if (this.root === null) {
             this.root = toInsert;
             this.depth = 1;
-            this.depthMonitor[0] = 1;
-            this._mustInitializePositions = true;
+            this.depthCounts[0] = 1;
             return;
          }
 
@@ -581,81 +559,78 @@ function() {
             parent.right = toInsert;
          }
 
-         this.depthMonitor[_depth] = (this.depthMonitor[_depth] !== undefined) ? this.depthMonitor[_depth] + 1 : _depth;
+         // TODO : DO NOT STRETCH AT ALL DEPTHS, POSSIBLY DO STRETCH AT DIFFERENT TIME
+         this.depthCounts[_depth] = (this.depthCounts[_depth] !== undefined) ? this.depthCounts[_depth] + 1 : 1;
          if (this.depth < _depth) {
             this.depth = _depth;
-            //this._mustInitializePositions = true;
          }
          else {
             return;
          }
 
-         // TODO : EXTRACT INTO SEPARATE FUNCTION (STRETCHING TREE DEPENDING ON DEPTHS)
-
-         function*stretchPositions(root, totalTime) {
-            // CREATE AN ARRAY OF THE ORIGINAL NODE POSITIONS
-            function getOriginalPositions(root, arr, nodeArr) {
-               if (root == null || root.center == undefined) {
-                  return;
-               }
-               arr.push(root.center);
-               nodeArr.push(root);
-               
-               getOriginalPositions(root.left, arr, nodeArr);
-               getOriginalPositions(root.right, arr, nodeArr);
-            }
-            // TRAVERSE THE TREE AND CALCULATE THE NEW NODE POSITIONS
-            // WITHOUT MUTATING THE TREE,
-            // RETURN AN ARRAY OF THESE NEW POSITIONS
-            // (SAME ORDER AS IN getOriginalPositions())
-            function getNewPositions(root, arr) {
-               sketchCtx._predictTreeLayout(root, arr);
-            }
-
-            const starts = [];
-            const nodes = [];
-            const ends = [];
-            
-            // GET CURRENT NODE POSITIONS AND POINTERS TO NODES
-            getOriginalPositions(root, starts, nodes);
-            // CALCULATE NEW NODE POSITIONS FOR STRETCHED TREE
-            getNewPositions(root, ends);
-
-            // CREATE LINEAR INTERPOLATION OBJECTS FOR EACH NODE'S
-            // MOVEMENT TOWARDS THEIR NEW POSITIONS
-            const transitions = [];
-            for (let t = 0; t < starts.length; t++) {
-               transitions.push(
-                  SketchAnimation.create(
-                     SketchAnimation.Type.LINE({
-                        start : {x : starts[t][0], y : starts[t][1]},
-                        end : {x : ends[t][0], y : ends[t][1]}
-                     }),
-                     totalTime,
-                     true
-                  )
-               );
-            }
-
-            // MOVE THE NODES UNTIL THEY REACH THEIR END POSITIONS
-            let done = null;
-            let status = null;
-            do {
-               done = true;
-               for (let t = 0; t < transitions.length; t++) {
-                  status = transitions[t].step(sketchCtx.elapsed);
-                  nodes[t].center = status.point;
-                  done &= status.done;
-               }  
-               yield;             
-            } while (!done);
-         }
-
          // STRETCH THE TREE OUTWARDS
-         const stretch = stretchPositions(this.root, 0.6);
+         const stretch = this._stretchPositions(this.root, 0.6);
          while (!stretch.next().done) {
             yield;
          }
+      },
+
+      _stretchPositions : function*(root, duration) {
+         // CREATE AN ARRAY OF THE ORIGINAL NODE POSITIONS
+         function getOriginalPositions(root, arr, nodeArr) {
+            if (root == null || root.center == undefined) {
+               return;
+            }
+            arr.push(root.center);
+            nodeArr.push(root);
+            
+            getOriginalPositions(root.left, arr, nodeArr);
+            getOriginalPositions(root.right, arr, nodeArr);
+         }
+         // TRAVERSE THE TREE AND CALCULATE THE NEW NODE POSITIONS
+         // WITHOUT MUTATING THE TREE,
+         // RETURN AN ARRAY OF THESE NEW POSITIONS
+         // (SAME ORDER AS IN getOriginalPositions())
+         function getNewPositions(root, arr) {
+            sketchCtx._predictTreeLayout(root, arr);
+         }
+
+         const starts = [];
+         const nodes = [];
+         const ends = [];
+         
+         // GET CURRENT NODE POSITIONS AND POINTERS TO NODES
+         getOriginalPositions(root, starts, nodes);
+         // CALCULATE NEW NODE POSITIONS FOR STRETCHED TREE
+         getNewPositions(root, ends);
+
+         // CREATE LINEAR INTERPOLATION OBJECTS FOR EACH NODE'S
+         // MOVEMENT TOWARDS THEIR NEW POSITIONS
+         const transitions = [];
+         for (let t = 0; t < starts.length; t++) {
+            transitions.push(
+               SketchAnimation.create(
+                  SketchAnimation.Type.LINE({
+                     start : {x : starts[t][0], y : starts[t][1]},
+                     end : {x : ends[t][0], y : ends[t][1]}
+                  }),
+                  duration,
+               )
+            );
+         }
+
+         // MOVE THE NODES UNTIL THEY REACH THEIR END POSITIONS
+         let done = true;
+         let status = null;
+         do {
+            done = true;
+            for (let t = 0; t < transitions.length; t++) {
+               status = transitions[t].step();
+               nodes[t].center = status.point;
+               done &= status.done;
+            }  
+            yield;             
+         } while (!done);
       },
 
       size : function(node) {
