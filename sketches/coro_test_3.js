@@ -228,7 +228,7 @@ function() {
                drawSmile();
             }
 
-            if (ret.finished) {
+            if (ret.done) {
                break;
             }
             else {

@@ -9,13 +9,13 @@ var SketchAnimation = (function() {
 
    a.Type = {};
    a.Type.NONE = function() {
-      return function() { return []; };
+      return function() { };
    };
 
    a.Type.LINE = function(args) {
       args.start.z = args.start.z || 0.0;
       args.end.z = args.end.z || 0.0;
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          const start = args.start;
          const end = args.end;
 
@@ -45,7 +45,7 @@ var SketchAnimation = (function() {
       const c1 = args.control1;
       const c2 = args.control2;
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          return [
             cubic(fractionComplete, start.x, c1.x, c2.x, end.x),
             cubic(fractionComplete, start.y, c1.y, c2.y, end.y),
@@ -59,7 +59,7 @@ var SketchAnimation = (function() {
       const end = args.end;
       const cp = args.control;
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          const fc = fractionComplete;
 
          return [
@@ -73,7 +73,7 @@ var SketchAnimation = (function() {
 
    // TODO
    // a.Type.BSPLINE = function(args) {
-   //    return function(/*UNUSED, */fractionComplete) {
+   //    return function(fractionComplete) {
 
    //    }
    // };
@@ -92,7 +92,7 @@ var SketchAnimation = (function() {
       let inY = defined(args.inY, 0);
       let inZ = defined(args.inZ, 0);
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
 
          const func = args.function;
          const dx = endX - startX;
@@ -275,7 +275,7 @@ var SketchAnimation = (function() {
       let x = defined(args.startX, 0);
       let z = defined(args.startZ, 0);
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          let t = fractionComplete;
          let sinusoid = A * cos(omegaD * t) + B * sin(omegaD * t);
          return [
@@ -350,7 +350,7 @@ var SketchAnimation = (function() {
 
       let velocityX = args.velocityX;
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let tAdj = t * duration;
 
@@ -405,7 +405,7 @@ var SketchAnimation = (function() {
       let inY = defined(args.inY, 0);
       let inZ = defined(args.inZ, 0);
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let displacement = ((correction * base(2 * t - 1) + 0.5) * length);
          return [
@@ -434,7 +434,7 @@ var SketchAnimation = (function() {
 
       let denominator = base(1);
 
-      return function(/*UNUSED, */fractionComplete) {
+      return function(fractionComplete) {
          let t = clamp(fractionComplete, 0, 1);
          let displacement = (base(t) / denominator) * length;
          return [
@@ -445,91 +445,41 @@ var SketchAnimation = (function() {
       };
    };
    
-   a.Animation = function(stepProcedure, /*args, */timeToCompleteSeconds, doProvideElapsed) {
-      let that = this;
-      this.prevTime = time;
-      //this.args = args;
-      this.timeToComplete = timeToCompleteSeconds;
-      this.elapsedTime = 0;
-      this.stepProcedure = stepProcedure;
-      this.isReversed = false;
-
-      this.startTime = null;
-
-      // TRACK INTERNAL ELAPSED TIME AND TIME DIFFERENCES
-      if (doProvideElapsed === undefined || doProvideElapsed === null || !doProvideElapsed) {
-         this.step = function() {
-            let currTime = time;
-            let dT = currTime - this.prevTime;
-            this.prevTime = currTime;
-            this.elapsedTime += dT;
-
-            let fin = false;
-            if (this.elapsedTime >= this.timeToComplete) {
-               this.elapsedTime = this.timeToComplete;
-               fin = true;
-            }
-
-            let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
-            
-            return {point : nextPt, finished : fin};
-         };
-      }
-      else { // ALTERNATIVE: USE CHALKTALK SKETCH TIME DIFFERENCES FOR ELAPSED TIME ( TODO decide which version is better default )
-         this.step = function(elapsed) {
-            this.elapsedTime += elapsed;
-
-            let fin = false;
-            if (this.elapsedTime >= this.timeToComplete) {
-               this.elapsedTime = this.timeToComplete;
-               fin = true;
-            }
-
-            let fractionComplete = this.elapsedTime / this.timeToComplete;
-            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
-            
-            return {point : nextPt, finished : fin};
-         };         
-      }
-
-      // TODO SIMPLIFY AND IMPROVE SO ELAPSED TIME BASED ON TIME_NOW - TIME_START INSTEAD OF RUNNING SUM
-      /*
-            this.step = function(elapsed) {
-            if (this.startTime == null) {
-               this.startTime = time;
-            }
-
-            let fin = false;
-            let fractionComplete = 0;
-            if (time - this.startTime >= this.timeToComplete) {
-               fractionComplete = 1;
-               fin = true;
-            }
-            else {
-               fractionComplete = (time - this.startTime) / this.timeToComplete;
-            }
-
-            let nextPt = this.stepProcedure((this.isReversed) ? 1 - fractionComplete : fractionComplete);
-            
-            return {point : nextPt, finished : fin};
-         }; 
-
-      */
+   a.Animation = function(stepFunction, durationSeconds) {
+      this.stepFunction = stepFunction;
+      this.duration = durationSeconds;
+      this.startTime = time;
    };
 
    a.Animation.prototype = {
-      reset : function(timeToCompleteSeconds) {
-         this.prevTime = time;
-         this.elapsedTime = 0;
-         if (timeToCompleteSeconds !== undefined && timeToCompleteSeconds >= 0) {
-            this.timeToComplete = timeToCompleteSeconds;
+      step : function() {
+         let dt = time - this.startTime;
+         let done = false;
+         if (dt >= this.duration) {
+            dt = this.duration;
+            done = true;
          }
+
+         return {point : this.stepFunction(dt / this.duration), done : done};
       },
 
-      reverse : function() {
-         this.isReversed = !this.isReversed;         
-      }
+      stepReversed : function() {
+         let dt = time - this.startTime;
+         let done = false;
+         if (dt >= this.duration) {
+            dt = this.duration;
+            done = true;
+         }
+
+         return {point : this.stepFunction(1 - (dt / this.duration)), done : done};        
+      },
+
+      reset : function(durationSeconds) {
+         this.startTime = time;
+         if (durationSeconds !== undefined && durationSeconds >= 0) {
+            this.duration = durationSeconds;
+         }
+      },
    };
 
    // TODO IS THERE A HELPFUL WAY TO SYNCHRONIZE MULTIPLE ANIMATION OBJECTS 
@@ -541,7 +491,7 @@ var SketchAnimation = (function() {
    //       this.animations.push({
    //          animation :,
    //          point : null,
-   //          finished  : false
+   //          done  : false
    //       });
    //    }
 
@@ -549,7 +499,7 @@ var SketchAnimation = (function() {
    //       let fin = true;
    //       for (let i = 0; i < this.animations.length; i++) {
    //          let aniI = this.animations[i];
-   //          if (aniI.finished) {
+   //          if (aniI.done) {
    //             continue;
    //          }
    //          else {
@@ -559,71 +509,51 @@ var SketchAnimation = (function() {
    //          // STEP EACH INCOMPLETE ANIMATION
    //          let status = aniI.step(elapsed);
 
-   //          if (status.finished) {
-   //             aniI.finished = true;
+   //          if (status.done) {
+   //             aniI.done = true;
    //          }
    //       }
    //    };
 
    //    this.resetAll = function() {
    //       for (let i = 0; i < this.animations.length; i++) {
-   //          this.animations[i].finished = false;
+   //          this.animations[i].done = false;
    //       }         
    //    };
    // }
 
-   a.create = function(stepProcedure, timeToCompleteSeconds, doProvideElapsed) {
-      return new a.Animation(stepProcedure, timeToCompleteSeconds, doProvideElapsed);
+   // ALTERNATIVE CREATION FUNCTION
+   a.create = function(stepFunction, durationSeconds) {
+      return new a.Animation(stepFunction, durationSeconds);
    };
 
-   a.pause = function(timeToCompleteSeconds, elapsedSrc) {
-      if (elapsedSrc) {
-         return (function() {
-            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, true);
-            let func = function() { return !pause.step(elapsedSrc.elapsed).finished; };
-            func.reset = function(timeToCompleteSeconds) { pause.reset(timeToCompleteSeconds); }
+   // CONVENIENCE FUNCTION OBJECT FOR PAUSING,
+   // REUSABLE WITH reset()
+   a.pause = function(durationSeconds) {
+      return (function() {
+         const pause = new a.Animation(a.Type.NONE(), durationSeconds);
+         let func = function() { return !pause.step().done; };
+         func.reset = function(durationSeconds) { pause.reset(durationSeconds); }
 
-            return func;
-         }());
-      }
-      else {
-         return (function() {
-            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, false);
-            let func = function() { return !pause.step().finished; };
-            func.reset = function(timeToCompleteSeconds) { pause.reset(timeToCompleteSeconds); }
-
-            return func;
-         }());       
-      }
+         return func;
+      }());
    };
 
-   a.pauseAutoReset = function(timeToCompleteSeconds, elapsedSrc) {
-      if (elapsedSrc) {
-         return (function() {
-            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, true);
-            let func = function() { 
-               let shouldPause = !pause.step(elapsedSrc.elapsed).finished;
-               if (!shouldPause) {
-                  pause.reset();
-               }
-               return shouldPause;
-            };
-            return func;
-         }());
-      }
-      else {
-         return (function() {
-            let pause = new a.Animation(a.Type.NONE(), timeToCompleteSeconds, false);
-            let func = function() { 
-               let shouldPause = !pause.step().finished;
-               if (!shouldPause) {
-                  pause.reset();
-               }
-               return shouldPause; 
-            };
-            return func;
-         }());       
-      }
+   // CONVENIENCE FUNCTION OBJECT FOR PAUSING,
+   // AUTOMATICALLY RESETS ON FIRST USE AFTER A PAUSE HAS ENDED
+   a.pauseAutoReset = function(durationSeconds) {
+      return (function() {
+         const pause = new a.Animation(a.Type.NONE(), durationSeconds);
+         let shouldPause = true;
+         let func = function() {
+            if (!shouldPause) {
+               pause.reset();
+            } 
+            shouldPause = !pause.step().done;
+            return shouldPause; 
+         };
+         return func;
+      }());
    };
 
    a.Path = a.Animation;

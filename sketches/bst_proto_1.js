@@ -106,7 +106,7 @@ function() {
          if (!this.operationMemory.active) {
             return;
          }
-         let status = this.operationMemory.operation();
+         const status = this.operationMemory.operation();
          if (status.done) {
             this.operationMemory.active = false;
             this.operationMemory.operation = null;
@@ -128,11 +128,11 @@ function() {
       },
       // TODO IMPROVE
       calcTraversalPauseTime : function() {
-         let size = this.size();
+         const size = this.size();
          if (size == 0) {
             return 0.1;
          }
-         let ret = max((4.2 / size), 0.13);
+         const ret = max((4.2 / size), 0.13);
          return ret;
       },
 
@@ -148,10 +148,10 @@ function() {
       },
 
       inOrder : function() {
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._inOrder(self.root, self.calcTraversalPauseTime());
+               const op = self._inOrder(self.root, self.calcTraversalPauseTime());
 
                return function(args) { return op.next(args); };
 
@@ -177,10 +177,10 @@ function() {
       },
 
       preOrder : function() {
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._preOrder(self.root, self.calcTraversalPauseTime());
+               const op = self._preOrder(self.root, self.calcTraversalPauseTime());
 
                return function(args) { return op.next(args); };
 
@@ -211,10 +211,10 @@ function() {
 
 
       postOrder : function() {
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._postOrder(self.root, self.calcTraversalPauseTime());
+               const op = self._postOrder(self.root, self.calcTraversalPauseTime());
 
                return function(args) { return op.next(args); };
 
@@ -244,10 +244,10 @@ function() {
       },
 
       breadthFirst : function() {
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._breadthFirst(self.calcTraversalPauseTime());
+               const op = self._breadthFirst(self.calcTraversalPauseTime());
 
                return function(args) { return op.next(args); };
 
@@ -286,10 +286,10 @@ function() {
 
       remove : function(value) {
          this.operationStack.push("remove("+value+")");
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._remove(value, self.root, null);
+               const op = self._remove(value, self.root, null);
 
                return function(args) { return op.next(args); };
 
@@ -356,7 +356,7 @@ function() {
                      .6,
                      true
                   );
-                  while (!pause.step(this.sketchCtx.elapsed).finished) {
+                  while (!pause.step(this.sketchCtx.elapsed).done) {
                      yield;
                   }
                }
@@ -456,7 +456,7 @@ function() {
                true
             );
             let ret = {};
-            while (!ret.finished) {
+            while (!ret.done) {
                ret = valMoveAni.step(this.sketchCtx.elapsed);
                textHeight(this.sketchCtx.mScale(.4));
                mText(find.value, ret.point, .5, .5, .5);
@@ -482,10 +482,10 @@ function() {
       insert : function(value) {
          this.operationStack.push("insert("+value+")");
          // THIS WILL BE A COMMON PATTERN THAT I'LL TRY TO ABSTRACT AWAY LATER
-         let self = this;
+         const self = this;
          if (!this.operationMemory.active) {
             this.operationMemory.operation = (function() {
-               let op = self._insert(value);
+               const op = self._insert(value);
 
                return function(args) { return op.next(args); };
 
@@ -529,7 +529,7 @@ function() {
          }
       },
       _insert : function*(value) {
-         let toInsert = new BinarySearchTree.Node(value);
+         const toInsert = new BinarySearchTree.Node(value);
          toInsert.colorManager.enableColor(true).setColor("green");
          if (this.root === null) {
             this.root = toInsert;
@@ -612,9 +612,9 @@ function() {
                sketchCtx._predictTreeLayout(root, arr);
             }
 
-            let starts = [];
-            let nodes = [];
-            let ends = [];
+            const starts = [];
+            const nodes = [];
+            const ends = [];
             
             // GET CURRENT NODE POSITIONS AND POINTERS TO NODES
             getOriginalPositions(root, starts, nodes);
@@ -623,7 +623,7 @@ function() {
 
             // CREATE LINEAR INTERPOLATION OBJECTS FOR EACH NODE'S
             // MOVEMENT TOWARDS THEIR NEW POSITIONS
-            let transitions = [];
+            const transitions = [];
             for (let t = 0; t < starts.length; t++) {
                transitions.push(
                   SketchAnimation.create(
@@ -638,21 +638,21 @@ function() {
             }
 
             // MOVE THE NODES UNTIL THEY REACH THEIR END POSITIONS
-            let finished = null;
+            let done = null;
             let status = null;
             do {
-               finished = true;
+               done = true;
                for (let t = 0; t < transitions.length; t++) {
                   status = transitions[t].step(sketchCtx.elapsed);
                   nodes[t].center = status.point;
-                  finished &= status.finished;
+                  done &= status.done;
                }  
                yield;             
-            } while (!finished);
+            } while (!done);
          }
 
          // STRETCH THE TREE OUTWARDS
-         let stretch = stretchPositions(this.root, 0.6);
+         const stretch = stretchPositions(this.root, 0.6);
          while (!stretch.next().done) {
             yield;
          }
@@ -673,7 +673,7 @@ function() {
       },
 
       copyData : function(oldNode) {
-         let newNode = new BinarySearchTree.Node(oldNode.value, oldNode.center);
+         const newNode = new BinarySearchTree.Node(oldNode.value, oldNode.center);
 
          if (oldNode.left !== null){
             newNode.left = this.copyData(oldNode.left)
@@ -684,8 +684,8 @@ function() {
          return newNode;
       },
       clone : function() {
-         let newBST = new BinarySearchTree(this.sketchCtx);
-         let oldNode = this.root;
+         const newBST = new BinarySearchTree(this.sketchCtx);
+         const oldNode = this.root;
          if (this.root === null) {
             return newBST;
          }
@@ -711,7 +711,7 @@ function() {
       saveState : function() {
          if (this.useOldHistory) {
             this.historyStack.push(this.clone());
-            let newBST = this.historyStack[this.historyStack.length - 1];
+            const newBST = this.historyStack[this.historyStack.length - 1];
             this.root = newBST.root;
             return;
          }
@@ -725,8 +725,8 @@ function() {
             if (this.historyStack.length <= 1) {
                return;
             }
-            let temp = this.historyStack.pop();
-            let oldBST = this.historyStack[this.historyStack.length - 1];
+            const temp = this.historyStack.pop();
+            const oldBST = this.historyStack[this.historyStack.length - 1];
 
             this.root = oldBST.root;
             this.depth = oldBST.depth;
@@ -745,18 +745,18 @@ function() {
          if (start > end){
             return null;
          }
-         let mid = Math.trunc((start + end)/2);
-         let node = new BinarySearchTree.Node(arr[mid]);
-         this.operationStack.push("insert("+arr[mid]+")");
-         node.left = this._sortedArrayToBST(arr, start, mid-1);
-         node.right = this._sortedArrayToBST(arr, mid+1, end);
+         const mid = Math.trunc((start + end) / 2);
+         const node = new BinarySearchTree.Node(arr[mid]);
+         this.operationStack.push("insert(" + arr[mid] + ")");
+         node.left = this._sortedArrayToBST(arr, start, mid - 1);
+         node.right = this._sortedArrayToBST(arr, mid + 1, end);
          return node;
       },
 
       createArrWithDepth : function(depth) {
-         let height = depth - 1;
-         let maxVal = pow(2, height + 1) - 1;
-         let arr = [];
+         const height = depth - 1;
+         const maxVal = pow(2, height + 1) - 1;
+         const arr = [];
          for (let i = 1; i <= maxVal; i++){
             arr.push(i);
          }
@@ -765,7 +765,7 @@ function() {
 
       createBSTWithDepth : function(value){
         this.depth = value;
-        let arr = this.createArrWithDepth(value);
+        const arr = this.createArrWithDepth(value);
 
         return this._sortedArrayToBST(arr, 0, arr.length-1);;
       },
@@ -818,18 +818,18 @@ function() {
          arr.push(center);
 
          if (node.left !== null) {
-            let newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
+            const newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
             traverseTree(node.left, arr, newCenter, radius, center, radius, xOffset / 2);
          }
          if (node.right !== null) {
-            let newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
+            const newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
             traverseTree(node.right, arr, newCenter, radius, center, radius, xOffset / 2);
          }
       }
 
-      let nodeSize = radius;
-      let curNode = node;
-      let depth = this.tree.depth;
+      const nodeSize = radius;
+      const curNode = node;
+      const depth = this.tree.depth;
 
       if (depth > 4){
          traverseTree(curNode, arr, center, nodeSize, undefined, undefined, 20);
@@ -843,10 +843,10 @@ function() {
    }
 
    this.drawNode = function(node, center, radius, parentCenter, parentRadius) {
-     let left = center[0] - radius;
-     let right = center[0] + radius;
-     let bottom = center[1] - radius;
-     let top = center[1] + radius;
+     const left = center[0] - radius;
+     const right = center[0] + radius;
+     const bottom = center[1] - radius;
+     const top = center[1] + radius;
 
      node.colorManager.activateColor();
      // DRAW CONTAINER
@@ -868,11 +868,11 @@ function() {
          if (childCenter == undefined) {
             return;
          }
-         let childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
-         let childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
+         const childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
+         const childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
 
-         let edgeOfParent = [center[0] + radius / childParentDist * childParentVec[0], center[1] + radius / childParentDist * childParentVec[1]];
-         let edgeOfChild = [childCenter[0] - radius / childParentDist * childParentVec[0], childCenter[1] - radius / childParentDist * childParentVec[1]];
+         const edgeOfParent = [center[0] + radius / childParentDist * childParentVec[0], center[1] + radius / childParentDist * childParentVec[1]];
+         const edgeOfChild = [childCenter[0] - radius / childParentDist * childParentVec[0], childCenter[1] - radius / childParentDist * childParentVec[1]];
          mLine(edgeOfParent, edgeOfChild);
       }
 
@@ -889,22 +889,21 @@ function() {
 
       this.drawNode(node, center, radius);
 
-      let newCenter = null;
       if (node.left !== null) {
-         newCenter = (this.tree.mustInitializePositions()) ?
+         const newCenter = (this.tree.mustInitializePositions()) ?
                         [center[0] - xOffset * radius, center[1] - yOffset * radius] :
                         node.left.center;
 
-         drawParentToChildEdge(center, radius, newCenter);
          this._drawTree(node.left, newCenter, radius, xOffset / 2);
+         drawParentToChildEdge(center, radius, newCenter);
       }
       if (node.right !== null) {
-         newCenter = (this.tree.mustInitializePositions()) ?
+         const newCenter = (this.tree.mustInitializePositions()) ?
                         [center[0] + xOffset * radius, center[1] - yOffset * radius] :
                         node.right.center;
 
-         drawParentToChildEdge(center, radius, newCenter);
          this._drawTree(node.right, newCenter, radius, xOffset / 2);
+         drawParentToChildEdge(center, radius, newCenter);
       }
    };
 
@@ -915,7 +914,7 @@ function() {
 
    // CHECK IF POINT LIES WITHIN CIRCLE
    this.inCircle = function(node, clickLocation){
-      let dist = Math.sqrt((clickLocation[0] - node.center[0]) * (clickLocation[0] - node.center[0]) +
+      const dist = Math.sqrt((clickLocation[0] - node.center[0]) * (clickLocation[0] - node.center[0]) +
                           (clickLocation[1] - node.center[1]) * (clickLocation[1] - node.center[1]));
       return dist < 0.5;
    };
@@ -952,7 +951,7 @@ function() {
 
 
    this.onPress = function(p) {
-      let ci = this.clickInfoCache;
+      const ci = this.clickInfoCache;
       ci.x = p.x;
       ci.y = p.y;
       ci.time = time;
@@ -962,10 +961,10 @@ function() {
    }
 
    this.onRelease = function(p) {
-      let ci = this.clickInfoCache;
+      const ci = this.clickInfoCache;
       if (abs(p.x - ci.x) < 0.05 &&
           abs(p.y - ci.y) < 0.05) {
-         let node = this.findClickedNode(this.tree.root, [ci.x, ci.y]);
+         const node = this.findClickedNode(this.tree.root, [ci.x, ci.y]);
          if (node !== null) {
             this.tree.saveState();
             this.tree.remove(node.value);
@@ -1005,11 +1004,11 @@ function() {
    };
 
    this.onDrag = function(p) {
-      let ci = this.clickInfoCache;
+      const ci = this.clickInfoCache;
       // save a point "boundary"/"threshold" for comparison
-      let point = [p.x, p.y];
+      const point = [p.x, p.y];
 
-      let addedDepth = Math.round((ci.y - point[1]) / 2);
+      const addedDepth = Math.round((ci.y - point[1]) / 2);
       if (addedDepth !== 0) {
          let newDepth = this.tree.depth + addedDepth;
          newDepth = min(newDepth, 6);
@@ -1020,7 +1019,6 @@ function() {
             this.tree.saveState();
          }
          this.tree.depth = newDepth;
-
 
          ci.y = point[1];
       };
@@ -1043,14 +1041,13 @@ function() {
 
       other.fade();
       other.delete();
-
    };
 
    this.drawEmpty = function(center, radius) {
-      let left = center[0] - radius;
-      let right = center[0] + radius;
-      let bottom = center[1] - radius;
-      let top = center[1] + radius;
+      const left = center[0] - radius;
+      const right = center[0] + radius;
+      const bottom = center[1] - radius;
+      const top = center[1] + radius;
       color("grey");
       mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
 
@@ -1088,7 +1085,6 @@ function() {
          else {
             this.drawEmpty(center, nodeSize);
          }
-
       });
    }
 }
