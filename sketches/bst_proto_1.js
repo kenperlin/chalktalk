@@ -759,6 +759,7 @@ function() {
          // TODO MAKE MORE EFFICIENT WITH PRE-CALCULATION
          const arr = this.createArrWithDepth(value);
          let count = 1;
+         this.depthCounts = {};
          for (let i = 1; i <= value; i++) {
             this.depthCounts[i] = count;
             count *= 2;
