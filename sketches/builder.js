@@ -254,7 +254,7 @@ function() {
             let unfinished = false;
             for (let i = 0; i < Q.length; i++) {
                let ret = Q[i]();
-               if (!ret.finished) {
+               if (!ret.done) {
                   unfinished = true;
                   break;
                }
