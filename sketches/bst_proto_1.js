@@ -1,7 +1,6 @@
 function() {
    // DEVELOPED BY KARL AND PAT
 
-   // TODO UPDATE DEPTH WHEN NODE IS ADDED
    this.label = 'BST';
 
    let sketchCtx = null;
@@ -14,8 +13,8 @@ function() {
       this.depth = 0;
 
       // TODO : FIX UNDO / REDO, WILL REPLACE LEGACY VERSION LATER
-      this.history = HistoryQueue.create();
-      // TODO : REPLACE WITH WORKING HISTORY LATER
+      //this.history = HistoryQueue.create();
+      // TODO : REPLACE WITH WORKING BACKWARDS AND FUTURE HISTORY LATER
       this.historyStack = [];
 
 
