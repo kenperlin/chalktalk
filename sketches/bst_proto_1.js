@@ -28,17 +28,19 @@ function() {
 
       this.depthCounts = {};
 
+      // TODO : IMPLEMENT SKETCH CONTROLS TO ENABLE / DISABLE
+      this.blocker = new BreakpointManager();
+      this.blocker.enableBreakpoints(true);
+
       BinarySearchTree.Node = function(value, center) {
          this.value = value;
          this.left = null;
          this.right = null;
          this.center = (center == undefined) ? undefined : [center[0], center[1], 0];
-         // MANAGE COLORS
          this.colorManager = new ColorManager();
       };
 
       let bst = this;
-
 
       this._applyAll = function(func, node) {
          func(node);
@@ -106,6 +108,9 @@ function() {
             this.isAcceptingInput = true;
             return;
          }
+         if (this.blocker.isBlocked()) {
+            return;
+         }
          const status = this.operationMemory.operation();
          if (status.done) {
             this.operationMemory.active = false;
@@ -114,6 +119,8 @@ function() {
             // ADDITIONAL CASES TO CONSIDER FOR IN-PROGRESS OPERATIONS
             this._mustInitializePositions = true;
             this.isAcceptingInput = true;
+
+            this.blocker.
             return;
          }
          this.isAcceptingInput = false;
@@ -416,6 +423,9 @@ function() {
             return;
          }
 
+         
+         this.blocker.block();
+
          // CASE 3 : FIND A PREDECESSOR
 
          // NAVIGATE BRANCH TO FIND PREDECESSOR
@@ -453,6 +463,8 @@ function() {
          find.colorManager.enableColor(true).setColor("orange");
 
          while (movementPause()) { yield; }
+
+         this.blocker.block();
 
          // MOVE THE COPY VALUE (VISUALLY)
          {
