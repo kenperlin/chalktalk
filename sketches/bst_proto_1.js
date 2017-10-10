@@ -30,7 +30,7 @@ function() {
 
       // TODO : IMPLEMENT SKETCH CONTROLS TO ENABLE / DISABLE
       this.blocker = new BreakpointManager();
-      this.blocker.enableBreakpoints(true);
+      // this.blocker.enableBreakpoints(true);
 
       BinarySearchTree.Node = function(value, center) {
          this.value = value;
