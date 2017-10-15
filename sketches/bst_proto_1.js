@@ -1086,7 +1086,7 @@ function() {
 
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
-      this.duringSketch(function(){
+      this.duringSketch(function() {
          mDrawOval([-1, -1], [1, 1], 32, PI, 0);
       });
       this.afterSketch(function() {
