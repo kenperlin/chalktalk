@@ -1,10 +1,10 @@
 function() {
-   var mode = 0;
+   var mode = 1;
    function createVolume() {
       var V = [];
-      for (let i = 0 ; i < n ; i++)
+      for (let k = 0 ; k < n ; k++)
       for (let j = 0 ; j < n ; j++)
-      for (let k = 0 ; k < n ; k++) {
+      for (let i = 0 ; i < n ; i++) {
          let x = (i - n/2) / (n/2),
              y = (j - n/2) / (n/2),
              z = (k - n/2) / (n/2);
@@ -13,14 +13,14 @@ function() {
          switch (mode) {
 	 case 0:
             t = x * x + y * y + z * z;
-            s = .2 + t + noise.noise([2*x,2*y,2*z]) / 2;
+            s = .2 + t + noise.noise([2*x,2*y,2*z + .5 * time]) / 2;
 	    break;
 
 	 case 1:
-	    t = .15 + .05 * sin(time);
+	    t = .4;// + .05 * sin(time);
 	    s = 1;
 	    for (let u = -t ; u <= t ; u += 2 * t) {
-               f = (x+u) * (x+u) + y * y + z * z;
+               f = .1 * ((x+u) * (x+u) + y * y + z * z);
                f = max(0, 1 - (12+21*t) * f);
 	       s -= f * f * f;
             }
@@ -36,13 +36,17 @@ function() {
 	       s -= f * f * f;
             }
 	    break;
+
+         case 3:
+	    s = x * x + y * y + z * z;
+	    break;
          }
 
          V.push(s);
       }
       return V;
    }
-   var n = 30, V, P, T, N;
+   var n = 60, V, P, T, N;
    var noise = new Noise();
    this.label = 'blob';
    this.render = function() {
@@ -51,7 +55,7 @@ function() {
          mCurve([[-1,0],[1,0],[1,-1],[-1,-1]]);
       });
       this.afterSketch(function() {
-         if (true) {
+         if (V === undefined) {
             V = createVolume();
             var PT = marchingTetrahedra.eval(V, n, n, .5);
             P = PT[0], T = PT[1];
@@ -61,9 +65,23 @@ function() {
                N = computeNormals(P, T);
             }
 	 }
-         m.scale(2);
-         m.translate(-.5,-.5,-.5);
-	 mPolyhedron(P, T, N);
+	 if (mode == 1) {
+	    let theta = .5 * sin(6 * time);
+	    let cs = cos(theta), sn = sin(theta);
+	    let Q = [];
+	    for (let n = 0 ; n < P.length ; n += 3) {
+	       let x = P[n], y = P[n+1], z = P[n+2];
+	       let t = sCurve(.5 * x + .5);
+	       let x0 =  cs * x + sn * y;
+	       let y0 = -sn * x + cs * y;
+	       let x1 =  cs * x - sn * y;
+	       let y1 =  sn * x + cs * y;
+	       Q.push(mix(x0, x1, t), mix(y0, y1, t), z);
+	    }
+	    mPolyhedron(Q, T, computeNormals(Q, T));
+         }
+	 else
+	    mPolyhedron(P, T, N);
       });
    }
 } 
