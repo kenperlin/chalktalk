@@ -2,8 +2,8 @@ function() {
    this.label = 'planet';
    this.render = function() {
       this.duringSketch(function() {
-         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 32,PI/2,5*PI/2));
-         mCurve([ [0,.95], [-1/2,1/3], [1/2,-1/3], [0,-.95] ]);
+         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 16,  PI/2,3*PI/2));
+         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 16,3*PI/2,5*PI/2));
       });
    }
 
