@@ -3,7 +3,7 @@ function() {
 
    this.label = 'BST';
 
-   let sketchCtx = null;
+   let sketchCtx = this;
 
    function BinarySearchTree(sketchCtx) {
       this.sketchCtx = sketchCtx;
@@ -810,6 +810,85 @@ function() {
       ];
 
       this.isAcceptingInput = true;
+
+      function CurveCache() {}
+      CurveCache.prototype = {
+         c : [],
+         beginCurve : function() {
+            this.c.push([]);   
+         },
+         addPoint : function(p) {
+            this.c[this.c.length - 1].push(p);
+         },
+         begin : function() {
+            this.c = [];
+         },
+         clear : function() {
+            this.c = [];
+         },
+         get : function() {
+            return this.c;
+         },
+         get length() {
+            return this.c.length;
+         },
+         get lastCurve() {
+            return this.c[this.c.length - 1];
+         },
+         get lastPoint() {
+            const numCurves = this.c.length;
+            const numPoints = this.c[numCurves - 1].length;
+            return this.c[numCurves - 1][numPoints - 1];
+         },
+      };
+
+      this.glyphCurves = new CurveCache();
+      this.glyphCommandInProgress = false;
+
+      this.cmdGlyphs = [
+         new SketchGlyph("pre-order", [
+            [[0, 1], [-1, -1], [1, -1]]
+         ]),
+         new SketchGlyph("in-order", [
+            [[-1, -1], [0, 1], [1, -1]]
+         ]),
+         new SketchGlyph("post-order", [
+            [[-1, -1], [1, -1], [0, 1]]
+         ]),
+         new SketchGlyph("breadth-first", [
+            [[-1, 1], [1, 1], [-1, -1], [1, -1]]
+         ])
+      ];
+
+      this.cmdGlyphFuncs = {
+         "-1" : function() {},
+         "0" : sketchCtx.traversals[0][1],
+         "1" : sketchCtx.traversals[1][1],
+         "2" : sketchCtx.traversals[2][1],
+         "3" : sketchCtx.traversals[3][1]
+      };
+
+      this.compareAll = function(curves, glyphs, tolerance = 500) {
+
+         const drawing = new SketchGlyph(null, curves);
+
+         let best = {glyph : null, score : drawing.WORST_SCORE, idx : -1};
+         
+         for (let i = 0; i < glyphs.length; i++) {
+            const score = drawing.compare(glyphs[i]);
+            if (score < best.score) {
+               best.glyph = glyphs[i];
+               best.score = score;
+               best.idx = i;
+            }
+         }
+
+         return best;
+      }
+
+      this.recognizeCommand = function(idx) {
+         this.cmdGlyphFuncs[idx]();
+      }
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -1005,18 +1084,36 @@ function() {
    // ];
 
 
-   this.onCmdClick = function(p) {
-      this.traversalTypeIdx = (this.traversalTypeIdx + 1) % this.traversals.length;
-      this.onSwipe[0][0] = this.traversals[this.traversalTypeIdx][0];
-   };
+   // this.onCmdClick = function(p) {
+   //    this.traversalTypeIdx = (this.traversalTypeIdx + 1) % this.traversals.length;
+   //    this.onSwipe[0][0] = this.traversals[this.traversalTypeIdx][0];
+   // };
    this.onCmdPress = function(p) {
-      console.log("cmd_press");
+      if (this.glyphCommandInProgress) {
+         return;
+      }
+      this.glyphCommandInProgress = true;
+
+      this.glyphCurves.beginCurve();
+      this.onCmdDrag(p);
    };
    this.onCmdDrag = function(p) {
-      console.log("cmd_drag");
+      if (!this.glyphCommandInProgress) {
+         return;
+      }
+
+      this.glyphCurves.addPoint([p.x, p.y]);
    };
    this.onCmdRelease = function(p) {
-      console.log("cmd_release");
+      if (!this.glyphCommandInProgress) {
+         return;
+      }
+
+      const comp = this.compareAll(this.glyphCurves.get(), this.cmdGlyphs);
+      const idx = comp.idx;
+      this.recognizeCommand(idx);
+      this.glyphCurves.clear();
+      this.glyphCommandInProgress = false;
    };
 
    this.onDrag = function(p) {
@@ -1025,7 +1122,7 @@ function() {
       }
 
       const ci = this.clickInfoCache;
-      // save a point "boundary"/"threshold" for comparison
+      // SAVE A POINT "BOUNDARY/"THRESHOLD" FOR COMPARISON
       const point = [p.x, p.y];
 
       const addedDepth = Math.round((ci.y - point[1]) / 2);
@@ -1110,6 +1207,15 @@ function() {
          else {
             this.drawEmpty(center, nodeRadius);
          }
+
+         _g.save();
+         color("turquoise");
+         lineWidth(1);
+         const curves = this.glyphCurves.get();
+         for (let i = 0; i < curves.length; i++) {
+            mCurve(curves[i]);
+         }
+         _g.restore();
       });
    }
 }
