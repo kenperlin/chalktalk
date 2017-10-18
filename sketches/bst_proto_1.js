@@ -794,7 +794,7 @@ function() {
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
 
-      this.traversalTypeIdx = 0;
+      // this.traversalTypeIdx = 0;
       this.traversals = [
          ["pre-order", function() { sketchCtx.tree.preOrder(); }],
          ["in-order", function() { sketchCtx.tree.inOrder(); }],
@@ -802,12 +802,12 @@ function() {
          ["breadth first", function() { sketchCtx.tree.breadthFirst(); }]
       ];
 
-      this.onSwipe[0] = [
-         this.traversals[this.traversalTypeIdx][0],
-         function() {
-            this.traversals[this.traversalTypeIdx][1]();
-         }
-      ];
+      // this.onSwipe[0] = [
+      //    this.traversals[this.traversalTypeIdx][0],
+      //    function() {
+      //       this.traversals[this.traversalTypeIdx][1]();
+      //    }
+      // ];
 
       this.isAcceptingInput = true;
 
@@ -861,10 +861,16 @@ function() {
       ];
 
       this.cmdGlyphFuncs = {
-         "-1" : function() {},
+         "pre-order" : sketchCtx.traversals[0][1],
          "0" : sketchCtx.traversals[0][1],
+
+         "in-order" : sketchCtx.traversals[1][1],
          "1" : sketchCtx.traversals[1][1],
+
+         "post-order" : sketchCtx.traversals[2][1],
          "2" : sketchCtx.traversals[2][1],
+
+         "breadth-first" : sketchCtx.traversals[3][1],
          "3" : sketchCtx.traversals[3][1]
       };
 
@@ -886,9 +892,19 @@ function() {
          return best;
       }
 
-      this.recognizeCommand = function(idx) {
+      this.recognizeGlyphCommandByIdx = function(idx) {
+         if (this.cmdGlyphFuncs[idx] === undefined) {
+            return;
+         }
          this.cmdGlyphFuncs[idx]();
-      }
+      };
+      this.recognizeGlyphCommandByName = function(name) {
+         if (this.cmdGlyphFuncs[name] === undefined) {
+            return;
+         }
+         this.cmdGlyphFuncs[name]();
+      };
+
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -1109,9 +1125,11 @@ function() {
          return;
       }
 
-      const comp = this.compareAll(this.glyphCurves.get(), this.cmdGlyphs);
-      const idx = comp.idx;
-      this.recognizeCommand(idx);
+      const comp = this.compareAll(
+         this.glyphCurves.get(),
+         this.cmdGlyphs
+      );
+      this.recognizeGlyphCommandByIdx(comp.idx);
       this.glyphCurves.clear();
       this.glyphCommandInProgress = false;
    };
@@ -1178,7 +1196,7 @@ function() {
 
    this.sketchIsAcceptingInput = function() {
       return this.tree.isAcceptingInput;
-   }
+   };
 
 
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
@@ -1217,5 +1235,5 @@ function() {
          }
          _g.restore();
       });
-   }
+   };
 }
