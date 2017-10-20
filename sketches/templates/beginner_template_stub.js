@@ -7,7 +7,7 @@ function() {
     * OPTIONAL SETUP BEFORE CREATION OF SKETCH
     */
    this.setup = function() {
-      // instantiate properties
+      // INSTANTIATE PROPERTIES
    };
 
    /*
