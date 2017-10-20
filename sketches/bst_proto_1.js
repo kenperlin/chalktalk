@@ -786,6 +786,62 @@ function() {
       },
    };
 
+   function SketchGlyphCommand(name, src, commandCallback) {
+      SketchGlyph.call(this, name, src);
+      this.execute = commandCallback || function() {};
+   }
+   SketchGlyphCommand.Null = new SketchGlyphCommand(null, [], null);
+   SketchGlyphCommand.compare = function(glyph) { return glyph.WORST_SCORE; },
+   SketchGlyphCommand.execute = function(args) {};
+
+   SketchGlyphCommand.compareAll = function(curves, glyphs, tolerance = 500) {
+      const drawing = new SketchGlyph(null, curves);
+
+      let best = {glyph : SketchGlyphCommand.Null, score : drawing.WORST_SCORE, idx : -1};
+      
+      for (let i = 0; i < glyphs.length; i++) {
+         const score = drawing.compare(glyphs[i]);
+         if (score < best.score) {
+            best.glyphMatch = glyphs[i];
+            best.score = score;
+            best.idx = i;
+         }
+      }
+
+      return best;
+   };
+
+   function CurveStore() {}
+   CurveStore.prototype = {
+      c : [],
+      beginCurve : function() {
+         this.c.push([]);   
+      },
+      addPoint : function(p) {
+         this.c[this.c.length - 1].push(p);
+      },
+      begin : function() {
+         this.c = [];
+      },
+      clear : function() {
+         this.c = [];
+      },
+      get array() {
+         return this.c;
+      },
+      get length() {
+         return this.c.length;
+      },
+      get lastCurve() {
+         return this.c[this.c.length - 1];
+      },
+      get lastPoint() {
+         const numCurves = this.c.length;
+         const numPoints = this.c[numCurves - 1].length;
+         return this.c[numCurves - 1][numPoints - 1];
+      },
+   };
+
 
    this.setup = function() {
       sketchCtx = this;
@@ -794,7 +850,6 @@ function() {
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
 
-      // this.traversalTypeIdx = 0;
       this.traversals = [
          ["pre-order", function() { sketchCtx.tree.preOrder(); }],
          ["in-order", function() { sketchCtx.tree.inOrder(); }],
@@ -802,109 +857,28 @@ function() {
          ["breadth first", function() { sketchCtx.tree.breadthFirst(); }]
       ];
 
-      // this.onSwipe[0] = [
-      //    this.traversals[this.traversalTypeIdx][0],
-      //    function() {
-      //       this.traversals[this.traversalTypeIdx][1]();
-      //    }
-      // ];
-
       this.isAcceptingInput = true;
 
-      function CurveCache() {}
-      CurveCache.prototype = {
-         c : [],
-         beginCurve : function() {
-            this.c.push([]);   
-         },
-         addPoint : function(p) {
-            this.c[this.c.length - 1].push(p);
-         },
-         begin : function() {
-            this.c = [];
-         },
-         clear : function() {
-            this.c = [];
-         },
-         get : function() {
-            return this.c;
-         },
-         get length() {
-            return this.c.length;
-         },
-         get lastCurve() {
-            return this.c[this.c.length - 1];
-         },
-         get lastPoint() {
-            const numCurves = this.c.length;
-            const numPoints = this.c[numCurves - 1].length;
-            return this.c[numCurves - 1][numPoints - 1];
-         },
-      };
-
-      this.glyphCurves = new CurveCache();
+      this.glyphCurves = new CurveStore();
       this.glyphCommandInProgress = false;
 
       this.cmdGlyphs = [
-         new SketchGlyph("pre-order", [
+         new SketchGlyphCommand("pre-order", [
             [[0, 1], [-1, -1], [1, -1]]
-         ]),
-         new SketchGlyph("in-order", [
+         ], sketchCtx.traversals[0][1]),
+
+         new SketchGlyphCommand("in-order", [
             [[-1, -1], [0, 1], [1, -1]]
-         ]),
-         new SketchGlyph("post-order", [
+         ], sketchCtx.traversals[1][1]),
+
+         new SketchGlyphCommand("post-order", [
             [[-1, -1], [1, -1], [0, 1]]
-         ]),
-         new SketchGlyph("breadth-first", [
+         ], sketchCtx.traversals[2][1]),
+
+         new SketchGlyphCommand("breadth-first", [
             [[0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1]]
-         ])
+         ], sketchCtx.traversals[3][1])
       ];
-
-      this.cmdGlyphFuncs = {
-         "pre-order" : sketchCtx.traversals[0][1],
-         "0" : sketchCtx.traversals[0][1],
-
-         "in-order" : sketchCtx.traversals[1][1],
-         "1" : sketchCtx.traversals[1][1],
-
-         "post-order" : sketchCtx.traversals[2][1],
-         "2" : sketchCtx.traversals[2][1],
-
-         "breadth-first" : sketchCtx.traversals[3][1],
-         "3" : sketchCtx.traversals[3][1]
-      };
-
-      this.compareAll = function(curves, glyphs, tolerance = 500) {
-
-         const drawing = new SketchGlyph(null, curves);
-
-         let best = {glyph : null, score : drawing.WORST_SCORE, idx : -1};
-         
-         for (let i = 0; i < glyphs.length; i++) {
-            const score = drawing.compare(glyphs[i]);
-            if (score < best.score) {
-               best.glyph = glyphs[i];
-               best.score = score;
-               best.idx = i;
-            }
-         }
-
-         return best;
-      }
-
-      this.recognizeGlyphCommandByIdx = function(idx) {
-         if (this.cmdGlyphFuncs[idx] === undefined) {
-            return;
-         }
-         this.cmdGlyphFuncs[idx]();
-      };
-      this.recognizeGlyphCommandByName = function(name) {
-         if (this.cmdGlyphFuncs[name] === undefined) {
-            return;
-         }
-         this.cmdGlyphFuncs[name]();
-      };
-
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -1120,16 +1094,35 @@ function() {
 
       this.glyphCurves.addPoint([p.x, p.y]);
    };
+
+   // MORE ACCURATE? 
+   this.mouseDown = function(x, y, z) {
+      console.log("MOUSEDOWN");
+      this.glyphCurves.beginCurve();
+      this.mouseDrag(x, y, z);
+   }
+   this.mouseDrag = function(x, y, z) {
+      console.log("MOUSEDRAG");
+      // if (!this.glyphCommandInProgress) {
+      //    return;
+      // }
+      this.glyphCurves.addPoint(this.inverseTransform([x, y, z]));
+   };
+   this.mouseUp = function() {
+      console.log("MOUSEUP");
+      this.glyphCurves.clear();
+   };
+   //////////////////////////////////////
    this.onCmdRelease = function(p) {
       if (!this.glyphCommandInProgress) {
          return;
       }
 
-      const comp = this.compareAll(
-         this.glyphCurves.get(),
+      SketchGlyphCommand.compareAll(
+         this.glyphCurves.array,
          this.cmdGlyphs
-      );
-      this.recognizeGlyphCommandByIdx(comp.idx);
+      ).glyphMatch.execute();
+
       this.glyphCurves.clear();
       this.glyphCommandInProgress = false;
    };
@@ -1227,9 +1220,9 @@ function() {
          }
 
          _g.save();
-         color("turquoise");
+         color("cyan");
          lineWidth(1);
-         const curves = this.glyphCurves.get();
+         const curves = this.glyphCurves.array;
          for (let i = 0; i < curves.length; i++) {
             mCurve(curves[i]);
          }
