@@ -19,12 +19,12 @@ See wiki.
 
 ### Creating and Contributing
 
-Contributions are welcome.
+Contributions to the core code-base and sketch library are welcome.
 
 To try creating your own sketch, create a new .js file (nameOfMySketch.js) 
 or copy a template (from sketches/templates) into the sketches directory to get started. 
 
-In your file, change the value of this.label and begin customizing your sketches
+In your file, change the value of `this.label` and begin customizing your sketches.
 
 ### License 
 (to come) <- SOON
