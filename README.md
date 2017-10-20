@@ -4,8 +4,7 @@ Using a blackboard-like interface, it allows a presenter to create and interact
 with animated digital sketches in order to demonstrate ideas and concepts (especially in the sciences) in the context
 of a live presentation or conversation.
 
-Sketches can display 2D and 3D graphics, move and animate, respond to input and output, and be linked together to allow for more complex logical connections and behaviors. 
-(PARAPHRASED FROM GABRIEL'S VIDEO)
+Sketches can display 2D and 3D graphics, move and animate, respond to input and output, and be linked together to allow for more complex logical connections and behaviors.
 
 A growing library of sketches--from creatures to math and physics objects--is available,
 and Chalktalk continues to evolve.
@@ -27,6 +26,6 @@ or copy a template (from sketches/templates) into the sketches directory to get 
 In your file, change the value of `this.label` and begin customizing your sketches.
 
 ### License 
-(to come) <- SOON
+(to come)
 
 
