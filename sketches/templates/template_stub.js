@@ -4,7 +4,7 @@ function() {
 
    this.setup = function() {
    
-   }
+   };
 
    this.render = function(elapsedTime) {
 
