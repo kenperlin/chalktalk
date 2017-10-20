@@ -8,7 +8,7 @@ function() {
     */
    this.setup = function() {
       // instantiate properties
-   }
+   };
 
    /*
     * MAIN RENDER LOOP FOR THE SKETCH,
