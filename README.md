@@ -1,25 +1,32 @@
+**Chalktalk** is a digital presentation and communication language 
+in development at New York University's Future Reality Lab.
+Using a blackboard-like interface, it allows a presenter to create and interact
+with animated digital sketches in order to demonstrate ideas and concepts (especially in the sciences) in the context
+of a live presentation or conversation.
 
-**Chalktalk** is a graphic blackboard to teach sciences, computer sciences and more. 
-A list of +250 objects ("glyphs") with specific behaviors is available. Glyphs can be connected and affect each others via an input/output maner, so meaningful mecanisms can be build. Glyphs can also be reprogrammed, stylized.
+Sketches can display 2D and 3D graphics, move and animate, respond to input and output, and be linked together to allow for more complex logical connections and behaviors. 
+(PARAPHRASED FROM GABRIEL'S VIDEO)
+
+A growing library of sketches--from creatures to math and physics objects--is available,
+and Chalktalk continues to evolve.
 
 ### Requirements
 * [NodeJS](http://nodejs.org/download/) & npm
 * Python
 
-### Installation
+### Installation and Usage
 See wiki.
 
-### Usage
-See wiki.
+### Creating and Contributing
 
-### Hacking
-To try creating your own sketch type, copy any of the files in
-the sketches/ folder to a new sketches/WHATEVER.js file.
+Contributions are welcome.
 
-In your new file, change the value of this.label, and customize
-it to draw a different shape.
+To try creating your own sketch, create a new .js file (nameOfMySketch.js) 
+or copy a template (from sketches/templates) into the sketches directory to get started. 
 
-### License
-(to come)
+In your file, change the value of this.label and begin customizing your sketches
+
+### License 
+(to come) <- SOON
 
 
