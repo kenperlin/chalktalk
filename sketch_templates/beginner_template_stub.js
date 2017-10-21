@@ -7,8 +7,8 @@ function() {
     * OPTIONAL SETUP BEFORE CREATION OF SKETCH
     */
    this.setup = function() {
-      // INSTANTIATE PROPERTIES
-   };
+      // instantiate properties
+   }
 
    /*
     * MAIN RENDER LOOP FOR THE SKETCH,
@@ -19,7 +19,7 @@ function() {
    this.render = function(elapsedTime) {
       // RENDER FUNCTION BODY: 
       //    - CALL DRAW FUNCTIONS IN THE BODY TO SPECIFY 
-      //       STROKES AND STROKE ORDER FOR RECOGNITION OF SKETCH,
+      //       STROKES AND STROKE ORDER FOR RECOGNITION OF SKETCH
       //    - ADD PROGRAM LOGIC, RESPOND TO INPUT / OUTPUT
 
 
@@ -54,10 +54,10 @@ function() {
       }
    ];
    // ...
-   // this.onSwipe[7] = [ ... ]
+   // this.onSwipe[7] = [ ... ];
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE,
+    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
     * 
     * param : p (AN OBJECT CONTAINING THE PROPERTIES x, y : 
     *    COORDINATES OF THE MOUSE EVENT WITH RESPECT TO THIS SKETCH)
@@ -92,11 +92,11 @@ function() {
 
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE,
+    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
     * 
     * param : x, y, z (COORDINATES IN THE CHALKTALK WORLD),
     *    USE this.inverseTransform([x, y, def(z)]) 
-    *       TO TRANSFORM INTO COORDINATES IN THIS SKETCH (RETURNS AS AN ARRAY)
+    *       TO TRANSFORM INTO COORDINATES IN THIS SKETCH (RETURNS POINT AS AN ARRAY)
     */
    this.mouseDown = function(x, y, z) {
 
