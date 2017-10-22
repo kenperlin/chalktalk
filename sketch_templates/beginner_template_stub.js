@@ -57,7 +57,7 @@ function() {
    // this.onSwipe[7] = [ ... ];
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
+    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, RELEASE, AND MOVE
     * 
     * param : p (AN OBJECT CONTAINING THE PROPERTIES x, y : 
     *    COORDINATES OF THE MOUSE EVENT WITH RESPECT TO THIS SKETCH)
@@ -70,6 +70,9 @@ function() {
    };
    this.onRelease = function(p) {
 
+   };
+   this.onMove = function(p) {
+   
    };
 
    /*
