@@ -1,5 +1,5 @@
 function() {
-   var _audio_volume = 1;
+   var audioVolume = 1;
    this.label = "Audio";
    this.code = [
       ["sin", "sin(TAU*x*time)"],
@@ -25,15 +25,21 @@ function() {
    }
 
    this.render = function(elapsed) {
-      var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
+
       var t = 1/3;
-
       m.scale(this.size / 400);
-
-      _audio_volume = pow(Math.min(1.0, this.computePixelSize()), 3);
-
       mLine([1,1],[1,-1]);
       mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
+      audioVolume = pow(Math.min(1.0, this.computePixelSize()), 3);
+
+      if (typeof this.inValue[0] == 'function') {
+         var input = this.inValue[0];
+         setAudioSignal(function(t) { return audioVolume * valueOf(input, t); });
+         return;
+      }
+
+      var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
+
       if ( this.code[cs][1] != this.savedCode ||
            this.inputs.hasLink(0) && this.inputs.value(0) != this.savedX ||
            this.inputs.hasLink(1) && this.inputs.value(1) != this.savedY ||
@@ -73,7 +79,7 @@ function() {
             var audioFunction = function(time) {
                var f1 = audioFunction1(time);
                var t = sCurve(min(1, (audioIndex - audioIndex0) / 1024));
-               return _audio_volume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
+               return audioVolume * (t == 1 ? f1 : mix(audioFunction0(time), f1, t));
             }
 
             window.audioIndex0 = audioIndex;

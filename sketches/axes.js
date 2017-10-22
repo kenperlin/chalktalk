@@ -1,4 +1,7 @@
 function() {
+/*
+   to do:  add x', y', z', text labels to rotated RGB axes.
+*/
    this.label = 'Axes';
    this.is3D = true;
    this.mode = 0;
@@ -27,7 +30,7 @@ function() {
    this.render = function() {
       mLine([-1,0], [1,0]);
       mLine([0,-1], [0,1]);
-      var otherColor = backgroundColor == 'black' ? 'cyan' : 'rgb(0,128,200)';
+      var otherColor = isBlackBackground() ? 'cyan' : 'rgb(0,128,200)';
       this.afterSketch(function() {
          var e = this.pointToPixelMatrix.elements;
          var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;

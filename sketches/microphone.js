@@ -1,7 +1,7 @@
 function() {
    this.USES_DEPRECATED_PORT_SYSTEM = true;
    var that = this;
-   this.label = 'Microphone';
+   this.label = 'Mike';
    this.tSignal = [];
    this.fSignal = [];
    this.onDelete = function() { stopMicrophone(); }

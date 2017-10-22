@@ -1,5 +1,5 @@
 function() {
-   this.label = 'reflectRay';
+   this.label = 'reflRay';
    var ax = -1, ay = -.5;
    var sx = .3, sy = 0, sr = .5;
    var cx = -.75, cy = .25, cr = .15;

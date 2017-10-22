@@ -2,8 +2,8 @@ function() {
    this.label = 'planet';
    this.render = function() {
       this.duringSketch(function() {
-         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 32,PI/2,5*PI/2));
-         mCurve([ [0,.95], [-1/2,1/3], [1/2,-1/3], [0,-.95] ]);
+         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 16,  PI/2,3*PI/2));
+         mCurve(makeOval(-.95, -.95, 1.9, 1.9, 16,3*PI/2,5*PI/2));
       });
    }
 
@@ -41,8 +41,8 @@ function() {
    ,'      float r = r0;'
    ,'      float ti = uTime*.3;'
    ,'      float t = mod(ti, 1.);'
-   ,'      float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .1* t    +2.));'
-   ,'      float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .1*(t-1.)+2.));'
+   ,'      float u0 = turbulence(vec3(x*(2.-t)/2., y*(2.-t)/2., .2* t    +2.));'
+   ,'      float u1 = turbulence(vec3(x*(2.-t)   , y*(2.-t)   , .2*(t-1.)+2.));'
    ,'      r = min(1., r - .1 + 0.3 * mix(u0, u1, t));'
    ,'      s = (1. - r) / (1. - b);'
    ,'   }'

@@ -23,12 +23,12 @@ function() {
          curve.push([t*2-1, this.func(C, t)*2-1]);
       color('red');
       mCurve(curve);
-      color(backgroundColor == 'black' ? 'cyan' : 'blue');
+      color(isBlackBackground() ? 'cyan' : 'blue');
       this.afterSketch(function() {
          color(defaultPenColor);
          lineWidth(1);
          mLine([-1,-1],[-1,1]);
-         color(backgroundColor == 'black' ? 'cyan' : 'blue');
+         color(isBlackBackground() ? 'cyan' : 'blue');
          textHeight(this.mScale(.15));
          mText('a =', [-1.65, .9], 0,.5);
          mText('b =', [-1.65, .3], 0,.5);

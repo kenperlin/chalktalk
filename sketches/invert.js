@@ -3,7 +3,7 @@ function() {
    this.label = 'invert';
    this.render = function() {
       mCurve([[1,1],[1,-1],[-1,-1]]);
-      mLine([.6,.6],[-.6,-.6]);
+      mLine([-.6,-.6],[.6,.6]);
       this.afterSketch(function() {
          mCurve([[-1,-1],[-1,1],[1,1]]);
          mLine([-.3,.5],[-.3,.1]);

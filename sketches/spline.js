@@ -6,12 +6,21 @@ function() {
    this.Pix = [];
    this.showKeys = true;
    this.isLoop = false;
+   this.isAlt = false;
    var r = .1;
+
+   var alt = [
+      [ -.5,  1.0, 0 ],
+      [  .5,  0.3, 0 ],
+      [ -.5, -0.3, 0 ],
+      [  .5, -1.0, 0 ]
+   ];
 
    // ALLOW USER TO DECIDE WHETHER TO DISPLAY KEY POINTS.
 
    this.onCmdClick = function() { this.showKeys = ! this.showKeys; }
    this.onCmdSwipe[6] = ['loop', function() { this.isLoop = ! this.isLoop; }];
+   this.onCmdSwipe[4] = ['loop', function() { this.isAlt  = ! this.isAlt ; }];
 
    this._projectPoints = function(pt) {
 
@@ -118,25 +127,27 @@ function() {
       });
 
       this.afterSketch(function() {
+         var P = this.isAlt ? alt : this.P;
+
          if (this.isLoop)
-            this.P.push(this.P[0]);
-         this.splineCurve = makeSpline(this.P);
+            P.push(P[0]);
+         this.splineCurve = makeSpline(P);
+         if (this.isLoop)
+            P.pop();
          var splineCurve = this.splineCurve;
-         if (this.isLoop)
-            this.P.pop();
 
          // EITHER SHOW THIN CURVE WITH KEYS AS DOTS, OR SHOW JUST A THICK CURVE.
 
          lineWidth(this.showKeys ? 2 : 4);
          mCurve(splineCurve);
          if (this.showKeys) {
-            for (var n = 0 ; n < this.P.length ; n++) {
+            for (var n = 0 ; n < P.length ; n++) {
                color(n == this.N && ! this.isNewPoint ? 'cyan' : defaultPenColor);
-               mDot(this.P[n], 2*r);
+               mDot(P[n], 2*r);
             }
             if (this.isNewPoint) {
                color('blue');
-               var t = (this.N + 0.5) / (this.P.length - (this.isLoop ? 0 : 1));
+               var t = (this.N + 0.5) / (P.length - (this.isLoop ? 0 : 1));
                mDot(getPointOnCurve(splineCurve, t), 2*r);
             }
          }
