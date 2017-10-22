@@ -30,6 +30,8 @@ function() {
    this.onRelease = function(p) {
 
    };
+   this.onMove = function(p) {
+   };
 
    this.onCmdPress = function(p) {
 
