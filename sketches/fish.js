@@ -7,6 +7,10 @@ function() {
 
    this.m0 = new M4();
 
+   this.initCopy = function() {
+      this.swimTime = undefined;
+   }
+
    this.render = function() {
       var c = 0;
       this.afterSketch(function() {

@@ -3,7 +3,7 @@ function() {
 
    this.label = 'BST';
 
-   let sketchCtx = this;
+   //let sketchCtx = this;
 
    function BinarySearchTree(sketchCtx) {
       this.sketchCtx = sketchCtx;
@@ -120,7 +120,7 @@ function() {
             this._mustInitializePositions = true;
             this.isAcceptingInput = true;
 
-            this.blocker.
+            // TODO this.blocker.
             return;
          }
          this.isAcceptingInput = false;
@@ -607,8 +607,9 @@ function() {
          // WITHOUT MUTATING THE TREE,
          // RETURN AN ARRAY OF THESE NEW POSITIONS
          // (SAME ORDER AS IN getOriginalPositions())
+         let that = this.sketchCtx;
          function getNewPositions(root, arr) {
-            sketchCtx._predictTreeLayout(root, arr);
+            that._predictTreeLayout(root, arr);
          }
 
          const starts = [];
@@ -843,55 +844,62 @@ function() {
    };
 
 
-   this.initTree = function() {
-      this.tree = new BinarySearchTree(sketchCtx);
+   this.setupTree = function() {
+      this.tree = new BinarySearchTree(this);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
    };
 
-   this.initCommands = function() {
-      this.traversals = [
-         ["pre-order", function() { sketchCtx.tree.preOrder(); }],
-         ["in-order", function() { sketchCtx.tree.inOrder(); }],
-         ["post-order", function() { sketchCtx.tree.postOrder(); }],
-         ["breadth first", function() { sketchCtx.tree.breadthFirst(); }]
-      ];
-
+   this.setupGlyphCommands = function() {
       this.cmdGlyphs = [
          new SketchGlyphCommand("pre-order", [
             [[0, 1], [-1, -1], [1, -1]]
-         ], sketchCtx.traversals[0][1]),
+         ], function(args) { args.self.tree.preOrder(); }),
 
          new SketchGlyphCommand("in-order", [
             [[-1, -1], [0, 1], [1, -1]]
-         ], sketchCtx.traversals[1][1]),
+         ], function(args) { args.self.tree.inOrder(); }),
 
          new SketchGlyphCommand("post-order", [
             [[-1, -1], [1, -1], [0, 1]]
-         ], sketchCtx.traversals[2][1]),
+         ], function(args) { args.self.tree.postOrder(); }),
 
          new SketchGlyphCommand("breadth-first", [
             [[0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1]]
-         ], sketchCtx.traversals[3][1])
+         ], function(args) { args.self.tree.breadthFirst(); })
       ];      
    };
 
    this.setup = function() {
-      sketchCtx = this;
-      this.initTree();
-      this.initCommands();
-
-      this.isAcceptingInput = true;
+      //sketchCtx = this;
+      this.setupTree();
+      this.setupGlyphCommands();
 
       this.glyphCurves = new CurveStore();
       this.glyphCommandInProgress = false;
 
-
+      this.isAcceptingInput = true;
    };
 
    this.initCopy = function() {
-      sketchCtx = this;
-      this.initCommands();
+      //sketchCtx = this;
+      const tree = this.tree;
+      if (tree.historyStack.length == 0) {
+         return;
+      }
+      if (tree.isAcceptingInput) {
+         tree.historyStack = tree.historyStack.slice(tree.historyStack.length - 1);
+      }
+      else {
+         // COPY THE TREE BEFORE AN OPERATION WAS IN PROGRESS
+         tree.historyStack = tree.historyStack.slice(tree.historyStack.length - 2);
+         const newBST = tree.historyStack[tree.historyStack.length - 1];
+         tree.root = newBST.root;
+         tree.isAcceptingInput = true;
+         tree.operationMemory.active = false;
+         tree.operationMemory.operation = null;
+      }
+      tree.resetGraphicTemporaries();
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -1079,22 +1087,11 @@ function() {
       }
    ];
 
-   // this.onSwipe[0] = [
-   //    'redo',
-   //    function() {
-   //       this.tree.restoreFuture();
-   //    }
-   // ];
-
-
-   // this.onCmdClick = function(p) {
-   //    this.traversalTypeIdx = (this.traversalTypeIdx + 1) % this.traversals.length;
-   //    this.onSwipe[0][0] = this.traversals[this.traversalTypeIdx][0];
-   // };
    this.onCmdPress = function(p) {
       if (this.glyphCommandInProgress) {
          return;
       }
+      this.tree.resetGraphicTemporaries();
       this.glyphCommandInProgress = true;
 
       this.glyphCurves.beginCurve();
@@ -1134,7 +1131,7 @@ function() {
       SketchGlyphCommand.compareAll(
          this.glyphCurves.array,
          this.cmdGlyphs
-      ).glyphMatch.execute();
+      ).glyphMatch.execute({self : this});
 
       this.glyphCurves.clear();
       this.glyphCommandInProgress = false;
@@ -1175,11 +1172,20 @@ function() {
       }
 
       if (this.sketchIsAcceptingInput()) {
-         let out = other.output();
-         out = Number(1 * out);
+         if (other.label && other.label === "BST") {
+            console.log("TODO: merge trees operation");
+         }
+         else {
+            let out = other.output();
+            out = Number(1 * out);
 
-         this.tree.saveState();
-         this.tree.insert(out);
+            if (isNaN(out)) {
+               return;
+            }
+
+            this.tree.saveState();
+            this.tree.insert(out);
+         }
       }
 
       other.fade();

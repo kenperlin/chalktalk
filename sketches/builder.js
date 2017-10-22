@@ -326,19 +326,7 @@ function() {
       }
    }
 
-   this.setup = function() {
-      this.drawElementList = [];
-      this.curElement = [];
-      this.pressed = false;
-
-      this.sketchStubName = "newsketchstub";
-
-      this.grid = new Grid();
-
-      this.is3D = true;
-
-
-
+   this.setupDrawProcedures = function() {
       let that = this;
 
       function DrawElement(drawFunc, toCodeTextFunc, argList) {
@@ -508,8 +496,6 @@ function() {
       this.drawProceduresListIdx = 0;
       this.drawProceduresList = [this.drawProcedures.line, this.drawProcedures.oval, this.drawProcedures.curveQuarter, this.drawProcedures.curveQuarterInverted];
 
-      this.drawProcedure = this.drawProcedures.line;
-
       this.drawProcedures.line.temp = function(p) {
          if (that.curElement.length === 0) {
             return;
@@ -590,7 +576,6 @@ function() {
             m.restore();
          }
       };
-
       // this.onSwipe[0] = [
       //    "select draw type",
       //    function() { 
@@ -599,63 +584,75 @@ function() {
       //       that.curElement = [];
       //    }
       // ];
+   };
+   this.setupDrawProcedures();
+
+   this.setup = function() {
+      this.drawElementList = [];
+      this.curElement = [];
+      this.pressed = false;
+
+      this.sketchStubName = "newsketchstub";
+
+      this.grid = new Grid();
+
+      this.drawProcedure = this.drawProcedures.line;
+
+      this.is3D = true;
 
       this.deleting = false;
       this.deleteTime = 0;
-
-      this.state = 
-
-      this.onSwipe[4] = [
-         "clear",
-         function() {
-            that.drawElementList = [];
-            that.resetCurElement();
-            thatSketch.deleting = true;
-            thatSketch.deleteTime = time;
-         }
-      ];
-
-      this.onSwipe[4] = [
-         "clear flip",
-         function() {
-            that.resetCurElement();
-            thatSketch.deleting = true;
-            thatSketch.deleteTime = time;
-         }
-      ];
-
-      this.onSwipe[2] = [
-         "save as sketch",
-         function() {
-            //server.writeFile('sketches/builderstubs/WEE.js', this.drawElementList.toString());
-            server.writeFile('sketches/__' + this.sketchStubName + '.js', 
-                             "function() {\n" + 
-                             "   this.label = \"" + this.sketchStubName + "\"\n\n" + 
-                             "   this.setup = function() {\n" + 
-                             "   };\n\n" + 
-                             "   this.render = function(elapsed) {\n" +
-                             "" + this.drawElementsToSketchStub() + 
-                             "      this.duringSketch(function() {\n" +
-                             "         /*TODO*/\n" +
-                             "      });\n\n" + 
-                             "      this.afterSketch(function() {\n" +
-                             "         /*TODO*/\n" +
-                             "      });\n\n" + 
-                             "   };\n\n" +
-                             "   this.output = function() {\n" +
-                             "      /*TODO*/\n" +
-                             "   };\n\n" +
-                             "}\n"
-            );
-            // BROKEN, LOADING THIS WAY DURING SAME RUN OF CHALKTALK LEADS TO STRANGE BEHAVIOR
-            // try {
-            //    importSketch('__' + this.sketchStubName + '.js', {count: 1});
-            // }
-            // catch (e) { console.log("TEST FAILED"); }
-         }
-      ];
-
    };
+
+   this.onSwipe[4] = [
+      "clear",
+      function() {
+         this.drawElementList = [];
+         this.resetCurElement();
+         this.deleting = true;
+         this.deleteTime = time;
+      }
+   ];
+
+   this.onSwipe[4] = [
+      "clear flip",
+      function() {
+         this.resetCurElement();
+         this.deleting = true;
+         this.deleteTime = time;
+      }
+   ];
+
+   this.onSwipe[2] = [
+      "save as sketch",
+      function() {
+         //server.writeFile('sketches/builderstubs/WEE.js', this.drawElementList.toString());
+         server.writeFile('sketches/__' + this.sketchStubName + '.js', 
+                          "function() {\n" + 
+                          "   this.label = \"" + this.sketchStubName + "\"\n\n" + 
+                          "   this.setup = function() {\n" + 
+                          "   };\n\n" + 
+                          "   this.render = function(elapsed) {\n" +
+                          "" + this.drawElementsToSketchStub() + 
+                          "      this.duringSketch(function() {\n" +
+                          "         /*TODO*/\n" +
+                          "      });\n\n" + 
+                          "      this.afterSketch(function() {\n" +
+                          "         /*TODO*/\n" +
+                          "      });\n\n" + 
+                          "   };\n\n" +
+                          "   this.output = function() {\n" +
+                          "      /*TODO*/\n" +
+                          "   };\n\n" +
+                          "}\n"
+         );
+         // BROKEN, LOADING THIS WAY DURING SAME RUN OF CHALKTALK LEADS TO STRANGE BEHAVIOR
+         // try {
+         //    importSketch('__' + this.sketchStubName + '.js', {count: 1});
+         // }
+         // catch (e) { console.log("TEST FAILED"); }
+      }
+   ];
 
    this.drawElementsToSketchStub = function() {
       let toSave = this.drawElementList;

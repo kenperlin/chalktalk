@@ -6,11 +6,14 @@ function() {
       return 1 - this.selection % 2;
    }
    this.labels = 'Hvec2 Vvec2 Hvec3 Vvec3 Hvec4 Vvec4'.split(' ');
-   this.value = [1,0,0,0];
-   this.row = 0;
-   this.precision = 1;
-   this.mxy = [0,0];
-   this.p10 = [1,10,100,1000];
+   
+   this.setup = function() {
+      this.value = [1,0,0,0];
+      this.row = 0;
+      this.precision = 1;
+      this.mxy = [0,0];
+      this.p10 = [1,10,100,1000];
+   }
    this.mouseDown = function(x, y) {
       this.isDraggedValue = false;
       var mt = m.transform([x,y])[this.axis()];

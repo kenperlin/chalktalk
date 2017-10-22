@@ -15,20 +15,26 @@ function() {
       'x\u2082 y\u2082 z\u2082 t\u2082'.split(' '),
       'x\u2083 y\u2083 z\u2083 t\u2083'.split(' '),
    ];
-   this.p = newVec3();
-   this.vals = [
-       [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
-       [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,   'A','B','C', 1 ],
-       [ 1 , 0 , 0 , 0,   0 ,'A','B', 0,    0 ,'C','A', 0,    0 , 0 , 0 , 1 ],
-       ['A', 0 ,'C', 0,   0 , 1 , 0 , 0,   'B', 0 ,'A', 0,    0 , 0 , 0 , 1 ],
-       ['A','B', 0 , 0,  'C','A', 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
-       ['A', 0 , 0 , 0,   0 ,'B', 0 , 0,    0 , 0 ,'C', 0,    0 , 0 , 0 , 1 ],
-       [ 1 , 0 , 0 ,'A',  0 , 1 , 0 ,'B',   0 , 0 , 1 ,'C',   0 , 0 , 0 , 1 ],
-    ];
-   this.mode = 0;
-   this.is_xyzt = false;
-   this.onClick = ['next type', function() { this.mode = (this.mode + 1) % this.vals.length; }];
-   this.cmdMode = 0;
+
+   this.setup = function() {
+      this.p = newVec3();
+      this.vals = [
+          [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
+          [ 1 , 0 , 0 , 0,   0 , 1 , 0 , 0,    0 , 0 , 1 , 0,   'A','B','C', 1 ],
+          [ 1 , 0 , 0 , 0,   0 ,'A','B', 0,    0 ,'C','A', 0,    0 , 0 , 0 , 1 ],
+          ['A', 0 ,'C', 0,   0 , 1 , 0 , 0,   'B', 0 ,'A', 0,    0 , 0 , 0 , 1 ],
+          ['A','B', 0 , 0,  'C','A', 0 , 0,    0 , 0 , 1 , 0,    0 , 0 , 0 , 1 ],
+          ['A', 0 , 0 , 0,   0 ,'B', 0 , 0,    0 , 0 ,'C', 0,    0 , 0 , 0 , 1 ],
+          [ 1 , 0 , 0 ,'A',  0 , 1 , 0 ,'B',   0 , 0 , 1 ,'C',   0 , 0 , 0 , 1 ],
+       ];
+      this.mode = 0;
+      this.is_xyzt = false;
+      this.onClick = ['next type', function() { this.mode = (this.mode + 1) % this.vals.length; }];
+      this.cmdMode = 0;
+
+      this.matrixValues = newArray(16);
+   };
+   
    this.onCmdClick = function() { this.cmdMode = (this.cmdMode + 1) % 2; }
    this.onCmdSwipe[2] = ['show labels', function() { this.is_xyzt = ! this.is_xyzt; }];
    this.onCmdSwipe[6] = ['show labels', function() { this.is_xyzt = ! this.is_xyzt; }];
@@ -204,6 +210,5 @@ function() {
       return outValue;
    }
 
-   this.matrixValues = newArray(16);
 }
 
