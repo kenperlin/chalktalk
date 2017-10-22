@@ -843,24 +843,19 @@ function() {
    };
 
 
-   this.setup = function() {
-      sketchCtx = this;
-
+   this.initTree = function() {
       this.tree = new BinarySearchTree(sketchCtx);
       this.tree.root = this.tree.createBSTWithDepth(3);
       this.tree.saveState();
+   };
 
+   this.initCommands = function() {
       this.traversals = [
          ["pre-order", function() { sketchCtx.tree.preOrder(); }],
          ["in-order", function() { sketchCtx.tree.inOrder(); }],
          ["post-order", function() { sketchCtx.tree.postOrder(); }],
          ["breadth first", function() { sketchCtx.tree.breadthFirst(); }]
       ];
-
-      this.isAcceptingInput = true;
-
-      this.glyphCurves = new CurveStore();
-      this.glyphCommandInProgress = false;
 
       this.cmdGlyphs = [
          new SketchGlyphCommand("pre-order", [
@@ -878,7 +873,25 @@ function() {
          new SketchGlyphCommand("breadth-first", [
             [[0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1]]
          ], sketchCtx.traversals[3][1])
-      ];
+      ];      
+   };
+
+   this.setup = function() {
+      sketchCtx = this;
+      this.initTree();
+      this.initCommands();
+
+      this.isAcceptingInput = true;
+
+      this.glyphCurves = new CurveStore();
+      this.glyphCommandInProgress = false;
+
+
+   };
+
+   this.initCopy = function() {
+      sketchCtx = this;
+      this.initCommands();
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
