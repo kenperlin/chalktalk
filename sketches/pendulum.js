@@ -49,7 +49,7 @@ function() {
          angle = this.inputs.value(0);
       }
       else {
-         this.angle = spring.getPosition();
+         angle = spring.getPosition();
       }
       if (isNaN(angle)) angle = 0;
 
