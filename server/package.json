@@ -1,10 +1,11 @@
 {
-   "name": "chalktalk",
-   "version": "0.0.1",
-   "dependencies": {
-      "body-parser": "1.5.x",
-      "express": "4.7.x",
-      "formidable": "1.0.x",
-      "ws": "0.8.x"
-   }
+  "name": "chalktalk",
+  "version": "0.0.1",
+  "dependencies": {
+    "body-parser": "1.5.x",
+    "express": "4.7.x",
+    "formidable": "1.0.x",
+    "osc-js": "^1.0.5",
+    "ws": "0.8.x"
+  }
 }
