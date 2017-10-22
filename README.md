@@ -1,7 +1,7 @@
 # Chalktalk
 
 **Chalktalk** is a digital presentation and communication language 
-in development at New York University's Future Reality Lab.
+in development at [New York University's Future Reality Lab](https://frl.nyu.edu/).
 Using a blackboard-like interface, it allows a presenter to create and interact
 with animated digital sketches in order to demonstrate ideas and concepts in the context
 of a live presentation or conversation.
