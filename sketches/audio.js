@@ -32,12 +32,6 @@ function() {
       mCurve([[1,-1],[-t,-t],[-1,-t],[-1,t],[-t,t],[1,1]]);
       audioVolume = pow(Math.min(1.0, this.computePixelSize()), 3);
 
-      if (typeof this.inValue[0] == 'function') {
-         var input = this.inValue[0];
-         setAudioSignal(function(t) { return audioVolume * valueOf(input, t); });
-         return;
-      }
-
       var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
 
       if ( this.code[cs][1] != this.savedCode ||
