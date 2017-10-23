@@ -1043,11 +1043,24 @@ function AtypicalModuleGenerator() {
 
    AT.defineType({
       typename: "Vector",
-      init: function() {
-         let values = Array.from(arguments);
-         if (values[0] instanceof Array) {
-            values = values[0];
+      init: function(value) {
+         if (typeof(value) === "object" && value._quickConstruct != undefined) {
+            // This is another option for construction. Pass in an object with "quickconstruct"
+            // set to a well-formed array of floats, and this will construct it by just a simple
+            // pointer copy with no validation performed at all.
+            // This is more meant for internal use and is not recommended unless performance is
+            // critical!
+            this._set("values", value._quickConstruct);
+            return;
          }
+
+         if (value instanceof Array) {
+            var values = value;
+         }
+         else {
+            var values = Array.from(arguments);
+         }
+
          for (let i = 0; i < values.length; i++) {
             if (values[i] instanceof AT.Float) {
                values[i] = values[i].value;
