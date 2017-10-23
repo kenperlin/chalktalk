@@ -14,6 +14,7 @@ function() {
    }
 
    this.mouseDrag = function(x, y) {
+
       var dx = x - xx;
       var dy = y - yy;
       switch (swingMode) {
@@ -26,9 +27,18 @@ function() {
       }
       xx = x;
       yy = y;
+      console.log("x difference " + dx + " y difference " + dy)
+      var msg = {
+        eventType: "hue",
+        brightness : 255,
+        dx: dx // todo: scale dx to a max of 255, ignore 0 and when negative, take away from brightness
+      };
+
+      server.broadcastObject(msg);
    }
 
    this.render = function(elapsed) {
+
       hubWidth  = this.stretch('hub width' , 10 * S(0).width);
       rodHeight = this.stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
       bobRadius = this.stretch('bob size'  , 10 * (S(2).width + S(2).height) / 4);
@@ -58,4 +68,3 @@ function() {
 
    this.output = function() { return angle; }
 }
-
