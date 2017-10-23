@@ -17,6 +17,10 @@ ttData = [];
 var app = express();
 var port = process.argv[2] || 11235;
 
+// set hue state to false on start, also turn the light off physically
+var hueState = false;
+
+
 // serve static files from main directory
 app.use(express.static("./"));
 
@@ -185,6 +189,17 @@ try {
       websockets[ws.index] = ws;
 
       ws.on("message", function(msg) {
+         console.log(msg); // log to node.log
+
+         // check hue state and then toggle
+         if (msg == "hue" && hueState == false){
+            hue.light(1).on()
+            hueState = true;
+          } else if (msg == "hue" && hueState == true){
+            hue.light(1).off()
+            hueState = false;
+          }
+
          for (var index = 0 ; index < websockets.length ; index++)
             if (index != ws.index)
                websockets[index].send(msg);
@@ -205,4 +220,21 @@ httpserver.listen(parseInt(port, 10), function() {
    console.log("HTTP server listening on port %d", httpserver.address().port);
 });
 
+// LOG ONTO HUES
+var Hue = require('philips-hue');
 
+var hue = new Hue;
+var configFile = process.env.HOME+'/.philips-hue.json';
+
+hue.bridge = "10.10.11.158";  // from hue.getBridges
+hue.username = "SEkMCLj5vQP1ZP9ihJRwKSWIxllAX9jY2J7r9NB3"; // from hue.auth
+hue.light(1).off()
+
+
+// RUN OSC bridge
+const OSC = require('osc-js')
+
+const config = { udpClient: { port: 9129 } }
+const osc = new OSC({ plugin: new OSC.BridgePlugin(config) })
+
+osc.open() // start a WebSocket server on port 8080
