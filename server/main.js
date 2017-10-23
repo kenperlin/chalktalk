@@ -192,6 +192,7 @@ try {
          console.log(msg); // log to node.log
 
          // check hue state and then toggle
+         /*
          if (msg == "hue" && hueState == false){
             hue.light(1).on()
             hueState = true;
@@ -199,6 +200,27 @@ try {
             hue.light(1).off()
             hueState = false;
           }
+          */
+
+        var hueMsg = JSON.parse(msg);
+        var brightness;
+        if (hueMsg.eventType == "hue")
+        {
+            console.log("hue data received");
+        }
+        switch(hueMsg.eventType){
+          case "hue":
+            hue.light(1).on()
+            //hueState = true;
+            brightness = hueMsg.brightness;
+            var state = {bri: brightness, sat: 120, hue: 50000};
+            //if (hueState)
+            hue.light(1).setState(state)
+            console.log("hue data received");
+            break;
+        }
+
+
 
          for (var index = 0 ; index < websockets.length ; index++)
             if (index != ws.index)
