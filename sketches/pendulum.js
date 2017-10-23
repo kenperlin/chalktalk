@@ -30,8 +30,9 @@ function() {
       console.log("x difference " + dx + " y difference " + dy)
       var msg = {
         eventType: "hue",
-        brightness : 255,
-        dx: dx // todo: scale dx to a max of 255, ignore 0 and when negative, take away from brightness
+        brightness : 100,
+        dx: dx, // todo: scale dx to a max of 255, ignore 0 and when negative, take away from brightness
+        force: force
       };
 
       server.broadcastObject(msg);

@@ -6,6 +6,10 @@ var http = require("http");
 var path = require("path");
 
 
+var brightness;
+var brightnessDiff = 15000;
+
+
 var ttDgram = require('dgram');
 var ttServer = ttDgram.createSocket('udp4');
 ttServer.on('listening', function () { });
@@ -203,7 +207,7 @@ try {
           */
 
         var hueMsg = JSON.parse(msg);
-        var brightness;
+
         if (hueMsg.eventType == "hue")
         {
             console.log("hue data received");
@@ -212,11 +216,36 @@ try {
           case "hue":
             hue.light(1).on()
             //hueState = true;
-            brightness = hueMsg.brightness;
-            var state = {bri: brightness, sat: 120, hue: 50000};
+            brightness = parseInt(hueMsg.brightness);
+            //brightnessDiff = hue.light(1).state.hue + (parseFloat(hueMsg.force) * 100);
+            if (hueMsg.force > 0){
+              var force = parseFloat(hueMsg.force) * 100;
+              console.log("force " + force);
+              console.log("brightnessDiff " + brightnessDiff);
+              brightnessDiff = brightnessDiff + force;
+              brightnessDiff = parseInt(brightnessDiff);
+              console.log("brightnessDiff2 " + brightnessDiff);
+            //brightnessDiff = brightnessDiff + (parseFloat(hueMsg.force) * 100);
+            //console.log("new brightness " + brightnessDiff);
+            var state = {bri: brightness, sat: 120, hue: brightnessDiff};
             //if (hueState)
-            hue.light(1).setState(state)
-            console.log("hue data received");
+            hue.light(1).setState(state).then(console.log).catch(console.error);
+          } else if (hueMsg.force < 0){
+            var force = parseFloat(hueMsg.force) * 100;
+            console.log("force " + force);
+            console.log("brightnessDiff " + brightnessDiff);
+            brightnessDiff = brightnessDiff + force;
+            brightnessDiff = parseInt(brightnessDiff);
+            console.log("brightnessDiff2 " + brightnessDiff);
+          //brightnessDiff = brightnessDiff + (parseFloat(hueMsg.force) * 100);
+          //console.log("new brightness " + brightnessDiff);
+          var state = {bri: brightness, sat: 120, hue: brightnessDiff};
+          //if (hueState)
+          hue.light(1).setState(state).then(console.log).catch(console.error);
+
+          }
+
+            //console.log("hue data received");
             break;
         }
 
