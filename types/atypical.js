@@ -1135,6 +1135,11 @@ function AtypicalModuleGenerator() {
             }
          }
          else if (rowsOrInit instanceof Array) {
+            if (!(rowsOrInit.length === 0 || rowsOrInit[0] instanceof Array)) {
+               // If it's a 1D array, convert it to a 2D array first
+               rowsOrInit = rowsOrInit.map(function(x) { return [x]; });
+            }
+
             // Init from a 2D array of numbers
             let columns = rowsOrInit.reduce(function(max, row) {
                return Math.max(max, row.length);

@@ -1464,6 +1464,13 @@ window.AtypicalTests = [
       // Conversion to flat array outputs it in column-major order
       let flatValues = [1, 4, 7, 10,   2, 5, 8, 11,   3, 6, 9, 12];
       T.assert(T.arraysEqual(mx4.toFlatArray(), flatValues));
+
+      // Conversion FROM flat array assumes it's a column vector
+      let columnVectorArray = [6, 7, 8, 9];
+      let columnVectorTest = new AT.Matrix(columnVectorArray);
+      for (let row = 0; row < 4; row++) {
+         T.assert(columnVectorArray[row] === columnVectorTest.element(row, 0));
+      }
    }
 ];
 
