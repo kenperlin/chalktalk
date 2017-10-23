@@ -1,4 +1,5 @@
 #!/bin/sh
+killall node server/main.js
 if [ `ps -x | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
 then node server/main.js >> node.log &
 fi
