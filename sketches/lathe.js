@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'lathe';
 
    this.computeStatistics = function() {
@@ -11,6 +10,8 @@ function() {
       for (var i = 0 ; i < stroke.length ; i++)
          this.profile.push( [ (stroke[i][0]-axisX) / axisR, (stroke[i][1]-axisY) / axisR ] );
    }
+
+   this.defineInput(AT.Function(AT.Float, AT.Vector));
 
    this.render = function() {
       this.duringSketch(function() {
@@ -24,10 +25,12 @@ function() {
       m.rotateX(PI/2);
 
       var that = this;
-      window._lsiv0 = this.inValue_DEPRECATED_PORT_SYSTEM[0];
-      mRevolved(128, 128, typeof _lsiv0 == 'function'
-         ? new Function('t', 'var p=_lsiv0(t);return [1+p[0],-p[1]];//' + ++that._counter)
-         : function(t) { return sample(that.profile, t); });
+      window._lsiv0 = this.inputs.value(0);
+      // Has to use new Function(...) because of weird caching issues with 3D renderer
+      mRevolved(128, 128, this.inputs.hasValue(0)
+         ? new Function('t', 'var p=_lsiv0(t);return [1+p.values[0],-p.values[1]]//' + ++that._counter)
+         : function(t) { return sample(that.profile, t); }
+      );
    }
    this._counter = 0;
 }

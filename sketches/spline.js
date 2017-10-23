@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'Spline';
    this.is3D = true;
    this.N = -1;
@@ -109,6 +108,28 @@ function() {
          this.N = -1;
       }
    }
+   
+   this.defineInput(AT.Float);
+   let FunctionPointPair = AT.Pair(AT.Function(AT.Float, AT.Vector), AT.Vector);
+   this.defineOutput(FunctionPointPair, function() {
+
+      // This sketch outputs two values at once:
+      // - The function of its spline, and
+      // - An evaluated point on its spline, as a column matrix.
+      // The second value is the result of the function when the sketch's input is
+      // fed into the function. If no input is given, it just uses the current time
+      // as input.
+
+      let inputValue = this.inputs.hasValue(0) ? this.inputs.value(0) : time;
+      let splineCurve = this.splineCurve;
+      let outPoint = getPointOnCurve(splineCurve, inputValue % 1);
+      let outFunction = function(t) {
+         return new AT.Vector({ _quickConstruct: getPointOnCurve(splineCurve, t % 1) });
+      };
+
+      return new FunctionPointPair(outFunction, outPoint);
+   });
+
    this.render = function() {
 
       // THE FIRST TIME THROUGH, INITIALIZE EVERYTHING THAT DEPENDS ON THREE.JS.
@@ -152,19 +173,10 @@ function() {
             }
          }
 
-         // IF THERE WAS INPUT, THEN OUTPUT A SPECIFIC VALUE.
-
-         if (this.inValues_DEPRECATED_PORT_SYSTEM[0] !== undefined) {
-            var p = getPointOnCurve(splineCurve, this.inValues_DEPRECATED_PORT_SYSTEM[0] % 1);
-            this.setOutPortValue_DEPRECATED_PORT_SYSTEM(p);
-            if (! this.showKeys)
-               mDot(p, 2*r);
+         if (this.inputs.hasValue(0) && !this.showKeys) {
+            let p = getPointOnCurve(splineCurve, this.inputs.value(0) % 1);
+            mDot(p, 2*r);
          }
-
-         // IF THERE WAS NO INPUT, THEN OUTPUT A DEFINING FUNCTION.
-
-         else
-            this.setOutPortValue_DEPRECATED_PORT_SYSTEM(function(t) { return getPointOnCurve(splineCurve, t % 1); });
       });
    }
 }

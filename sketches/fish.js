@@ -1,5 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true;
    this.label = 'fish';
    this.swim = false;
    this.onSwipe[0] = ['SWIM!', function() { this.swim = true; }];
@@ -7,6 +6,8 @@ function() {
    this.angleZ = 0;
 
    this.m0 = new M4();
+
+   this.defineInput(AT.Function(AT.Float, AT.Vector));
 
    this.render = function() {
       var c = 0;
@@ -18,11 +19,12 @@ function() {
                this.swimTime = time;
             var t = time - this.swimTime;
             c = cos(2 * TAU * t) * .1;
-            if (typeof this.inValue_DEPRECATED_PORT_SYSTEM[0] != 'function')
+            if (!this.inputs.hasValue(0)) {
                m.translate(2*t,0,0);
+            }
             else {
-               p0 = this.inValue_DEPRECATED_PORT_SYSTEM[0]( t/4         % 1);
-               p1 = this.inValue_DEPRECATED_PORT_SYSTEM[0]((t/4 + .001) % 1);
+               p0 = this.inputs.value(0)( t/4         % 1).values;
+               p1 = this.inputs.value(0)((t/4 + .001) % 1).values;
 
                dx = p1[0] - p0[0];
                dy = p1[1] - p0[1];
