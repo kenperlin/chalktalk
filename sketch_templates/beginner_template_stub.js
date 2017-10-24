@@ -1,6 +1,6 @@
 function() {
 
-   // CHANGE TO ORIGINAL NAME FOR SKETCH
+   // CHANGE TO AN ORIGINAL NAME FOR SKETCH
    this.label = "nameofsketch";
 
    /*
