@@ -52,6 +52,9 @@ function() {
    this.mouseRelease = function(x, y, z) {
 
    };
+   this.mouseMove = function(x, y, z) {
+      
+   };
 
    this.under = function(otherSketch) {
 

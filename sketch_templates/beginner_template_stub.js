@@ -1,6 +1,6 @@
 function() {
 
-   // CHANGE TO ORIGINAL NAME FOR SKETCH
+   // CHANGE TO AN ORIGINAL NAME FOR SKETCH
    this.label = "nameofsketch";
 
    /*
@@ -96,7 +96,7 @@ function() {
 
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
+    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, RELEASE, AND MOVE
     * 
     * param : x, y, z (COORDINATES IN THE CHALKTALK WORLD),
     *    USE this.inverseTransform([x, y, def(z)]) 
@@ -110,6 +110,9 @@ function() {
    };
    this.mouseRelease = function(x, y, z) {
 
+   };
+   this.mouseMove = function(x, y, z) {
+      
    };
 
    // OTHER SKETCH INTERACTION CALLBACKS :
