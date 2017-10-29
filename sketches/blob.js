@@ -13,7 +13,7 @@ function() {
          switch (mode) {
 	 case 0:
             t = x * x + y * y + z * z;
-            s = .2 + t + noise.noise([2*x,2*y,2*z + .5 * time]) / 2;
+            s = .2 + t + noise([2*x,2*y,2*z + .5 * time]) / 2;
 	    break;
 
 	 case 1:
@@ -47,7 +47,6 @@ function() {
       return V;
    }
    var n = 60, V, P, T, N;
-   var noise = new Noise();
    this.label = 'blob';
    this.render = function() {
       this.duringSketch(function() {
