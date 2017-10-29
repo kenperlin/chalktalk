@@ -1,6 +1,8 @@
 function() {
    this.label = 'stack';
 
+   // ORIGINAL SKETCH BY PAT
+
    function Stack(sketchCtx) {
       this.sketchCtx = sketchCtx;
       this.array = [];
@@ -186,10 +188,10 @@ function() {
       }); 
       this.afterSketch(function() {
          this.stack.doPendingOperation();
-         if (this.sketchIsAcceptingInput() && 
+         if (this.sketchIsAcceptingInput() &&
             this.inValue[0] !== undefined) {
             this.stack.emptyStack();
-            this.stack.push(this.inValue[0]);
+            this.stack.push(this.inValue[0], false);
          }
          this.stack.draw();
       });
