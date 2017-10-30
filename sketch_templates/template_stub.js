@@ -49,7 +49,7 @@ function() {
    this.mouseDrag = function(x, y, z) {
 
    };
-   this.mouseRelease = function(x, y, z) {
+   this.mouseUp = function(x, y, z) {
 
    };
    this.mouseMove = function(x, y, z) {
