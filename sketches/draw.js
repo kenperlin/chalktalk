@@ -13,15 +13,43 @@ function() {
                    'ArcUpLeft'    , 'ArcUpRight'  , 'ArcDownLeft' , 'ArcDownRight' ,
                    'ArcRightDown' , 'ArcLeftDown' , 'ArcRightUp'  , 'ArcLeftUp'    ];
 
+
+
    this.is3D = true;
    this._tolerance = 0.1; // HOW NEAR THINGS NEED TO BE TO BE CONSIDERED THE "SAME" POINT.
-   this._curveState = 'none';
-   this._x = 0;
-   this._y = 0;
-   this._p0 = newVec3();
-   this._p1 = newVec3();
-   this._p2 = newVec3();
-   this._p3 = newVec3();
+
+   this.setup = function() {
+      this._curveState = 'none';
+      this._x = 0;
+      this._y = 0;
+      this._p0 = newVec3();
+      this._p1 = newVec3();
+      this._p2 = newVec3();
+      this._p3 = newVec3();
+      
+      this._curves = [
+        [ this.createLine( 0,-1,  0, 1) ],
+        [ this.createLine( 0, 1,  0,-1) ],
+        [ this.createLine( 1, 0, -1, 0) ],
+        [ this.createLine(-1, 0,  1, 0) ],
+
+        [ this.createArc ( 0, 0,  1, 1,  0, 90) ],
+        [ this.createArc ( 0, 0, -1, 1,  0, 90) ],
+        [ this.createArc ( 0, 0,  1,-1,  0, 90) ],
+        [ this.createArc ( 0, 0, -1,-1,  0, 90) ],
+
+        [ this.createArc ( 0, 0,  1, 1,  90, 0) ],
+        [ this.createArc ( 0, 0,  1,-1,  90, 0) ],
+        [ this.createArc ( 0, 0, -1, 1,  90, 0) ],
+        [ this.createArc ( 0, 0, -1,-1,  90, 0) ],
+      ];
+
+      this._a = [0, 0];
+      this._b = [0, 0];
+      this._m0 = 0;
+      this._m1 = 0;
+   };
+
 
    this.under = function(sketch) {
       if (sketch.isFreehandSketch() && sketch.text.length > 0) {
@@ -87,22 +115,8 @@ function() {
       }
    }
 
-   this._curves = [
-     [ this.createLine( 0,-1,  0, 1) ],
-     [ this.createLine( 0, 1,  0,-1) ],
-     [ this.createLine( 1, 0, -1, 0) ],
-     [ this.createLine(-1, 0,  1, 0) ],
 
-     [ this.createArc ( 0, 0,  1, 1,  0, 90) ],
-     [ this.createArc ( 0, 0, -1, 1,  0, 90) ],
-     [ this.createArc ( 0, 0,  1,-1,  0, 90) ],
-     [ this.createArc ( 0, 0, -1,-1,  0, 90) ],
 
-     [ this.createArc ( 0, 0,  1, 1,  90, 0) ],
-     [ this.createArc ( 0, 0,  1,-1,  90, 0) ],
-     [ this.createArc ( 0, 0, -1, 1,  90, 0) ],
-     [ this.createArc ( 0, 0, -1,-1,  90, 0) ],
-   ];
 
    this.render = function() {
       var curves = this._curves[this.selection];
@@ -128,11 +142,6 @@ function() {
          break;
       }
    }
-
-   this._a = [0, 0];
-   this._b = [0, 0];
-   this._m0 = 0;
-   this._m1 = 0;
 
    this.onCmdPress = function(p) {
       this._m0 = [ p.x, p.y ];
