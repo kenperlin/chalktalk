@@ -194,28 +194,28 @@ try {
 
       ws.on("message", function(msg) {
          console.log(msg); // log to node.log
-
+         //console.log("message printed")
          // check hue state and then toggle
-         /*
-         if (msg == "hue" && hueState == false){
-            hue.light(1).on()
-            hueState = true;
-          } else if (msg == "hue" && hueState == true){
-            hue.light(1).off()
-            hueState = false;
-          }
-          */
 
+        // parse the JSON object sent through socket
+        //JSON.stringify(msg);
         var hueMsg = JSON.parse(msg);
-
-        if (hueMsg.eventType == "hue")
-        {
-            console.log("hue data received");
-        }
         switch(hueMsg.eventType){
+          case "hueToggle":
+            if (hueState == true) {
+
+              hue.light(1).off();
+              hueState = false;
+            }
+            else if (hueState ==false){
+              hue.light(1).on();
+              hueState = true;
+            }
+            break;
           case "hue":
-            hue.light(1).on()
-            //hueState = true;
+            hue.light(1).on();
+            hueState = true;
+
             brightness = parseInt(hueMsg.brightness);
             //brightnessDiff = hue.light(1).state.hue + (parseFloat(hueMsg.force) * 100);
             if (hueMsg.force > 0){
