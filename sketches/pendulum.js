@@ -28,6 +28,8 @@ function() {
       yy = y;
    }
 
+   this.hasBeenTraced = false;
+
    this.render = function(elapsed) {
       hubWidth  = this.stretch('hub width' , 10 * S(0).width);
       rodHeight = this.stretch('rod length', 10 * (S(2).y - S(1).ylo) / 4) * 4;
@@ -54,6 +56,10 @@ function() {
 
       mCurve([[0, rodHeight], [0,bobRadius]]);
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
+      if(!this.hasBeenTraced){
+         console.trace();
+         this.hasBeenTraced = true;
+      }
    }
 
    this.output = function() { return angle; }
