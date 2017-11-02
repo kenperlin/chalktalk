@@ -39,7 +39,32 @@ function() {
       });
 
       this.afterSketch(function() {
-         mCube();
+         // mCube();
+         // if (! this.ctObject) {
+         //       this.ctObject = new CT.Node();
+         //       ctScene.add(this.ctObject);
+         // }
+         // var mycube = new CT.Cube();
+         // mycube.scale(0.2,0.2,0.2);
+         // this.ctObject.add(mycube);
+
+         // this.ctObject.draw();
+         // mBox(0.5,0.3);
+         // window.mTorus();
+         // window.mCube();
+         m.save();
+         m.scale(0.5,0.5,0.5);
+         m.rotateY(PI/4);
+         m.translate(0.5,0,0);
+         mSquare();
+         m.restore();
+
+         m.save();
+         m.rotateY(-PI/4);
+         m.scale(0.5,0.5,0.5);
+         m.translate(-0.5,0,0);
+         mSquare();
+         m.restore();
       });
 
       //this.afterSketch(function() {
