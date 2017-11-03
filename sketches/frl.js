@@ -56,7 +56,9 @@ function() {
          m.scale(0.5,0.5,0.5);
          m.rotateY(PI/4);
          m.translate(0.5,0,0);
-         mSquare();
+         var mdl = mSquare().texture('images/brick.png');
+         // var mdl = mSquare().setTexture('http://localhost:11235/images/brick.png');
+         // this._model.getChild(0).setTexture('images/brick.png');
          m.restore();
 
          m.save();
