@@ -38,52 +38,108 @@ function() {
 
       });
 
-      this.afterSketch(function() {
-         // mCube();
-         // if (! this.ctObject) {
-         //       this.ctObject = new CT.Node();
-         //       ctScene.add(this.ctObject);
-         // }
-         // var mycube = new CT.Cube();
-         // mycube.scale(0.2,0.2,0.2);
-         // this.ctObject.add(mycube);
+      m.scale(3.0);
 
-         // this.ctObject.draw();
-         // mBox(0.5,0.3);
-         // window.mTorus();
-         // window.mCube();
-         m.save();
-         m.scale(0.5,0.5,0.5);
-         m.rotateY(PI/4);
-         m.translate(0.5,0,0);
-         var mdl = mSquare().texture('images/brick.png');
-         // var mdl = mSquare().setTexture('http://localhost:11235/images/brick.png');
-         // this._model.getChild(0).setTexture('images/brick.png');
-         m.restore();
+      var x = 0;
+      m.save();
+         m.translate(x, 0, 0);
+         m.scale(0.73825, 0.245625, 0.0001); // FLOOR
+         mSquare().texture('images/frl/FloorTile.jpg');
+      m.restore();
+      x = -.73825 + .024;
+      m.save();
+         m.translate(x, .245625 + .029, .143); // COLUMN
+         m.scale(0.024, 0.029, .143);
+         mCube().color(157/255,41/255,51/255);
+      m.restore();
+      x += .024 + 2*.2125 + .026625;
+      m.save();
+         m.translate(x, .245625 + .029, .143); // COLUMN
+         m.scale(0.026625, 0.029, 0.143);
+         mCube().color(157/255,41/255,51/255);
+      m.restore();
+      x += .026625 + 2 * .212 + .026625;
+      m.save();
+         m.translate(x, .245625 + .029, .143); // COLUMN
+         m.scale(0.026625, 0.029, 0.143);
+         mCube().color(157/255,41/255,51/255);
+      m.restore();
+      x += .026625 + 2 * .2365 - .026625;
+      m.save();
+         m.translate(x, .245625 + .029, .143); // COLUMN
+         m.scale(0.026625, 0.029, 0.143);
+         mCube().color(157/255,41/255,51/255);
+      m.restore();
+      // x = -.73825 + .0185;
+      // m.save();
+      //    m.translate(x, 0, .029); // CABINETS
+      //    m.scale(0.0185, 0.245625, 0.029);
+      //    mCube();
+      // m.restore();
+      // m.save();
+      //    m.translate(0, .245626 + .022, 2 * .029 + 2 * .0665 + .0475); // CABINETS
+      //    m.scale(.73825, .022, 0.0475);
+      //    mCube();
+      // m.restore();
+      x = -.73825;
+      m.save();
+         m.translate(x, 0, .143);
+         m.rotateY(PI/2);
+         m.rotateZ(PI/2);
+         m.scale(0.245625, 0.143, 1); // WEST WALL
+         
+         // mSquare().texture('images/frl/leftWall_transparent.png').setOpacity(0.5);
+         mSquare().texture('images/frl/leftWall_transparent.png').setOpacity(0.5);
+      m.restore();
 
-         m.save();
-         m.rotateY(-PI/4);
-         m.scale(0.5,0.5,0.5);
-         m.translate(-0.5,0,0);
-         mSquare();
-         m.restore();
-      });
 
-      //this.afterSketch(function() {
-         // color(palette.color[this.colorId]);
-         // mCurve(S);
 
-         // color(fadedColor(mix(.03, 1, pow(light, 3)), this.colorId));
-         // mFillCurve(S);
+      x = .73825;
+      m.save();
+         m.translate(x, 0, .143);
+         m.rotateY(PI/2);
+         m.rotateZ(PI/2);
+         m.scale(0.245625, 0.143, 1); // EAST WALL
+         mSquare().texture('images/frl/rightWall_transparent.png').setOpacity(0.75);
+      m.restore();
+      m.save();
+         m.translate(0, -.24526, .143);
+         m.rotateX(PI/2);
+         m.scale(.73825/3, 0.143, 1); // SOUTH WALL
+         mSquare().texture('images/frl/frontWall_transparent.png').setOpacity(0.75);
+      m.restore();
+      m.save();
+         m.translate(-.73825/3*2, -.24526, .143);
+         m.rotateX(PI/2);
+         m.scale(.73825/3, 0.143, 1); // SOUTH WALL
+         mSquare().texture('images/frl/frontWall_transparent.png').setOpacity(0.75);
+      m.restore();
+      m.save();
+         m.translate(.73825/3*2, -.24526, .143);
+         m.rotateX(PI/2);
+         m.scale(.73825/3, 0.143, 1); // SOUTH WALL
+         mSquare().texture('images/frl/frontWall_transparent.png').setOpacity(0.75);
+      m.restore();
+   
 
-         // lineWidth(1);
-         // color(defaultPenColor);
-         // mCurve(A);
-         // mCurve(B);
-      //});
+      // this.afterSketch(function() {
+      //    m.save();
+      //    m.scale(0.5,0.5,0.5);
+      //    m.rotateY(PI/4);
+      //    m.translate(0.5,0,0);
+      //    var mdl = mSquare().texture('images/brick.png');
+      //    // var mdl = mSquare().setTexture('http://localhost:11235/images/brick.png');
+      //    // this._model.getChild(0).setTexture('images/brick.png');
+      //    m.restore();
 
-      //lineWidth(1);
-      //color(defaultPenColor);
-      //mCurve(C);
+      //    m.save();
+      //    m.rotateY(-PI/4);
+      //    m.scale(0.5,0.5,0.5);
+      //    m.translate(-0.5,0,0);
+      //    mSquare();
+      //    m.restore();
+      // });
+
+      
    }
 }
