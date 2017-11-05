@@ -163,6 +163,7 @@ function() {
      node.colorManager.activateColor();
      // DRAW CONTAINER
      mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
+
      node.colorManager.deactivateColor();
 
      // DRAW ELEMENT
