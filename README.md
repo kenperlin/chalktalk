@@ -25,7 +25,7 @@ and Chalktalk continues to evolve.
 
 ## Installation and Usage
 
-[Installation instructions can be found in the wiki](https://github.com/kenperlin/chalktalk/wiki/Creating-a-Sketch).
+[Installation instructions can be found in the wiki](https://github.com/kenperlin/chalktalk/wiki/Installation-and-Running).
 
 More complete documentation on the usage of the system can be found there as well, but is a work in progress.
 
