@@ -25,9 +25,7 @@ and Chalktalk continues to evolve.
 
 ## Installation and Usage
 
-[Installation instructions can be found in the wiki](https://github.com/kenperlin/chalktalk/wiki/Installation-and-Running).
-
-More complete documentation on the usage of the system can be found there as well, but is a work in progress.
+Installation instructions can be found [in the wiki](https://github.com/kenperlin/chalktalk/wiki/Installation-and-Running). A brief tutorial on how to use the system [can be found there as well](https://github.com/kenperlin/chalktalk/wiki/Introduction-to-Chalktalk).
 
 ## Creating and Contributing
 
