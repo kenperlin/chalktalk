@@ -429,13 +429,24 @@ function() {
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
       this.duringSketch(function() {
-         mDrawOval([-1, -1], [1, 1], 32, PI, 0);
+         mCurve([
+            // OUTER
+            [-3.75, -2],
+            [-2.5, -1],
+            [0, 0],
+            [2.5, -1],
+            [3.75, -2],
+            // INNER
+            [3.75, -2],
+            [1.25, -2],
+            [2.5, -1]
+         ]);
       });
       this.afterSketch(function() {
          let nodeRadius = 0.5;
          let center = [0, 0];
-
          let currNode = this.tree.root;
+
          let depth = this.tree.depth;
 
          this.tree.doPendingOperation();
