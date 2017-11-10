@@ -207,29 +207,26 @@ function() {
             case 1:
                let x = Math.floor(p.x);
                let y = Math.floor(p.y);
-
+               let posString = (x+0.5)+","+(y+0.5);
+               if (this.graph.posToKey[posString] !== undefined) break;
                let node = new Graph.Node(this.graph.counter,[x+0.5,y+0.5]);
                this.graph.nodeMap[this.graph.counter] = node;
                this.graph.edgeMap[this.graph.counter] = [];
-               this.graph.posToKey[(x+0.5)+","+(y+0.5)] = this.graph.counter;
+               this.graph.posToKey[posString] = this.graph.counter;
                this.graph.counter += 1;
                break;
             case 2:
-               console.log(Math.round(this.clickInfoCache.x) +","+ Math.round(this.clickInfoCache.y));
-               console.log(this.graph.nodeMap);
-               console.log(this.graph.posToKey);
                let srcKey = this.graph.posToKey[(Math.floor(this.clickInfoCache.x)+0.5) +","+ (Math.floor(this.clickInfoCache.y)+0.5)];
                let dstKey = this.graph.posToKey[(Math.floor(p.x)+0.5)+","+(Math.floor(p.y)+0.5)];
                let srcEdgeList = this.graph.edgeMap[srcKey];
                let dstEdgeList = this.graph.edgeMap[dstKey];
-               if (srcEdgeList !== undefined || dstEdgeList !== undefined){
+               if (srcKey === dstKey) break;
+               if (srcEdgeList !== undefined && dstEdgeList !== undefined ){
                   srcEdgeList.push(this.graph.nodeMap[dstKey]);
                   dstEdgeList.push(this.graph.nodeMap[srcKey]);
                }
                break;
             case 3:
-               console.log((Math.floor(p.x)+0.5)+","+(Math.floor(p.y)+0.5));
-               console.log(this.graph.posToKey);
                let dstKey2 = this.graph.posToKey[(Math.floor(p.x)+0.5)+","+(Math.floor(p.y)+0.5)];
                let dstNode2 = this.graph.nodeMap[dstKey2];
                this.graph.breadthFirst(dstNode2);
