@@ -1,6 +1,20 @@
 function() {
    this.label = "pendulum";
 
+
+   var on = {
+     eventType: "hue",
+     brightness: 50,
+     hue: 30000
+   };
+
+   var off = {
+     eventType: "hue",
+     brightness: 0,
+     hue: 30000
+   };
+     this.onSwipe[2] = ['turn\non' , function() {  server.broadcastObject(off); }];
+
    var xx, yy, spring = new Spring(), force = 0, adjustHeight = 1,
        angle = 0, bobRadius, hubWidth, rodHeight, swingMode = 'swing';
 
@@ -14,6 +28,7 @@ function() {
    }
 
    this.mouseDrag = function(x, y) {
+
 
       var dx = x - xx;
       var dy = y - yy;
@@ -37,6 +52,7 @@ function() {
 
       server.broadcastObject(msg);
    }
+   //var hueState = false;
 
    this.render = function(elapsed) {
 
@@ -65,6 +81,19 @@ function() {
 
       mCurve([[0, rodHeight], [0,bobRadius]]);
       mDrawOval([-bobRadius, -bobRadius], [bobRadius, bobRadius], N, PI/2, PI/2-TAU);
+
+    /*
+     if (hueState == true) {
+       server.broadcastObject(off);
+       hueState = false;
+     }
+     else if (hueState ==false){
+       server.broadcastObject(on);
+       console.log("on");
+       hueState = true;
+     }*/
+
+
    }
 
    this.output = function() { return angle; }
