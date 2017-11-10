@@ -1,13 +1,21 @@
 function() {
+   this.label = "ptrtest";
 
-   this.label = "nameofsketch";
+   function Pointee(/*TODO*/) {
+
+   }
+   Pointee.prototype = {
+      ptrInPos : null
+   }
 
    this.setup = function() {
-   
+      this.pointees = [new Pointee(), new Pointee()];
    };
 
    this.render = function(elapsedTime) {
-
+      // TEMP
+      mLine([-1, 0], [1, 0]);
+      mCurve([[0.75, -0.25], [1, 0], [0.75, 0.25]]);
       this.duringSketch(function() {
 
       });
