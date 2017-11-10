@@ -1,5 +1,5 @@
 function() {
-   this.label = 'A';
+   this.label = 'stack';
 
    let sketchCtx = this;
 
@@ -111,6 +111,10 @@ function() {
         mDrawOval([-1, -1], [1, 1], 32, PI, 0);
      });
      this.afterSketch(function() {
+        mLine([-1, -0.5], [1, -0.5]);
+        mLine([1, -0.5], [1, -1]);
+        mLine([1, -1], [-1, -1]);
+        mLine([-1, -1], [-1, -0.5]);
         if (this.inValue[0] !== undefined){
            sketchCtx.stack.emptyStack();
            this.inValue[0].forEach(function(item){
