@@ -215,7 +215,6 @@ try {
           case "hue":
             hue.light(1).on();
             hueState = true;
-
             brightness = parseInt(hueMsg.brightness);
             //brightnessDiff = hue.light(1).state.hue + (parseFloat(hueMsg.force) * 100);
             if (hueMsg.force > 0){
@@ -224,6 +223,8 @@ try {
               console.log("brightnessDiff " + brightnessDiff);
               brightnessDiff = brightnessDiff + force;
               brightnessDiff = parseInt(brightnessDiff);
+              //brightness = force*10;
+              //brightness = parseInt(brightness);
               console.log("brightnessDiff2 " + brightnessDiff);
             //brightnessDiff = brightnessDiff + (parseFloat(hueMsg.force) * 100);
             //console.log("new brightness " + brightnessDiff);
