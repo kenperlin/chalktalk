@@ -9,7 +9,7 @@ let VisualPointer = (function() {
    }
    VisualPointer.prototype = {
    }
-   _vp.VisualPointer = VisualPointer;
+   _vp.create = VisualPointer;
 
    // TODO
 
