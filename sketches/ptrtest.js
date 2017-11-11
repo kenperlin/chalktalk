@@ -21,7 +21,6 @@ function() {
       });
 
       this.afterSketch(function() {
-
       });
    };
 
