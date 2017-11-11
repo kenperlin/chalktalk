@@ -114,8 +114,8 @@ function() {
                // VERTICAL LINES TO THE RIGHT OF ORIGIN
                for (let x = 0, bound = pR[0]; x <= bound; x+= this.distX) {
                   function* gen() {
-                     let ani = new SketchAnimation.Animation(
-                        SketchAnimation.Type.LINE({
+                     let ani = new SketchLerp.Lerp(
+                        SketchLerp.Type.LINE({
                            start : new Location.Position(x, pL[1], 0), 
                            end : new Location.Position(x, pR[1], 0)
                         }),
@@ -136,8 +136,8 @@ function() {
                // VERTICAL LINES TO THE LEFT OF ORIGIN, MOVING LEFTWARDS
                for (let x = -this._distX, bound = pL[0]; x >= bound; x-= this._distX) {
                   function* gen() {
-                     let ani = new SketchAnimation.Animation(
-                        SketchAnimation.Type.LINE({
+                     let ani = new SketchLerp.Lerp(
+                        SketchLerp.Type.LINE({
                            start : new Location.Position(x, pL[1], 0), 
                            end : new Location.Position(x, pR[1], 0)
                         }),
@@ -158,8 +158,8 @@ function() {
                // HORIZONTAL LINES ABOVE ORIGIN
                for (let y = 0, bound = pL[1]; y <= bound; y+= (this._slope * this._distX)) {
                   function* gen() {
-                     let ani = new SketchAnimation.Animation(
-                        SketchAnimation.Type.LINE({
+                     let ani = new SketchLerp.Lerp(
+                        SketchLerp.Type.LINE({
                            start : new Location.Position(pL[0], y, 0), 
                            end : new Location.Position(pR[0], y, 0)
                         }),
@@ -180,8 +180,8 @@ function() {
                // HORIZONTAL LINES BELOW ORIGIN
                for (let y = -this._slope * this._distX, bound = pR[1]; y >= bound; y-= (this._slope * this._distX)) {
                   function* gen() {
-                     let ani = new SketchAnimation.Animation(
-                        SketchAnimation.Type.LINE({
+                     let ani = new SketchLerp.Lerp(
+                        SketchLerp.Type.LINE({
                            start : new Location.Position(pL[0], y, 0), 
                            end : new Location.Position(pR[0], y, 0)
                         }),

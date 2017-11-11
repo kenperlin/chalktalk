@@ -166,7 +166,7 @@ BinarySearchTree.prototype = {
 
    _inOrder : function*(node, pauseTime) {
       node.colorManager.enableColor(true).setColor("purple");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
       if (node === null){
          return;
       }
@@ -174,7 +174,7 @@ BinarySearchTree.prototype = {
          yield *this._inOrder(node.left, pauseTime);
       }
       node.colorManager.enableColor(true).setColor("green");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
       if (node.right !== null) {
          yield *this._inOrder(node.right, pauseTime);
       }
@@ -195,14 +195,14 @@ BinarySearchTree.prototype = {
 
    _preOrder : function*(node, pauseTime) {
       node.colorManager.enableColor(true).setColor("purple");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
       if (node === null) {
          return;
       }
 
       node.colorManager.enableColor(true).setColor("green");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
       if (node.left !== null) {
          yield *this._preOrder(node.left, pauseTime);
@@ -229,7 +229,7 @@ BinarySearchTree.prototype = {
 
    _postOrder: function*(node, pauseTime) {
       node.colorManager.enableColor(true).setColor("purple");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
       if (node === null) {
          return;
       }
@@ -243,7 +243,7 @@ BinarySearchTree.prototype = {
       }
 
       node.colorManager.enableColor(true).setColor("green");
-      for (let p = SketchAnimation.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      for (let p = SketchLerp.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
    },
 
@@ -265,8 +265,8 @@ BinarySearchTree.prototype = {
          return;
       }
 
-      const pauseDequeue = SketchAnimation.pauseAutoReset(pauseDuration);
-      const pauseEnqueue = SketchAnimation.pauseAutoReset(pauseDuration);
+      const pauseDequeue = SketchLerp.pauseAutoReset(pauseDuration);
+      const pauseEnqueue = SketchLerp.pauseAutoReset(pauseDuration);
 
       const queue = [];
       let parent = this.root;
@@ -311,7 +311,7 @@ BinarySearchTree.prototype = {
 
       let _depth = 0;
 
-      const movementPause = SketchAnimation.pauseAutoReset(0.6);
+      const movementPause = SketchLerp.pauseAutoReset(0.6);
 
       while (current !== null) {
          _depth++;
@@ -463,8 +463,8 @@ BinarySearchTree.prototype = {
       {
          let c1 = find.center;
          let c2 = current.center;
-         let valMoveAni = SketchAnimation.create(
-            SketchAnimation.Type.LINE({
+         let valMoveAni = SketchLerp.create(
+            SketchLerp.Type.LINE({
                start : { x : c1[0], y : c1[1] },
                end : { x : c2[0], y : c2[1] }
             }),
@@ -557,7 +557,7 @@ BinarySearchTree.prototype = {
             current = current.right;
          }
 
-         for (let p = SketchAnimation.pause(.6, this.sketchCtx); p();) { yield; }
+         for (let p = SketchLerp.pause(.6, this.sketchCtx); p();) { yield; }
 
       }
 
@@ -619,8 +619,8 @@ BinarySearchTree.prototype = {
       const transitions = [];
       for (let t = 0; t < starts.length; t++) {
          transitions.push(
-            SketchAnimation.create(
-               SketchAnimation.Type.LINE({
+            SketchLerp.create(
+               SketchLerp.Type.LINE({
                   start : {x : starts[t][0], y : starts[t][1]},
                   end : {x : ends[t][0], y : ends[t][1]}
                }),

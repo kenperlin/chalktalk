@@ -87,8 +87,8 @@ function() {
             return;
          }
 
-         const pauseDequeue = SketchAnimation.pauseAutoReset(pauseDuration);
-         const pauseEnqueue = SketchAnimation.pauseAutoReset(pauseDuration);
+         const pauseDequeue = SketchLerp.pauseAutoReset(pauseDuration);
+         const pauseEnqueue = SketchLerp.pauseAutoReset(pauseDuration);
 
          const queue = [];
          let opQueue = [];

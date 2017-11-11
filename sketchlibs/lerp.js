@@ -1,6 +1,6 @@
 "use strict";
 
-var SketchAnimation = (function() {
+var SketchLerp = (function() {
    let a = {};
 
    // https://stackoverflow.com/a/17096947/7361580 for LINE and BEZIER
@@ -445,13 +445,13 @@ var SketchAnimation = (function() {
       };
    };
    
-   a.Animation = function(stepFunction, durationSeconds) {
+   a.Lerp = function(stepFunction, durationSeconds) {
       this.stepFunction = stepFunction;
       this.duration = durationSeconds;
       this.startTime = time;
    };
 
-   a.Animation.prototype = {
+   a.Lerp.prototype = {
       step : function() {
          let dt = time - this.startTime;
          let done = false;
@@ -524,14 +524,14 @@ var SketchAnimation = (function() {
 
    // ALTERNATIVE CREATION FUNCTION
    a.create = function(stepFunction, durationSeconds) {
-      return new a.Animation(stepFunction, durationSeconds);
+      return new a.Lerp(stepFunction, durationSeconds);
    };
 
    // CONVENIENCE FUNCTION OBJECT FOR PAUSING,
    // REUSABLE WITH reset()
    a.pause = function(durationSeconds) {
       return (function() {
-         const pause = new a.Animation(a.Type.NONE(), durationSeconds);
+         const pause = new a.Lerp(a.Type.NONE(), durationSeconds);
          let func = function() { return !pause.step().done; };
          func.reset = function(durationSeconds) { pause.reset(durationSeconds); }
 
@@ -543,7 +543,7 @@ var SketchAnimation = (function() {
    // AUTOMATICALLY RESETS ON FIRST USE AFTER A PAUSE HAS ENDED
    a.pauseAutoReset = function(durationSeconds) {
       return (function() {
-         const pause = new a.Animation(a.Type.NONE(), durationSeconds);
+         const pause = new a.Lerp(a.Type.NONE(), durationSeconds);
          let shouldPause = true;
          let func = function() {
             if (!shouldPause) {
@@ -556,7 +556,7 @@ var SketchAnimation = (function() {
       }());
    };
 
-   a.Path = a.Animation;
+   a.Path = a.Lerp;
 
    return a;
 })();
