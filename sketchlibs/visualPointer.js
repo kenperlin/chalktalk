@@ -3,21 +3,67 @@
 let VisualPointer = (function() {
    let _vp = {};
 
-   function VisualPointer(self, pointee) {
-      this.self = self;
-      this.pointee = pointee;
+   function VisualPointer(sketchCtx, holder, pointee) {
+      this.sketchCtx = sketchCtx;
+      this.holder = holder;
+      this.pointee = (pointee != null) ? pointee : {getPtrOutPos : function() { return holder.getPtrOutPos(); }, getPtrInPos : function() { return holder.getPtrInPos(); }};
       // TODO
       console.log("CREATING VISUAL POINTER");
    }
+   function _defaultDrawFunc(self) {
+      mLine(self.holder.getPtrInPos(), self.pointee.getPtrOutPos());
+   }
+
    VisualPointer.prototype = {
-      assign : function() {
-
+      operationMemory : {
+         active : false,
+         operation : null
       },
-      draw : function() {
+      isAcceptingInput : true,
 
+      doPendingOperation : function() {
+         if (!this.operationMemory.active) {
+            this.isAcceptingInput = true;
+            return;
+         }
+
+         const status = this.operationMemory.operation();
+         if (status.done) {
+            this.operationMemory.active = false;
+            this.operationMemory.operation = null;
+            this.isAcceptingInput = true;
+            return;
+         }
+         this.isAcceptingInput = false;
+         return;
+      },
+      // TEMP
+      assign : function(pointee) {
+         this.pointee = pointee;
+      },
+      // assign : function(pointee) {
+      //    const self = this;
+      //    if (!this.operationMemory.active) {
+      //       this.operationMemory.operation = (function() {
+      //          const op = self._assign(pointee);
+
+      //          return function(args) { return op.next(args); };
+
+      //       }());
+      //       this.operationMemory.active = true;
+      //    }
+      // },
+      // _assign : function*(pointee) {
+      //    this.pointee = pointee;
+      // },
+      _drawFunc : _defaultDrawFunc,
+      draw : function() {
+         this._drawFunc(this);
       }
    }
-   _vp.createPtr = VisualPointer;
+   _vp.createPtr = function(sketchCtx, holder, pointee) {
+      return new VisualPointer(sketchCtx, holder, pointee);
+   };
 
    function VisualEdge(a, b, isDirected = true) {
       this.a = a;
@@ -34,7 +80,9 @@ let VisualPointer = (function() {
 
       }
    }
-   _vp.createEdge = VisualEdge;
+   _vp.createEdge = function(a, b, isDirected = true) {
+      return new VisualEdge(a, b, isDirected = true);
+   };
 
    // TODO
 
