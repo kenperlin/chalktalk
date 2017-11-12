@@ -47,19 +47,71 @@ let VisualPointer = (function() {
       }());
 
       return handler;
+   };
+
+   let createAssignmentDrawHandler = function(args) {
+      let handler = (function() {
+         let self = args.self;
+         let pointee = args.pointee;
+         let started = false;
+         let progress = LerpUtil.lerpAutoResetSaveFracDone(args.duration || 2.5, LerpUtil.Type.NONE());
+         let originalTarget = self.getTargetPos();
+
+         return function(self) {
+            const status = progress();
+
+            const start = self.getOutPos();
+            const newTarget = pointee.getPtrInPos();
+            const end = LerpUtil.Type.LINE({
+               start : {x : originalTarget[0], y : originalTarget[1], z : originalTarget[2]},
+               end   : {x : newTarget[0],      y : newTarget[1],      z : newTarget[2]}
+            })(status.fracDone);
+
+            mSpline(
+               [start,
+               [(start[0] + end[0]) / 4, (start[1] + end[1]) / 4], 
+               [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2],
+               end
+            ]);
+
+            if (status.done) {
+               if (pointee == null) {
+                  self.pointee = {
+                     getPtrOutPos : function() { return self.holder.getPtrOutPos(); }, 
+                     getPtrInPos  : function() { return self.holder.getPtrInPos(); },
+                  };
+                  self._isNullptr = true;
+               }
+               else {
+                  self.pointee = pointee;
+                  self._isNullptr = false;
+               }
+            }
+
+            return status;
+         }
+
+      }());
+
+      return handler;
    }
 
-   function VisualPointer(sketchCtx, holder, pointee, label = "") {
-      console.log("CREATING VISUAL POINTER");
-
+   function VisualPointer(sketchCtx, holder, pointee = null, label = "") {
       this.sketchCtx = sketchCtx;
       this.holder = holder;
 
+      if (pointee == null) {
+         this.pointee = {
+            getPtrOutPos : function() { return holder.getPtrOutPos(); }, 
+            getPtrInPos  : function() { return holder.getPtrInPos(); },
+         };
+         this._isNullptr = true;
+      }
+      else {
+         this.pointee = pointee;
+         this._isNullptr = false;
+      }
 
-      this.pointee = (pointee != null) ? pointee : {
-         getPtrOutPos : function() { return holder.getPtrOutPos(); }, 
-         getPtrInPos  : function() { return holder.getPtrInPos(); }
-      };
 
       this.getOutPos = function() {
          return this.holder.getPtrOutPos();
@@ -80,7 +132,7 @@ let VisualPointer = (function() {
          active : false,
          stack : [defaultDrawHandler]
       },
-      this.isAcceptingInput = true
+      this.isAcceptingInput = true;
    }
 
 
@@ -104,8 +156,13 @@ let VisualPointer = (function() {
       resetTemporaryGraphics : function() {
          this.colorManager.enableColor(false);
       },
-
+      isNullptr : function() {
+         return this._isNullptr;
+      },
       traverse : function(duration) {
+         if (this._isNullptr) {
+            return;
+         }
          if (!this.drawMemory.active) {
             this.drawMemory.stack.push(
                createTraversalDrawHandler({duration : (duration || 2.5)})
@@ -113,23 +170,31 @@ let VisualPointer = (function() {
             this.drawMemory.active = true;
          }
       },
-      assign : function(pointee) {
-         const self = this;
-         if (!this.operationMemory.active) {
-            this.operationMemory.operation = (function() {
-               const op = self._assign(pointee);
-
-               return function(args) { return op.next(args); };
-
-            }());
-            this.operationMemory.active = true;
+      assign : function(pointee, duration) {
+         const args = {};
+         args.self = this;
+         args.pointee = pointee;
+         args.duration = duration;
+         if (!this.drawMemory.active) {
+            this.drawMemory.stack.push(
+               createAssignmentDrawHandler(args)
+            );
+            this.drawMemory.active = true;
          }
       },
-      _assign : function(pointee) {
-
-      },
       assignNoAnimation : function(pointee) {
-         this.pointee = pointee;
+         if (pointee == null) {
+            const self = this;
+            this.pointee = {
+               getPtrOutPos : function() { return self.holder.getPtrOutPos(); }, 
+               getPtrInPos  : function() { return self.holder.getPtrInPos(); },
+            };
+            this._isNullptr = true;
+         }
+         else {
+            this.pointee = pointee;
+            this._isNullptr = false;
+         }
       },
       // assign : function(pointee) {
       //    const self = this;

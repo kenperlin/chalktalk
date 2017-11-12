@@ -24,7 +24,10 @@ function() {
          m.save();
             m.translate(this._ptrOutPos);
             m.scale(0.25);
-            mDrawOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
+            _g.save();
+            color("rgba(0, 255, 0, .05)");
+            mFillOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
+            _g.restore();
          m.restore();
          this.child.draw();
       }
@@ -40,7 +43,7 @@ function() {
       this.testState = 0;
    };
 
-   const numCases = 4;
+   const numCases = 5;
 
    const case2Visits = [2, 0, 1];
    const case2VisitsIdx = 0;
@@ -55,9 +58,6 @@ function() {
 
 
       this.afterSketch(function() {
-
-
-
          const i = this.pointees[1].getPtrInPos();
          const n = [sin(time), i[1] , i[2]];
          this.pointees[1].setPtrInPos(n);
@@ -71,6 +71,8 @@ function() {
          case 2:
             break;
          case 3:
+            break;
+         case 4:
             if (this.caseTwo) {
                this.caseTwo.next();
             }
@@ -96,14 +98,14 @@ function() {
       p1.child.resetTemporaryGraphics();
       p2.child.resetTemporaryGraphics();
       p3.child.resetTemporaryGraphics();
+      
       p1.child.traverse();
-
       while (p1.child.drawMemory.active) { yield; }
-      that.pointees[0].child.traverse();
-
+      
+      p2.child.traverse();
       while (p2.child.drawMemory.active) { yield; }
-      that.pointees[1].child.traverse();
-
+      
+      p3.child.traverse();
       while (p3.child.drawMemory.active) { yield; }
 
       that.caseTwo = null;
@@ -112,18 +114,20 @@ function() {
    this.onPress = function(p) {
       switch (this.testState) {
       case 0:
-         this.pointees[0].child.pointee = this.pointees[1];
+         this.pointees[0].child.assign(this.pointees[1]);
          break;
       case 1:
-         this.pointees[1].child.pointee = this.pointees[2];
+         this.pointees[1].child.assign(this.pointees[2]);
          break;
       case 2:
-         this.pointees[2].child.pointee = this.pointees[0];
+         this.pointees[2].child.assign(this.pointees[0]);
          this.caseTwo = c2();
          break;
       case 3:
+         break;
+      case 4:
          for (let i = 0; i < this.pointees.length; i++) {
-            this.pointees[i].child.pointee = this.pointees[i];
+            this.pointees[i].child.assignNoAnimation(this.pointees[i]);
          }        
          break;
       }
