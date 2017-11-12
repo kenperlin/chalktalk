@@ -21,6 +21,7 @@ ColorManager.prototype = {
       if (this.useColor == false) {
          return this;
       }
+
       _g.save();
       color(this.color);
       return this;
@@ -29,8 +30,12 @@ ColorManager.prototype = {
       if (this.useColor == false) {
          return this;
       }
+
       _g.restore();
       return this;
-   }     
+   },
+   colorIsEnabled : function() { 
+      return this.useColor; 
+   }
 };
 

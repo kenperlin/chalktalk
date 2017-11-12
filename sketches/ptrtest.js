@@ -40,7 +40,10 @@ function() {
       this.testState = 0;
    };
 
-   const numCases = 3;
+   const numCases = 4;
+
+   const case2Visits = [2, 0, 1];
+   const case2VisitsIdx = 0;
 
    this.render = function(elapsedTime) {
 
@@ -67,6 +70,11 @@ function() {
             break;
          case 2:
             break;
+         case 3:
+            if (this.caseTwo) {
+               this.caseTwo.next();
+            }
+            break;
          }
          for (let i = 0; i < this.pointees.length; i++) {
             this.pointees[i].draw();
@@ -78,6 +86,28 @@ function() {
 
    ];
 
+   let that = this;
+
+   this.caseTwo = null;
+   function* c2() {
+      const p1 = that.pointees[2];
+      const p2 = that.pointees[0];
+      const p3 = that.pointees[1];
+      p1.child.resetTemporaryGraphics();
+      p2.child.resetTemporaryGraphics();
+      p3.child.resetTemporaryGraphics();
+      p1.child.traverse();
+
+      while (p1.child.drawMemory.active) { yield; }
+      that.pointees[0].child.traverse();
+
+      while (p2.child.drawMemory.active) { yield; }
+      that.pointees[1].child.traverse();
+
+      while (p3.child.drawMemory.active) { yield; }
+
+      that.caseTwo = null;
+   }
 
    this.onPress = function(p) {
       switch (this.testState) {
@@ -88,6 +118,10 @@ function() {
          this.pointees[1].child.pointee = this.pointees[2];
          break;
       case 2:
+         this.pointees[2].child.pointee = this.pointees[0];
+         this.caseTwo = c2();
+         break;
+      case 3:
          for (let i = 0; i < this.pointees.length; i++) {
             this.pointees[i].child.pointee = this.pointees[i];
          }        

@@ -113,7 +113,7 @@ function() {
          tree.operationMemory.active = false;
          tree.operationMemory.operation = null;
       }
-      tree.resetGraphicTemporaries();
+      tree.resetTemporaryGraphics();
    };
 
    // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
@@ -274,7 +274,7 @@ function() {
       ci.time = time;
 
 
-      this.tree.resetGraphicTemporaries();
+      this.tree.resetTemporaryGraphics();
    }
 
    this.onRelease = function(p) {
@@ -306,7 +306,7 @@ function() {
       if (this.glyphCommandInProgress) {
          return;
       }
-      this.tree.resetGraphicTemporaries();
+      this.tree.resetTemporaryGraphics();
       this.glyphCommandInProgress = true;
 
       this.glyphCurves.beginCurve();

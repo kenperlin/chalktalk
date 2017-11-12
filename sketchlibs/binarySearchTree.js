@@ -27,6 +27,12 @@ function BinarySearchTree(sketchCtx) {
    this.blocker = new BreakpointManager();
    // this.blocker.enableBreakpoints(true);
 
+   this.operationMemory = {
+      active : false,
+      operation : null
+   };
+   this.isAcceptingInput = true;
+
    BinarySearchTree.Node = function(value, center) {
       this.value = value;
       this.left = null;
@@ -53,7 +59,7 @@ function BinarySearchTree(sketchCtx) {
       this._applyAll(func, node);
    };
 
-   this.resetGraphicTemporaries = function() {
+   this.resetTemporaryGraphics = function() {
       this.applyAll(function(node) {
          // RESET COLORS
          node.colorManager.enableColor(false);
@@ -91,11 +97,6 @@ function BinarySearchTree(sketchCtx) {
 
 
 BinarySearchTree.prototype = {
-   operationMemory : {
-      active : false,
-      operation : null
-   },
-   isAcceptingInput : true,
    doPendingOperation : function() {
       if (!this.operationMemory.active) {
          this.isAcceptingInput = true;

@@ -1,6 +1,6 @@
 "use strict";
 
-var SketchLerp = (function() {
+var LerpUtil = (function() {
    let a = {};
 
    // https://stackoverflow.com/a/17096947/7361580 for LINE and BEZIER
@@ -463,6 +463,18 @@ var SketchLerp = (function() {
          return {point : this.stepFunction(dt / this.duration), done : done};
       },
 
+      stepSaveFracDone : function() {
+         let dt = time - this.startTime;
+         let done = false;
+         if (dt >= this.duration) {
+            dt = this.duration;
+            done = true;
+         }
+
+         const fracDone = dt / this.duration;
+         return {point : this.stepFunction(fracDone), done : done, fracDone : fracDone};
+      },
+
       stepReversed : function() {
          let dt = time - this.startTime;
          let done = false;
@@ -551,6 +563,53 @@ var SketchLerp = (function() {
             } 
             shouldPause = !pause.step().done;
             return shouldPause; 
+         };
+         return func;
+      }());
+   };
+
+   a.pauseAutoReset = function(durationSeconds) {
+      return (function() {
+         const pause = new a.Lerp(a.Type.NONE(), durationSeconds);
+         let shouldPause = true;
+         let func = function() {
+            if (!shouldPause) {
+               pause.reset();
+            } 
+            shouldPause = !pause.step().done;
+            return shouldPause; 
+         };
+         return func;
+      }());
+   };
+
+   a.lerpAutoReset = function(durationSeconds, lerpType) {
+      return (function() {
+         const lerp = new a.Lerp(lerpType, durationSeconds);
+         let inProgress = true;
+         let func = function() {
+            if (!inProgress) {
+               lerp.reset();
+            } 
+            const ret = lerp.step();
+            inProgress = !ret.done;
+            return ret; 
+         };
+         return func;
+      }());
+   };
+
+   a.lerpAutoResetSaveFracDone = function(durationSeconds, lerpType) {
+      return (function() {
+         const lerp = new a.Lerp(lerpType, durationSeconds);
+         let inProgress = true;
+         let func = function() {
+            if (!inProgress) {
+               lerp.reset();
+            } 
+            const ret = lerp.stepSaveFracDone();
+            inProgress = !ret.done;
+            return ret; 
          };
          return func;
       }());
