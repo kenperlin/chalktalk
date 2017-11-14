@@ -67,8 +67,8 @@ let VisualPointer = (function() {
                end   : {x : newTarget[0],      y : newTarget[1],      z : newTarget[2]}
             })(status.fracDone);
 
-            mSpline(
-               [start,
+            mSpline([
+               start,
                [(start[0] + end[0]) / 4, (start[1] + end[1]) / 4], 
                [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2],
                end
