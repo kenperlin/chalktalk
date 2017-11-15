@@ -3,6 +3,7 @@ function() {
    TODO:  Add chords.
 */
    this.label = 'piano';
+   this.tags = ['music', 'audio'];
    this.minOctave = 3;
    this.maxOctave = 3;
    this.pt = newVec3(-100,0,0);

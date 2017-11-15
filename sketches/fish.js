@@ -1,5 +1,6 @@
 function() {
    this.label = 'fish';
+   this.tag = 'creatures';
    this.swim = false;
    this.onSwipe[0] = ['SWIM!', function() { this.swim = true; }];
    this.angleY = 0;

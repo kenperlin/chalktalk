@@ -1,5 +1,6 @@
 function() {
    this.label = "Midi";
+   this.tags = ["music", "audio"];
 
    // Draw as a musical note.
 
