@@ -43,7 +43,7 @@ function() {
       this.testState = 0;
    };
 
-   const numCases = 5;
+   const numCases = 6;
 
    const case2Visits = [2, 0, 1];
    const case2VisitsIdx = 0;
@@ -73,6 +73,8 @@ function() {
          case 3:
             break;
          case 4:
+            break;
+         case 5:
             if (this.caseTwo) {
                this.caseTwo.next();
             }
@@ -121,15 +123,18 @@ function() {
          break;
       case 2:
          this.pointees[2].child.assign(this.pointees[0]);
-         this.caseTwo = c2();
+         this.pointees[0].child.assign(this.pointees[2]);
          break;
       case 3:
+         this.pointees[0].child.assign(this.pointees[1]);
          break;
       case 4:
+         this.caseTwo = c2();       
+         break;
+      case 5:
          for (let i = 0; i < this.pointees.length; i++) {
             this.pointees[i].child.assignNoAnimation(this.pointees[i]);
-         }        
-         break;
+         } 
       }
       this.testState = (this.testState + 1) % numCases;
 
