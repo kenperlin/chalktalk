@@ -16,6 +16,9 @@ function() {
 
       });
    };
+   
+   this.output = function() {
+   };
 
    this.onSwipe = [
 
