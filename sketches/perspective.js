@@ -1,5 +1,6 @@
 function() {
    this.label = 'perspect';
+   this.tag = 'computer graphics';
    this.point = newVec3();
    this.dy = 0;
    this.onPress = function(point) { this.point.copy(point); }

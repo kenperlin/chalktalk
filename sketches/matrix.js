@@ -1,5 +1,6 @@
 function() {
    this.labels = 'Matrix bezier bspline hermite'.split(' ');
+   this.tag = 'mathematics';
    this.inLabel = ['', '\u2715'];
    function rounded(x) { return floor(x * 100) / 100; }
    var c = "cos";

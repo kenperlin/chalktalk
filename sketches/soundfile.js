@@ -1,6 +1,7 @@
 function() {
    var self = this;
    this.label = 'Soundfile';
+   this.tag = 'audio';
 
    this.soundBuffer = null;
    this.soundBufferChannelData = null;
