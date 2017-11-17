@@ -1,5 +1,6 @@
 function() {
    this.label = 'holospecs';
+   this.tags = ["future", "vr", "ar"];
    this.is3D = true;
    this.displayMode = 0;
    this.onClick = ['next mode', function() { this.displayMode = (this.displayMode + 1) % 4; }];
