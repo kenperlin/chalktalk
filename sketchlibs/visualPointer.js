@@ -93,7 +93,92 @@ let VisualPointer = (function() {
 
       }());
 
-      return handler;
+      // TEMPORARY IMPLEMENTATION OF SKETCH-LINK-BASED POINTER ARROW
+
+      let linkLike = (function() {
+         let self = args.self;
+         let pointee = args.pointee;
+         let started = false;
+         let progress = LerpUtil.lerpAutoResetSaveFracDone(args.duration || 2.5, LerpUtil.Type.NONE());
+         let originalTarget = self.getTargetPos();
+         let C = null;
+
+         return function(self) {
+            const status = progress();
+
+            const start = self.getOutPos();
+            const newTarget = pointee.getPtrInPos();
+            const end = LerpUtil.Type.LINE({
+               start : {x : originalTarget[0], y : originalTarget[1], z : originalTarget[2]},
+               end   : {x : newTarget[0],      y : newTarget[1],      z : newTarget[2]}
+            })(status.fracDone);
+
+            var a = start;
+            var b = end;
+
+            var ax = a[0];
+            var ay = a[1];
+
+            var bx = b[0];
+            var by = b[1];
+
+            // Get the bounds of the two sketches.
+
+            var aR = [ax, ay, ax, ay];
+            var bR = [bx, by, bx, by];
+
+            // straighten the curve as it approaches its destination
+            const dxTarget = (newTarget[0] - bx);
+            const dyTarget = (newTarget[1] - by);
+            const dTarget = sqrt((dxTarget * dxTarget) + (dyTarget * dyTarget));
+            // unstraighten the curve as it departs
+            const dxStart = (bx - start[0]);
+            const dyStart = (by - start[1]);
+            const dStart = sqrt((dxStart * dxStart) + (dyStart * dyStart));
+
+            const dxOTarget = (originalTarget[0] - bx);
+            const dyOTarget = (originalTarget[1] - by);
+            const dO = sqrt((dxOTarget * dxOTarget) + (dyOTarget * dyOTarget));
+           
+            let s = min(min(dStart, dO), dTarget) * 0.2;
+            C = createCurvedLine([ax,ay], [bx,by], s);
+            // C = clipCurveAgainstRect(C, aR);
+            // C = clipCurveAgainstRect(C, bR);
+
+            // C = clipCurveAgainstRect(C, [ax, ay, ax, ay]);
+            // C = clipCurveAgainstRect(C, [bx, by, bx, by]);
+            // C = resampleCurve(C, 20);
+
+            // lineWidth(2);
+
+            // as a curved line with an arrow at the end.
+
+            const n = C.length;
+            mCurve(C);
+            if (n >= 2) {
+               mArrow(C[n - 2], C[n - 1], 0.5);
+            }
+
+            if (status.done) {
+               if (pointee == null) {
+                  self.pointee = {
+                     getPtrOutPos : function() { return self.holder.getPtrOutPos(); }, 
+                     getPtrInPos  : function() { return self.holder.getPtrInPos(); },
+                  };
+                  self._isNullptr = true;
+               }
+               else {
+                  self.pointee = pointee;
+                  self._isNullptr = false;
+               }
+            }
+
+            return status;
+         }
+
+      }());
+
+      return linkLike;
    }
 
    function VisualPointer(sketchCtx, holder, pointee = null, label = "") {
