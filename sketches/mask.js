@@ -141,12 +141,10 @@ function() {
       return [sign * x, y, z];
    }
 
-   var noise = new Noise();
-
    this.flexValues = newArray(3 + flexData.length / 2);
 
    this.computeFlexValue = function(n) {
-      var value = 5 * jtrAmpl[n] * noise.noise([n + .5, .5, jtrFreq[n] * time * 2]) + (n==3 ? -1 : 0);
+      var value = 5 * jtrAmpl[n] * noise(n + .5, .5, jtrFreq[n] * time * 2) + (n==3 ? -1 : 0);
       var t = this.inValues_DEPRECATED_PORT_SYSTEM[n];
       if (t !== undefined) {
          switch (n) {

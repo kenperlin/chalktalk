@@ -1,10 +1,10 @@
 function() {
-   var mode = 1;
+   var mode = 0;
    function createVolume() {
       var V = [];
-      for (let k = 0 ; k < n ; k++)
+      for (let i = 0 ; i < n ; i++)
       for (let j = 0 ; j < n ; j++)
-      for (let i = 0 ; i < n ; i++) {
+      for (let k = 0 ; k < n ; k++) {
          let x = (i - n/2) / (n/2),
              y = (j - n/2) / (n/2),
              z = (k - n/2) / (n/2);
@@ -13,14 +13,14 @@ function() {
          switch (mode) {
 	 case 0:
             t = x * x + y * y + z * z;
-            s = .2 + t + noise.noise([2*x,2*y,2*z + .5 * time]) / 2;
+            s = .2 + t + noise(2*x,2*y,2*z + .5 * time) / 2;
 	    break;
 
 	 case 1:
-	    t = .4;// + .05 * sin(time);
+	    t = .15 + .05 * sin(time);
 	    s = 1;
 	    for (let u = -t ; u <= t ; u += 2 * t) {
-               f = .1 * ((x+u) * (x+u) + y * y + z * z);
+               f = (x+u) * (x+u) + y * y + z * z;
                f = max(0, 1 - (12+21*t) * f);
 	       s -= f * f * f;
             }
@@ -46,8 +46,7 @@ function() {
       }
       return V;
    }
-   var n = 60, V, P, T, N;
-   var noise = new Noise();
+   var n = 30, V, P, T, N;
    this.label = 'blob';
    this.render = function() {
       this.duringSketch(function() {
@@ -65,23 +64,8 @@ function() {
                N = computeNormals(P, T);
             }
 	 }
-	 if (mode == 1) {
-	    let theta = .5 * sin(6 * time);
-	    let cs = cos(theta), sn = sin(theta);
-	    let Q = [];
-	    for (let n = 0 ; n < P.length ; n += 3) {
-	       let x = P[n], y = P[n+1], z = P[n+2];
-	       let t = sCurve(.5 * x + .5);
-	       let x0 =  cs * x + sn * y;
-	       let y0 = -sn * x + cs * y;
-	       let x1 =  cs * x - sn * y;
-	       let y1 =  sn * x + cs * y;
-	       Q.push(mix(x0, x1, t), mix(y0, y1, t), z);
-	    }
-	    mPolyhedron(Q, T, computeNormals(Q, T));
-         }
-	 else
-	    mPolyhedron(P, T, N);
+         m.scale(2);
+	 mPolyhedron(P, T, N);
       });
    }
 } 

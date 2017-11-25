@@ -1,6 +1,6 @@
 function() {
 
-   // CHANGE TO ORIGINAL NAME FOR SKETCH
+   // CHANGE TO AN ORIGINAL NAME FOR SKETCH
    this.label = "nameofsketch";
 
    /*
@@ -17,13 +17,13 @@ function() {
     * param : elapsedTime (TIME BETWEEN RENDER CALLS)
     */
    this.render = function(elapsedTime) {
-      // RENDER FUNCTION BODY: 
+      // render FUNCTION BODY: 
       //    - CALL DRAW FUNCTIONS IN THE BODY TO SPECIFY 
       //       STROKES AND STROKE ORDER FOR RECOGNITION OF SKETCH
       //    - ADD PROGRAM LOGIC, RESPOND TO INPUT / OUTPUT
 
 
-      // DURINGSKETCH:
+      // duringSketch:
       //    - OPTIONALLY CALL DRAW FUNCTIONS IN A PROVIDED CALLBACK TO SPECIFY
       //       STROKES FOR RECOGNITION THAT WILL DISAPPEAR AFTER RECOGNITION
       this.duringSketch(function() {
@@ -31,7 +31,7 @@ function() {
       });
 
 
-      // AFTERSKETCH:
+      // afterSketch:
       //    - CALL DRAW FUNCTIONS IN A PROVIDED CALLBACK TO
       //       CHANGE THE APPEARANCE OF THE SKETCH DURING ITS LIFETIME,
       //       STROKES NOT USED FOR RECOGNITION
@@ -39,6 +39,29 @@ function() {
       this.afterSketch(function() {
          // DRAW OR DO SOMETHING HERE
       });
+   };
+   
+   /*
+    * SEND OUTPUT TO CONNECTED SKETCHES
+    */
+   this.output = function() {
+      // THE RETURN VALUE OF THIS FUNCTION WILL
+      // BE PASSED THROUGH SKETCH LINKS
+      // e.g. 
+      // return 10; 
+      // TO RETURN THE VALUE 10;
+      //
+      // THERE ARE CURRENTLY NO RESTRICTIONS ON OUTPUT TYPE,
+      // SO THE SKETCH ON THE RECEIVING END IS RESPONSIBLE
+      // FOR INTERPRETING AND HANDLING THE DATA
+      // (NOTE THAT A TYPE SYSTEM FOR SAFE SKETCH INPUT / OUTPUT IS BEING DEVELOPED BY @Kronopath)
+      
+      // TO ACCESS DATA SENT TO THIS SKETCH BY ANOTHER ONE
+      // THROUGH THE "i"th LINK (THERE CAN BE MULTIPLE INPUT SKETCH LINKS PER SKETCH), 
+      // RETRIEVE THE VALUE FROM:
+      // this.inValue[i]
+      // (ALSO NOTE THAT BEFORE USING AN INPUT VALUE,
+      // YOU SHOULD CHECK WHETHER IT IS DEFINED -- i.e. THE SKETCH LINK EXISTS)
    };
 
    // CURSOR CONTROLS :
@@ -57,7 +80,7 @@ function() {
    // this.onSwipe[7] = [ ... ];
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
+    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, RELEASE, AND MOVE
     * 
     * param : p (AN OBJECT CONTAINING THE PROPERTIES x, y : 
     *    COORDINATES OF THE MOUSE EVENT WITH RESPECT TO THIS SKETCH)
@@ -71,10 +94,14 @@ function() {
    this.onRelease = function(p) {
 
    };
+   this.onMove = function(p) {
+   
+   };
 
    /*
     * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE WHEN COMMAND CLICK ACTIVE
-    *    (ALTERNATE INPUTS THAT ACTIVATE AFTER CLICKING THE BOTTOM-LEFT "cmd" OPTION FOR A SKETCH
+    *    (ALTERNATE INPUTS THAT ACTIVATE AFTER CLICKING THE 
+    *     BOTTOM-LEFT "cmd" OPTION FOR A SKETCH)
     *
     * 
     * param : p (AN OBJECT CONTAINING THE PROPERTIES x, y : 
@@ -92,7 +119,7 @@ function() {
 
 
    /*
-    * MOUSE CLICK EVENT CALLBACKS FOR CLICK, DRAG, AND RELEASE
+    * MOUSE CLICK EVENT CALLBACKS FOR DOWN (CLICK), DRAG, UP (RELEASE), AND MOVE
     * 
     * param : x, y, z (COORDINATES IN THE CHALKTALK WORLD),
     *    USE this.inverseTransform([x, y, def(z)]) 
@@ -104,8 +131,11 @@ function() {
    this.mouseDrag = function(x, y, z) {
 
    };
-   this.mouseRelease = function(x, y, z) {
+   this.mouseUp = function(x, y, z) {
 
+   };
+   this.mouseMove = function(x, y, z) {
+      
    };
 
    // OTHER SKETCH INTERACTION CALLBACKS :

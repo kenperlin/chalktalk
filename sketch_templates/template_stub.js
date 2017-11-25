@@ -16,6 +16,9 @@ function() {
 
       });
    };
+   
+   this.output = function() {
+   };
 
    this.onSwipe = [
 
@@ -29,6 +32,8 @@ function() {
    };
    this.onRelease = function(p) {
 
+   };
+   this.onMove = function(p) {
    };
 
    this.onCmdPress = function(p) {
@@ -47,8 +52,11 @@ function() {
    this.mouseDrag = function(x, y, z) {
 
    };
-   this.mouseRelease = function(x, y, z) {
+   this.mouseUp = function(x, y, z) {
 
+   };
+   this.mouseMove = function(x, y, z) {
+      
    };
 
    this.under = function(otherSketch) {
