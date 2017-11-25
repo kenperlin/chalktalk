@@ -658,6 +658,35 @@ window.AtypicalTests = [
    },
 
    //--------------------------------------------------------------------------------
+   // A few tests for basic types
+   function() {
+      let f1 = new AT.Float(5.6);
+      T.assert(f1 && f1.value === 5.6);
+      let f2 = new AT.Float(f1);
+      T.assert(f2 && f2.value === 5.6); // Ensure no nested floats
+
+      let i1 = new AT.Int(4.2);
+      T.assert(i1 && i1.value === 4);
+      let i2 = new AT.Int(i1);
+      T.assert(i2 && i2.value === 4); // Ensure no nested ints
+
+      let s1 = new AT.String("hi");
+      T.assert(s1 && s1.value === "hi");
+      let s2 = new AT.String(s1);
+      T.assert(s2 && s2.value === "hi"); // Same with strings
+
+      let v1 = new AT.Vector(3, 4, 5);
+      T.assert(v1.x() === 3 && v1.y() === 4 && v1.z() === 5);
+      let v2 = new AT.Vector([4, 5, 6]);
+      T.assert(v2.x() === 4 && v2.y() === 5 && v2.z() === 6);
+      let v3 = new AT.Vector();
+      T.assert(v3.x() === 0 && v3.y() === 0 && v3.z() === 0);
+      let v4 = new AT.Vector(6);
+      T.assert(v4.x() === 6 && v4.y() === 0 && v4.z() === 0);
+
+   },
+
+   //--------------------------------------------------------------------------------
    // Test defining generic types
    function() {
       let GenericThing = AT.defineGenericType({
@@ -724,6 +753,21 @@ window.AtypicalTests = [
       T.assert(doubleFloatValue.x.x.value === 7);
       T.assert(doubleFloatValue.typeParameters.length === 1);
       T.assert(doubleFloatValue.typeParameters[0] === GenericThing(AT.Float));
+
+      // Test defined conversions to and from generic types
+      T.assert(!AT.canConvert(AT.GenericThing(AT.Float), AT.Int));
+      AT.defineConversion(AT.GenericThing(AT.Float), AT.Int, function(gf) {
+         return new AT.Int(gf.x.value);
+      });
+      T.assert(AT.canConvert(AT.GenericThing(AT.Float), AT.Int));
+      T.assert((new (AT.GenericThing(AT.Float))(5.2)).convert(AT.Int).value == 5);
+
+      T.assert(!AT.canConvert(AT.Int, AT.GenericThing(AT.Float)));
+      AT.defineConversion(AT.Int, AT.GenericThing(AT.Float), function(i) {
+         return new (AT.GenericThing(AT.Float))(i.value);
+      });
+      T.assert(AT.canConvert(AT.Int, AT.GenericThing(AT.Float)));
+      T.assert((new AT.Int(5)).convert(AT.GenericThing(AT.Float)).x.value == 5);
    },
 
    //--------------------------------------------------------------------------------
@@ -1139,35 +1183,6 @@ window.AtypicalTests = [
 
       // TODO: should convert(To|From)TypeParameter(n) call the overridden conversion?
       // If so, should the corresponding canConvert functions call AT.canConvert?
-   },
-
-   //--------------------------------------------------------------------------------
-   // A few tests for basic types
-   function() {
-      let f1 = new AT.Float(5.6);
-      T.assert(f1 && f1.value === 5.6);
-      let f2 = new AT.Float(f1);
-      T.assert(f2 && f2.value === 5.6); // Ensure no nested floats
-
-      let i1 = new AT.Int(4.2);
-      T.assert(i1 && i1.value === 4);
-      let i2 = new AT.Int(i1);
-      T.assert(i2 && i2.value === 4); // Ensure no nested ints
-
-      let s1 = new AT.String("hi");
-      T.assert(s1 && s1.value === "hi");
-      let s2 = new AT.String(s1);
-      T.assert(s2 && s2.value === "hi"); // Same with strings
-
-      let v1 = new AT.Vector(3, 4, 5);
-      T.assert(v1.x() === 3 && v1.y() === 4 && v1.z() === 5);
-      let v2 = new AT.Vector([4, 5, 6]);
-      T.assert(v2.x() === 4 && v2.y() === 5 && v2.z() === 6);
-      let v3 = new AT.Vector();
-      T.assert(v3.x() === 0 && v3.y() === 0 && v3.z() === 0);
-      let v4 = new AT.Vector(6);
-      T.assert(v4.x() === 6 && v4.y() === 0 && v4.z() === 0);
-
    },
 
    //--------------------------------------------------------------------------------
