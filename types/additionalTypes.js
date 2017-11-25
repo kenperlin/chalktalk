@@ -119,6 +119,12 @@
       getRGB: function() {
          return [this.r, this.g, this.b];
       },
+      getRGBString: function() {
+         return "rgb(" +
+            (this.r * 255).toFixed(0) + "," +
+            (this.g * 255).toFixed(0) + "," +
+            (this.b * 255).toFixed(0) + ")";
+      },
       getRGBA: function() {
          return [this.r, this.g, this.b, this.a];
       }
