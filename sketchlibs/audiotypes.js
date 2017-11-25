@@ -70,3 +70,9 @@ AT.defineConversion(AT.Array(AT.Hertz), AT.String, function(arr) {
       }).join(", ") + "]"
    );
 });
+
+AT.defineConversion(AT.Hertz, AT.Function(AT.Seconds, AT.AudioSample), function(hz) {
+   return new (AT.Function(AT.Seconds, AT.AudioSample))(function (seconds) {
+      return Math.sin(hz.value*seconds*2*Math.PI);
+   });
+});
