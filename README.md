@@ -31,10 +31,12 @@ Installation instructions can be found [in the wiki](https://github.com/kenperli
 
 ### What to Contribute:
 
-Contributions to the core codebase and sketch library are welcome. Current development for Chalktalk will foucs on building out “domains of knowledge” which will essentially be modules that contain a set of sketches for a specific use case or application (e.g. modules for mathematics, architecture, audio engineering/ sound design, VR, art, computer graphics,  chemistry,  cooking, etc...). With the addition of each new module, Chalktalk will essentially “speak” the language associated with that knowledge domain. 
+Contributions to the sketch library and sketchlibs are welcome. Suggest improvememts or updates to the core codebase by submitting an issue.
+Current development for Chalktalk will focus on building out “domains of knowledge” which will essentially be modules that contain a set of sketches for a specific use case or application (e.g. modules for mathematics, architecture, audio engineering, sound design, VR, art, computer graphics,  chemistry,  cooking, etc...). With the addition of each new module, Chalktalk will essentially “speak” the language associated with that knowledge domain.
+However, this is one option. Creativity is encouraged as well, and we are excited to see what people will do. 
 
-There will soon be updates that will enable a tagging system where each sketch will be associated with one or more tags (modules) so new PR’s with sketches to be added should indicate which knowledge domain a sketch should be associated with 
-(the domain doesn’t have to currently exist within Chalktalk). The vision for Chalktalk is to make it into an educational platform that is capable of visually communicating knowledge in any subject, so new contributions should be made with that in mind.  
+There will soon be updates that will enable a tagging system where each sketch will be associated with one or more tags (attributes / descriptions), so new pull requests with sketches to be added should use this.tag = "tagname" or this.tags = [
+(the domain doesn’t have to currently exist within Chalktalk). The vision for Chalktalk is to make it into an educational platform and performance language that is capable of visually communicating knowledge in any subject, so new contributions should be made with that in mind.  
 
 ### How to Contribute:
 
