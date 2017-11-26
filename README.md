@@ -33,7 +33,7 @@ Installation instructions can be found [in the wiki](https://github.com/kenperli
 
 Contributions to the sketch library and sketchlibs are welcome. 
 Place reusable code in sketchlibs.
-Suggest improvememts or updates to the core codebase by submitting an issue.
+Suggest improvements or updates to the core codebase by submitting an issue.
 
 Chalktalk is an educational platform and performance language capable of visually communicating knowledge in any subject, so new contributions should be made with that in mind.  
 
