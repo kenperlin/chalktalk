@@ -50,7 +50,7 @@ Formatting and Style:
     e.g.
 
       if (x) {
-      } // no handing else if / else here
+      } // else goes below this brace
       else {
       }
       
