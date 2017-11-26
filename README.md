@@ -29,7 +29,7 @@ Installation instructions can be found [in the wiki](https://github.com/kenperli
 
 ## What we need and how to contribute
 
-### What to Contribute:
+### Contributing:
 
 Contributions to the sketch library and sketchlibs are welcome. 
 Place reusable code in sketchlibs.
