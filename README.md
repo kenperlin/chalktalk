@@ -27,9 +27,9 @@ and Chalktalk continues to evolve.
 
 Installation instructions can be found [in the wiki](https://github.com/kenperlin/chalktalk/wiki/Installation-and-Running). A brief tutorial on how to use the system [can be found there as well](https://github.com/kenperlin/chalktalk/wiki/Introduction-to-Chalktalk).
 
-## What we need and how to contribute
+## Contributing
 
-### Contributing:
+### What to Contribute:
 
 Contributions to the sketch library and sketchlibs are welcome. 
 Place reusable code in sketchlibs.
