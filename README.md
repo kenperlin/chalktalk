@@ -29,7 +29,7 @@ Installation instructions can be found [in the wiki](https://github.com/kenperli
 
 ## Contribute
 
-See [the contribution guidelines](https://github.com/kenperlin/chalktalk/CONTRIBUTIONS.md) to learn how to contribute to Chalktalk.
+See [the contribution guidelines](https://github.com/kenperlin/chalktalk/CONTRIBUTING.md) to learn how to contribute to Chalktalk.
 
 ## Sketch Creation
 
