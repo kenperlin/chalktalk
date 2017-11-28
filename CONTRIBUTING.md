@@ -40,3 +40,6 @@ To create your own sketch, create a new .js file (nameOfMySketch.js) or copy a t
 In your file, change the value of `this.label` and begin customizing your new sketch.
 
 Note: a soon-to-be-enabled update will implement a sketch tagging system where each sketch is associated with one or more tags (attributes / descriptions), so new pull requests with sketches to be added should use `this.tag = "tagname"` or `this.tags = ["tagname1", "tagname2"]` within the function body of a sketch file (similar to `this.label` and `this.labels`). Tag names should be general enough to apply to multiple sketches.
+
+[Further information on sketch creation can be found in the wiki](https://github.com/kenperlin/chalktalk/wiki/Creating-a-Sketch).
+
