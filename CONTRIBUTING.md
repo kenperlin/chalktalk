@@ -14,8 +14,7 @@ We encourage creativity and are excited to see contributions going beyond the cu
 ## How to Contribute:
 
 Formatting and Style:
-- 3 space indents, terminate statements with semicolons,
-  best to use braces for if/else/while/etc. for clarity 
+- 3 space indents, terminate statements with semicolons. Best to use braces for if/else/while/etc. for clarity.
     e.g.
 
       if (x) {
@@ -24,13 +23,13 @@ Formatting and Style:
       }
       
       // one-liner if-statement body, 
-      // use braces even if unecessary
+      // use braces even if unnecessary
       // so future changes are less bug-prone
       // and easier to make
       if (y) {
          doSomething();
       }
     
-- use `let` and `const` instead of `var` wherever possible, (not a restriction, just a loose recommendation)
+- Use `let` and `const` instead of `var` wherever possible. This isn't a restriction, just a loose recommendation.
 
-- specify strict mode ( `"use strict"` ) at the top of all source files except for sketches. Note that sketches automatically use strict by default via the sketch loading code.
+- Specify strict mode ( `"use strict"` ) at the top of all source files except for sketches. Note that sketches automatically use strict by default via the sketch loading code.
