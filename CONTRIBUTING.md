@@ -8,7 +8,7 @@ Suggest improvements or updates to the core codebase by submitting an issue.
 
 Chalktalk is an educational platform and performance language capable of visually communicating knowledge in any subject, so new contributions should be made with that in mind.  
 
-Current development for Chalktalk content will focus on building sketches that belong to certain domains of knowledge. (e.g. mathematics, architecture, audio engineering, sound design, VR, art, computer graphics, computer science, chemistry, cooking, etc.) Sketches should interact with each other as part of a larger ecosystem.
+Current development for Chalktalk content will focus on building sketches that belong to certain domains of knowledge. (e.g. mathematics, architecture, audio engineering, sound design, computer science, VR, AR, art, chemistry, cooking, etc.) Sketches should interact with each other as part of a larger ecosystem.
 We encourage creativity and are excited to see contributions going beyond the current library.
 
 ## How to Contribute
