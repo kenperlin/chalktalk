@@ -1,6 +1,6 @@
 # Contribute
 
-## What to Contribute:
+## What to Contribute
 
 Contributions to the sketch library and sketchlibs are welcome. 
 Code that can be reused across multiple sketches should be placed in sketchlibs.
@@ -11,7 +11,7 @@ Chalktalk is an educational platform and performance language capable of visuall
 Current development for Chalktalk content will focus on building sketches that belong to certain domains of knowledge. (e.g. mathematics, architecture, audio engineering, sound design, VR, art, computer graphics, computer science, chemistry, cooking, etc.) Sketches should interact with each other as part of a larger ecosystem.
 We encourage creativity and are excited to see contributions going beyond the current library.
 
-## How to Contribute:
+## How to Contribute
 
 Formatting and Style:
 - 3 space indents, terminate statements with semicolons. Best to use braces for if/else/while/etc. for clarity.
