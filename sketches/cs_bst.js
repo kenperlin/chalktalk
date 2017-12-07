@@ -116,145 +116,6 @@ function() {
       tree.resetTemporaryGraphics();
    };
 
-   // TODO, WILL SET NODE CENTERS ONLY WHEN DEPTH CHANGES
-   // UNUSED
-   this._predictTreeLayout = function(node, arr, center = [0, 0], radius = 0.5, xOffset = 5, yOffset = 2, zOffset = 0) {
-      if (node === null) {
-         return;
-      }
-
-      function traverseTree(node, arr, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2, zOffset = 0) {
-         // TODO, GIVE THE NEWLY INSERTED OR REMOVED NODE 
-         // A DEFAULT CENTER FOR THE TREE STRETCHING ANIMATION
-         if (node.center === undefined) {
-            return;
-         }
-         arr.push(center);
-
-         if (node.left !== null) {
-            const newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
-            traverseTree(node.left, arr, newCenter, radius, center, radius, xOffset / 2);
-         }
-         if (node.right !== null) {
-            const newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
-            traverseTree(node.right, arr, newCenter, radius, center, radius, xOffset / 2);
-         }
-      }
-
-      const depth = this.tree.depth;
-
-      if (depth > 4){
-         traverseTree(node, arr, center, radius, undefined, undefined, 20);
-      }
-      else if (depth > 3){
-         traverseTree(node, arr, center, radius, undefined, undefined, 10);
-      }
-      else if (depth > 0) {
-         traverseTree(node, arr, center, radius);
-      }
-   }
-
-   this.drawNode = function(node, center, radius, parentCenter, parentRadius) {
-     const left = center[0] - radius;
-     const right = center[0] + radius;
-     const bottom = center[1] - radius;
-     const top = center[1] + radius;
-
-     node.colorManager.activateColor();
-     // DRAW CONTAINER
-     mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
-
-     node.colorManager.deactivateColor();
-
-     // DRAW ELEMENT
-     textHeight(this.mScale(.4));
-     mText(node.value, center, .5, .5, .5);
-   };
-
-   // TODO : MOVE DRAW FUNCTIONS INTO THE STRUCTURE ITSELF?
-   this._drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
-      if (node === null) {
-         return;
-      }
-
-      function drawParentToChildEdge(center, radius, childCenter) {
-         if (childCenter == undefined) {
-            return;
-         }
-         const childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
-         const childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
-
-         const edgeOfParent = [center[0] + radius / childParentDist * childParentVec[0], center[1] + radius / childParentDist * childParentVec[1]];
-         const edgeOfChild = [childCenter[0] - radius / childParentDist * childParentVec[0], childCenter[1] - radius / childParentDist * childParentVec[1]];
-         mLine(edgeOfParent, edgeOfChild);
-      }
-
-      if (this.tree.mustInitializePositions()) {
-         node.center = center;
-      }
-
-      // TODO : DON'T ADD NEW NODE UNTIL REST OF TREE HAS MOVED TO CORRECT POSITIONS, THIS IS A TEMPORARY FIX
-      if (node.center == undefined) {
-         return;
-      }
-
-      center = node.center;
-
-      this.drawNode(node, center, radius);
-
-      if (node.left !== null) {
-         const newCenter = (this.tree.mustInitializePositions()) ?
-                        [center[0] - xOffset * radius, center[1] - yOffset * radius] :
-                        node.left.center;
-
-         this._drawTree(node.left, newCenter, radius, xOffset / 2);
-         drawParentToChildEdge(center, radius, newCenter);
-      }
-      if (node.right !== null) {
-         const newCenter = (this.tree.mustInitializePositions()) ?
-                        [center[0] + xOffset * radius, center[1] - yOffset * radius] :
-                        node.right.center;
-
-         this._drawTree(node.right, newCenter, radius, xOffset / 2);
-         drawParentToChildEdge(center, radius, newCenter);
-      }
-   };
-
-   this.drawTree = function(node, center, radius, xOffset = 5, yOffset = 2) {
-      this._drawTree(node, center, radius, xOffset, yOffset);
-      this.tree._mustInitializePositions = false;
-   };
-
-   // CHECK IF POINT LIES WITHIN CIRCLE
-   this.inCircle = function(node, clickLocation){
-      const dist = Math.sqrt((clickLocation[0] - node.center[0]) * (clickLocation[0] - node.center[0]) +
-                          (clickLocation[1] - node.center[1]) * (clickLocation[1] - node.center[1]));
-      return dist < 0.5;
-   };
-
-   this._findClickedNode = function(node, clickLocation) {
-      if (!this.inCircle(node, clickLocation)) {
-         if (node.center[0] > clickLocation[0]) {
-            if (node.left !== null){
-               return this.findClickedNode(node.left, clickLocation);
-            }
-            return null;
-         }
-         else {
-            if (node.right !== null) {
-               return this.findClickedNode(node.right, clickLocation);
-            }
-            return null;
-         }
-      }
-      return node;
-   };
-
-   this.findClickedNode = function(node, clickLocation) {
-      return (node === null) ?
-               null : this._findClickedNode(node, clickLocation);
-   };
-
    // STORE CLICK INFORMATION FROM PREVIOUS FRAMES
    this.clickInfoCache = {
       px : null,
@@ -285,7 +146,7 @@ function() {
       const ci = this.clickInfoCache;
       if (abs(p.x - ci.x) < 0.05 &&
           abs(p.y - ci.y) < 0.05) {
-         const node = this.findClickedNode(this.tree.root, [ci.x, ci.y]);
+         const node = this.tree.findClickedNode(this.tree.root, [ci.x, ci.y]);
          if (node !== null) {
             this.tree.saveState();
             this.tree.remove(node.value);
@@ -407,19 +268,6 @@ function() {
       other.delete();
    };
 
-   this.drawEmpty = function(center, radius) {
-      const left = center[0] - radius;
-      const right = center[0] + radius;
-      const bottom = center[1] - radius;
-      const top = center[1] + radius;
-      color("grey");
-      mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
-
-      color("blue");
-      textHeight(this.mScale(.2));
-      mText("nullptr", center, .5, .5, .5);
-   };
-
 
    this.sketchIsAcceptingInput = function() {
       return this.tree.isAcceptingInput;
@@ -445,26 +293,10 @@ function() {
          ]);
       });
       this.afterSketch(function() {
-         let nodeRadius = 0.5;
-         let center = [0, 0];
-         let currNode = this.tree.root;
-
-         let depth = this.tree.depth;
 
          this.tree.doPendingOperation();
 
-         if (depth > 4) {
-            this.drawTree(currNode, center, nodeRadius, 20);
-         }
-         else if (depth > 3) {
-            this.drawTree(currNode, center, nodeRadius, 10);
-         }
-         else if (depth > 0) {
-            this.drawTree(currNode, center, nodeRadius);
-         }
-         else {
-            this.drawEmpty(center, nodeRadius);
-         }
+         this.tree.drawTree();
 
          _g.save();
          color("cyan");

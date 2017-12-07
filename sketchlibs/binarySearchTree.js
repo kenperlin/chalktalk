@@ -34,6 +34,7 @@ function BinarySearchTree(sketchCtx) {
    this.isAcceptingInput = true;
 
    BinarySearchTree.Node = function(value, center) {
+      this.sketchCtx = sketchCtx;
       this.value = value;
       this.left = null;
       this.right = null;
@@ -41,32 +42,27 @@ function BinarySearchTree(sketchCtx) {
       this.colorManager = new ColorManager();
    };
 
-   this._applyAll = function(func, node) {
-      func(node);
-      if (node.left !== null) {
-         this._applyAll(func, node.left);
-      }
-      if (node.right !== null) {
-         this._applyAll(func, node.right);
-      }
-   };
-
-   this.applyAll = function(func, node) {
-      node = (node === undefined) ? this.root : node;
-      if (node == null) {
-         return;
-      }
-      this._applyAll(func, node);
-   };
-
-   this.resetTemporaryGraphics = function() {
-      this.applyAll(function(node) {
-         // RESET COLORS
-         node.colorManager.enableColor(false);
-      });
-   };
-
    BinarySearchTree.Node.prototype = {
+      drawNode : function(center, radius, parentCenter, parentRadius) {
+         const left = center[0] - radius;
+         const right = center[0] + radius;
+         const bottom = center[1] - radius;
+         const top = center[1] + radius;
+
+         if (this.colorManager.colorIsEnabled()) {
+            this.colorManager.activateColor();
+            // DRAW CONTAINER
+            mFillOval([left, bottom], [right, top], 32, PI / 2 - TAU);
+
+            this.colorManager.deactivateColor();
+         }
+         mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
+
+         // DRAW ELEMENT
+         textHeight(this.sketchCtx.mScale(.4));
+         mText(this.value, center, .5, .5, .5);
+      },
+
       get children() {
          const _children = [];
          if (this.left != null) {
@@ -94,8 +90,7 @@ function BinarySearchTree(sketchCtx) {
    };
 }
 
-
-
+   
 BinarySearchTree.prototype = {
    doPendingOperation : function() {
       if (!this.operationMemory.active) {
@@ -318,27 +313,27 @@ BinarySearchTree.prototype = {
          _depth++;
          comp = current.value;
          if (value == comp) {
-            current.colorManager.enableColor(true).setColor("orange");
-            this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("grey");
-            }, current.right);
+            current.colorManager.enableColor(true).setColor("red");
+            // this.applyAll(function(node) {
+            //    node.colorManager.enableColor(true).setColor("grey");
+            // }, current.right);
             break;
          }
          current.colorManager.enableColor(true).setColor("purple");
          parent = current;
          if (value < comp) {
             // HIGHLIGHT UN-TRAVERSED SUB-TREE
-            this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("grey");
-            }, current.right);
+            // this.applyAll(function(node) {
+            //    node.colorManager.enableColor(true).setColor("grey");
+            // }, current.right);
 
             current = current.left;
          }
          else {
             // HIGHLIGHT UN-TRAVERSED SUB-TREE
-            this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("grey");
-            }, current.left);
+            // this.applyAll(function(node) {
+            //    node.colorManager.enableColor(true).setColor("grey");
+            // }, current.left);
 
             current = current.right;
          }
@@ -362,17 +357,15 @@ BinarySearchTree.prototype = {
          if (current.left === null) {
             while (movementPause()) { yield; }
 
-            current.colorManager.setColor("orange");
-
             parent.left = current.right;
          }
          else if (current.right === null) {
             while (movementPause()) { yield; }
 
-            current.colorManager.setColor("orange");
             parent.left = current.left;
          }
          else {
+            current.colorManager.enableColor(true).setColor("orange");
             hasTwoChildren = true;
          }
       }
@@ -380,26 +373,25 @@ BinarySearchTree.prototype = {
          if (current.left === null) {
             while (movementPause()) { yield; }
 
-            current.colorManager.setColor("orange");
             parent.right = current.right;
          }
          else if (current.right === null) {
             while (movementPause()) { yield; }
 
-            current.colorManager.setColor("orange");
             parent.right = current.left;
          }
          else {
+            current.colorManager.enableColor(true).setColor("orange");
             hasTwoChildren = true;
          }
       }
       else if (current.left == null && current.right == null) {
          while (movementPause()) { yield; }
 
-         current.colorManager.setColor("orange");
          this.root = null;
       }
       else {
+         current.colorManager.enableColor(true).setColor("orange");
          hasTwoChildren = true;
       }
 
@@ -433,19 +425,23 @@ BinarySearchTree.prototype = {
 
       while (movementPause()) { yield; }
 
-
-      this.applyAll(function(node) {
-         node.colorManager.enableColor(true).setColor("grey");
-      }, find.left);
+      // UNUSED
+      // WOULD HIGHLIGHT SUB-TREE
+      // this.applyAll(function(node) {
+      //    node.colorManager.enableColor(true).setColor("grey");
+      // }, find.left);
 
       while (find.right !== null) {
          _depth++;
 
          find = find.right;
          find.colorManager.enableColor(true).setColor("cyan");
-         this.applyAll(function(node) {
-            node.colorManager.enableColor(true).setColor("grey");
-         }, find.left);
+
+         // UNUSED
+         // WOULD HIGHLIGHT SUB-TREE
+         // this.applyAll(function(node) {
+         //    node.colorManager.enableColor(true).setColor("grey");
+         // }, find.left);
 
          if (find.right == null) {
             break;
@@ -461,24 +457,22 @@ BinarySearchTree.prototype = {
       this.blocker.block();
 
       // MOVE THE COPY VALUE (VISUALLY)
-      {
-         let c1 = find.center;
-         let c2 = current.center;
-         let valMoveAni = LerpUtil.create(
-            LerpUtil.Type.LINE({
-               start : { x : c1[0], y : c1[1] },
-               end : { x : c2[0], y : c2[1] }
-            }),
-            .6,
-            true
-         );
-         let ret = {};
-         while (!ret.done) {
-            ret = valMoveAni.step();
-            textHeight(this.sketchCtx.mScale(.4));
-            mText(find.value, ret.point, .5, .5, .5);
-            yield;
-         }
+      const c1 = find.center;
+      const c2 = current.center;
+      let valMoveAni = LerpUtil.create(
+         LerpUtil.Type.LINE({
+            start : { x : c1[0], y : c1[1] },
+            end : { x : c2[0], y : c2[1] }
+         }),
+         .6,
+         true
+      );
+      let ret = {};
+      while (!ret.done) {
+         ret = valMoveAni.step();
+         textHeight(this.sketchCtx.mScale(.4));
+         mText(find.value, ret.point, .5, .5, .5);
+         yield;
       }
 
       current.value = find.value;
@@ -543,17 +537,17 @@ BinarySearchTree.prototype = {
          }
          else if (value < comp) {
             // HIGHLIGHT UN-TRAVERSED SUB-TREE
-            this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("grey");
-            }, current.right);
+            // this.applyAll(function(node) {
+            //    node.colorManager.enableColor(true).setColor("grey");
+            // }, current.right);
 
             current = current.left;
          }
          else {
             // HIGHLIGHT UN-TRAVERSED SUB-TREE
-            this.applyAll(function(node) {
-               node.colorManager.enableColor(true).setColor("grey");
-            }, current.left);
+            // this.applyAll(function(node) {
+            //    node.colorManager.enableColor(true).setColor("grey");
+            // }, current.left);
 
             current = current.right;
          }
@@ -601,7 +595,7 @@ BinarySearchTree.prototype = {
       // WITHOUT MUTATING THE TREE,
       // RETURN AN ARRAY OF THESE NEW POSITIONS
       // (SAME ORDER AS IN getOriginalPositions())
-      let that = this.sketchCtx;
+      const that = this;
       function getNewPositions(root, arr) {
          that._predictTreeLayout(root, arr);
       }
@@ -609,7 +603,6 @@ BinarySearchTree.prototype = {
       const starts = [];
       const nodes = [];
       const ends = [];
-      
       // GET CURRENT NODE POSITIONS AND POINTERS TO NODES
       getOriginalPositions(root, starts, nodes);
       // CALCULATE NEW NODE POSITIONS FOR STRETCHED TREE
@@ -779,4 +772,174 @@ BinarySearchTree.prototype = {
       }
       this.root.print();
    },
+
+   _predictTreeLayout : function(node, arr, center = [0, 0], radius = 0.5, xOffset = 5, yOffset = 2, zOffset = 0) {
+      if (node === null) {
+         return;
+      }
+
+      function traverseTree(node, arr, center, radius, parentCenter, parentRadius, xOffset = 5, yOffset = 2, zOffset = 0) {
+         // TODO, GIVE THE NEWLY INSERTED OR REMOVED NODE 
+         // A DEFAULT CENTER FOR THE TREE STRETCHING ANIMATION
+         if (node.center === undefined) {
+            return;
+         }
+         arr.push(center);
+
+         if (node.left !== null) {
+            const newCenter = [center[0] - xOffset * radius,center[1] - yOffset * radius];
+            traverseTree(node.left, arr, newCenter, radius, center, radius, xOffset / 2);
+         }
+         if (node.right !== null) {
+            const newCenter = [center[0] + xOffset * radius,center[1] - yOffset * radius];
+            traverseTree(node.right, arr, newCenter, radius, center, radius, xOffset / 2);
+         }
+      }
+
+      const depth = this.depth;
+
+      if (depth > 4){
+         traverseTree(node, arr, center, radius, undefined, undefined, 20);
+      }
+      else if (depth > 3){
+         traverseTree(node, arr, center, radius, undefined, undefined, 10);
+      }
+      else if (depth > 0) {
+         traverseTree(node, arr, center, radius);
+      }
+   },
+
+   // CHECK IF POINT LIES WITHIN CIRCLE
+   inCircle : function(node, clickLocation){
+      const dist = Math.sqrt((clickLocation[0] - node.center[0]) * (clickLocation[0] - node.center[0]) +
+                          (clickLocation[1] - node.center[1]) * (clickLocation[1] - node.center[1]));
+      return dist < 0.5;
+   },
+
+   _findClickedNode : function(node, clickLocation) {
+      if (!this.inCircle(node, clickLocation)) {
+         if (node.center[0] > clickLocation[0]) {
+            if (node.left !== null){
+               return this.findClickedNode(node.left, clickLocation);
+            }
+            return null;
+         }
+         else {
+            if (node.right !== null) {
+               return this.findClickedNode(node.right, clickLocation);
+            }
+            return null;
+         }
+      }
+      return node;
+   },
+
+   findClickedNode : function(node, clickLocation) {
+      return (node === null) ?
+               null : this._findClickedNode(node, clickLocation);
+   },
+
+   drawEmpty : function(center, radius = 0.5) {
+      const left = center[0] - radius;
+      const right = center[0] + radius;
+      const bottom = center[1] - radius;
+      const top = center[1] + radius;
+      color("grey");
+      mDrawOval([left, bottom], [right, top], 32, PI / 2 - TAU);
+
+      color("blue");
+      textHeight(this.sketchCtx.mScale(.2));
+      mText("nullptr", center, .5, .5, .5);
+   },
+
+   _drawTree : function(node, center, radius, xOffset = 5, yOffset = 2) {
+      if (node === null) {
+         return;
+      }
+
+      function drawParentToChildEdge(center, radius, childCenter) {
+         if (childCenter == undefined) {
+            return;
+         }
+         const childParentVec = [childCenter[0] - center[0], childCenter[1] - center[1]];
+         const childParentDist = sqrt(pow(childParentVec[0], 2) + pow(childParentVec[1], 2));
+
+         const edgeOfParent = [center[0] + radius / childParentDist * childParentVec[0], center[1] + radius / childParentDist * childParentVec[1]];
+         const edgeOfChild = [childCenter[0] - radius / childParentDist * childParentVec[0], childCenter[1] - radius / childParentDist * childParentVec[1]];
+         mLine(edgeOfParent, edgeOfChild);
+      }
+
+      if (this.mustInitializePositions()) {
+         node.center = center;
+      }
+
+      // TODO : DON'T ADD NEW NODE UNTIL REST OF TREE HAS MOVED TO CORRECT POSITIONS, THIS IS A TEMPORARY FIX
+      if (node.center == undefined) {
+         return;
+      }
+
+      center = node.center;
+
+      node.drawNode(center, radius);
+
+      if (node.left !== null) {
+         const newCenter = (this.mustInitializePositions()) ?
+                        [center[0] - xOffset * radius, center[1] - yOffset * radius] :
+                        node.left.center;
+
+         this._drawTree(node.left, [center[0] - xOffset * radius, center[1] - yOffset * radius], radius, xOffset / 2);
+         drawParentToChildEdge(center, radius, newCenter);
+      }
+      if (node.right !== null) {
+         const newCenter = (this.mustInitializePositions()) ?
+                        [center[0] + xOffset * radius, center[1] - yOffset * radius] :
+                        node.right.center;
+
+         this._drawTree(node.right, [center[0] + xOffset * radius, center[1] - yOffset * radius], radius, xOffset / 2);
+         drawParentToChildEdge(center, radius, newCenter);
+      }
+   },
+
+   drawTree : function(center = [0, 0], radius = 0.5, xOffset = 5, yOffset = 2) {
+      const depth = this.depth;
+      if (depth > 4) {
+         this._drawTree(this.root, center, radius, 20);
+      }
+      else if (depth > 3) {
+         this._drawTree(this.root, center, radius, 10);
+      }
+      else if (depth > 0) {
+         this._drawTree(this.root, center, radius);
+      }
+      else {
+         this._drawEmpty(center, radius);
+      }
+
+      this._mustInitializePositions = false;
+   },
+
+   _applyAll : function(func, node) {
+      func(node);
+      if (node.left !== null) {
+         this._applyAll(func, node.left);
+      }
+      if (node.right !== null) {
+         this._applyAll(func, node.right);
+      }
+   },
+
+   applyAll : function(func, node) {
+      node = (node === undefined) ? this.root : node;
+      if (node == null) {
+         return;
+      }
+      this._applyAll(func, node);
+   },
+
+   resetTemporaryGraphics : function() {
+      this.applyAll(function(node) {
+         // RESET COLORS
+         node.colorManager.enableColor(false);
+      });
+   }
 };
