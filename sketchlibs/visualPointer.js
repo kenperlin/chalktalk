@@ -255,7 +255,7 @@ let VisualPointer = (function() {
             this.drawMemory.active = true;
          }
       },
-      assign : function(pointee, duration) {
+      pointTo : function(pointee, duration) {
          const args = {};
          args.self = this;
          args.pointee = pointee;
@@ -267,7 +267,7 @@ let VisualPointer = (function() {
             this.drawMemory.active = true;
          }
       },
-      assignNoAnimation : function(pointee) {
+      pointToNoAnimation : function(pointee) {
          if (pointee == null) {
             const self = this;
             this.pointee = {
@@ -281,11 +281,11 @@ let VisualPointer = (function() {
             this._isNullptr = false;
          }
       },
-      // assign : function(pointee) {
+      // pointTo : function(pointee) {
       //    const self = this;
       //    if (!this.operationMemory.active) {
       //       this.operationMemory.operation = (function() {
-      //          const op = self._assign(pointee);
+      //          const op = self._pointTo(pointee);
 
       //          return function(args) { return op.next(args); };
 
@@ -293,7 +293,7 @@ let VisualPointer = (function() {
       //       this.operationMemory.active = true;
       //    }
       // },
-      // _assign : function*(pointee) {
+      // _pointTo : function*(pointee) {
       //    this.pointee = pointee;
       // },
       draw : function() {
@@ -327,7 +327,7 @@ let VisualPointer = (function() {
 
    }
    VisualEdge.prototype = {
-      assign : function() {
+      pointTo : function() {
 
       },
       draw : function() {
@@ -335,10 +335,48 @@ let VisualPointer = (function() {
       }
    }
    _vp.createEdge = function(a, b, isDirected = true) {
-      return new VisualEdge(a, b, isDirected = true);
+      return new VisualEdge(a, b, isDirected);
    };
 
    // TODO
+
+   function Pointee(sketchCtx, pIn, pOut) {
+      this._ptrInPos = pIn;
+      this._ptrOutPos = pOut;
+   }
+
+   Pointee.prototype = {
+      ptrOutPos : [0, 0, 0],
+      ptrInPos : [1, 1, 0],
+      getPtrInPos : function() {
+         return this._ptrInPos;
+      },
+      setPtrInPos : function(p) {
+         this._ptrInPos = p;
+      },
+      getPtrOutPos : function() {
+         return this._ptrOutPos;
+      },
+      setPtrOutPos : function(p) {
+         this._ptrOutPos = p;
+      },
+      draw : function() {
+         m.save();
+            m.translate(this._ptrOutPos);
+            m.scale(0.25);
+            _g.save();
+            color("rgba(0, 255, 0, .05)");
+            mFillOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
+            _g.restore();
+         m.restore();
+         this.child.draw();
+      }
+   };
+
+   _vp.Pointee = Pointee;
+   _vp.createPointee = function(sketchCtx, pIn, pOut) {
+      return new Pointee(sketchCtx, pIn, pOut);
+   };
 
    return _vp;
 }());

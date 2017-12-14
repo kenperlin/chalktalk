@@ -1,47 +1,25 @@
 function() {
    this.label = "ptrtest";
-   function Pointee(sc, pIn, pOut) {
-      this._ptrInPos = pIn;
-      this._ptrOutPos = pOut;
-      this.getPtrInPos = function() {
-         return this._ptrInPos;
-      };
-      this.setPtrInPos = function(p) {
-         this._ptrInPos = p;
-      }
-      this.getPtrOutPos = function() {
-         return this._ptrOutPos;
-      }
-      this.setPtrOutPos = function(p) {
-         this._ptrOutPos = p;
-      }
-      this.child = VisualPointer.createPtr(sc, this, null);
+
+   function TestPointee(sketchCtx, pIn, pOut) {
+      VisualPointer.Pointee.call(this, sketchCtx, pIn, pOut);
+      this.child = VisualPointer.createPtr(sketchCtx, this, null);
    }
-   Pointee.prototype = {
-      ptrOutPos : [0, 0, 0],
-      ptrInPos : [1, 1, 0],
-      draw : function() {
-         m.save();
-            m.translate(this._ptrOutPos);
-            m.scale(0.25);
-            _g.save();
-            color("rgba(0, 255, 0, .05)");
-            mFillOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
-            _g.restore();
-         m.restore();
-         this.child.draw();
-      }
-   }
+   TestPointee.prototype = Object.create(VisualPointer.Pointee.prototype);
 
    this.setup = function() {
       this.pointees = [
-         new Pointee(this, [-1, 1, 0], [-1, 1, 0]),
-         new Pointee(this, [1, -1, 0], [1, -1, 0]),
-         new Pointee(this, [1, 1, 0], [1, 1, 0])
+         new TestPointee(this, [-1, 1, 0], [-1, 1, 0]),
+         new TestPointee(this, [1, -1, 0], [1, -1, 0]),
+         new TestPointee(this, [1, 1, 0], [1, 1, 0])
       ];
 
       this.testState = 0;
    };
+
+   function Container() {
+
+   }
 
    const numCases = 6;
 
@@ -60,8 +38,11 @@ function() {
       this.afterSketch(function() {
          const i = this.pointees[1].getPtrInPos();
          const n = [sin(time), i[1] , i[2]];
+
          this.pointees[1].setPtrInPos(n);
          this.pointees[1].setPtrOutPos(n);
+
+
 
          switch (this.testState) {
          case 0:
@@ -116,24 +97,27 @@ function() {
    this.onPress = function(p) {
       switch (this.testState) {
       case 0:
-         this.pointees[0].child.assign(this.pointees[1]);
+         for (let i = 0; i < this.pointees.length; i++) {
+            this.pointees[i].child.resetTemporaryGraphics();
+         }
+         this.pointees[0].child.pointTo(this.pointees[1]);
          break;
       case 1:
-         this.pointees[1].child.assign(this.pointees[2]);
+         this.pointees[1].child.pointTo(this.pointees[2]);
          break;
       case 2:
-         this.pointees[2].child.assign(this.pointees[0]);
-         this.pointees[0].child.assign(this.pointees[2]);
+         this.pointees[2].child.pointTo(this.pointees[0]);
+         this.pointees[0].child.pointTo(this.pointees[2]);
          break;
       case 3:
-         this.pointees[0].child.assign(this.pointees[1]);
+         this.pointees[0].child.pointTo(this.pointees[1]);
          break;
       case 4:
          this.caseTwo = c2();       
          break;
       case 5:
          for (let i = 0; i < this.pointees.length; i++) {
-            this.pointees[i].child.assignNoAnimation(this.pointees[i]);
+            this.pointees[i].child.pointToNoAnimation(this.pointees[i]);
          } 
       }
       this.testState = (this.testState + 1) % numCases;
