@@ -15,11 +15,15 @@ function() {
       ];
 
       this.testState = 0;
+
+
+      this.circle1 = Container.Circle({x : 2, y : 2, z : 0, radius : 0.25})();
+      this.circle2 = Container.Circle({x : -2, y : -2, z : 0, radius : 0.25})();
+      this.circle3 = Container.Circle({x : -1, y : 1, z : 0, radius : 1})();
+
+      this.circles = [this.circle1, this.circle2, this.circle3];
    };
 
-   function Container() {
-
-   }
 
    const numCases = 6;
 
@@ -42,7 +46,17 @@ function() {
          this.pointees[1].setPtrInPos(n);
          this.pointees[1].setPtrOutPos(n);
 
-
+         this.circles[0].point[0] = 2 * sin(2 + time);
+         this.circles[0].point[1] = 2 * sin(2 + time + 0.067);
+         this.circles[1].point[0] = 2 * -sin(time);
+         this.circles[1].point[1] = 2 * -cos(time - 0.067);
+         this.circles[2].point[1] = 2 * cos(1 + time - 0.8);
+         for (let i = 0; i < this.circles.length; i++) {
+            this.circles[i].draw();
+         }
+         mCurve(this.circles[0].getLineSegment(this.circles[1]));
+         mCurve(this.circles[1].getLineSegment(this.circles[2]));
+         mCurve(this.circles[2].getLineSegment(this.circles[0]));
 
          switch (this.testState) {
          case 0:
