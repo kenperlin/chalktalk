@@ -26,6 +26,7 @@ function() {
 
    this.defineInput(AT.Mesh);
    this.defineAlternateInputType(AT.Matrix);
+   this.defineAlternateInputType(AT.Pair(AT.Matrix, AT.Mesh));
 
    var tmp = newVec3();
    this.render = function() {
@@ -56,6 +57,17 @@ function() {
 
          if (this.inputs.hasValue(0)) {
             let inValue = this.inputs.value(0);
+
+            // If getting a pair, look inside the pair to see which one is available
+            // If mesh is available, draw that. If not, draw the matrix axes.
+            if (inValue instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
+               if (inValue.second.mesh.length > 0) {
+                  inValue = inValue.second;
+               }
+               else {
+                  inValue = inValue.first;
+               }
+            }
 
             if (inValue instanceof AT.Matrix) {
                // INPUT VALUE IS A MATRIX
