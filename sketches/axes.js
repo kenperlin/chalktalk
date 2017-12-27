@@ -24,6 +24,9 @@ function() {
       this.point.copy(point);
    }
 
+   this.defineInput(AT.Mesh);
+   this.defineAlternateInputType(AT.Matrix);
+
    var tmp = newVec3();
    this.render = function() {
       mLine([-1,0], [1,0]);
@@ -51,47 +54,51 @@ function() {
 
          // HANDLE THE CASES WHERE THERE IS INPUT DATA.
 
-         if (isDef(this.inValue[0])) {
-            let inValue = this.inValue[0];
+         if (this.inputs.hasValue(0)) {
+            let inValue = this.inputs.value(0);
 
-            // INPUT VALUE IS A MATRIX
+            if (inValue instanceof AT.Matrix) {
+               // INPUT VALUE IS A MATRIX
 
-            if (inValue.length == 16 && isNumeric(inValue[0])) {
-	       let M = inValue;
-	       m.save();
-	       m.translate(M[12], M[13], M[14]);
-	       let lw = lineWidth();
-	       lineWidth(4);
-	       color('red'  ); mArrow([0,0,0], [M[0],M[1],M[2]]);
-	       color('green'); mArrow([0,0,0], [M[4],M[5],M[6]]);
-	       color('blue' ); mArrow([0,0,0], [M[8],M[9],M[10]]);
-	       lineWidth(lw);
-	       m.restore();
+               if (inValue.numRows() == 4 && inValue.numColumns() == 4) {
+                  let M = inValue.toFlatArray();
+                  m.save();
+                  m.translate(M[12], M[13], M[14]);
+                  let lw = lineWidth();
+                  lineWidth(4);
+                  color('red'  ); mArrow([0,0,0], [M[0],M[1],M[2]]);
+                  color('green'); mArrow([0,0,0], [M[4],M[5],M[6]]);
+                  color('blue' ); mArrow([0,0,0], [M[8],M[9],M[10]]);
+                  lineWidth(lw);
+                  m.restore();
+               }
+
+               // INPUT VALUE IS A VECTOR
+
+               else if (inValue.numColumns() == 1 || inValue.numRows() == 1) {
+
+                  V = inValue.toFlatArray(); x = V[0]; y = V[1]; z = def(V[2]);
+                  lineWidth(0.5);
+                  mLine([x,0,0],[x,y,0]);
+                  mLine([0,y,0],[x,y,0]);
+                  mLine([x,0,0],[x,0,z]);
+                  mLine([0,0,z],[x,0,z]);
+                  mLine([0,y,0],[0,y,z]);
+                  mLine([0,0,z],[0,y,z]);
+                  mLine([0,y,z],V);
+                  mLine([x,0,z],V);
+                  mLine([x,y,0],V);
+                  lineWidth(4);
+                  mLine([x-.01,y,z], [x+.01,y,z]);
+                  mLine([x,y-.01,z], [x,y+.01,z]);
+                  mLine([x,y,z-.01], [x,y,z+.01]);
+                  mFillDisk(V, 0.05);
+               }
             }
 
-            // INPUT VALUE IS A VECTOR
-
-            else if (arrayDepth(inValue) == 1) {
-
-               V = inValue; x = V[0]; y = V[1]; z = def(V[2]);
-               lineWidth(0.5);
-               mLine([x,0,0],[x,y,0]);
-               mLine([0,y,0],[x,y,0]);
-               mLine([x,0,0],[x,0,z]);
-               mLine([0,0,z],[x,0,z]);
-               mLine([0,y,0],[0,y,z]);
-               mLine([0,0,z],[0,y,z]);
-               mLine([0,y,z], V);
-               mLine([x,0,z], V);
-               mLine([x,y,0], V);
-               lineWidth(4);
-               mLine([x-.01,y,z], [x+.01,y,z]);
-               mLine([x,y-.01,z], [x,y+.01,z]);
-               mLine([x,y,z-.01], [x,y,z+.01]);
-               mFillDisk(V, 0.05);
-            }
-
-            else if (arrayDepth(inValue) == 2) {
+            else {
+               // Input value is a mesh
+               inValue = inValue.mesh;
 
                if (inValue.color)
                   color(inValue.color);
