@@ -1635,6 +1635,83 @@ function AtypicalModuleGenerator() {
       }
    });
 
+   AT.defineGenericType({
+      typename: "AnyOf",
+      init: function(values) {
+         let typedValues = [];
+         if (values instanceof Array) {
+            // Assume each element of the array exactly corresponds with each type parameter
+            for (let i = 0; i < values.length && i < this.typeParameters.length; i++) {
+               if (values[i] !== null && values[i] !== undefined) {
+                  typedValues.push(AT.wrapOrConvertValue(this.typeParameters[i], values[i]));
+               }
+            }
+         }
+         else {
+            // Assume it's an unstructured set of arguments that are ALREADY wrapped
+            let checkType = function(value) {
+               // Check for exact type matches
+               for (let i = 0; i < this.typeParameters.length; i++) {
+                  if (value instanceof this.typeParameters[i]) {
+                     return value;
+                  }
+               }
+               // If it doesn't match any of our types, give up!
+               throw new AT.ConstructionError("Attempted to construct "
+                  + AT.prettyTypename(this.type)
+                  + " with incompatible or unwrapped value "
+                  + value);
+            }.bind(this);
+
+            typedValues = Array.from(arguments).map(checkType);
+         }
+
+         let valuesObject = {};
+         for (let i = 0; i < typedValues.length; i++) {
+            let value = typedValues[i];
+            valuesObject[value.type.name] = value;
+         }
+
+         this._set("values", valuesObject);
+         for (let i = 0; i < this.typeParameters.length; i++) {
+            let type = this.typeParameters[i];
+            if (type.name in valuesObject) {
+               this._set(type.name, valuesObject[type.name]);
+            }
+            else {
+               this._set(type.name, null);
+            }
+         }
+      },
+      canChangeTypeParameters: function(newTypes) {
+         // If there's any overlap between the types at all, allow the conversion
+         for (let i = 0; i < newTypes.length; i++) {
+            if (this.typeParameters.indexOf(newTypes[i]) >= 0) {
+               return true;
+            }
+         }
+      },
+      changeTypeParameters: function(newTypes) {
+         let isOfAnyNewType = function(value) {
+            for (let i = 0; i < newTypes.length; i++) {
+               if (value instanceof newTypes[i]) {
+                  return true;
+               }
+            }
+            return false;
+         }
+         let newValues = Object.values(this.values).filter(isOfAnyNewType);
+         return new (this.genericType(...newTypes))(...newValues);
+      },
+      convertToTypeParameter: function(typeIndex) {
+         let value = this.values[this.typeParameters[typeIndex].name];
+         return value !== null ? value : new (this.typeParameters[typeIndex]);
+      },
+      convertFromTypeParameter: function(typeIndex, value) {
+         return new this.type(value);
+      },
+   });
+
    return AT;
 };
 
