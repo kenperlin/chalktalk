@@ -1669,7 +1669,12 @@ function AtypicalModuleGenerator() {
          let valuesObject = {};
          for (let i = 0; i < typedValues.length; i++) {
             let value = typedValues[i];
-            valuesObject[value.type.name] = value;
+            if (value.isPrimitive()) {
+               valuesObject[value.type.name] = value.toPrimitive();
+            }
+            else {
+               valuesObject[value.type.name] = value;
+            }
          }
 
          this._set("values", valuesObject);
@@ -1692,20 +1697,20 @@ function AtypicalModuleGenerator() {
          }
       },
       changeTypeParameters: function(newTypes) {
-         let isOfAnyNewType = function(value) {
-            for (let i = 0; i < newTypes.length; i++) {
-               if (value instanceof newTypes[i]) {
-                  return true;
-               }
+         let newValues = []
+         for (let typename in this.values) {
+            let type = AT.typeNamed(typename);
+            if (newTypes.indexOf(type) !== -1) {
+               newValues.push(AT.wrapOrConvertValue(type, this.values[typename]));
             }
-            return false;
          }
-         let newValues = Object.values(this.values).filter(isOfAnyNewType);
          return new (this.genericType(...newTypes))(...newValues);
       },
       convertToTypeParameter: function(typeIndex) {
          let value = this.values[this.typeParameters[typeIndex].name];
-         return value !== null ? value : new (this.typeParameters[typeIndex]);
+         return value !== null
+            ? AT.wrapOrConvertValue(this.typeParameters[typeIndex], value)
+            : new (this.typeParameters[typeIndex])();
       },
       convertFromTypeParameter: function(typeIndex, value) {
          return new this.type(value);

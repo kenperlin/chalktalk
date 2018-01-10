@@ -1376,12 +1376,12 @@ window.AtypicalTests = [
       let AnyOfFloatIntOrString = AT.AnyOf(AT.Float, AT.Int, AT.String);
 
       let anyFloatValue = new AnyOfFloat(new AT.Float(4.2));
-      T.assert(anyFloatValue.Float.value === 4.2);
-      T.assert(anyFloatValue.values.Float.value === 4.2);
+      T.assert(anyFloatValue.Float === 4.2);
+      T.assert(anyFloatValue.values.Float === 4.2);
       anyFloatValue = new AnyOfFloat();
       T.assert(anyFloatValue.Float === null);
       anyFloatValue = new AnyOfFloat([4.2]);
-      T.assert(anyFloatValue.Float.value === 4.2);
+      T.assert(anyFloatValue.Float === 4.2);
 
       T.assertThrows(AT.ConstructionError, function() {
          let brokenFloat = new AnyOfFloatOrInt(4.2);
@@ -1393,47 +1393,47 @@ window.AtypicalTests = [
       // Test the various ways you can construct them
 
       let floatOrIntValue = new AnyOfFloatOrInt(new AT.Float(4.2));
-      T.assert(floatOrIntValue.Float.value === 4.2);
+      T.assert(floatOrIntValue.Float === 4.2);
       T.assert(floatOrIntValue.Int === null);
       floatOrIntValue = new AnyOfFloatOrInt([4.2]);
-      T.assert(floatOrIntValue.Float.value === 4.2);
+      T.assert(floatOrIntValue.Float === 4.2);
       T.assert(floatOrIntValue.Int === null);
       floatOrIntValue = new AnyOfFloatOrInt(new AT.Int(4.2));
-      T.assert(floatOrIntValue.Int.value === 4);
+      T.assert(floatOrIntValue.Int === 4);
       T.assert(floatOrIntValue.Float === null);
 
       floatOrIntValue = new AnyOfFloatOrInt(new AT.Int(7.2), new AT.Float(4.2));
-      T.assert(floatOrIntValue.Float.value === 4.2);
-      T.assert(floatOrIntValue.Int.value === 7);
+      T.assert(floatOrIntValue.Float === 4.2);
+      T.assert(floatOrIntValue.Int === 7);
       floatOrIntValue = new AnyOfFloatOrInt(new AT.Float(4.2), new AT.Int(7.2));
-      T.assert(floatOrIntValue.Float.value === 4.2);
-      T.assert(floatOrIntValue.Int.value === 7);
+      T.assert(floatOrIntValue.Float === 4.2);
+      T.assert(floatOrIntValue.Int === 7);
       floatOrIntValue = new AnyOfFloatOrInt([4.2, 7.2]);
-      T.assert(floatOrIntValue.Float.value === 4.2);
-      T.assert(floatOrIntValue.Int.value === 7);
+      T.assert(floatOrIntValue.Float === 4.2);
+      T.assert(floatOrIntValue.Int === 7);
 
       let tripleValue = new AnyOfFloatIntOrString([4.2]);
-      T.assert(tripleValue.Float.value === 4.2);
+      T.assert(tripleValue.Float === 4.2);
       T.assert(tripleValue.Int === null);
       T.assert(tripleValue.String === null);
 
       tripleValue = new AnyOfFloatIntOrString([null, 4.2]);
       T.assert(tripleValue.Float === null);
-      T.assert(tripleValue.Int.value === 4);
+      T.assert(tripleValue.Int === 4);
       T.assert(tripleValue.String === null);
 
       tripleValue = new AnyOfFloatIntOrString([null, null, 4.2]);
       T.assert(tripleValue.Float === null);
       T.assert(tripleValue.Int === null);
-      T.assert(tripleValue.String.value === "4.2");
+      T.assert(tripleValue.String === "4.2");
 
       tripleValue = new AnyOfFloatIntOrString(
          new AT.String("hi"),
          new AT.Float(4.2),
          new AT.Int(7.2));
-      T.assert(tripleValue.Float.value === 4.2);
-      T.assert(tripleValue.Int.value === 7);
-      T.assert(tripleValue.String.value === "hi");
+      T.assert(tripleValue.Float === 4.2);
+      T.assert(tripleValue.Int === 7);
+      T.assert(tripleValue.String === "hi");
 
       // Test conversions
       
@@ -1443,19 +1443,19 @@ window.AtypicalTests = [
       T.assert(!AT.canConvert(AT.String, AnyOfFloatOrInt));
 
       let convertedValue = (new AT.Float(3.14)).convert(AnyOfFloatIntOrString);
-      T.assert(convertedValue.Float.value === 3.14);
+      T.assert(convertedValue.Float === 3.14);
       T.assert(convertedValue.Int === null);
       T.assert(convertedValue.String === null);
 
       convertedValue = (new AT.Int(8)).convert(AnyOfFloatIntOrString);
       T.assert(convertedValue.Float === null);
-      T.assert(convertedValue.Int.value === 8);
+      T.assert(convertedValue.Int === 8);
       T.assert(convertedValue.String === null);
 
       convertedValue = (new AT.String("hi")).convert(AnyOfFloatIntOrString);
       T.assert(convertedValue.Float === null);
       T.assert(convertedValue.Int === null);
-      T.assert(convertedValue.String.value === "hi");
+      T.assert(convertedValue.String === "hi");
 
       T.assert(AT.canConvert(AnyOfFloatIntOrString, AT.Float));
       T.assert(AT.canConvert(AnyOfFloatIntOrString, AT.Int));
@@ -1471,18 +1471,19 @@ window.AtypicalTests = [
 
       let AnyOfIntOrFloat = AT.AnyOf(AT.Int, AT.Float);
       let intOrFloatValue = floatOrIntValue.convert(AnyOfIntOrFloat);
-      T.assert(intOrFloatValue.Float.value === 4.2);
-      T.assert(intOrFloatValue.Int.value === 7);
+      T.assert(intOrFloatValue.Float === 4.2);
+      T.assert(intOrFloatValue.Int === 7);
 
       convertedValue = intOrFloatValue.convert(AnyOfFloatIntOrString);
-      T.assert(convertedValue.Float.value === 4.2);
-      T.assert(convertedValue.Int.value === 7);
+      T.assert(convertedValue.Float === 4.2);
+      T.assert(convertedValue.Int === 7);
       T.assert(convertedValue.String === null);
 
       let AnyOfIntOrString = AT.AnyOf(AT.Int, AT.String);
       convertedValue = intOrFloatValue.convert(AnyOfIntOrString);
-      T.assert(convertedValue.Int.value === 7);
+      T.assert(convertedValue.Int === 7);
       T.assert(convertedValue.String === null);
+
    },
 
    //--------------------------------------------------------------------------------
