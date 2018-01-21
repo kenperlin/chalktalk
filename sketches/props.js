@@ -135,13 +135,13 @@ function() {
 	 else {
 	    nItems = 0;
 	    propName = [];
-	    for (let name in props) {
-	       propName[nItems++] = name;
-	       if (typeof props[name] == 'object' && x0[name] == 1)
-	          for (let subname in props[name])
-		     propName[nItems++] = name + R_ARROW + subname;
-            }
-
+	    for (let name in props)
+	       if (props[name] !== undefined) {
+	          propName[nItems++] = name;
+	          if (typeof props[name] == 'object' && x0[name] == 1)
+	             for (let subname in props[name])
+		        propName[nItems++] = name + R_ARROW + subname;
+               }
             lineWidth(.75);
             let menuStr = '';
             let ry = dy * 0.7, name = '', subname = '';
