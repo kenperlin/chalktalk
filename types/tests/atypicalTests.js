@@ -1440,7 +1440,12 @@ window.AtypicalTests = [
       T.assert(AT.canConvert(AT.Float, AnyOfFloatIntOrString));
       T.assert(AT.canConvert(AT.Int, AnyOfFloatIntOrString));
       T.assert(AT.canConvert(AT.String, AnyOfFloatIntOrString));
-      T.assert(!AT.canConvert(AT.String, AnyOfFloatOrInt));
+
+      // If a more indirect conversion exists, it takes the first compatible type
+      T.assert(AT.canConvert(AT.String, AnyOfFloatOrInt));
+      let stringToFloatOrInt = (new AT.String("5.32")).convert(AnyOfFloatOrInt);
+      T.assert(stringToFloatOrInt.Float === 5.32);
+      T.assert(stringToFloatOrInt.Int === null);
 
       let convertedValue = (new AT.Float(3.14)).convert(AnyOfFloatIntOrString);
       T.assert(convertedValue.Float === 3.14);
@@ -1484,6 +1489,13 @@ window.AtypicalTests = [
       T.assert(convertedValue.Int === 7);
       T.assert(convertedValue.String === null);
 
+      T.assert(AT.canConvert(AT.Int, AnyOfFloat));
+      intValue = new AT.Int(6);
+      T.assert(intValue.convert(AnyOfFloat).Float === 6.0);
+
+      T.assert(AT.canConvert(AT.String, AnyOfFloat));
+      stringValue = new AT.String("5.32");
+      T.assert(stringValue.convert(AnyOfFloat).Float == 5.32);
    },
 
    //--------------------------------------------------------------------------------

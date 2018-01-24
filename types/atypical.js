@@ -211,11 +211,10 @@ function AtypicalModuleGenerator() {
       if (_isGenericType(sourceType) && _isGenericType(destinationType)) {
 
          // Do some special processing for conversions between 2 types with the same generic type
-         if (sourceType.prototype.genericType === destinationType.prototype.genericType) {
-
-            // Can't convert if no conversion function exists.
-            if (!sourceType.prototype.changeTypeParameters) { return undefined; }
-
+         // and a generic conversion function
+         if (sourceType.prototype.genericType === destinationType.prototype.genericType
+            && sourceType.prototype.changeTypeParameters !== undefined)
+         {
             // Can't convert if the type parameters are not convertible
             if (!sourceType.prototype.canChangeTypeParameters(
                destinationType.prototype.typeParameters))
@@ -227,9 +226,24 @@ function AtypicalModuleGenerator() {
                return sourceValue.changeTypeParameters(destinationType.prototype.typeParameters);
             }
          }
-         else {
-            // TODO: add conversions between different generic types
-            return undefined;
+      }
+      if (_isGenericType(sourceType)) {
+         // Check for arbitrary rules of conversion
+         if (sourceType.prototype.canConvertToType !== undefined
+            && sourceType.prototype.canConvertToType(destinationType))
+         {
+            return function(sourceValue) {
+               return sourceValue.convertToType(destinationType);
+            }
+         }
+      }
+      if (_isGenericType(destinationType)) {
+         if (destinationType.prototype.canConvertFromType !== undefined
+            && destinationType.prototype.canConvertFromType(sourceType))
+         {
+            return function(sourceValue) {
+               return destinationType.prototype.convertFromType(sourceValue);
+            }
          }
       }
       return undefined;
@@ -318,7 +332,7 @@ function AtypicalModuleGenerator() {
       let directConversion = _directConversionFunction(sourceType, destinationType);
       if (directConversion) { return directConversion; }
 
-      // Last option: broad intermediary conversions
+      // Second-last option: broad intermediary conversions
       let broadIntermediaryConversion = _broadIntermediaryConversionFunction(
          sourceType, destinationType);
       if (broadIntermediaryConversion) { return broadIntermediaryConversion; }
@@ -580,6 +594,8 @@ function AtypicalModuleGenerator() {
    //                      PROTOTYPE of this generic type (e.g. anything defined in this
    //                      implementation object, as well as properties like this.type and
    //                      this.typeParameters, but not anything defined in the init function).
+   //                 
+   //                 TODO: DOCUMENT convertToType, convertFromType, and the corresponding canConverts
    //
    //                 The following proeprties MUST NOT be defined on this object:
    //
@@ -666,7 +682,7 @@ function AtypicalModuleGenerator() {
          if(!_isFunctionOfNArguments(implementation.convertFromTypeParameter, 2)) {
             console.error("Error defining generic types: convertFromTypeParameter "
                + "must be a function of two arguments taking in the index and the value "
-                  + "to be converted.");
+               + "to be converted.");
             return undefined;
          }
 
@@ -677,7 +693,7 @@ function AtypicalModuleGenerator() {
                return index < this.typeParameters.length;
             }
          }
-         else if (!_isFunctionOfNArguments(implementation.canConvertFromTypeParameter,1)) {
+         else if (!_isFunctionOfNArguments(implementation.canConvertFromTypeParameter, 1)) {
             // If they did, though, validate it.
             console.error("Error defining generic types: canConvertFromTypeParameter "
                + "must be a function of one argument taking in only the index.");
@@ -688,6 +704,36 @@ function AtypicalModuleGenerator() {
          // If they didn't define a conversion function, make sure canConvert... always is false.
          implementation.canConvertFromTypeParameter = function(index) {
             return false;
+         }
+      }
+
+      if (implementation.convertToType !== undefined) {
+         if(!_isFunctionOfNArguments(implementation.convertToType, 1)) {
+            console.error("Error defining generic type: convertToType must be a function of "
+               + "one argument taking in the type to be converted to.");
+            return undefined;
+         }
+
+         if (!_isFunctionOfNArguments(implementation.canConvertToType, 1)) {
+            console.error("Error defining generic type: If convertToType is defined, "
+               + "canConvertToType must also be defined as a function of one argument taking "
+               + "in the type to be converted to.");
+            return undefined;
+         }
+      }
+
+      if (implementation.convertFromType !== undefined) {
+         if(!_isFunctionOfNArguments(implementation.convertFromType, 1)) {
+            console.error("Error defining generic type: convertFromType must be a function of "
+               + "one argument taking in the value to be converted.");
+            return undefined;
+         }
+
+         if (!_isFunctionOfNArguments(implementation.canConvertFromType, 1)) {
+            console.error("Error defining generic type: If convertFromType is defined, "
+               + "canConvertFromType must also be defined as a function of one argument taking "
+               + "in the type to be converted from.");
+            return undefined;
          }
       }
 
@@ -1635,6 +1681,7 @@ function AtypicalModuleGenerator() {
       }
    });
 
+   // TODO: EXPLAIN WHAT THIS IS
    AT.defineGenericType({
       typename: "AnyOf",
       init: function(values) {
@@ -1715,6 +1762,21 @@ function AtypicalModuleGenerator() {
       convertFromTypeParameter: function(typeIndex, value) {
          return new this.type(value);
       },
+      canConvertFromType: function(type) {
+         for (let i = 0; i < this.typeParameters.length; i++) {
+            if (AT.canConvert(type, this.typeParameters[i])) {
+               return true;
+            }
+         }
+      },
+      convertFromType: function(value) {
+         for (let i = 0; i < this.typeParameters.length; i++) {
+            if (value.canConvert(this.typeParameters[i])) {
+               return new (this.type)(value.convert(this.typeParameters[i]));
+            }
+         }
+         return undefined;
+      }
    });
 
    return AT;
