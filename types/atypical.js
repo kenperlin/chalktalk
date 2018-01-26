@@ -1714,6 +1714,7 @@ function AtypicalModuleGenerator() {
          }
 
          let valuesObject = {};
+         let rawValues = {};
          for (let i = 0; i < typedValues.length; i++) {
             let value = typedValues[i];
             if (value.isPrimitive()) {
@@ -1722,6 +1723,7 @@ function AtypicalModuleGenerator() {
             else {
                valuesObject[value.type.name] = value;
             }
+            rawValues[value.type.name] = value;
          }
 
          for (let i = 0; i < this.typeParameters.length; i++) {
@@ -1732,9 +1734,11 @@ function AtypicalModuleGenerator() {
             else {
                this._set(type.name, null);
                valuesObject[type.name] = null;
+               rawValues[type.name] = null;
             }
          }
          this._set("values", valuesObject);
+         this._set("rawValues", rawValues);
       },
       canChangeTypeParameters: function(newTypes) {
          // If there's any overlap between the types at all, allow the conversion
