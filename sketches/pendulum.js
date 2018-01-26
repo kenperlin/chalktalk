@@ -65,14 +65,18 @@ function() {
       return angle;
    });
 
-   this.defineInput(AT.Radians);
-   // Allow us to connect this to objects not yet migrated to the new type system.
-   this.defineAlternateInputType(AT.Unknown, function(unk) {
-      if (isNumeric(unk.value)) {
-         return +(unk.value);
+   this.defineInput(AT.AnyOf(AT.Radians, AT.Unknown), function (value) {
+      if (value.Radians !== null) {
+         return value.Radians;
       }
-      else {
-         return 0;
+      else if (value.Unknown !== null) {
+         let unk = value.Unknown
+         if (isNumeric(unk.value)) {
+            return +(unk.value);
+         }
+         else {
+            return 0;
+         }
       }
    });
 }
