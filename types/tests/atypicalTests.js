@@ -1380,6 +1380,7 @@ window.AtypicalTests = [
       T.assert(anyFloatValue.values.Float === 4.2);
       anyFloatValue = new AnyOfFloat();
       T.assert(anyFloatValue.Float === null);
+      T.assert(anyFloatValue.values.Float === null);
       anyFloatValue = new AnyOfFloat([4.2]);
       T.assert(anyFloatValue.Float === 4.2);
 
@@ -1402,6 +1403,7 @@ window.AtypicalTests = [
       T.assert(floatOrIntValue.Int === 4);
       T.assert(floatOrIntValue.Float === null);
 
+      T.assert(floatOrIntValue.values.Float === null);
       floatOrIntValue = new AnyOfFloatOrInt(new AT.Int(7.2), new AT.Float(4.2));
       T.assert(floatOrIntValue.Float === 4.2);
       T.assert(floatOrIntValue.Int === 7);

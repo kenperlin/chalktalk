@@ -1724,7 +1724,6 @@ function AtypicalModuleGenerator() {
             }
          }
 
-         this._set("values", valuesObject);
          for (let i = 0; i < this.typeParameters.length; i++) {
             let type = this.typeParameters[i];
             if (type.name in valuesObject) {
@@ -1732,8 +1731,10 @@ function AtypicalModuleGenerator() {
             }
             else {
                this._set(type.name, null);
+               valuesObject[type.name] = null;
             }
          }
+         this._set("values", valuesObject);
       },
       canChangeTypeParameters: function(newTypes) {
          // If there's any overlap between the types at all, allow the conversion
