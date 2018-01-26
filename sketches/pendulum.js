@@ -71,8 +71,8 @@ function() {
       }
       else if (value.Unknown !== null) {
          let unk = value.Unknown
-         if (isNumeric(unk.value)) {
-            return +(unk.value);
+         if (isNumeric(unk)) {
+            return +unk;
          }
          else {
             return 0;
