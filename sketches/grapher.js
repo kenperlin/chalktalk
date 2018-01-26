@@ -62,22 +62,34 @@ function() {
       }
    };
 
-   this.defineInput(AT.Function(AT.Float, AT.Float));
-   this.defineAlternateInputType(AT.Float, function(f) {
-      // Convert floats into constant functions for easy handling
-      return function() { return f.value; }
-   });
-   this.defineAlternateInputType(AT.Unknown, function(unk) {
-      // Convert unknown values into constant functions of floats for easy handling
-      return function() {
-         if (isNumeric(unk.value)) {
-            return +(unk.value);
+   let FunctionType = AT.Function(AT.Float, AT.Float);
+
+   this.defineInput(
+      AT.AnyOf(
+         FunctionType,
+         AT.Float,
+         AT.Unknown),
+
+      function(input) {
+         let functionInput = input[FunctionType.name];
+         if (functionInput !== null) {
+            return functionInput;
          }
-         else {
-            return 0;
+         else if (input.Float !== null) {
+            return function() { return input.Float; };
+         }
+         else if (input.Unknown !== null) {
+            return function() {
+               if (isNumeric(input.Unknown)) {
+                  return +(input.Unknown);
+               }
+               else {
+                  return 0;
+               }
+            }
          }
       }
-   });
+   );
 
    this.render = function(elapsed) {
       var sc = this.size / 400;
