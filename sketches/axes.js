@@ -24,9 +24,7 @@ function() {
       this.point.copy(point);
    }
 
-   this.defineInput(AT.Mesh);
-   this.defineAlternateInputType(AT.Matrix);
-   this.defineAlternateInputType(AT.Pair(AT.Matrix, AT.Mesh));
+   this.defineInput(AT.AnyOf(AT.Matrix, AT.Mesh));
 
    var tmp = newVec3();
    this.render = function() {
@@ -58,22 +56,37 @@ function() {
          if (this.inputs.hasValue(0)) {
             let inValue = this.inputs.value(0);
 
-            // If getting a pair, look inside the pair to see which one is available
-            // If mesh is available, draw that. If not, draw the matrix axes.
-            if (inValue instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
-               if (inValue.second.mesh.length > 0) {
-                  inValue = inValue.second;
-               }
-               else {
-                  inValue = inValue.first;
-               }
-            }
+            if (inValue.Mesh !== null) {
+               // Input value is a mesh
+               let inMesh = inValue.Mesh.mesh;
 
-            if (inValue instanceof AT.Matrix) {
+               if (inMesh.color)
+                  color(inMesh.color);
+               m.scale(.5,.5,.5);
+               if (inMesh && inMesh.fillMode > 0) {
+                  if (inMesh.fillMode == 1) {
+                     color(fadedColor(0.25, parseRGBA(c = _g.strokeStyle)));
+                     m.translate(0,0,-.001);
+                     mFillCurve(inMesh);
+                     m.translate(0,0,.001);
+                     color(c);
+                  }
+                  else
+                     mFillCurve(inMesh);
+               }
+               if (edges = inMesh.edges)
+                  for (i = 0 ; i < edges.length ; i++)
+                     mLine(inMesh[edges[i][0]], inMesh[edges[i][1]]);
+               else
+                  for (i = 0 ; i < inMesh.length ; i++)
+                     mDot(inMesh[i], 0.1);
+            }
+            else if (inValue.Matrix !== null) {
+               let inMatrix = inValue.Matrix
                // INPUT VALUE IS A MATRIX
 
-               if (inValue.numRows() == 4 && inValue.numColumns() == 4) {
-                  let M = inValue.toFlatArray();
+               if (inMatrix.numRows() == 4 && inMatrix.numColumns() == 4) {
+                  let M = inMatrix.toFlatArray();
                   m.save();
                   m.translate(M[12], M[13], M[14]);
                   let lw = lineWidth();
@@ -87,9 +100,9 @@ function() {
 
                // INPUT VALUE IS A VECTOR
 
-               else if (inValue.numColumns() == 1 || inValue.numRows() == 1) {
+               else if (inMatrix.numColumns() == 1 || inMatrix.numRows() == 1) {
 
-                  V = inValue.toFlatArray(); x = V[0]; y = V[1]; z = def(V[2]);
+                  V = inMatrix.toFlatArray(); x = V[0]; y = V[1]; z = def(V[2]);
                   lineWidth(0.5);
                   mLine([x,0,0],[x,y,0]);
                   mLine([0,y,0],[x,y,0]);
@@ -106,32 +119,6 @@ function() {
                   mLine([x,y,z-.01], [x,y,z+.01]);
                   mFillDisk(V, 0.05);
                }
-            }
-
-            else {
-               // Input value is a mesh
-               inValue = inValue.mesh;
-
-               if (inValue.color)
-                  color(inValue.color);
-               m.scale(.5,.5,.5);
-               if (inValue && inValue.fillMode > 0) {
-                  if (inValue.fillMode == 1) {
-                     color(fadedColor(0.25, parseRGBA(c = _g.strokeStyle)));
-                     m.translate(0,0,-.001);
-                     mFillCurve(inValue);
-                     m.translate(0,0,.001);
-                     color(c);
-                  }
-                  else
-                     mFillCurve(inValue);
-               }
-               if (edges = inValue.edges)
-                  for (i = 0 ; i < edges.length ; i++)
-                     mLine(inValue[edges[i][0]], inValue[edges[i][1]]);
-               else
-                  for (i = 0 ; i < inValue.length ; i++)
-                     mDot(inValue[i], 0.1);
             }
          }
 
