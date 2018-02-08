@@ -53,26 +53,32 @@ const Container = (function() {
       let defaultArgs = {
          x : 0, y : 0, z : 0,
          radius : 1,
-         is3D : false
       }; // TODO         
       
       function _Circle(_args) {
          this.point = [
             _args.x,
             _args.y,
-            _args.z || defaultArgs.z
+            0
          ];
 
          this.radius = _args.radius;
-         this.is3D = _args.is3D || false;
       }
       _Circle.prototype = {
-         getPoint : function() { return this.point; },
+         getPoint : function() { 
+            return this.point; 
+         },
+         setPoint : function(p) { 
+            this.point = p; 
+         },
          draw : function(offset) {
             const r = this.radius;
             m.save();
                m.translate(this.point);
-               mDrawOval([-r, -r], [r, r], 32, PI / 2 - TAU);
+               _g.save();
+               color("rgba(0, 255, 0, .05)");
+               mFillOval([-r, -r], [r, r], 32, PI / 2 - TAU);
+               _g.restore();
             m.restore();
          },
 
@@ -80,8 +86,8 @@ const Container = (function() {
          getLineSegment : function(other) {
             const thisPoint = this.getPoint();
             const otherPoint = other.getPoint(); // TODO MAKE CONTAINERS INTERACT WITH POINTEES TO GET THEIR POSITIONS
-            const vec = [otherPoint[0] - thisPoint[0], otherPoint[1] - thisPoint[1], otherPoint[2] - thisPoint[2]];
-            const dist = sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]) + (vec[2] * vec[2]));
+            const vec = [otherPoint[0] - thisPoint[0], otherPoint[1] - thisPoint[1]];
+            const dist = sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]));
 
             const thisRadius = this.radius;
             const otherRadius = other.radius;
@@ -96,13 +102,11 @@ const Container = (function() {
 
             const startPoint = [
                thisPoint[0] + thisRadius / dist * negation * vec[0],
-               thisPoint[1] + thisRadius / dist * negation * vec[1],
-               thisPoint[2] + thisRadius / dist * negation * vec[2],
+               thisPoint[1] + thisRadius / dist * negation * vec[1]
             ]; 
             const endPoint = [
                otherPoint[0] - otherRadius / dist * vec[0],
-               otherPoint[1] - otherRadius / dist * vec[1],
-               otherPoint[2] - otherRadius / dist * vec[2],
+               otherPoint[1] - otherRadius / dist * vec[1]
             ];
 
             return [startPoint, endPoint];

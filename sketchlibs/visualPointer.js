@@ -3,13 +3,34 @@
 let VisualPointer = (function() {
    let _vp = {};
 
+   function getLineCurve(self) {
+      const cThis = self.getHolderContainer();
+      const cOther = self.getPointeeContainer();
+      if (cThis == null || cOther == null) {
+         return [self.getOutPos(), self.getTargetPos()];
+      }
+      else {
+         return cThis.getLineSegment(cOther);
+      }     
+   }
+
+   const TEST_JAGGED_LINE = false;
+
    let defaultDrawHandler = (function() {
 
       return function(self) {
          if (self.colorManager.colorIsEnabled()) {
             self.colorManager.activateColor();
          }
-         mLine(self.getOutPos(), self.getTargetPos());
+
+         let c = getLineCurve(self);
+         if (c[0][0] != c[1][0] || c[0][1] != c[1][1]) {
+            if (TEST_JAGGED_LINE) {
+               c = [c[0], [(c[0][0] + c[1][0]) / 2, c[0][1]], [(c[0][0] + c[1][0]) / 2, c[1][1]], c[1]];
+            }
+            mCurve(c);
+         }
+
          self.colorManager.deactivateColor();
 
          return {done : false};
@@ -25,8 +46,10 @@ let VisualPointer = (function() {
          return function(self) {
             const status = progress();
 
-            const start = self.getOutPos();
-            const end = self.getTargetPos();
+            const curve = getLineCurve(self);
+            const start = curve[0];
+            const end = curve[1];
+
             const mid = LerpUtil.Type.LINE({
                start : {x : start[0], y : start[1], z : start[2]},
                end   : {x : end[0],   y : end[1],   z : end[2]},
@@ -37,6 +60,23 @@ let VisualPointer = (function() {
             mLine(start, mid);
             self.colorManager.deactivateColor();
             mLine(mid, end);
+
+            // TEST ///////////////////////////
+            const TEST_ON = false;
+            function lerp(t, a, b) { return a + t * (b - a); }
+            for (let i = 0; i <= 10 && TEST_ON; i++) {
+               let t = ((i + (5 * time)) % 10) / 10;
+               const p = [lerp(t, start[0], end[0]), lerp(t, start[1], end[1]), 0];
+               if (distance(start, mid) < distance(start, p)) {
+                  continue;
+               }
+               m.save();
+                  m.translate(p);
+                  m.scale(0.05);
+                  mSphere().color(0, 0, 1);
+               m.restore();
+            }
+            // TEST ///////////////////////////
 
             if (status.done) {
                self.colorManager.activateColor();
@@ -49,19 +89,32 @@ let VisualPointer = (function() {
       return handler;
    };
 
+
+   function getLineCurveSpecifyPointee(self, pointee) {
+      const cThis = self.getHolderContainer(); // TODO
+      const cOther = pointee.container;
+      if (cThis == null || cOther == null) {
+         return [self.getOutPos(), pointee.getPtrInPos()];
+      }
+      else {
+         return cThis.getLineSegment(cOther);
+      } 
+   }
+
    let createAssignmentDrawHandler = function(args) {
       let handler = (function() {
          let self = args.self;
          let pointee = args.pointee;
          let started = false;
-         let progress = LerpUtil.lerpAutoResetSaveFracDone(args.duration || 2.5, LerpUtil.Type.NONE());
-         let originalTarget = self.getTargetPos();
+         let progress = LerpUtil.lerpAutoResetSaveFracDone(args.duration || 2.5, LerpUtil.Type.NONE()); 
+         let originalTarget = getLineCurve(self)[1];
 
          return function(self) {
             const status = progress();
 
-            const start = self.getOutPos();
-            const newTarget = pointee.getPtrInPos();
+            const newCurve = getLineCurveSpecifyPointee(self, pointee);
+            const start = newCurve[0];
+            const newTarget = newCurve[1];
             const end = LerpUtil.Type.LINE({
                start : {x : originalTarget[0], y : originalTarget[1], z : originalTarget[2]},
                end   : {x : newTarget[0],      y : newTarget[1],      z : newTarget[2]}
@@ -100,14 +153,15 @@ let VisualPointer = (function() {
          let pointee = args.pointee;
          let started = false;
          let progress = LerpUtil.lerpAutoResetSaveFracDone(args.duration || 2.5, LerpUtil.Type.NONE());
-         let originalTarget = self.getTargetPos();
+         let originalTarget = getLineCurve(self)[1];
          let C = null;
 
          return function(self) {
             const status = progress();
 
-            const start = self.getOutPos();
-            const newTarget = pointee.getPtrInPos();
+            const newCurve = getLineCurveSpecifyPointee(self, pointee);
+            const start = newCurve[0];
+            const newTarget = newCurve[1];
             const end = LerpUtil.Type.LINE({
                start : {x : originalTarget[0], y : originalTarget[1], z : originalTarget[2]},
                end   : {x : newTarget[0],      y : newTarget[1],      z : newTarget[2]}
@@ -181,8 +235,7 @@ let VisualPointer = (function() {
       return linkLike;
    }
 
-   function VisualPointer(sketchCtx, holder, pointee = null, label = "") {
-      this.sketchCtx = sketchCtx;
+   function VisualPointer(holder, pointee = null, label = "") {
       this.holder = holder;
 
       if (pointee == null) {
@@ -203,6 +256,12 @@ let VisualPointer = (function() {
       };
       this.getTargetPos = function() {
          return this.pointee.getPtrInPos();
+      };
+      this.getHolderContainer = function() {
+         return (this.holder == null) ? null : this.holder.container;         
+      }
+      this.getPointeeContainer = function() {
+         return (this.pointee == null) ? null : this.pointee.container;
       };
 
       this.label = label;
@@ -314,8 +373,8 @@ let VisualPointer = (function() {
          return;
       }
    }
-   _vp.createPtr = function(sketchCtx, holder, pointee) {
-      return new VisualPointer(sketchCtx, holder, pointee);
+   _vp.createPtr = function(holder, pointee) {
+      return new VisualPointer(holder, pointee);
    };
 
    function VisualEdge(a, b, isDirected = false) {
@@ -340,42 +399,32 @@ let VisualPointer = (function() {
 
    // TODO
 
-   function Pointee(sketchCtx, pIn, pOut) {
-      this._ptrInPos = pIn;
-      this._ptrOutPos = pOut;
+   function Pointee(pIn, pOut) {
+      this._ptrInPos = pIn || [0, 0, 0];
+      this._ptrOutPos = pOut || [1, 1, 0];
+      this.getPtrInPos = function() {
+         return this._ptrInPos;
+      };
+      this.setPtrInPos = function(p) {
+         this._ptrInPos = p;
+      };
+      this.getPtrOutPos = function() {
+         return this._ptrOutPos;
+      };
+      this.setPtrOutPos = function(p) {
+         this._ptrOutPos = p;
+      };
+      this.draw = function() {
+      };
    }
 
    Pointee.prototype = {
-      ptrOutPos : [0, 0, 0],
-      ptrInPos : [1, 1, 0],
-      getPtrInPos : function() {
-         return this._ptrInPos;
-      },
-      setPtrInPos : function(p) {
-         this._ptrInPos = p;
-      },
-      getPtrOutPos : function() {
-         return this._ptrOutPos;
-      },
-      setPtrOutPos : function(p) {
-         this._ptrOutPos = p;
-      },
-      draw : function() {
-         m.save();
-            m.translate(this._ptrOutPos);
-            m.scale(0.25);
-            _g.save();
-            color("rgba(0, 255, 0, .05)");
-            mFillOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
-            _g.restore();
-         m.restore();
-         this.child.draw();
-      }
+
    };
 
    _vp.Pointee = Pointee;
-   _vp.createPointee = function(sketchCtx, pIn, pOut) {
-      return new Pointee(sketchCtx, pIn, pOut);
+   _vp.createPointee = function(pIn, pOut) {
+      return new Pointee(pIn, pOut);
    };
 
    return _vp;

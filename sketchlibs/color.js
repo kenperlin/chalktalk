@@ -9,6 +9,9 @@ function ColorManager() {
 }
 
 ColorManager.prototype = {
+   getColor : function() {
+      return this.color;
+   },
    setColor : function(color) {
       this.color = color;
       return this;

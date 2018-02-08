@@ -1,25 +1,65 @@
 function() {
    this.label = "ptrtest";
 
-   function TestPointee(sketchCtx, pIn, pOut) {
-      VisualPointer.Pointee.call(this, sketchCtx, pIn, pOut);
-      this.child = VisualPointer.createPtr(sketchCtx, this, null);
+   function TestPointee(pIn, pOut) {
+      VisualPointer.Pointee.call(this, pIn, pOut);
+      this.child = VisualPointer.createPtr(this, null);
+      this.container = Container.Circle({x : pIn[0], y : pIn[1], radius : 0.25})();
+
+
+      this.usesContainer = function() {
+         return this.container != null;
+      };
+
+      this.getPtrInPos = function() {
+         return this._ptrInPos;
+      };
+      this.setPtrInPos = function(p) {
+         if (this.usesContainer()) {
+            this.container.setPoint(p);
+         } 
+         this._ptrInPos = p;
+      };
+      this.getPtrOutPos = function() {
+         return this._ptrOutPos;
+      };
+      this.setPtrOutPos = function(p) {
+         if (this.usesContainer()) {
+            this.container.setPoint(p);
+         }
+         this._ptrOutPos = p;
+      };
+      this.draw = function() {
+         if (this.usesContainer()) {
+            this.container.draw();  
+         }
+         else {
+            m.save();
+               m.translate(this._ptrOutPos);
+               m.scale(0.25);
+               _g.save();
+               color("rgba(0, 255, 0, .05)");
+               mFillOval([-1, -1], [1, 1], 32, PI / 2 - TAU);
+               _g.restore();
+            m.restore();
+         }
+         this.child.draw();
+      };
    }
-   TestPointee.prototype = Object.create(VisualPointer.Pointee.prototype);
 
    this.setup = function() {
       this.pointees = [
-         new TestPointee(this, [-1, 1, 0], [-1, 1, 0]),
-         new TestPointee(this, [1, -1, 0], [1, -1, 0]),
-         new TestPointee(this, [1, 1, 0], [1, 1, 0])
+         new TestPointee([-1, 1, 0], [-1, 1, 0]),
+         new TestPointee([1, -1, 0], [1, -1, 0]),
+         new TestPointee([1, 1, 0], [1, 1, 0])
       ];
 
       this.testState = 0;
 
 
-      this.circle1 = Container.Circle({x : 2, y : 2, z : 0, radius : 0.25})();
-      this.circle2 = Container.Circle({x : -2, y : -2, z : 0, radius : 0.25})();
-      this.circle3 = Container.Circle({x : -1, y : 1, z : 0, radius : 1})();
+      this.circle1 = Container.Circle({x : 2, y : 2, radius : 0.25})();
+      this.circle2 = Container.Circle({x : -2, y : -2, radius : 0.25})();
+      this.circle3 = Container.Circle({x : -1, y : 1, radius : 1})();
 
       this.circles = [this.circle1, this.circle2, this.circle3];
    };
@@ -46,17 +86,17 @@ function() {
          this.pointees[1].setPtrInPos(n);
          this.pointees[1].setPtrOutPos(n);
 
-         this.circles[0].point[0] = 2 * sin(2 + time);
-         this.circles[0].point[1] = 2 * sin(2 + time + 0.067);
-         this.circles[1].point[0] = 2 * -sin(time);
-         this.circles[1].point[1] = 2 * -cos(time - 0.067);
-         this.circles[2].point[1] = 2 * cos(1 + time - 0.8);
-         for (let i = 0; i < this.circles.length; i++) {
-            this.circles[i].draw();
-         }
-         mCurve(this.circles[0].getLineSegment(this.circles[1]));
-         mCurve(this.circles[1].getLineSegment(this.circles[2]));
-         mCurve(this.circles[2].getLineSegment(this.circles[0]));
+         // this.circles[0].point[0] = 2 * sin(2 + time);
+         // this.circles[0].point[1] = 2 * sin(2 + time + 0.067);
+         // this.circles[1].point[0] = 2 * -sin(time);
+         // this.circles[1].point[1] = 2 * -cos(time - 0.067);
+         // this.circles[2].point[1] = 2 * cos(1 + time - 0.8);
+         // for (let i = 0; i < this.circles.length; i++) {
+         //    this.circles[i].draw();
+         // }
+         // mCurve(this.circles[0].getLineSegment(this.circles[1]));
+         // mCurve(this.circles[1].getLineSegment(this.circles[2]));
+         // mCurve(this.circles[2].getLineSegment(this.circles[0]));
 
          switch (this.testState) {
          case 0:
