@@ -116,14 +116,16 @@ function() {
             break;
 
          case 'Matrix':
-            let control = this.inputs.value(0);
-            if (control instanceof AT.Matrix
-                && control.numRows() === 4
-                && control.numColumns() === 4)
+            let controlMatrix = this.inputs.hasValue(0) ? this.inputs.value(0).Matrix : null;
+            let controlFloat = this.inputs.hasValue(0) ? this.inputs.value(0).Float : null;
+            if (controlMatrix !== null
+                && controlMatrix.numRows() === 4
+                && controlMatrix.numColumns() === 4)
             {
+               // Use a 4x4 matrix as control (just copy the values)
                for (let row = 0; row < 4; row++) {
                   for (let column = 0; column < 4; column++) {
-                     out.push(roundedString(control.element(row, column)));
+                     out.push(roundedString(controlMatrix.element(row, column)));
                   }
                }
             }
@@ -138,14 +140,17 @@ function() {
                   case 6: sub = ["px","py","pz"]; break;
                }
 
-               if (isDef(control)) {
-                  if (control instanceof AT.Matrix) {
-                     x = rounded(control.element(0, 0), 0);
-                     y = rounded(control.element(0, 1), x);
-                     z = rounded(control.element(0, 2), y);
+               if (controlMatrix !== null || controlFloat !== null) {
+                  // Use a vector matrix as control
+                  if (controlMatrix) {
+                     let vals = controlMatrix.toFlatArray();
+                     x = rounded(def(vals[0], 0));
+                     y = rounded(def(vals[1], x));
+                     z = rounded(def(vals[2], y));
                   }
-                  else {
-                     x = y = z = rounded(control, 0);
+                  else if (controlFloat !== null) {
+                     // Use a single floating point number as control
+                     x = y = z = rounded(controlFloat);
                   }
 
                   switch (this.mode) {
@@ -214,18 +219,18 @@ function() {
 
       if (type === "Matrix") {
          // Generic matrices need a "control" input as their first input
-         this.defineInput(AT.Float);
-         this.defineAlternateInputType(AT.Matrix);
+         this.defineInput(AT.AnyOf(AT.Float, AT.Matrix));
       }
 
       // Second input on generic matrices, and first input on bezier and so on,
       // are a second matrix to multiply this by, or a mesh to transform by this matrix.
-      this.defineInput(AT.Pair(AT.Matrix, AT.Mesh));
-      this.defineAlternateInputType(AT.Mesh);
-      this.defineAlternateInputType(AT.Matrix);
+      this.defineInput(AT.AnyOf(
+         AT.Matrix,
+         AT.Mesh
+      ));
    }
 
-   let MatrixOrMesh = AT.Pair(AT.Matrix, AT.Mesh)
+   let MatrixOrMesh = AT.AnyOf(AT.Matrix, AT.Mesh)
    this.defineOutput(MatrixOrMesh, function() {
       let type = this.labels[this.selection];
       let outValue = (type !== 'Matrix' || this.inputs.hasValue(0)) ? this.matrixValues
@@ -234,23 +239,19 @@ function() {
       let multObject = this.inputs.value((type === "Matrix") ? 1 : 0);
 
       let outMatrix = outValue;
-      let outMesh = new AT.Mesh([]);
+      let outMesh = null;
       
-      if (multObject instanceof AT.Pair(AT.Matrix, AT.Mesh)) {
-         if (multObject.first.canMultiply(outMatrix)) {
-            outMatrix = multObject.first.times(outMatrix);
+      if (multObject) {
+         if (multObject.Mesh) {
+            outMesh = multObject.Mesh.transform(outValue);
          }
-         outMesh = multObject.second.transform(outValue);
-      }
-      else if (multObject instanceof AT.Mesh) {
-         outMesh = multObject.transform(outValue);
-      }
-      else if (multObject instanceof AT.Matrix) {
-         if (multObject.canMultiply(outMatrix)) {
-            outMatrix = multObject.times(outMatrix);
+         else if (multObject.Matrix) {
+            if (multObject.Matrix.canMultiply(outMatrix)) {
+               outMatrix = multObject.times(outMatrix);
+            }
          }
       }
-      return new MatrixOrMesh(outMatrix, outMesh);
+      return new MatrixOrMesh([outMatrix, outMesh]);
    });
 
    this.matrixValues = new AT.Matrix(4, 4);
