@@ -1,5 +1,5 @@
 function() {
-   this.label = 'perspective';
+   this.label = 'perspect';
    this.point = newVec3();
    this.dy = 0;
    this.onPress = function(point) { this.point.copy(point); }

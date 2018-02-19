@@ -1,4 +1,7 @@
 function() {
+/*
+   to do:  add x', y', z', text labels to rotated RGB axes.
+*/
    this.label = 'Axes';
    this.is3D = true;
    this.mode = 0;
@@ -25,7 +28,7 @@ function() {
    this.render = function() {
       mLine([-1,0], [1,0]);
       mLine([0,-1], [0,1]);
-      var otherColor = backgroundColor == 'black' ? 'cyan' : 'rgb(0,128,200)';
+      var otherColor = isBlackBackground() ? 'cyan' : 'rgb(0,128,200)';
       this.afterSketch(function() {
          var e = this.pointToPixelMatrix.elements;
          var showZ = tmp.set(e[8],e[9],e[10]).normalize().z < .975;
@@ -46,10 +49,30 @@ function() {
          if (showZ)
             mArrow([0,0,-1],[0,0,1], .1);
 
-         if (isDef(this.inValue[0]) && this.inValue[0].length != 16) {
-            inValue = this.inValue[0];
-            switch (arrayDepth(inValue)) {
-            case 1:
+         // HANDLE THE CASES WHERE THERE IS INPUT DATA.
+
+         if (isDef(this.inValue[0])) {
+            let inValue = this.inValue[0];
+
+            // INPUT VALUE IS A MATRIX
+
+            if (inValue.length == 16 && isNumeric(inValue[0])) {
+	       let M = inValue;
+	       m.save();
+	       m.translate(M[12], M[13], M[14]);
+	       let lw = lineWidth();
+	       lineWidth(4);
+	       color('red'  ); mArrow([0,0,0], [M[0],M[1],M[2]]);
+	       color('green'); mArrow([0,0,0], [M[4],M[5],M[6]]);
+	       color('blue' ); mArrow([0,0,0], [M[8],M[9],M[10]]);
+	       lineWidth(lw);
+	       m.restore();
+            }
+
+            // INPUT VALUE IS A VECTOR
+
+            else if (arrayDepth(inValue) == 1) {
+
                V = inValue; x = V[0]; y = V[1]; z = def(V[2]);
                lineWidth(0.5);
                mLine([x,0,0],[x,y,0]);
@@ -65,15 +88,17 @@ function() {
                mLine([x-.01,y,z], [x+.01,y,z]);
                mLine([x,y-.01,z], [x,y+.01,z]);
                mLine([x,y,z-.01], [x,y,z+.01]);
-	       mFillDisk(V, 0.05);
-               break;
-            case 2:
+               mFillDisk(V, 0.05);
+            }
+
+            else if (arrayDepth(inValue) == 2) {
+
                if (inValue.color)
                   color(inValue.color);
                m.scale(.5,.5,.5);
                if (inValue && inValue.fillMode > 0) {
                   if (inValue.fillMode == 1) {
-                     color(fadedRGB(0.25, parseRGBA(c = _g.strokeStyle)));
+                     color(fadedColor(0.25, parseRGBA(c = _g.strokeStyle)));
                      m.translate(0,0,-.001);
                      mFillCurve(inValue);
                      m.translate(0,0,.001);
@@ -88,7 +113,6 @@ function() {
                else
                   for (i = 0 ; i < inValue.length ; i++)
                      mDot(inValue[i], 0.1);
-               break;
             }
          }
 
