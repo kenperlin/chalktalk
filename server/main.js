@@ -7,7 +7,10 @@ const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
 
-const holojam = require('holojam-node')(['relay']);
+// behave as a relay
+//const holojam = require('holojam-node')(['relay']);
+// behave as a receiver and sender
+const holojam = require('holojam-node')(['emitter', 'sink']);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
