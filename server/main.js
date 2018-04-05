@@ -9,9 +9,9 @@ const path = require('path');
 const dgram = require('dgram');
 
 // behave as a relay
-const holojam = require('holojam-node')(['relay']);
+//const holojam = require('holojam-node')(['relay']);
 // behave as a receiver and sender
-//const holojam = req uire('holojam-node')(['emitter', 'sink'], '192.168.1.70');
+const holojam = req uire('holojam-node')(['emitter', 'sink'], '192.168.1.70');
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -50,6 +50,7 @@ udpServer.on('listening', function () {
 //  Ended = 4,   A finger was lifted from the screen. This is the final phase of a touch.
 //  Canceled = 5   The system cancelled tracking for the touch.
 var curDaydreamInput = {
+	threedof:true,
 	rx:0,
 	ry:0,
 	rz:0,
@@ -75,7 +76,7 @@ udpServer.on('message', function (message, remote) {
 	index += 4;
 	curDaydreamInput.y = message.readFloatLE(index);
 	//console.log(rx,ry,rz,state,x,y);
-	console.log(curDaydreamInput);
+	//console.log(curDaydreamInput);
 });
 
 udpServer.bind(PORT, HOST);
@@ -95,6 +96,15 @@ function readHeader(data) {
    return header;
 }
 
+// zhenyi: send 3dof cursor
+setInterval( function() { sendDaydreamInput(); }, 20);
+var curWS;
+function sendDaydreamInput(){
+	if(curWS != null){
+		curWS.send(JSON.stringify(curDaydreamInput));
+	}
+}
+
 try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
@@ -108,13 +118,14 @@ try {
       if (ws.index == 0) {
          // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
-
+		 curWS = ws;
          // Broadcast curve data
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
+			   //console.log("display");
             }
          });
 
