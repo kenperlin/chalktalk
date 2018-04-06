@@ -11,7 +11,7 @@ const dgram = require('dgram');
 // behave as a relay
 //const holojam = require('holojam-node')(['relay']);
 // behave as a receiver and sender
-const holojam = req uire('holojam-node')(['emitter', 'sink'], '192.168.1.70');
+const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.70');
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -28,6 +28,7 @@ server.listen(parseInt(port, 10), () =>
 
 // listen to android simulation through udp
 const udpServer = dgram.createSocket('udp4');
+var udpHOST = process.argv[3] || "192.168.1.70";
 
 udpServer.on('error', (err) => {
   console.log(`udpServer error:\n${err.stack}`);
@@ -35,7 +36,7 @@ udpServer.on('error', (err) => {
 });
 
 var PORT = 11000;
-var HOST = '192.168.1.70';
+//var HOST = '216.165.71.243';
 
 udpServer.on('listening', function () {
     var address = udpServer.address();
@@ -79,7 +80,7 @@ udpServer.on('message', function (message, remote) {
 	//console.log(curDaydreamInput);
 });
 
-udpServer.bind(PORT, HOST);
+udpServer.bind(PORT, udpHOST);
 // end of udp server
 
 let data = [], time = 0;
