@@ -11,7 +11,7 @@ const dgram = require('dgram');
 // behave as a relay
 //const holojam = require('holojam-node')(['relay']);
 // behave as a receiver and sender
-const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.70');
+const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.126');
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -26,9 +26,13 @@ server.listen(parseInt(port, 10), () =>
    console.log('HTTP server listening on port %d', server.address().port)
 );
 
+// for sending ack back to 3dof phone to confirm the connection
+var ackclient = dgram.createSocket('udp4');
+
+
 // listen to android simulation through udp
 const udpServer = dgram.createSocket('udp4');
-var udpHOST = process.argv[3] || "192.168.1.70";
+var udpHOST = process.argv[3] || "192.168.1.126";
 
 udpServer.on('error', (err) => {
   console.log(`udpServer error:\n${err.stack}`);
@@ -41,6 +45,7 @@ var PORT = 11000;
 udpServer.on('listening', function () {
     var address = udpServer.address();
     console.log('UDP udpServer listening on ' + address.address + ":" + address.port);
+	
 });
 
 //
@@ -62,6 +67,13 @@ var curDaydreamInput = {
 
 udpServer.on('message', function (message, remote) {
     //console.log(remote.address + ':' + remote.port +' - ' + message + message.length);
+	
+	ackclient.send(message, 0, message.length, remote.port, remote.address, function(err, bytes) {
+		//console.log('UDP message sent to ' + remote.address +':'+ remote.port);
+		if (err) 
+			ackclient.close();
+	});
+	
 	if(message.length != 24)
 		return;
 	var index = 0;
@@ -76,6 +88,7 @@ udpServer.on('message', function (message, remote) {
 	curDaydreamInput.x = message.readFloatLE(index);
 	index += 4;
 	curDaydreamInput.y = message.readFloatLE(index);
+	
 	//console.log(rx,ry,rz,state,x,y);
 	//console.log(curDaydreamInput);
 });
