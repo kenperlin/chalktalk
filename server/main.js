@@ -68,11 +68,12 @@ var curDaydreamInput = {
 udpServer.on('message', function (message, remote) {
     //console.log(remote.address + ':' + remote.port +' - ' + message + message.length);
 	
-	ackclient.send(message, 0, message.length, remote.port, remote.address, function(err, bytes) {
-		//console.log('UDP message sent to ' + remote.address +':'+ remote.port);
-		if (err) 
-			ackclient.close();
-	});
+	if(new String(message).contains("Is anybody there?"))
+		ackclient.send(message, 0, message.length, remote.port, remote.address, function(err, bytes) {
+			//console.log('UDP message sent to ' + remote.address +':'+ remote.port);
+			if (err) 
+				ackclient.close();
+		});
 	
 	if(message.length != 24)
 		return;
