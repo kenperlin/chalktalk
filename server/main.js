@@ -9,9 +9,9 @@ const path = require('path');
 const dgram = require('dgram');
 
 // behave as a relay
-//const holojam = require('holojam-node')(['relay']);
+const holojam = require('holojam-node')(['relay']);
 // behave as a receiver and sender
-const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.126');
+//const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -178,6 +178,27 @@ try {
 
          holojam.on('update', (flakes, scope, origin) => {
             //
+			for (var i=0; i < flakes.length; i++) {
+				var flake = flakes[i];
+				if(flake.label.contains("Stylus")){
+					console.log(flake.vector3s[0].z);
+					var type = flake.ints[0];
+					type = (type == 0 ? "onmousedown"
+					: (type == 1 ? "onmousemove" : "onmouseup"));
+
+					var e = {
+					   eventType: type,
+					   event: {
+						  button: 3,
+						  clientX: flake.vector3s[0].z * 1920,
+						  clientY: flake.vector3s[0].y * 1080
+					   }
+					};
+
+					ws.send(JSON.stringify(e));					
+				}
+				
+			}
          });
       }
 
