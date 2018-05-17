@@ -9,7 +9,7 @@ const path = require('path');
 const dgram = require('dgram');
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.14','192.168.1.26'];
+var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
