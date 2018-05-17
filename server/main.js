@@ -182,10 +182,12 @@ try {
 
          holojam.on('update', (flakes, scope, origin) => {
             //
+			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
+				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
-					console.log(flake.vector3s[0].z);
+					//console.log(flake.vector3s[0].z);
 					var type = flake.ints[0];
 					type = (type == 0 ? "onmousedown"
 					: (type == 1 ? "onmousemove" : "onmouseup"));
