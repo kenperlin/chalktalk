@@ -43,4 +43,6 @@ function() {
       console.log(str);
 */
    }
+
+   this.defineInput(AT.Props);
 }

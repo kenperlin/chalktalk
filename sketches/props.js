@@ -1,6 +1,4 @@
 function() {
-   this.USES_DEPRECATED_PORT_SYSTEM = true
-
    this.label = 'props';
 
    this.onPress = function(p) {
@@ -279,5 +277,9 @@ function() {
    function y2i(y) { return floor((y / (1 + dy/4) + dy - 1) / (-2 * dy) + .5); }
    var props = null, propName = [], menuChoice = 0, x0 = {}, x1 = {}, dy, I = -1;
    var nItems = 1, dy = 1 / 12, currentName = '', currentValue;
+
+   this.defineOutput(AT.Props, function() {
+      return new AT.Props();
+   });
 }
 
