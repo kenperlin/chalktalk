@@ -129,6 +129,7 @@ try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
+   let sendCount = 0;
 
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
@@ -289,30 +290,36 @@ try {
                //
 
                const len = data.byteLength;
-               let countSlices = 1;
+               let sliceCount = 1;
                //console.log("INITIAL LENGTH: " + len);
-               while (len > 100 * countSlices) {
-                  countSlices *= 2;
+               while (len > 100 * sliceCount) {
+                  sliceCount *= 2;
                }
 
                //console.log("DATA BYTE LENGTH: " + data.byteLength);
-               //console.log("DATA SLICES: " + countSlices);
+               //console.log("DATA SLICES: " + sliceCount);
 
                const labelPrefix = "Display";
 
-               if (countSlices == 1) {
+               ++sendCount;
+
+               if (sliceCount == 1) {
                   holojam.Send(holojam.BuildUpdate('ChalkTalk', [
                      {
-                        label: labelPrefix + "1", bytes: data, ints: [1, 1]
+                        label: labelPrefix + "1", bytes: data, ints: [data.byteLength, 1, 1, sendCount]
                      },
                   ]));       
                }
-               else {
+               else if (sliceCount > 1) {
+                  // TEMP
+                  sliceCount = 3;
+
+                  
                   const sliceList = [];
                   const HEADER_SIZE = 8;
-                  const bytesPerSlice = Math.ceil(((data.byteLength - HEADER_SIZE) / countSlices));
+                  const bytesPerSlice = Math.ceil(((data.byteLength - HEADER_SIZE) / sliceCount));
 
-                  console.log("data size: " + data.byteLength);
+                  //console.log("data size: " + data.byteLength);
 
                   // console.log("{");
                   // var D = "{";
@@ -328,7 +335,7 @@ try {
                      var doCorrection = false;
                      var i = 0;
                      for (var byteOffset = HEADER_SIZE;
-                             i < countSlices; 
+                             i < sliceCount; 
                              ++i, byteOffset += bytesPerSlice
                      ) {
 
@@ -358,17 +365,17 @@ try {
                         sliceList.push([{ 
                            label : labelPrefix + (i + 1), 
                            bytes : u8buff, 
-                           ints  : new Uint16Array([countSlices, i + 1])
+                           ints  : [data.byteLength, sliceCount, i + 1, sendCount]
                         }]);
                      }
 
                      // CORRECT OFF-BY-1 SLICE COUNT
                      if (doCorrection) {
                         //console.log("CORRECTING SLICE COUNT")
-                        countSlices = i;
-                        for (i = 0; i < countSlices; ++i) {
+                        sliceCount = i;
+                        for (i = 0; i < sliceCount; ++i) {
                            try {
-                              sliceList[i][0].ints[0] = countSlices;
+                              sliceList[i][0].ints[0] = sliceCount;
                            } catch (e) {
                               console.error("index" + i);
                               console.error(sliceList[i]);
@@ -379,7 +386,7 @@ try {
 
                   }
 
-                  console.log("SLICE COUNT: " + countSlices);
+                  //console.log("SLICE COUNT: " + sliceCount);
                   // for (var i = 0; i < sliceList.length; ++i) {
                   //    console.log(sliceList[i][0].bytes.byteLength);
                   //    var S = "{";
@@ -395,7 +402,7 @@ try {
                   const dataLen = data.byteLength;
                   var byteIdx = HEADER_SIZE;
                   for (var sliceIdx = 0; 
-                           byteIdx < dataLen && sliceIdx < countSlices; 
+                           byteIdx < dataLen && sliceIdx < sliceCount; 
                            ++sliceIdx)
                   {
                      const slice = sliceList[sliceIdx][0].bytes;
@@ -408,7 +415,7 @@ try {
                   console.assert(byteIdx == dataLen);
 
 
-                  for (var i = 0; i < countSlices; ++i) {
+                  for (var i = 0; i < sliceCount; ++i) {
                      holojam.Send(holojam.BuildUpdate('ChalkTalk', sliceList[i]));
                   }
                }
