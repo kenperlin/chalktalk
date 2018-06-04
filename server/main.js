@@ -129,7 +129,9 @@ try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
-   let sendCount = 0;
+
+   let batchTimestamp = 0;
+   let batchTimestampOverflow = 0;
 
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
@@ -296,24 +298,26 @@ try {
                   sliceCount *= 2;
                }
 
-               //console.log("DATA BYTE LENGTH: " + data.byteLength);
-               //console.log("DATA SLICES: " + sliceCount);
-
                const labelPrefix = "Display";
 
-               ++sendCount;
+               // update clock TODO handle overflow on CT server side
+               ++batchTimestamp;
 
+               if (batchTimestamp == 2147483647) { // 2^31 - 1
+                  batchTimestamp = 0;
+                  ++batchTimestampOverflow;
+               }
 
                if (sliceCount == 1) {
                   holojam.Send(holojam.BuildUpdate('ChalkTalk', [
                      {
-                        label: labelPrefix + "1", bytes: data, ints: [len, 1, 1, sendCount]
+                        label: labelPrefix + "1", bytes: data, ints: [len, 1, 1, batchTimestamp, batchTimestampOverflow]
                      },
                   ]));       
                }
                else if (sliceCount > 1) {
-                  // TEMP
-                  sliceCount = 2;
+                  // TEMP SET TO CONSTANT NUMBER OF SLICES TODO remove this line
+                  sliceCount = 5;
 
 
                   const sliceList = [];
@@ -332,7 +336,7 @@ try {
                      sliceList.push([{ 
                         label : labelPrefix + (i + 1), 
                         bytes : subBuffer, 
-                        ints  : [dataLen, sliceCount, i + 1, sendCount]
+                        ints  : [dataLen, sliceCount, i + 1, batchTimestamp, batchTimestampOverflow]
                      }]);
 
                      byteOffset = byteOffsetEnd;
@@ -405,7 +409,7 @@ try {
 //                         sliceList.push([{ 
 //                            label : labelPrefix + (i + 1), 
 //                            bytes : u8buff, 
-//                            ints  : [data.byteLength, sliceCount, i + 1, sendCount]
+//                            ints  : [data.byteLength, sliceCount, i + 1, batchTimestamp]
 //                         }]);
 //                      }
 
