@@ -1,5 +1,6 @@
 function() {
    this.label = "rocket";
+   this.tags = ["vehicles", "aircrafts"];
    this.onSwipeTime = 0;
    this.velocity = 0;
    this.altitude = 0;

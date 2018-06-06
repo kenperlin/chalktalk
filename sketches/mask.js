@@ -1,5 +1,6 @@
 function() {
    this.label = 'mask';
+   this.tag = 'people';
    this.is3D = true;
    var that = this;
 

@@ -1,5 +1,6 @@
 function() {
    this.label = "phong";
+   this.tag = "computer graphics";
    this.rx = .707;
    this.ry = .707;
    this.code = [["", "R = 2 * N * dot(N,L) - L"]];

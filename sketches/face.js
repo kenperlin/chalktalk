@@ -1,5 +1,6 @@
 function() {
    this.label = 'face';
+   this.tag = 'people';
    this.is3D = true;
    this.mode = 0;
    this.isNeutral = false;

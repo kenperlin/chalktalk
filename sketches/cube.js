@@ -1,5 +1,6 @@
 function() {
    this.label = 'cube';
+   this.tag = 'geometry';
    this.is3D = true;
    this._isSolid = true;
 

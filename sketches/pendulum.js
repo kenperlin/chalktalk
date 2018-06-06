@@ -1,5 +1,6 @@
 function() {
    this.label = "pendulum";
+   this.tag = "physics";
 
    var xx, yy, spring = new Spring(), force = 0, adjustHeight = 1,
        angle = 0, bobRadius, hubWidth, rodHeight, swingMode = 'swing';

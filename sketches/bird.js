@@ -1,5 +1,6 @@
 function() {
    this.label = "bird";
+   this.tag = 'creatures';
    this.is3D = true;
    this.bird = new Bird();
 

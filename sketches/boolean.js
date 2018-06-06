@@ -1,6 +1,7 @@
 
 function() {
    this.label = "Boolean";
+   this.tag = "logic";
    this.state = true;
    this.onClick = ['toggle T/F', function() { this.state = ! this.state; }];
    this.render = function() {

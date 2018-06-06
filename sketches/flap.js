@@ -1,5 +1,6 @@
 function() {
    this.label = 'flap';
+   this.tag = 'creatures';
 
    this.isWandering = false;
    this.isExiting = false;

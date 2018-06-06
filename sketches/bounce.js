@@ -1,5 +1,6 @@
 function() {
    this.label = "bounce";
+   this.tag = 'physics';
    this.isBouncing = false;
    this.bouncing = 0;
    this.y = 0;

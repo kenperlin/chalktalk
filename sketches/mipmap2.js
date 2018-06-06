@@ -1,5 +1,6 @@
 function() {
    this.label = 'mipmap2';
+   this.tag = 'computer graphics';
    this.is3D = true;
    this.mode = 0;
    this.onCmdClick = function() { this.mode++; }

@@ -1,5 +1,6 @@
 function() {
    this.label = 'raytrace';
+   this.tag = 'computer graphics';
    this.mode = 0;
    this.onCmdClick = function() { this.mode++; }
    this.render = function() {

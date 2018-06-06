@@ -1,5 +1,6 @@
 function() {
    this.label = 'mipmap';
+   this.tag = 'computer graphics';
    this.render = function() {
       for (var i = 0 ; i < 2 ; i++) {
          mClosedCurve([[-1,1],[1,1],[1,-1],[-1,-1]]);
