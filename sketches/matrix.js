@@ -247,7 +247,7 @@ function() {
          }
          else if (multObject.Matrix) {
             if (multObject.Matrix.canMultiply(outMatrix)) {
-               outMatrix = multObject.times(outMatrix);
+               outMatrix = multObject.Matrix.times(outMatrix);
             }
          }
       }
