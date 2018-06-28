@@ -246,8 +246,8 @@ function() {
             outMesh = multObject.Mesh.transform(outValue);
          }
          else if (multObject.Matrix) {
-            if (multObject.Matrix.canMultiply(outMatrix)) {
-               outMatrix = multObject.Matrix.times(outMatrix);
+            if (outMatrix.canMultiply(multObject.Matrix)) {
+               outMatrix = outMatrix.times(multObject.Matrix);
             }
          }
       }
