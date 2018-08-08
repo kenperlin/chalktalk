@@ -14,14 +14,23 @@ function() {
 
       let best = {glyph : SketchGlyphCommand.Null, score : drawing.WORST_SCORE, idx : -1};
       
+      console.log("GLYPHS");
+      console.log(glyphs);
+      console.log("CURVES");
+      console.log(curves);
+      
       for (let i = 0; i < glyphs.length; i++) {
          const score = drawing.compare(glyphs[i]);
          if (score < best.score) {
+            console.log("FOUND BETTER");
             best.glyphMatch = glyphs[i];
             best.score = score;
             best.idx = i;
          }
       }
+      
+      console.log("BEST");
+      console.log(best);
 
       return best;
    };
@@ -183,20 +192,20 @@ function() {
 
    // MORE ACCURATE? 
    this.mouseDown = function(x, y, z) {
-      console.log("MOUSEDOWN");
-      this.glyphCurves.beginCurve();
-      this.mouseDrag(x, y, z);
+      //console.log("MOUSEDOWN");
+      //this.glyphCurves.beginCurve();
+      //this.mouseDrag(x, y, z);
    }
    this.mouseDrag = function(x, y, z) {
-      console.log("MOUSEDRAG");
+      //console.log("MOUSEDRAG");
       // if (!this.glyphCommandInProgress) {
       //    return;
       // }
-      this.glyphCurves.addPoint(this.inverseTransform([x, y, z]));
+      //this.glyphCurves.addPoint(this.inverseTransform([x, y, z]));
    };
    this.mouseUp = function() {
-      console.log("MOUSEUP");
-      this.glyphCurves.clear();
+      //console.log("MOUSEUP");
+      //this.glyphCurves.clear();
    };
    //////////////////////////////////////
    this.onCmdRelease = function(p) {
