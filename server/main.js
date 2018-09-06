@@ -129,6 +129,7 @@ try {
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
 
+   let prevLength = -1;
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
       sockets[ws.index] = ws;
@@ -141,6 +142,10 @@ try {
          // Broadcast curve data
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
+			   if (prevLength != data.length) {
+				  console.log("DISPLAY LIST LENGTH IN BYTES: " + data.length);
+			      prevLength = data.length;
+			   }
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
