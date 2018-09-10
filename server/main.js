@@ -143,7 +143,6 @@ try {
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
 			   if (prevLength != data.length) {
-				  console.log("DISPLAY LIST LENGTH IN BYTES: " + data.length);
 			      prevLength = data.length;
 			   }
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
