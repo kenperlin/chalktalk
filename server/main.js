@@ -207,6 +207,12 @@ try {
 
 					ws.send(JSON.stringify(e));					
 				}
+				if(flake.label.contains("Avatar")){
+					var b = flake.bytes;
+					//console.log(flake.bytes.length);
+					//for(var bi = 0; bi < b.length/10; bi++)
+						//console.log(b[bi]);
+				}
 				
 			}
          });
