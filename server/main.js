@@ -191,21 +191,34 @@ try {
 				var flake = flakes[i];
 				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
-					//console.log(flake.vector3s[0].z);
-					var type = flake.ints[0];
-					type = (type == 0 ? "onmousedown"
-					: (type == 1 ? "onmousemove" : "onmouseup"));
+					var wipeOrNot = flake.ints[1];
+					if(wipeOrNot == 3){
+						console.log("recv wipe");
+						var e = {
+						   eventType: "wipe",
+						   event: {
+							  button: 1,
+							  clientX: 0,
+							  clientY: 0
+						   }
+						};
+						ws.send(JSON.stringify(e));	
+					}
+					else{
+						var type = flake.ints[0];
+						type = (type == 0 ? "onmousedown"
+						: (type == 1 ? "onmousemove" :"onmouseup" ));
 
-					var e = {
-					   eventType: type,
-					   event: {
-						  button: 3,
-						  clientX: flake.vector3s[0].z * 1920,
-						  clientY: flake.vector3s[0].y * 1080
-					   }
-					};
-
-					ws.send(JSON.stringify(e));					
+						var e = {
+						   eventType: type,
+						   event: {
+							  button: 3,
+							  clientX: flake.vector3s[0].z * 1920,
+							  clientY: flake.vector3s[0].y * 1080
+						   }
+						};
+						ws.send(JSON.stringify(e));		
+					}									
 				}
 				if(flake.label.contains("Avatar")){
 					var b = flake.bytes;
