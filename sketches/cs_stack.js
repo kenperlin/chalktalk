@@ -13,26 +13,30 @@ function() {
          let centerY = sketchCtx.stack.size();
          let scale = 1;
          this.center = [centerX, centerY];
-         this.value = value;
+         this.value = value.value || value;
+         this.color = value.color || "white";
          this.scale = scale;
       }
       Stack.Item.prototype = {
          drawItem: function() {
-            sketchCtx.drawItem(this.center, this.scale, this.value);
+            sketchCtx.drawItem(this.center, this.scale, this.value, this.color);
         }
      }
    }
 
 
-   this.drawItem = function(center, scale, value) {
+   this.drawItem = function(center, scale, value, itemColor) {
       let left = center[0] - scale;
       let right = center[0] + scale;
       let bottom = center[1] - scale/2;
       let top = center[1] + scale/2;
+      _g.save();
+      color(itemColor);
       mLine([left,bottom],[right,bottom]);
       mLine([left,bottom],[left, top]);
       mLine([right, bottom],[right,top]);
       mLine([left,top],[right,top]);
+      _g.restore();
       textHeight(this.mScale(.3));
       mText(value, center, .5, .5, .5);
    }

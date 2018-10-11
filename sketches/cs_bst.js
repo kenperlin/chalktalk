@@ -14,22 +14,22 @@ function() {
 
       let best = {glyph : SketchGlyphCommand.Null, score : drawing.WORST_SCORE, idx : -1};
       
-      console.log("GLYPHS");
-      console.log(glyphs);
-      console.log("CURVES");
-      console.log(curves);
+      //console.log("GLYPHS");
+      //console.log(glyphs);
+      //console.log("CURVES");
+      //console.log(curves);
       
       for (let i = 0; i < glyphs.length; i++) {
          const score = drawing.compare(glyphs[i]);
          if (score < best.score) {
-            console.log("FOUND BETTER");
+            //console.log("FOUND BETTER");
             best.glyphMatch = glyphs[i];
             best.score = score;
             best.idx = i;
          }
       }
       
-      console.log("BEST");
+      //console.log("BEST");
       console.log(best);
 
       return best;
@@ -248,7 +248,8 @@ function() {
    };
 
    this.output = function() {
-      return this.tree.operationStack;
+      //return this.tree.operationStack;
+      return this.tree.recursiveCallStack;
    }
 
    this.under = function(other) {

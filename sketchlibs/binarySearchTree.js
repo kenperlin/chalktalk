@@ -16,6 +16,8 @@ function BinarySearchTree(sketchCtx) {
    // Keeps track of all operations for output
    this.operationStack = [];
 
+   this.recursiveCallStack = [];
+
    // LEGACY UNDO
    this.useOldHistory = true;
 
@@ -161,19 +163,34 @@ BinarySearchTree.prototype = {
    },
 
    _inOrder : function*(node, pauseTime) {
+
       node.colorManager.enableColor(true).setColor("purple");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
-      if (node === null){
-         return;
-      }
+
+      const stackRecord = {value : node.value, color : "purple", time : time};
+      this.recursiveCallStack.push(stackRecord);
+
+      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+
       if (node.left !== null) {
          yield *this._inOrder(node.left, pauseTime);
-      }
-      node.colorManager.enableColor(true).setColor("green");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      } 
+
+      node.colorManager.enableColor(true).setColor("purple");
+      
+      //for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
+      
       if (node.right !== null) {
          yield *this._inOrder(node.right, pauseTime);
-      }
+      } 
+
+      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+
+      node.colorManager.enableColor(true).setColor("green");
+      stackRecord.color = "green";
+
+      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+
+      this.recursiveCallStack.pop();
    },
 
    preOrder : function() {
