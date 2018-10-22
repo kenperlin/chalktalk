@@ -128,7 +128,6 @@ BinarySearchTree.prototype = {
 
          this.breakpoint.unblock();
 
-         // TODO this.breakpoint.
          return;
       }
       this.isAcceptingInput = false;
@@ -171,11 +170,58 @@ BinarySearchTree.prototype = {
       if (!this.operationMemory.active) {
          this.operationMemory.operation = (function() {
             const op = args.proc(args);
-            return function(_args) { return op.next(_args) };
+
+            let retVal = null;
+
+            return function() {
+               const out = op.next(retVal);
+               retVal = out.value;
+               return out;
+            };
+
          }());
          this.operationMemory.active = true;
       }
-   }, 
+   },
+
+   sum : function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+
+      if (node == null) {
+         return 0;
+      }
+
+
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
+
+      {
+         node.colorManager.enableColor(true).setColor("purple");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+      }
+
+      args.root = node.left;
+      const subLeft = yield *proc(args);
+      args.root = node.right;
+      const subRight = yield *proc(args);
+
+      node.value += subLeft + subRight;
+
+      {
+         node.colorManager.enableColor(true).setColor("green");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+
+         if (self.breakpoint.block()) {
+            yield;
+         }
+      }
+      
+      return node.value;
+   },
 
    inOrder : function*(args) {
       const sketch    = args.sketch;
@@ -185,7 +231,7 @@ BinarySearchTree.prototype = {
       const proc      = args.proc;
 
       if (node == null) {
-         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
@@ -207,7 +253,6 @@ BinarySearchTree.prototype = {
       yield;
 
       if (self.breakpoint.block()) {
-         console.log("BLOCK");
          yield;
       }
 
@@ -882,7 +927,7 @@ BinarySearchTree.prototype = {
                null : this._findClickedNode(node, clickLocation);
    },
 
-   drawEmpty : function(center, radius = 0.5) {
+   _drawEmpty : function(center, radius = 0.5) {
       const left = center[0] - radius;
       const right = center[0] + radius;
       const bottom = center[1] - radius;

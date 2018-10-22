@@ -82,6 +82,21 @@ function() {
 
    this.setupGlyphCommands = function() {
       this.cmdGlyphs = [
+         new SketchGlyphCommand("sum", [
+            [[1, 1], [-1, 1], [0, 0], [-1, -1], [1, -1]]
+         ], function(args) {
+               args.self.tree.saveState();
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.sum,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         ),
          new SketchGlyphCommand("pre-order", [
             [[0, 1], [-1, -1], [1, -1]]
          ], function(args) { args.self.tree.preOrder(); }),
