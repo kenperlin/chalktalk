@@ -1,6 +1,13 @@
 function() {
    this.label = 'bst';
 
+
+   this.props = {
+      isPaused : false,
+      breakpointsOn : false,
+      speedFactor : 0.5
+   };
+
    function SketchGlyphCommand(name, src, commandCallback) {
       SketchGlyph.call(this, name, src);
       this.execute = commandCallback || function() {};
@@ -30,7 +37,7 @@ function() {
       }
       
       //console.log("BEST");
-      console.log(best);
+      //console.log(best);
 
       return best;
    };
@@ -75,13 +82,39 @@ function() {
 
    this.setupGlyphCommands = function() {
       this.cmdGlyphs = [
+         new SketchGlyphCommand("sum", [
+            [[1, 1], [-1, 1], [0, 0], [-1, -1], [1, -1]]
+         ], function(args) {
+               args.self.tree.saveState();
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.sum,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         ),
          new SketchGlyphCommand("pre-order", [
             [[0, 1], [-1, -1], [1, -1]]
          ], function(args) { args.self.tree.preOrder(); }),
 
          new SketchGlyphCommand("in-order", [
             [[-1, -1], [0, 1], [1, -1]]
-         ], function(args) { args.self.tree.inOrder(); }),
+         ], function(args) { 
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.inOrder,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         ),
 
          new SketchGlyphCommand("post-order", [
             [[-1, -1], [1, -1], [0, 1]]
@@ -89,7 +122,17 @@ function() {
 
          new SketchGlyphCommand("breadth-first", [
             [[0, 1], [-1, 0.75], [1, 0.75], [-1, 0], [1, 0]]
-         ], function(args) { args.self.tree.breadthFirst(); })
+         ], function(args) { 
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.breadthFirst,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+         }),
       ];      
    };
 
@@ -171,6 +214,29 @@ function() {
          this.tree.restorePast();
       }
    ];
+
+   function unpause(entity) {
+      if (!entity.breakpoint) {
+         return;
+      }
+
+      entity.breakpoint.unblock();
+   }
+
+   this.onSwipe[0] = [
+      'next',
+      function() {
+         if (!this.tree.isAcceptingInput) {
+            unpause(this.tree);
+         } else {
+            // this.tree.breakpoint.enableBreakpoints(
+            //    !this.tree.breakpoint.breakpointsAreActive
+            // );
+         }
+      }
+   ];
+
+
 
    this.onCmdPress = function(p) {
       if (this.glyphCommandInProgress) {
@@ -283,7 +349,7 @@ function() {
       return this.tree.isAcceptingInput;
    };
 
-
+   this.breakpointsWereOn = false;
    // THE ELAPSED TIME MUST BE AVAILABLE AT ALL TIMES, HOW TO ENFORCE?
    this.render = function(elapsed) {
       this.duringSketch(function() {
@@ -302,11 +368,23 @@ function() {
             [2.5, -1]
          ]);
       });
-      this.afterSketch(function() {
 
-         this.tree.doPendingOperation();
+
+      this.afterSketch(function() {
+         const BREAKPOINTS_ON = this.prop("breakpointsOn");
+         if (!BREAKPOINTS_ON && this.breakpointsWereOn) {
+            unpause(this.tree);
+         }
+
+         const IS_BLOCKED = this.prop("isPaused") || (this.tree.doPendingOperation(BREAKPOINTS_ON) == -1);
+         this.breakpointsWereOn = BREAKPOINTS_ON;
 
          this.tree.drawTree();
+
+         if (IS_BLOCKED) {
+            textHeight(this.mScale(0.8));
+            mText("||", [0.0, 1.0], .5, .5, .5);
+         }
 
          _g.save();
          color("cyan");

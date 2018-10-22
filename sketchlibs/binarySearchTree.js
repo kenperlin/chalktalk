@@ -26,12 +26,13 @@ function BinarySearchTree(sketchCtx) {
    this.depthCounts = {};
 
    // TODO : IMPLEMENT SKETCH CONTROLS TO ENABLE / DISABLE
-   this.blocker = new BreakpointManager();
-   // this.blocker.enableBreakpoints(true);
+   this.breakpoint = new BreakpointController();
+   // this.breakpoint.enableBreakpoints(true);
 
    this.operationMemory = {
       active : false,
-      operation : null
+      operation : null,
+      pause : null
    };
    this.isAcceptingInput = true;
 
@@ -92,16 +93,30 @@ function BinarySearchTree(sketchCtx) {
    };
 }
 
+
+
    
 BinarySearchTree.prototype = {
-   doPendingOperation : function() {
+   doPendingOperation : function(useBreakpoints = false) {
       if (!this.operationMemory.active) {
          this.isAcceptingInput = true;
          return;
       }
-      if (this.blocker.isBlocked()) {
-         return;
+      //console.log("BREAKPOINTSON: " + breakpointsOn);
+     // console.log("BLOCKED ENABLED: " + useBreakpoints + ", IS BLOCKED: " + this.breakpoint.isBlocked());
+      if (useBreakpoints && this.breakpoint.isBlocked()) {
+         return -1;
       }
+
+      if (this.operationMemory.pause) {
+         if (this.operationMemory.pause()) {
+            return;
+         }
+         else {
+            this.operationMemory.pause = null;
+         }
+      }
+
       const status = this.operationMemory.operation();
       if (status.done) {
          this.operationMemory.active = false;
@@ -111,7 +126,8 @@ BinarySearchTree.prototype = {
          this._mustInitializePositions = true;
          this.isAcceptingInput = true;
 
-         // TODO this.blocker.
+         this.breakpoint.unblock();
+
          return;
       }
       this.isAcceptingInput = false;
@@ -132,10 +148,10 @@ BinarySearchTree.prototype = {
    calcTraversalPauseTime : function() {
       const size = this.size();
       if (size == 0) {
-         return 0.1;
+         return 0.1 / 2;
       }
       const ret = max((4.2 / size), 0.13);
-      return ret;
+      return ret / 2;
    },
 
    getSize: function(){
@@ -149,48 +165,111 @@ BinarySearchTree.prototype = {
       return this._getSize(node.left) + 1 + this._getSize(node.right);
    },
 
-   inOrder : function() {
+   addOperation : function(args) {
       const self = this;
       if (!this.operationMemory.active) {
          this.operationMemory.operation = (function() {
-            const op = self._inOrder(self.root, self.calcTraversalPauseTime());
+            const op = args.proc(args);
 
-            return function(args) { return op.next(args); };
+            let retVal = null;
+
+            return function() {
+               const out = op.next(retVal);
+               retVal = out.value;
+               return out;
+            };
 
          }());
          this.operationMemory.active = true;
       }
    },
 
-   _inOrder : function*(node, pauseTime) {
+   sum : function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+
+      if (node == null) {
+         return 0;
+      }
+
+
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
+
+      {
+         node.colorManager.enableColor(true).setColor("purple");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+      }
+
+      args.root = node.left;
+      const subLeft = yield *proc(args);
+      args.root = node.right;
+      const subRight = yield *proc(args);
+
+      node.value += subLeft + subRight;
+
+      {
+         node.colorManager.enableColor(true).setColor("green");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+
+         if (self.breakpoint.block()) {
+            yield;
+         }
+      }
+      
+      return node.value;
+   },
+
+   inOrder : function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
+
+      if (node == null) {
+         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         return;
+      }
 
       node.colorManager.enableColor(true).setColor("purple");
 
       const stackRecord = {value : node.value, color : "purple", time : time};
-      this.recursiveCallStack.push(stackRecord);
+      self.recursiveCallStack.push(stackRecord);
 
-      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+      yield;
 
-      if (node.left !== null) {
-         yield *this._inOrder(node.left, pauseTime);
-      } 
-
-      node.colorManager.enableColor(true).setColor("purple");
-      
-      //for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
-      
-      if (node.right !== null) {
-         yield *this._inOrder(node.right, pauseTime);
-      } 
-
-      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+      args.root = node.left;
+      yield *proc(args);
 
       node.colorManager.enableColor(true).setColor("green");
       stackRecord.color = "green";
 
-      for (let p = LerpUtil.pause(pauseTime * 1, this.sketchCtx); p();) { yield; }
+      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+      yield;
 
-      this.recursiveCallStack.pop();
+      if (self.breakpoint.block()) {
+         yield;
+      }
+
+      args.root = node.right
+      yield *proc(args);
+
+
+      node.colorManager.enableColor(true).setColor("red");
+      stackRecord.color = "red";
+
+      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+      yield;
+
+      self.recursiveCallStack.pop();
+
+      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+      yield;
    },
 
    preOrder : function() {
@@ -259,39 +338,31 @@ BinarySearchTree.prototype = {
       for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
 
    },
-
-   breadthFirst : function() {
-      const self = this;
-      if (!this.operationMemory.active) {
-         this.operationMemory.operation = (function() {
-            const op = self._breadthFirst(self.calcTraversalPauseTime());
-
-            return function(args) { return op.next(args); };
-
-         }());
-         this.operationMemory.active = true;
-      }
-   },
-
-   _breadthFirst : function*(pauseDuration) {
-      if (this.root === null) {
+   breadthFirst : function*(args) {
+      if (args.root === null) {
          return;
       }
+
+      const pauseDuration = args.pauseDuration || 0;
 
       const pauseDequeue = LerpUtil.pauseAutoReset(pauseDuration);
       const pauseEnqueue = LerpUtil.pauseAutoReset(pauseDuration);
 
       const queue = [];
-      let parent = this.root;
+      let parent = args.root;
 
       parent.colorManager.enableColor(true).setColor("yellow");
       queue.push(parent);
+
+
       while (pauseEnqueue()) { yield; }
       
       while (queue.length > 0) {
          parent = queue.shift();
          parent.colorManager.enableColor(true).setColor("green");
          while (pauseDequeue()) { yield; }
+
+         console.log(parent.children);
 
          for (const child of parent.children) {
             child.colorManager.enableColor(true).setColor("yellow");
@@ -427,7 +498,7 @@ BinarySearchTree.prototype = {
       }
 
       
-      this.blocker.block();
+      this.breakpoint.block();
 
       // CASE 3 : FIND A PREDECESSOR
 
@@ -471,7 +542,7 @@ BinarySearchTree.prototype = {
 
       while (movementPause()) { yield; }
 
-      this.blocker.block();
+      this.breakpoint.block();
 
       // MOVE THE COPY VALUE (VISUALLY)
       const c1 = find.center;
@@ -856,7 +927,7 @@ BinarySearchTree.prototype = {
                null : this._findClickedNode(node, clickLocation);
    },
 
-   drawEmpty : function(center, radius = 0.5) {
+   _drawEmpty : function(center, radius = 0.5) {
       const left = center[0] - radius;
       const right = center[0] + radius;
       const bottom = center[1] - radius;

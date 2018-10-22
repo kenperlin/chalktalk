@@ -14,7 +14,7 @@ function() {
       // Keeps track of all operations for output
       this.operationStack = [];
 
-      this.blocker = new BreakpointManager();
+      this.breakpoint = new BreakpointController();
 
 
       Graph.Node = function(value, center) {
@@ -36,7 +36,7 @@ function() {
             this.isAcceptingInput = true;
             return;
          }
-         if (this.blocker.isBlocked()) {
+         if (this.breakpoint.isBlocked()) {
             return;
          }
          const status = this.operationMemory.operation();
@@ -48,7 +48,7 @@ function() {
             this._mustInitializePositions = true;
             this.isAcceptingInput = true;
 
-            // TODO this.blocker.
+            // TODO this.breakpoint.
             return;
          }
          this.isAcceptingInput = false;
