@@ -97,6 +97,7 @@ function BinarySearchTree(sketchCtx) {
 
    
 BinarySearchTree.prototype = {
+   PENDING_COLOR : "rgb(20, 65, 113)",
    doPendingOperation : function(useBreakpoints = false) {
       if (!this.operationMemory.active) {
          this.isAcceptingInput = true;
@@ -148,10 +149,10 @@ BinarySearchTree.prototype = {
    calcTraversalPauseTime : function() {
       const size = this.size();
       if (size == 0) {
-         return 0.1 / 2;
+         return 0.1 / 1.5;
       }
       const ret = max((4.2 / size), 0.13);
-      return ret / 2;
+      return ret / 1.5;
    },
 
    getSize: function(){
@@ -235,107 +236,151 @@ BinarySearchTree.prototype = {
          return;
       }
 
-      node.colorManager.enableColor(true).setColor("purple");
-
       const stackRecord = {value : node.value, color : "purple", time : time};
-      self.recursiveCallStack.push(stackRecord);
+      {
+            node.colorManager.enableColor(true).setColor("purple");
+            
+            self.recursiveCallStack.push(stackRecord);
 
-      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
-      yield;
+            self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+            yield;
+      }
 
       args.root = node.left;
       yield *proc(args);
 
-      node.colorManager.enableColor(true).setColor("green");
-      stackRecord.color = "green";
+      {
+            node.colorManager.enableColor(true).setColor("green");
+            stackRecord.color = "green";
 
-      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
-      yield;
+            self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+            yield;
 
-      if (self.breakpoint.block()) {
-         yield;
+            if (self.breakpoint.block()) {
+               yield;
+            }
       }
 
-      args.root = node.right
+      args.root = node.right;
       yield *proc(args);
 
 
-      node.colorManager.enableColor(true).setColor("red");
-      stackRecord.color = "red";
+      {
+            node.colorManager.enableColor(true).setColor("red");
+            stackRecord.color = "red";
 
-      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
-      yield;
+            self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+            yield;
 
-      self.recursiveCallStack.pop();
+            self.recursiveCallStack.pop();
 
-      self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
-      yield;
-   },
-
-   preOrder : function() {
-      const self = this;
-      if (!this.operationMemory.active) {
-         this.operationMemory.operation = (function() {
-            const op = self._preOrder(self.root, self.calcTraversalPauseTime());
-
-            return function(args) { return op.next(args); };
-
-         }());
-         this.operationMemory.active = true;
+            self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+            yield;
       }
    },
 
-   _preOrder : function*(node, pauseTime) {
-      node.colorManager.enableColor(true).setColor("purple");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
+   preOrder : function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
 
-      if (node === null) {
+      if (node == null) {
+         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
-      node.colorManager.enableColor(true).setColor("green");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
+            const stackRecord = {value : node.value, color : "green", time : time};
+            {
+               node.colorManager.enableColor(true).setColor("green");
 
-      if (node.left !== null) {
-         yield *this._preOrder(node.left, pauseTime);
-      }
+               self.recursiveCallStack.push(stackRecord);
 
-      if (node.right !== null){
-         yield *this._preOrder(node.right, pauseTime);
-      }
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+            }
+
+      args.root = node.left;
+      yield *proc(args);
+
+            if (self.breakpoint.block()) {
+               yield;
+            }
+
+      args.root = node.right;
+      yield *proc(args);
+
+
+            {
+                  node.colorManager.enableColor(true).setColor("green");
+                  stackRecord.color = "green";
+
+                  self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+                  yield;
+
+                  if (self.breakpoint.block()) {
+                     yield;
+                  }
+            }
+            {
+               node.colorManager.enableColor(true).setColor("red");
+               stackRecord.color = "red";
+
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+
+               self.recursiveCallStack.pop();
+
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+            }
    },
 
+   postOrder: function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
 
-   postOrder : function() {
-      const self = this;
-      if (!this.operationMemory.active) {
-         this.operationMemory.operation = (function() {
-            const op = self._postOrder(self.root, self.calcTraversalPauseTime());
-
-            return function(args) { return op.next(args); };
-
-         }());
-         this.operationMemory.active = true;
-      }
-   },
-
-   _postOrder: function*(node, pauseTime) {
-      node.colorManager.enableColor(true).setColor("purple");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
-      if (node === null) {
+      if (node == null) {
+         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
-      if (node.left !== null) {
-         yield *this._postOrder(node.left, pauseTime);
-      }
+            const stackRecord = {value : node.value, color : "purple", time : time};
+            {
+               node.colorManager.enableColor(true).setColor("purple");
 
-      if (node.right !== null) {
-         yield *this._postOrder(node.right, pauseTime);
-      }
+               self.recursiveCallStack.push(stackRecord);
 
-      node.colorManager.enableColor(true).setColor("green");
-      for (let p = LerpUtil.pause(pauseTime, this.sketchCtx); p();) { yield; }
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+            }
+
+      args.root = node.left;
+      yield *proc(args);
+
+            if (self.breakpoint.block()) {
+               yield;
+            }
+
+      args.root = node.right;
+      yield *proc(args);
+
+            {
+               node.colorManager.enableColor(true).setColor("red");
+               stackRecord.color = "red";
+
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+
+               self.recursiveCallStack.pop();
+
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+               yield;
+            }
 
    },
    breadthFirst : function*(args) {
@@ -350,24 +395,45 @@ BinarySearchTree.prototype = {
 
       const queue = [];
       let parent = args.root;
+      const self = args.self;
 
-      parent.colorManager.enableColor(true).setColor("yellow");
+      parent.colorManager.enableColor(true).setColor(self.PENDING_COLOR);
       queue.push(parent);
+      args.self.recursiveCallStack.push({value : parent.value, color : self.PENDING_COLOR, time : time});
 
 
       while (pauseEnqueue()) { yield; }
+      if (self.breakpoint.block()) {
+         yield;
+      }
       
       while (queue.length > 0) {
          parent = queue.shift();
+         //parent = queue.pop();
          parent.colorManager.enableColor(true).setColor("green");
+
+         args.self.recursiveCallStack[0].color = "green";
+
          while (pauseDequeue()) { yield; }
 
-         console.log(parent.children);
+         if (self.breakpoint.block()) {
+            yield;
+         }
+
+         args.self.recursiveCallStack.shift();
+
+         //console.log(parent.children);
 
          for (const child of parent.children) {
-            child.colorManager.enableColor(true).setColor("yellow");
+            child.colorManager.enableColor(true).setColor(self.PENDING_COLOR);
             queue.push(child);
+
+            args.self.recursiveCallStack.push({value : child.value, color : self.PENDING_COLOR, time : time});
             while (pauseEnqueue()) { yield; }
+         }
+
+         if (self.breakpoint.block()) {
+            yield;
          }
       }
    },

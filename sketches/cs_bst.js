@@ -99,7 +99,18 @@ function() {
          ),
          new SketchGlyphCommand("pre-order", [
             [[0, 1], [-1, -1], [1, -1]]
-         ], function(args) { args.self.tree.preOrder(); }),
+         ], function(args) {
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.preOrder,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         ),
 
          new SketchGlyphCommand("in-order", [
             [[-1, -1], [0, 1], [1, -1]]
@@ -118,7 +129,18 @@ function() {
 
          new SketchGlyphCommand("post-order", [
             [[-1, -1], [1, -1], [0, 1]]
-         ], function(args) { args.self.tree.postOrder(); }),
+         ], function(args) { 
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : args.self.tree.postOrder,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         ),
 
          new SketchGlyphCommand("breadth-first", [
             [[0, 1], [-1, 0.75], [1, 0.75], [-1, 0], [1, 0]]
@@ -375,6 +397,9 @@ function() {
          if (!BREAKPOINTS_ON && this.breakpointsWereOn) {
             unpause(this.tree);
          }
+
+
+         console.log(this.prop("isPaused"));
 
          const IS_BLOCKED = this.prop("isPaused") || (this.tree.doPendingOperation(BREAKPOINTS_ON) == -1);
          this.breakpointsWereOn = BREAKPOINTS_ON;
