@@ -51,6 +51,9 @@ function() {
       pop: function(){
          return this.array.pop();
       },
+      peek : function() {
+         return this.array[this.array.length - 1];
+      },
       draw: function(){
          this.array.forEach(function(item){
             item.drawItem();
@@ -133,4 +136,8 @@ function() {
 
      });
    }
+
+   this.output = function() {
+      return (this.stack.size() > 0) ? this.stack.peek().value : 0;
+   };
 }

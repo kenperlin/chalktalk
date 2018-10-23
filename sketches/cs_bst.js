@@ -399,7 +399,7 @@ function() {
          }
 
 
-         console.log(this.prop("isPaused"));
+         //console.log(this.prop("isPaused"));
 
          const IS_BLOCKED = this.prop("isPaused") || (this.tree.doPendingOperation(BREAKPOINTS_ON) == -1);
          this.breakpointsWereOn = BREAKPOINTS_ON;
