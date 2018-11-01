@@ -103,6 +103,7 @@ BinarySearchTree.prototype = {
          this.isAcceptingInput = true;
          return;
       }
+
       //console.log("BREAKPOINTSON: " + breakpointsOn);
      // console.log("BLOCKED ENABLED: " + useBreakpoints + ", IS BLOCKED: " + this.breakpoint.isBlocked());
       if (useBreakpoints && this.breakpoint.isBlocked()) {
@@ -122,6 +123,7 @@ BinarySearchTree.prototype = {
       if (status.done) {
          this.operationMemory.active = false;
          this.operationMemory.operation = null;
+         this.operationMemory.pause = null;
          // TODO : MAKE RE-INITIALIZATION CLEANER,
          // ADDITIONAL CASES TO CONSIDER FOR IN-PROGRESS OPERATIONS
          this._mustInitializePositions = true;
@@ -205,9 +207,9 @@ BinarySearchTree.prototype = {
       }
 
       args.root = node.left;
-      const subLeft = yield *proc(args);
+      const subLeft = (node.left == null) ? 0 : yield *proc(args);
       args.root = node.right;
-      const subRight = yield *proc(args);
+      const subRight = (node.right == null) ? 0 : yield *proc(args);
 
       node.value += subLeft + subRight;
 
@@ -232,7 +234,6 @@ BinarySearchTree.prototype = {
       const proc      = args.proc;
 
       if (node == null) {
-         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
@@ -246,8 +247,10 @@ BinarySearchTree.prototype = {
             yield;
       }
 
-      args.root = node.left;
-      yield *proc(args);
+      if (node.left != null) {
+         args.root = node.left;
+         yield *proc(args);
+      }
 
       {
             node.colorManager.enableColor(true).setColor("green");
@@ -261,8 +264,10 @@ BinarySearchTree.prototype = {
             }
       }
 
-      args.root = node.right;
-      yield *proc(args);
+      if (node.right != null) {
+         args.root = node.right;
+         yield *proc(args);
+      }
 
 
       {
@@ -287,7 +292,6 @@ BinarySearchTree.prototype = {
       const proc      = args.proc;
 
       if (node == null) {
-         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
@@ -301,15 +305,19 @@ BinarySearchTree.prototype = {
                yield;
             }
 
-      args.root = node.left;
-      yield *proc(args);
+      if (node.left != null) {
+         args.root = node.left;
+         yield *proc(args);
+      }
 
             if (self.breakpoint.block()) {
                yield;
             }
 
-      args.root = node.right;
-      yield *proc(args);
+      if (node.right != null) {
+         args.root = node.right;
+         yield *proc(args);
+      }
 
 
             {
@@ -345,7 +353,6 @@ BinarySearchTree.prototype = {
       const proc      = args.proc;
 
       if (node == null) {
-         //self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
          return;
       }
 
@@ -359,15 +366,25 @@ BinarySearchTree.prototype = {
                yield;
             }
 
-      args.root = node.left;
-      yield *proc(args);
+      if (node.left  != null) {
+         args.root = node.left;
+         yield *proc(args);
+      }
 
-            if (self.breakpoint.block()) {
+      if (node.right != null) {
+         args.root = node.right;
+         yield *proc(args);
+      }
+            {
+
+               self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
                yield;
+               node.colorManager.enableColor(true).setColor("green");
+               stackRecord.color = "green";
+               if (self.breakpoint.block()) {
+                  yield;
+               }
             }
-
-      args.root = node.right;
-      yield *proc(args);
 
             {
                node.colorManager.enableColor(true).setColor("red");
@@ -381,7 +398,6 @@ BinarySearchTree.prototype = {
                self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
                yield;
             }
-
    },
    breadthFirst : function*(args) {
       if (args.root === null) {

@@ -81,7 +81,7 @@ function() {
    };
 
    this.setupGlyphCommands = function() {
-      this.cmdGlyphs = [
+      this.cmdGlyphs = [       
          new SketchGlyphCommand("sum", [
             [[1, 1], [-1, 1], [0, 0], [-1, -1], [1, -1]]
          ], function(args) {
@@ -157,6 +157,67 @@ function() {
          }),
       ];      
    };
+
+
+/*
+   const mul = function*(args) {
+      const sketch    = args.sketch;
+      const self      = args.self;
+      const node      = args.root;
+
+      if (node == null) {
+         return 0;
+      }
+
+
+      const pauseTime = args.pauseDuration;
+      const proc      = args.proc;
+
+      {
+         node.colorManager.enableColor(true).setColor("purple");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+      }
+
+      args.root = node.left;
+      const subLeft = (node.left == null) ? 0 : yield *proc(args);
+      args.root = node.right;
+      const subRight = (node.right == null) ? 0 : yield *proc(args);
+
+      node.value += subLeft * subRight;
+
+      {
+         node.colorManager.enableColor(true).setColor("green");
+         self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+         yield;
+
+         if (self.breakpoint.block()) {
+            yield;
+         }
+      }
+      
+      return node.value;
+   };
+
+   this.cmdGlyphs.push(
+         new SketchGlyphCommand("mul", [
+            [[1, -1], [1, 1], [-1, 1], [-1, -1]]
+         ], function(args) {
+               args.self.tree.saveState();
+               args.self.tree.addOperation({
+                  sketch : args.self,
+                  proc : mul,
+                  self : args.self.tree, 
+                  root : args.self.tree.root,
+                  pauseDuration : args.self.tree.calcTraversalPauseTime(),
+                  callback : null,
+                  callbackArgs : null
+               });
+            }
+         )
+   );
+
+*/
 
    this.setup = function() {
       //sketchCtx = this;
@@ -393,32 +454,35 @@ function() {
 
 
       this.afterSketch(function() {
-         const BREAKPOINTS_ON = this.prop("breakpointsOn");
-         if (!BREAKPOINTS_ON && this.breakpointsWereOn) {
-            unpause(this.tree);
-         }
 
+         do {
+            const BREAKPOINTS_ON = this.prop("breakpointsOn");
+            if (!BREAKPOINTS_ON && this.breakpointsWereOn) {
+               unpause(this.tree);
+            }
 
-         //console.log(this.prop("isPaused"));
+            this.breakpointsWereOn = BREAKPOINTS_ON;
+            
+            const IS_BLOCKED = this.prop("isPaused") || (this.tree.doPendingOperation(BREAKPOINTS_ON) == -1);
 
-         const IS_BLOCKED = this.prop("isPaused") || (this.tree.doPendingOperation(BREAKPOINTS_ON) == -1);
-         this.breakpointsWereOn = BREAKPOINTS_ON;
+            this.tree.drawTree();
 
-         this.tree.drawTree();
+            if (IS_BLOCKED) {
+               textHeight(this.mScale(0.8));
+               mText("||", [0.0, 1.0], .5, .5, .5);
+            }
 
-         if (IS_BLOCKED) {
-            textHeight(this.mScale(0.8));
-            mText("||", [0.0, 1.0], .5, .5, .5);
-         }
+         } while (this.prop("isImmediate") && this.tree.operationMemory.active);
 
-         _g.save();
-         color("cyan");
-         lineWidth(1);
-         const curves = this.glyphCurves.array;
-         for (let i = 0; i < curves.length; i++) {
-            mCurve(curves[i]);
-         }
-         _g.restore();
+            _g.save();
+            color("cyan");
+            lineWidth(1);
+            const curves = this.glyphCurves.array;
+            for (let i = 0; i < curves.length; i++) {
+               mCurve(curves[i]);
+            }
+            _g.restore();
+
       });
    };
 }
