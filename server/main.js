@@ -9,7 +9,7 @@ const path = require('path');
 const dgram = require('dgram');
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.14'];
+var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
@@ -130,9 +130,9 @@ try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
-
    let batchTimestamp = 0;
    let batchTimestampOverflow = 0;
+
 
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
@@ -146,152 +146,7 @@ try {
          // Broadcast curve data
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
-               /*
-               //console.log("{");
-               //console.log(new Uint16Array(data, 0, 2)[0]);
-               //console.log(data.subarray(0, 20));
-               //console.log(data.subarray(0, 10));
-
-               //console.log("DATA LENGTH: " + data.length + " DATA BYTE LENGTH: " + data.byteLength);
-
-               //var A = new Uint16Array(data, 0, data.byteLength / 2);
-               //var B = new Uint16Array(data, data.byteLength / 2);
-
-
-               //console.log("A LENGTH: " + A.length + " A BYTE LENGTH: " + A.byteLength);
-               //console.log("B LENGTH: " + B.length + " B BYTE LENGTH: " + B.byteLength);
-
-               var buffA = data.subarray(0, data.byteLength / 2);
-               var buffB = data.subarray(data.byteLength / 2);
-               for (let i = 0; i < 8; ++i) {
-                  buffB[i] = buffA[i];
-               }
-
-               //console.log(buffA);
-               //console.log(buffB);
-
-               //console.log(readHeader(buffA) == "CTdata01" && readHeader(buffB) == "CTdata01");
-
-               //console.log("}");
-
-               */
-
-
-
-               /* OLD
-               ///*
-               const HEADER_SIZE = 8;
-               var A = new Uint8Array(((data.byteLength - HEADER_SIZE) / 2) + HEADER_SIZE);
-               var B = new Uint8Array(((data.byteLength - HEADER_SIZE) / 2) + HEADER_SIZE);  
-               const buffA = Buffer.from(A.buffer);
-               const buffB = Buffer.from(B.buffer);
-
-               data.copy(buffA, 0, 0, HEADER_SIZE);
-               data.copy(buffB, 0, 0, HEADER_SIZE);
-
-               //console.log(data);
-               //console.log(buffA);
-               //console.log(buffB);
-
-               //console.log(data.length); 
-               //console.log(buffA.length);
-               //console.log(buffB.length);
-
-               const ALL = new Uint8Array(60008 * 4);
-
-               const T1 = Buffer.from(ALL.buffer, 0,         60008);
-               const T2 = Buffer.from(ALL.buffer, 60008,     60008);
-               const T3 = Buffer.from(ALL.buffer, 60008 * 2, 60008);
-               const T4 = Buffer.from(ALL.buffer, 60008 * 3, 60008);
-
-               data.copy(T1, 0, 0, HEADER_SIZE);
-               data.copy(T2, 0, 0, HEADER_SIZE);
-               data.copy(T3, 0, 0, HEADER_SIZE);
-               data.copy(T4, 0, 0, HEADER_SIZE);
-
-
-               
-               
-               
-
-
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                  {
-                     label: 'Display1', bytes: T1, ints : new Uint16Array([4, 1])
-                  }
-               ]));
-
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                  {
-                     label: 'Display2', bytes: T2, ints : new Uint16Array([4, 2])
-                  } 
-               ]));
-
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                  {
-                     label: 'Display3', bytes: T3, ints : new Uint16Array([4, 3])
-                  } 
-               ]));
-
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                  {
-                     label: 'Display4', bytes: T4, ints : new Uint16Array([4, 4])
-                  }
-               ]));
-               */
-
-               // TRY HERE
-
-/*
-               const len = data.byteLength;
-               let sliceCount = 1;
-
-               console.log("LEN: " + len);
-
-               while (len > (60000 * sliceCount)) {
-                  sliceCount *= 2;
-               }
-
-               const labelPrefix = "Display";
-
-               console.log("slice count: " + sliceCount);
-
-               if (sliceCount == 1) {
-                  holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                     {
-                        label: 'Display1', bytes: data, ints: [1, 1]
-                     }
-                  ]));                
-               }
-               else {
-                  const HEADER_SIZE = 8;
-                  var A = new Uint8Array(((data.byteLength - HEADER_SIZE) / sliceCount) + HEADER_SIZE);
-                  var B = new Uint8Array(((data.byteLength - HEADER_SIZE) / sliceCount) + HEADER_SIZE);
-                  const buffA = Buffer.from(A.buffer);
-                  const buffB = Buffer.from(B.buffer);
-
-                  data.copy(buffA, 0, 0, HEADER_SIZE);
-                  data.copy(buffB, 0, 0, HEADER_SIZE);
-
-                  console.log("ALEN: " + A.length);
-                  console.log("BLEN: " + B.length);
-
-                  //console.log(buffA.byteLength);
-                  //console.log(buffB.byteLength);
-
-                  holojam.Send(holojam.BuildUpdate('ChalkTalk', [
-                     {
-                        label: 'Display1', bytes: buffA, ints: [2, 1]
-                     },
-                     {
-                        label: 'Display2', bytes: buffB, ints: [2, 2]
-                     } 
-                  ]));
-
-               }
-*/
                //
-
                const len = data.byteLength;
                let sliceCount = 1;
                //console.log("INITIAL LENGTH: " + len);
@@ -312,7 +167,6 @@ try {
                }
 
                //sliceCount = 1;
-
                //sliceCount = 2;
 
                if (sliceCount == 1) {
@@ -354,20 +208,6 @@ try {
 
                   console.log(batchTimestamp);
 
-                  // TEST
-                  // var byteIdx = 0;
-                  // var sliceIdx = 0;
-                  // for (; byteIdx < dataLen && sliceIdx < sliceCount; ++sliceIdx) {
-                  //    const slice = sliceList[sliceIdx][0].bytes;
-                  //    const sliceLen = slice.byteLength;
-                  //    for (var j = 0; j < sliceLen; ++j) {
-                  //       console.assert(data[byteIdx] == slice[j]);
-                  //       ++byteIdx;
-                  //    }
-                  // }
-                  // console.assert(byteIdx == dataLen);
-
-
                   for (var i = 0; i < sliceCount; ++i) {
                      holojam.Send(holojam.BuildUpdate('ChalkTalk', sliceList[i]));
                   }
@@ -375,107 +215,7 @@ try {
                   return;
 
                   //console.log("data size: " + data.byteLength);
-
-                  // console.log("{");
-                  // var D = "{";
-                  // for (var i = 0; i < data.byteLength; i++) {
-                  //    D += data[i] + ", ";
-                  // }
-                  // D += "}";
-                  // console.log(D);
-
-                  //console.log("bytesPerSlice - header_size: " + bytesPerSlice);
-
-// // OLD
-//                   { 
-//                      var doCorrection = false;
-//                      var i = 0;
-//                      for (var byteOffset = HEADER_SIZE;
-//                              i < sliceCount; 
-//                              ++i, byteOffset += bytesPerSlice
-//                      ) {
-
-//                         if (byteOffset >= data.byteLength) {
-//                            doCorrection = true;
-//                            break;
-//                         }
-
-//                         //console.log("byte_offset: " + byteOffset);
-
-//                         const buffSize = HEADER_SIZE + Math.min(
-//                            bytesPerSlice,
-//                            (data.byteLength) - byteOffset
-//                         );
-
-//                         //console.log("creating slice " + (i + 1) + " of size " + buffSize);
-                        
-//                         var u8arr = new Uint8Array(buffSize);
-//                         var u8buff = Buffer.from(u8arr.buffer);
-
-
-//                         data.copy(u8buff, 0, 0, HEADER_SIZE);
-//                         const sourceEnd = Math.min(byteOffset + bytesPerSlice, data.byteLength);
-//                         //console.log("copying data section: target_start=" + HEADER_SIZE + " source_start=" + byteOffset + " source_end=" + sourceEnd);
-//                         data.copy(u8buff, HEADER_SIZE, byteOffset, sourceEnd);
-
-//                         sliceList.push([{ 
-//                            label : labelPrefix + (i + 1), 
-//                            bytes : u8buff, 
-//                            ints  : [data.byteLength, sliceCount, i + 1, batchTimestamp]
-//                         }]);
-//                      }
-
-//                      // CORRECT OFF-BY-1 SLICE COUNT
-//                      if (doCorrection) {
-//                         //console.log("CORRECTING SLICE COUNT")
-//                         sliceCount = i;
-//                         for (i = 0; i < sliceCount; ++i) {
-//                            try {
-//                               sliceList[i][0].ints[0] = sliceCount;
-//                            } catch (e) {
-//                               console.error("index" + i);
-//                               console.error(sliceList[i]);
-//                               throw e;
-//                            }
-//                         }
-//                      }
-
-//                   }
-
-                  //console.log("SLICE COUNT: " + sliceCount);
-                  // for (var i = 0; i < sliceList.length; ++i) {
-                  //    console.log(sliceList[i][0].bytes.byteLength);
-                  //    var S = "{";
-                  //    for (let j = 0; j < sliceList[i][0].bytes.byteLength; ++j) {
-                  //       S += sliceList[i][0].bytes[j] + ", ";
-                  //    }
-                  //    S += "}";
-                  //    console.log(S);
-                  // }
-                  // console.log("}");
-
-                  // TESTING
-                  // const dataLen = data.byteLength;
-                  // var byteIdx = HEADER_SIZE;
-                  // for (var sliceIdx = 0; 
-                  //          byteIdx < dataLen && sliceIdx < sliceCount; 
-                  //          ++sliceIdx)
-                  // {
-                  //    const slice = sliceList[sliceIdx][0].bytes;
-                  //    const sliceLen = slice.byteLength;
-                  //    for (var j = HEADER_SIZE; j < sliceLen; ++j) {
-                  //       console.assert(data[byteIdx] == slice[j]);
-                  //       ++byteIdx;
-                  //    }
-                  // }
-                  // console.assert(byteIdx == dataLen);
-
-
-                  // for (var i = 0; i < sliceCount; ++i) {
-                  //    holojam.Send(holojam.BuildUpdate('ChalkTalk', sliceList[i]));
-                  // }
                }
-               
             }
          });
 
@@ -513,24 +253,45 @@ try {
 
          holojam.on('update', (flakes, scope, origin) => {
             //
+			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
+				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
-					console.log(flake.vector3s[0].z);
-					var type = flake.ints[0];
-					type = (type == 0 ? "onmousedown"
-					: (type == 1 ? "onmousemove" : "onmouseup"));
+					var wipeOrNot = flake.ints[1];
+					if(wipeOrNot == 3){
+						console.log("recv wipe");
+						var e = {
+						   eventType: "wipe",
+						   event: {
+							  button: 1,
+							  clientX: 0,
+							  clientY: 0
+						   }
+						};
+						ws.send(JSON.stringify(e));	
+					}
+					else{
+						var type = flake.ints[0];
+						type = (type == 0 ? "onmousedown"
+						: (type == 1 ? "onmousemove" :"onmouseup" ));
 
-					var e = {
-					   eventType: type,
-					   event: {
-						  button: 3,
-						  clientX: flake.vector3s[0].z * 1920,
-						  clientY: flake.vector3s[0].y * 1080
-					   }
-					};
-
-					ws.send(JSON.stringify(e));					
+						var e = {
+						   eventType: type,
+						   event: {
+							  button: 3,
+							  clientX: flake.vector3s[0].z * 1920,
+							  clientY: flake.vector3s[0].y * 1080
+						   }
+						};
+						ws.send(JSON.stringify(e));		
+					}									
+				}
+				if(flake.label.contains("Avatar")){
+					var b = flake.bytes;
+					//console.log(flake.bytes.length);
+					//for(var bi = 0; bi < b.length/10; bi++)
+						//console.log(b[bi]);
 				}
 				
 			}
