@@ -13,6 +13,7 @@ var saved_ips = ['192.168.1.14'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+holojam.ucAddresses = [];
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
@@ -294,9 +295,11 @@ try {
                const len = data.byteLength;
                let sliceCount = 1;
                //console.log("INITIAL LENGTH: " + len);
-               while (len > 100 * sliceCount) {
-                  sliceCount *= 2;
-               }
+
+               //console.log(len)
+               let lenCount = len;
+               //console.log(lenCount);
+               sliceCount = Math.ceil(lenCount / 65000);
 
                const labelPrefix = "Display";
 
@@ -308,17 +311,24 @@ try {
                   ++batchTimestampOverflow;
                }
 
+               //sliceCount = 1;
+
+               //sliceCount = 2;
+
                if (sliceCount == 1) {
                   holojam.Send(holojam.BuildUpdate('ChalkTalk', [
                      {
                         label: labelPrefix + "1", bytes: data, ints: [len, 1, 1, batchTimestamp, batchTimestampOverflow]
                      },
-                  ]));       
+                  ])); 
+
+                  console.log(batchTimestamp);
                }
                else if (sliceCount > 1) {
                   // TEMP SET TO CONSTANT NUMBER OF SLICES TODO remove this line
-                  sliceCount = 5;
+                  // sliceCount = 5;
 
+                  //console.log(sliceCount);
 
                   const sliceList = [];
 
@@ -342,18 +352,20 @@ try {
                      byteOffset = byteOffsetEnd;
                   }
 
+                  console.log(batchTimestamp);
+
                   // TEST
-                  var byteIdx = 0;
-                  var sliceIdx = 0;
-                  for (; byteIdx < dataLen && sliceIdx < sliceCount; ++sliceIdx) {
-                     const slice = sliceList[sliceIdx][0].bytes;
-                     const sliceLen = slice.byteLength;
-                     for (var j = 0; j < sliceLen; ++j) {
-                        console.assert(data[byteIdx] == slice[j]);
-                        ++byteIdx;
-                     }
-                  }
-                  console.assert(byteIdx == dataLen);
+                  // var byteIdx = 0;
+                  // var sliceIdx = 0;
+                  // for (; byteIdx < dataLen && sliceIdx < sliceCount; ++sliceIdx) {
+                  //    const slice = sliceList[sliceIdx][0].bytes;
+                  //    const sliceLen = slice.byteLength;
+                  //    for (var j = 0; j < sliceLen; ++j) {
+                  //       console.assert(data[byteIdx] == slice[j]);
+                  //       ++byteIdx;
+                  //    }
+                  // }
+                  // console.assert(byteIdx == dataLen);
 
 
                   for (var i = 0; i < sliceCount; ++i) {
