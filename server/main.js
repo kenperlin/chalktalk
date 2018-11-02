@@ -13,6 +13,7 @@ var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+holojam.ucAddresses = [];
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
@@ -112,6 +113,7 @@ function readHeader(data) {
    header += data.toString('ascii', 4, 5);
    header += data.toString('ascii', 7, 8);
    header += data.toString('ascii', 6, 7);
+
    return header;
 }
 
@@ -128,8 +130,10 @@ try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
+   let batchTimestamp = 0;
+   let batchTimestampOverflow = 0;
 
-   let prevLength = -1;
+
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
       sockets[ws.index] = ws;
@@ -138,17 +142,80 @@ try {
       if (ws.index == 0) {
          // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
-		 curWS = ws;
+		   curWS = ws;
          // Broadcast curve data
          ws.on('message', data => {
             if (readHeader(data) == 'CTdata01') {
-			   if (prevLength != data.length) {
-			      prevLength = data.length;
-			   }
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  label: 'Display', bytes: data
-               }]));
-			   //console.log("display");
+               //
+               const len = data.byteLength;
+               let sliceCount = 1;
+               //console.log("INITIAL LENGTH: " + len);
+
+               //console.log(len)
+               let lenCount = len;
+               //console.log(lenCount);
+               sliceCount = Math.ceil(lenCount / 65000);
+
+               const labelPrefix = "Display";
+
+               // update clock TODO handle overflow on CT server side
+               ++batchTimestamp;
+
+               if (batchTimestamp == 2147483647) { // 2^31 - 1
+                  batchTimestamp = 0;
+                  ++batchTimestampOverflow;
+               }
+
+               //sliceCount = 1;
+               //sliceCount = 2;
+
+               if (sliceCount == 1) {
+                  holojam.Send(holojam.BuildUpdate('ChalkTalk', [
+                     {
+                        label: labelPrefix + "1", bytes: data, ints: [len, 1, 1, batchTimestamp, batchTimestampOverflow]
+                     },
+                  ])); 
+
+                  console.log(batchTimestamp);
+               }
+               else if (sliceCount > 1) {
+                  // TEMP SET TO CONSTANT NUMBER OF SLICES TODO remove this line
+                  // sliceCount = 5;
+
+                  //console.log(sliceCount);
+
+                  const sliceList = [];
+
+                  const dataLen = data.byteLength;
+
+                  const bytesPerSlice = Math.floor(dataLen / sliceCount);
+                  sliceCount = Math.ceil(dataLen / bytesPerSlice);
+
+                  var byteOffset = 0;
+                  var byteOffsetEnd = 0;
+                  for (var i = 0; i < sliceCount; ++i) {
+                     byteOffsetEnd = byteOffset + bytesPerSlice;
+                     const subBuffer = data.subarray(byteOffset, Math.min(data.byteLength, byteOffsetEnd));
+
+                     sliceList.push([{ 
+                        label : labelPrefix + (i + 1), 
+                        bytes : subBuffer, 
+                        ints  : [dataLen, sliceCount, i + 1, batchTimestamp, batchTimestampOverflow]
+                     }]);
+
+                     byteOffset = byteOffsetEnd;
+                  }
+
+                  console.log(batchTimestamp);
+
+                  for (var i = 0; i < sliceCount; ++i) {
+                     holojam.Send(holojam.BuildUpdate('ChalkTalk', sliceList[i]));
+                  }
+
+                  return;
+
+                  //console.log("data size: " + data.byteLength);
+               }
             }
          });
 
