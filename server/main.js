@@ -8,6 +8,9 @@ const fs = require('fs');
 const path = require('path');
 const dgram = require('dgram');
 
+const resolutionHeight = 1440;
+const resolutionWidth = 2560;
+
 //These will get unicast to no matter what!
 var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
@@ -213,8 +216,8 @@ try {
 						   eventType: type,
 						   event: {
 							  button: 3,
-							  clientX: flake.vector3s[0].z * 1920,
-							  clientY: flake.vector3s[0].y * 1080
+							  clientX: flake.vector3s[0].z * resolutionWidth,
+							  clientY: flake.vector3s[0].y * resolutionHeight
 						   }
 						};
 						ws.send(JSON.stringify(e));		
