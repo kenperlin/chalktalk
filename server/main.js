@@ -42,7 +42,8 @@ const udpServer = dgram.createSocket('udp4');
 var udpHOST = process.argv[3] || "192.168.1.126";
 
 udpServer.on('error', (err) => {
-  console.log(`udpServer error:\n${err.stack}`);
+  //console.log(`udpServer error:\n${err.stack}`);
+  console.log("udpServer closed because no android simulation needs to be listened now");
   udpServer.close();
 });
 
