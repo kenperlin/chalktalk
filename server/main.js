@@ -16,6 +16,8 @@ var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+var holodeckWrapper = require('./wrapperChalktalk');
+holodeckWrapper.runWrapper();
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
@@ -149,10 +151,12 @@ try {
 			   if (prevLength != data.length) {
 			      prevLength = data.length;
 			   }
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  label: 'Display', bytes: data
-               }]));
-			   //console.log("display");
+               //holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+//                  label: 'Display', bytes: data
+               //}]));
+			   
+			   console.log("display");
+			   holodeckWrapper.sendChalktalk(data);
             }
          });
 
@@ -372,6 +376,6 @@ app.route('/ls_images').get((req, res) => readDir(res, 'images'));
 app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
 // Debug
-holojam.on('tick', (a, b) => {
-  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
-});
+//holojam.on('tick', (a, b) => {
+//  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
+//});
