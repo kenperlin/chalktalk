@@ -132,7 +132,6 @@ try {
    let wss = new WebSocket({ port: 22346 });
    let sockets = [];
 
-   let prevLength = -1;
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
       sockets[ws.index] = ws;
@@ -142,17 +141,24 @@ try {
          // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
 		 curWS = ws;
+
+
          // Broadcast curve data
          ws.on('message', data => {
-            if (readHeader(data) == 'CTdata01') {
-			   if (prevLength != data.length) {
-			      prevLength = data.length;
-			   }
+         	const headerString = readHeader(data);
+            if (headerString == 'CTdata01') {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
-			   //console.log("display");
-            }
+            } else {
+            	//console.log("HEADER: " + headerString);
+           		if (headerString == 'CTDspl01') {
+            		//console.log("SENDING resolution");
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'resRcv', bytes: data
+               		}]));
+            	}
+        	}
          });
 
          /* VR Input (deprecated events) */
@@ -192,7 +198,15 @@ try {
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
-				//console.log(flake.label);
+				if(flake.label.contains("resSnd")) {
+					console.log("received request for resolution:" + flake.bytes[0]);
+					var e = {
+						eventType: "onRequestForResolution",
+						event: {}
+					};
+					ws.send(JSON.stringify(e));
+				}
+				console.log(flake.label);
 				if(flake.label.contains("Stylus")){
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
