@@ -63,6 +63,7 @@ function start() {
 	processing['GetStream'] = new Object({
 		start: function() {
 			var request = '{"function":"sender","workspace":"Holodeck","proto":"udp","ip":"'+IPSource+'","port":'+sourcePort+',"type":"' + type + '","token":"'+token+'"}';
+			console.log("GetStream-sending\t" + request);
 			client.write(request);
 		},
 		process: function(message){
