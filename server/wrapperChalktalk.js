@@ -218,7 +218,7 @@ module.exports = {
 				}
 			});
 
-			console.log(`sent: ${message.toString()} to ${IPControl}:${udpPort}`);
+			//console.log(`sent: ${message.toString()} to ${IPControl}:${udpPort}`);
 		}
 
 		sendData(data);
