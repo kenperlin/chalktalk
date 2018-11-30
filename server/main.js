@@ -8,8 +8,8 @@ const fs = require('fs');
 const path = require('path');
 const dgram = require('dgram');
 
-const resolutionHeight = 1080;
-const resolutionWidth = 1920;
+var resolutionHeight = 800;
+var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
 var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
@@ -156,8 +156,11 @@ try {
            		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'resRcv', bytes: data
+                  		label: 'res', bytes: data
                		}]));
+					resolutionWidth = data.readInt16LE(8);
+					resolutionHeight = data.readInt16LE(10);					
+					console.log(resolutionWidth,resolutionHeight);
             	}
         	}
          });
@@ -199,7 +202,7 @@ try {
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
-				if(flake.label.contains("resSnd")) {
+				if(flake.label.contains("res")) {
 					console.log("received request for resolution:" + flake.bytes[0]);
 					var e = {
 						eventType: "onRequestForResolution",
