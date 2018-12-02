@@ -148,9 +148,10 @@ try {
          ws.on('message', data => {
          	const headerString = readHeader(data);
             if (headerString == 'CTdata01') {
-               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  label: 'Display', bytes: data
-               }]));
+               // holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+               //    label: 'Display', bytes: data
+               // }]));
+               holojam.SendRaw(data);
             } else {
             	//console.log("HEADER: " + headerString);
            		if (headerString == 'CTDspl01') {
@@ -207,7 +208,7 @@ try {
 					};
 					ws.send(JSON.stringify(e));
 				}
-				console.log(flake.label);
+
 				if(flake.label.contains("Stylus")){
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
