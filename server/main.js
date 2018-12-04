@@ -110,7 +110,7 @@ udpServer.bind(PORT, udpHOST);
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Vive
 ////////////////////////////////////////////////////////////////////////////////
-var sourceIP = "127.0.0.1";
+var sourceIP = "10.19.40.65";
 var framerate = 60.;
 var viveServer = dgram.createSocket('udp4');
 var calibratedSource = undefined
@@ -141,6 +141,7 @@ function tryAssignLighthouse(address, trackedObject) {
 	if (!calibratedSource && viveServer.address().address == address)
 		calibratedSource = address
 	lighthouses[address] = trackedObject;
+	//console.log(lighthouses);
 }
 
 function tryCalibrateObject(address, trackedObject) {
@@ -181,6 +182,10 @@ function tryCalibrateObject(address, trackedObject) {
 }
 
 var trackedObjects = [];
+var LHMappings = {};
+LHMappings["10.19.40.65"] = "REF-LH";
+LHMappings["10.19.164.43"] = "ZHU-LH";
+
 viveServer.on('message', function(message, info){
 	var json = JSON.parse(message.toString());
 	trackedObjects = [];
@@ -195,17 +200,25 @@ viveServer.on('message', function(message, info){
 		};
 		if (json[key]["triggerPress"] != undefined) {
 			trackedObject['ints'] = [parseInt(json[key]['appMenuPress']), parseInt(json[key]['gripPress']), parseInt(json[key]['touchpadPress']), parseInt(json[key]['triggerPress']), 0, 0]
+			//console.log(trackedObject['ints']);
 			trackedObject['floats'] = [0., 0., 0., 0., 0., 0.]
 		}
-		if (trackedObject['label'].includes("LIGHTHOUSE")) {
+		
+		if (trackedObject['label'].includes("LIGHTHOUSE-V2-4")) {
+				
 			tryAssignLighthouse(info.address, trackedObject);
+			trackedObject.label = LHMappings[info.address];
+			
+			//console.log(trackedObject);
 		}
-		if (trackedObject['label'].includes("LIGHTHOUSE")) {
-			//Don't send lighthouses!
+		if (trackedObject['label'].includes("LIGHTHOUSE") && !trackedObject['label'].includes("V2-4")) {
+			//Don't send lighthouses except for V2-4!
 			continue;
 		}
 		
-		trackedObject = tryCalibrateObject(info.address, trackedObject)
+		// we don't sync vive controllers because it is only visible to the owner
+		// we only need to broadcast THE lighthouse info of the calibratedSource, thus other 
+		//trackedObject = tryCalibrateObject(info.address, trackedObject)
 		if (trackedObject['label'] != undefined) {
 			trackedObjects.push(trackedObject);
 		}
