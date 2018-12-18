@@ -110,7 +110,7 @@ udpServer.bind(PORT, udpHOST);
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Vive
 ////////////////////////////////////////////////////////////////////////////////
-var sourceIP = "10.19.40.65";
+var sourceIP = "192.168.1.112";
 var framerate = 60.;
 var viveServer = dgram.createSocket('udp4');
 var calibratedSource = undefined
@@ -185,6 +185,8 @@ var trackedObjects = [];
 var LHMappings = {};
 LHMappings["10.19.40.65"] = "REF-LH";
 LHMappings["10.19.164.43"] = "ZHU-LH";
+LHMappings["192.168.1.98"] = "HE-LH";
+LHMappings["192.168.1.107"] = "ZHU-LH";
 
 viveServer.on('message', function(message, info){
 	var json = JSON.parse(message.toString());
@@ -291,6 +293,14 @@ try {
 					resolutionHeight = data.readInt16LE(10);					
 					console.log(resolutionWidth,resolutionHeight);
             	}
+				if (headerString == 'CTPage01') {
+            		//console.log("SENDING resolution");
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'createSP', bytes: data
+               		}]));
+					var boardCnt = data.readInt16LE(8);
+					console.log("the amount of sketchPages" + boardCnt);
+            	}
         	}
          });
 
@@ -339,7 +349,23 @@ try {
 					};
 					ws.send(JSON.stringify(e));
 				}
-				console.log(flake.label);
+				if(flake.label.contains("createSP")) {
+					console.log("received request for creating sketchPage:" + flake.ints[0]);
+					var e = {
+						eventType: "createSketchPage",
+						event: {}
+					};
+					ws.send(JSON.stringify(e));
+				}
+				if(flake.label.contains("setSP")) {
+					console.log("received request for setting sketchPage:" + flake.ints[0]);
+					var e = {
+						eventType: "createSketchPage",
+						event: {index: flake.ints[0]}
+					};
+					ws.send(JSON.stringify(e));
+				}
+				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
@@ -356,6 +382,7 @@ try {
 					}
 					else{
 						var type = flake.ints[0];
+						//console.log(flake.ints[0]);
 						type = (type == 0 ? "onmousedown"
 						: (type == 1 ? "onmousemove" :"onmouseup" ));
 
@@ -369,6 +396,12 @@ try {
 						};
 						ws.send(JSON.stringify(e));		
 					}									
+				}
+				if(flake.label.contains("ResetSty")){
+					//var b = flake.bytes;
+					console.log("reset stylus:" + flake.ints[0]);
+					//for(var bi = 0; bi < b.length/10; bi++)
+						//console.log(b[bi]);
 				}
 				if(flake.label.contains("Avatar")){
 					var b = flake.bytes;
@@ -519,5 +552,5 @@ app.route('/ls_state').get((req, res) => readDir(res, 'state'));
 
 // Debug
 holojam.on('tick', (a, b) => {
-  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
+  //console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
 });
