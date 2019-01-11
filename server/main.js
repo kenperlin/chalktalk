@@ -410,7 +410,14 @@ try {
 					//for(var bi = 0; bi < b.length/10; bi++)
 						//console.log(b[bi]);
 				}
-				
+				if(flake.label.contains("MSGSender")){
+					var b = flake.bytes;
+					var s = new Buffer(b).toString('ascii');
+					console.log(s + "\t" + flake.bytes.length);
+					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv', bytes: Buffer.from(s+":"+s)
+               		}]));
+				}
 			}
          });
       }
