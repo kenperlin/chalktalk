@@ -435,6 +435,15 @@ try {
 							};
 							ws.send(JSON.stringify(e));
 						break;
+						case 1:
+							console.log("reset stylus:" + b.readInt32LE(8));
+							var buf = Buffer.allocUnsafe(4);
+							buf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
+							buf.writeInt16LE(b.readInt32LE(8),2);// stylus id// index 4 is the count of parameter so skip
+							holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+								label: 'MSGRcv', bytes: buf
+							}]));
+						break;
 						default:
 						break;
 					}
