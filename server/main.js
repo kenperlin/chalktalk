@@ -290,8 +290,8 @@ try {
 					// encode the resolution
 					var buf = Buffer.allocUnsafe(6);
 					buf.writeInt16LE(0,0);// 0 for resolution
-					buf.writeInt16LE(data.readInt16LE(8),2);// 0 for resolution
-					buf.writeInt16LE( data.readInt16LE(10),4);// 0 for resolution
+					buf.writeInt16LE(data.readInt16LE(8),2);// 2 for resolution
+					buf.writeInt16LE( data.readInt16LE(10),4);// 4 for resolution
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv', bytes: buf
                		}]));
@@ -300,12 +300,14 @@ try {
 					console.log(resolutionWidth,resolutionHeight);
             	}
 				if (headerString == 'CTPage01') {
-            		//console.log("SENDING resolution");
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(2,0);// 2 for creating sketchpage
+					buf.writeInt16LE(data.readInt16LE(8),2);// 2 for new page id
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'createSP', bytes: data
+                  		label: 'MSGRcv', bytes: buf
                		}]));
 					var boardCnt = data.readInt16LE(8);
-					console.log("the amount of sketchPages" + boardCnt);
+					console.log("create a new sketchPages with id:" + boardCnt);
             	}
         	}
          });
@@ -347,22 +349,6 @@ try {
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
-				if(flake.label.contains("res")) {
-					console.log("received request for resolution:" + flake.bytes[0]);
-					var e = {
-						eventType: "onRequestForResolution",
-						event: {}
-					};
-					ws.send(JSON.stringify(e));
-				}
-				if(flake.label.contains("createSP")) {
-					console.log("received request for creating sketchPage:" + flake.ints[0]);
-					var e = {
-						eventType: "createSketchPage",
-						event: {}
-					};
-					ws.send(JSON.stringify(e));
-				}
 				if(flake.label.contains("setSP")) {
 					console.log("received request for setting sketchPage:" + flake.ints[0]);
 					var e = {
@@ -403,12 +389,6 @@ try {
 						ws.send(JSON.stringify(e));		
 					}									
 				}
-				if(flake.label.contains("ResetSty")){
-					//var b = flake.bytes;
-					console.log("reset stylus:" + flake.ints[0]);
-					//for(var bi = 0; bi < b.length/10; bi++)
-						//console.log(b[bi]);
-				}
 				if(flake.label.contains("Avatar")){
 					var b = flake.bytes;
 					//console.log(flake.bytes.length);
@@ -444,6 +424,14 @@ try {
 								label: 'MSGRcv', bytes: buf
 							}]));
 						break;
+						case 2:
+							console.log("create new sketchPage:" + b.readInt32LE(8));
+							var e = {
+								eventType: "createSketchPage",
+								event: {}
+							};
+							ws.send(JSON.stringify(e));
+							break;
 						default:
 						break;
 					}
