@@ -287,8 +287,13 @@ try {
             	//console.log("HEADER: " + headerString);
            		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
+					// encode the resolution
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(0,0);// 0 for resolution
+					buf.writeInt16LE(data.readInt16LE(8),2);// 0 for resolution
+					buf.writeInt16LE( data.readInt16LE(10),4);// 0 for resolution
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'res', bytes: data
+                  		label: 'MSGRcv', bytes: buf
                		}]));
 					resolutionWidth = data.readInt16LE(8);
 					resolutionHeight = data.readInt16LE(10);					
@@ -411,12 +416,28 @@ try {
 						//console.log(b[bi]);
 				}
 				if(flake.label.contains("MSGSender")){
-					var b = flake.bytes;
+/* 					var b = flake.bytes;
 					var s = new Buffer(b).toString('ascii');
 					console.log(s + "\t" + flake.bytes.length);
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv', bytes: Buffer.from(s+":"+s)
-               		}]));
+               		}])); */
+					
+					var b = new Buffer(flake.bytes);
+					console.log("bytes:" + b);
+					var cmdNumber = b.readInt32LE(0);
+					console.log("cmdNumber:" + cmdNumber);
+					switch(cmdNumber){
+						case 0:
+							var e = {
+								eventType: "onRequestForResolution",
+								event: {}
+							};
+							ws.send(JSON.stringify(e));
+						break;
+						default:
+						break;
+					}
 				}
 			}
          });
