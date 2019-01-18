@@ -7,6 +7,7 @@ const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
 const dgram = require('dgram');
+var Uint64LE = require("int64-buffer").Uint64LE;
 
 var resolutionHeight = 800;
 var resolutionWidth = 600;
@@ -35,6 +36,9 @@ server.listen(parseInt(port, 10), () =>
 
 // for sending ack back to 3dof phone to confirm the connection
 var ackclient = dgram.createSocket('udp4');
+
+// pair of avatar name and avatar oculusUserID
+var mapAvatarId = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Android Simulation
@@ -432,6 +436,48 @@ try {
 							};
 							ws.send(JSON.stringify(e));
 							break;
+						case 2:
+							console.log("create new sketchPage:" + b.readInt32LE(8));
+							var e = {
+								eventType: "createSketchPage",
+								event: {}
+							};
+							ws.send(JSON.stringify(e));
+							break;
+						case 3:
+							var nStr = b.readInt32LE(4);
+							var avatarname = b.toString('utf8',8,8+nStr);
+							console.log("receive new avatar nStr:" + nStr + "\tb.length:" + b.length + "\t" + avatarname );
+							var avatarid = new Uint64LE(b, 8+nStr);
+							//var avatarid = b.readUIntLE(8+nStr,8);
+							console.log(avatarid-0);
+							// add to map
+							mapAvatarId[avatarname] = avatarid;
+							
+							// calculate the size of nStr + name + id
+							var nBuf = 2+2;
+							Object.entries(mapAvatarId).forEach(([key, value]) => {
+								nBuf += 2 + key.length + 8;
+							});
+							
+							var buf = Buffer.allocUnsafe(nBuf);
+							buf.writeInt16LE(cmdNumber,0);// 3 for avatar number
+							buf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
+							console.log("header:" + buf + "\t" + Object.entries(mapAvatarId).length);
+							var index = 4;
+							Object.entries(mapAvatarId).forEach(([key, value]) => {
+								buf.writeInt16LE(key.length,index);// avatar number's length
+								index += 2;
+								buf.write(key,index,key.length);
+								index += key.length;
+								var uintID = new Uint64LE(value);
+								uintID.toBuffer().copy(buf, index, 0, 8);								
+								index += 8;
+							});
+							console.log("test:" + buf);
+							holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+								label: 'MSGRcv', bytes: buf
+							}]));
 						default:
 						break;
 					}
