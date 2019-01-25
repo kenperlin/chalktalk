@@ -313,6 +313,15 @@ try {
 					var boardCnt = data.readInt16LE(8);
 					console.log("create a new sketchPages with id:" + boardCnt);
             	}
+            	if (headerString == 'CTpIdx01') {
+            		console.log("sending page index back to client");
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(4,0);// 4 for setting sketch page
+					buf.writeInt16LE(data.readInt16LE(8),2);// 2 for new page id
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv', bytes: buf
+               		}]));           		
+            	}
         	}
          });
 
@@ -413,12 +422,13 @@ try {
 					console.log("cmdNumber:" + cmdNumber);
 					switch(cmdNumber){
 						case 0:
+							console.log("resolution request");
 							var e = {
 								eventType: "onRequestForResolution",
 								event: {}
 							};
 							ws.send(JSON.stringify(e));
-						break;
+							break;
 						case 1:
 							console.log("reset stylus:" + b.readInt32LE(8));
 							var buf = Buffer.allocUnsafe(4);
@@ -427,14 +437,6 @@ try {
 							holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 								label: 'MSGRcv', bytes: buf
 							}]));
-						break;
-						case 2:
-							console.log("create new sketchPage:" + b.readInt32LE(8));
-							var e = {
-								eventType: "createSketchPage",
-								event: {}
-							};
-							ws.send(JSON.stringify(e));
 							break;
 						case 2:
 							console.log("create new sketchPage:" + b.readInt32LE(8));
@@ -447,7 +449,7 @@ try {
 						case 3:
 							var nStr = b.readInt32LE(4);
 							var avatarname = b.toString('utf8',8,8+nStr);
-							console.log("receive new avatar nStr:" + nStr + "\tb.length:" + b.length + "\t" + avatarname );
+							//console.log("receive new avatar nStr:" + nStr + "\tb.length:" + b.length + "\t" + avatarname );
 							var avatarid = new Uint64LE(b, 8+nStr);
 							//var avatarid = b.readUIntLE(8+nStr,8);
 							console.log(avatarid-0);
@@ -463,7 +465,7 @@ try {
 							var buf = Buffer.allocUnsafe(nBuf);
 							buf.writeInt16LE(cmdNumber,0);// 3 for avatar number
 							buf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
-							console.log("header:" + buf + "\t" + Object.entries(mapAvatarId).length);
+							//console.log("header:" + buf + "\t" + Object.entries(mapAvatarId).length);
 							var index = 4;
 							Object.entries(mapAvatarId).forEach(([key, value]) => {
 								buf.writeInt16LE(key.length,index);// avatar number's length
@@ -474,12 +476,40 @@ try {
 								uintID.toBuffer().copy(buf, index, 0, 8);								
 								index += 8;
 							});
-							console.log("test:" + buf);
+							//console.log("test:" + buf);
 							holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 								label: 'MSGRcv', bytes: buf
 							}]));
+							break;
+						case 4:
+							const idx = b.readInt32LE(8);
+							console.log("in server, set page: " + idx);
+							var e = {
+								eventType: "setSketchPage",
+								event: {index : idx}
+							};
+							ws.send(JSON.stringify(e));
+							break;
+						case 5:
+							const toggleState = b.readInt32LE(8);
+							const test = b.readInt32LE(12);
+							console.log("in server: toggle copy mode: " + toggleState + ":" + test);
+							var e = {
+								eventType: "toggleSketchCopyMode",
+								event: {toggleState : toggleState}
+							};
+							ws.send(JSON.stringify(e));
+							break;
+						case 6:
+							console.log("client requesting the page index");
+							var e = {
+								eventType: "onRequestForSketchPageIndex",
+								event: {}
+							};
+							ws.send(JSON.stringify(e));
+							break;
 						default:
-						break;
+							break;
 					}
 				}
 			}
