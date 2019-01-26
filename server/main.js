@@ -264,6 +264,20 @@ function sendDaydreamInput(){
 	}
 }
 
+
+const CommandFromClient = {
+	RESOLUTION_REQUEST : 0,
+	STYLUS_RESET       : 1,
+	SKETCHPAGE_CREATE  : 2,
+	AVATAR_SYNC        : 3,
+};
+const CommandToClient = {
+	RESOLUTION_REQUEST : 0,
+	STYLUS_RESET       : 1,
+	SKETCHPAGE_CREATE  : 2,
+	AVATAR_SYNC        : 3,
+};
+
 try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
@@ -488,7 +502,7 @@ try {
 								cursor += paraCount;
 								console.log("cursor", cursor);
 							default:
-							break;
+								break;
 						}
 					}	
 					//console.log("debug");
@@ -501,7 +515,7 @@ try {
 					console.log("buf", buf);	
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv', bytes: buf
-               		}]));					
+               		}]));	
 				}
 			}
          });
