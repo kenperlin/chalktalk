@@ -306,37 +306,65 @@ try {
            		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
 					// encode the resolution
-					var curbuf = Buffer.allocUnsafe(6);
-					curbuf.writeInt16LE(0,0);// 0 for resolution
-					curbuf.writeInt16LE(data.readInt16LE(8),2);// 2 for resolution
-					curbuf.writeInt16LE( data.readInt16LE(10),4);// 4 for resolution
-					
-					var bufLengthByte = Buffer.allocUnsafe(2);
-					bufLengthByte.writeInt16LE(1,0);  
-					var buf = Buffer.concat([bufLengthByte, curbuf]);
-					console.log("buf", buf);
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(0,0);// 0 for resolution
+					buf.writeInt16LE(data.readInt16LE(8),2);// 2 for resolution
+					buf.writeInt16LE( data.readInt16LE(10),4);// 4 for resolution
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'MSGRcv2', bytes: buf
+                  		label: 'MSGRcv3', bytes: buf
                		}]));
 					resolutionWidth = data.readInt16LE(8);
 					resolutionHeight = data.readInt16LE(10);					
-					console.log(resolutionWidth,resolutionHeight);
+               		console.log("(server -> client) initializing with resolution[" + 
+               				resolutionWidth + ", " + resolutionHeight + "]"
+               		);
             	}
-				if (headerString == 'CTPage01') {
-					var curbuf = Buffer.allocUnsafe(6);
-					curbuf.writeInt16LE(2,0);// 2 for creating sketchpage
-					curbuf.writeInt16LE(data.readInt16LE(8),2);// 2 for new page id
-					
-					var bufLengthByte = Buffer.allocUnsafe(2);
-					bufLengthByte.writeInt16LE(1,0);  
-					var buf = Buffer.concat([bufLengthByte, curbuf]);
-					console.log("buf", buf);
+            	if (headerString == 'CTPcrt01') {
+            		console.log("{");
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(2,0);// 2 for creating sketch page
+					buf.writeInt16LE(data.readInt16LE(8), 2); // write page id
+					buf.writeInt16LE(data.readInt16LE(10), 4); // whether page should be set immediately after creation
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv2', bytes: buf
+               		}]));
+               		var boardCnt = data.readInt16LE(8);
 
+					console.log("(server -> client) create sketch page with id: " + boardCnt);
+					console.log("}");          		
+            	}
+				if (headerString == 'CTPset01') {
+					var buf = Buffer.allocUnsafe(6);
+					buf.writeInt16LE(4,0); // 4 for setting sketch page
+					buf.writeInt16LE(data.readInt16LE(8), 2); // write page id
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv2', bytes: buf
                		}]));
 					var boardCnt = data.readInt16LE(8);
-					console.log("create a new sketchPages with id:" + boardCnt);
+					
+					console.log("(server -> client) set sketch page with id: " + boardCnt);
+            	}
+            	if (headerString == 'CTInit01') {
+            		var buf = Buffer.allocUnsafe(8); // write 4 int16s
+
+            		buf.writeInt16LE(5, 0); // init command
+
+            		const roff = 8; // read offset
+            		const woff = 2; // write offset
+
+            		buf.writeInt16LE(data.readInt16LE(roff),     woff);     // resolution x
+            		buf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // resolution y
+            		buf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // page index
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv3', bytes: buf
+               		}]));
+
+               		console.log(
+               			"(server -> client) initializing with resolution[" + 
+               			data.readInt16LE(roff) + ", " + data.readInt16LE(roff + 2) + "]" +
+               			"and page index[" + data.readInt16LE(roff + 4) + "]"
+               		);
+
             	}
         	}
          });
@@ -412,111 +440,96 @@ try {
 					}									
 				}
 				if(flake.label.contains("MSGSender")){
-					// buffer array for holojam to send back
-					var bufLength = 0;
-					var bufArray = new Array(0);
-/* 					var b = flake.bytes;
-					var s = new Buffer(b).toString('ascii');
-					console.log(s + "\t" + flake.bytes.length);
-					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'MSGRcv', bytes: Buffer.from(s+":"+s)
-               		}])); */
 					
-					var b = new Buffer(flake.bytes);
-					//console.log("bytes:" + b);
-					var cursor = 0;
-					var cmdCount = b.readInt32LE(cursor);
-					cursor += 4;
-					console.log("cmdCount:" + cmdCount);
-					for(var cmdIndex = 0; cmdIndex < cmdCount; cmdIndex++){
-							var cmdNumber = b.readInt32LE(cursor);
-							cursor += 4;
-							var paraCount = b.readInt32LE(cursor);
-							cursor += 4;
-							console.log("cmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
-							switch(cmdNumber){
-							case 0:
-								var e = {
-									eventType: "onRequestForResolution",
-									event: {}
-								};
-								ws.send(JSON.stringify(e));
-								cursor += paraCount * 4;
-							break;
-							case 1:
-								console.log("reset stylus:" + b.readInt32LE(cursor));
-								var curbuf = Buffer.allocUnsafe(4);
-								curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
-								curbuf.writeInt16LE(b.readInt32LE(8),2);// stylus id// index 4 is the count of parameter so skip
-								bufLength += curbuf.length;
-								bufArray.push(curbuf);
-								//holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-//									label: 'MSGRcv', bytes: buf
-								//}]));
-								cursor += paraCount * 4;
-							break;
-							case 2:
-								console.log("create new sketchPage:" + b.readInt32LE(cursor));
-								var e = {
-									eventType: "createSketchPage",
-									event: {}
-								};
-								ws.send(JSON.stringify(e));
-								cursor += paraCount * 4;
-								break;
-							case 3:
-								var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
-								console.log("receive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
-								var avatarid = new Uint64LE(b, cursor+paraCount);
-								cursor += 8;
-								console.log(avatarid-0);
-								// add to map
-								mapAvatarId[avatarname] = avatarid;
-								
-								// calculate the size of nStr + name + id
-								var nBuf = 2+2;
-								Object.entries(mapAvatarId).forEach(([key, value]) => {
-									nBuf += 2 + key.length + 8;
-								});
-								
-								var curbuf = Buffer.allocUnsafe(nBuf);
-								curbuf.writeInt16LE(cmdNumber,0);// 3 for avatar number
-								curbuf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
-								console.log("header:" + curbuf + "\t" + Object.entries(mapAvatarId).length);
-								var index = 4;
-								Object.entries(mapAvatarId).forEach(([key, value]) => {
-									curbuf.writeInt16LE(key.length,index);// avatar number's length
-									index += 2;
-									curbuf.write(key,index,key.length);
-									index += key.length;
-									var uintID = new Uint64LE(value);
-									uintID.toBuffer().copy(curbuf, index, 0, 8);								
-									index += 8;
-								});
-								console.log("test:" + curbuf);
-								bufLength += curbuf.length;
-								bufArray.push(curbuf);
-								//holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-//									label: 'MSGRcv', bytes: buf
-								//}]));
-								cursor += paraCount;
-								console.log("cursor", cursor);
-							default:
-								break;
-						}
-					}	
-					//console.log("debug");
-					var bufLengthByte = Buffer.allocUnsafe(2);
-					var bufCursor = 0;
-					console.log("\nbufArray.length:" + bufArray.length);
-					bufLengthByte.writeInt16LE(bufArray.length,bufCursor);  
-					bufArray.splice(0, 0, bufLengthByte);	// insert cmd count into the front
-					var buf = Buffer.concat(bufArray);
-					console.log("buf", buf);	
-					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-                  		label: 'MSGRcv', bytes: buf
-               		}]));	
+					let b = new Buffer(flake.bytes);
+					console.log("bytes:" + b);
+					var cmdNumber = b.readInt32LE(0);
+					console.log("command received: " + cmdNumber);
+					switch(cmdNumber) {
+					case 0:
+						var e = {
+							eventType: "clientGetResolution",
+							event: {}
+						};
+						ws.send(JSON.stringify(e));
+						break;
+					case 1:
+						console.log("reset stylus:" + b.readInt32LE(8));
+						var buf = Buffer.allocUnsafe(4);
+						buf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
+						buf.writeInt16LE(b.readInt32LE(8),2);// stylus id// index 4 is the count of parameter so skip
+						
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv', bytes: buf
+						}]));
+
+						break;
+					case 2:
+						console.log("(client -> server) create new sketchPage:" + b.readInt32LE(8));
+						console.log("(client -> server) set page immediately? " + b.readInt32LE(12));
+						console.log(b);
+						var e = {
+							eventType: "clientCreateSketchPage",
+							event: {setImmediately : b.readInt32LE(12)}
+						};
+						ws.send(JSON.stringify(e));
+						break;
+					case 3:
+						var nStr = b.readInt32LE(4);
+						var avatarname = b.toString('utf8',8,8+nStr);
+						//console.log("receive new avatar nStr:" + nStr + "\tb.length:" + b.length + "\t" + avatarname );
+						var avatarid = new Uint64LE(b, 8+nStr);
+						//var avatarid = b.readUIntLE(8+nStr,8);
+						console.log(avatarid-0);
+						// add to map
+						mapAvatarId[avatarname] = avatarid;
+						
+						// calculate the size of nStr + name + id
+						var nBuf = 2+2;
+						Object.entries(mapAvatarId).forEach(([key, value]) => {
+							nBuf += 2 + key.length + 8;
+						});
+						
+						var buf = Buffer.allocUnsafe(nBuf);
+						buf.writeInt16LE(cmdNumber,0);// 3 for avatar number
+						buf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
+						//console.log("header:" + buf + "\t" + Object.entries(mapAvatarId).length);
+						var index = 4;
+						Object.entries(mapAvatarId).forEach(([key, value]) => {
+							buf.writeInt16LE(key.length,index);// avatar number's length
+							index += 2;
+							buf.write(key,index,key.length);
+							index += key.length;
+							var uintID = new Uint64LE(value);
+							uintID.toBuffer().copy(buf, index, 0, 8);								
+							index += 8;
+						});
+						//console.log("test:" + buf);
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv2', bytes: buf
+						}]));
+						break;
+					case 4:
+						const idx = b.readInt32LE(8);
+						console.log("in server, set page: " + idx);
+						var e = {
+							eventType: "clientSetSketchPage",
+							event: {index : idx}
+						};
+						ws.send(JSON.stringify(e));
+						break;
+					case 5:
+						console.log("Get initialization data");
+						var e = {
+							eventType: "clientInitialize",
+							event: {}
+						};
+						ws.send(JSON.stringify(e));
+						break;
+					default:
+						break;
 				}
+			}					
 			}
          });
       }
