@@ -366,6 +366,12 @@ try {
                		);
 
             	}
+            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+
+            	}
+            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
+
+            	}
         	}
          });
 
@@ -526,6 +532,41 @@ try {
 						};
 						ws.send(JSON.stringify(e));
 						break;
+					case 6:
+						console.log(("(server -> client) prototype temporary board on"));
+
+
+						var e = {
+							eventType: "clientMoveContentFromPage",
+							event: {}
+						};
+						ws.send(JSON.stringify(e));
+
+						break;
+
+						var buf = Buffer.allocUnsafe(4);
+						buf.writeInt16LE(6, 0);  // command number 6
+						buf.writeInt16LE(42, 2); // test value
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv3', bytes: buf
+						}]));
+						break;
+					case 7:
+						console.log(("(server -> client) prototype temporary board off"));
+
+						var e = {
+							eventType: "clientMoveContentToPage",
+							event: {}
+						};
+						ws.send(JSON.stringify(e));
+						break;
+
+						var buf = Buffer.allocUnsafe(4);
+						buf.writeInt16LE(7, 0);  // command number 6
+						buf.writeInt16LE(42, 2); // test value
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv3', bytes: buf
+						}]));					
 					default:
 						break;
 				}
