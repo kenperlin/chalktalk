@@ -367,7 +367,20 @@ try {
 
             	}
             	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+            		console.log("header correct");
+            		var buf = Buffer.allocUnsafe(4);
 
+            		buf.writeInt16LE(6, 0); // board on command
+
+            		const roff = 8; // read offset
+            		const woff = 2; // write offset
+
+            		buf.writeInt16LE(data.readInt16LE(roff), woff); // whether a chalktalk object was selected
+
+            		console.log("board on?: " + data.readInt16LE(roff))
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv2', bytes: buf
+               		}]));
             	}
             	if (headerString == 'CTBrdoff') { // turns off the tempoary board
 
@@ -537,36 +550,36 @@ try {
 
 
 						var e = {
-							eventType: "clientMoveContentFromPage",
+							eventType: "clientBeginMoveGroupOrSketchFromPage",
 							event: {}
 						};
 						ws.send(JSON.stringify(e));
 
 						break;
 
-						var buf = Buffer.allocUnsafe(4);
-						buf.writeInt16LE(6, 0);  // command number 6
-						buf.writeInt16LE(42, 2); // test value
-						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv3', bytes: buf
-						}]));
-						break;
+						// var buf = Buffer.allocUnsafe(4);
+						// buf.writeInt16LE(6, 0);  // command number 6
+						// buf.writeInt16LE(42, 2); // test value
+						// holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+						// 	label: 'MSGRcv3', bytes: buf
+						// }]));
+						// break;
 					case 7:
-						console.log(("(server -> client) prototype temporary board off"));
+						console.log(("(server -> client) prototype temporary board off, dst page: " + b.readInt32LE(8)));
 
 						var e = {
-							eventType: "clientMoveContentToPage",
-							event: {}
+							eventType: "clientEndMoveGroupOrSketchFromPage",
+							event: {dstPageIdx : b.readInt32LE(8)}
 						};
 						ws.send(JSON.stringify(e));
 						break;
 
-						var buf = Buffer.allocUnsafe(4);
-						buf.writeInt16LE(7, 0);  // command number 6
-						buf.writeInt16LE(42, 2); // test value
-						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv3', bytes: buf
-						}]));					
+						// var buf = Buffer.allocUnsafe(4);
+						// buf.writeInt16LE(7, 0);  // command number 6
+						// buf.writeInt16LE(42, 2); // test value
+						// holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+						// 	label: 'MSGRcv3', bytes: buf
+						// }]));					
 					default:
 						break;
 				}
