@@ -367,23 +367,37 @@ try {
 
             	}
             	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
-            		console.log("header correct");
-            		var buf = Buffer.allocUnsafe(4);
+            		var buf = Buffer.allocUnsafe(8);
 
             		buf.writeInt16LE(6, 0); // board on command
 
             		const roff = 8; // read offset
             		const woff = 2; // write offset
 
-            		buf.writeInt16LE(data.readInt16LE(roff), woff); // whether a chalktalk object was selected
+            		buf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+            		buf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
+            		buf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // whether a chalktalk object was selected
 
-            		console.log("board on?: " + data.readInt16LE(roff))
+            		console.log("board on?: " + data.readInt16LE(roff + 4))
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv2', bytes: buf
                		}]));
             	}
             	if (headerString == 'CTBrdoff') { // turns off the tempoary board
+            		var buf = Buffer.allocUnsafe(8);
 
+            		buf.writeInt16LE(7, 0); // board off command
+
+            		const roff = 8; // read offset
+            		const woff = 2; // write offset
+
+            		buf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+            		buf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
+            		buf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // which chalktalk object was selected
+
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv2', bytes: buf
+               		}]));
             	}
         	}
          });
@@ -546,12 +560,12 @@ try {
 						ws.send(JSON.stringify(e));
 						break;
 					case 6:
-						console.log(("(server -> client) prototype temporary board on"));
+						console.log(("(server -> client) prototype temporary board on at framecount=[" + b.readInt32LE(8) + "]"));
 
 
 						var e = {
 							eventType: "clientBeginMoveGroupOrSketchFromPage",
-							event: {}
+							event: {timestamp : b.readInt32LE(8)}
 						};
 						ws.send(JSON.stringify(e));
 
@@ -565,11 +579,14 @@ try {
 						// }]));
 						// break;
 					case 7:
-						console.log(("(server -> client) prototype temporary board off, dst page: " + b.readInt32LE(8)));
+						console.log(("(server -> client) prototype temporary board off at framecount=[" + b.readInt32LE(8) + "], dst page: " + b.readInt32LE(12)));
 
 						var e = {
 							eventType: "clientEndMoveGroupOrSketchFromPage",
-							event: {dstPageIdx : b.readInt32LE(8)}
+							event: {
+								timestamp : b.readInt32LE(8),
+								dstPageIdx : b.readInt32LE(12)
+							}
 						};
 						ws.send(JSON.stringify(e));
 						break;
