@@ -1,6 +1,8 @@
 function() {
    this.label = "Grapher";
 
+   this.is3D = true;
+   
    this.choice = new Choice();
    this.s = 0;
    var that = this;
