@@ -302,7 +302,7 @@ try {
 			var buf = Buffer.allocUnsafe(0);
 
 			bufLengthByte.writeInt16LE(bufLength,0);  
-			
+
          	const headerString = readHeader(data);
             if (headerString == 'CTdata01') {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
@@ -454,6 +454,21 @@ try {
                   		label: 'MSGRcv7', bytes: entirebuf
                		}]));
             	}
+            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+
+            	}
+            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
+
+            	}
+				// wrap all the buf
+				/*if(bufLength > 0){
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+					console.log("Sending MSGRcv2 with", bufLength, " commands");
+					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv2', bytes: entirebuf
+						}]));
+				}*/
         	}
          });
 
@@ -528,6 +543,7 @@ try {
 					}									
 				}
 				if(flake.label.contains("MSGSender")){
+					
 					// buffer array for holojam to send back
 					var bufLength = 0;
 					var bufArray = new Array(0);
