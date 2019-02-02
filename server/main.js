@@ -338,7 +338,8 @@ try {
             	if (headerString == 'CTPcrt01') {
             		var curbuf = Buffer.allocUnsafe(6);
 					curbuf.writeInt16LE(2,0);// 2 for creating sketchpage
-					curbuf.writeInt16LE(data.readInt16LE(8),2);// 2 for new page id
+					curbuf.writeInt16LE(data.readInt16LE(8),2);// new page id
+					curbuf.writeInt16LE(data.readInt16LE(10), 4); // whether page should be set immediately
 					
 					++bufLength;
 					console.log("\tbuf before\t", buf);
@@ -585,7 +586,7 @@ try {
 								console.log(b);
 								var e = {
 									eventType: "clientCreateSketchPage",
-									event: {setImmediately : b.readInt32LE(cursor)}
+									event: {setImmediately : b.readInt32LE(cursor + 4)}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
