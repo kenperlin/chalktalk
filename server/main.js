@@ -586,7 +586,7 @@ try {
 								console.log(b);
 								var e = {
 									eventType: "clientCreateSketchPage",
-									event: {setImmediately : b.readInt32LE(cursor + 4)}
+									event: {setImmediately : b.readInt32LE(cursor + 4), id: b.readInt32LE(cursor)}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
