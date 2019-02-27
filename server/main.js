@@ -13,13 +13,13 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
+var saved_ips = ['192.168.1.37',,'192.168.1.204'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
-//holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
+holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
