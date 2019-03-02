@@ -13,7 +13,7 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.37',,'192.168.1.204'];
+var saved_ips = ['192.168.1.37','192.168.1.204','192.168.1.142','192.168.1.112','192.168.1.212'];
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
