@@ -39,7 +39,7 @@ var ackclient = dgram.createSocket('udp4');
 
 // pair of avatar name and avatar oculusUserID
 var mapAvatarId = {};
-
+var globalStylusID = 0;
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Android Simulation
 ////////////////////////////////////////////////////////////////////////////////
@@ -605,7 +605,7 @@ try {
 								Object.entries(mapAvatarId).forEach(([key, value]) => {
 									nBuf += 2 + key.length + 8;
 								});
-								
+								nBuf += 2;
 								var curbuf = Buffer.allocUnsafe(nBuf);
 								curbuf.writeInt16LE(cmdNumber,0);// 3 for avatar number
 								curbuf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
@@ -620,6 +620,8 @@ try {
 									uintID.toBuffer().copy(curbuf, index, 0, 8);								
 									index += 8;
 								});
+								curbuf.writeInt16LE(globalStylusID++,index);
+								index += 2;
 								//console.log("test:" + curbuf);
 								bufLength += curbuf.length;
 								bufArray.push(curbuf);
@@ -671,7 +673,35 @@ try {
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
-								break;					
+								break;	
+							case 8:
+								console.log("Someone is leaving");
+								var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
+								console.log("\treceive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
+								var avatarid = new Uint64LE(b, cursor+paraCount);
+								cursor += 8;
+								delete mapAvatarId[avatarname]
+								
+								console.log("Object.entries(mapAvatarId).length:\t" + Object.entries(mapAvatarId).length);
+								
+								// broadcast who is leaving
+								// calculate the size of nStr + name + id
+								var nBuf = 2 + 3 + avatarname.length;
+								var curbuf = Buffer.allocUnsafe(nBuf);
+								var index = 0;
+								curbuf.writeInt16LE(cmdNumber,index);
+								index += 2;
+								curbuf.writeInt16LE(avatarname.length,index);
+								index += 2;
+								curbuf.write(avatarname,index,avatarname.length);
+								index += avatarname.length;
+								
+								bufLength += curbuf.length;
+								bufArray.push(curbuf);
+								
+								cursor += paraCount;
+								console.log("\tcursor", cursor);
+								break;
 							default:
 								break;
 						}
