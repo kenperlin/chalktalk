@@ -685,8 +685,8 @@ try {
 								console.log("Object.entries(mapAvatarId).length:\t" + Object.entries(mapAvatarId).length);
 								
 								// broadcast who is leaving
-								// calculate the size of nStr + name + id
-								var nBuf = 2 + 3 + avatarname.length;
+								// calculate the size of cmdNumber + avatarname.length + avatarname
+								var nBuf = 2 + 2 + avatarname.length;
 								var curbuf = Buffer.allocUnsafe(nBuf);
 								var index = 0;
 								curbuf.writeInt16LE(cmdNumber,index);
