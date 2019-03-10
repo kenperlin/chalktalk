@@ -605,7 +605,8 @@ try {
 								Object.entries(mapAvatarId).forEach(([key, value]) => {
 									nBuf += 2 + key.length + 8;
 								});
-								nBuf += 2;
+								// return back the avatarname with the assigned id
+								nBuf += 2 + avatarname.length + 2;
 								var curbuf = Buffer.allocUnsafe(nBuf);
 								curbuf.writeInt16LE(cmdNumber,0);// 3 for avatar number
 								curbuf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
@@ -620,6 +621,10 @@ try {
 									uintID.toBuffer().copy(curbuf, index, 0, 8);								
 									index += 8;
 								});
+								curbuf.writeInt16LE(avatarname.length, index);
+								index += 2;
+								curbuf.write(avatarname,index,avatarname.length);
+								index += avatarname.length;
 								curbuf.writeInt16LE(globalStylusID++,index);
 								index += 2;
 								//console.log("test:" + curbuf);
