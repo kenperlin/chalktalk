@@ -455,11 +455,34 @@ try {
                   		label: 'MSGRcv7', bytes: entirebuf
                		}]));
             	}
-            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+            	if (headerString == 'CTzOff01') {
+            		console.log("(client -> server) sending z offset");
+            		try {
+            		var curbuf = Buffer.allocUnsafe(10);
 
+            		curbuf.writeInt16LE(9, 0) // stylus z offset 
+
+            		const roff = 8; // read offset
+            		const woff = 2; // write offset
+
+            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
+
+            		++bufLength;
+            		buf = Buffer.concat([buf, curbuf]);
+
+      				bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+					console.log("Sending MSGRcv8 with", bufLength, " commands");
+
+            		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+            			label: 'MSGRcv8', bytes: entirebuf
+            		}]))
+            	} catch (e) {
+            		console.log(e);
             	}
-            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
-
             	}
 				// wrap all the buf
 				/*if(bufLength > 0){
@@ -706,6 +729,19 @@ try {
 								
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
+								break;
+							case 9:
+								console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
+								
+								var ts = b.readInt32LE(cursor)
+								var opt = b.readInt32LE(cursor + 4);
+
+								var e = {
+									eventType: "clientBeginOrFinishMovingBackwardsOrForwards",
+									event: {timestamp : ts, option : opt}
+								};
+								ws.send(JSON.stringify(e));
+								cursor += paraCount * 4;
 								break;
 							default:
 								break;
