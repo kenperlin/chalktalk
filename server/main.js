@@ -8,12 +8,20 @@ const fs = require('fs');
 const path = require('path');
 const dgram = require('dgram');
 var Uint64LE = require("int64-buffer").Uint64LE;
+var parseArgs = require('minimist');
 
 var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
 var saved_ips = ['192.168.1.37','192.168.1.204','192.168.1.142','192.168.1.112','192.168.1.212'];
+//
+var argv = parseArgs(process.argv.slice(2));
+argv._.forEach(function(ipaddr){
+	console.log("add " + ipaddr + " to unicast list");
+	saved_ips.push(ipaddr);
+	console.log("DEBUG saved_ips " + saved_ips);
+});
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
@@ -27,7 +35,7 @@ app.use(parser.json());
 app.use(parser.urlencoded({ extended: true }));
 
 const http = require('http');
-const port = process.argv[2] || 11235;
+const port = argv.port || 11235;
 let server = http.Server(app);
 
 server.listen(parseInt(port, 10), () =>
