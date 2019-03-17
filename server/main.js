@@ -542,7 +542,7 @@ try {
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
-				//console.log(flake.label);
+				console.log(flake.label);
 				if(flake.label.contains("Stylus")){
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
@@ -750,6 +750,12 @@ try {
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
+								break;
+							case 18:
+								//console.log("18! Test [" + paraCount + "] bytes");
+
+								let view = b.slice(cursor, cursor + paraCount);
+								//console.log(view);
 								break;
 							default:
 								break;
