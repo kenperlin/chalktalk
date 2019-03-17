@@ -25,9 +25,16 @@ argv._.forEach(function(ipaddr){
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+const holojamMesh = require('holojam-node')(
+	['relay'], '0.0.0.0',
+	9693, 9692, 9691, '239.0.2.5',
+	[]
+);
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
+
+holojamMesh.ucAddresses = holojamMesh.ucAddresses.concat(saved_ips);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -273,18 +280,23 @@ function sendDaydreamInput(){
 }
 
 
-const CommandFromClient = {
-	RESOLUTION_REQUEST : 0,
-	STYLUS_RESET       : 1,
-	SKETCHPAGE_CREATE  : 2,
-	AVATAR_SYNC        : 3,
-};
-const CommandToClient = {
-	RESOLUTION_REQUEST : 0,
-	STYLUS_RESET       : 1,
-	SKETCHPAGE_CREATE  : 2,
-	AVATAR_SYNC        : 3,
-};
+// const CommandFromClient = {
+// 	RESOLUTION_REQUEST : 0,
+// 	STYLUS_RESET       : 1,
+// 	SKETCHPAGE_CREATE  : 2,
+// 	AVATAR_SYNC        : 3,
+// };
+// const CommandToClient = {
+// 	RESOLUTION_REQUEST : 0,
+// 	STYLUS_RESET       : 1,
+// 	SKETCHPAGE_CREATE  : 2,
+// 	AVATAR_SYNC        : 3,
+// };
+
+function CachedClientData() {
+
+}
+const cachedData = new CachedClientData();
 
 try {
    let WebSocket = require('ws').Server;
@@ -316,6 +328,11 @@ try {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
+
+
+               const testBuff = Buffer.from("This message thing seems to be working, yay!", "ascii");
+               holojamMesh.SendRaw(testBuff);
+            
             } else {
             	//console.log("HEADER: " + headerString);
            		if (headerString == 'CTDspl01') {
@@ -536,13 +553,25 @@ try {
             ws.send(JSON.stringify(e));
          });
 
+         holojamMesh.on('update-raw', (buffer, info) => {
+         	var e = {
+         		eventType: "RAW",
+         		event : {
+         			buffer : buffer.toString('ascii'),
+         			info   : info
+         		}
+         	};
+
+
+         	ws.send(JSON.stringify(e));
+         });
+
          holojam.on('update', (flakes, scope, origin) => {
-			 
-            //
+    
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
-				console.log(flake.label);
+				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
