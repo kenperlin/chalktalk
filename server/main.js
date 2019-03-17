@@ -323,6 +323,9 @@ try {
 
 			bufLengthByte.writeInt16LE(bufLength,0);  
 
+			const testBuff = Buffer.from("This message thing seems to be working, yay!", "ascii");
+            holojamMesh.SendRaw(testBuff);
+
          	const headerString = readHeader(data);
             if (headerString == 'CTdata01') {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
@@ -330,8 +333,7 @@ try {
                }]));
 
 
-               const testBuff = Buffer.from("This message thing seems to be working, yay!", "ascii");
-               holojamMesh.SendRaw(testBuff);
+
             
             } else {
             	//console.log("HEADER: " + headerString);
