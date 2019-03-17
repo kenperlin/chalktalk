@@ -766,6 +766,13 @@ try {
 						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 							label: 'MSGRcv', bytes: buf
 						}]));	
+					}else{
+						// add an empty return
+						var buf = Buffer.allocUnsafe(2);
+						buf.writeInt16LE(0,0);// cmdCount = 0
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv', bytes: buf
+						}]));	
 					}
 				}
 			}
