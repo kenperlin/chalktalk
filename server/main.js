@@ -14,7 +14,7 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.37','192.168.1.204','192.168.1.142','192.168.1.112','192.168.1.212'];
+var saved_ips = [];
 //
 var argv = parseArgs(process.argv.slice(2));
 argv._.forEach(function(ipaddr){
@@ -466,31 +466,47 @@ try {
             	if (headerString == 'CTzOff01') {
             		console.log("(client -> server) sending z offset");
             		try {
-            		var curbuf = Buffer.allocUnsafe(10);
+						var curbuf = Buffer.allocUnsafe(10);
 
-            		curbuf.writeInt16LE(9, 0) // stylus z offset 
+						curbuf.writeInt16LE(9, 0) // stylus z offset 
 
-            		const roff = 8; // read offset
-            		const woff = 2; // write offset
+						const roff = 8; // read offset
+						const woff = 2; // write offset
 
-            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
+						curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
+						curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
 
-            		++bufLength;
-            		buf = Buffer.concat([buf, curbuf]);
+						++bufLength;
+						buf = Buffer.concat([buf, curbuf]);
 
-      				bufLengthByte.writeInt16LE(bufLength,0);  
-					var entirebuf = Buffer.concat([bufLengthByte, buf]);
-					console.log("Sending MSGRcv8 with", bufLength, " commands");
+						bufLengthByte.writeInt16LE(bufLength,0);  
+						var entirebuf = Buffer.concat([bufLengthByte, buf]);
+						console.log("Sending MSGRcv8 with", bufLength, " commands");
 
-            		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-            			label: 'MSGRcv8', bytes: entirebuf
-            		}]))
-            	} catch (e) {
-            		console.log(e);
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv8', bytes: entirebuf
+						}]))
+					} catch (e) {
+						console.log(e);
+					}
             	}
+				if (headerString == 'CTReStyl') { // turns off the tempoary board
+            		var curbuf = Buffer.allocUnsafe(4);
+
+            		curbuf.writeInt16LE(1, 0); // reset the stylus
+            		curbuf.writeInt16LE(-1, 2);     // -1 means broswer
+					
+					++bufLength;
+					buf = Buffer.concat([buf, curbuf]);
+					
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+					console.log("Sending MSGRcv9 with", bufLength, " commands");
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv9', bytes: entirebuf
+               		}]));
             	}
 				// wrap all the buf
 				/*if(bufLength > 0){
