@@ -6,23 +6,43 @@ function() {
    
    };
 
-   //let V = [-1,0,0, 1,0,0, 0,-1,0, 0,1,0, 0,0,-1, 0,0,1];
-   //let T = [0,2,4, 1,2,4, 0,3,4, 1,3,4, 0,2,5, 1,2,5, 0,3,5, 1,3,5];
+   let V1 = [-1,0,0, 1,0,0, 0,-1,0, 0,1,0, 0,0,-1, 0,0,1];
+   let T1 = [0,2,4, 1,2,4, 0,3,4, 1,3,4, 0,2,5, 1,2,5, 0,3,5, 1,3,5];
 
-   let V = [-1,0,0, 0,0,0, 0,1,0, 0,0,1];
-   let T = [0,1,2, 2,1,3];
+   let V2 = [-1,0,0, 0,0,0, 0,1,0, 0,0,1];
+   let T2 = [0,1,2, 2,1,3];
+
+   let V = V1;
+   let T = T1;
    this.render = function(elapsedTime) {
-      console.log(time);
-
       this.duringSketch(function() {
          mLine([-1, 1], [1, -1]);
          mLine([-1, 1], [1, -1]);
       });
 
       this.afterSketch(function() {
-         m.rotateX(time);
-         mPolyhedron(V, T);         
+         
+
+         if (sin(time / 4) < 0) {
+            V = V2;
+            T = T2;
+         }
+         else {
+            V = V1;
+            T = T1;
+         }
+
+         //V1[0] += 0.1;
+         //V2[0] += 0.1;
+         m.save();
+            //m.translate(sin(time), sin(time), sin(time));
+            mPolyhedron(V1, T1);
+         m.restore();
+            //m.rotateX(time);
+            //mPolyhedron(V, T); 
       });
+
+
    };
    
    this.output = function() {

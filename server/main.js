@@ -293,9 +293,17 @@ function sendDaydreamInput(){
 // 	AVATAR_SYNC        : 3,
 // };
 
-function CachedClientData() {
-
+function MeshData() {
+	// contains vertex and triangle index lists
+	this.idxToSubMeshes = [];
 }
+function CachedClientData() {
+	// contains MeshData
+	this.sketchIDToMeshMap = {
+
+	};
+}
+
 const cachedData = new CachedClientData();
 
 try {
@@ -331,11 +339,49 @@ try {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
-
-
-
             
             } else {
+
+
+            	// mode
+				// sketch id
+				// submesh idx
+				// page idx
+				// mesh type
+				// transform (x, y, z, rx, ry, rz) for now
+				// vertex data count
+				// vertex data
+				// triangle index data count
+				// triangle index data
+
+            	if (headerString == 'CTmesh01') {
+            		// const roff = 8;
+            		// const mode = data.readInt16LE(roff);
+            		//const sketchID = data.readInt16LE(roff + 2);
+            		//const submeshIdx = data.readInt16LE(roff + )
+					      				
+				   console.log("sending mesh01:");
+				   console.log(data);
+
+	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+	                  label: 'DisplayMesh', bytes: data
+	               }]));
+
+
+            		// switch (mode) {
+            		// case 0:
+            		// 	console.log("creating new data");
+
+
+            		// 	break;
+            		// case 1:
+            		// 	console.log("updating transform data");
+            		// 	break;
+            		// default:
+            		// 	console.log("shouldn't get here!")
+            		// 	break;
+            		// }
+            	}
             	//console.log("HEADER: " + headerString);
            		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
