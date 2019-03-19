@@ -68,8 +68,8 @@ function() {
       this.afterSketch(function() {
          mSpline([[.95,h*-.15],[.8,h*-.15],[.6,h*-.15+.05]]);
          mDrawOval([.55 - h*.1, .05 + h*.02], [.55 + h*.1, .05 + h*.22]);
-         if (! this.isOnScreen())
-            this.fade();
+         // if (! this.isOnScreen())
+         //    this.fade();
       });
    }
 }

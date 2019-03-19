@@ -14,7 +14,7 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = ['192.168.1.37','192.168.1.204','192.168.1.142','192.168.1.112','192.168.1.212'];
+var saved_ips = [];
 //
 var argv = parseArgs(process.argv.slice(2));
 argv._.forEach(function(ipaddr){
@@ -463,11 +463,50 @@ try {
                   		label: 'MSGRcv7', bytes: entirebuf
                		}]));
             	}
-            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+            	if (headerString == 'CTzOff01') {
+            		console.log("(client -> server) sending z offset");
+            		try {
+						var curbuf = Buffer.allocUnsafe(10);
 
+						curbuf.writeInt16LE(9, 0) // stylus z offset 
+
+						const roff = 8; // read offset
+						const woff = 2; // write offset
+
+						curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
+						curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
+
+						++bufLength;
+						buf = Buffer.concat([buf, curbuf]);
+
+						bufLengthByte.writeInt16LE(bufLength,0);  
+						var entirebuf = Buffer.concat([bufLengthByte, buf]);
+						console.log("Sending MSGRcv8 with", bufLength, " commands");
+
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv8', bytes: entirebuf
+						}]))
+					} catch (e) {
+						console.log(e);
+					}
             	}
-            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
+				if (headerString == 'CTReStyl') { // turns off the tempoary board
+            		var curbuf = Buffer.allocUnsafe(4);
 
+            		curbuf.writeInt16LE(1, 0); // reset the stylus
+            		curbuf.writeInt16LE(-1, 2);     // -1 means broswer
+					
+					++bufLength;
+					buf = Buffer.concat([buf, curbuf]);
+					
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+					console.log("Sending MSGRcv9 with", bufLength, " commands");
+               		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+                  		label: 'MSGRcv9', bytes: entirebuf
+               		}]));
             	}
 				// wrap all the buf
 				/*if(bufLength > 0){
@@ -568,6 +607,7 @@ try {
 						cursor += 4;
 						var paraCount = b.readInt32LE(cursor);
 						cursor += 4;
+						console.log("\nReceiving cmdCount:" + cmdCount);
 						console.log("\tcursor", cursor);
 						console.log("cmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
 						switch(cmdNumber) {
@@ -613,7 +653,8 @@ try {
 								Object.entries(mapAvatarId).forEach(([key, value]) => {
 									nBuf += 2 + key.length + 8;
 								});
-								nBuf += 2;
+								// return back the avatarname with the assigned id
+								nBuf += 2 + avatarname.length + 2;
 								var curbuf = Buffer.allocUnsafe(nBuf);
 								curbuf.writeInt16LE(cmdNumber,0);// 3 for avatar number
 								curbuf.writeInt16LE(Object.entries(mapAvatarId).length,2);// for avatar amount
@@ -628,6 +669,10 @@ try {
 									uintID.toBuffer().copy(curbuf, index, 0, 8);								
 									index += 8;
 								});
+								curbuf.writeInt16LE(avatarname.length, index);
+								index += 2;
+								curbuf.write(avatarname,index,avatarname.length);
+								index += avatarname.length;
 								curbuf.writeInt16LE(globalStylusID++,index);
 								index += 2;
 								//console.log("test:" + curbuf);
@@ -710,6 +755,19 @@ try {
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
 								break;
+							case 9:
+								console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
+								
+								var ts = b.readInt32LE(cursor)
+								var opt = b.readInt32LE(cursor + 4);
+
+								var e = {
+									eventType: "clientBeginOrFinishMovingBackwardsOrForwards",
+									event: {timestamp : ts, option : opt}
+								};
+								ws.send(JSON.stringify(e));
+								cursor += paraCount * 4;
+								break;
 							default:
 								break;
 						}
@@ -722,6 +780,13 @@ try {
 						bufArray.splice(0, 0, bufLengthByte);	// insert cmd count into the front
 						var buf = Buffer.concat(bufArray);
 						//console.log("buf", buf);	
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv', bytes: buf
+						}]));	
+					}else{
+						// add an empty return
+						var buf = Buffer.allocUnsafe(2);
+						buf.writeInt16LE(0,0);// cmdCount = 0
 						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 							label: 'MSGRcv', bytes: buf
 						}]));	
