@@ -607,6 +607,7 @@ try {
 						cursor += 4;
 						var paraCount = b.readInt32LE(cursor);
 						cursor += 4;
+						console.log("\nReceiving cmdCount:" + cmdCount);
 						console.log("\tcursor", cursor);
 						console.log("cmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
 						switch(cmdNumber) {
