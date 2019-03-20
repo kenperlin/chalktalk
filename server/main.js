@@ -360,8 +360,7 @@ try {
             		//const sketchID = data.readInt16LE(roff + 2);
             		//const submeshIdx = data.readInt16LE(roff + )
 					      				
-				   console.log("sending mesh01:");
-				   console.log(data);
+				   //console.log("sending mesh01:");
 
 	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 	                  label: 'DisplayMesh', bytes: data

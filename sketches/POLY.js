@@ -6,14 +6,14 @@ function() {
    
    };
 
-   let V1 = [-1,0,0, 1,0,0, 0,-1,0, 0,1,0, 0,0,-1, 0,0,1];
-   let T1 = [0,2,4, 1,2,4, 0,3,4, 1,3,4, 0,2,5, 1,2,5, 0,3,5, 1,3,5];
+   this.V1 = [-1,0,0, 1,0,0, 0,-1,0, 0,1,0, 0,0,-1, 0,0,1];
+   this.T1 = [0,2,4, 1,2,4, 0,3,4, 1,3,4, 0,2,5, 1,2,5, 0,3,5, 1,3,5];
 
-   let V2 = [-1,0,0, 0,0,0, 0,1,0, 0,0,1];
-   let T2 = [0,1,2, 2,1,3];
+   this.V2 = [-1,0,0, 0,0,0, 0,1,0, 0,0,1];
+   this.T2 = [0,1,2, 2,1,3];
 
-   let V = V1;
-   let T = T1;
+   this.V = this.V1;
+   this.T = this.T1;
    this.render = function(elapsedTime) {
       this.duringSketch(function() {
          mLine([-1, 1], [1, -1]);
@@ -24,19 +24,21 @@ function() {
          
 
          if (sin(time / 4) < 0) {
-            V = V2;
-            T = T2;
+            this.V = this.V2;
+            this.T = this.T2;
          }
          else {
-            V = V1;
-            T = T1;
+           this.V = this.V1;
+           this.T = this.T1;
          }
 
          //V1[0] += 0.1;
          //V2[0] += 0.1;
          m.save();
             //m.translate(sin(time), sin(time), sin(time));
-            mPolyhedron(V1, T1);
+            mPolyhedron(this.V1, this.T1);
+            // m.translate(-sin(time), 0.0, 0.0);
+            // mPolyhedron(this.V2, this.T2);
          m.restore();
             //m.rotateX(time);
             //mPolyhedron(V, T); 
