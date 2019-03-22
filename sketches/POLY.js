@@ -36,7 +36,9 @@ function() {
          //V2[0] += 0.1;
          m.save();
             //m.translate(sin(time), sin(time), sin(time));
-            mPolyhedron(this.V1, this.T1);
+            //mPolyhedron(this.V1, this.T1);
+            //mTorus(10, 10);
+            mCylinder(10);
             // m.translate(-sin(time), 0.0, 0.0);
             // mPolyhedron(this.V2, this.T2);
          m.restore();
