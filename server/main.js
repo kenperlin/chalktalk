@@ -381,8 +381,7 @@ try {
             		// 	break;
             		// }
             	}
-            	//console.log("HEADER: " + headerString);
-           		if (headerString == 'CTDspl01') {
+           		else if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
 					// encode the resolution
 					var curbuf = Buffer.allocUnsafe(6);
@@ -407,7 +406,7 @@ try {
 							label: 'MSGRcv2', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTPcrt01') {
+            	else if (headerString == 'CTPcrt01') {
             		var curbuf = Buffer.allocUnsafe(6);
 					curbuf.writeInt16LE(2,0);// 2 for creating sketchpage
 					curbuf.writeInt16LE(data.readInt16LE(8),2);// new page id
@@ -432,7 +431,7 @@ try {
 							label: 'MSGRcv3', bytes: entirebuf
 						}]));		     		
             	}
-				if (headerString == 'CTPset01') {
+				else if (headerString == 'CTPset01') {
 					var curbuf = Buffer.allocUnsafe(6);
 					curbuf.writeInt16LE(4,0); // 4 for setting sketch page
 					curbuf.writeInt16LE(data.readInt16LE(8), 2); // write page id
@@ -453,7 +452,7 @@ try {
 							label: 'MSGRcv4', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTInit01') {
+            	else if (headerString == 'CTInit01') {
             		var curbuf = Buffer.allocUnsafe(8); // write 4 int16s
 
             		curbuf.writeInt16LE(5, 0); // init command
@@ -482,7 +481,7 @@ try {
 							label: 'MSGRcv5', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+            	else if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
 					var curbuf = Buffer.allocUnsafe(8); 
 
             		curbuf.writeInt16LE(6, 0); // board on command
@@ -505,7 +504,7 @@ try {
 							label: 'MSGRcv6', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
+            	else if (headerString == 'CTBrdoff') { // turns off the tempoary board
             		var curbuf = Buffer.allocUnsafe(8);
 
             		curbuf.writeInt16LE(7, 0); // board off command
@@ -527,7 +526,7 @@ try {
                   		label: 'MSGRcv7', bytes: entirebuf
                		}]));
             	}
-            	if (headerString == 'CTzOff01') {
+            	else if (headerString == 'CTzOff01') {
             		console.log("(client -> server) sending z offset");
             		try {
 						var curbuf = Buffer.allocUnsafe(10);
@@ -556,7 +555,7 @@ try {
 						console.log(e);
 					}
             	}
-				if (headerString == 'CTReStyl') { // turns off the tempoary board
+				else if (headerString == 'CTReStyl') { // turns off the tempoary board
             		var curbuf = Buffer.allocUnsafe(4);
 
             		curbuf.writeInt16LE(1, 0); // reset the stylus
@@ -571,6 +570,24 @@ try {
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv9', bytes: entirebuf
                		}]));
+            	}
+            	else if (headerString == 'CTReSlct') { // reset selections
+
+					var curbuf = Buffer.allocUnsafe(2); 
+
+            		curbuf.writeInt16LE(10, 0); // board on command
+
+					++bufLength;
+					buf = Buffer.concat([buf, curbuf]);
+					
+            		console.log("resetting selection");
+					
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+
+					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv5', bytes: entirebuf
+					}]));
             	}
 				// wrap all the buf
 				/*if(bufLength > 0){
