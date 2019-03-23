@@ -339,7 +339,6 @@ try {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
-            
             } else {
 
 
