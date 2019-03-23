@@ -196,7 +196,7 @@ module.exports = {
 			return;
 		}
 
-		console.log(`running with target ${IPControl}:${udpPort}`);
+		//console.log(`running with target ${IPControl}:${udpPort}`);
 
 		function sendData(data) {
 			var header = {
@@ -208,7 +208,7 @@ module.exports = {
 			data = Buffer.from(data);
 			header_size.writeUInt16LE(header.length,0);
 			header_size.writeUInt32LE(data.length,2);
-			console.log("data.length:" + data.length);
+			//console.log("data.length:" + data.length);
 			
 			var packet = [header_size,header,data];
 			message = Buffer.concat(packet);

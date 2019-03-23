@@ -144,6 +144,8 @@ try {
       if (ws.index == 0) {
          // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
+		 // Holodeck
+		 ws.send(JSON.stringify({global: "holodeckListener", value: true }));
 		 curWS = ws;
          // Broadcast curve data
          ws.on('message', data => {
@@ -155,10 +157,17 @@ try {
 //                  label: 'Display', bytes: data
                //}]));
 			   
-			   console.log("display");
+			   //console.log("display");
+			   // this is for point data
 			   holodeckWrapper.sendChalktalk(data);
-            }
-         });
+            }else if (readHeader(data) == 'Holodeck'){
+				holodeckWrapper.sendChalktalk(data);
+				//console.log(data[8]);
+				if(data[8] != 0){
+					console.log("extra data", data[9]);
+					console.log("extra data", data[10]);
+				}
+         }});
       }
 
       // Remove this sockets
