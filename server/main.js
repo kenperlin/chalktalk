@@ -15,12 +15,12 @@ const resolutionWidth = 2560;
 var saved_ips = ['192.168.1.14','192.168.1.26','192.168.1.16'];
 
 // behave as a relay
-const holojam = require('holojam-node')(['relay']);
+//const holojam = require('holojam-node')(['relay']);
 var holodeckWrapper = require('./wrapperChalktalk');
 holodeckWrapper.runWrapper();
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
-holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
+//holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -158,84 +158,6 @@ try {
 			   console.log("display");
 			   holodeckWrapper.sendChalktalk(data);
             }
-         });
-
-         /* VR Input (deprecated events) */
-
-         holojam.on('mouseEvent', flake => {
-            var type = flake.ints[0];
-            type = (type == 0 ? "onmousedown"
-               : (type == 1 ? "onmousemove" : "onmouseup"));
-
-            var e = {
-               eventType: type,
-               event: {
-                  button: 3,
-                  clientX: flake.floats[0],
-                  clientY: flake.floats[1]
-               }
-            }
-
-            ws.send(JSON.stringify(e));
-         });
-
-         holojam.on('keyEvent', (flake) => {
-            var type = flake.ints[1];
-            type = (type == 0 ? "onkeydown" : "onkeyup");
-
-            var e = {
-               eventType: type,
-               event: {
-                  keyCode: flake.ints[0] + 48
-            }};
-
-            ws.send(JSON.stringify(e));
-         });
-
-         holojam.on('update', (flakes, scope, origin) => {
-            //
-			//console.log(flakes.length);
-			for (var i=0; i < flakes.length; i++) {
-				var flake = flakes[i];
-				//console.log(flake.label);
-				if(flake.label.contains("Stylus")){
-					var wipeOrNot = flake.ints[1];
-					if(wipeOrNot == 3){
-						console.log("recv wipe");
-						var e = {
-						   eventType: "wipe",
-						   event: {
-							  button: 1,
-							  clientX: 0,
-							  clientY: 0
-						   }
-						};
-						ws.send(JSON.stringify(e));	
-					}
-					else{
-						var type = flake.ints[0];
-						type = (type == 0 ? "onmousedown"
-						: (type == 1 ? "onmousemove" :"onmouseup" ));
-
-						var e = {
-						   eventType: type,
-						   event: {
-							  button: 3,
-							  clientX: flake.vector3s[0].z * resolutionWidth,
-							  clientY: flake.vector3s[0].y * resolutionHeight
-						   }
-						};
-						ws.send(JSON.stringify(e));		
-					}									
-				}
-				if(flake.label.contains("Avatar")){
-					var b = flake.bytes;
-					//console.log(flake.bytes.length);
-					//for(var bi = 0; bi < b.length/10; bi++)
-						//console.log(b[bi]);
-				}
-				
-			}
          });
       }
 
