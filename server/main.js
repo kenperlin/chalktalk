@@ -353,34 +353,7 @@ try {
 				// triangle index data count
 				// triangle index data
 
-            	if (headerString == 'CTmesh01') {
-            		// const roff = 8;
-            		// const mode = data.readInt16LE(roff);
-            		//const sketchID = data.readInt16LE(roff + 2);
-            		//const submeshIdx = data.readInt16LE(roff + )
-					      				
-				   //console.log("sending mesh01:");
-
-	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-	                  label: 'DisplayMesh', bytes: data
-	               }]));
-
-
-            		// switch (mode) {
-            		// case 0:
-            		// 	console.log("creating new data");
-
-
-            		// 	break;
-            		// case 1:
-            		// 	console.log("updating transform data");
-            		// 	break;
-            		// default:
-            		// 	console.log("shouldn't get here!")
-            		// 	break;
-            		// }
-            	}
-           		else if (headerString == 'CTDspl01') {
+           		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
 					// encode the resolution
 					var curbuf = Buffer.allocUnsafe(6);
@@ -404,6 +377,12 @@ try {
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 							label: 'MSGRcv2', bytes: entirebuf
 						}]));
+            	}
+            	else if (headerString == 'CTmesh01') {
+
+	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+	                  label: 'DisplayMesh', bytes: data
+	               }]));
             	}
             	else if (headerString == 'CTPcrt01') {
             		var curbuf = Buffer.allocUnsafe(6);
@@ -477,43 +456,45 @@ try {
 					var entirebuf = Buffer.concat([bufLengthByte, buf]);
 					console.log("Sending MSGRcv5 with", bufLength, " commands");
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv5', bytes: entirebuf
-						}]));
+						label: 'MSGRcv5', bytes: entirebuf
+					}]));
             	}
             	else if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
-					var curbuf = Buffer.allocUnsafe(8); 
+					var curbuf = Buffer.allocUnsafe(10); 
 
             		curbuf.writeInt16LE(6, 0); // board on command
 
             		const roff = 8; // read offset
             		const woff = 2; // write offset
 
-            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // whether a chalktalk object was selected
+            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // uid
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // timestamp half-2
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // whether a chalktalk object was selected
 					++bufLength;
 					buf = Buffer.concat([buf, curbuf]);
 					
-            		console.log("board on?: " + data.readInt16LE(roff + 4))
+            		console.log("board on?: " + data.readInt16LE(roff + 6));
 					
 					bufLengthByte.writeInt16LE(bufLength,0);  
 					var entirebuf = Buffer.concat([bufLengthByte, buf]);
 					console.log("Sending MSGRcv6 with", bufLength, " commands");
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv6', bytes: entirebuf
-						}]));
+						label: 'MSGRcv6', bytes: entirebuf
+					}]));
             	}
             	else if (headerString == 'CTBrdoff') { // turns off the tempoary board
-            		var curbuf = Buffer.allocUnsafe(8);
+            		var curbuf = Buffer.allocUnsafe(10);
 
             		curbuf.writeInt16LE(7, 0); // board off command
 
             		const roff = 8; // read offset
             		const woff = 2; // write offset
 
-            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // which chalktalk object was selected
+            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // uid
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // timestamp half-2
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // whether a chalktalk object was selected
 					
 					++bufLength;
 					buf = Buffer.concat([buf, curbuf]);
@@ -535,7 +516,7 @@ try {
 						const roff = 8; // read offset
 						const woff = 2; // write offset
 
-						curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // timestamp half-1
 						curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
 						curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
 						curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
@@ -775,6 +756,12 @@ try {
 								//}]));
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
+
+								var e = {
+									eventType : "clientAddUserID",
+									event : {uid : globalStylusID - 1}
+								};
+								ws.send(JSON.stringify(e));
 								break;
 							case 4:
 								const idx = b.readInt32LE(cursor);
@@ -789,36 +776,39 @@ try {
 							case 5:
 								console.log("Get initialization data");
 								var e = {
-									eventType: "clientInitialize",
-									event: {}
+									eventType : "clientInitialize",
+									event : {}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
 							case 6:
-								var ts = b.readInt32LE(cursor)
-								console.log(("(server -> client) prototype temporary board on at framecount=[" + ts + "]"));
+								var ts = b.readInt32LE(cursor);
+								var uid = b.readInt32LE(cursor + 4);
+								console.log(("(server -> client) selection on at framecount=[" + ts + "]"));
 								var e = {
 									eventType: "clientBeginMoveGroupOrSketchFromPage",
-									event: {timestamp : ts}
+									event: {timestamp : ts, uid : uid}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
 							case 7:
-								var ts = b.readInt32LE(cursor)
-								var dstPId = b.readInt32LE(cursor + 4)
-								console.log(("(server -> client) prototype temporary board off at framecount=[" + ts + "], dst page: " + dstPId));
+								var ts = b.readInt32LE(cursor);
+								var dstPId = b.readInt32LE(cursor + 4);
+								var uid = b.readInt32LE(cursor + 8);
+								console.log(("(server -> client) selection off at framecount=[" + ts + "], dst page: " + dstPId));
 								var e = {
-									eventType: "clientEndMoveGroupOrSketchFromPage",
-									event: {
+									eventType : "clientEndMoveGroupOrSketchFromPage",
+									event : {
 										timestamp : ts,
-										dstPageIdx : dstPId
+										dstPageIdx : dstPId,
+										uid : uid
 									}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
-								break;	
+								break;
 							case 8:
 								console.log("Someone is leaving");
 								var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
@@ -846,25 +836,36 @@ try {
 								
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
+
 								break;
 							case 9:
 								console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
 								
-								var ts = b.readInt32LE(cursor)
+								var ts = b.readInt32LE(cursor);
 								var opt = b.readInt32LE(cursor + 4);
+								var uid = b.readInt32LE(cursor + 8);
 
 								var e = {
 									eventType: "clientBeginOrFinishMovingBackwardsOrForwards",
-									event: {timestamp : ts, option : opt}
+									event : {
+										timestamp : ts,
+										option : opt,
+										uid : uid
+									}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 18:
-								//console.log("18! Test [" + paraCount + "] bytes");
+							case 11:
+								console.log("removing ID");
 
-								let view = b.slice(cursor, cursor + paraCount);
-								//console.log(view);
+								var uid = b.readInt32LE(cursor);
+
+								var e = {
+									eventType : "clientRemoveUserID",
+									event : {uid : uid}
+								};
+								ws.send(JSON.stringify(e));
 								break;
 							default:
 								break;
