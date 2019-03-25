@@ -45,214 +45,234 @@ const http = require('http');
 const port = argv.port || 11235;
 let server = http.Server(app);
 
+var curWS;
+
 server.listen(parseInt(port, 10), () =>
    console.log('HTTP server listening on port %d', server.address().port)
 );
 
-// for sending ack back to 3dof phone to confirm the connection
-var ackclient = dgram.createSocket('udp4');
-
 // pair of avatar name and avatar oculusUserID
 var mapAvatarId = {};
 var globalStylusID = 0;
+
+// different platform support
+var usingVive = false;
+var using3DOF = false;
+
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Android Simulation
 ////////////////////////////////////////////////////////////////////////////////
-// listen to android simulation through udp
-const udpServer = dgram.createSocket('udp4');
-var udpHOST = process.argv[3] || "192.168.1.126";
 
-udpServer.on('error', (err) => {
-  //console.log(`udpServer error:\n${err.stack}`);
-  console.log("udpServer closed because no android simulation needs to be listened now");
-  udpServer.close();
-});
+if(using3DOF){
+// for sending ack back to 3dof phone to confirm the connection
+	var ackclient = dgram.createSocket('udp4');
+	// listen to android simulation through udp
+	const udpServer = dgram.createSocket('udp4');
+	var udpHOST = process.argv[3] || "192.168.1.126";
 
-var PORT = 11000;
-//var HOST = '216.165.71.243';
+	udpServer.on('error', (err) => {
+	  //console.log(`udpServer error:\n${err.stack}`);
+	  console.log("udpServer closed because no android simulation needs to be listened now");
+	  udpServer.close();
+	});
 
-udpServer.on('listening', function () {
-    var address = udpServer.address();
-    console.log('UDP udpServer listening on ' + address.address + ":" + address.port);
+	var PORT = 11000;
+	//var HOST = '216.165.71.243';
+
+	udpServer.on('listening', function () {
+		var address = udpServer.address();
+		console.log('UDP udpServer listening on ' + address.address + ":" + address.port);
+		
+	});
+
+	//
+	// Summary:
+	//   Began = 1,  A finger touched the screen.
+	//   Moved = 2,   A finger moved on the screen.
+	//   Stationary = 3,  A finger is touching the screen but hasn't moved.
+	//  Ended = 4,   A finger was lifted from the screen. This is the final phase of a touch.
+	//  Canceled = 5   The system cancelled tracking for the touch.
+	var curDaydreamInput = {
+		threedof:true,
+		rx:0,
+		ry:0,
+		rz:0,
+		state:0,
+		x:0,
+		y:0
+	};
+
+	udpServer.on('message', function (message, remote) {
+		//console.log(remote.address + ':' + remote.port +' - ' + message + message.length);
+		
+		if(new String(message).contains("Is anybody there?"))
+			ackclient.send(message, 0, message.length, remote.port, remote.address, function(err, bytes) {
+				//console.log('UDP message sent to ' + remote.address +':'+ remote.port);
+				if (err) 
+					ackclient.close();
+			});
+		
+		if(message.length != 24)
+			return;
+		var index = 0;
+		curDaydreamInput.rx = message.readFloatLE(index);
+		index += 4;
+		curDaydreamInput.ry = message.readFloatLE(index);
+		index += 4;
+		curDaydreamInput.rz = message.readFloatLE(index);
+		index += 4;
+		curDaydreamInput.state = message.readInt32LE(index);
+		index += 4;
+		curDaydreamInput.x = message.readFloatLE(index);
+		index += 4;
+		curDaydreamInput.y = message.readFloatLE(index);
+		
+		//console.log(rx,ry,rz,state,x,y);
+		//console.log(curDaydreamInput);
+	});
+
+	udpServer.bind(PORT, udpHOST);
 	
-});
-
-//
-// Summary:
-//   Began = 1,  A finger touched the screen.
-//   Moved = 2,   A finger moved on the screen.
-//   Stationary = 3,  A finger is touching the screen but hasn't moved.
-//  Ended = 4,   A finger was lifted from the screen. This is the final phase of a touch.
-//  Canceled = 5   The system cancelled tracking for the touch.
-var curDaydreamInput = {
-	threedof:true,
-	rx:0,
-	ry:0,
-	rz:0,
-	state:0,
-	x:0,
-	y:0
-};
-
-udpServer.on('message', function (message, remote) {
-    //console.log(remote.address + ':' + remote.port +' - ' + message + message.length);
-	
-	if(new String(message).contains("Is anybody there?"))
-		ackclient.send(message, 0, message.length, remote.port, remote.address, function(err, bytes) {
-			//console.log('UDP message sent to ' + remote.address +':'+ remote.port);
-			if (err) 
-				ackclient.close();
-		});
-	
-	if(message.length != 24)
-		return;
-	var index = 0;
-    curDaydreamInput.rx = message.readFloatLE(index);
-	index += 4;
-	curDaydreamInput.ry = message.readFloatLE(index);
-	index += 4;
-	curDaydreamInput.rz = message.readFloatLE(index);
-	index += 4;
-	curDaydreamInput.state = message.readInt32LE(index);
-	index += 4;
-	curDaydreamInput.x = message.readFloatLE(index);
-	index += 4;
-	curDaydreamInput.y = message.readFloatLE(index);
-	
-	//console.log(rx,ry,rz,state,x,y);
-	//console.log(curDaydreamInput);
-});
-
-udpServer.bind(PORT, udpHOST);
+	// zhenyi: send 3dof cursor
+	setInterval( function() { sendDaydreamInput(); }, 20);
+	function sendDaydreamInput(){
+		if(curWS != null){
+			curWS.send(JSON.stringify(curDaydreamInput));
+		}
+	}
+}
 // end of udp server
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////// Vive
 ////////////////////////////////////////////////////////////////////////////////
 // var sourceIP = "192.168.1.112";
-var sourceIP = "192.168.1.158";
-var framerate = 60.;
-var viveServer = dgram.createSocket('udp4');
-var calibratedSource = undefined
-var lighthouses = {}
 
-viveServer.bind({
-  address: sourceIP,
-  port: 10000,
-  reuseAddr: true,
-});
-viveServer.on('error', function(error) {
-	console.log("Error: " + error);
-	viveServer.close()
-});
-viveServer.on('close', function(){
-	console.log('Vive socket closed.');
-});
-viveServer.on('listening', function(){
-	var address = viveServer.address();
-	console.log('\nVive listening on ' + address.address + ":" + address.port);
-}); 
+if(usingVive){
+	var sourceIP = "192.168.1.158";
+	var framerate = 60.;
+	var viveServer = dgram.createSocket('udp4');
+	var calibratedSource = undefined
+	var lighthouses = {}
 
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
+	viveServer.bind({
+	  address: sourceIP,
+	  port: 10000,
+	  reuseAddr: true,
+	});
+	viveServer.on('error', function(error) {
+		console.log("Error: " + error);
+		viveServer.close()
+	});
+	viveServer.on('close', function(){
+		console.log('Vive socket closed.');
+	});
+	viveServer.on('listening', function(){
+		var address = viveServer.address();
+		console.log('\nVive listening on ' + address.address + ":" + address.port);
+	}); 
 
-function tryAssignLighthouse(address, trackedObject) {
-	if (!calibratedSource && viveServer.address().address == address)
-		calibratedSource = address
-	lighthouses[address] = trackedObject;
-	//console.log(lighthouses);
-}
+	function isEmpty(obj) {
+	  return Object.keys(obj).length === 0;
+	}
 
-function tryCalibrateObject(address, trackedObject) {
-	if (!(calibratedSource) || calibratedSource == address) {
-		return trackedObject;
-	} 
-	if (lighthouses[address] == undefined) {
+	function tryAssignLighthouse(address, trackedObject) {
+		if (!calibratedSource && viveServer.address().address == address)
+			calibratedSource = address
+		lighthouses[address] = trackedObject;
+		//console.log(lighthouses);
+	}
+
+	function tryCalibrateObject(address, trackedObject) {
+		if (!(calibratedSource) || calibratedSource == address) {
+			return trackedObject;
+		} 
+		if (lighthouses[address] == undefined) {
+			return trackedObject;
+		}
+
+		var toPos = trackedObject['vector3s'][0]
+		toPos = new Vector3(toPos.x, toPos.y, toPos.z);
+		var toRot = trackedObject['vector4s'][0]
+		toRot = new Quaternion(toRot.x, toRot.y, toRot.z, toRot.w);
+
+		var lh1 = lighthouses[calibratedSource];
+		var lh1Pos = lh1['vector3s'][0]
+		lh1Pos = new Vector3(lh1Pos.x, lh1Pos.y, lh1Pos.z);
+		var lh1Rot = lh1['vector4s'][0]
+		lh1Rot = new Quaternion(lh1Rot.x, lh1Rot.y, lh1Rot.z, lh1Rot.w);
+
+		var lh2 = lighthouses[address];
+		var lh2Pos = lh2['vector3s'][0]
+		lh2Pos = new Vector3(lh2Pos.x, lh2Pos.y, lh2Pos.z);
+		var lh2Rot = lh2['vector4s'][0]
+		lh2Rot = new Quaternion(lh2Rot.x, lh2Rot.y, lh2Rot.z, lh2Rot.w);
+
+		var tempQuat = lh1Rot.mul(lh2Rot.inverse());
+		var deltaPos = lh1Pos.sub(tempQuat.mulVector3(lh2Pos));
+
+		var newPos = deltaPos.add(tempQuat.mulVector3(toPos));
+		var newRot = tempQuat.mul(toRot);
+
+		trackedObject['vector3s'] = [{x: newPos.x, y: newPos.y, z:newPos.z}]
+		trackedObject['vector4s'] = [{x: newRot.x, y: newRot.y, z: newRot.z, w: newRot.w}]
+
 		return trackedObject;
 	}
 
-	var toPos = trackedObject['vector3s'][0]
-	toPos = new Vector3(toPos.x, toPos.y, toPos.z);
-	var toRot = trackedObject['vector4s'][0]
-	toRot = new Quaternion(toRot.x, toRot.y, toRot.z, toRot.w);
+	var trackedObjects = [];
+	var LHMappings = {};
+	LHMappings["10.19.40.65"] = "REF-LH";
+	LHMappings["10.19.164.43"] = "ZHU-LH";
+	LHMappings["192.168.1.98"] = "HE-LH";
+	LHMappings["192.168.1.107"] = "ZHU-LH";
 
-	var lh1 = lighthouses[calibratedSource];
-	var lh1Pos = lh1['vector3s'][0]
-	lh1Pos = new Vector3(lh1Pos.x, lh1Pos.y, lh1Pos.z);
-	var lh1Rot = lh1['vector4s'][0]
-	lh1Rot = new Quaternion(lh1Rot.x, lh1Rot.y, lh1Rot.z, lh1Rot.w);
-
-	var lh2 = lighthouses[address];
-	var lh2Pos = lh2['vector3s'][0]
-	lh2Pos = new Vector3(lh2Pos.x, lh2Pos.y, lh2Pos.z);
-	var lh2Rot = lh2['vector4s'][0]
-	lh2Rot = new Quaternion(lh2Rot.x, lh2Rot.y, lh2Rot.z, lh2Rot.w);
-
-	var tempQuat = lh1Rot.mul(lh2Rot.inverse());
-	var deltaPos = lh1Pos.sub(tempQuat.mulVector3(lh2Pos));
-
-	var newPos = deltaPos.add(tempQuat.mulVector3(toPos));
-	var newRot = tempQuat.mul(toRot);
-
-	trackedObject['vector3s'] = [{x: newPos.x, y: newPos.y, z:newPos.z}]
-	trackedObject['vector4s'] = [{x: newRot.x, y: newRot.y, z: newRot.z, w: newRot.w}]
-
-	return trackedObject;
-}
-
-var trackedObjects = [];
-var LHMappings = {};
-LHMappings["10.19.40.65"] = "REF-LH";
-LHMappings["10.19.164.43"] = "ZHU-LH";
-LHMappings["192.168.1.98"] = "HE-LH";
-LHMappings["192.168.1.107"] = "ZHU-LH";
-
-viveServer.on('message', function(message, info){
-	var json = JSON.parse(message.toString());
-	trackedObjects = [];
-	for (var key in json) {
-		if(!json.hasOwnProperty(key) || key == 'time'){
-			continue;
-		}
-		var trackedObject = { 
-			label: json[key].id,
-	    	vector3s: [{x: parseFloat(json[key].x), y: parseFloat(json[key].y), z: -parseFloat(json[key].z)}],
-			vector4s: [{x: parseFloat(json[key].qx), y: parseFloat(json[key].qy), z: -parseFloat(json[key].qz), w: -parseFloat(json[key].qw)}]
-		};
-		if (json[key]["triggerPress"] != undefined) {
-			trackedObject['ints'] = [parseInt(json[key]['appMenuPress']), parseInt(json[key]['gripPress']), parseInt(json[key]['touchpadPress']), parseInt(json[key]['triggerPress']), 0, 0]
-			//console.log(trackedObject['ints']);
-			trackedObject['floats'] = [0., 0., 0., 0., 0., 0.]
-		}
-		
-		if (trackedObject['label'].includes("LIGHTHOUSE-V2-4")) {
-				
-			tryAssignLighthouse(info.address, trackedObject);
-			trackedObject.label = LHMappings[info.address];
+	viveServer.on('message', function(message, info){
+		var json = JSON.parse(message.toString());
+		trackedObjects = [];
+		for (var key in json) {
+			if(!json.hasOwnProperty(key) || key == 'time'){
+				continue;
+			}
+			var trackedObject = { 
+				label: json[key].id,
+				vector3s: [{x: parseFloat(json[key].x), y: parseFloat(json[key].y), z: -parseFloat(json[key].z)}],
+				vector4s: [{x: parseFloat(json[key].qx), y: parseFloat(json[key].qy), z: -parseFloat(json[key].qz), w: -parseFloat(json[key].qw)}]
+			};
+			if (json[key]["triggerPress"] != undefined) {
+				trackedObject['ints'] = [parseInt(json[key]['appMenuPress']), parseInt(json[key]['gripPress']), parseInt(json[key]['touchpadPress']), parseInt(json[key]['triggerPress']), 0, 0]
+				//console.log(trackedObject['ints']);
+				trackedObject['floats'] = [0., 0., 0., 0., 0., 0.]
+			}
 			
-			//console.log(trackedObject);
+			if (trackedObject['label'].includes("LIGHTHOUSE-V2-4")) {
+					
+				tryAssignLighthouse(info.address, trackedObject);
+				trackedObject.label = LHMappings[info.address];
+				
+				//console.log(trackedObject);
+			}
+			if (trackedObject['label'].includes("LIGHTHOUSE") && !trackedObject['label'].includes("V2-4")) {
+				//Don't send lighthouses except for V2-4!
+				continue;
+			}
+			
+			// we don't sync vive controllers because it is only visible to the owner
+			// we only need to broadcast THE lighthouse info of the calibratedSource, thus other 
+			//trackedObject = tryCalibrateObject(info.address, trackedObject)
+			if (trackedObject['label'] != undefined) {
+				trackedObjects.push(trackedObject);
+			}
+			//pool[json[key].id] = trackedObject;
 		}
-		if (trackedObject['label'].includes("LIGHTHOUSE") && !trackedObject['label'].includes("V2-4")) {
-			//Don't send lighthouses except for V2-4!
-			continue;
-		}
-		
-		// we don't sync vive controllers because it is only visible to the owner
-		// we only need to broadcast THE lighthouse info of the calibratedSource, thus other 
-		//trackedObject = tryCalibrateObject(info.address, trackedObject)
-		if (trackedObject['label'] != undefined) {
-			trackedObjects.push(trackedObject);
-		}
-		//pool[json[key].id] = trackedObject;
-	}
-}); 
+	}); 
 
-setInterval(() => {
-	if (!isEmpty(trackedObjects)) {
-		holojam.Send(holojam.BuildUpdate('Vive', trackedObjects));
-	}
-}, 1000./framerate);
+	setInterval(() => {
+		if (!isEmpty(trackedObjects)) {
+			holojam.Send(holojam.BuildUpdate('Vive', trackedObjects));
+		}
+	}, 1000./framerate);
+}
 /// end of viveServer
 
 
@@ -270,28 +290,8 @@ function readHeader(data) {
    return header;
 }
 
-// zhenyi: send 3dof cursor
-setInterval( function() { sendDaydreamInput(); }, 20);
-var curWS;
-function sendDaydreamInput(){
-	if(curWS != null){
-		curWS.send(JSON.stringify(curDaydreamInput));
-	}
-}
-
-
-// const CommandFromClient = {
-// 	RESOLUTION_REQUEST : 0,
-// 	STYLUS_RESET       : 1,
-// 	SKETCHPAGE_CREATE  : 2,
-// 	AVATAR_SYNC        : 3,
-// };
-// const CommandToClient = {
-// 	RESOLUTION_REQUEST : 0,
-// 	STYLUS_RESET       : 1,
-// 	SKETCHPAGE_CREATE  : 2,
-// 	AVATAR_SYNC        : 3,
-// };
+var CommandFromClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3,
+"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11});
 
 function MeshData() {
 	// contains vertex and triangle index lists
@@ -306,6 +306,13 @@ function CachedClientData() {
 
 const cachedData = new CachedClientData();
 
+const CommandToClient = {
+	RESOLUTION_REQUEST : 0,
+	STYLUS_RESET       : 1,
+	SKETCHPAGE_CREATE  : 2,
+	AVATAR_SYNC        : 3,
+};
+
 try {
    let WebSocket = require('ws').Server;
    let wss = new WebSocket({ port: 22346 });
@@ -313,14 +320,14 @@ try {
 
    wss.on('connection', ws => {
       for (ws.index = 0; sockets[ws.index]; ws.index++);
-      sockets[ws.index] = ws;
+		sockets[ws.index] = ws;
 	  
+	  console.log("websocket connection number:", ws.index);
       // Communicate with first connection only
       if (ws.index == 0) {
          // Initialize
          ws.send(JSON.stringify({global: "displayListener", value: true }));
 		 curWS = ws;
-
 
          // Broadcast curve data
          ws.on('message', data => {
@@ -627,7 +634,13 @@ try {
          });
 
          holojam.on('update', (flakes, scope, origin) => {
-    
+			 //console.log("ws.readyState",ws.readyState);
+			 if(ws == null){
+				 console.log("when null? ws.readyState",ws.readyState);
+				 return;
+			 }
+            //
+
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
@@ -684,7 +697,7 @@ try {
 						console.log("\tcursor", cursor);
 						console.log("cmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
 						switch(cmdNumber) {
-							case 0:
+							case CommandFromClient.RESOLUTION_REQUEST:
 								var e = {
 									eventType: "clientGetResolution",
 									event: {}
@@ -692,7 +705,7 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 1:
+							case CommandFromClient.STYLUS_RESET:
 								console.log("reset stylus:" + b.readInt32LE(cursor));
 								var curbuf = Buffer.allocUnsafe(4);
 								curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
@@ -712,7 +725,7 @@ try {
 								cursor += paraCount * 4;
 
 								break;
-							case 2:
+							case CommandFromClient.SKETCHPAGE_CREATE:
 								console.log("(client -> server) create new sketchPage:" + b.readInt32LE(cursor));
 								console.log("(client -> server) set page immediately? " + b.readInt32LE(cursor+4));
 								console.log(b);
@@ -723,7 +736,7 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 3:
+							case CommandFromClient.AVATAR_SYNC:
 								var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
 								console.log("\treceive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
 								var avatarid = new Uint64LE(b, cursor+paraCount);
@@ -774,7 +787,7 @@ try {
 								};
 								ws.send(JSON.stringify(e));
 								break;
-							case 4:
+							case CommandFromClient.SKETCHPAGE_SET:
 								const idx = b.readInt32LE(cursor);
 								console.log("in server, set page: " + idx);
 								var e = {
@@ -784,7 +797,7 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 5:
+							case CommandFromClient.INIT_COMBINE:
 								console.log("Get initialization data");
 								var e = {
 									eventType : "clientInitialize",
@@ -793,7 +806,7 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 6:
+							case CommandFromClient.SELECT_CTOBJECT:
 								var ts = b.readInt32LE(cursor);
 								var uid = b.readInt32LE(cursor + 4);
 								console.log(("(server -> client) selection on at framecount=[" + ts + "]"));
@@ -804,7 +817,8 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 7:
+
+							case CommandFromClient.DESELECT_CTOBJECT:
 								var ts = b.readInt32LE(cursor);
 								var dstPId = b.readInt32LE(cursor + 4);
 								var uid = b.readInt32LE(cursor + 8);
@@ -819,8 +833,8 @@ try {
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
-								break;
-							case 8:
+								break;	
+							case CommandFromClient.AVATAR_LEAVE:
 								console.log("Someone is leaving");
 								var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
 								console.log("\treceive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
@@ -849,7 +863,7 @@ try {
 								console.log("\tcursor", cursor);
 
 								break;
-							case 9:
+							case CommandFromClient.MOVE_FW_BW_CTOBJECT:
 								console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
 								
 								var ts = b.readInt32LE(cursor);
@@ -867,7 +881,7 @@ try {
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
-							case 11:
+							case CommandFromClient.AVATAR_LEAVE_REMOVE_ID:
 								console.log("removing ID");
 
 								var uid = b.readInt32LE(cursor);
@@ -905,6 +919,12 @@ try {
 			}
 		 });
 	  }
+	  
+	  ws.on("message", function(msg) {
+         for (var index = 0 ; index < sockets.length ; index++)
+            if (index != ws.index)
+               sockets[index].send(msg);
+      });
       // Remove this sockets
       ws.on('close', () => sockets.splice(ws.index, 1));
    });
