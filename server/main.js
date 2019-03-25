@@ -25,9 +25,16 @@ argv._.forEach(function(ipaddr){
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+const holojamMesh = require('holojam-node')(
+	['relay'], '0.0.0.0',
+	9693, 9692, 9691, '239.0.2.5',
+	[]
+);
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
+
+holojamMesh.ucAddresses = holojamMesh.ucAddresses.concat(saved_ips);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -284,13 +291,20 @@ function readHeader(data) {
 }
 
 var CommandFromClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3,
-"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10});
-//const CommandFromClient = {
-//	RESOLUTION_REQUEST : 0,
-//	STYLUS_RESET       : 1,
-//	SKETCHPAGE_CREATE  : 2,
-//	AVATAR_SYNC        : 3,
-//};
+"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11});
+
+function MeshData() {
+	// contains vertex and triangle index lists
+	this.idxToSubMeshes = [];
+}
+function CachedClientData() {
+	// contains MeshData
+	this.sketchIDToMeshMap = {
+
+	};
+}
+
+const cachedData = new CachedClientData();
 
 const CommandToClient = {
 	RESOLUTION_REQUEST : 0,
@@ -324,13 +338,28 @@ try {
 
 			bufLengthByte.writeInt16LE(bufLength,0);  
 
+			const testBuff = Buffer.from("This message thing seems to be working, yay!", "ascii");
+            holojamMesh.SendRaw(testBuff);
+
          	const headerString = readHeader(data);
             if (headerString == 'CTdata01') {
                holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   label: 'Display', bytes: data
                }]));
             } else {
-            	//console.log("HEADER: " + headerString);
+
+
+            	// mode
+				// sketch id
+				// submesh idx
+				// page idx
+				// mesh type
+				// transform (x, y, z, rx, ry, rz) for now
+				// vertex data count
+				// vertex data
+				// triangle index data count
+				// triangle index data
+
            		if (headerString == 'CTDspl01') {
             		//console.log("SENDING resolution");
 					// encode the resolution
@@ -356,7 +385,13 @@ try {
 							label: 'MSGRcv2', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTPcrt01') {
+            	else if (headerString == 'CTmesh01') {
+
+	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+	                  label: 'DisplayMesh', bytes: data
+	               }]));
+            	}
+            	else if (headerString == 'CTPcrt01') {
             		var curbuf = Buffer.allocUnsafe(6);
 					curbuf.writeInt16LE(2,0);// 2 for creating sketchpage
 					curbuf.writeInt16LE(data.readInt16LE(8),2);// new page id
@@ -381,7 +416,7 @@ try {
 							label: 'MSGRcv3', bytes: entirebuf
 						}]));		     		
             	}
-				if (headerString == 'CTPset01') {
+				else if (headerString == 'CTPset01') {
 					var curbuf = Buffer.allocUnsafe(6);
 					curbuf.writeInt16LE(4,0); // 4 for setting sketch page
 					curbuf.writeInt16LE(data.readInt16LE(8), 2); // write page id
@@ -402,7 +437,7 @@ try {
 							label: 'MSGRcv4', bytes: entirebuf
 						}]));
             	}
-            	if (headerString == 'CTInit01') {
+            	else if (headerString == 'CTInit01') {
             		var curbuf = Buffer.allocUnsafe(8); // write 4 int16s
 
             		curbuf.writeInt16LE(5, 0); // init command
@@ -428,43 +463,45 @@ try {
 					var entirebuf = Buffer.concat([bufLengthByte, buf]);
 					console.log("Sending MSGRcv5 with", bufLength, " commands");
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv5', bytes: entirebuf
-						}]));
+						label: 'MSGRcv5', bytes: entirebuf
+					}]));
             	}
-            	if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
-					var curbuf = Buffer.allocUnsafe(8); 
+            	else if (headerString == 'CTBrdon?') { // temporary board on? (could be rejected if there's nothing to move between boards)
+					var curbuf = Buffer.allocUnsafe(10); 
 
             		curbuf.writeInt16LE(6, 0); // board on command
 
             		const roff = 8; // read offset
             		const woff = 2; // write offset
 
-            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // whether a chalktalk object was selected
+            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // uid
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // timestamp half-2
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // whether a chalktalk object was selected
 					++bufLength;
 					buf = Buffer.concat([buf, curbuf]);
 					
-            		console.log("board on?: " + data.readInt16LE(roff + 4))
+            		console.log("board on?: " + data.readInt16LE(roff + 6));
 					
 					bufLengthByte.writeInt16LE(bufLength,0);  
 					var entirebuf = Buffer.concat([bufLengthByte, buf]);
 					console.log("Sending MSGRcv6 with", bufLength, " commands");
 					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-							label: 'MSGRcv6', bytes: entirebuf
-						}]));
+						label: 'MSGRcv6', bytes: entirebuf
+					}]));
             	}
-            	if (headerString == 'CTBrdoff') { // turns off the tempoary board
-            		var curbuf = Buffer.allocUnsafe(8);
+            	else if (headerString == 'CTBrdoff') { // turns off the tempoary board
+            		var curbuf = Buffer.allocUnsafe(10);
 
             		curbuf.writeInt16LE(7, 0); // board off command
 
             		const roff = 8; // read offset
             		const woff = 2; // write offset
 
-            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // which chalktalk object was selected
+            		curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // uid
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-1
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // timestamp half-2
+            		curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // whether a chalktalk object was selected
 					
 					++bufLength;
 					buf = Buffer.concat([buf, curbuf]);
@@ -476,7 +513,7 @@ try {
                   		label: 'MSGRcv7', bytes: entirebuf
                		}]));
             	}
-            	if (headerString == 'CTzOff01') {
+            	else if (headerString == 'CTzOff01') {
             		console.log("(client -> server) sending z offset");
             		try {
 						var curbuf = Buffer.allocUnsafe(10);
@@ -486,7 +523,7 @@ try {
 						const roff = 8; // read offset
 						const woff = 2; // write offset
 
-						curbuf.writeInt16LE(data.readInt16LE(roff), woff);     // timestamp half-1
+						curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // timestamp half-1
 						curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
 						curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
 						curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
@@ -505,7 +542,7 @@ try {
 						console.log(e);
 					}
             	}
-				if (headerString == 'CTReStyl') { // turns off the tempoary board
+				else if (headerString == 'CTReStyl') { // turns off the tempoary board
             		var curbuf = Buffer.allocUnsafe(4);
 
             		curbuf.writeInt16LE(1, 0); // reset the stylus
@@ -520,6 +557,24 @@ try {
                		holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
                   		label: 'MSGRcv9', bytes: entirebuf
                		}]));
+            	}
+            	else if (headerString == 'CTReSlct') { // reset selections
+
+					var curbuf = Buffer.allocUnsafe(2); 
+
+            		curbuf.writeInt16LE(10, 0); // board on command
+
+					++bufLength;
+					buf = Buffer.concat([buf, curbuf]);
+					
+            		console.log("resetting selection");
+					
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+
+					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv5', bytes: entirebuf
+					}]));
             	}
 				// wrap all the buf
 				/*if(bufLength > 0){
@@ -565,6 +620,19 @@ try {
             ws.send(JSON.stringify(e));
          });
 
+         holojamMesh.on('update-raw', (buffer, info) => {
+         	var e = {
+         		eventType: "RAW",
+         		event : {
+         			buffer : buffer.toString('ascii'),
+         			info   : info
+         		}
+         	};
+
+
+         	ws.send(JSON.stringify(e));
+         });
+
          holojam.on('update', (flakes, scope, origin) => {
 			 //console.log("ws.readyState",ws.readyState);
 			 if(ws == null){
@@ -572,6 +640,7 @@ try {
 				 return;
 			 }
             //
+
 			//console.log(flakes.length);
 			for (var i=0; i < flakes.length; i++) {
 				var flake = flakes[i];
@@ -640,10 +709,21 @@ try {
 								console.log("reset stylus:" + b.readInt32LE(cursor));
 								var curbuf = Buffer.allocUnsafe(4);
 								curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
-								curbuf.writeInt16LE(b.readInt32LE(cursor),2);// stylus id// index 4 is the count of parameter so skip
+
+								const STYLUS_ID = b.readInt32LE(cursor);
+								curbuf.writeInt16LE(STYLUS_ID,2);// stylus id// index 4 is the count of parameter so skip
 								bufLength += curbuf.length;
 								bufArray.push(curbuf);
+								
+
+								var eventLocal = {
+									eventType: "disableSelectionForAllOtherClients",
+									event: {uid : STYLUS_ID}
+								};
+								ws.send(JSON.stringify(eventLocal));
+
 								cursor += paraCount * 4;
+
 								break;
 							case CommandFromClient.SKETCHPAGE_CREATE:
 								console.log("(client -> server) create new sketchPage:" + b.readInt32LE(cursor));
@@ -700,6 +780,12 @@ try {
 								//}]));
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
+
+								var e = {
+									eventType : "clientAddUserID",
+									event : {uid : globalStylusID - 1}
+								};
+								ws.send(JSON.stringify(e));
 								break;
 							case CommandFromClient.SKETCHPAGE_SET:
 								const idx = b.readInt32LE(cursor);
@@ -714,31 +800,35 @@ try {
 							case CommandFromClient.INIT_COMBINE:
 								console.log("Get initialization data");
 								var e = {
-									eventType: "clientInitialize",
-									event: {}
+									eventType : "clientInitialize",
+									event : {}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
 							case CommandFromClient.SELECT_CTOBJECT:
-								var ts = b.readInt32LE(cursor)
-								console.log(("(server -> client) prototype temporary board on at framecount=[" + ts + "]"));
+								var ts = b.readInt32LE(cursor);
+								var uid = b.readInt32LE(cursor + 4);
+								console.log(("(server -> client) selection on at framecount=[" + ts + "]"));
 								var e = {
 									eventType: "clientBeginMoveGroupOrSketchFromPage",
-									event: {timestamp : ts}
+									event: {timestamp : ts, uid : uid}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
 								break;
+
 							case CommandFromClient.DESELECT_CTOBJECT:
-								var ts = b.readInt32LE(cursor)
-								var dstPId = b.readInt32LE(cursor + 4)
-								console.log(("(server -> client) prototype temporary board off at framecount=[" + ts + "], dst page: " + dstPId));
+								var ts = b.readInt32LE(cursor);
+								var dstPId = b.readInt32LE(cursor + 4);
+								var uid = b.readInt32LE(cursor + 8);
+								console.log(("(server -> client) selection off at framecount=[" + ts + "], dst page: " + dstPId));
 								var e = {
-									eventType: "clientEndMoveGroupOrSketchFromPage",
-									event: {
+									eventType : "clientEndMoveGroupOrSketchFromPage",
+									event : {
 										timestamp : ts,
-										dstPageIdx : dstPId
+										dstPageIdx : dstPId,
+										uid : uid
 									}
 								};
 								ws.send(JSON.stringify(e));
@@ -771,19 +861,36 @@ try {
 								
 								cursor += paraCount;
 								console.log("\tcursor", cursor);
+
 								break;
 							case CommandFromClient.MOVE_FW_BW_CTOBJECT:
 								console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
 								
-								var ts = b.readInt32LE(cursor)
+								var ts = b.readInt32LE(cursor);
 								var opt = b.readInt32LE(cursor + 4);
+								var uid = b.readInt32LE(cursor + 8);
 
 								var e = {
 									eventType: "clientBeginOrFinishMovingBackwardsOrForwards",
-									event: {timestamp : ts, option : opt}
+									event : {
+										timestamp : ts,
+										option : opt,
+										uid : uid
+									}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
+								break;
+							case CommandFromClient.AVATAR_LEAVE_REMOVE_ID:
+								console.log("removing ID");
+
+								var uid = b.readInt32LE(cursor);
+
+								var e = {
+									eventType : "clientRemoveUserID",
+									event : {uid : uid}
+								};
+								ws.send(JSON.stringify(e));
 								break;
 							default:
 								break;
