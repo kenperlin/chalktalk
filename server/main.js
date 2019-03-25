@@ -696,10 +696,21 @@ try {
 								console.log("reset stylus:" + b.readInt32LE(cursor));
 								var curbuf = Buffer.allocUnsafe(4);
 								curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
-								curbuf.writeInt16LE(b.readInt32LE(cursor),2);// stylus id// index 4 is the count of parameter so skip
+
+								const STYLUS_ID = b.readInt32LE(cursor);
+								curbuf.writeInt16LE(STYLUS_ID,2);// stylus id// index 4 is the count of parameter so skip
 								bufLength += curbuf.length;
 								bufArray.push(curbuf);
+								
+
+								var eventLocal = {
+									eventType: "disableSelectionForAllOtherClients",
+									event: {uid : STYLUS_ID}
+								};
+								ws.send(JSON.stringify(eventLocal));
+
 								cursor += paraCount * 4;
+
 								break;
 							case 2:
 								console.log("(client -> server) create new sketchPage:" + b.readInt32LE(cursor));
