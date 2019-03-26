@@ -635,8 +635,14 @@ try {
 
          holojam.on('update', (flakes, scope, origin) => {
 			 //console.log("ws.readyState",ws.readyState);
-			 if(ws == null){
+			 if(ws.readyState != 1){
 				 console.log("when null? ws.readyState",ws.readyState);
+				 // add an empty return
+						var buf = Buffer.allocUnsafe(2);
+						buf.writeInt16LE(0,0);// cmdCount = 0
+						holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv', bytes: buf
+						}]));	
 				 return;
 			 }
             //
