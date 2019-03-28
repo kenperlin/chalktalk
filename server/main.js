@@ -386,7 +386,6 @@ try {
 						}]));
             	}
             	else if (headerString == 'CTmesh01') {
-
 	               holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 	                  label: 'DisplayMesh', bytes: data
 	               }]));
@@ -576,6 +575,25 @@ try {
 							label: 'MSGRcv5', bytes: entirebuf
 					}]));
             	}
+				else if (headerString == 'CTCountD') { // reset selections
+
+					var curbuf = Buffer.allocUnsafe(4); 
+
+            		curbuf.writeInt16LE(11, 0); // count down command
+					curbuf.writeInt16LE(data.readInt16LE(8), 2);
+					++bufLength;
+					buf = Buffer.concat([buf, curbuf]);
+					
+            		console.log("start count down:" + data.readInt16LE(8));
+					
+					bufLengthByte.writeInt16LE(bufLength,0);  
+					var entirebuf = Buffer.concat([bufLengthByte, buf]);
+
+					holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+							label: 'MSGRcv10', bytes: entirebuf
+					}]));
+            	}
+				
 				// wrap all the buf
 				/*if(bufLength > 0){
 					bufLengthByte.writeInt16LE(bufLength,0);  
