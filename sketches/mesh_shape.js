@@ -68,6 +68,10 @@ function() {
          // square
          mSquare(24, 24, 10);
       },
+	  function(){
+		  // open cylinder
+		  mCylinder(16);
+	  }
      
       //function() {
 

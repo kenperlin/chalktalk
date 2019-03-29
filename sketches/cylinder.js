@@ -24,8 +24,10 @@ function() {
       });
       this.afterSketch(function() {
          if (this._isSolid) {
-            m.rotateX(PI/2);
-            m.rotateZ(PI/2);
+			 //console.log("m", m._mS[2]);
+            //m.rotateX(PI/2);
+			//console.log("m", m._mS[2]);
+            //m.rotateZ(PI/2);
 	    mCylinder(this.nSteps);
 	    return;
 	 }
