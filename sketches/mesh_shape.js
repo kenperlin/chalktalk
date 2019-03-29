@@ -43,10 +43,10 @@ function() {
          // tetrahedron
          mPolyhedron(tetrahedronData.V, tetrahedronData.T);
       },
-      function() {
+/*       function() {
          // cube
          mCube();
-      },
+      }, */
       function() {
          // sphere
          mSphere();
