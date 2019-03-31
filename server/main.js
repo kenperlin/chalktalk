@@ -292,7 +292,7 @@ function readHeader(data) {
 }
 
 var CommandFromClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3,
-"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11});
+"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11, "TOGGLE_PALETTE":12});
 
 function MeshData() {
 	// contains vertex and triangle index lists
@@ -947,6 +947,18 @@ try {
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
+								break;
+							case CommandFromClient.TOGGLE_PALETTE:
+								const remoteUID = b.readInt32LE(cursor);
+								const paletteStatus = b.readInt32LE(cursor + 4);
+
+								var e = {
+									eventType : "clientTogglePalette",
+									event : {uid : uid, turnOnPalette}
+								};
+								ws.send(JSON.stringify(e));
+								cursor += paraCount * 4;
+
 								break;
 							default:
 								break;
