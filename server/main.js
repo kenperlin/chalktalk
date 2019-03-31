@@ -670,6 +670,12 @@ try {
 				var flake = flakes[i];
 				//console.log(flake.label);
 				if(flake.label.contains("Stylus")){
+					const wheelX = flake.floats[0];
+					const wheelY = flake.floats[1];
+					const USER_ID = flake.ints[2];
+					const TIMESTAMP = flake.ints[3];
+					const LOCAL_BOARD_ID = flake.ints[4];
+
 					var wipeOrNot = flake.ints[1];
 					if(wipeOrNot == 3){
 						console.log("recv wipe");
@@ -678,7 +684,13 @@ try {
 						   event: {
 							  button: 1,
 							  clientX: 0,
-							  clientY: 0
+							  clientY: 0,
+							  wheelX: wheelX,
+							  wheelY: wheelY,
+							  uid: USER_ID,
+							  timestamp: TIMESTAMP,
+							  isMR: true,
+							  pageIdx: LOCAL_BOARD_ID
 						   }
 						};
 						ws.send(JSON.stringify(e));	
@@ -694,11 +706,19 @@ try {
 						   event: {
 							  button: 3,
 							  clientX: flake.vector3s[0].x * resolutionWidth,
-							  clientY: flake.vector3s[0].y * resolutionHeight
+							  clientY: flake.vector3s[0].y * resolutionHeight,
+							  wheelX: wheelX,
+							  wheelY: wheelY,
+							  uid: USER_ID,
+							  timestamp: TIMESTAMP,
+							  isMR: true,
+							  pageIdx: LOCAL_BOARD_ID
 						   }
 						};
 						ws.send(JSON.stringify(e));		
-					}									
+					}
+
+
 				}
 				if(flake.label.contains("MSGSender")){
 					
