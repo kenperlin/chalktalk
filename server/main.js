@@ -54,6 +54,7 @@ server.listen(parseInt(port, 10), () =>
 // pair of avatar name and avatar oculusUserID
 var mapAvatarId = {};
 var globalStylusID = 0;
+var curStylusID = -1; // -1 means no one or browser
 
 // different platform support
 var usingVive = false;
@@ -306,12 +307,8 @@ function CachedClientData() {
 
 const cachedData = new CachedClientData();
 
-const CommandToClient = {
-	RESOLUTION_REQUEST : 0,
-	STYLUS_RESET       : 1,
-	SKETCHPAGE_CREATE  : 2,
-	AVATAR_SYNC        : 3,
-};
+var CommandToClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3});
+
 
 try {
    let WebSocket = require('ws').Server;
@@ -543,9 +540,10 @@ try {
             	}
 				else if (headerString == 'CTReStyl') { // turns off the tempoary board
             		var curbuf = Buffer.allocUnsafe(4);
+					curStylusID = -1;
 
-            		curbuf.writeInt16LE(1, 0); // reset the stylus
-            		curbuf.writeInt16LE(-1, 2);     // -1 means broswer
+            		curbuf.writeInt16LE(CommandToClient.STYLUS_RESET, 0); // reset the stylus
+            		curbuf.writeInt16LE(curStylusID, 2);     // -1 means broswer
 					
 					++bufLength;
 					buf = Buffer.concat([buf, curbuf]);
@@ -730,19 +728,32 @@ try {
 								cursor += paraCount * 4;
 								break;
 							case CommandFromClient.STYLUS_RESET:
-								console.log("reset stylus:" + b.readInt32LE(cursor));
+								console.log("reset stylus:" + b.readInt32LE(cursor) + " when current is " + curStylusID);
+								const STYLUS_ID = b.readInt32LE(cursor);
+								var setStylus = b.readInt32LE(cursor+4);	//1 means set and -1 means release
+								
+								if((curStylusID == -1) && (setStylus == 1) ){
+									// give the control
+									console.log("\tgive the control");
+									curStylusID = STYLUS_ID;
+								}
+								else if((curStylusID == STYLUS_ID) && (setStylus == -1)){
+									// reset the control
+									console.log("\trelease the control");
+									curStylusID = -1;
+								}else{
+									// reject
+									console.log("\tno change with " + STYLUS_ID	+" " + setStylus);
+								}
 								var curbuf = Buffer.allocUnsafe(4);
 								curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
-
-								const STYLUS_ID = b.readInt32LE(cursor);
-								curbuf.writeInt16LE(STYLUS_ID,2);// stylus id// index 4 is the count of parameter so skip
+								curbuf.writeInt16LE(curStylusID,2);// stylus id// index 4 is the count of parameter so skip
 								bufLength += curbuf.length;
-								bufArray.push(curbuf);
-								
+								bufArray.push(curbuf);								
 
 								var eventLocal = {
 									eventType: "disableSelectionForAllOtherClients",
-									event: {uid : STYLUS_ID}
+									event: {uid : curStylusID}
 								};
 								ws.send(JSON.stringify(eventLocal));
 
@@ -915,6 +926,7 @@ try {
 									event : {uid : uid}
 								};
 								ws.send(JSON.stringify(e));
+								cursor += paraCount * 4;
 								break;
 							default:
 								break;
