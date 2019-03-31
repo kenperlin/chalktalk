@@ -953,8 +953,8 @@ try {
 								const paletteStatus = b.readInt32LE(cursor + 4);
 
 								var e = {
-									eventType : "clientTogglePalette",
-									event : {uid : uid, turnOnPalette}
+									eventType : "clientEnablePalette",
+									event : {uid : uid, turnOnPalette : paletteStatus}
 								};
 								ws.send(JSON.stringify(e));
 								cursor += paraCount * 4;
