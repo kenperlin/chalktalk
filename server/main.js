@@ -14,7 +14,7 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = [];
+var saved_ips = ["10.19.42.249", "172.24.71.215"];
 //
 var argv = parseArgs(process.argv.slice(2));
 argv._.forEach(function(ipaddr){
@@ -25,16 +25,16 @@ argv._.forEach(function(ipaddr){
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
-const holojamMesh = require('holojam-node')(
-	['relay'], '0.0.0.0',
-	9693, 9692, 9691, '239.0.2.5',
-	[]
-);
+//const holojamMesh = require('holojam-node')(
+	//['relay'], '0.0.0.0',
+	//9693, 9692, 9691, '239.0.2.5',
+	//[]
+//);
 // behave as a receiver and sender
 //const holojam = require('holojam-node')(['emitter', 'sink'], '192.168.1.12');
 holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
 
-holojamMesh.ucAddresses = holojamMesh.ucAddresses.concat(saved_ips);
+//holojamMesh.ucAddresses = holojamMesh.ucAddresses.concat(saved_ips);
 
 const app = express();
 app.use(express.static('./')); // Serve static files from main directory
@@ -336,7 +336,7 @@ try {
 			bufLengthByte.writeInt16LE(bufLength,0);  
 
 			const testBuff = Buffer.from("This message thing seems to be working, yay!", "ascii");
-            holojamMesh.SendRaw(testBuff);
+            //holojamMesh.SendRaw(testBuff);
 
          	const headerString = readHeader(data);
             if (headerString == 'CTdata01') {
@@ -636,18 +636,18 @@ try {
             ws.send(JSON.stringify(e));
          });
 
-         holojamMesh.on('update-raw', (buffer, info) => {
-         	var e = {
-         		eventType: "RAW",
-         		event : {
-         			buffer : buffer.toString('ascii'),
-         			info   : info
-         		}
-         	};
+         //holojamMesh.on('update-raw', (buffer, info) => {
+//         	var e = {
+         		//eventType: "RAW",
+         		//event : {
+         			//buffer : buffer.toString('ascii'),
+         			//info   : info
+         		//}
+         	//};
 
 
-         	ws.send(JSON.stringify(e));
-         });
+         	//ws.send(JSON.stringify(e));
+         //});
 
          holojam.on('update', (flakes, scope, origin) => {
 			 //console.log("ws.readyState",ws.readyState);
