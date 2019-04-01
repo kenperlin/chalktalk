@@ -23,7 +23,7 @@ argv._.forEach(function(ipaddr){
 	console.log("DEBUG saved_ips " + saved_ips);
 });
 if(argv.send == "all"){
-	saved_ips = ["10.19.42.249", "172.24.71.215", "172.24.71.208"];	
+	saved_ips = ["172.24.71.247",  "10.19.42.249", "172.24.71.208", "172.24.71.240"];	
 	console.log("send to " + saved_ips);
 }else{
 	console.log("send to self only");
