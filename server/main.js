@@ -14,7 +14,7 @@ var resolutionHeight = 800;
 var resolutionWidth = 600;
 
 //These will get unicast to no matter what!
-var saved_ips = ["10.19.42.249", "172.24.71.215"];
+var saved_ips = [];
 //
 var argv = parseArgs(process.argv.slice(2));
 argv._.forEach(function(ipaddr){
@@ -22,6 +22,15 @@ argv._.forEach(function(ipaddr){
 	saved_ips.push(ipaddr);
 	console.log("DEBUG saved_ips " + saved_ips);
 });
+if(argv.send == "all"){
+	saved_ips = ["10.19.42.249", "172.24.71.215"];	
+	console.log("send to " + saved_ips);
+}else{
+	console.log("send to self only");
+	var ip = require('ip');
+	saved_ips = [ip.address()];
+	console.log("send to " + saved_ips);
+}
 
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
