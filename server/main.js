@@ -704,10 +704,10 @@ try {
 					}
 					else{
 						var type = flake.ints[0];
-						//console.log(flake.ints[0]);
 						type = (type == 0 ? "onmousedown"
 						: (type == 1 ? "onmousemove" :"onmouseup" ));
-
+						//console.log(flake.ints[0]);
+						//console.log("type",type);
 						var e = {
 						   eventType: type,
 						   event: {
@@ -724,7 +724,32 @@ try {
 						};
 						ws.send(JSON.stringify(e));		
 					}
+				}
+				if(flake.label.contains("Selection")){
+					const wheelX = flake.floats[0];
+					const wheelY = flake.floats[1];
+					const USER_ID = flake.ints[0];
+					const TIMESTAMP = flake.ints[1];
+					const LOCAL_BOARD_ID = flake.ints[2];
 
+						var type = "onmousemoveNonHost";
+						//console.log(flake.ints[0]);
+						//console.log("type",type);
+						var e = {
+						   eventType: type,
+						   event: {
+							  button: 3,
+							  clientX: flake.vector3s[0].x * resolutionWidth,
+							  clientY: flake.vector3s[0].y * resolutionHeight,
+							  wheelX: wheelX,
+							  wheelY: wheelY,
+							  uid: USER_ID,
+							  timestamp: TIMESTAMP,
+							  isMR: true,
+							  pageIdx: LOCAL_BOARD_ID
+						   }
+						};
+						ws.send(JSON.stringify(e));		
 
 				}
 				if(flake.label.contains("MSGSender")){
