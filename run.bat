@@ -1,0 +1,1 @@
+start "" http://localhost:11235/ && node server\main.js
