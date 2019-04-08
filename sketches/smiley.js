@@ -1,6 +1,7 @@
 function() {
    this.label = 'smiley';
    this.onSwipe[6] = ['wink', function() { this.isWink = ! this.isWink; }];
+   this.onClick = ['wink', function() { this.isWink = ! this.isWink; }];
    this.render = function() {
       mDrawOval([-1,-1],[1,1],32,PI/2,PI/2-TAU);
       mDrawOval([-.6,-.6],[.6,.6],32,TAU*6/10,TAU*9/10);

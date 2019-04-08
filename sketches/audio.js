@@ -34,6 +34,8 @@ function() {
          return;
       }
 
+      setAudioStereo(def(this.inValue[1]));
+
       var cs = isDef(this.selectedIndex) ? this.selectedIndex : 0;
 
       if ( this.code[cs][1] != this.savedCode ||

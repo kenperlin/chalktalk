@@ -1,14 +1,19 @@
 function() {
-   this.label = 'fish';
+   this.labels = ['fish','fish2'];
    this.swim = false;
    this.onSwipe[0] = ['SWIM!', function() { this.swim = true; }];
+   this.onSwipe[4] = ['SWIM!', function() { this.swim = true; }];
    this.angleY = 0;
    this.angleZ = 0;
 
    this.m0 = new M4();
 
    this.render = function() {
+      let s = this.selection;
       var c = 0;
+      m.save();
+      if (s == 1)
+         m.scale(-1,1,1);
       this.afterSketch(function() {
          var angle, p0, p1, dx, dy, dz;;
 
@@ -71,5 +76,6 @@ function() {
          if (! this.isOnScreen())
             this.fade();
       });
+      m.restore();
    }
 }

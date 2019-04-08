@@ -18,7 +18,7 @@ function() {
       }
    }
 
-   this.render = function(elapsed) {
+   this.render = elapsed => {
       this.duringSketch(function() {
          mLine([-1,0],[1,0]);
          mLine([0,0],[this.lx,this.ly]);

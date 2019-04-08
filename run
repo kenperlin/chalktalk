@@ -1,5 +1,6 @@
 #!/bin/sh
 if [ `ps -x | grep 'node server/main.js' | wc | cut -c-10` -lt 2 ]
-then node server/main.js >> node.log &
+# then node server/main.js >> node.log &
+then node server/main.js >> /dev/null &
 fi
 open -a /Applications/*Chrome.app http://localhost:11235/

@@ -1,3 +1,4 @@
+
 var bodyParser = require("body-parser");
 var express = require("express");
 var formidable = require("formidable");
@@ -5,6 +6,9 @@ var fs = require("fs");
 var http = require("http");
 var path = require("path");
 
+// behave as a relay
+
+const holojam = require('holojam-node')(['relay']);
 
 var ttDgram = require('dgram');
 var ttServer = ttDgram.createSocket('udp4');
@@ -169,6 +173,18 @@ String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
 
+function readHeader(data) {
+   let header = data.toString('ascii', 1, 2);
+   header += data.toString('ascii', 0, 1);
+   header += data.toString('ascii', 3, 4);
+   header += data.toString('ascii', 2, 3);
+   header += data.toString('ascii', 5, 6);
+   header += data.toString('ascii', 4, 5);
+   header += data.toString('ascii', 7, 8);
+   header += data.toString('ascii', 6, 7);
+   return header;
+}
+
 // CREATE THE HTTP SERVER
 var httpserver = http.Server(app);
 
@@ -184,10 +200,21 @@ try {
 	 ;
       websockets[ws.index] = ws;
 
-      ws.on("message", function(msg) {
+      // Initialize
+      ws.send(JSON.stringify({ global: "displayListener", value: true }));
+
+      ws.on("message", data => {
          for (var index = 0 ; index < websockets.length ; index++)
             if (index != ws.index)
-               websockets[index].send(msg);
+               websockets[index].send(data);
+	 if (readHeader(data) == 'CTdata01') {
+	    //console.log('A');
+	    holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+	       label: 'Display',
+	       bytes: data
+	    }]));
+	    //console.log('B');
+	 }
       });
 
       ws.on("close", function() {
@@ -205,4 +232,10 @@ httpserver.listen(parseInt(port, 10), function() {
    console.log("HTTP server listening on port %d", httpserver.address().port);
 });
 
+/*
+// Debug
+holojam.on('tick', (a, b) => {
+  console.log('VR: [ ' + a[0] + ' in, ' + b[0] + ' out ]');
+});
+*/
 

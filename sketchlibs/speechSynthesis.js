@@ -1,6 +1,6 @@
 "use strict";
 
-let Speech = (function() {
+var Speech = (function() {
    let Speech = {};
 
    Speech.say = function(words) {

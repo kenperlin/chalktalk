@@ -1,69 +1,65 @@
 function() {
    this.label = 'bezier3';
 
-   function _bezier3(a,b,c,d, t) {
-       return mix( mix( mix( a, b, t), 
-                        mix( b, c, t),  t), 
-                   mix( mix( b, c, t), 
-                        mix( c, d, t),  t),  t);
-   }
+   var T = 0.5;
+   var N = -2;
+   var P = [newVec3(-1 , .5, 0),
+            newVec3(-.3,-.5, 0),
+            newVec3( .3, .5, 0),
+            newVec3( 1 ,-.5, 0)];
+   var mode = 0;
+   var isVerbose = 1;
 
-   this.P = [newVec3(-1 , .5, 0),
-             newVec3(-.3,-.5, 0),
-             newVec3( .3, .5, 0),
-             newVec3( 1 ,-.5, 0)];
-
-   this.mode = 0;
-   this.isVerbose = 1;
-   this.onCmdSwipe[0] = ['toggle lines', function() { this.isVerbose = ! this.isVerbose; }];
+   this.onCmdSwipe[0] = ['toggle lines', function() { isVerbose = ! isVerbose; }];
    this.onCmdClick = function() {
-      this.mode = (this.mode + 1) % 4;
+      mode = (mode + 1) % 4;
    }
    this.onPress = function(pt) {
-      this.N = -1;
+      N = -1;
       var D = 1000;
-      for (var n = 0 ; n < this.P.length ; n++) {
-         var d = this.P[n].distanceTo(pt);
+      for (var n = 0 ; n < P.length ; n++) {
+         var d = P[n].distanceTo(pt);
          if (d < .1) {
-            this.N = n;
+            N = n;
             D = d;
          }
       }
    }
    this.onDrag = function(pt) {
-      if (this.N >= 0)
-         this.P[this.N].copy(pt);
+      if (N >= 0)
+         P[N].copy(pt);
       else {
          var xLo = 1000, xHi = -1000;
-         for (var n = 0 ; n < this.P.length ; n++) {
-            xLo = min(xLo, this.P[n].x);
-            xHi = max(xHi, this.P[n].x);
+         for (var n = 0 ; n < P.length ; n++) {
+            xLo = min(xLo, P[n].x);
+            xHi = max(xHi, P[n].x);
          }
-         this.T = max(0, min(1, (pt.x - xLo) / (xHi - xLo)));
+         T = max(0, min(1, (pt.x - xLo) / (xHi - xLo)));
       }
    }
    this.onRelease = function(pt) {
-      this.N = -2;
+      N = -2;
    }
    this.render = function() {
-      if (this.isVerbose) {
+      if (isVerbose) {
          lineWidth(1);
-         mLine(this.P[0], this.P[1]);
-         mCurve(this.P.slice(1));
+         mLine(P[0], P[1]);
+         mCurve(P.slice(1));
       }
       lineWidth(2);
       this.afterSketch(function() {
          var C = [];
          var eps = 0.01;
-         var ax = this.P[0].x, bx = this.P[1].x, cx = this.P[2].x, dx = this.P[3].x;
-         var ay = this.P[0].y, by = this.P[1].y, cy = this.P[2].y, dy = this.P[3].y;
+         var ax = P[0].x, bx = P[1].x, cx = P[2].x, dx = P[3].x;
+         var ay = P[0].y, by = P[1].y, cy = P[2].y, dy = P[3].y;
 
          color('red');
          for (var t = 0 ; t <= 1 + eps/2 ; t += eps)
-            C.push([ _bezier3(ax,bx,cx,dx, t), _bezier3(ay,by,cy,dy, t) ]);
+            C.push([ evalBezier(t, ax,bx,cx,dx),
+	             evalBezier(t, ay,by,cy,dy) ]);
          mCurve(C);
 
-	 if (! this.isVerbose)
+	 if (! isVerbose)
 	    return;
 
          color(defaultPenColor);
@@ -73,9 +69,7 @@ function() {
          mText('C', [cx,cy], 2, .5);
          mText('D', [dx,dy], 2, .5);
 
-         if (this.N == -1 || this.mode == 3) {
-            var T = this.T;
-
+         if (N == -1 || mode == 3) {
             var A = [mix(ax,bx,T), mix(ay,by,T)];
             var B = [mix(bx,cx,T), mix(by,cy,T)];
             var C = [mix(cx,dx,T), mix(cy,dy,T)];
@@ -88,7 +82,7 @@ function() {
             mDot(B, .15);
             mDot(C, .15);
 
-            if (this.mode == 0)
+            if (mode == 0)
                return;
 
             color(backgroundColor == 'black' ? 'yellow' : 'violet');
@@ -98,7 +92,7 @@ function() {
             mDot(D, .15);
             mDot(E, .15);
 
-            if (this.mode == 1)
+            if (mode == 1)
                return;
 
             color('red');
@@ -106,10 +100,8 @@ function() {
          }
 
          color(defaultPenColor);
-         for (var n = 0 ; n < this.P.length ; n++)
-            mDot([this.P[n].x,this.P[n].y], .15);
+         for (var n = 0 ; n < P.length ; n++)
+            mDot([P[n].x,P[n].y], .15);
       });
    }
-   this.T = 0.5;
-   this.N = -2;
 }

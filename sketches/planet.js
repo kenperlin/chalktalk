@@ -95,10 +95,166 @@ function() {
    ,'}'
    ].join('\n')),
 
-   ]
+   [
+   ,'void main(void) {'
+   ,'   float x = vPosition.x;'
+   ,'   float y = vPosition.y;'
+   ,'   vec3 P = vec3(x,y,0.);'
+   ,'   float r = noise(2.*P)<0.?0.:1.;'
+   ,'   float g = noise(4.*P)<0.?0.:1.;'
+   ,'   float b = noise(8.*P)<0.?0.:1.;'
+   ,'   float a = x*x+y*y<1.?1.:0.;'
+   ,'   gl_FragColor = vec4(a*r*.7,a*g*.5,a*b,a);'
+   ,'}'
+   ].join('\n'),
+
+   [
+   ,'void main(void) {'
+   ,'   float x = vPosition.x;'
+   ,'   float y = vPosition.y;'
+   ,'   vec3 P = 2. * vec3(x, y, floor(uTime));'
+   ,'   float s = noise(P) + noise(2.*P) < 0. ? 0. : 1.;'
+   ,'   gl_FragColor = (x*x + y*y < 1. ? 1. : 0.) * vec4(s,s,s,1.);'
+   ,'}'
+   ].join('\n'),
+
+   [
+   ,'float wall(float x) {'
+   ,'   return clamp(x, 0., 1.);'
+   ,'}'
+   ,'float sphere(vec4 S, vec3 p) {'
+   ,'   p = (p - S.xyz) / S.w;'
+   ,'   return wall(1. - dot(p, p));'
+   ,'}'
+   ,'float cube(vec4 S, vec3 p) {'
+   ,'   p = (p - S.xyz) / S.w;'
+   ,'   return wall(1. - p.x * p.x) *'
+   ,'          wall(1. - p.y * p.y) *'
+   ,'          wall(1. - p.z * p.z);'
+   ,'}'
+   ,'float vol(vec3 p) {'
+   ,'   return sphere(vec4(0.,0.,0.,1.), p) * pow(.2 * noise(2. * p) + .8, 20.);'
+   ,'}'
+   ,'float rnd(float x, float y) {'
+   ,'   return fract(cos(x * 23.14 + y * 2.66) * 12345.6789);'
+   ,'}'
+   ,'void main(void) {'
+   ,'   float tilt = -.3;'
+   ,'   float spin = .4 * uTime;'
+   ,''
+   ,'   float cx = cos(tilt);'
+   ,'   float sx = sin(tilt);'
+   ,'   float cy = cos(spin);'
+   ,'   float sy = sin(spin);'
+   ,''
+   ,'   float x1 = vPosition.x;'
+   ,'   float y1 = vPosition.y;'
+   ,'   float a = 0.;'
+   ,'   float c = 0.;'
+   ,'   float eps = .01;'
+   ,'   float numSteps = 50.;'
+   ,'   float power = pow(100. / numSteps, .1);'
+   ,''
+   ,'   for (int i = 0 ; i < 20 ; i++) {'
+   ,'      float z1 = 1. - 2. * (float(i)) / numSteps;'
+   ,''
+   ,'      float x2 =  x1;'
+   ,'      float y2 =  y1 * cx + z1 * sx;'
+   ,'      float z2 = -y1 * sx + z1 * cx;'
+   ,''
+   ,'      float x =  x2 * cy + z2 * sy;'
+   ,'      float y =  y2;'
+   ,'      float z = -x2 * sy + z2 * cy;'
+   ,''
+   ,'      float v  =  vol(vec3(x, y, z));'
+   ,'      float vx = (vol(vec3(x + eps, y, z)) - v) / eps;'
+   ,'      float vy = (vol(vec3(x, y + eps, z)) - v) / eps;'
+   ,'      float vz = (vol(vec3(x, y, z + eps)) - v) / eps;'
+   ,''
+   ,'      a += v / numSteps;'
+   ,'      if (a >= .9)'
+   ,'         break;'
+   ,''
+   ,'      float ak = 1. - pow(1. - v, power);'
+   ,'      float t = ak * (1. - a);'
+   ,'      c += t * (2. + vx + vy + vz);'
+   ,'      a += t;'
+   ,'   }'
+   ,'   gl_FragColor = sqrt(a * vec4(c,c,c,1.));'
+   ,'}'
+   ].join('\n'),
+   ];
 
    this.createMesh = function() {
       return new THREE.Mesh(planeGeometry(), this.shaderMaterial());
    }
 }
+/*
 
+float wall(float x) {
+   return clamp(x, 0., 1.);
+}
+float sphere(vec4 S, vec3 p) {
+   p = (p - S.xyz) / S.w;
+   return wall(1. - dot(p, p));
+}
+float cube(vec4 S, vec3 p) {
+   p = (p - S.xyz) / S.w;
+   return wall(1. - p.x * p.x) *
+          wall(1. - p.y * p.y) *
+          wall(1. - p.z * p.z);
+}
+float vol(vec3 p) {
+   float t = pow(.2 * noise(8. * p) + .8, 20.);
+   return t * sphere(vec4(0.,0.,0.,1.), p);
+}
+float rnd(float x, float y) {
+   return fract(cos(x * 23.14 + y * 2.66) * 12345.6789);
+}
+void main(void) {
+   float tilt = -.3;
+   float spin = .4 * uTime;
+
+   float cx = cos(tilt);
+   float sx = sin(tilt);
+   float cy = cos(spin);
+   float sy = sin(spin);
+
+   float x1 = vPosition.x;
+   float y1 = vPosition.y;
+   float a = 0.;
+   float c = 0.;
+   float eps = .01;
+   float numSteps = 50.;
+   float power = pow(100. / numSteps, .3);
+
+   for (int i = 0 ; i < 20 ; i++) {
+      float z1 = 1. - 2. * (float(i)) / numSteps;
+
+      float x2 =  x1;
+      float y2 =  y1 * cx + z1 * sx;
+      float z2 = -y1 * sx + z1 * cx;
+
+      float x =  x2 * cy + z2 * sy;
+      float y =  y2;
+      float z = -x2 * sy + z2 * cy;
+
+      float v  =  vol(vec3(x, y, z));
+      float vx = (vol(vec3(x + eps, y, z)) - v) / eps;
+      float vy = (vol(vec3(x, y + eps, z)) - v) / eps;
+      float vz = (vol(vec3(x, y, z + eps)) - v) / eps;
+
+      a += v / numSteps;
+      if (a >= .9)
+         break;
+
+      float ak = 1. - pow(1. - v, power);
+      float t = ak * (1. - a);
+      c += t * (2. + vx + vy + vz);
+      a += t;
+
+      //s = (1. - a) * s + (vx + vy + vz) / eps;
+   }
+   gl_FragColor = sqrt(a * vec4(c,c,c,1.));
+}
+*/
