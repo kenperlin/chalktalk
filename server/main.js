@@ -5,10 +5,11 @@ var formidable = require("formidable");
 var fs = require("fs");
 var http = require("http");
 var path = require("path");
+var parseArgs = require('minimist');
+var unityWrapper = require('./unityWrapper.js');
+var androidSim = require('./androidSim.js');
+var viveWrapper = require('./viveWrapper.js');
 
-// behave as a relay
-
-const holojam = require('holojam-node')(['relay']);
 
 var ttDgram = require('dgram');
 var ttServer = ttDgram.createSocket('udp4');
@@ -17,9 +18,17 @@ ttServer.on('message', function (message, remote) { ttData.push(message); });
 ttServer.bind(9090, '127.0.0.1');
 ttData = [];
 
+unityWrapper.processArgs(process.argv.slice(2));
 
 var app = express();
-var port = process.argv[2] || 11235;
+var port = parseArgs(process.argv.slice(2)).port || 11235;
+
+// different platform support
+var usingVive = false;
+var using3DOF = false;
+
+androidSim.start(using3DOF);
+viveWrapper.start(usingVive);
 
 // serve static files from main directory
 app.use(express.static("./"));
@@ -173,53 +182,55 @@ String.prototype.contains = function(substr) {
    return this.indexOf(substr) > -1;
 };
 
-function readHeader(data) {
-   let header = data.toString('ascii', 1, 2);
-   header += data.toString('ascii', 0, 1);
-   header += data.toString('ascii', 3, 4);
-   header += data.toString('ascii', 2, 3);
-   header += data.toString('ascii', 5, 6);
-   header += data.toString('ascii', 4, 5);
-   header += data.toString('ascii', 7, 8);
-   header += data.toString('ascii', 6, 7);
-   return header;
-}
-
 // CREATE THE HTTP SERVER
 var httpserver = http.Server(app);
+var wsIndex = 0;
 
 // WEBSOCKET ENDPOINT SETUP
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
-   var websockets = [];
+   var websocketMap = new Map();
 
+	// for unity, we only need to send data to unity for one websocket connection
+	var unityIndex = 0;
+	
    wss.on("connection", function(ws) {
+	ws.index = wsIndex++;
+	  websocketMap.set(ws.index, ws);
+	  if(unityIndex == -1)
+		  unityIndex = ws.index;
 
-      for (ws.index = 0 ; websockets[ws.index] ; ws.index++)
-	 ;
-      websockets[ws.index] = ws;
+		console.log("connection: ", unityIndex);
 
       // Initialize
       ws.send(JSON.stringify({ global: "displayListener", value: true }));
 
       ws.on("message", data => {
-         for (var index = 0 ; index < websockets.length ; index++)
-            if (index != ws.index)
-               websockets[index].send(data);
-	 if (readHeader(data) == 'CTdata01') {
-	    //console.log('A');
-	    holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-	       label: 'Display',
-	       bytes: data
-	    }]));
-	    //console.log('B');
-	 }
-      });
+		   for (var [key, value] of websocketMap) {
+			  if(key != ws.index)
+				value.send(data);  
+			}
+		   if(unityIndex == ws.index){
+			   unityWrapper.processChalktalk(data);
+		   }
+	 });
+	 
+	 if(unityIndex == ws.index){
+			unityWrapper.processUnity(ws);
+	}
 
       ws.on("close", function() {
          // REMOVE THIS WEBSOCKET
-         websockets.splice(ws.index, 1);
+		 websocketMap.delete(ws.index);
+		 
+		 if(unityIndex == ws.index){
+			 if(Array.from(websocketMap.keys() ).length == 0)
+				 unityIndex = -1;
+			 else
+				 unityIndex = Math.min.apply( Math, Array.from(websocketMap.keys() ));
+		 }
+		 console.log("close: websocketMap.keys():",Array.from(websocketMap.keys() ), unityIndex);
       });
    });
 } catch (err) {

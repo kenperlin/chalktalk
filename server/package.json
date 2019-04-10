@@ -6,6 +6,9 @@
       "express": "^4.16.4",
       "formidable": "1.0.x",
       "holojam-node": "^0.2.3",
-      "ws": "^6.2.1"
+      "ws": "^6.2.1",
+      "minimist": "1.2.0",
+      "int64-buffer": "0.99.1007",
+      "ip": "1.1.5"
    }
 }

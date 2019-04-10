@@ -189,6 +189,8 @@ function() {
             mFillCurve(c);
          that.allPolys.push(c);
       }
+	  if(polys == null)
+		  return;
       for (n = 0 ; n < polys.length ; n++) {
          p = polys[n];
          if (p.length == 2) {
