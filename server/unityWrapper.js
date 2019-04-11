@@ -656,6 +656,10 @@ module.exports = {
 			saved_ips.push(ip.address());
 			console.log("send to self in addition to unicast " + saved_ips);
 		}
+		if (!holojam.ucAddresses) {
+			holojam.ucAddresses = [];
+		}
 		holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
+
 	}
 }
