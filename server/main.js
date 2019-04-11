@@ -193,10 +193,10 @@ try {
    var websocketMap = new Map();
 
 	// for unity, we only need to send data to unity for one websocket connection
-	var unityIndex = 0;
+   var unityIndex = 0;
 	
    wss.on("connection", function(ws) {
-	ws.index = wsIndex++;
+	  ws.index = wsIndex++;
 	  websocketMap.set(ws.index, ws);
 	  if(unityIndex == -1)
 		  unityIndex = ws.index;
