@@ -1,6 +1,6 @@
 function() {
 
-   this.label = "mesh_shape";
+   this.label = "meshShape";
 
    this.shapeCommandIdx = 0;
 
