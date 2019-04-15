@@ -427,6 +427,7 @@ module.exports = {
 			}]));
 		}
 		else if(headerString == 'CTmesh01') {
+			console.log("data.length", data.length);
 			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 				label: 'DisplayMesh', bytes: data
 			}]));
@@ -647,14 +648,13 @@ module.exports = {
 		argv._.forEach(function(ipaddr){
 			console.log("add " + ipaddr + " to unicast list");
 			saved_ips.push(ipaddr);
-			console.log("DEBUG saved_ips " + saved_ips);
 		});
 		if(argv.send == "all"){
 			saved_ips = ["172.24.71.247", "172.24.71.215", "172.24.71.208", "172.24.71.240"];	
 			console.log("send to " + saved_ips);
 		}else{
 			saved_ips.push(ip.address());
-			console.log("send to self in addition to unicast " + saved_ips);
+			console.log("send to " + saved_ips);
 		}
 		if (!holojam.ucAddresses) {
 			holojam.ucAddresses = [];
