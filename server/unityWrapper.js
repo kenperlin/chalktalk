@@ -27,7 +27,7 @@ function readHeader(data) {
 }
 
 var CommandFromClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3,
-"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11, "TOGGLE_PALETTE":12});
+"SKETCHPAGE_SET":4, "INIT_COMBINE":5, "SELECT_CTOBJECT":6, "DESELECT_CTOBJECT":7, "AVATAR_LEAVE":8, "MOVE_FW_BW_CTOBJECT":9, "UPDATE_STYLUS_Z":10, "AVATAR_LEAVE_REMOVE_ID":11, "TOGGLE_PALETTE":12, "MESH_ASSET_REQUEST" : 13});
 
 function MeshData() {
 	// contains vertex and triangle index lists
@@ -275,6 +275,19 @@ function ProcessMSGSender(flake, ws){
 				var e = {
 					eventType : "clientEnablePalette",
 					event : {uid : uid, turnOnPalette : paletteStatus}
+				};
+				ws.send(JSON.stringify(e));
+				cursor += paraCount * 4;
+
+				break;
+			case CommandFromClient.MESH_ASSET_REQUEST:
+				const _timeStamp = b.readInt32LE(cursor);
+				const _remoteUID = b.readInt32LE(cursor + 4);
+				const _meshAssetID = b.readInt32LE(cursor + 8);
+
+				var e = {
+					eventType : "clientRequestMeshAsset",
+					event : {timestamp : _timeStamp, uid : _remoteUID, mid : _meshAssetID}
 				};
 				ws.send(JSON.stringify(e));
 				cursor += paraCount * 4;
