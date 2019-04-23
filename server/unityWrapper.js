@@ -461,7 +461,13 @@ module.exports = {
 			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 				label: 'DisplayMesh', bytes: data
 			}]));
-		}else if (headerString == 'CTPcrt01') {
+		}
+		else if (headerString == 'CTmeshSl') {// for slices
+			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+				label: 'DisplayMeshSlices', bytes: data
+			}])); 
+		} 
+		else if (headerString == 'CTPcrt01') {
 			var curbuf = Buffer.allocUnsafe(6);
 			curbuf.writeInt16LE(2,0);// 2 for creating sketchpage
 			curbuf.writeInt16LE(data.readInt16LE(8),2);// new page id
