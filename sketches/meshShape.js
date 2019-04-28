@@ -40,23 +40,6 @@ function() {
 
    const shapeCommands = [
       function() {
-         mPolyhedron(
-         [
-            0,0,0, 
-            0,1,0,
-            1,1,0
-         ],
-         [
-            0,1,2
-         ],
-         [
-            0,0,1, 
-            0,0,1, 
-            0,0,1
-         ]
-         );
-      },
-      function() {
          // tetrahedron
          mPolyhedron(tetrahedronData.V, tetrahedronData.T);
       },
@@ -88,7 +71,24 @@ function() {
 	  function(){
 		  // open cylinder
 		  mCylinder(16);
-	  }
+	  },
+      function() {
+         mPolyhedron(
+         [
+            0,0,0, 
+            0,1,0,
+            1,1,0
+         ],
+         [
+            0,1,2
+         ],
+         [
+            0,0,1, 
+            0,0,1, 
+            0,0,1
+         ]
+         );
+      },
      
       //function() {
 
