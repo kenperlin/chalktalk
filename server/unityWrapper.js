@@ -1,5 +1,16 @@
 // behave as a relay
 const holojam = require('holojam-node')(['relay']);
+let holojamRaw;
+const SEND_RAW = false;
+if (SEND_RAW) {
+	holojamRaw = require('holojam-node')(
+		['relay'],
+		'0.0.0.0',
+		9596, 9595, 9594,
+		'239.0.2.255' //'239.0.2.4'
+	);
+}
+
 const Uint64LE = require("int64-buffer").Uint64LE;
 var parseArgs = require('minimist');
 const ip = require('ip');
@@ -458,14 +469,24 @@ module.exports = {
 			}]));
 		}
 		else if(headerString == 'CTmesh01') {
-			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-				label: 'DisplayMesh', bytes: data
-			}]));
+			if (SEND_RAW) {
+				holojamRaw.SendRaw(data);
+			}
+			else {
+				holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+					label: 'DisplayMesh', bytes: data
+				}]));
+			}
 		}
 		else if (headerString == 'CTmeshSl') {// for slices
-			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-				label: 'DisplayMeshSlices', bytes: data
-			}])); 
+			if (SEND_RAW) {
+				holojamRaw.SendRaw(data);
+			}
+			else {
+				holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
+					label: 'DisplayMeshSlices', bytes: data
+				}]));
+			}
 		} 
 		else if (headerString == 'CTPcrt01') {
 			var curbuf = Buffer.allocUnsafe(6);
