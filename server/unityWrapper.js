@@ -427,7 +427,6 @@ module.exports = {
 			}]));
 		}
 		else if(headerString == 'CTmesh01') {
-			console.log("data.length", data.length);
 			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
 				label: 'DisplayMesh', bytes: data
 			}]));
