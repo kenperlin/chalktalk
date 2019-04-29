@@ -1,5 +1,5 @@
 function() {
-	this.label = "netstress";
+	this.label = "netstressIndiv";
 
 	this.VBegin = [
 		-1,1,0, -1,-1,0, 1,-1,0, 1,1,0
@@ -18,21 +18,21 @@ function() {
 	this.nextCountToAdd = 1;
 
 
-   this.onClick = ["double buffer size", function(self) {  // swipe right
+   this.onClick = ["double objects", function(self) {  // swipe right
    	  if (!self) {
    	  	self = this;
    	  }
-   	  console.log("doubling buffer size");
+   	  console.log("doubling count");
+   	  //self.addPlane(self.nextCountToAdd);
+      self.nextCountToAdd *= 2;
 
-      self.addPlane((self.V.length / self.VBegin.length));
-
-      console.log("buff len: " + self.V.length);
+      console.log("currently: " + self.nextCountToAdd / 2);
    }];
 
 
 	this.addPlane = function(count) {
 		for (let times = 0; times < count; times += 1) {
-			const VxOff = (Math.log2(count) * 2);
+			const VxOff = (Math.log2(count) * 0.5);
 			const originalCount = this.V.length;
 			for (let i = 0; i < this.VBegin.length; i += 1) {
 				this.V.push(this.VBegin[i]);
@@ -57,19 +57,28 @@ function() {
 	}
 
 	this.setup = function() {
-		this.addPlane(1);
+		this.addPlane(this.nextCountToAdd);
+		this.nextCountToAdd *= 2;
+
 		window.SK = this;
 	}
 	this.render = function() {
 		this.duringSketch(function() {
 			mLine([-1, -1], [1, 1]);
 			mLine([-1, -1], [1, 1]);
-			mLine([-1, -1], [1, 1]);
 		});
 
-
+		//if (!this.separateObjects) {
+			// this.afterSketch(function() {
+			// 	mPolyhedron(this.V, this.I, this.N);
+			// });
+		//}
+		//else {
 		this.afterSketch(function() {
-			mPolyhedron(this.V, this.I, this.N);
+			for (let i = 0; i < this.nextCountToAdd / 2; i += 1) {
+				mPolyhedron(this.V, this.I, this.N);
+			}
 		});
+		//}
 	}
 }
