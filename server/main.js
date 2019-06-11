@@ -193,43 +193,91 @@ try {
    var websocketMap = new Map();
 
 	// for unity, we only need to send data to unity for one websocket connection
-   var unityIndex = 0;
+   var unityIndex = 2;
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
+     if (ws.index == unityIndex) {
+       ws.index = wsIndex++;
+     }
 	  websocketMap.set(ws.index, ws);
-	  if(unityIndex == -1)
+	  if(unityIndex == -1) {
 		  unityIndex = ws.index;
+     }
+
+
 
 		console.log("connection: ", unityIndex);
+      console.log("browser connection: ", ws.index);
 
       // Initialize
       ws.send(JSON.stringify({ global: "displayListener", value: true }));
 
+
+
       ws.on("message", data => {
 		   for (var [key, value] of websocketMap) {
-			  if(key != ws.index)
-				value.send(data);  
+			  if(key != ws.index && value.readyState == 1) {
+			     value.send(data);  
+           }
 			}
 		   if(unityIndex == ws.index){
 			   unityWrapper.processChalktalk(data);
 		   }
 	 });
 	 
-	 if(unityIndex == ws.index){
+
+      console.log("unityIndex == ws.index:" + (unityIndex == ws.index));
+
+	   if(unityIndex == ws.index){
 			unityWrapper.processUnity(ws);
-	}
+	   }
+      else {
+
+         const _newBrowserID = unityWrapper.getAndIncrementStylusID();
+                  console.log("setting browser ID to: " + _newBrowserID);
+         var eForBrowser = {
+            eventType: "browserSetID",
+            event: { uid : _newBrowserID }
+         };
+         ws.uid = _newBrowserID;
+         ws.send(JSON.stringify(eForBrowser));
+
+         for (var [key, value] of websocketMap) {
+            for (var [keyother, valother] of websocketMap) {
+              if(key != unityIndex && value.readyState == 1) {
+                 value.send(JSON.stringify({
+                  eventType : "clientAddUserID", 
+                  event : { uid : valother.uid}
+                 }));  
+            }
+           }
+         }
+      }
 
       ws.on("close", function() {
          // REMOVE THIS WEBSOCKET
+       console.log("closing ws index: " + ws.index);
 		 websocketMap.delete(ws.index);
 		 
 		 if(unityIndex == ws.index){
-			 if(Array.from(websocketMap.keys() ).length == 0)
-				 unityIndex = -1;
-			 else
+			 if(Array.from(websocketMap.keys() ).length == 0) {
+				 unityIndex = ws.index; // changed from -1 to ws.index
+             console.log("unityIndex is now: " + unityIndex);
+			 } else {
 				 unityIndex = Math.min.apply( Math, Array.from(websocketMap.keys() ));
+          }
 		 }
+       else {
+         for (var [key, value] of websocketMap) {
+           if(key != ws.index && key != unityIndex && value.readyState == 1) {
+              value.send(JSON.stringify({
+               eventType : "clientRemoveUserID", 
+               event : { uid : ws.uid }
+              }));  
+           }
+         }
+       }
 		 console.log("close: websocketMap.keys():",Array.from(websocketMap.keys() ), unityIndex);
       });
    });

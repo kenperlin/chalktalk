@@ -660,5 +660,10 @@ module.exports = {
 		}
 		holojam.ucAddresses = holojam.ucAddresses.concat(saved_ips);
 
+	},
+	getAndIncrementStylusID : function(args) {
+		const ID = globalStylusID;
+		globalStylusID += 1;
+		return ID;
 	}
 }
