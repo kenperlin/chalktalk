@@ -193,7 +193,7 @@ try {
    var websocketMap = new Map();
 
 	// for unity, we only need to send data to unity for one websocket connection
-   var unityIndex = 2;
+   var unityIndex = 0;
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
@@ -205,10 +205,7 @@ try {
 		  unityIndex = ws.index;
      }
 
-
-
-		console.log("connection: ", unityIndex);
-      console.log("browser connection: ", ws.index);
+      console.log("connection: ", ws.index);
 
       // Initialize
       ws.send(JSON.stringify({ global: "displayListener", value: true }));
@@ -267,17 +264,15 @@ try {
 			 } else {
 				 unityIndex = Math.min.apply( Math, Array.from(websocketMap.keys() ));
           }
-		 }
-       else {
-         for (var [key, value] of websocketMap) {
-           if(key != ws.index && key != unityIndex && value.readyState == 1) {
+       }
+        for (var [key, value] of websocketMap) {
+           if(key != unityIndex && value.readyState == 1) {
               value.send(JSON.stringify({
                eventType : "clientRemoveUserID", 
                event : { uid : ws.uid }
               }));  
            }
          }
-       }
 		 console.log("close: websocketMap.keys():",Array.from(websocketMap.keys() ), unityIndex);
       });
    });
