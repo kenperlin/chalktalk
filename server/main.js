@@ -194,12 +194,17 @@ try {
 
 	// for unity, we only need to send data to unity for one websocket connection
    var unityIndex = 0;
+
+   let hostIsAssigned = false;
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
      if (ws.index == unityIndex) {
        ws.index = wsIndex++;
      }
+     ws.isHost = !hostIsAssigned;
+     hostIsAssigned = true;
+
 	  websocketMap.set(ws.index, ws);
 	  if(unityIndex == -1) {
 		  unityIndex = ws.index;
@@ -232,10 +237,10 @@ try {
       else {
 
          const _newBrowserID = unityWrapper.getAndIncrementStylusID();
-                  console.log("setting browser ID to: " + _newBrowserID);
+         console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
          var eForBrowser = {
             eventType: "browserSetID",
-            event: { uid : _newBrowserID }
+            event: { uid : _newBrowserID, isHost : ws.isHost }
          };
          ws.uid = _newBrowserID;
          ws.send(JSON.stringify(eForBrowser));
@@ -274,6 +279,10 @@ try {
            }
          }
 		 console.log("close: websocketMap.keys():",Array.from(websocketMap.keys() ), unityIndex);
+
+         if (ws.isHost) {
+            hostIsAssigned = false;
+         }
       });
    });
 } catch (err) {
