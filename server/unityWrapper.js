@@ -44,7 +44,7 @@ const cachedData = new CachedClientData();
 
 var CommandToClient = Object.freeze({"RESOLUTION_REQUEST":0, "STYLUS_RESET":1, "SKETCHPAGE_CREATE":2, "AVATAR_SYNC":3});
 
-function ProcessMSGSender(flake, ws){
+function ProcessMSGSender(flake, ws, sockData){
 	// buffer array for holojam to send back
 	var bufLength = 0;
 	var bufArray = new Array(0);
@@ -53,13 +53,13 @@ function ProcessMSGSender(flake, ws){
 	var cursor = 0;
 	var cmdCount = b.readInt32LE(cursor);
 	cursor += 4;
-	console.log("\nReceiving cmdCount:" + cmdCount);
+	//console.log("\nReceiving cmdCount:" + cmdCount);
 	for(var cmdIndex = 0; cmdIndex < cmdCount; cmdIndex++){
 		var cmdNumber = b.readInt32LE(cursor);
 		cursor += 4;
 		var paraCount = b.readInt32LE(cursor);
 		cursor += 4;
-		console.log("\tcursor", cursor, "\ncmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
+		//console.log("\tcursor", cursor, "\ncmdNumber:" + cmdNumber + "\tparaCount:" + paraCount);
 		switch(cmdNumber) {
 			case CommandFromClient.RESOLUTION_REQUEST:
 				var e = {
@@ -111,7 +111,7 @@ function ProcessMSGSender(flake, ws){
 				ws.send(JSON.stringify(e));
 				cursor += paraCount * 4;
 				break;
-			case CommandFromClient.AVATAR_SYNC:
+			case CommandFromClient.AVATAR_SYNC: {
 				var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
 				console.log("\treceive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
 				var avatarid = new Uint64LE(b, cursor+paraCount);
@@ -141,11 +141,21 @@ function ProcessMSGSender(flake, ws){
 					uintID.toBuffer().copy(curbuf, index, 0, 8);								
 					index += 8;
 				});
+
+				let ASSIGNED_USERID = sockData.nameToUID.get(avatarname);
+				if (!ASSIGNED_USERID) {
+					ASSIGNED_USERID = globalStylusID;
+					sockData.nameToUID.set(avatarname, ASSIGNED_USERID);
+					const availSock = sockData.availSocks.pop();
+					sockData.uidToSock.set(ASSIGNED_USERID, availSock);
+					globalStylusID += 1;
+				}
+
 				curbuf.writeInt16LE(avatarname.length, index);
 				index += 2;
 				curbuf.write(avatarname,index,avatarname.length);
 				index += avatarname.length;
-				curbuf.writeInt16LE(globalStylusID++,index);
+				curbuf.writeInt16LE(ASSIGNED_USERID, index);
 				index += 2;
 				//console.log("test:" + curbuf);
 				bufLength += curbuf.length;
@@ -156,12 +166,17 @@ function ProcessMSGSender(flake, ws){
 				cursor += paraCount;
 				console.log("\tcursor", cursor);
 
+
+
+
 				var e = {
 					eventType : "clientAddUserID",
-					event : {uid : globalStylusID - 1}
+					event : {uid : ASSIGNED_USERID}
 				};
 				ws.send(JSON.stringify(e));
+
 				break;
+			}
 			case CommandFromClient.SKETCHPAGE_SET:
 				const idx = b.readInt32LE(cursor);
 				console.log("in server, set page: " + idx);
@@ -209,7 +224,7 @@ function ProcessMSGSender(flake, ws){
 				ws.send(JSON.stringify(e));
 				cursor += paraCount * 4;
 				break;	
-			case CommandFromClient.AVATAR_LEAVE:
+			case CommandFromClient.AVATAR_LEAVE: {
 				console.log("Someone is leaving");
 				var avatarname = b.toString('utf8',cursor,cursor+paraCount);//nStr = paraCount
 				console.log("\treceive new avatar nStr:" + paraCount + "\tb.length:" + b.length + "\t" + avatarname );
@@ -237,7 +252,13 @@ function ProcessMSGSender(flake, ws){
 				cursor += paraCount;
 				console.log("\tcursor", cursor);
 
+				const ASSIGNED_USERID = sockData.nameToUID.get(avatarname);
+				sockData.nameToUID.delete(avatarname);
+				sockData.availSocks.push(sockData.uidToSock.get(ASSIGNED_USERID));
+				sockData.uidToSock.delete(ASSIGNED_USERID);
+
 				break;
+			} 
 			case CommandFromClient.MOVE_FW_BW_CTOBJECT:
 				console.log("(server -> client) received command to start or finish moving CTObject backward and forward");
 				
@@ -305,7 +326,7 @@ function ProcessMSGSender(flake, ws){
 	}
 }
 
-function ProcessFlakes(flakes, ws){
+function ProcessFlakes(flakes, ws, sockData){
 	for (var i=0; i < flakes.length; i++) {
 		var flake = flakes[i];
 		//console.log(flake.label);
@@ -384,7 +405,7 @@ function ProcessFlakes(flakes, ws){
 
 		}
 		else if(flake.label.contains("MSGSender")){	
-			ProcessMSGSender(flake, ws);
+			ProcessMSGSender(flake, ws, sockData);
 		}
 	}
 }
@@ -625,10 +646,10 @@ module.exports = {
 			}]));
 		}
 	},
-	processUnity: function(ws){
+	processUnity: function(ws, sockData){
 		holojam.on('update', (flakes, scope, origin) => {
 			//console.log("ws.readyState",ws.readyState);
-			if(ws.readyState != 1){
+			if(ws.readyState != 1) {
 				//console.log("when null? ws.readyState",ws.readyState);
 				// add an empty return
 				//var buf = Buffer.allocUnsafe(2);
@@ -639,7 +660,7 @@ module.exports = {
 				return;
 			}
 			//
-			ProcessFlakes(flakes, ws);
+			ProcessFlakes(flakes, ws, sockData);
 		});
 	},
 	processArgs: function(args){

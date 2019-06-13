@@ -186,31 +186,46 @@ String.prototype.contains = function(substr) {
 var httpserver = http.Server(app);
 var wsIndex = 0;
 
+function SocketCollection() {
+   this.uidToSock = new Map();
+   this.availSocks = [];
+   this.nameToUID = new Map();
+}
+
 // WEBSOCKET ENDPOINT SETUP
 try {
    var WebSocketServer = require("ws").Server;
    var wss = new WebSocketServer({ port: 22346 });
    var websocketMap = new Map();
 
+   const socks = new SocketCollection();
+
 	// for unity, we only need to send data to unity for one websocket connection
    var unityIndex = 0;
 
    let hostIsAssigned = false;
+
+   const uidToWebsocket = new Map();
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
-     if (ws.index == unityIndex) {
-       ws.index = wsIndex++;
+     
+     if(unityIndex == -1) {
+        unityIndex = ws.index;
      }
+     // else if (ws.index == unityIndex) {
+     //     ws.index = wsIndex++;
+     // }
+
+     websocketMap.set(ws.index, ws);
+
      ws.isHost = !hostIsAssigned;
      hostIsAssigned = true;
 
-	  websocketMap.set(ws.index, ws);
-	  if(unityIndex == -1) {
-		  unityIndex = ws.index;
-     }
+
 
       console.log("connection: ", ws.index);
+      console.log("unity index: ", unityIndex);
 
       // Initialize
       ws.send(JSON.stringify({ global: "displayListener", value: true }));
@@ -223,39 +238,57 @@ try {
 			     value.send(data);  
            }
 			}
-		   if(unityIndex == ws.index){
-			   unityWrapper.processChalktalk(data);
-		   }
-	 });
+
+			unityWrapper.processChalktalk(data);
+
+	   });
 	 
 
       console.log("unityIndex == ws.index:" + (unityIndex == ws.index));
 
-	   if(unityIndex == ws.index){
-			unityWrapper.processUnity(ws);
-	   }
-      else {
+	   //if(unityIndex == ws.index) {
+         // forward the message to the specific Chalktalk instance here
+	   //}
 
-         const _newBrowserID = unityWrapper.getAndIncrementStylusID();
-         console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
-         var eForBrowser = {
-            eventType: "browserSetID",
-            event: { uid : _newBrowserID, isHost : ws.isHost }
-         };
-         ws.uid = _newBrowserID;
-         ws.send(JSON.stringify(eForBrowser));
+      const _newBrowserID = unityWrapper.getAndIncrementStylusID();
+      console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
+      var eForBrowser = {
+         eventType: "browserSetID",
+         event: { uid : _newBrowserID, isHost : ws.isHost }
+      };
+      ws.uid = _newBrowserID;
 
-         for (var [key, value] of websocketMap) {
-            for (var [keyother, valother] of websocketMap) {
-              if(key != unityIndex && value.readyState == 1) {
-                 value.send(JSON.stringify({
-                  eventType : "clientAddUserID", 
-                  event : { uid : valother.uid}
-                 }));  
-            }
-           }
+      ///
+      socks.uidToSock.set(ws.uid, ws);
+      socks.availSocks.push(ws);
+      ///
+
+      unityWrapper.processUnity(ws, socks);
+
+      ws.send(JSON.stringify(eForBrowser));
+
+      for (var [key, value] of websocketMap) {
+         for (var [keyother, valother] of websocketMap) {
+           if(value.readyState == 1) {
+              value.send(JSON.stringify({
+               eventType : "clientAddUserID", 
+               event : { uid : valother.uid}
+              }));  
          }
+        }
       }
+
+      for (var [key, value] of websocketMap) {
+         for (var [keyother, valother] of socks.uidToSock) {
+           if(value.readyState == 1) {
+              value.send(JSON.stringify({
+               eventType : "clientAddUserID", 
+               event : { uid : keyother}
+            }));  
+         }
+        }
+      }
+      
 
       ws.on("close", function() {
          // REMOVE THIS WEBSOCKET
@@ -263,9 +296,9 @@ try {
 		 websocketMap.delete(ws.index);
 		 
 		 if(unityIndex == ws.index){
+          console.log("the Unity index is closing");
 			 if(Array.from(websocketMap.keys() ).length == 0) {
-				 unityIndex = ws.index; // changed from -1 to ws.index
-             console.log("unityIndex is now: " + unityIndex);
+				 unityIndex = -1;
 			 } else {
 				 unityIndex = Math.min.apply( Math, Array.from(websocketMap.keys() ));
           }
