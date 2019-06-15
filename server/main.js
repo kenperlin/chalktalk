@@ -188,6 +188,7 @@ var wsIndex = 0;
 
 function SocketCollection() {
    this.uidToSock = new Map();
+   this.clientUIDToSock = new Map();
    this.availSocks = [];
    this.nameToUID = new Map();
 }
@@ -219,10 +220,6 @@ try {
 
      websocketMap.set(ws.index, ws);
 
-     ws.isHost = !hostIsAssigned;
-     hostIsAssigned = true;
-
-
 
       console.log("connection: ", ws.index);
       console.log("unity index: ", unityIndex);
@@ -234,6 +231,7 @@ try {
 
       ws.on("message", data => {
 		   for (var [key, value] of websocketMap) {
+            console.log("message to: " + value.uid);
 			  if(key != ws.index && value.readyState == 1) {
 			     value.send(data);  
            }
@@ -251,10 +249,9 @@ try {
 	   //}
 
       const _newBrowserID = unityWrapper.getAndIncrementStylusID();
-      console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
       var eForBrowser = {
          eventType: "browserSetID",
-         event: { uid : _newBrowserID, isHost : ws.isHost }
+         event: { uid : _newBrowserID }
       };
       ws.uid = _newBrowserID;
 
@@ -267,27 +264,27 @@ try {
 
       ws.send(JSON.stringify(eForBrowser));
 
-      for (var [key, value] of websocketMap) {
-         for (var [keyother, valother] of websocketMap) {
-           if(value.readyState == 1) {
-              value.send(JSON.stringify({
-               eventType : "clientAddUserID", 
-               event : { uid : valother.uid}
-              }));  
-         }
-        }
-      }
+      // for (var [key, value] of websocketMap) {
+      //    for (var [keyother, valother] of websocketMap) {
+      //      if(value.readyState == 1) {
+      //         value.send(JSON.stringify({
+      //          eventType : "clientAddUserID", 
+      //          event : { uid : valother.uid}
+      //         }));  
+      //    }
+      //   }
+      // }
 
-      for (var [key, value] of websocketMap) {
-         for (var [keyother, valother] of socks.uidToSock) {
-           if(value.readyState == 1) {
-              value.send(JSON.stringify({
-               eventType : "clientAddUserID", 
-               event : { uid : keyother}
-            }));  
-         }
-        }
-      }
+      // for (var [key, value] of websocketMap) {
+      //    for (var [keyother, valother] of socks.uidToSock) {
+      //      if(value.readyState == 1) {
+      //         value.send(JSON.stringify({
+      //          eventType : "clientAddUserID", 
+      //          event : { uid : keyother}
+      //       }));  
+      //    }
+      //   }
+      // }
       
 
       ws.on("close", function() {
@@ -295,7 +292,7 @@ try {
        console.log("closing ws index: " + ws.index);
 		 websocketMap.delete(ws.index);
 		 
-		 if(unityIndex == ws.index){
+		 if(unityIndex == ws.index) {
           console.log("the Unity index is closing");
 			 if(Array.from(websocketMap.keys() ).length == 0) {
 				 unityIndex = -1;
@@ -316,6 +313,8 @@ try {
          if (ws.isHost) {
             hostIsAssigned = false;
          }
+
+         // TODO remove
       });
    });
 } catch (err) {

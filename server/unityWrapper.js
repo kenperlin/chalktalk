@@ -53,6 +53,18 @@ function ProcessMSGSender(flake, ws, sockData){
 	var cursor = 0;
 	var cmdCount = b.readInt32LE(cursor);
 	cursor += 4;
+
+	const USER_ID = flake.ints[0];
+
+	const USER_SOCK = sockData.clientUIDToSock.get(USER_ID);
+
+	if (USER_SOCK != undefined) {
+			console.log("using sock:[" + USER_SOCK.uid + "]");
+		ws = USER_SOCK;
+		//console.log("UID_CLIENT =[" + USER_ID + "] " +
+			//"PAIRED CONTENT SERVER UID=[" + sockData.clientUIDToSock.get(USER_ID).uid + "]");
+	}
+
 	//console.log("\nReceiving cmdCount:" + cmdCount);
 	for(var cmdIndex = 0; cmdIndex < cmdCount; cmdIndex++){
 		var cmdNumber = b.readInt32LE(cursor);
@@ -97,7 +109,7 @@ function ProcessMSGSender(flake, ws, sockData){
 					eventType: "disableSelectionForAllOtherClients",
 					event: {uid : curStylusID}
 				};
-				ws.send(JSON.stringify(eventLocal));
+				// ws.send(JSON.stringify(eventLocal));
 				cursor += paraCount * 4;
 				break;
 			case CommandFromClient.SKETCHPAGE_CREATE:
@@ -143,13 +155,50 @@ function ProcessMSGSender(flake, ws, sockData){
 				});
 
 				let ASSIGNED_USERID = sockData.nameToUID.get(avatarname);
+				let availSock = null;
 				if (!ASSIGNED_USERID) {
 					ASSIGNED_USERID = globalStylusID;
 					sockData.nameToUID.set(avatarname, ASSIGNED_USERID);
-					const availSock = sockData.availSocks.pop();
-					sockData.uidToSock.set(ASSIGNED_USERID, availSock);
+					availSock = sockData.availSocks.pop();
+					while (availSock && availSock.readyState != 1) {
+						availSock = sockData.pop();
+					}
+					if (!availSock || availSock.readyState != 1) {
+						console.log("WARNING: no available content server instance");
+						break;
+					}
+
+					ws = availSock;
+					sockData.clientUIDToSock.set(ASSIGNED_USERID, availSock);
 					globalStylusID += 1;
-				}
+
+					console.log(avatarname + " assigned UID=[" + ASSIGNED_USERID + 
+						"], paired with content server instance with UID=[" + availSock.uid + "]");
+			    
+			    }
+
+		  //     	let out = '';
+				// console.log("nameToUID:");
+				// console.log(sockData.nameToUID);
+				
+				// out = '';
+				// console.log("clientUIDToSock:");
+				// for (var [key, value] of sockData.clientUIDToSock) { 
+		  //       	out += "key : " + key + ", value uid : " + ((value != undefined) ? value.uid : "UNDEFINED") + ", ";
+		  //       }
+				// console.log(out);
+
+				// out = '';
+				// console.log("availSock:");
+				// out += '[';
+				// for (let i = 0; i < sockData.availSocks.length; i += 1) {
+				// 	out += ((sockData.availSocks[i]) ? sockData.availSocks[i].uid : "UNDEFINED") + ", ";
+				// }
+				// out += ']';
+				// console.log(out);
+				
+
+				// console.log("--------");
 
 				curbuf.writeInt16LE(avatarname.length, index);
 				index += 2;
@@ -165,9 +214,6 @@ function ProcessMSGSender(flake, ws, sockData){
 				//}]));
 				cursor += paraCount;
 				console.log("\tcursor", cursor);
-
-
-
 
 				var e = {
 					eventType : "clientAddUserID",
@@ -254,8 +300,36 @@ function ProcessMSGSender(flake, ws, sockData){
 
 				const ASSIGNED_USERID = sockData.nameToUID.get(avatarname);
 				sockData.nameToUID.delete(avatarname);
-				sockData.availSocks.push(sockData.uidToSock.get(ASSIGNED_USERID));
-				sockData.uidToSock.delete(ASSIGNED_USERID);
+
+				const availSock = sockData.clientUIDToSock.get(ASSIGNED_USERID);
+				if (availSock) {
+					sockData.availSocks.push(availSock);
+				}
+				sockData.clientUIDToSock.delete(ASSIGNED_USERID);
+
+
+		  //     	let out = '';
+				// console.log("nameToUID:");
+				// console.log(sockData.nameToUID);
+				
+				// out = '';
+				// console.log("clientUIDToSock:");
+				// for (var [key, value] of sockData.clientUIDToSock) { 
+		  //       	out += "key : " + key + ", value uid : " + ((value != undefined) ? value.uid : "UNDEFINED") + ", ";
+		  //       }
+				// console.log(out);
+
+				// out = '';
+				// console.log("availSock:");
+				// out += '[';
+				// for (let i = 0; i < sockData.availSocks.length; i += 1) {
+				// 	out += ((sockData.availSocks[i]) ? sockData.availSocks[i].uid : "UNDEFINED") + ", ";
+				// }
+				// out += ']';
+				// console.log(out);
+				
+
+				// console.log("--------");
 
 				break;
 			} 
@@ -337,27 +411,47 @@ function ProcessFlakes(flakes, ws, sockData){
 			const TIMESTAMP = flake.ints[3];
 			const LOCAL_BOARD_ID = flake.ints[4];
 
-			var wipeOrNot = flake.ints[1];
-			if(wipeOrNot == 3){
-				console.log("recv wipe");
-				var e = {
-				   eventType: "wipe",
-				   event: {
-					  button: 1,
-					  clientX: 0,
-					  clientY: 0,
-					  wheelX: wheelX,
-					  wheelY: wheelY,
-					  uid: USER_ID,
-					  timestamp: TIMESTAMP,
-					  isMR: true,
-					  pageIdx: LOCAL_BOARD_ID
-				   }
-				};
-				ws.send(JSON.stringify(e));	
+			const USER_SOCK = sockData.clientUIDToSock.get(USER_ID);
+			if (USER_SOCK != undefined) {
+				ws = USER_SOCK;
+
+				console.log("using sock:[" + USER_SOCK.uid + "]");
+				//console.log("UID_CLIENT =[" + USER_ID + "] " +
+					//"PAIRED CONTENT SERVER UID=[" + sockData.clientUIDToSock.get(USER_ID).uid + "]");
 			}
-			else{
+			else {
+				console.log("USER SOCK UNDEFINED");
+			}
+
+			// var wipeOrNot = flake.ints[1];
+			// if(wipeOrNot == 3){
+			// 	console.log("recv wipe");
+			// 	var e = {
+			// 	   eventType: "wipe",
+			// 	   event: {
+			// 		  button: 1,
+			// 		  clientX: 0,
+			// 		  clientY: 0,
+			// 		  wheelX: wheelX,
+			// 		  wheelY: wheelY,
+			// 		  uid: USER_ID,
+			// 		  timestamp: TIMESTAMP,
+			// 		  isMR: true,
+			// 		  pageIdx: LOCAL_BOARD_ID
+			// 	   }
+			// 	};
+			// 	ws.send(JSON.stringify(e));	
+			// }
+			// else{
+
+
 				var type = flake.ints[0];
+								if (type != 1) {
+				//console.log("mode: stylus");
+				//console.log("sending mouse event to: " + ws.uid);
+			}
+
+				console.log("sending from (" + USER_ID + ") to (" + ws.uid + ")");
 				type = (type == 0 ? "onmousedown"
 				: (type == 1 ? "onmousemove" :"onmouseup" ));
 				var e = {
@@ -375,7 +469,7 @@ function ProcessFlakes(flakes, ws, sockData){
 				   }
 				};
 				ws.send(JSON.stringify(e));		
-			}
+			// }
 		}
 		else if(flake.label.contains("Selection")){
 			const wheelX = flake.floats[0];
@@ -384,25 +478,38 @@ function ProcessFlakes(flakes, ws, sockData){
 			const TIMESTAMP = flake.ints[1];
 			const LOCAL_BOARD_ID = flake.ints[2];
 
-				var type = "onmousemoveNonHost";
-				//console.log(flake.ints[0]);
-				//console.log("type",type);
-				var e = {
-				   eventType: type,
-				   event: {
-					  button: 3,
-					  clientX: flake.vector3s[0].x * resolutionWidth,
-					  clientY: flake.vector3s[0].y * resolutionHeight,
-					  wheelX: wheelX,
-					  wheelY: wheelY,
-					  uid: USER_ID,
-					  timestamp: TIMESTAMP,
-					  isMR: true,
-					  pageIdx: LOCAL_BOARD_ID
-				   }
-				};
-				ws.send(JSON.stringify(e));		
 
+
+			const USER_SOCK = sockData.clientUIDToSock.get(USER_ID);
+			if (USER_SOCK != undefined) {
+				ws = USER_SOCK;
+
+				console.log("using sock:[" + USER_SOCK.uid + "]");
+				//console.log("UID_CLIENT =[" + USER_ID + "] " +
+					//"PAIRED CONTENT SERVER UID=[" + sockData.clientUIDToSock.get(USER_ID).uid + "]");
+			}
+
+			var type = "onmousemoveNonHost";
+							//console.log("mode: Selection");
+							//console.log("sending mouse event to: " + ws.uid);
+							//console.log("type: " + type);
+			//console.log(flake.ints[0]);
+			//console.log("type",type);
+			var e = {
+			   eventType: type,
+			   event: {
+				  button: 3,
+				  clientX: flake.vector3s[0].x * resolutionWidth,
+				  clientY: flake.vector3s[0].y * resolutionHeight,
+				  wheelX: wheelX,
+				  wheelY: wheelY,
+				  uid: USER_ID,
+				  timestamp: TIMESTAMP,
+				  isMR: true,
+				  pageIdx: LOCAL_BOARD_ID
+			   }
+			};
+			ws.send(JSON.stringify(e));	
 		}
 		else if(flake.label.contains("MSGSender")){	
 			ProcessMSGSender(flake, ws, sockData);
@@ -648,17 +755,6 @@ module.exports = {
 	},
 	processUnity: function(ws, sockData){
 		holojam.on('update', (flakes, scope, origin) => {
-			//console.log("ws.readyState",ws.readyState);
-			if(ws.readyState != 1) {
-				//console.log("when null? ws.readyState",ws.readyState);
-				// add an empty return
-				//var buf = Buffer.allocUnsafe(2);
-				//buf.writeInt16LE(0,0);// cmdCount = 0
-				//holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-				//	label: 'MSGRcv', bytes: buf
-				//}]));	
-				return;
-			}
 			//
 			ProcessFlakes(flakes, ws, sockData);
 		});
