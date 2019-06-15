@@ -199,16 +199,15 @@ try {
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
-     if (ws.index == unityIndex) {
-       ws.index = wsIndex++;
-     }
-     ws.isHost = !hostIsAssigned;
-     hostIsAssigned = true;
+
 
 	  websocketMap.set(ws.index, ws);
 	  if(unityIndex == -1) {
 		  unityIndex = ws.index;
      }
+
+     ws.isHost = !hostIsAssigned;
+     hostIsAssigned = true;
 
       console.log("connection: ", ws.index);
 
@@ -223,39 +222,30 @@ try {
 			     value.send(data);  
            }
 			}
-		   if(unityIndex == ws.index){
-			   unityWrapper.processChalktalk(data);
-		   }
-	 });
+			unityWrapper.processChalktalk(data);
+	   });
 	 
+      const _newBrowserID = unityWrapper.getAndIncrementStylusID();
+      console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
+      var eForBrowser = {
+         eventType: "browserSetID",
+         event: { uid : _newBrowserID, isHost : ws.isHost }
+      };
+      ws.uid = _newBrowserID;
+      ws.send(JSON.stringify(eForBrowser));
 
-      console.log("unityIndex == ws.index:" + (unityIndex == ws.index));
-
-	   if(unityIndex == ws.index){
-			unityWrapper.processUnity(ws);
-	   }
-      else {
-
-         const _newBrowserID = unityWrapper.getAndIncrementStylusID();
-         console.log("setting browser ID to: " + _newBrowserID + " isHost=[" + ws.isHost + "]");
-         var eForBrowser = {
-            eventType: "browserSetID",
-            event: { uid : _newBrowserID, isHost : ws.isHost }
-         };
-         ws.uid = _newBrowserID;
-         ws.send(JSON.stringify(eForBrowser));
-
-         for (var [key, value] of websocketMap) {
-            for (var [keyother, valother] of websocketMap) {
-              if(key != unityIndex && value.readyState == 1) {
-                 value.send(JSON.stringify({
-                  eventType : "clientAddUserID", 
-                  event : { uid : valother.uid}
-                 }));  
-            }
-           }
+      for (var [key, value] of websocketMap) {
+         for (var [keyother, valother] of websocketMap) {
+           if(value.readyState == 1) {
+              value.send(JSON.stringify({
+               eventType : "clientAddUserID", 
+               event : { uid : valother.uid}
+              }));  
          }
+        }
       }
+
+      unityWrapper.processUnity(ws);
 
       ws.on("close", function() {
          // REMOVE THIS WEBSOCKET
@@ -264,7 +254,7 @@ try {
 		 
 		 if(unityIndex == ws.index){
 			 if(Array.from(websocketMap.keys() ).length == 0) {
-				 unityIndex = ws.index; // changed from -1 to ws.index
+				 unityIndex = -1;
              console.log("unityIndex is now: " + unityIndex);
 			 } else {
 				 unityIndex = Math.min.apply( Math, Array.from(websocketMap.keys() ));
@@ -278,7 +268,7 @@ try {
               }));  
            }
          }
-		 console.log("close: websocketMap.keys():",Array.from(websocketMap.keys() ), unityIndex);
+		 console.log("close: websocketMap.keys():", Array.from(websocketMap.keys() ), unityIndex);
 
          if (ws.isHost) {
             hostIsAssigned = false;

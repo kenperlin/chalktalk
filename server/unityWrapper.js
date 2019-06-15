@@ -11,6 +11,7 @@ var resolutionWidth = 600;
 var saved_ips = [];
 // pair of avatar name and avatar oculusUserID
 var mapAvatarId = {};
+const mapAvatarNameToUID = new Map();
 var globalStylusID = 0;
 var curStylusID = -1; // -1 means no one or browser
 
@@ -70,34 +71,34 @@ function ProcessMSGSender(flake, ws){
 				cursor += paraCount * 4;
 				break;
 			case CommandFromClient.STYLUS_RESET:
-				console.log("reset stylus:" + b.readInt32LE(cursor) + " when current is " + curStylusID);
-				const STYLUS_ID = b.readInt32LE(cursor);
-				var setStylus = b.readInt32LE(cursor+4);	//1 means set and -1 means release
+				// console.log("reset stylus:" + b.readInt32LE(cursor) + " when current is " + curStylusID);
+				// const STYLUS_ID = b.readInt32LE(cursor);
+				// var setStylus = b.readInt32LE(cursor+4);	//1 means set and -1 means release
 				
-				if((curStylusID == -1) && (setStylus == 1) ){
-					// give the control
-					console.log("\tgive the control");
-					curStylusID = STYLUS_ID;
-				}
-				else if((curStylusID == STYLUS_ID) && (setStylus == -1)){
-					// reset the control
-					console.log("\trelease the control");
-					curStylusID = -1;
-				}else{
-					// reject
-					console.log("\tno change with " + STYLUS_ID	+" " + setStylus);
-				}
-				var curbuf = Buffer.allocUnsafe(4);
-				curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
-				curbuf.writeInt16LE(curStylusID,2);// stylus id// index 4 is the count of parameter so skip
-				bufLength += curbuf.length;
-				bufArray.push(curbuf);								
+				// if(/*(curStylusID == -1) && */(setStylus == 1) ){
+				// 	// give the control
+				// 	console.log("\tgive the control");
+				// 	curStylusID = STYLUS_ID;
+				// }
+				// else if((curStylusID == STYLUS_ID) && (setStylus == -1)){
+				// 	// reset the control
+				// 	console.log("\trelease the control");
+				// 	curStylusID = -1;
+				// }else{
+				// 	// reject
+				// 	console.log("\tno change with " + STYLUS_ID	+" " + setStylus);
+				// }
+				// var curbuf = Buffer.allocUnsafe(4);
+				// curbuf.writeInt16LE(cmdNumber,0);// 1 for reset stylus id
+				// curbuf.writeInt16LE(curStylusID,2);// stylus id// index 4 is the count of parameter so skip
+				// bufLength += curbuf.length;
+				// bufArray.push(curbuf);								
 
-				var eventLocal = {
-					eventType: "disableSelectionForAllOtherClients",
-					event: {uid : curStylusID}
-				};
-				ws.send(JSON.stringify(eventLocal));
+				// var eventLocal = {
+				// 	eventType: "disableSelectionForAllOtherClients",
+				// 	event: {uid : curStylusID}
+				// };
+				//ws.send(JSON.stringify(eventLocal));
 				cursor += paraCount * 4;
 				break;
 			case CommandFromClient.SKETCHPAGE_CREATE:
@@ -141,11 +142,22 @@ function ProcessMSGSender(flake, ws){
 					uintID.toBuffer().copy(curbuf, index, 0, 8);								
 					index += 8;
 				});
+
+				let ASSIGNED_USERID = mapAvatarNameToUID.get(avatarname);
+				let availSock = null;
+				if (!ASSIGNED_USERID) {
+					ASSIGNED_USERID = globalStylusID;
+					mapAvatarNameToUID.set(avatarname, ASSIGNED_USERID);
+
+					globalStylusID += 1;
+			    }
+
+
 				curbuf.writeInt16LE(avatarname.length, index);
 				index += 2;
 				curbuf.write(avatarname,index,avatarname.length);
 				index += avatarname.length;
-				curbuf.writeInt16LE(globalStylusID++,index);
+				curbuf.writeInt16LE(ASSIGNED_USERID, index);
 				index += 2;
 				//console.log("test:" + curbuf);
 				bufLength += curbuf.length;
@@ -158,7 +170,7 @@ function ProcessMSGSender(flake, ws){
 
 				var e = {
 					eventType : "clientAddUserID",
-					event : {uid : globalStylusID - 1}
+					event : {uid : ASSIGNED_USERID}
 				};
 				ws.send(JSON.stringify(e));
 				break;
@@ -216,6 +228,7 @@ function ProcessMSGSender(flake, ws){
 				var avatarid = new Uint64LE(b, cursor+paraCount);
 				cursor += 8;
 				delete mapAvatarId[avatarname]
+				mapAvatarNameToUID.delete[avatarname];
 				
 				console.log("Object.entries(mapAvatarId).length:\t" + Object.entries(mapAvatarId).length);
 				
