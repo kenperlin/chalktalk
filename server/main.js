@@ -196,6 +196,8 @@ try {
    var unityIndex = 0;
 
    let hostIsAssigned = false;
+
+   const wsMap = new Map();
 	
    wss.on("connection", function(ws) {
 	  ws.index = wsIndex++;
@@ -217,12 +219,12 @@ try {
 
 
       ws.on("message", data => {
-		   for (var [key, value] of websocketMap) {
-			  if(key != ws.index && value.readyState == 1) {
-			     value.send(data);  
-           }
-			}
-			unityWrapper.processChalktalk(data);
+		 //   for (var [key, value] of websocketMap) {
+			//   if(key != ws.index && value.readyState == 1) {
+			//      value.send(data);  
+   //         }
+			// }
+			unityWrapper.processChalktalk(data, ws.uid);
 	   });
 	 
       const _newBrowserID = unityWrapper.getAndIncrementStylusID();
@@ -232,6 +234,12 @@ try {
          event: { uid : _newBrowserID, isHost : ws.isHost }
       };
       ws.uid = _newBrowserID;
+      wsMap.set(ws.uid, ws);
+
+      for (var [key, value] of wsMap) {
+         console.log("ws-uid=[" + key + "]");
+      }
+
       ws.send(JSON.stringify(eForBrowser));
 
       for (var [key, value] of websocketMap) {
@@ -245,12 +253,13 @@ try {
         }
       }
 
-      unityWrapper.processUnity(ws);
+      unityWrapper.processUnity(ws, wsMap);
 
       ws.on("close", function() {
          // REMOVE THIS WEBSOCKET
        console.log("closing ws index: " + ws.index);
 		 websocketMap.delete(ws.index);
+       wsMap.delete(ws.uid);
 		 
 		 if(unityIndex == ws.index){
 			 if(Array.from(websocketMap.keys() ).length == 0) {

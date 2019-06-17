@@ -287,7 +287,7 @@ function ProcessMSGSender(flake, ws){
 
 				var e = {
 					eventType : "clientEnablePalette",
-					event : {uid : uid, turnOnPalette : paletteStatus}
+					event : {uid : remoteUID, turnOnPalette : paletteStatus}
 				};
 				ws.send(JSON.stringify(e));
 				cursor += paraCount * 4;
@@ -318,7 +318,7 @@ function ProcessMSGSender(flake, ws){
 	}
 }
 
-function ProcessFlakes(flakes, ws){
+function ProcessFlakes(flakes, ws, wsMap){
 	for (var i=0; i < flakes.length; i++) {
 		var flake = flakes[i];
 		//console.log(flake.label);
@@ -403,7 +403,7 @@ function ProcessFlakes(flakes, ws){
 }
 
 module.exports = {
-	processChalktalk: function (data) {
+	processChalktalk: function (data, ID) {
 		// init buf for sending to holojam for every message
 		var bufLengthByte = Buffer.allocUnsafe(2);
 		var bufLength = 0;
@@ -412,8 +412,9 @@ module.exports = {
 		bufLengthByte.writeInt16LE(bufLength,0);  
 		const headerString = readHeader(data);
 		if (headerString == 'CTdata01') {
+			const _LABEL_ = 'Display' + ID;
 			holojam.Send(holojam.BuildUpdate('ChalkTalk', [{
-			   label: 'Display',
+			   label: _LABEL_,
 			   bytes: data
 			}]));
 		}else if (headerString == 'CTDspl01'){
@@ -558,17 +559,18 @@ module.exports = {
 		else if (headerString == 'CTzOff01') {
 			console.log("(client -> server) sending z offset");
 			try {
-				var curbuf = Buffer.allocUnsafe(10);
+				var curbuf = Buffer.allocUnsafe(12);
 
 				curbuf.writeInt16LE(9, 0) // stylus z offset 
 
 				const roff = 8; // read offset
 				const woff = 2; // write offset
 
-				curbuf.writeInt16LE(data.readInt16LE(roff), woff);         // timestamp half-1
-				curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-2
-				curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // z offset half-1
-				curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-2
+				curbuf.writeInt16LE(data.readInt16LE(roff), woff);     	   // ID    
+				curbuf.writeInt16LE(data.readInt16LE(roff + 2), woff + 2); // timestamp half-1
+				curbuf.writeInt16LE(data.readInt16LE(roff + 4), woff + 4); // timestamp half-2
+				curbuf.writeInt16LE(data.readInt16LE(roff + 6), woff + 6); // z offset half-1
+				curbuf.writeInt16LE(data.readInt16LE(roff + 8), woff + 8); // z offset half-2
 
 				++bufLength;
 				buf = Buffer.concat([buf, curbuf]);
@@ -638,7 +640,7 @@ module.exports = {
 			}]));
 		}
 	},
-	processUnity: function(ws){
+	processUnity: function(ws, wsMap){
 		holojam.on('update', (flakes, scope, origin) => {
 			//console.log("ws.readyState",ws.readyState);
 			if(ws.readyState != 1){
@@ -652,7 +654,7 @@ module.exports = {
 				return;
 			}
 			//
-			ProcessFlakes(flakes, ws);
+			ProcessFlakes(flakes, ws, wsMap);
 		});
 	},
 	processArgs: function(args){
