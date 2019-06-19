@@ -175,11 +175,12 @@ function ProcessMSGSender(flake, ws){
 				ws.send(JSON.stringify(e));
 				break;
 			case CommandFromClient.SKETCHPAGE_SET:
-				const idx = b.readInt32LE(cursor);
+				const __U_ID__ = b.readInt32LE(cursor);
+				const idx = b.readInt32LE(cursor + 4);
 				console.log("in server, set page: " + idx);
 				var e = {
 					eventType: "clientSetSketchPage",
-					event: {index : idx}
+					event: {uid : __U_ID__, index : idx}
 				};
 				ws.send(JSON.stringify(e));
 				cursor += paraCount * 4;
@@ -467,13 +468,14 @@ module.exports = {
 		else if (headerString == 'CTPset01') {
 			var curbuf = Buffer.allocUnsafe(6);
 			curbuf.writeInt16LE(4,0); // 4 for setting sketch page
-			curbuf.writeInt16LE(data.readInt16LE(8), 2); // write page id
+			curbuf.writeInt16LE(data.readInt16LE(8), 2)
+			curbuf.writeInt16LE(data.readInt16LE(10), 4); // write page id
 			
 			++bufLength;
 			buf = Buffer.concat([buf, curbuf]);
 
-			var boardCnt = data.readInt16LE(8);
-			console.log("\nreply from client:", "(server -> client) set sketch page with id: " + boardCnt);
+			var boardID = data.readInt16LE(10);
+			console.log("\nreply from client:", "(server -> client) uid=[" + data.readInt16LE(8) + "] set sketch page with id: " + boardID);
 			
 			bufLengthByte.writeInt16LE(bufLength,0);  
 			var entirebuf = Buffer.concat([bufLengthByte, buf]);
