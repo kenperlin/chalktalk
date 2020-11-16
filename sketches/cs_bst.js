@@ -724,10 +724,13 @@ function() {
                }
 
                {
-                  node.colorManager.enableColor(true).setColor("red");
-                  stackRecord.color = "red";
+
 
                   self.operationMemory.pause = LerpUtil.pause(pauseTime * (1 / sketch.prop('speedFactor')));
+
+                  yield;
+                  node.colorManager.enableColor(true).setColor("red");
+                  stackRecord.color = "red";
                   yield;
 
                   self.recursiveCallStack.pop();
@@ -854,6 +857,8 @@ function() {
             return;
          }
 
+
+
          let hasTwoChildren = false;
          // CASES 1 AND 2: 1 CHILD
          if (parent == null) {
@@ -900,6 +905,82 @@ function() {
          else {
             current.colorManager.enableColor(true).setColor("orange");
             hasTwoChildren = true;
+         }
+
+         if (current.left == null) {
+            if (this.root == current) {
+               if (current.left == null) {
+                  hasTwoChildren = false;
+
+                  current.colorManager.enableColor(true).setColor("orange");
+                  while (movementPause()) { yield; }
+                  current.colorManager.enableColor(true).setColor("red");
+                  while (movementPause()) { yield; }
+
+                  this.root = current.right;
+
+                  const c1 = current.right.center;
+                  const c2 = current.center;
+                  let valMoveAni = LerpUtil.create(
+                     LerpUtil.Type.LINE({
+                        start : {x : c1[0], y : c1[1]},
+                        end   : {x : c2[0], y : c2[1]}
+                     }),
+                     .6,
+                     true
+                  );
+                  let ret = {};
+                  let diffPoint = [0, 0];
+                  while (!ret.done) {
+                     ret = valMoveAni.step();
+                     diffPoint[0] = current.right.center[0] - ret.point[0];
+                     diffPoint[1] = current.right.center[1] - ret.point[1];
+
+                     this.applyAll(function(node) {
+                        node.center[0] -= diffPoint[0];
+                        node.center[1] -= diffPoint[1];
+                     }, current.right);
+
+                     yield;
+                  }
+
+               } else if (current.right == null) {
+                  hasTwoChildren = false;
+
+                  current.colorManager.enableColor(true).setColor("orange");
+                  while (movementPause()) { yield; }
+                  current.colorManager.enableColor(true).setColor("red");
+                  while (movementPause()) { yield; }
+
+                  this.root = current.left;
+
+                  const c1 = current.left.center;
+                  const c2 = current.center;
+                  let valMoveAni = LerpUtil.create(
+                     LerpUtil.Type.LINE({
+                        start : {x : c1[0], y : c1[1]},
+                        end   : {x : c2[0], y : c2[1]}
+                     }),
+                     .6,
+                     true
+                  );
+                  let ret = {};
+                  let diffPoint = [0, 0];
+                  while (!ret.done) {
+                     ret = valMoveAni.step();
+                     diffPoint[0] = current.left.center[0] - ret.point[0];
+                     diffPoint[1] = current.left.center[1] - ret.point[1];
+
+                     this.applyAll(function(node) {
+                        node.center[0] -= diffPoint[0];
+                        node.center[1] -= diffPoint[1];
+                     }, current.left);
+
+                     yield;
+                  }
+
+               }
+            }
          }
 
          if (!hasTwoChildren) {
